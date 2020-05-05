@@ -89,11 +89,11 @@
     .set    HEADER_LENGTH, header_end - header_start
     .set    CHECKSUM, -(MULTIBOOT2_HEADER_MAGIC + MULTIBOOT_ARCHITECTURE_I386 + HEADER_LENGTH)
 
-#ifndef CONFIG_ARCH_EXCLUDE_MULTIBOOT
     .section ".multiboot", "a"
     .align    8
 
 header_start:
+#ifndef CONFIG_ARCH_EXCLUDE_MULTIBOOT
     .long MULTIBOOT2_HEADER_MAGIC
     .long MULTIBOOT_ARCHITECTURE_I386
     .long HEADER_LENGTH
@@ -104,9 +104,9 @@ header_start:
     .short MULTIBOOT_HEADER_TAG_END
     .short 0    // flags, none set
     .long 8     // size, including itself (short + short + long)
+#endif
 header_end:
 
-#endif
 
 /****************************************************************************
  * .text
