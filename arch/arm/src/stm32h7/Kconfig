@@ -1625,6 +1625,24 @@ config STM32H7_DMACAPABLE
 
 menu "Timer Configuration"
 
+config STM32H7_ONESHOT
+	bool "TIM one-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config STM32H7_ONESHOT_MAXTIMERS
+	int "Maximum number of oneshot timers"
+	default 1
+	range 1 8
+	depends on STM32H7_ONESHOT
+	---help---
+		Determines the maximum number of oneshot timers that can be
+		supported.  This setting pre-allocates some minimal support for each
+		of the timers and places an upper limit on the number of oneshot
+		timers that you can use.
+
 config STM32H7_PWM_LL_OPS
 	bool "PWM low-level operations"
 	default n
