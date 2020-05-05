@@ -2754,6 +2754,8 @@ static void gs2200m_irq_worker(FAR void *arg)
     }
   while (ret < 0);
 
+repeat:
+
   n = dev->lower->dready(&ec);
   wlinfo("== start (dready=%d, ec=%d) \n", n, ec);
 
@@ -2844,20 +2846,26 @@ static void gs2200m_irq_worker(FAR void *arg)
 
 errout:
 
-  /* NOTE: Enable gs2200m irq which was disabled in gs2200m_irq() */
-
-  dev->lower->enable();
+  if (ignored)
+    {
+      _release_pkt_dat(pkt_dat);
+      kmm_free(pkt_dat);
+      ignored = false;
+    }
 
   n = dev->lower->dready(&ec);
 
   wlinfo("== end: cid=%c (dready=%d, ec=%d) type=%d \n",
          pkt_dat->cid, n, ec, t);
 
-  if (ignored)
+  if (1 == n)
     {
-      _release_pkt_dat(pkt_dat);
-      kmm_free(pkt_dat);
+      goto repeat;
     }
+
+  /* NOTE: Enable gs2200m irq which was disabled in gs2200m_irq() */
+
+  dev->lower->enable();
 
   gs2200m_unlock(dev);
 }
