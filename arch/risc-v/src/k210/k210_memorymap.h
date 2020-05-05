@@ -41,6 +41,7 @@
 #include "hardware/k210_uart.h"
 #include "hardware/k210_clint.h"
 #include "hardware/k210_plic.h"
+#include "hardware/k210_sysctl.h"
 
 /****************************************************************************
  * Pre-processor Definitions

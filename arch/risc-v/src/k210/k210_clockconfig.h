@@ -65,10 +65,11 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 EXTERN uint32_t k210_get_cpuclk(void);
+EXTERN uint32_t k210_get_pll0clk(void);
 EXTERN void k210_clockconfig(void);
 
 #if defined(__cplusplus)
