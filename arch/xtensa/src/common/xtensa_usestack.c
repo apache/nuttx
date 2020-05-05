@@ -46,6 +46,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/tls.h>
 
 #include "xtensa.h"
 
@@ -106,6 +107,12 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
   size_t top_of_stack;
   size_t size_of_stack;
 
+#ifdef CONFIG_TLS_ALIGNED
+  /* Make certain that the user provided stack is properly aligned */
+
+  DEBUGASSERT(((uintptr_t)stack & TLS_STACK_MASK) == 0);
+#endif
+
   /* Is there already a stack allocated? */
 
   if (tcb->stack_alloc_ptr)
@@ -139,6 +146,12 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   tcb->adj_stack_ptr  = (uint32_t *)top_of_stack;
   tcb->adj_stack_size = size_of_stack;
+
+#ifdef CONFIG_TLS
+  /* Initialize the TLS data structure */
+
+  memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
+#endif
 
   return OK;
 }

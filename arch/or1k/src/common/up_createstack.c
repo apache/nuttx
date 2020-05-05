@@ -122,6 +122,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   stack_size += sizeof(struct tls_info_s);
 
+#ifdef CONFIG_TLS_ALIGNED
   /* The allocated stack size must not exceed the maximum possible for the
    * TLS feature.
    */
@@ -131,6 +132,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
     {
       stack_size = TLS_MAXSTACK;
     }
+#endif
 #endif
 
   /* Is there already a stack allocated of a different size?  Because of
@@ -154,7 +156,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * If TLS is enabled, then we must allocate aligned stacks.
        */
 
-#ifdef CONFIG_TLS
+#ifdef CONFIG_TLS_ALIGNED
 #ifdef CONFIG_MM_KERNEL_HEAP
       /* Use the kernel allocator if this is a kernel thread */
 
@@ -172,7 +174,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
             (uint32_t *)kumm_memalign(TLS_STACK_ALIGN, stack_size);
         }
 
-#else /* CONFIG_TLS */
+#else /* CONFIG_TLS_ALIGNED */
 #ifdef CONFIG_MM_KERNEL_HEAP
       /* Use the kernel allocator if this is a kernel thread */
 
@@ -187,7 +189,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
           tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
         }
-#endif /* CONFIG_TLS */
+#endif /* CONFIG_TLS_ALIGNED */
 
 #ifdef CONFIG_DEBUG_FEATURES
       /* Was the allocation successful? */
