@@ -91,6 +91,9 @@ The format of the CSV file for each line is:
   Field 3: Condition for compilation
   Field 4: The type of function return value.
   Field 5 - N+5: The type of each of the N formal parameters of the function
+  Fields N+5 - : If the last parameter is "...", then the following fields
+           provide the type and number of of possible optional parameters.
+           See note below about variadic functions
 
 Each type field has a format as follows:
 
@@ -107,6 +110,33 @@ Each type field has a format as follows:
         member types when passing the actual parameter.  Similarly, we
         cannot cast a union sigval to a uinptr_t either.  Rather, we need
         to cast a specific union member fieldname to uintptr_t.
+
+Variadic Functions:
+
+   General variadic functions which may have an arbitrary number of argument
+   or arbitrary types cannot be represented as system calls.  syslog() is a
+   good example.   Normally you would work around this by using the non-
+   variadic form of the OS interface that accepts a va_list as an argument,
+   vsyslog() in this case.
+
+   There there are many functions that have a variadic form but take only
+   one or two arguments optional arguments.  There can be handled as system
+   calls, but only by treating them as though they had a fixed number of
+   arguments.
+
+   These are are handled in syscall.csv by appending the number and type of
+   optional arguments.  For example, consider the open() OS interface.  Its
+   prototype is:
+
+      int open(const char *path, int oflag, ...);
+
+   In reality, open may take only a single optional argument of type mode_t
+   and is represented in syscall.cvs like this:
+
+      "open","fcntl.h","","int","const char*","int","...","mode_t"
+
+   The existence of the "mode_t" tells tools/mksyscall that there is at most
+   one optional parameter and, if present, it is of type mode_t.
 
 NOTE: This CSV file is used both to support the generate of trap information,
 but also for the generation of symbol tables.  See nuttx/tools/README.txt
