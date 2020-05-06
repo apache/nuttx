@@ -266,53 +266,62 @@ static int qemu_pci_msix_register(FAR struct pcie_dev_s *dev,
   unsigned int bar;
   uint16_t message_control;
   uint32_t table_bar_ind;
-  uint32_t lo_table_addr;
-  uint32_t hi_table_addr;
+  uint32_t table_addr_32;
   uint64_t msix_table_addr = 0;
 
   int cap = pci_find_cap(dev, PCI_CAP_MSIX);
   if (cap < 0)
       return -EINVAL;
 
-  __qemu_pci_cfg_read(dev->bdf, cap + 2, &message_control, 2);
+  __qemu_pci_cfg_read(dev->bdf, cap + PCI_MSIX_MCR,
+                      &message_control, PCI_MSIX_MCR_SIZE);
 
   /* bounds check */
 
-  if (index > (message_control & 0x3ff))
+  if (index > (message_control & PCI_MSIX_MCR_TBL_MASK))
       return -EINVAL;
 
-  __qemu_pci_cfg_read(dev->bdf, cap + 4, &table_bar_ind, 4);
+  __qemu_pci_cfg_read(dev->bdf, cap + PCI_MSIX_TBL,
+                      &table_bar_ind, PCI_MSIX_TBL_SIZE);
 
-  bar = (table_bar_ind & 7) * 4 + PCI_CFG_BAR;
+  bar = (table_bar_ind & PCI_MSIX_BIR_MASK);
 
-  __qemu_pci_cfg_read(dev->bdf, bar, &lo_table_addr, 4);
-
-  if ((lo_table_addr & 6) == PCI_BAR_64BIT)
+  if (!pci_get_bar(dev, bar, &table_addr_32))
     {
-      __qemu_pci_cfg_read(dev->bdf, bar + 4, &hi_table_addr, 4);
-      msix_table_addr = (uint64_t)hi_table_addr << 32;
+      /* 32 bit bar */
+
+      msix_table_addr = table_addr_32;
+    }
+  else
+    {
+      pci_get_bar64(dev, bar, &msix_table_addr);
     }
 
-  msix_table_addr |= lo_table_addr & ~0xf;
-  msix_table_addr += table_bar_ind & ~0x7;
+  msix_table_addr &= ~0xf;
+  msix_table_addr += table_bar_ind & ~PCI_MSIX_BIR_MASK;
 
   /* enable and mask */
 
-  message_control |= (MSIX_CTRL_ENABLE | MSIX_CTRL_FMASK);
-  __qemu_pci_cfg_write(dev->bdf, cap + 2, &message_control, 2);
+  message_control |= (PCI_MSIX_MCR_EN | PCI_MSIX_MCR_FMASK);
+  __qemu_pci_cfg_write(dev->bdf, cap + PCI_MSIX_MCR,
+                       &message_control, PCI_MSIX_MCR_SIZE);
 
-  msix_table_addr += 16 * index;
-  mmio_write32((uint32_t *)(msix_table_addr),
-               0xfee00000 | up_apic_cpu_id() << 12);
-  mmio_write32((uint32_t *)(msix_table_addr + 4), 0);
-  mmio_write32((uint32_t *)(msix_table_addr + 8), vector);
-  mmio_write32((uint32_t *)(msix_table_addr + 12), 0);
+  msix_table_addr += PCI_MSIX_TBL_ENTRY_SIZE * index;
+  mmio_write32((uint32_t *)(msix_table_addr + PCI_MSIX_TBL_LO_ADDR),
+               0xfee00000 | up_apic_cpu_id() << PCI_MSIX_APIC_ID_OFFSET);
+  mmio_write32((uint32_t *)(msix_table_addr + PCI_MSIX_TBL_HI_ADDR),
+               0);
+  mmio_write32((uint32_t *)(msix_table_addr + PCI_MSIX_TBL_MSG_DATA),
+               vector);
+  mmio_write32((uint32_t *)(msix_table_addr + PCI_MSIX_TBL_VEC_CTL),
+               0);
 
   /* enable and unmask */
 
-  message_control &= ~MSIX_CTRL_FMASK;
+  message_control &= ~PCI_MSIX_MCR_FMASK;
 
-  __qemu_pci_cfg_write(dev->bdf, cap + 2, &message_control, 2);
+  __qemu_pci_cfg_write(dev->bdf, cap + PCI_MSIX_MCR,
+                       &message_control, PCI_MSIX_MCR_SIZE);
 
   return 0;
 }
@@ -342,27 +351,31 @@ static int qemu_pci_msi_register(FAR struct pcie_dev_s *dev, uint16_t vector)
   if (cap < 0)
       return -1;
 
-  uint32_t dest = 0xfee00000 | (up_apic_cpu_id() << 12);
-  __qemu_pci_cfg_write(dev->bdf, cap + 4, &dest, 4);
+  uint32_t dest = 0xfee00000 | (up_apic_cpu_id() << PCI_MSI_APIC_ID_OFFSET);
+  __qemu_pci_cfg_write(dev->bdf, cap + PCI_MSI_MAR, &dest, PCI_MSI_MAR_SIZE);
 
-  __qemu_pci_cfg_read(dev->bdf, cap + 2, &ctl, 2);
-  if (ctl & (1 << 7))
+  __qemu_pci_cfg_read(dev->bdf, cap + PCI_MSI_MCR, &ctl, PCI_MSI_MCR_SIZE);
+  if ((ctl & PCI_MSI_MCR_64) == PCI_MSI_MCR_64)
     {
       uint32_t tmp = 0;
-      __qemu_pci_cfg_write(dev->bdf, cap + 8, &tmp, 4);
-      data = cap + 0x0c;
+      __qemu_pci_cfg_write(dev->bdf,
+                           cap + PCI_MSI_MAR64_HI, &tmp,
+                           PCI_MSI_MAR64_HI_SIZE);
+      data = cap + PCI_MSI_MDR64;
     }
   else
     {
-      data = cap + 0x08;
+      data = cap + PCI_MSI_MDR;
     }
 
-  __qemu_pci_cfg_write(dev->bdf, data, &vector, 2);
+  __qemu_pci_cfg_write(dev->bdf, data, &vector, PCI_MSI_MDR_SIZE);
 
-  __qemu_pci_cfg_write(dev->bdf, cap + 2, &vector, 2);
+  __qemu_pci_cfg_write(dev->bdf, cap + PCI_MSI_MCR, &vector,
+                       PCI_MSI_MCR_SIZE);
 
-  uint16_t en = 0x0001;
-  __qemu_pci_cfg_write(dev->bdf, cap + 2, &en, 2);
+  uint16_t tmp = PCI_MSI_MCR_EN;
+
+  __qemu_pci_cfg_write(dev->bdf, cap + PCI_MSI_MCR, &tmp, PCI_MSI_MCR_SIZE);
 
   return OK;
 }
