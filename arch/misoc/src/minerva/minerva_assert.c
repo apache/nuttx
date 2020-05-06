@@ -85,11 +85,11 @@ static void _up_assert(int errorcode)
 
   syslog_flush();
 
-  /* Are we in an interrupt handler or the idle task? NOTE: You cannot use the
-   * PID to determine if this is an IDLE task.  In the SMP case, there may be
-   * multiple IDLE tasks with different PIDs.  The only consistent way to test
-   * for the IDLE task is to check it is at the end of the list (flink ==
-   * NULL)
+  /* Are we in an interrupt handler or the idle task? NOTE: You cannot use
+   * the PID to determine if this is an IDLE task.  In the SMP case, there
+   * may be multiple IDLE tasks with different PIDs.  The only consistent
+   * way to test for the IDLE task is to check it is at the end of the list
+   * (flink == NULL)
    */
 
   if (g_current_regs || running_task()->flink == NULL)
