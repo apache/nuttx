@@ -143,14 +143,13 @@ static struct usbmon_state_s g_usbmonitor;
 static int usbtrace_syslog(FAR const char *fmt, ...)
 {
   va_list ap;
-  int ret;
 
-  /* Let nx_vsyslog do the real work */
+  /* Let vsyslog do the real work */
 
   va_start(ap, fmt);
-  ret = nx_vsyslog(LOG_INFO, fmt, &ap);
+  vsyslog(LOG_INFO, fmt, ap);
   va_end(ap);
-  return ret;
+  return OK;
 }
 
 static int usbmonitor_tracecallback(struct usbtrace_s *trace, void *arg)
