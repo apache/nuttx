@@ -193,7 +193,7 @@ int pci_get_bar(FAR struct pcie_dev_s *dev, uint32_t bar,
 int pci_get_bar64(FAR struct pcie_dev_s *dev, uint32_t bar,
                   uint64_t *ret)
 {
-  if (bar > 5 || ((bar % 2) != 0))
+  if (bar > 4 || ((bar % 2) != 0))
       return -EINVAL;
 
   uint32_t barmem1;
@@ -253,7 +253,7 @@ int pci_set_bar(FAR struct pcie_dev_s *dev, uint32_t bar,
 int pci_set_bar64(FAR struct pcie_dev_s *dev, uint32_t bar,
                   uint64_t val)
 {
-  if (bar > 5 || ((bar % 2) != 0))
+  if (bar > 4 || ((bar % 2) != 0))
       return -EINVAL;
 
   uint32_t barmem1 = (uint32_t)val;
@@ -328,7 +328,7 @@ int pci_map_bar(FAR struct pcie_dev_s *dev, uint32_t bar,
 int pci_map_bar64(FAR struct pcie_dev_s *dev, uint32_t bar,
                   unsigned long length, uint64_t *ret)
 {
-  if (bar > 5 || ((bar % 2) != 0))
+  if (bar > 4 || ((bar % 2) != 0))
       return -EINVAL;
 
   uint32_t barmem1;
