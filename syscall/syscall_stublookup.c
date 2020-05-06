@@ -234,8 +234,7 @@ uintptr_t STUB_closedir(int nbr, uintptr_t parm1);
 uintptr_t STUB_dup(int nbr, uintptr_t parm1);
 uintptr_t STUB_dup2(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_fcntl(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
-            uintptr_t parm6);
+            uintptr_t parm3);
 uintptr_t STUB_lseek(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_mmap(int nbr, uintptr_t parm1, uintptr_t parm2,
