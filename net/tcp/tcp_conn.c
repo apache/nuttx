@@ -63,6 +63,8 @@
 #include "devif/devif.h"
 #include "inet/inet.h"
 #include "tcp/tcp.h"
+#include "arp/arp.h"
+#include "icmpv6/icmpv6.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1228,6 +1230,38 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
       nerr("ERROR: Failed to find network device: %d\n", ret);
       goto errout_with_lock;
     }
+
+#if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
+#ifdef CONFIG_NET_ARP_SEND
+#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
+  if (conn->domain == PF_INET)
+#endif
+    {
+      /* Make sure that the IP address mapping is in the ARP table */
+
+      ret = arp_send(conn->u.ipv4.raddr);
+    }
+#endif /* CONFIG_NET_ARP_SEND */
+
+#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
+#ifdef CONFIG_NET_ARP_SEND
+  else
+#endif
+    {
+      /* Make sure that the IP address mapping is in the Neighbor Table */
+
+      ret = icmpv6_neighbor(conn->u.ipv6.raddr);
+    }
+#endif /* CONFIG_NET_ICMPv6_NEIGHBOR */
+
+  /* Did we successfully get the address mapping? */
+
+  if (ret < 0)
+    {
+      ret = -ENETUNREACH;
+      goto errout_with_lock;
+    }
+#endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
   /* Initialize and return the connection structure, bind it to the port
    * number.  At this point, we do not know the size of the initial MSS We
