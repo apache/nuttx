@@ -113,8 +113,6 @@ void up_sigdeliver(void)
 
   /* Deliver the signals */
 
-  _err("Deliver signal to %llx: %llx\n", rtcb, rtcb->xcp.sigdeliver);
-
   sighandler(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
