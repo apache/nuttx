@@ -91,7 +91,7 @@ struct alm_cbinfo_s
 struct prd_cbinfo_s
 {
   volatile periodiccb_t prd_cb; /* Client callback function */
-  volatile FAR void *prd_arg;     /* Argument to pass with the callback function */
+  volatile FAR void *prd_arg;   /* Argument to pass with the callback function */
 };
 #endif
 
@@ -562,7 +562,9 @@ int up_rtc_settime(FAR const struct timespec *tp)
   volatile uint8_t dummy_byte;
   volatile uint16_t dummy_word;
 
-  /* Break out the time values (note that the time is set only to units of seconds) */
+  /* Break out the time values (note that the time is set only to units of 
+   * seconds)
+   */
 
   (void)gmtime_r(&tp->tv_sec, &newtime);
   rtc_dumptime(&newtime, "Setting time");
@@ -1050,7 +1052,7 @@ int rx65n_rtc_cancelperiodic(void)
 
   IEN(RTC, PRD) = 0U;
 
-  /* Clear IR flag of PRD interrupt*/
+  /* Clear IR flag of PRD interrupt */
 
   IR(RTC, PRD) = 0U;
 
@@ -1059,7 +1061,7 @@ int rx65n_rtc_cancelperiodic(void)
   RTC.RCR1.BIT.PIE = 0U;
   while (0U != RTC.RCR1.BIT.PIE)
     {
-      /* Wait for this write to complete.*/
+      /* Wait for this write to complete. */
     }
 
   return OK;
@@ -1071,7 +1073,7 @@ int rx65n_rtc_cancelperiodic(void)
 
 int rx65n_rtc_cancelcarry(void)
 {
-  /* Clear IR flag of CUP interrupt*/
+  /* Clear IR flag of CUP interrupt */
 
   IR(PERIB, INTB176) = 0U;
 

@@ -1,43 +1,20 @@
 /****************************************************************************
  * arch/renesas/src/rx65n/rx65n_eth.c
- * 10/100 Base-T Ethernet driver for the RX65N family
  *
- *   Copyright (C) 2008-2019 Gregory Nutt. All rights reserved.
- *   Author: Surya <surya.prakash@tataelxsi.co.in>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * This logic derives from the NuttX Ethernet Skeleton driver, STM32 ethernet
- * driver and
- * RX65N-rsk2mb baremetal code
- * This code has a BSD compatible license that requires this copyright notice:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Copyright (C) 2008-2019 Gregory Nutt. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the names NuttX nor Atmel nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -87,6 +64,7 @@
 #include "rx65n_cmtw0.h"
 
 #include <arch/board/board.h>
+#include <arch/board/rx65n_gpio.h>
 
 #if RX65N_NETHERNET > 0
 
@@ -245,12 +223,12 @@
 
 /* Define the access timing of MII/RMII register */
 
-#define ETHER_CFG_PHY_MII_WAIT                      (8)     /* Please define the value of 1 or more */
+#define ETHER_CFG_PHY_MII_WAIT                      (8)     /* define the value of 1 or more */
 
 /* Define the waiting time for reset completion of PHY-LSI */
 
 #define ETHER_CFG_PHY_DELAY_RESET                   (0x00020000L)
-#define ETHER_PHY_STATUS_CHECK_DELAY                 (20000)
+#define ETHER_PHY_STATUS_CHECK_DELAY                (20000)
 
 /* Group AL1 interrupt priority level.
  * This definition is not used when EINT interrupt
@@ -267,18 +245,15 @@
 
 /* This setting is reflected in all channels */
 
-#define ETHER_CFG_USE_LINKSTA                       (1)
-#if defined(CONFIG_ARCH_RX65N_RSK2MB)
+#define ETHER_CFG_USE_LINKSTA           (1)
 
-#define ETHER_LINKUP                                (0)
-#define ETHER_LINKDOWN                              (1)
+#define ETHER_LINKUP                    (1)
+#define ETHER_LINKDOWN                  (0)
 
-#elif defined(CONFIG_ARCH_RX65N_GRROSE)
+/* Multicast filter */
 
-#define ETHER_LINKUP                                (1)
-#define ETHER_LINKDOWN                              (0)
-
-#endif
+#define ETHER_MC_FILTER_OFF             (0) /* Multicast frame filter disable */
+#define ETHER_MC_FILTER_ON              (1) /* Multicast frame filter enable */
 
 /* Standard PHY Registers */
 
@@ -289,30 +264,6 @@
 #define PHY_REG_AN_ADVERTISEMENT        (4)
 #define PHY_REG_AN_LINK_PARTNER         (5)
 #define PHY_REG_AN_EXPANSION            (6)
-
-#if defined(CONFIG_ARCH_RX65N_RSK2MB)
-#define PHY_STS_REG                      0x10
-#define PHY_STS_REG_LINK                (1 << 0)
-#elif defined(CONFIG_ARCH_RX65N_GRROSE)
-#define PHY_STS_REG                      0x1f
-#define PHY_STS_REG_AUTO_NEG             (1 << 12)
-#endif
-
-/* If we want to debug PHY register. Need to define these two macro
- * #define PHY_READ_WRITE_TEST
- * #define PHY_REG_DEBUGGING
- */
-
-#if defined(PHY_READ_WRITE_TEST)
-#if defined(CONFIG_ARCH_RX65N_RSK2MB)
-  #define PHY_REG_IDENTIFIER1_DEF_VAL 0x2000
-  #define PHY_REG_IDENTIFIER2_DEF_VAL 0x5ce1
-#elif defined(CONFIG_ARCH_RX65N_GRROSE)
-  #define PHY_REG_IDENTIFIER1_DEF_VAL 0x0007
-  #define PHY_REG_IDENTIFIER2_DEF_VAL 0xc0f0 /* The The default value of LSB 4bit will vary dependent on the silicon revision number */
-#endif
-  #define PHY_REG_MII_INT_CONTROL 0x11
-#endif
 
 /* Phy Interrupt register */
 
@@ -386,7 +337,7 @@
 #define NX_ALIGN32 __attribute__((aligned(32)))
 
 /****************************************************************************
- * Private Types
+ * Public Variables
  ****************************************************************************/
 
 /* Ethernet TX DMA Descriptor */
@@ -420,8 +371,8 @@ struct eth_rxdesc_s
  * Private Types
  ****************************************************************************/
 
-/* The rx65n_ethmac_s encapsulates all state information for a single hardware
- * interface
+/* The rx65n_ethmac_s encapsulates all state information for a single 
+ * hardware interface
  */
 
 struct rx65n_ethmac_s
@@ -456,7 +407,8 @@ struct rx65n_ethmac_s
   uint16_t             inflight;    /* Number of TX transfers "in_flight" */
   sq_queue_t           freeb;       /* The free buffer list */
 
-  uint32_t            prevlinkstatus; /* Previous link status to ignore multiple link change interrupt (specific to GR-Rose) */
+  uint32_t             prevlinkstatus; /* Previous link status to ignore multiple link change interrupt (specific to GR-Rose) */
+  uint8_t              mc_filter_flag; /* Multicast filter */
 };
 
 /****************************************************************************
@@ -598,12 +550,6 @@ static int rx65n_phywrite (uint8_t phydevaddr, uint16_t reg_addr,
 static uint16_t rx65n_phyread (uint8_t phydevaddr, uint16_t reg_addr,
                                uint16_t *value);
 
-#if defined(PHY_READ_WRITE_TEST)
-static int rx65n_phy_read_write_test();
-#endif
-#if defined(PHY_REG_DEBUGGING)
-static void rx65n_phy_reg_dump();
-#endif
 void up_enable_irq(int irq);
 void up_disable_irq(int irq);
 
@@ -615,8 +561,7 @@ struct phylinknotification_t
         struct phy_notify_s *pclient;
 };
 
-struct phylinknotification_t phylinknotification;
-phylinknotification_t phylinknotification =
+struct phylinknotification_t phylinknotification =
 {
   NULL, NULL, NULL
 };
@@ -887,9 +832,10 @@ static int rx65n_transmit(FAR struct rx65n_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   struct eth_txdesc_s *txfirst;
+  uint32_t regval;
 
-  /* The internal (optimal) network buffer size may be configured to be larger
-   * than the Ethernet buffer size.
+  /* The internal (optimal) network buffer size may be configured to be 
+   * larger than the Ethernet buffer size.
    */
 
 #if OPTIMAL_ETH_BUFSIZE > CONFIG_RX65N_ETH_BUFSIZE
@@ -984,9 +930,11 @@ static int rx65n_transmit(FAR struct rx65n_ethmac_s *priv)
           /* Give the descriptor to DMA */
 
           txdesc->tdes0 |= TACT;
-                  rx65n_putreg(1, RX65N_ETHD_EDTRR);
+          regval  = rx65n_getreg(RX65N_ETHD_EDTRR);
+          regval |= (ETHD_EDRRR_TR);
+          rx65n_putreg(regval, RX65N_ETHD_EDTRR);
 
-          txdesc         = (struct eth_txdesc_s *)txdesc->tdes3;
+          txdesc = (struct eth_txdesc_s *)txdesc->tdes3;
         }
     }
   else
@@ -1012,7 +960,9 @@ static int rx65n_transmit(FAR struct rx65n_ethmac_s *priv)
        */
 
       txdesc->tdes0 |= TACT;
-          rx65n_putreg(1, RX65N_ETHD_EDTRR);
+      regval  = rx65n_getreg(RX65N_ETHD_EDTRR);
+      regval |= (ETHD_EDRRR_TR);
+      rx65n_putreg(regval, RX65N_ETHD_EDTRR);
 
       /* Point to the next available TX descriptor */
 
@@ -1178,8 +1128,8 @@ static int rx65n_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections 
+   * have been examined.
    */
 
   return 0;
@@ -1217,9 +1167,9 @@ static void rx65n_dopoll(FAR struct rx65n_ethmac_s *priv)
    * another packet for transmission.
    *
    * In a race condition, TACT may be cleared BUT still not available
-   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has run,
-   * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
-   * CONFIG_RX65N_ETH_NTXDESC).
+   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has 
+   * run, the buffer1 pointer (tdes2) will be nullified (and inflight
+   * should be < CONFIG_RX65N_ETH_NTXDESC).
    */
 
   if ((priv->txhead->tdes0 & TACT) == 0 &&
@@ -1290,7 +1240,8 @@ static void rx65n_enableint(FAR struct rx65n_ethmac_s *priv, uint32_t ierbit)
  *   None
  ****************************************************************************/
 
-static void rx65n_disableint(FAR struct rx65n_ethmac_s *priv, uint32_t ierbit)
+static void rx65n_disableint(FAR struct rx65n_ethmac_s *priv, 
+                             uint32_t ierbit)
 {
   uint32_t regval;
 
@@ -1325,6 +1276,7 @@ static void rx65n_freesegment(FAR struct rx65n_ethmac_s *priv,
 {
   struct eth_rxdesc_s *rxdesc;
   int i;
+  uint32_t regval;
 
   ninfo("rxfirst: %p segments: %d\n", rxfirst, segments);
 
@@ -1351,7 +1303,9 @@ static void rx65n_freesegment(FAR struct rx65n_ethmac_s *priv,
 
   if (!(rx65n_getreg(RX65N_ETHD_EDRRR)))
     {
-      rx65n_putreg(0x00000001, RX65N_ETHD_EDRRR);
+      regval  = rx65n_getreg(RX65N_ETHD_EDRRR);
+      regval |= (ETHD_EDRRR_RR);
+      rx65n_putreg(regval, RX65N_ETHD_EDRRR);
     }
 
   /* Reset the segment management logic */
@@ -1391,8 +1345,8 @@ static int rx65n_recvframe(FAR struct rx65n_ethmac_s *priv)
   ninfo("rxhead: %p rxcurr: %p segments: %d\n",
         priv->rxhead, priv->rxcurr, priv->segments);
 
-  /* Check if there are free buffers.  We cannot receive new frames in this
-   * design unless there is at least one free buffer.
+  /* Check if there are free buffers.  We cannot receive new frames in 
+   * this design unless there is at least one free buffer.
    */
 
   if (!rx65n_isfreebuffer(priv))
@@ -1492,8 +1446,8 @@ static int rx65n_recvframe(FAR struct rx65n_ethmac_s *priv)
   (priv->dev.d_statistics.rx_packets)++;
 #endif
 
-              /* Return success, remembering where we should re-start scanning
-               * and resetting the segment scanning logic
+              /* Return success, remembering where we should re-start 
+               * scanning and resetting the segment scanning logic
                */
 
               priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
@@ -1570,7 +1524,9 @@ static void rx65n_receive(FAR struct rx65n_ethmac_s *priv)
     {
 #ifdef CONFIG_NET_PKT
 
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the packet 
+	   * tap
+	   */
 
       pkt_input(&priv->dev);
 #endif
@@ -1737,7 +1693,8 @@ static void rx65n_receive(FAR struct rx65n_ethmac_s *priv)
  * Function: rx65n_freeframe
  *
  * Description:
- *   Scans the TX descriptors and frees the buffers of completed TX transfers.
+ *   Scans the TX descriptors and frees the buffers of completed TX 
+ *   transfers.
  *
  * Input Parameters:
  *   priv  - Reference to the driver state structure
@@ -1905,6 +1862,7 @@ static void rx65n_interrupt_work(FAR void *arg)
 #if defined(CONFIG_ARCH_PHY_INTERRUPT)
   uint16_t phyreg;
   int phyreg_read_status;
+  int irqno = 0;
 #endif
   DEBUGASSERT(priv);
 
@@ -1923,22 +1881,21 @@ static void rx65n_interrupt_work(FAR void *arg)
       rx65n_putreg(regval, RX65N_ETH_ECSR);
 
 #if defined(CONFIG_ARCH_PHY_INTERRUPT)
-#if defined(CONFIG_ARCH_BOARD_RX65N_GRROSE)
-      phyreg_read_status = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR,
-                                         PHY_REG_STATUS, &phyreg);
-      regval = (uint32_t)(phyreg & 0x04) >> 2;
-#elif defined(CONFIG_ARCH_BOARD_RX65N_RSK2MB)
-      phyreg_read_status = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR,
-                                         PHY_STS_REG, &phyreg);
-      regval = (uint32_t)(phyreg & 0x01);
-#endif
+    phyreg_read_status = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR,
+                                         PHY_STS_READ_REG, &phyreg);
+      if (OK == phyreg_read_status)
+        {
+          regval = (uint32_t)(phyreg & PHY_STS_BIT_MASK) 
+		             >> PHY_STS_SHIFT_COUNT;
+        }
+
       if (regval != priv->prevlinkstatus) /* Check link status by 0th bit */
         {
           /* Link UP or DOWN status */
 
           if (phylinknotification.phandler != NULL)
             {
-              phylinknotification.phandler(NULL, (FAR void *)NULL,
+              phylinknotification.phandler(irqno, (FAR void *)NULL,
               (FAR void *)phylinknotification.pclient);
               priv->prevlinkstatus = regval;
             }
@@ -2165,9 +2122,9 @@ static void rx65n_poll_work(FAR void *arg)
    * a transmit in progress, we will miss TCP time state updates?
    *
    * In a race condition, TACT may be cleared BUT still not available
-   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has run,
-   * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
-   * CONFIG_RX65N_ETH_NTXDESC).
+   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has 
+   * run, the buffer1 pointer (tdes2) will be nullified (and inflight 
+   * should be < CONFIG_RX65N_ETH_NTXDESC).
    */
 
   net_lock();
@@ -2300,6 +2257,7 @@ static int rx65n_ifup(struct net_driver_s *dev)
 
   up_enable_irq(RX65N_ETH_IRQ);
 
+  priv->prevlinkstatus = ETHER_LINKUP;
   rx65n_checksetup();
   return OK;
 }
@@ -2341,7 +2299,7 @@ static int rx65n_ifdown(struct net_driver_s *dev)
 
   /* Put the EMAC in its reset, non-operational state.
    * This should be a known configuration that will guarantee
-   * the rx65n_ifup() alwayssuccessfully brings the interface back up.
+   * the rx65n_ifup() always successfully brings the interface back up.
    */
 
   ret = rx65n_ethreset(priv);
@@ -2354,6 +2312,9 @@ static int rx65n_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->ifup = false;
+
+  priv->prevlinkstatus = ETHER_LINKDOWN;
+
   leave_critical_section(flags);
   return ret;
 }
@@ -2452,13 +2413,28 @@ static int rx65n_txavail(struct net_driver_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-/* Currently Not supported, Need to update this code when support added */
-
 static uint32_t rx65n_calcethcrc(const uint8_t *data, size_t length)
 {
   uint32_t crc = 0xffffffff;
+  size_t i;
+  int j;
 
-  /* Currently not implemented */
+  for (i = 0; i < length; i++)
+    {
+      for (j = 0; j < 8; j++)
+        {
+          if (((crc >> 31) ^ (data[i] >> j)) & 0x01)
+            {
+              /* x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1 */
+
+              crc = (crc << 1) ^ 0x04c11db7;
+            }
+          else
+            {
+              crc = crc << 1;
+            }
+        }
+    }
 
   return ~crc;
 }
@@ -2483,11 +2459,25 @@ static uint32_t rx65n_calcethcrc(const uint8_t *data, size_t length)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-/* Currently Not supported, Need to update this code when support added */
-
 static int rx65n_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  /* Currnently not implemented */
+  uint32_t regval;
+  uint32_t crc;
+  uint32_t hashindex;
+  uint32_t temp;
+  uint32_t registeraddress;
+  regval = 0;
+
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+    crc = rx65n_calcethcrc(mac, 6);
+
+  hashindex = (crc >> 26) & 0x3f;
+
+  /* RX65N do not support add on mac multi cast feature because related
+   * hash table mac multi cast register is not supported in RX65N.
+   */
 
   return OK;
 }
@@ -2512,12 +2502,27 @@ static int rx65n_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-/* Currently Not supported, Need to update this code when support added */
-
 #ifdef CONFIG_NET_MCASTGROUP
 static int rx65n_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  /* Currnently not implemented */
+  uint32_t crc;
+  uint32_t hashindex;
+  uint32_t temp;
+  uint32_t registeraddress;
+
+  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+  /* Remove the MAC address to the hardware multicast hash table */
+
+  crc = rx65n_calcethcrc(mac, 6);
+
+  hashindex = (crc >> 26) & 0x3f;
+
+  /* RX65N do not support add on mac multi cast feature because related
+   * hash table multi cast mac register not available. This function is
+   * not need to implement.
+   */
 
   return OK;
 }
@@ -2576,7 +2581,9 @@ static void rx65n_txdescinit(FAR struct rx65n_ethmac_s *priv)
       txdesc->tdes1 = (uint32_t)(1 << 16);
       txdesc->tdes2 = 0;
 
-      /* Initialize the next descriptor with the Next Descriptor Polling Enable */
+      /* Initialize the next descriptor with the Next Descriptor Polling 
+	   * Enable
+	   */
 
       if (i < (CONFIG_RX65N_ETH_NTXDESC - 1))
         {
@@ -2656,7 +2663,9 @@ static void rx65n_rxdescinit(FAR struct rx65n_ethmac_s *priv)
 
       rxdesc->rdes2 = (uint32_t)&priv->rxbuffer[i*CONFIG_RX65N_ETH_BUFSIZE];
 
-      /* Initialize the next descriptor with the Next Descriptor Polling Enable */
+      /* Initialize the next descriptor with the Next Descriptor Polling 
+	   * Enable
+	   */
 
       if (i < (CONFIG_RX65N_ETH_NRXDESC - 1))
         {
@@ -2715,10 +2724,6 @@ static void rx65n_rxdescinit(FAR struct rx65n_ethmac_s *priv)
 #ifdef CONFIG_NETDEV_IOCTL
 static int rx65n_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
-#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-  FAR struct rx65n_ethmac_s *priv =
-  (FAR struct rx65n_ethmac_s *)dev->d_private;
-#endif
   int ret;
 
   switch (cmd)
@@ -2885,7 +2890,6 @@ int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
 
   irqstate_t flags;
   phy_enable_t enabler;
-  int irq;
 
   DEBUGASSERT(intf);
 
@@ -2942,7 +2946,7 @@ int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
  * Arguments    : pause -
  *                    Using state of pause frames
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 void phy_start_autonegotiate (uint8_t pause)
 {
@@ -2974,7 +2978,9 @@ void phy_start_autonegotiate (uint8_t pause)
                      PHY_AN_ADVERTISEMENT_SELECTOR);
     }
 
-  /* Configure what the PHY and the Ethernet controller on this board supports */
+  /* Configure what the PHY and the Ethernet controller on this board 
+   * supports
+   */
 
   rx65n_phywrite(CONFIG_RX65N_EMAC0_PHYADDR,
                            PHY_REG_AN_ADVERTISEMENT, regval);
@@ -2989,7 +2995,7 @@ void phy_start_autonegotiate (uint8_t pause)
  *                PHY access channel is powered off.
  * Arguments    : none
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 void rx65n_power_on_control(void)
 {
@@ -3039,7 +3045,7 @@ void rx65n_power_on_control(void)
  * Arguments    : mode -
  *                    phy mode
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 void rx65n_ether_set_phy_mode(uint8_t mode)
 {
@@ -3049,7 +3055,7 @@ void rx65n_ether_set_phy_mode(uint8_t mode)
 
       /* PFENET -> PHYMODE0 is Enabled Ethernet Channel0 to use MII Mode; */
 
-      putreg8(0x10, RX65N_MPC_PFENET);
+      putreg8(ETH_PFENET_MII_MODE, RX65N_MPC_PFENET);
     }
   else if (PHY_RMII_SET_MODE == mode)
     {
@@ -3057,7 +3063,7 @@ void rx65n_ether_set_phy_mode(uint8_t mode)
 
       /* PFENET -> PHYMODE0 is Enabled Ethernet Channel0 to use MII Mode; */
 
-      putreg8(0x00, RX65N_MPC_PFENET);
+      putreg8(ETH_PFENET_RMII_MODE, RX65N_MPC_PFENET);
     }
   else
     {
@@ -3065,7 +3071,7 @@ void rx65n_ether_set_phy_mode(uint8_t mode)
 
       /* PFENET -> PHYMODE0 is Enabled Ethernet Channel0 to use MII Mode; */
 
-      putreg8(0x10, RX65N_MPC_PFENET);
+      putreg8(ETH_PFENET_MII_MODE, RX65N_MPC_PFENET);
     }
 }
 
@@ -3075,7 +3081,7 @@ void rx65n_ether_set_phy_mode(uint8_t mode)
  * Arguments    : pdata -
  *                    pointer to store the data read
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 static void phy_reg_read (uint16_t *pdata)
 {
@@ -3098,32 +3104,33 @@ static void phy_reg_read (uint16_t *pdata)
         {
           /* Reset All Flags of PIR */
 
-          rx65n_putreg(0x00000000, RX65N_ETH_PIR);
+          rx65n_putreg(ETH_PIR_RESET_ALL, RX65N_ETH_PIR);
         }
 
       for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
         {
           /* Setting MDC of PIR */
 
-          rx65n_putreg(0x00000001, RX65N_ETH_PIR);
+          rx65n_putreg(ETH_PIR_SET_MDC, RX65N_ETH_PIR);
         }
 
       reg_data <<= 1;
 
       /* MDI read  */
 
-      reg_data |= (uint16_t) (((rx65n_getreg(RX65N_ETH_PIR)) & 0x00000008) >> 3);
+      reg_data |= (uint16_t) (((rx65n_getreg(RX65N_ETH_PIR))
+                                                  & ETH_PIR_MDI) >> 3);
 
       for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
         {
           /* Setting MDC of PIR */
 
-          rx65n_putreg(0x00000001, RX65N_ETH_PIR);
+          rx65n_putreg(ETH_PIR_SET_MDC, RX65N_ETH_PIR);
         }
 
       for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
         {
-          rx65n_putreg(0x00000000, RX65N_ETH_PIR); /* Reset All Flags of PIR */
+          rx65n_putreg(ETH_PIR_RESET_ALL, RX65N_ETH_PIR); /* Reset All Flags of PIR */
         }
 
       databitcnt--;
@@ -3140,7 +3147,7 @@ static void phy_reg_read (uint16_t *pdata)
  *                reg_addr -
  *                    address of the PHY register
  * Return Value : read value
- ***************************************************************************/
+ ****************************************************************************/
 
 static uint16_t rx65n_phyread (uint8_t phydevaddr, uint16_t reg_addr,
                                uint16_t *value)
@@ -3199,14 +3206,14 @@ void rx65n_ether_enable_icu(void)
   IEN(ICU, GROUPAL1) = 1;
 }
 
-/***************************************************************************
+/****************************************************************************
  * Function Name: rx65n_phy_trans_zto0
  * Description  : Performs bus release so that PHY can drive data
  *              : for read operation
  * Arguments    : ether_channel -
  *                    Ethernet channel number
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 static void rx65n_phy_trans_zto0 ()
 {
@@ -3221,24 +3228,24 @@ static void rx65n_phy_trans_zto0 ()
     {
           /* Resetting All flags of PIR */
 
-      rx65n_putreg(0x00000000, RX65N_ETH_PIR);
+      rx65n_putreg(ETH_PIR_RESET_ALL, RX65N_ETH_PIR);
     }
 
   for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
     {
-      rx65n_putreg(0x00000001, RX65N_ETH_PIR); /* Setting MDC of PIR */
+      rx65n_putreg(ETH_PIR_SET_MDC, RX65N_ETH_PIR); /* Setting MDC of PIR */
     }
 
   for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
     {
-      rx65n_putreg(0x00000001, RX65N_ETH_PIR); /* Setting MDC of PIR */
+      rx65n_putreg(ETH_PIR_SET_MDC, RX65N_ETH_PIR); /* Setting MDC of PIR */
     }
 
   for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
     {
       /* Resetting All flags of PIR */
 
-      rx65n_putreg(0x00000000, RX65N_ETH_PIR);
+      rx65n_putreg(ETH_PIR_RESET_ALL, RX65N_ETH_PIR);
     }
 }
 
@@ -3249,7 +3256,7 @@ static void rx65n_phy_trans_zto0 ()
  * Arguments    : ether_channel -
  *                    Ethernet channel number
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 static void rx65n_phy_trans_1to0 ()
 {
@@ -3272,7 +3279,7 @@ static void rx65n_phy_trans_1to0 ()
  *                option -
  *                    mode
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 static void rx65n_phy_reg_set (uint8_t phydevaddr, uint16_t reg_addr,
                                int32_t option)
@@ -3324,7 +3331,7 @@ static void rx65n_phy_reg_set (uint8_t phydevaddr, uint16_t reg_addr,
  * Arguments    :  data -
  *                value to write
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 static void rx65n_phy_reg_write (uint16_t data)
 {
@@ -3336,7 +3343,7 @@ static void rx65n_phy_reg_write (uint16_t data)
    * of "IEEE 802.3-2008_section2".
    */
 
-  databitcnt = 16; /* Number of bit to write */
+  databitcnt = 16;       /* Number of bit to write */
   while (databitcnt > 0) /* writing 1 bit per loop */
     {
       if (0 == (data & 0x8000))
@@ -3358,7 +3365,7 @@ static void rx65n_phy_reg_write (uint16_t data)
  * Description  : Outputs 1 to the MII interface
  * Arguments    : none
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 static void rx65n_phy_mii_write1 ()
 {
@@ -3375,28 +3382,28 @@ static void rx65n_phy_mii_write1 ()
     {
       /* Setting MDO and MMD and by default MDI */
 
-       rx65n_putreg(0x00000006, RX65N_ETH_PIR);
+       rx65n_putreg(ETH_PIR_SET_MDO_MMD, RX65N_ETH_PIR);
     }
 
   for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
     {
       /* Setting MDO, MMD and MDC and by default MDI */
 
-      rx65n_putreg(0x00000007, RX65N_ETH_PIR);
+      rx65n_putreg(ETH_PIR_SET_MDO_MMD_MDC, RX65N_ETH_PIR);
     }
 
   for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
     {
       /* Setting MDO, MMD and MDC and by default MDI */
 
-      rx65n_putreg(0x00000007, RX65N_ETH_PIR);
+      rx65n_putreg(ETH_PIR_SET_MDO_MMD_MDC, RX65N_ETH_PIR);
     }
 
   for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
     {
       /* Setting MDO and MMD and by default MDI */
 
-      rx65n_putreg(0x00000006, RX65N_ETH_PIR);
+      rx65n_putreg(ETH_PIR_SET_MDO_MMD, RX65N_ETH_PIR);
     }
 }
 
@@ -3405,7 +3412,7 @@ static void rx65n_phy_mii_write1 ()
  * Description  : Outputs 0 to the MII interface
  * Arguments    : none
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 static void rx65n_phy_mii_write0(void)
 {
@@ -3421,28 +3428,28 @@ static void rx65n_phy_mii_write0(void)
     {
       /* Setting MMD and by default MDI */
 
-      rx65n_putreg(0x00000002, RX65N_ETH_PIR);
+      rx65n_putreg(ETH_PIR_SET_MMD, RX65N_ETH_PIR);
     }
 
   for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
     {
       /* Setting MDC and MMD and by default MDI */
 
-      rx65n_putreg(0x00000003, RX65N_ETH_PIR);
+      rx65n_putreg(ETH_PIR_SET_MMD_MDC, RX65N_ETH_PIR);
     }
 
   for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
     {
       /* Setting MDC and MMD and by default MDI */
 
-      rx65n_putreg(0x00000003, RX65N_ETH_PIR);
+      rx65n_putreg(ETH_PIR_SET_MMD_MDC, RX65N_ETH_PIR);
     }
 
   for (j = ETHER_CFG_PHY_MII_WAIT; j > 0; j--)
     {
       /* Setting MMD and by default MDI */
 
-      rx65n_putreg(0x00000002, RX65N_ETH_PIR);
+      rx65n_putreg(ETH_PIR_SET_MMD, RX65N_ETH_PIR);
     }
 }
 
@@ -3453,7 +3460,7 @@ static void rx65n_phy_mii_write0(void)
  *                "1" is output via the MII management interface.
  * Arguments    : none
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 static void rx65n_phy_preamble(void)
 {
@@ -3487,7 +3494,7 @@ static void rx65n_phy_preamble(void)
  *                data -
  *                    value
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 static int rx65n_phywrite (uint8_t phydevaddr, uint16_t reg_addr,
                            uint16_t data)
@@ -3510,7 +3517,7 @@ static int rx65n_phywrite (uint8_t phydevaddr, uint16_t reg_addr,
  * Description  : Writes to a ETHERC/EDMAC register
  * Arguments    : none
  * Return Value : none
- ***************************************************************************/
+ ****************************************************************************/
 
 void rx65n_ether_interrupt_init(void)
 {
@@ -3540,180 +3547,6 @@ void rx65n_ether_interrupt_init(void)
   regval &= (~(ETHD_EESIPR_ECIIP));
   rx65n_putreg(regval, RX65N_ETHD_EESIPR);
 }
-
-/****************************************************************************
- * Function: rx65n_phy_reg_dump
- *
- * Description:
- *  Test PHY all register read and dump
- *
- * Input Parameters:
- *  None
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if defined(PHY_REG_DEBUGGING)
-static void rx65n_phy_reg_dump(void)
-{
-  int reg_offset;
-  int ret;
-  uint16_t reg;
-
-  /* Info: BMCR(Basic mode control register) offset 0x0;
-   * BMSR(Basic mode control register) offset 0x1
-   * PHSTS(Phy status register) offset 0x10
-   */
-
-  for (reg_offset = 0; reg_offset < 32; reg_offset++)
-    {
-      reg = 0;
-      ret = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR, reg_offset, &reg);
-
-      /* Read data from reg variable while debugging */
-
-      if (ret < 0)
-        {
-           nerr("ERROR: Failed to read register: %d\n", reg_offset);
-        }
-    }
-}
-#endif
-
-/****************************************************************************
- * Function: rx65n_phy_read_write_test
- *
- * Description:
- *  Test PHY read write operation
- *
- * Input Parameters:
- *  None
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if defined(PHY_READ_WRITE_TEST)
-static int rx65n_phy_read_write_test(void)
-{
-  int ret;
-  uint16_t reg;
-  reg = 0;
-  ret = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR, PHY_REG_IDENTIFIER1, &reg);
-  if (reg != PHY_REG_IDENTIFIER1_DEF_VAL)
-    {
-      nerr("ERROR: Failed to read PHY IDENTIFIER1 register\n");
-      return R_PHY_ERROR;
-    }
-
-  ret = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR, PHY_REG_IDENTIFIER2, &reg);
-#if defined(CONFIG_ARCH_RX65N_GRROSE)
-
-  /* The default value of LSB 4 bit will vary
-   * dependent on the silicon revision number.
-   */
-
-  reg = reg & 0xfff0;
-#endif
-  if (reg != PHY_REG_IDENTIFIER2_DEF_VAL)
-    {
-      nerr("ERROR: Failed to read PHY IDENTIFIER2 register\n");
-      nerr("ERROR: Failed to read PHY IDENTIFIER2 register\n");
-      return R_PHY_ERROR;
-    }
-
-#if defined(CONFIG_ARCH_RX65N_RSK2MB)
-  ret = rx65n_phywrite(CONFIG_RX65N_EMAC0_PHYADDR,
-                       PHY_REG_MII_INT_CONTROL, 0x0000);
-  ret = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR,
-                      PHY_REG_MII_INT_CONTROL, &reg);
-  if (reg != 0x0000)
-    {
-      nerr("ERROR: Failed to write to PHY_REG_MII_INT_CONTROL n");
-      return R_PHY_ERROR;
-    }
-
-  ret = rx65n_phywrite(CONFIG_RX65N_EMAC0_PHYADDR,
-                      PHY_REG_MII_INT_CONTROL, 0x0001);
-  ret = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR,
-                      PHY_REG_MII_INT_CONTROL, &reg);
-  if (reg != 0x0001)
-    {
-      nerr("ERROR: Failed to write to PHY_REG_MII_INT_CONTROL n");
-      return R_PHY_ERROR;
-    }
-
-  ret = rx65n_phywrite(CONFIG_RX65N_EMAC0_PHYADDR,
-                       PHY_REG_MII_INT_CONTROL, 0x0002);
-  ret = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR,
-                      PHY_REG_MII_INT_CONTROL, &reg);
-  if (reg != 0x0002)
-    {
-      nerr("ERROR: Failed to write to PHY_REG_MII_INT_CONTROL n");
-      return R_PHY_ERROR;
-    }
-
-  ret = rx65n_phywrite(CONFIG_RX65N_EMAC0_PHYADDR,
-                       PHY_REG_MII_INT_CONTROL, 0x0003);
-  ret = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR,
-                      PHY_REG_MII_INT_CONTROL, &reg);
-  if (reg != 0x0003)
-    {
-      nerr("ERROR: Failed to write to PHY_REG_MII_INT_CONTROL n");
-      return R_PHY_ERROR;
-    }
-
-  ret = rx65n_phywrite(CONFIG_RX65N_EMAC0_PHYADDR,
-                       PHY_REG_MII_INT_CONTROL, 0x0004);
-  ret = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR,
-                      PHY_REG_MII_INT_CONTROL, &reg);
-  if (reg != 0x0004)
-    {
-      nerr("ERROR: Failed to write to PHY_REG_MII_INT_CONTROL n");
-      return R_PHY_ERROR;
-    }
-
-  ret = rx65n_phywrite(CONFIG_RX65N_EMAC0_PHYADDR,
-                       PHY_REG_MII_INT_CONTROL, 0x0005);
-  ret = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR,
-                      PHY_REG_MII_INT_CONTROL, &reg);
-  if (reg != 0x0005)
-    {
-      nerr("ERROR: Failed to write to PHY_REG_MII_INT_CONTROL n");
-      return R_PHY_ERROR;
-    }
-
-  ret = rx65n_phywrite(CONFIG_RX65N_EMAC0_PHYADDR,
-                       PHY_REG_MII_INT_CONTROL, 0x0006);
-  ret = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR,
-                      PHY_REG_MII_INT_CONTROL, &reg);
-  if (reg != 0x0006)
-    {
-      nerr("ERROR: Failed to write to PHY_REG_MII_INT_CONTROL n");
-      return R_PHY_ERROR;
-    }
-
-  ret = rx65n_phywrite(CONFIG_RX65N_EMAC0_PHYADDR,
-                       PHY_REG_MII_INT_CONTROL, 0x0007);
-  ret = rx65n_phyread(CONFIG_RX65N_EMAC0_PHYADDR,
-                      PHY_REG_MII_INT_CONTROL, &reg);
-  if (reg != 0x0007)
-    {
-      nerr("ERROR: Failed to write to PHY_REG_MII_INT_CONTROL n");
-      return R_PHY_ERROR;
-    }
-#endif
-
-  return R_PHY_OK;
-}
-#endif
 
 /****************************************************************************
  * Function: rx65n_phyinit
@@ -3819,12 +3652,11 @@ static int rx65n_phyinit(FAR struct rx65n_ethmac_s *priv)
         priv->mbps100 = 1;
         break;
     }
+
 #endif
 #endif
-
-error_with_reset_timeout:
-error_with_auto_neg_timeout:
-
+  error_with_reset_timeout:
+  error_with_auto_neg_timeout:
   return ret;
 }
 
@@ -3958,6 +3790,16 @@ static int rx65n_macconfig(FAR struct rx65n_ethmac_s *priv)
   rx65n_putreg(regval, RX65N_ETHD_EESIPR);
 
   rx65n_macaddress(priv);
+
+ #ifdef CONFIG_NET_ICMPv6
+  /* Set up the IPv6 multicast address */
+
+  /* Not supported So commented */
+
+  /* rx65n_ipv6multicast(priv); */
+
+ #endif
+
   return OK;
 }
 
@@ -4024,13 +3866,62 @@ static void rx65n_macaddress(FAR struct rx65n_ethmac_s *priv)
  *
  ****************************************************************************/
 
-/* Currently Not supported, Need to update this code when support added */
-
 #ifdef CONFIG_NET_ICMPv6
 static void rx65n_ipv6multicast(FAR struct rx65n_ethmac_s *priv)
 {
-  /* Currnently not implemented */
+  struct net_driver_s *dev;
+  uint16_t tmp16;
+  uint8_t mac[6];
+
+  /* For ICMPv6, we need to add the IPv6 multicast address
+   *
+   * For IPv6 multicast addresses, the Ethernet MAC is derived by
+   * the four low-order octets OR'ed with the MAC 33:33:00:00:00:00,
+   * so for example the IPv6 address FF02:DEAD:BEEF::1:3 would map
+   * to the Ethernet MAC address 33:33:00:01:00:03.
+   *
+   * NOTES:  This appears correct for the ICMPv6 Router Solicitation
+   * Message, but the ICMPv6 Neighbor Solicitation message seems to
+   * use 33:33:ff:01:00:03.
+   */
+
+  mac[0] = 0x33;
+  mac[1] = 0x33;
+
+  dev    = &priv->dev;
+  tmp16  = dev->d_ipv6addr[6];
+  mac[2] = 0xff;
+  mac[3] = tmp16 >> 8;
+
+  tmp16  = dev->d_ipv6addr[7];
+  mac[4] = tmp16 & 0xff;
+  mac[5] = tmp16 >> 8;
+
+  ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+  (void)rx65n_addmac(dev, mac);
+
+#ifdef CONFIG_NET_ICMPv6_AUTOCONF
+  /* Add the IPv6 all link-local nodes Ethernet address.  This is the
+   * address that we expect to receive ICMPv6 Router Advertisement
+   * packets.
+   */
+
+  (void)rx65n_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
+
+#endif /* CONFIG_NET_ICMPv6_AUTOCONF */
+#ifdef CONFIG_NET_ICMPv6_ROUTER
+  /* Add the IPv6 all link-local routers Ethernet address.  This is the
+   * address that we expect to receive ICMPv6 Router Solicitation
+   * packets.
+   */
+
+  (void)rx65n_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
+
+#endif /* CONFIG_NET_ICMPv6_ROUTER */
 }
+
 #endif /* CONFIG_NET_ICMPv6 */
 
 /****************************************************************************
@@ -4068,27 +3959,11 @@ static int rx65n_ethconfig(FAR struct rx65n_ethmac_s *priv)
    * Currently we are using MII
    */
 
-#if defined(CONFIG_ARCH_BOARD_RX65N_RSK2MB) || \
-            defined(CONFIG_ARCH_BOARD_RX65N_RSK1MB)
-  rx65n_ether_set_phy_mode(PHY_MII_SET_MODE);
-#else
-  rx65n_ether_set_phy_mode(PHY_RMII_SET_MODE);
-#endif
+  rx65n_ether_set_phy_mode(PHY_SET_MODE_REG);
 
   /* ETHERC/EDMAC Power on */
 
   rx65n_power_on_control();
-
-  /* Test PHY read write */
-
-#if defined(PHY_READ_WRITE_TEST)
-  ret = rx65n_phy_read_write_test();
-  if (ret < 0)
-    {
-      nerr("ERROR: PHY read write failed\n");
-      return ret;
-    }
-#endif
 
   /* Initialize the PHY */
 
@@ -4164,23 +4039,30 @@ static int rx65n_ethconfig(FAR struct rx65n_ethmac_s *priv)
 
   /* Continuous reception number of Broadcast frame */
 
-  rx65n_putreg(0x00000000, RX65N_ETH_BCFRR);
+  regval  = rx65n_getreg(RX65N_ETH_BCFRR);
+  regval |= (ETH_BCFRR_BCF);
+  rx65n_putreg(regval, RX65N_ETH_BCFRR);
 
-#ifdef CONFIG_NET_MCASTGROUP
-
+  regval  = rx65n_getreg(RX65N_ETHD_TRSCER);
+  if (ETHER_MC_FILTER_ON == priv->mc_filter_flag)
+    {
   /* Reflect the EESR.RMAF bit status in the RD0.RFS bit
    * in the receive descriptor
    */
 
-  rx65n_putreg(0x00000000, RX65N_ETHD_TRSCER);
-#else
-
+      regval &= (~((ETHD_TRSCER_RMAFCE) | (ETHD_TRSCER_RRFCE)));
+      rx65n_putreg(regval, RX65N_ETHD_TRSCER);
+    }
+  else
+    {
   /* Don't reflect the EESR.RMAF bit status in the RD0.RFS
    * bit in the receive descriptor
    */
 
-  rx65n_putreg(0x00000080, RX65N_ETHD_TRSCER);
-#endif
+      regval &= (~(ETHD_TRSCER_RRFCE));
+      regval |= (ETHD_TRSCER_RMAFCE);
+      rx65n_putreg(regval, RX65N_ETHD_TRSCER);
+    }
 
   /* Threshold of Tx_FIFO */
 
@@ -4188,7 +4070,9 @@ static int rx65n_ethconfig(FAR struct rx65n_ethmac_s *priv)
 
   /* transmit fifo is 1968 bytes & receive fifo is 2048 bytes */
 
-  rx65n_putreg(0x00000707, RX65N_ETHD_FDR);
+  regval  = rx65n_getreg(RX65N_ETHD_FDR);
+  regval |= ((ETHD_FDR_RFD) | (ETHD_FDR_TFD));
+  rx65n_putreg(regval, RX65N_ETHD_FDR);
 
   /* Configure receiving method */
 
@@ -4197,11 +4081,15 @@ static int rx65n_ethconfig(FAR struct rx65n_ethmac_s *priv)
    * b31:b1  Reserved set to 0
    */
 
-  rx65n_putreg(0x00000001, RX65N_ETHD_RMCR);
+  regval  = rx65n_getreg(RX65N_ETHD_RMCR);
+  regval |= (ETHD_RMCR_RNR);
+  rx65n_putreg(regval, RX65N_ETHD_RMCR);
 
   /* Transmit Interrupt Setting */
 
-  rx65n_putreg(0x00000011, RX65N_ETHD_TRIMD);
+  regval  = rx65n_getreg(RX65N_ETHD_TRIMD);
+  regval |= ((ETHD_TRIMD_TIS) | (ETHD_TRIMD_TIM));
+  rx65n_putreg(regval, RX65N_ETHD_TRIMD);
 
   /* ETHERC/EDMAC enabling Interrupt */
 
@@ -4240,13 +4128,9 @@ static int rx65n_ethconfig(FAR struct rx65n_ethmac_s *priv)
 
   /* Start DMA reception */
 
-  rx65n_putreg(0x00000001, RX65N_ETHD_EDRRR);
-
-  /* Phy debugging */
-
-#if defined(PHY_REG_DEBUGGING)
-  rx65n_phy_reg_dump();
-#endif
+  regval  = rx65n_getreg(RX65N_ETHD_EDRRR);
+  regval |= (ETHD_EDRRR_RR);
+  rx65n_putreg(regval, RX65N_ETHD_EDRRR);
 
   return ret;
 }
@@ -4277,39 +4161,13 @@ int rx65n_ethinitialize(int intf)
 
   /* Initialize hardware mac address */
 
-#if defined(CONFIG_ARCH_BOARD_RX65N_RSK1MB)
   uint8_t mac[6];
-  mac[0]  = 0x74;
-  mac[1]  = 0x90;
-  mac[2]  = 0x50;
-  mac[3]  = 0x00;
-  mac[4]  = 0x9c;
-  mac[5]  = 0x91;
-#elif   defined (CONFIG_ARCH_BOARD_RX65N_RSK2MB)
-  uint8_t mac[6];
-  mac[0] = 0x74;
-  mac[1] = 0x90;
-  mac[2] = 0x50;
-  mac[3] = 0x00;
-  mac[4] = 0x9c;
-  mac[5] = 0x94;
-#elif defined(CONFIG_ARCH_BOARD_RX65N_GRROSE)
-  uint8_t mac[6];
-  mac[0] = 0x74;
-  mac[1] = 0x90;
-  mac[2] = 0x50;
-  mac[3] = 0x00;
-  mac[4] = 0x9c;
-  mac[5] = 0x97;
-#else
-  uint8_t mac[6];
-  mac[0] = 0x00;
-  mac[1] = 0x00;
-  mac[2] = 0x00;
-  mac[3] = 0x00;
-  mac[4] = 0x00;
-  mac[5] = 0x00;
-#endif
+  mac[0] = RX65N_MAC_ADDRL & 0xff;
+  mac[1] = (RX65N_MAC_ADDRL & 0xff00) >> 8;
+  mac[2] = (RX65N_MAC_ADDRL & 0xff0000) >> 16;
+  mac[3] = (RX65N_MAC_ADDRL & 0xff000000) >> 24;
+  mac[4] = RX65N_MAC_ADDRH & 0xff;
+  mac[5] = (RX65N_MAC_ADDRH & 0xff00) >> 8;
 
   ninfo("intf: %d\n", intf);
 
@@ -4342,6 +4200,10 @@ int rx65n_ethinitialize(int intf)
   /* Used to recover private state from dev */
 
   priv->dev.d_private = (void *)g_rx65nethmac;
+
+  /* Multi cast flag */
+
+  priv->mc_filter_flag = ETHER_MC_FILTER_OFF;
 
   /* hw mac address */
 

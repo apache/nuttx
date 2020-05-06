@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/renesas/src/rx65n/rx65n_cmtw0.h
+ * boards/renesas/rx65n/rx65n-rsk1mb/include/rx65n_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,40 +18,18 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RENESAS_SRC_RX65N_CMTW0_H
-#define __ARCH_RENESAS_SRC_RX65N_CMTW0_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include "rx65n_cmtw.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Compare Match Constant Register (CMWCOR) */
-
-#define _000000BB_CMTW0_CMWCOR_VALUE              (0xfffffffful)
-
-/* Output Compare Registers 0 (CMWOCR0) */
-
-#define _0000000A_CMTW0_CMWOCR0_VALUE             (0x0000000aul)
-
-/* Output Compare Registers 1 (CMWOCR1) */
-
-#define _0000000A_CMTW0_CMWOCR1_VALUE             (0x0000000aul)
+#ifndef __BOARDS_RENESAS_RX65N_RX65N_RSK1MB_INCLUDE_RX65N_GPIO_H
+#define __BOARDS_RENESAS_RX65N_RX65N_RSK1MB_INCLUDE_RX65N_GPIO_H
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rx65n_cmtw0_create
+ * Name: sci_port_create
  *
  * Description:
- *   Initializes CMTW0 Timer
+ *   Initializes SCI Ports of RX65N RSK1MB
  *
  * Input Parameters:
  *   None
@@ -61,13 +39,13 @@
  *
  ****************************************************************************/
 
-void rx65n_cmtw0_create(uint32_t txpoll_time, uint32_t txtimeout_time);
+void sci_port_create(void);
 
 /****************************************************************************
- * Name: rx65n_cmtw0_start
+ * Name: led_port_create
  *
  * Description:
- *   Start CMTW0 Timer
+ *   Initializes LED Ports of RX65N RSK1MB
  *
  * Input Parameters:
  *   None
@@ -77,13 +55,13 @@ void rx65n_cmtw0_create(uint32_t txpoll_time, uint32_t txtimeout_time);
  *
  ****************************************************************************/
 
-void rx65n_cmtw0_start(uint8_t type, uint32_t timeout);
+void led_port_create(void);
 
 /****************************************************************************
- * Name: rx65n_cmtw0_stop
+ * Name: r_ether_pheriperal_enable
  *
  * Description:
- *   Stop CMTW0 Timer
+ *   Ethernet Peripheral enabling
  *
  * Input Parameters:
  *   None
@@ -93,6 +71,27 @@ void rx65n_cmtw0_start(uint8_t type, uint32_t timeout);
  *
  ****************************************************************************/
 
-void rx65n_cmtw0_stop(uint8_t type);
+#ifdef CONFIG_RX65N_EMAC0
+void r_ether_pheriperal_enable(void);
+#endif
 
-#endif /* __ARCH_RENESAS_SRC_RX65N_CMTW0_H */
+/****************************************************************************
+ * Name: sci2_init_port
+ *
+ * Description:
+ *   SCI2 Initialization RX65N RSK1MB
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_SCI2
+void sci2_init_port(void);
+#endif
+
+#endif /* __BOARDS_RENESAS_RX65N_RX65N_RSK1MB_INCLUDE_RX65N_GPIO_H */
+
