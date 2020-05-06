@@ -59,10 +59,39 @@
 #define PCI_DEV_CLASS_OTHER     0xff
 
 #define PCI_CAP_PM              0x01
+
 #define PCI_CAP_MSI             0x05
+# define PCI_MSI_MCR            0x02
+# define PCI_MSI_MCR_SIZE       2
+# define PCI_MSI_MCR_EN         (1 << 0)
+# define PCI_MSI_MCR_64         (1 << 7)
+# define PCI_MSI_MAR            0x04
+# define PCI_MSI_MAR_SIZE       4
+# define PCI_MSI_MDR            0x08
+# define PCI_MSI_MDR_SIZE       2
+# define PCI_MSI_MAR64_HI       0x08
+# define PCI_MSI_MAR64_HI_SIZE  4
+# define PCI_MSI_MDR64          0x0c
+# define PCI_MSI_MDR64_SIZE     2
+# define PCI_MSI_APIC_ID_OFFSET 0xc
+
 #define PCI_CAP_MSIX            0x11
-# define MSIX_CTRL_ENABLE       0x8000
-# define MSIX_CTRL_FMASK        0x4000
+# define PCI_MSIX_MCR           0x02
+# define PCI_MSIX_MCR_SIZE      2
+# define PCI_MSIX_MCR_EN        (1 << 15)
+# define PCI_MSIX_MCR_FMASK     0x4000
+# define PCI_MSIX_MCR_TBL_MASK  0x03ff
+# define PCI_MSIX_TBL           0x04
+# define PCI_MSIX_TBL_SIZE      4
+# define PCI_MSIX_PBA           0x08
+# define PCI_MSIX_PBA_SIZE      4
+# define PCI_MSIX_BIR_MASK      0x07
+# define PCI_MSIX_TBL_ENTRY_SIZE 0x10
+# define PCI_MSIX_TBL_LO_ADDR   0x0
+# define PCI_MSIX_TBL_HI_ADDR   0x4
+# define PCI_MSIX_TBL_MSG_DATA  0x8
+# define PCI_MSIX_TBL_VEC_CTL   0xc
+# define PCI_MSIX_APIC_ID_OFFSET 0xc
 
 /****************************************************************************
  * Public Types
