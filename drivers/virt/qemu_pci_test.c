@@ -79,7 +79,7 @@ int qemu_pci_test_probe(FAR struct pcie_bus_s *bus,
       .bdf = bdf,
     };
 
-  pci_enable_device(&dev, (PCI_CMD_MASTER | PCI_CMD_MEM));
+  pci_enable_device(&dev);
 
   for (int ii = 0; ii < 2; ii++)
     {
