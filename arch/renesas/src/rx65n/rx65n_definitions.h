@@ -431,19 +431,63 @@
 
 #define ETH_PSR_LMON         (1)
 
+/* EDMAC Transmit Request Register's bit */
+
+#define ETHD_EDRRR_TR     (1) /* Transmit Request */
+
+/* EDMAC Receive Request Register's bit */
+
+#define ETHD_EDRRR_RR     (1) /* Receive descriptor read,
+                               * and receive function is enabled
+                               */
+
+/* Transmit Interrupt Setting Register's bit */
+
+#define ETHD_TRIMD_TIS        (1)    /* Transmit Interrupt is enabled */
+#define ETHD_TRIMD_TIM        (1<<4) /* Write-back complete interrupt mode */
+
+/* Receive Method Control Register's bit */
+
+/* Receive Method Control Register's bit */
+
+#define ETHD_RMCR_RNR        (1) /* EDRRR.RR bit (receive request bit) is not
+                                  * set to 0 when one frame has been received
+                                                                  */
+
+/* FIFO Depth Register's bit */
+
+#define ETHD_FDR_RFD         (7)     /* Receive FIFO Depth */
+#define ETHD_FDR_TFD         (7<<8)  /* Transmit FIFO Depth */
+
+/* ETHERC/EDMAC Transmit/Receive Status Copy Enable Register's bit */
+
+#define ETHD_TRSCER_RRFCE     (1<<4)  /* RRF Flag Copy Enable */
+#define ETHD_TRSCER_RMAFCE    (1<<7)  /* RMAF Flag Copy Enable */
+
+/* Broadcast Frame Receive Count Setting Register's field */
+
+#define ETH_BCFRR_BCF    (0x0000)  /* Broadcast Frame Continuous Receive Count Setting */
+
+/* PHY Interface Register's bit and values */
+
+#define ETH_PIR_MDC        (1)           /* MII/RMII Management Data Clock */
+#define ETH_PIR_MMD        (1<<1)        /* MII/RMII Management Mode */
+#define ETH_PIR_MDO        (1<<2)        /* MII/RMII Management Data-Out */
+#define ETH_PIR_MDI        (1<<3)        /* MII/RMII Management Data-In */
+
+#define ETH_PIR_RESET_ALL        (0x00000000)    /* Reset All Flags of PIR      */
+#define ETH_PIR_SET_MDC          (0x00000001)    /* Setting MDC of PIR */
+#define ETH_PIR_SET_MMD          (0x00000002)    /* Setting MMD of PIR */
+#define ETH_PIR_SET_MMD_MDC      (0x00000003)    /* Setting MMD and MDC */
+#define ETH_PIR_SET_MDO_MMD      (0x00000006)    /* Setting MDO and MMD */
+#define ETH_PIR_SET_MDO_MMD_MDC  (0x00000007)    /* Setting MDO, MMD and MDC */
+
+/* Ethernet Control Register's bit and value */
+
+#define ETH_PFENET_MII_MODE      (0x10)
+#define ETH_PFENET_RMII_MODE     (0x00)
+
 /* End Ethernet and EDMAC Interface */
-
-/* General Values LED: */
-
-#if defined(CONFIG_ARCH_BOARD_RX65N_RSK1MB) || defined(CONFIG_ARCH_BOARD_RX65N_RSK2MB)
-#  define LED_ON          (0)
-#  define LED_OFF         (1)
-#elif defined(CONFIG_ARCH_BOARD_RX65N_GRROSE)
-#  define LED_ON          (1)
-#  define LED_OFF         (0)
-#else
-#  error "No Selection for PORT definition in rx65n_port.c"
-#endif
 
 /* Bit Set Values */
 
@@ -499,33 +543,33 @@
 #define RX65N_RTC_RCR4      (RX65N_RTC_BASE + RX65N_RTC_RCR4_OFFSET)
 #define RX65N_RTC_RADJ      (RX65N_RTC_BASE + RX65N_RTC_RADJ_OFFSET)
 
-#define RTC_RTC_ALRDIS    (0x00)
-#define RTC_RCR4_RCKSEL   (0x00)
-#define RTC_RCR3_RTCEN    (0x01)
-#define RTC_RCR3_RTCDV    (0x02)
-#define RTC_RCR2_START    (0x01)
-#define RTC_RCR2_CNTMD    (0x00)
-#define RTC_RCR2_RESET    (0x01)
-#define RTC_ALARM_INT_ENABLE (0x01)
-#define RTC_CARRY_INT_ENABLE (0x02)
-#define RTC_PERIOD_INT_ENABLE (0x04)
-#define RTC_PERIODIC_INT_PERIOD_1 (0xe0)
-#define _04_FOUR_READ_COUNT (0x04)
-#define RTC_1_64_SEC_CYCLE (0x0005b8d9)
-#define _0F_RTC_PRIORITY_LEVEL15 (0x0f)
-#define  RTC_RCR1_CUP            (0x02)
-#define RX65N_SUBCLKOSC_SOSCCR  (0x00080033)
-#define SUBCLKOSC_SOSCCR_SOSTP  (0x01)
-#define RX65N_SUBCLKOSC_SOSCWTCR (0x0008c293)
-#define RTC_SOSCWTCR_VALUE      (0x21)
-#define RTC_DUMMY_READ          (3)
-#define _00_RTC_PRIORITY_LEVEL0 (0)
-#define _04_RTC_PERIOD_INT_ENABLE  (0x04)
-#define RTC_RTC_CARRYDIS     (0xe5)
-#define RTC_RTC_PERDIS       (0xe3)
-#define RTC_RADJ_INITVALUE   (0x0)
-#define RTC_RCR2_AADJE       (0x10)
-#define RTC_RCR2_AADJP       (0x20)
+#define RTC_RTC_ALRDIS                          (0x00)
+#define RTC_RCR4_RCKSEL                         (0x00)
+#define RTC_RCR3_RTCEN                          (0x01)
+#define RTC_RCR3_RTCDV                          (0x02)
+#define RTC_RCR2_START                          (0x01)
+#define RTC_RCR2_CNTMD                          (0x00)
+#define RTC_RCR2_RESET                          (0x01)
+#define RTC_ALARM_INT_ENABLE                    (0x01)
+#define RTC_CARRY_INT_ENABLE                    (0x02)
+#define RTC_PERIOD_INT_ENABLE                   (0x04)
+#define RTC_PERIODIC_INT_PERIOD_1               (0xe0)
+#define _04_FOUR_READ_COUNT                     (0x04)
+#define RTC_1_64_SEC_CYCLE                      (0x0005b8d9)
+#define _0F_RTC_PRIORITY_LEVEL15                (0x0f)
+#define  RTC_RCR1_CUP                           (0x02)
+#define RX65N_SUBCLKOSC_SOSCCR                  (0x00080033)
+#define SUBCLKOSC_SOSCCR_SOSTP                  (0x01)
+#define RX65N_SUBCLKOSC_SOSCWTCR                (0x0008c293)
+#define RTC_SOSCWTCR_VALUE                      (0x21)
+#define RTC_DUMMY_READ                          (3)
+#define _00_RTC_PRIORITY_LEVEL0                 (0)
+#define _04_RTC_PERIOD_INT_ENABLE               (0x04)
+#define RTC_RTC_CARRYDIS                        (0xe5)
+#define RTC_RTC_PERDIS                          (0xe3)
+#define RTC_RADJ_INITVALUE                      (0x0)
+#define RTC_RCR2_AADJE                          (0x10)
+#define RTC_RCR2_AADJP                          (0x20)
 
 #if defined(CONFIG_RTC) || defined(CONFIG_RTC_DRIVER)
 
@@ -534,8 +578,8 @@
 #endif
 
 #define RX65N_RTC_WAIT_PERIOD 184
-#define RTC_RCR2_HR24         (0x40)
-#define RTC_PERIODIC_INTERRUPT_2_SEC (0xf)
+#define RTC_RCR2_HR24                   (0x40)
+#define RTC_PERIODIC_INTERRUPT_2_SEC    (0xf)
 
 /* StandBy RAM Address */
 
@@ -569,7 +613,9 @@ enum   E_RX_SCI
   RX_SCI_SISR_OFFSET,
   RX_SCI_SPMR_OFFSET,
   RX_SCI_THRHL_OFFSET,
+  RX_SCI_THRL_OFFSET,
   RX_SCI_RDRHL_OFFSET,
+  RX_SCI_RDRL_OFFSET,
   RX_SCI_MDDR_OFFSET
 };
 #endif /* __ASSEMBLER__ */

@@ -30,6 +30,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "rx65n_definitions.h"
+#include "arch/board/rx65n_gpio.h"
 
 /****************************************************************************
  * Public Data
@@ -368,163 +369,6 @@ static inline void rx_mpc_disable(void)
 }
 
 /****************************************************************************
- * Name: sci0_init_port
- *
- * Description:
- * SCI0 Initialization
- ****************************************************************************/
-
-#ifdef CONFIG_RX65N_SCI0
-static inline void sci0_init_port(void)
-{
-#ifdef CONFIG_ARCH_BOARD_RX65N_GRROSE
-  /* Set RXD0 pin (P21) */
-
-  MPC.P21PFS.BYTE   = 0x0au;
-  PORT2.PMR.BIT.B1  = 1u;
-
-  /* Set TXD0 pin (P20) */
-
-  PORT2.PODR.BIT.BT0 = 1u;
-  MPC.P20PFS.BYTE    = 0x0au;
-  PORT2.PDR.BIT.BT0  = 1u;
-  PORT2.PMR.BIT.BT0  = 1u;
-#endif /* CONFIG_ARCH_BOARD_RX65N_GRROSE */
-}
-#endif
-
-/****************************************************************************
- * Name: sci1_init_port
- *
- * Description:
- * SCI1 Initialization
- ****************************************************************************/
-
-#ifdef CONFIG_RX65N_SCI1
-static inline void sci1_init_port(void)
-{
-#ifdef CONFIG_ARCH_BOARD_RX65N_RSK2MB
-  /* Set RXD1 pin (PF2) */
-
-  MPC.PF2PFS.BYTE   = 0x0au;
-  PORTF.PMR.BIT.B2  = 1u;
-
-  /* Set TXD1 pin (PF1) */
-
-  PORTF.PODR.BIT.B1 = 1u;
-  MPC.PF1PFS.BYTE   = 0x0au;
-  PORTF.PDR.BIT.B1  = 1u;
-  PORTF.PMR.BIT.B1  = 1u;
-
-#endif /* CONFIG_ARCH_BOARD_RX65N_RSK2MB */
-
-#ifdef CONFIG_ARCH_BOARD_RX65N_GRROSE
-  /* Set RXD1 pin (P30) */
-
-  MPC.P30PFS.BYTE   = 0x0au;
-  PORT3.PMR.BIT.BT0 = 1u;
-
-  /* Set TXD1 pin (P26) */
-
-  PORT2.PODR.BIT.B6 = 1u;
-  MPC.P26PFS.BYTE   = 0x0au;
-  PORT2.PDR.BIT.B6  = 1u;
-  PORT2.PMR.BIT.B6  = 1u;
-#endif /* CONFIG_ARCH_BOARD_RX65N_GRROSE */
-}
-#endif
-
-/****************************************************************************
- * Name: sci2_init_port
- *
- * Description:
- * SCI2 Initialization
- ****************************************************************************/
-
-#ifdef CONFIG_RX65N_SCI2
-static inline void sci2_init_port(void)
-{
-#ifdef CONFIG_ARCH_BOARD_RX65N_RSK1MB
-  /* Set RXD2 pin (P52) */
-
-  MPC.P52PFS.BYTE  = 0x0au;
-  PORT5.PMR.BIT.B2 = 1u;
-
-  /* Set TXD2 pin (P50) */
-
-  PORT5.PODR.BIT.BT0 = 1u;
-  MPC.P50PFS.BYTE    = 0x0au;
-  PORT5.PDR.BIT.BT0  = 1u;
-  PORT5.PMR.BIT.BT0  = 1u;
-#endif /* CONFIG_ARCH_BOARD_RX65N_RSK1MB */
-
-#ifdef CONFIG_ARCH_BOARD_RX65N_RSK2MB
-  /* Set RXD2 pin (P52) */
-
-  MPC.P52PFS.BYTE   = 0x0au;
-  PORT5.PMR.BIT.B2  = 1u;
-
-  /* Set TXD2 pin (P50) */
-
-  PORT5.PODR.BIT.BT0 = 1u;
-  MPC.P50PFS.BYTE    = 0x0au;
-  PORT5.PDR.BIT.BT0  = 1u;
-  PORT5.PMR.BIT.BT0  = 1u;
-#endif /* CONFIG_ARCH_BOARD_RX65N_RSK2MB */
-
-#ifdef CONFIG_ARCH_BOARD_RX65N_GRROSE
-  /* Set RXD2 pin (P12) */
-
-  MPC.P12PFS.BYTE  = 0x0au;
-  PORT1.PMR.BIT.B2 = 1u;
-
-  /* Set TXD2 pin (P13) */
-
-  PORT1.PODR.BIT.B3  = 1u;
-  MPC.P13PFS.BYTE    = 0x0au;
-  PORT1.PDR.BIT.B3   = 1u;
-  PORT1.PMR.BIT.B3   = 1u;
-#endif /* CONFIG_ARCH_BOARD_RX65N_GRROSE */
-}
-#endif
-
-/****************************************************************************
- * Name: sci3_init_port
- *
- * Description:
- * SCI3 Initialization
- ****************************************************************************/
-
-#ifdef CONFIG_RX65N_SCI3
-static inline void sci3_init_port(void)
-{
-  /* Set RXD3 pin (PXX)
-   * MPC.PXXPFS.BYTE = 0x0au;
-   * PORTX.PMR.BIT.BX = 1u;
-   * Set TXD3 pin (PXX)
-   * PORTX.PODR.BIT.BX = 1u;
-   * MPC.PXXPFS.BYTE   = 0x0au;
-   * PORTX.PDR.BIT.BX  = 1u;
-   * PORTX.PMR.BIT.BX  = 1u;
-   */
-
-#ifdef CONFIG_ARCH_BOARD_RX65N_GRROSE
-  /* Set RXD2 pin (P25) */
-
-  MPC.P25PFS.BYTE  = 0x0au;
-  PORT2.PMR.BIT.B5 = 1u;
-
-  /* Set TXD2 pin (P23) */
-
-  PORT2.PODR.BIT.B3  = 1u;
-  MPC.P23PFS.BYTE    = 0x0au;
-  PORT2.PDR.BIT.B3   = 1u;
-  PORT2.PMR.BIT.B3   = 1u;
-#endif /* CONFIG_ARCH_BOARD_RX65N_GRROSE */
-}
-#endif
-
-/****************************************************************************
  * Name: sci4_init_port
  *
  * Description:
@@ -547,60 +391,6 @@ static inline void sci4_init_port(void)
 #endif
 
 /****************************************************************************
- * Name: sci5_init_port
- *
- * Description:
- * SCI5 Initialization
- ****************************************************************************/
-
-#ifdef CONFIG_RX65N_SCI5
-static inline void sci5_init_port(void)
-{
-#ifdef CONFIG_ARCH_BOARD_RX65N_GRROSE
-
-  /* Set RXD3 pin (PC2) */
-
-  MPC.PC2PFS.BYTE  = 0x0au;
-  PORTC.PMR.BIT.B2 = 1u;
-
-  /* Set TXD3 pin (PC3) */
-
-  PORTC.PODR.BIT.B3 = 1u;
-  MPC.PC3PFS.BYTE   = 0x0au;
-  PORTC.PDR.BIT.B3  = 1u;
-  PORTC.PMR.BIT.B3  = 1u;
-#endif /* CONFIG_ARCH_BOARD_RX65N_GRROSE */
-}
-#endif
-
-/****************************************************************************
- * Name: sci6_init_port
- *
- * Description:
- * SCI6 Initialization
- ****************************************************************************/
-
-#ifdef CONFIG_RX65N_SCI6
-static inline void sci6_init_port(void)
-{
-#ifdef CONFIG_ARCH_BOARD_RX65N_GRROSE
-
-  /* Set RXD6 pin (P33) */
-
-  MPC.P33PFS.BYTE  = 0x0au;
-  PORT3.PMR.BIT.B3 = 1u;
-
-  /* Set TXD6 pin (P32) */
-
-  PORT3.PODR.BIT.B2 = 1u;
-  MPC.P32PFS.BYTE   = 0x0au;
-  PORT3.PDR.BIT.B2  = 1u;
-  PORT3.PMR.BIT.B2  = 1u;
-#endif /* CONFIG_ARCH_BOARD_RX65N_GRROSE */
-}
-#endif
-
-/****************************************************************************
  * Name: sci7_init_port
  *
  * Description:
@@ -619,46 +409,6 @@ static inline void sci7_init_port(void)
    * PORTX.PDR.BIT.BX = 1u;
    * PORTX.PMR.BIT.BX = 1u;
    */
-}
-#endif
-
-/****************************************************************************
- * Name: sci8_init_port
- *
- * Description:
- * SCI8 Initialization
- ****************************************************************************/
-
-#ifdef CONFIG_RX65N_SCI8
-static inline void sci8_init_port(void)
-{
-#ifdef CONFIG_ARCH_BOARD_RX65N_RSK2MB
-  /* Set RXD8 pin (PJ1) */
-
-  MPC.PJ1PFS.BYTE  = 0x0au;
-  PORTJ.PMR.BIT.B1 = 1u;
-
-  /* Set TXD8 pin (PJ2) */
-
-  PORTJ.PODR.BIT.B2 = 1u;
-  MPC.PJ2PFS.BYTE   = 0x0au;
-  PORTJ.PDR.BIT.B2  = 1u;
-  PORTJ.PMR.BIT.B2  = 1u;
-#endif /* CONFIG_ARCH_BOARD_RX65N_RSK2MB */
-
-#ifdef CONFIG_ARCH_BOARD_RX65N_GRROSE
-  /* Set RXD8 pin (PC6) */
-
-  MPC.PC6PFS.BYTE  = 0x0au;
-  PORTC.PMR.BIT.B6 = 1u;
-
-  /* Set TXD8 pin (PC7) */
-
-  PORTC.PODR.BIT.B7 = 1u;
-  MPC.PC7PFS.BYTE   = 0x0au;
-  PORTC.PDR.BIT.B7  = 1u;
-  PORTC.PMR.BIT.B7  = 1u;
-#endif /* CONFIG_ARCH_BOARD_RX65N_GRROSE */
 }
 #endif
 
@@ -720,42 +470,6 @@ static inline void sci11_init_port(void)
    * MPC.PXXPFS.BYTE = 0x0au;
    * PORTX.PMR.BIT.BX = 1u;
    * Set TXD11 pin (PXX)
-   * PORTX.PODR.BIT.BX = 1u;
-   * MPC.PXXPFS.BYTE   = 0x0au;
-   * PORTX.PDR.BIT.BX = 1u;
-   * PORTX.PMR.BIT.BX = 1u;
-   */
-}
-#endif
-
-/****************************************************************************
- * Name: sci12_init_port
- *
- * Description:
- * SCI12 Initialization
- ****************************************************************************/
-
-#ifdef CONFIG_RX65N_SCI12
-static inline void sci12_init_port(void)
-{
-#ifdef CONFIG_ARCH_BOARD_RX65N_RSK2MB
-
-  /* Set RXD12 pin */
-
-  MPC.PE2PFS.BYTE = 0x0cu;
-  PORTE.PMR.BYTE |= 0x04u;
-
-  /* Set TXD12 pin */
-
-  PORTE.PODR.BYTE |= 0x02u;
-  MPC.PE1PFS.BYTE = 0x0cu;
-  PORTE.PDR.BYTE |= 0x02u;
-#endif
-
-  /* Set RXD12 pin (PXX)
-   * MPC.PXXPFS.BYTE = 0x0au;
-   * PORTX.PMR.BIT.BX = 1u;
-   * Set TXD12 pin (PXX)
    * PORTX.PODR.BIT.BX = 1u;
    * MPC.PXXPFS.BYTE   = 0x0au;
    * PORTX.PDR.BIT.BX = 1u;
@@ -906,16 +620,16 @@ void r_sci1_create(void)
 {
   rx_mpc_enable();
   MSTP(SCI1)   = 0u;                    /* Cancel SCI1 module stop state */
-  IPR(SCI1, RXI1) = 15;                  /* Set interrupt priority */
-  IPR(SCI1, TXI1) = 15;                  /* Set interrupt priority */
-  SCI1.SCR.BYTE   = 0u;                  /* Clear the control register */
+  IPR(SCI1, RXI1) = 15;                 /* Set interrupt priority */
+  IPR(SCI1, TXI1) = 15;                 /* Set interrupt priority */
+  SCI1.SCR.BYTE   = 0u;                 /* Clear the control register */
 
   /* Set clock enable */
 
   SCI1.SCR.BYTE         = _00_SCI_INTERNAL_SCK_UNUSED;
-  SCI1.SIMR1.BIT.IICM   = 0u;                   /* Clear SIMR1.IICM bit */
-  SCI1.SPMR.BIT.CKPH    = 0u;                   /* Clear SPMR.CKPH bit */
-  SCI1.SPMR.BIT.CKPOL   = 0u;                   /* Clear SPMR.CKPOL bit */
+  SCI1.SIMR1.BIT.IICM   = 0u;           /* Clear SIMR1.IICM bit */
+  SCI1.SPMR.BIT.CKPH    = 0u;           /* Clear SPMR.CKPH bit */
+  SCI1.SPMR.BIT.CKPOL   = 0u;           /* Clear SPMR.CKPOL bit */
 
   /* Set control registers */
 
@@ -1035,8 +749,8 @@ void r_sci2_create(void)
 {
   rx_mpc_enable();
   MSTP(SCI2)    = 0u;                   /* Cancel SCI2 module stop state */
-  IPR(SCI2, RXI2) = 15;                  /* Set interrupt priority */
-  IPR(SCI2, TXI2) = 15;                  /* Set interrupt priority */
+  IPR(SCI2, RXI2) = 15;                 /* Set interrupt priority */
+  IPR(SCI2, TXI2) = 15;                 /* Set interrupt priority */
   SCI2.SCR.BYTE  = 0u;                  /* Clear the control register */
 
   /* Set clock enable */
@@ -1163,8 +877,8 @@ void r_sci3_create(void)
 {
   rx_mpc_enable();
   MSTP(SCI3)     = 0u;                  /* Cancel SCI3 module stop state */
-  IPR(SCI3, RXI3) = 15;                  /* Set interrupt priority */
-  IPR(SCI3, TXI3) = 15;                  /* Set interrupt priority */
+  IPR(SCI3, RXI3) = 15;                 /* Set interrupt priority */
+  IPR(SCI3, TXI3) = 15;                 /* Set interrupt priority */
   SCI3.SCR.BYTE  = 0u;                  /* Clear the control register */
 
   /* Set clock enable */
@@ -1223,8 +937,8 @@ void r_sci3_stop(void)
 {
   SCI3.SCR.BIT.TE  = 0u; /* Disable serial transmit */
   SCI3.SCR.BIT.RE  = 0u; /* Disable serial receive */
-  SCI3.SCR.BIT.TIE = 0u;   /* disable TXI interrupt */
-  SCI3.SCR.BIT.RIE = 0u;   /* disable RXI and ERI interrupt */
+  SCI3.SCR.BIT.TIE = 0u; /* disable TXI interrupt */
+  SCI3.SCR.BIT.RIE = 0u; /* disable RXI and ERI interrupt */
   IEN(SCI3, TXI3)  = 0u;
   ICU.GENBL0.BIT.EN6 = 0u;
   IR(SCI3, TXI3)  = 0u;
@@ -1291,9 +1005,9 @@ MD_STATUS r_sci3_serial_send(uint8_t * const tx_buf, uint16_t tx_num)
 void r_sci4_create(void)
 {
   rx_mpc_enable();
-  MSTP(SCI4) = 0u;                      /* Cancel SCI4 module stop state */
-  IPR(SCI4, RXI4) = 15;          /* Set interrupt priority */
-  IPR(SCI4, TXI4) = 15;          /* Set interrupt priority */
+  MSTP(SCI4) = 0u;              /* Cancel SCI4 module stop state */
+  IPR(SCI4, RXI4) = 15;         /* Set interrupt priority */
+  IPR(SCI4, TXI4) = 15;         /* Set interrupt priority */
   SCI4.SCR.BYTE  = 0u;          /* Clear the control register */
 
   /* Set clock enable */
@@ -1423,8 +1137,8 @@ void r_sci5_create(void)
 {
   rx_mpc_enable();
   MSTP(SCI5)     = 0u;                  /* Cancel SCI0 module stop state */
-  IPR(SCI5, RXI5) = 15;                  /* Set interrupt priority */
-  IPR(SCI5, TXI5) = 15;                  /* Set interrupt priority */
+  IPR(SCI5, RXI5) = 15;                 /* Set interrupt priority */
+  IPR(SCI5, TXI5) = 15;                 /* Set interrupt priority */
   SCI5.SCR.BYTE  = 0u;                  /* Clear the control register */
 
   /* Set clock enable */
@@ -1483,8 +1197,8 @@ void r_sci5_stop(void)
 {
   SCI5.SCR.BIT.TE  = 0u;     /* Disable serial transmit */
   SCI5.SCR.BIT.RE  = 0u;     /* Disable serial receive */
-  SCI5.SCR.BIT.TIE = 0u;        /* disable TXI interrupt */
-  SCI5.SCR.BIT.RIE = 0u;        /* disable RXI and ERI interrupt */
+  SCI5.SCR.BIT.TIE = 0u;     /* disable TXI interrupt */
+  SCI5.SCR.BIT.RIE = 0u;     /* disable RXI and ERI interrupt */
   IEN(SCI5, TXI5)  = 0u;
   ICU.GENBL0.BIT.EN10 = 0u;
   IR(SCI5, TXI5) = 0u;
@@ -1612,8 +1326,8 @@ void r_sci6_stop(void)
 {
   SCI6.SCR.BIT.TE = 0u;     /* Disable serial transmit */
   SCI6.SCR.BIT.RE = 0u;     /* Disable serial receive */
-  SCI6.SCR.BIT.TIE = 0u;        /* disable TXI interrupt */
-  SCI6.SCR.BIT.RIE = 0u;        /* disable RXI and ERI interrupt */
+  SCI6.SCR.BIT.TIE = 0u;    /* disable TXI interrupt */
+  SCI6.SCR.BIT.RIE = 0u;    /* disable RXI and ERI interrupt */
   IEN(SCI6, TXI6)  = 0u;
   ICU.GENBL0.BIT.EN12 = 0u;
   IR(SCI6, TXI6) = 0u;
@@ -1680,9 +1394,9 @@ MD_STATUS r_sci6_serial_send(uint8_t * const tx_buf, uint16_t tx_num)
 void r_sci7_create(void)
 {
   rx_mpc_enable();
-  MSTP(SCI7)      = 0u;                   /* Cancel SCI7 module stop state */
-  IPR(SCI7, RXI7) = 15;                  /* Set interrupt priority */
-  IPR(SCI7, TXI7) = 15;                  /* Set interrupt priority */
+  MSTP(SCI7)      = 0u;                 /* Cancel SCI7 module stop state */
+  IPR(SCI7, RXI7) = 15;                 /* Set interrupt priority */
+  IPR(SCI7, TXI7) = 15;                 /* Set interrupt priority */
   SCI7.SCR.BYTE  = 0u;                  /* Clear the control register */
 
   /* Set clock enable */
@@ -1743,7 +1457,7 @@ void r_sci7_stop(void)
   SCI7.SCR.BIT.TE = 0u;    /* Disable serial transmit */
   SCI7.SCR.BIT.RE = 0u;    /* Disable serial receive */
   SCI7.SCR.BIT.TIE = 0u;   /* disable TXI interrupt */
-  SCI7.SCR.BIT.RIE = 0u;        /* disable RXI and ERI interrupt */
+  SCI7.SCR.BIT.RIE = 0u;   /* disable RXI and ERI interrupt */
   IEN(SCI7, TXI7) = 0u;
   IR(SCI7, TXI7)  = 0u;
   IEN(SCI7, RXI7) = 0u;
@@ -1810,9 +1524,9 @@ MD_STATUS r_sci7_serial_send(uint8_t * const tx_buf, uint16_t tx_num)
 void r_sci8_create(void)
 {
   rx_mpc_enable();
-  MSTP(SCI8)      = 0u;                   /* Cancel SCI8 module stop state */
-  IPR(SCI8, RXI8) = 15;                  /* Set interrupt priority */
-  IPR(SCI8, TXI8) = 15;                  /* Set interrupt priority */
+  MSTP(SCI8)      = 0u;                 /* Cancel SCI8 module stop state */
+  IPR(SCI8, RXI8) = 15;                 /* Set interrupt priority */
+  IPR(SCI8, TXI8) = 15;                 /* Set interrupt priority */
   SCI8.SCR.BYTE  = 0u;                  /* Clear the control register */
 
   /* Set clock enable */
@@ -1873,7 +1587,7 @@ void r_sci8_stop(void)
   SCI8.SCR.BIT.TE = 0u;    /* Disable serial transmit */
   SCI8.SCR.BIT.RE = 0u;    /* Disable serial receive */
   SCI8.SCR.BIT.TIE = 0u;   /* disable TXI interrupt */
-  SCI8.SCR.BIT.RIE = 0u;        /* disable RXI and ERI interrupt */
+  SCI8.SCR.BIT.RIE = 0u;   /* disable RXI and ERI interrupt */
   IEN(SCI8, TXI8) = 0u;
   IR(SCI8, TXI8)  = 0u;
   IEN(SCI8, RXI8) = 0u;
@@ -1940,9 +1654,9 @@ MD_STATUS r_sci8_serial_send(uint8_t * const tx_buf, uint16_t tx_num)
 void r_sci9_create(void)
 {
   rx_mpc_enable();
-  MSTP(SCI9)      = 0u;                   /* Cancel SCI9 module stop state */
-  IPR(SCI9, RXI9) = 15;                  /* Set interrupt priority */
-  IPR(SCI9, TXI9) = 15;                  /* Set interrupt priority */
+  MSTP(SCI9)      = 0u;                 /* Cancel SCI9 module stop state */
+  IPR(SCI9, RXI9) = 15;                 /* Set interrupt priority */
+  IPR(SCI9, TXI9) = 15;                 /* Set interrupt priority */
   SCI9.SCR.BYTE  = 0u;                  /* Clear the control register */
 
   /* Set clock enable */
@@ -2003,7 +1717,7 @@ void r_sci9_stop(void)
   SCI9.SCR.BIT.TE = 0u;    /* Disable serial transmit */
   SCI9.SCR.BIT.RE = 0u;    /* Disable serial receive */
   SCI9.SCR.BIT.TIE = 0u;   /* disable TXI interrupt */
-  SCI9.SCR.BIT.RIE = 0u;        /* disable RXI and ERI interrupt */
+  SCI9.SCR.BIT.RIE = 0u;   /* disable RXI and ERI interrupt */
   IEN(SCI9, TXI9) = 0u;
   IR(SCI9, TXI9)  = 0u;
   IEN(SCI9, RXI9) = 0u;
@@ -2071,8 +1785,8 @@ void r_sci10_create(void)
 {
   rx_mpc_enable();
   MSTP(SCI10)      = 0u;                  /* Cancel SCI10 module stop state */
-  IPR(SCI10, RXI10) = 15;                  /* Set interrupt priority */
-  IPR(SCI10, TXI10) = 15;                  /* Set interrupt priority */
+  IPR(SCI10, RXI10) = 15;                 /* Set interrupt priority */
+  IPR(SCI10, TXI10) = 15;                 /* Set interrupt priority */
   SCI10.SCR.BYTE   = 0u;                  /* Clear the control register */
 
   /* Set clock enable */
@@ -2201,9 +1915,9 @@ void r_sci11_create(void)
 {
   rx_mpc_enable();
   MSTP(SCI11)   = 0u;                    /* Cancel SCI11 module stop state */
-  IPR(SCI11, RXI11) = 15;                  /* Set interrupt priority */
-  IPR(SCI11, TXI11) = 15;                  /* Set interrupt priority */
-  SCI11.SCR.BYTE   = 0u;                  /* Clear the control register */
+  IPR(SCI11, RXI11) = 15;                /* Set interrupt priority */
+  IPR(SCI11, TXI11) = 15;                /* Set interrupt priority */
+  SCI11.SCR.BYTE   = 0u;                 /* Clear the control register */
 
   /* Set clock enable */
 
@@ -2330,8 +2044,8 @@ void r_sci12_create(void)
 {
   rx_mpc_enable();
   MSTP(SCI12)    = 0u;                   /* Cancel SCI12 module stop state */
-  IPR(SCI12, RXI12) = 15;                  /* Set interrupt priority */
-  IPR(SCI12, TXI12) = 15;                  /* Set interrupt priority */
+  IPR(SCI12, RXI12) = 15;                /* Set interrupt priority */
+  IPR(SCI12, TXI12) = 15;                /* Set interrupt priority */
   SCI12.SCR.BYTE  = 0u;                  /* Clear the control register */
 
   /* Set clock enable */

@@ -56,7 +56,17 @@
 
 /* LED definitions */
 
-#if             defined(CONFIG_ARCH_BOARD_RX65N_RSK1MB)
+#if defined(CONFIG_ARCH_BOARD_RX65N_RSK1MB) || defined(CONFIG_ARCH_BOARD_RX65N_RSK2MB)
+#  define LED_ON          (0)
+#  define LED_OFF         (1)
+#elif defined(CONFIG_ARCH_BOARD_RX65N_GRROSE)
+#  define LED_ON          (1)
+#  define LED_OFF         (0)
+#else
+#  error "No Selection for PORT definition in rx65n_port.c"
+#endif
+
+#if     defined(CONFIG_ARCH_BOARD_RX65N_RSK1MB)
 #define LED0                            (PORT0.PODR.BIT.B3)
 #define LED1                            (PORT0.PODR.BIT.B5)
 #define LED_PORTINIT(X)         { LED0 = LED1 = (X);            \
