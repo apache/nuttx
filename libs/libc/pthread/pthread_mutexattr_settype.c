@@ -63,9 +63,10 @@
  *
  ****************************************************************************/
 
-int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
+int pthread_mutexattr_settype(FAR pthread_mutexattr_t *attr, int type)
 {
-  if (attr && type >= PTHREAD_MUTEX_NORMAL && type <= PTHREAD_MUTEX_RECURSIVE)
+  if (attr && type >= PTHREAD_MUTEX_NORMAL &&
+      type <= PTHREAD_MUTEX_RECURSIVE)
     {
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
       attr->type = type;

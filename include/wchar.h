@@ -53,6 +53,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* <wchar.h> defines the following macro names:
  *
  * WCHAR_MAX
@@ -143,6 +144,7 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /* "The <wchar.h> header declares the following as functions and may also
  *  define them as macros. Function prototypes must be provided for use with
  *  an ISO C compiler."
@@ -153,18 +155,6 @@ extern "C"
 wint_t            btowc(int);
 int               fwprintf(FILE *, FAR const wchar_t *, ...);
 int               fwscanf(FILE *, FAR const wchar_t *, ...);
-int               iswalnum(wint_t);
-int               iswalpha(wint_t);
-int               iswcntrl(wint_t);
-int               iswdigit(wint_t);
-int               iswgraph(wint_t);
-int               iswlower(wint_t);
-int               iswprint(wint_t);
-int               iswpunct(wint_t);
-int               iswspace(wint_t);
-int               iswupper(wint_t);
-int               iswxdigit(wint_t);
-int               iswctype(wint_t, wctype_t);
 wint_t            fgetwc(FILE *);
 FAR wchar_t      *fgetws(wchar_t *, int, FILE *);
 wint_t            fputwc(wchar_t, FILE *);
@@ -174,8 +164,8 @@ wint_t            getwc(FILE *);
 wint_t            getwchar(void);
 int               mbsinit(FAR const mbstate_t *);
 size_t            mbrlen(FAR const char *, size_t, FAR mbstate_t *);
-size_t            mbrtowc(wchar_t *, FAR const char *, size_t,
-                      mbstate_t *);
+size_t            mbrtowc(FAR wchar_t *, FAR const char *, size_t,
+                      FAR mbstate_t *);
 size_t            mbsnrtowcs(FAR wchar_t *, FAR const char **, size_t,
                       size_t, FAR mbstate_t *);
 size_t            mbsrtowcs(wchar_t *, FAR const char **, size_t,
@@ -184,8 +174,6 @@ wint_t            putwc(wchar_t, FILE *);
 wint_t            putwchar(wchar_t);
 int               swprintf(FAR wchar_t *, size_t, FAR const wchar_t *, ...);
 int               swscanf(FAR const wchar_t *, FAR const wchar_t *, ...);
-wint_t            towlower(wint_t);
-wint_t            towupper(wint_t);
 wint_t            ungetwc(wint_t, FILE *);
 int               vfwprintf(FILE *, FAR const wchar_t *, va_list);
 int               vwprintf(FAR const wchar_t *, va_list);
@@ -228,9 +216,8 @@ unsigned long int wcstoul(FAR const wchar_t *, FAR wchar_t **, int);
 unsigned long long int wcstoull(FAR const wchar_t *, FAR wchar_t **, int);
 FAR wchar_t      *wcswcs(FAR const wchar_t *, FAR const wchar_t *);
 int               wcswidth(FAR const wchar_t *, size_t);
-size_t            wcsxfrm(wchar_t *, FAR const wchar_t *, size_t);
+size_t            wcsxfrm(FAR wchar_t *, FAR const wchar_t *, size_t);
 int               wctob(wint_t);
-wctype_t          wctype(FAR const char *);
 int               wcwidth(wchar_t);
 FAR wchar_t      *wmemchr(FAR const wchar_t *, wchar_t, size_t);
 int               wmemcmp(FAR const wchar_t *, FAR const wchar_t *, size_t);

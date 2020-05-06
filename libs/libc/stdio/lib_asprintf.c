@@ -59,12 +59,12 @@
  *
  * Returned Value:
  *   The returned value is the number of characters allocated for the buffer,
- *   or less than zero if an error occurred. Usually this means that the buffer
- *   could not be allocated.
+ *   or less than zero if an error occurred. Usually this means that the
+ *   buffer could not be allocated.
  *
  ****************************************************************************/
 
-int asprintf (FAR char **ptr, FAR const IPTR char *fmt, ...)
+int asprintf(FAR char **ptr, FAR const IPTR char *fmt, ...)
 {
   va_list ap;
   int ret;

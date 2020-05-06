@@ -73,7 +73,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int match(const char *pattern, const char *string);
+int match(FAR const char *pattern, FAR const char *string);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -63,7 +63,8 @@
  *
  ****************************************************************************/
 
-int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type)
+int pthread_mutexattr_gettype(FAR const pthread_mutexattr_t *attr,
+                              FAR int *type)
 {
   if (attr != NULL && type != NULL)
     {

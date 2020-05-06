@@ -96,7 +96,7 @@
  *
  ****************************************************************************/
 
-int aio_suspend(FAR const struct aiocb *const list[], int nent,
+int aio_suspend(FAR const struct aiocb * const list[], int nent,
                 FAR const struct timespec *timeout)
 {
   sigset_t set;

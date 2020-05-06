@@ -141,7 +141,7 @@ extern "C"
 
 /* Operations on streams (FILE) */
 
-void   clearerr(register FILE *stream);
+void   clearerr(FAR FILE *stream);
 int    fclose(FAR FILE *stream);
 int    fflush(FAR FILE *stream);
 int    feof(FAR FILE *stream);
@@ -149,7 +149,7 @@ int    ferror(FAR FILE *stream);
 int    fileno(FAR FILE *stream);
 int    fgetc(FAR FILE *stream);
 int    fgetpos(FAR FILE *stream, FAR fpos_t *pos);
-char  *fgets(FAR char *s, int n, FAR FILE *stream);
+FAR char *fgets(FAR char *s, int n, FAR FILE *stream);
 FAR FILE *fopen(FAR const char *path, FAR const char *type);
 int    fprintf(FAR FILE *stream, FAR const IPTR char *format, ...);
 int    fputc(int c, FAR FILE *stream);
@@ -181,7 +181,7 @@ int    printf(FAR const IPTR char *fmt, ...);
 int    puts(FAR const char *s);
 int    rename(FAR const char *oldpath, FAR const char *newpath);
 int    sprintf(FAR char *buf, FAR const IPTR char *fmt, ...);
-int    asprintf (FAR char **ptr, FAR const IPTR char *fmt, ...);
+int    asprintf(FAR char **ptr, FAR const IPTR char *fmt, ...);
 int    snprintf(FAR char *buf, size_t size,
          FAR const IPTR char *fmt, ...);
 int    sscanf(FAR const char *buf, FAR const IPTR char *fmt, ...);

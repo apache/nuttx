@@ -311,7 +311,7 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
 int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
                FAR const posix_spawn_file_actions_t *file_actions,
                FAR const posix_spawnattr_t *attr,
-               FAR char *const argv[], FAR char *const envp[])
+               FAR char * const argv[], FAR char * const envp[])
 {
   struct sched_param param;
   pid_t proxy;

@@ -282,7 +282,7 @@ int task_create(FAR const char *name, int priority,
  ****************************************************************************/
 
 int kthread_create(FAR const char *name, int priority,
-                   int stack_size, main_t entry, FAR char *const argv[])
+                   int stack_size, main_t entry, FAR char * const argv[])
 {
   return nxthread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size,
                          entry, argv);

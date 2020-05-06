@@ -48,8 +48,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The socket()domain parameter specifies a communication domain; this selects
- * the protocol family which will be used for communication.
+/* The socket()domain parameter specifies a communication domain; this
+ * selects the protocol family which will be used for communication.
  */
 
 /* Supported Protocol Families */
@@ -104,7 +104,7 @@
                           * required to read an entire packet with each read
                           * system call.
                           */
-#define SOCK_PACKET    10 /* Obsolete and should not be used in new programs */
+#define SOCK_PACKET   10 /* Obsolete and should not be used in new programs */
 
 /* Bits in the FLAGS argument to `send', `recv', et al. These are the bits
  * recognized by Linux, not all are supported by NuttX.
@@ -254,14 +254,14 @@
  * Type Definitions
  ****************************************************************************/
 
- /* sockaddr_storage structure. This structure must be (1) large enough to
-  * accommodate all supported protocol-specific address structures, and (2)
-  * aligned at an appropriate boundary so that pointers to it can be cast
-  * as pointers to protocol-specific address structures and used to access
-  * the fields of those structures without alignment problems.
-  *
-  * REVISIT: sizeof(struct sockaddr_storge) should be 128 bytes.
-  */
+/* sockaddr_storage structure. This structure must be (1) large enough to
+ * accommodate all supported protocol-specific address structures, and (2)
+ * aligned at an appropriate boundary so that pointers to it can be cast
+ * as pointers to protocol-specific address structures and used to access
+ * the fields of those structures without alignment problems.
+ *
+ * REVISIT: sizeof(struct sockaddr_storge) should be 128 bytes.
+ */
 
 #ifdef CONFIG_NET_IPv6
 struct sockaddr_storage
@@ -324,7 +324,8 @@ static inline FAR struct cmsghdr *__cmsg_nxthdr(FAR void *__ctl,
 {
   FAR struct cmsghdr *__ptr;
 
-  __ptr = (FAR struct cmsghdr *)(((FAR char *)__cmsg) + CMSG_ALIGN(__cmsg->cmsg_len));
+  __ptr = (FAR struct cmsghdr *)
+    (((FAR char *)__cmsg) + CMSG_ALIGN(__cmsg->cmsg_len));
   if ((unsigned long)((FAR char *)(__ptr + 1) - (FAR char *)__ctl) > __size)
     {
       return (FAR struct cmsghdr *)NULL;
@@ -357,7 +358,7 @@ int bind(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
 int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
 
 int listen(int sockfd, int backlog);
-int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen);
 
 ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags);
 ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,

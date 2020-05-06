@@ -80,7 +80,7 @@
  *
  ****************************************************************************/
 
-int nxsched_getparam (pid_t pid, FAR struct sched_param *param)
+int nxsched_getparam(pid_t pid, FAR struct sched_param *param)
 {
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *tcb;
@@ -181,7 +181,7 @@ int nxsched_getparam (pid_t pid, FAR struct sched_param *param)
  *
  ****************************************************************************/
 
-int sched_getparam (pid_t pid, FAR struct sched_param *param)
+int sched_getparam(pid_t pid, FAR struct sched_param *param)
 {
   int ret = nxsched_getparam(pid, param);
   if (ret < 0)
