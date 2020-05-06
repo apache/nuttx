@@ -74,14 +74,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define QEMU_PCIE_MAX_BDF 0x10000
-
 /****************************************************************************
  * Private Functions Definitions
  ****************************************************************************/
-
-static int qemu_pci_enumerate(FAR struct pcie_bus_s *bus,
-                               FAR struct pcie_dev_type_s **types);
 
 static int qemu_pci_cfg_write(FAR struct pcie_dev_s *dev, uintptr_t addr,
                               FAR const void *buffer, unsigned int size);
@@ -107,7 +102,6 @@ static int qemu_pci_msi_register(FAR struct pcie_dev_s *dev,
 
 struct pcie_bus_ops_s qemu_pcie_bus_ops =
 {
-    .pcie_enumerate    =   qemu_pci_enumerate,
     .pci_cfg_write     =   qemu_pci_cfg_write,
     .pci_cfg_read      =   qemu_pci_cfg_read,
     .pci_map_bar       =   qemu_pci_map_bar,
@@ -124,82 +118,6 @@ struct pcie_bus_s qemu_pcie_bus =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: qemu_pci_enumerate
- *
- * Description:
- *  Scan the PCI bus and enumerate the devices.
- *  Initialize any recognized devices, given in types.
- *
- * Input Parameters:
- *   bus    - PCI-E bus structure
- *   type   - List of pointers to devices types recognized, NULL terminated
- *
- * Returned Value:
- *   0: success, <0: A negated errno
- *
- ****************************************************************************/
-
-static int qemu_pci_enumerate(FAR struct pcie_bus_s *bus,
-                               FAR struct pcie_dev_type_s **types)
-{
-  unsigned int bdf;
-  uint16_t vid;
-  uint16_t id;
-  uint16_t rev;
-
-  if (!bus)
-      return -EINVAL;
-  if (!types)
-      return -EINVAL;
-
-  for (bdf = 0; bdf < QEMU_PCIE_MAX_BDF; bdf++)
-    {
-      __qemu_pci_cfg_read(bdf, PCI_CFG_VENDOR_ID, &vid, 2);
-      __qemu_pci_cfg_read(bdf, PCI_CFG_DEVICE_ID, &id, 2);
-      __qemu_pci_cfg_read(bdf, PCI_CFG_REVERSION, &rev, 2);
-
-      if (vid == PCI_ID_ANY)
-        continue;
-
-      pciinfo("[%02x:%02x.%x] Found %04x:%04x, class/reversion %08x\n",
-              bdf >> 8, (bdf >> 3) & 0x1f, bdf & 0x3,
-              vid, id, rev);
-
-      for (int i = 0; types[i] != NULL; i++)
-        {
-          if (types[i]->vendor == PCI_ID_ANY ||
-              types[i]->vendor == vid)
-            {
-              if (types[i]->device == PCI_ID_ANY ||
-                  types[i]->device == id)
-                {
-                  if (types[i]->class_rev == PCI_ID_ANY ||
-                      types[i]->class_rev == rev)
-                    {
-                      if (types[i]->probe)
-                        {
-                          pciinfo("[%02x:%02x.%x] %s\n",
-                                  bdf >> 8, (bdf >> 3) & 0x1f, bdf & 0x3,
-                                  types[i]->name);
-                          types[i]->probe(bus, types[i], bdf);
-                        }
-                      else
-                        {
-                          pcierr("[%02x:%02x.%x] Error: Invalid \
-                                  device probe function\n",
-                                  bdf >> 8, (bdf >> 3) & 0x1f, bdf & 0x3);
-                        }
-                      break;
-                    }
-                }
-            }
-        }
-    }
-
-  return OK;
-}
 
 /****************************************************************************
  * Name: qemu_pci_cfg_write
