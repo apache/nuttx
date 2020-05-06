@@ -22,7 +22,7 @@
 "exec","nuttx/binfmt/binfmt.h","!defined(CONFIG_BINFMT_DISABLE) && !defined(CONFIG_BUILD_KERNEL)","int","FAR const char *","FAR char * const *","FAR const struct symtab_s *","int"
 "execv","unistd.h","!defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)","int","FAR const char *","FAR char *const []|FAR char *const *"
 "exit","stdlib.h","","void","int"
-"fcntl","fcntl.h","","int","int","int","..."
+"fcntl","fcntl.h","","int","int","int","...","int"
 "fs_fdopen","nuttx/fs/fs.h","CONFIG_NFILE_STREAMS > 0","FAR struct file_struct*","int","int","FAR struct tcb_s*"
 "fstat","sys/stat.h","","int","int","FAR struct stat*"
 "fstatfs","sys/statfs.h","","int","int","FAR struct statfs*"
