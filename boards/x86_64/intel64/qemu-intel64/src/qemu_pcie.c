@@ -221,6 +221,9 @@ static int qemu_pci_enumerate(FAR struct pcie_bus_s *bus,
 static int qemu_pci_cfg_write(FAR struct pcie_dev_s *dev, uintptr_t addr,
                               FAR const void *buffer, unsigned int size)
 {
+  if(!buffer)
+      return -EINVAL;
+
   switch (size)
     {
       case 1:
@@ -254,6 +257,9 @@ static int qemu_pci_cfg_write(FAR struct pcie_dev_s *dev, uintptr_t addr,
 static int qemu_pci_cfg_read(FAR struct pcie_dev_s *dev, uintptr_t addr,
                              FAR void *buffer, unsigned int size)
 {
+  if(!buffer)
+      return -EINVAL;
+
   switch (size)
     {
       case 1:
