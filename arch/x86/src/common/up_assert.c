@@ -111,14 +111,13 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
 static int usbtrace_syslog(FAR const char *fmt, ...)
 {
   va_list ap;
-  int ret;
 
-  /* Let nx_vsyslog do the real work */
+  /* Let vsyslog do the real work */
 
   va_start(ap, fmt);
-  ret = nx_vsyslog(LOG_EMERG, fmt, &ap);
+  vsyslog(LOG_EMERG, fmt, ap);
   va_end(ap);
-  return ret;
+  return OK;
 }
 
 static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)

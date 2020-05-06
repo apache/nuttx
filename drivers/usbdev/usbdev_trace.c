@@ -100,14 +100,13 @@ static usbtrace_idset_t g_maskedidset = CONFIG_USBDEV_TRACE_INITIALIDSET;
 static int usbtrace_syslog(const char *fmt, ...)
 {
   va_list ap;
-  int ret;
 
-  /* Let nx_vsyslog do the real work */
+  /* Let vsyslog do the real work */
 
   va_start(ap, fmt);
-  ret = nx_vsyslog(LOG_INFO, fmt, &ap);
+  vsyslog(LOG_INFO, fmt, ap);
   va_end(ap);
-  return ret;
+  return OK;
 }
 #endif
 
