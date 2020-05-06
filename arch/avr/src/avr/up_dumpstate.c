@@ -59,27 +59,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_getsp
- ****************************************************************************/
-
-/* There may be a built-in to do this, but I don't know if it is enabled */
-
-static inline uint16_t up_getsp(void)
-{
-  uint8_t spl;
-  uint8_t sph;
-
-  __asm__ __volatile__
-  (
-    "in %0, __SP_L__\n\t"
-    "in %1, __SP_H__\n"
-    : "=r" (spl), "=r" (sph)
-    :
-  );
-  return (uint16_t)sph << 8 | spl;
-}
-
-/****************************************************************************
  * Name: up_stackdump
  ****************************************************************************/
 
@@ -161,7 +140,7 @@ static inline void up_registerdump(void)
 void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint16_t sp = up_getsp();
+  uint16_t sp = avr_getsp();
   uint16_t ustackbase;
   uint16_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 0

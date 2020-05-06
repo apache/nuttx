@@ -62,24 +62,6 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sh1_getsp
- ****************************************************************************/
-
-static inline uint32_t sh1_getsp(void)
-{
-  uint32_t sp;
-
-  __asm__ __volatile__
-    (
-      "mov   r15, %0\n\t"
-      : "=&z" (sp)
-      :
-      : "memory"
-    );
-  return sp;
-}
-
-/****************************************************************************
  * Name: sh1_stackdump
  ****************************************************************************/
 
@@ -142,7 +124,7 @@ static inline void sh1_registerdump(void)
 void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp = sh1_getsp();
+  uint32_t sp = renesas_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3

@@ -63,24 +63,6 @@ static uint8_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: m16c_getsp
- ****************************************************************************/
-
-static inline uint16_t m16c_getsp(void)
-{
-  uint16_t sp;
-
-  __asm__ __volatile__
-    (
-      "\tstc sp, %0\n\t"
-      : "=r" (sp)
-      :
-      : "memory"
-    );
-  return sp;
-}
-
-/****************************************************************************
  * Name: m16c_getusersp
  ****************************************************************************/
 
@@ -152,7 +134,7 @@ static inline void m16c_registerdump(void)
 void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint16_t sp = m16c_getsp();
+  uint16_t sp = renesas_getsp();
   uint16_t ustackbase;
   uint16_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
