@@ -61,9 +61,9 @@
 
 enum
 {
-#  define SYSCALL_LOOKUP_(f)     SYS_##f
-#  define SYSCALL_LOOKUP1(f,n,p) SYSCALL_LOOKUP_(f) = CONFIG_SYS_RESERVED
-#  define SYSCALL_LOOKUP(f,n,p)  , SYSCALL_LOOKUP_(f)
+#  define SYSCALL_LOOKUP_(f)   SYS_##f
+#  define SYSCALL_LOOKUP1(f,n) SYSCALL_LOOKUP_(f) = CONFIG_SYS_RESERVED
+#  define SYSCALL_LOOKUP(f,n)  , SYSCALL_LOOKUP_(f)
 #  include "syscall_lookup.h"
   , SYS_maxsyscall
 #  undef SYSCALL_LOOKUP_
