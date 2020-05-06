@@ -107,7 +107,7 @@ static inline int __qemu_pci_cfg_write(uint16_t bfd, uintptr_t addr,
                                        FAR const void *buffer,
                                        unsigned int size)
 {
-  if(!buffer)
+  if (!buffer)
       return -EINVAL;
 
   outl(PCI_CONE | ((uint32_t)bfd << 8) | (addr & 0xfc), PCI_REG_ADDR_PORT);
@@ -152,7 +152,7 @@ static inline int __qemu_pci_cfg_write64(uint16_t bfd, uintptr_t addr,
 {
   int ret;
 
-  if(!buffer)
+  if (!buffer)
       return -EINVAL;
 
   ret = __qemu_pci_cfg_write(bfd, addr + 4, buffer + 4, 4);
@@ -181,7 +181,7 @@ static inline int __qemu_pci_cfg_write64(uint16_t bfd, uintptr_t addr,
 static inline int __qemu_pci_cfg_read(uint16_t bfd, uintptr_t addr,
                                       FAR void *buffer, unsigned int size)
 {
-  if(!buffer)
+  if (!buffer)
       return -EINVAL;
 
   outl(PCI_CONE | ((uint32_t)bfd << 8) | (addr & 0xfc), PCI_REG_ADDR_PORT);
@@ -228,7 +228,7 @@ static inline int __qemu_pci_cfg_read64(uint16_t bfd,
 {
   int ret;
 
-  if(!buffer)
+  if (!buffer)
       return -EINVAL;
 
   ret = __qemu_pci_cfg_read(bfd, addr + 4, buffer + 4, 4);

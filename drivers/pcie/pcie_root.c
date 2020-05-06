@@ -140,7 +140,6 @@ int pci_enumerate(FAR struct pcie_bus_s *bus,
   return OK;
 }
 
-
 /****************************************************************************
  * Name: pcie_initialize
  *
