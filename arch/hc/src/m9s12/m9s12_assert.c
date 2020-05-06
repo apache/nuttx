@@ -93,11 +93,13 @@ static void up_stackdump(uint16_t sp, uint16_t stack_base)
 
   for (stack = sp; stack < stack_base; stack += 16)
     {
-      uint8_t *ptr = (uint8_t*)stack;
+      uint8_t *ptr = (uint8_t *)stack;
+
       _alert("%04x: %02x %02x %02x %02x %02x %02x %02x %02x"
             "   %02x %02x %02x %02x %02x %02x %02x %02x\n",
-             stack, ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7],
-             ptr[8], ptr[9], ptr[10], ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
+             stack, ptr[0], ptr[1], ptr[2], ptr[3], ptr[4],
+             ptr[5], ptr[6], ptr[7], ptr[8], ptr[9], ptr[10],
+             ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
     }
 }
 #else
@@ -130,23 +132,22 @@ static inline void up_registerdump(void)
   _alert("SP:%02x%02x FRAME:%02x%02x TMP:%02x%02x Z:%02x%02x XY:%02x\n",
          regs[REG_SPH],  regs[REG_SPL],  regs[REG_FRAMEH], regs[REG_FRAMEL],
          regs[REG_TMPL], regs[REG_TMPH], regs[REG_ZL],     regs[REG_ZH],
-         regs[REG_XY],   regs[REG_XY+1]);
+         regs[REG_XY],   regs[REG_XY + 1]);
 
 #if CONFIG_HCS12_MSOFTREGS > 2
 #  error "Need to save more registers"
 #elif CONFIG_HCS12_MSOFTREGS == 2
   _alert("SOFTREGS: %02x%02x :%02x%02x\n",
-        regs[REG_SOFTREG1], regs[REG_SOFTREG1+1],
-        regs[REG_SOFTREG2], regs[REG_SOFTREG2+1]);
+        regs[REG_SOFTREG1], regs[REG_SOFTREG1 + 1],
+        regs[REG_SOFTREG2], regs[REG_SOFTREG2 + 1]);
 #elif CONFIG_HCS12_MSOFTREGS == 1
   _alert("SOFTREGS: %02x%02x\n",
-        regs[REG_SOFTREG1], regs[REG_SOFTREG1+1]);
+        regs[REG_SOFTREG1], regs[REG_SOFTREG1 + 1]);
 #endif
 
 #ifndef CONFIG_HCS12_NONBANKED
-      _alert("PPAGE: %02x\n", regs[REG_PPAGE]);
+  _alert("PPAGE: %02x\n", regs[REG_PPAGE]);
 #endif
-    }
 }
 #else
 # define up_registerdump()
@@ -295,19 +296,19 @@ static void _up_assert(int errorcode)
 
   if (g_current_regs || (running_task())->flink == NULL)
     {
-       up_irq_save();
-        for (;;)
-          {
+      up_irq_save();
+      for (; ; )
+        {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-            board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
+          board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
 #ifdef CONFIG_ARCH_LEDS
-            board_autoled_on(LED_PANIC);
-            up_mdelay(250);
-            board_autoled_off(LED_PANIC);
-            up_mdelay(250);
+          board_autoled_on(LED_PANIC);
+          up_mdelay(250);
+          board_autoled_off(LED_PANIC);
+          up_mdelay(250);
 #endif
-          }
+        }
     }
   else
     {

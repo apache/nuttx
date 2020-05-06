@@ -118,11 +118,12 @@ static int usbtrace_syslog(const char *fmt, ...)
  * Name: usbtrace_enable
  *
  * Description:
- *  Enable/disable tracing per trace ID.  The initial state is all IDs enabled.
+ *  Enable/disable tracing per trace ID.  The initial state is all IDs
+ *  enabled.
  *
  * Input Parameters:
- *  idset - The bitset of IDs to be masked.  TRACE_ALLIDS enables all IDS; zero
- *  masks all IDs.
+ *  idset - The bitset of IDs to be masked.  TRACE_ALLIDS enables all IDS;
+ *  zero masks all IDs.
  *
  * Returned Value:
  *  The previous idset value.
