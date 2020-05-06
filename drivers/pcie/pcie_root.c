@@ -52,6 +52,96 @@ struct pcie_dev_type_s *pci_device_types[] =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: pci_enumerate
+ *
+ * Description:
+ *  Scan the PCI bus and enumerate the devices.
+ *  Initialize any recognized devices, given in types.
+ *
+ * Input Parameters:
+ *   bus    - PCI-E bus structure
+ *   type   - List of pointers to devices types recognized, NULL terminated
+ *
+ * Returned Value:
+ *   0: success, <0: A negated errno
+ *
+ ****************************************************************************/
+
+int pci_enumerate(FAR struct pcie_bus_s *bus,
+                  FAR struct pcie_dev_type_s **types)
+{
+  unsigned int bdf;
+  uint16_t vid;
+  uint16_t id;
+  uint16_t rev;
+  struct pcie_dev_s tmp_dev;
+  struct pcie_dev_type_s tmp_type =
+    {
+      .name = "Unknown",
+      .vendor = PCI_ID_ANY,
+      .device = PCI_ID_ANY,
+      .class_rev = PCI_ID_ANY,
+      .probe = NULL,
+    };
+
+  if (!bus)
+      return -EINVAL;
+  if (!types)
+      return -EINVAL;
+
+  for (bdf = 0; bdf < CONFIG_PCIE_MAX_BDF; bdf++)
+    {
+      tmp_dev.bus = bus;
+      tmp_dev.type = &tmp_type;
+      tmp_dev.bdf = bdf;
+
+      bus->ops->pci_cfg_read(&tmp_dev, PCI_CFG_VENDOR_ID, &vid, 2);
+      bus->ops->pci_cfg_read(&tmp_dev, PCI_CFG_DEVICE_ID, &id, 2);
+      bus->ops->pci_cfg_read(&tmp_dev, PCI_CFG_REVERSION, &rev, 2);
+
+      if (vid == PCI_ID_ANY)
+        continue;
+
+      pciinfo("[%02x:%02x.%x] Found %04x:%04x, class/reversion %08x\n",
+              bdf >> 8, (bdf >> 3) & 0x1f, bdf & 0x3,
+              vid, id, rev);
+
+      for (int i = 0; types[i] != NULL; i++)
+        {
+          if (types[i]->vendor == PCI_ID_ANY ||
+              types[i]->vendor == vid)
+            {
+              if (types[i]->device == PCI_ID_ANY ||
+                  types[i]->device == id)
+                {
+                  if (types[i]->class_rev == PCI_ID_ANY ||
+                      types[i]->class_rev == rev)
+                    {
+                      if (types[i]->probe)
+                        {
+                          pciinfo("[%02x:%02x.%x] %s\n",
+                                  bdf >> 8, (bdf >> 3) & 0x1f, bdf & 0x3,
+                                  types[i]->name);
+                          types[i]->probe(bus, types[i], bdf);
+                        }
+                      else
+                        {
+                          pcierr("[%02x:%02x.%x] Error: Invalid \
+                                  device probe function\n",
+                                  bdf >> 8, (bdf >> 3) & 0x1f, bdf & 0x3);
+                        }
+                      break;
+                    }
+                }
+            }
+        }
+    }
+
+  return OK;
+}
+
+
+/****************************************************************************
  * Name: pcie_initialize
  *
  * Description:
@@ -71,7 +161,7 @@ struct pcie_dev_type_s *pci_device_types[] =
 
 int pcie_initialize(FAR struct pcie_bus_s *bus)
 {
-  return bus->ops->pcie_enumerate(bus, pci_device_types);
+  return pci_enumerate(bus, pci_device_types);
 }
 
 /****************************************************************************
