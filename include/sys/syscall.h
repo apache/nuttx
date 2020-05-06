@@ -284,13 +284,7 @@
  */
 
 #define SYS_close                    (__SYS_descriptors + 0)
-
-#ifdef CONFIG_LIBC_IOCTL_VARIADIC
-#  define SYS_fs_ioctl               (__SYS_descriptors + 1)
-#else
-#  define SYS_ioctl                  (__SYS_descriptors + 1)
-#endif
-
+#define SYS_ioctl                    (__SYS_descriptors + 1)
 #define SYS_read                     (__SYS_descriptors + 2)
 #define SYS_write                    (__SYS_descriptors + 3)
 #define SYS_pread                    (__SYS_descriptors + 4)
@@ -371,17 +365,11 @@
 #endif
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
-#  define SYS_pipe2                    (__SYS_pipes + 0)
-#  define __SYS_mkfifo2                (__SYS_pipes + 1)
+#  define SYS_nx_pipe                  (__SYS_pipes + 0)
+#  define SYS_nx_mkfifo                (__SYS_pipes + 1)
+#  define __SYS_fs_fdopen              (__SYS_pipes + 2)
 #else
-#  define __SYS_mkfifo2                (__SYS_pipes + 0)
-#endif
-
-#if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
-#  define SYS_mkfifo2                  (__SYS_mkfifo2 + 0)
-#  define __SYS_fs_fdopen              (__SYS_mkfifo2 + 1)
-#else
-#  define __SYS_fs_fdopen              (__SYS_mkfifo2 + 0)
+#  define __SYS_fs_fdopen              (__SYS_pipes + 0)
 #endif
 
 #if CONFIG_NFILE_STREAMS > 0

@@ -116,18 +116,10 @@
 
 /* Debug ********************************************************************/
 
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG_INFO
-#    define message(...) _info(__VA_ARGS__)
-#  else
-#    define message(...) syslog(LOG_INFO, __VA_ARGS__)
-#  endif
+#ifdef CONFIG_DEBUG_INFO
+#  define message _info
 #else
-#  ifdef CONFIG_DEBUG_INFO
-#    define message _info
-#  else
-#    define message _err
-#  endif
+#  define message _err
 #endif
 
 /****************************************************************************
@@ -186,7 +178,7 @@ int board_app_initialize(uintptr_t arg)
                                 CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      message("board_app_initialize: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+      message("Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
               CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
     }

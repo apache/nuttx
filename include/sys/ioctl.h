@@ -126,11 +126,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_IOCTL_VARIADIC
 int ioctl(int fd, int req, ...);
-#else
-int ioctl(int fd, int req, unsigned long arg);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

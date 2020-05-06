@@ -152,6 +152,93 @@ struct timespec;      /* Forward reference */
 struct task_group_s;  /* Forward reference */
 
 /****************************************************************************
+ * Name: nxmq_open
+ *
+ * Description:
+ *   This function establish a connection between a named message queue and
+ *   the calling task. This is an internal OS interface.  It is functionally
+ *   equivalent to mq_open() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_open() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mq_name - Name of the queue to open
+ *   oflags - open flags
+ *   Optional parameters.  When the O_CREAT flag is specified, two optional
+ *   parameters are expected:
+ *
+ *     1. mode_t mode (ignored), and
+ *     2. struct mq_attr *attr.  The mq_maxmsg attribute
+ *        is used at the time that the message queue is
+ *        created to determine the maximum number of
+ *        messages that may be placed in the message queue.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success, mqdes point to the new message queue descriptor.
+ *   A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxmq_open(FAR const char *mq_name, int oflags, mode_t mode,
+              FAR struct mq_attr *attr, FAR mqd_t *mqdes);
+
+/****************************************************************************
+ * Name: nxmq_close
+ *
+ * Description:
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   mq_close() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_close() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mqdes - Message queue descriptor.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success. A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxmq_close(mqd_t mqdes);
+
+/****************************************************************************
+ * Name: nxmq_unlink
+ *
+ * Description:
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   mq_unlink() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_unlink() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mq_name - Name of the message queue
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success. A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxmq_unlink(FAR const char *mq_name);
+
+/****************************************************************************
  * Name: nxmq_send
  *
  * Description:

@@ -82,13 +82,8 @@
 #  define baterr  _err
 #  define batreg  _err
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define baterr(x...)
-#    define batreg(x...)
-#  else
-#    define baterr (void)
-#    define batreg (void)
-#  endif
+#  define baterr  _none
+#  define batreg  _none
 #endif
 
 /****************************************************************************
@@ -100,7 +95,7 @@ struct bq2425x_dev_s
   /* The common part of the battery driver visible to the upper-half driver */
 
   FAR const struct battery_charger_operations_s *ops; /* Battery operations */
-  sem_t batsem;                /* Enforce mutually exclusive access */
+  sem_t batsem;                                       /* Enforce mutually exclusive access */
 
   /* Data fields specific to the lower half BQ2425x driver follow */
 
@@ -636,7 +631,8 @@ static inline int bq2425x_setvolt(FAR struct bq2425x_dev_s *priv, int volts)
  *
  ****************************************************************************/
 
-static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv, int current)
+static inline int bq2425x_setcurr(FAR struct bq2425x_dev_s *priv,
+                                  int current)
 {
   uint8_t regval;
   int idx;
@@ -744,7 +740,7 @@ static int bq2425x_input_current(FAR struct battery_charger_dev_s *dev,
   ret = bq2425x_powersupply(priv, value);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set BQ2425x power supply input limit: %d\n", ret);
+      baterr("ERROR: Failed to set BQ2425x power supply: %d\n", ret);
       return ret;
     }
 
@@ -804,7 +800,7 @@ FAR struct battery_charger_dev_s *
 
   /* Initialize the BQ2425x device structure */
 
-  priv = (FAR struct bq2425x_dev_s *)kmm_zalloc(sizeof(struct bq2425x_dev_s));
+  priv = kmm_zalloc(sizeof(struct bq2425x_dev_s));
   if (priv)
     {
       /* Initialize the BQ2425x device structure */
@@ -840,7 +836,7 @@ FAR struct battery_charger_dev_s *
       ret = bq2425x_powersupply(priv, current);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to set BQ2425x power supply input limit: %d\n", ret);
+          baterr("ERROR: Failed to set BQ2425x power supply: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }

@@ -78,13 +78,8 @@
 #  define baterr  _err
 #  define batreg  _err
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define baterr(x...)
-#    define batreg(x...)
-#  else
-#    define baterr (void)
-#    define batreg (void)
-#  endif
+#  define baterr  _none
+#  define batreg  _none
 #endif
 
 /****************************************************************************

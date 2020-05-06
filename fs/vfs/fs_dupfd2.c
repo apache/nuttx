@@ -61,26 +61,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fs_dupfd2 OR dup2
+ * Name: fs_dupfd2
  *
  * Description:
- *   Clone a file descriptor to a specific descriptor number. If socket
- *   descriptors are implemented, then this is called by dup2() for the
- *   case of file descriptors.  If socket descriptors are not implemented,
- *   then this function IS dup2().
+ *   Clone a file descriptor to a specific descriptor number.
  *
  * Returned Value:
- *   fs_dupfd is sometimes an OS internal function and sometimes is a direct
- *   substitute for dup2().  So it must return an errno value as though it
- *   were dup2().
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET
 int fs_dupfd2(int fd1, int fd2)
-#else
-int dup2(int fd1, int fd2)
-#endif
 {
   FAR struct file *filep1;
   FAR struct file *filep2 = NULL;
@@ -96,7 +88,7 @@ int dup2(int fd1, int fd2)
 
   if (ret < 0)
     {
-      goto errout;
+      return ret;
     }
 
   DEBUGASSERT(filep1 != NULL && filep2 != NULL);
@@ -105,8 +97,7 @@ int dup2(int fd1, int fd2)
 
   if (!DUP_ISOPEN(filep1))
     {
-      ret = -EBADF;
-      goto errout;
+      return -EBADF;
     }
 
   /* Handle a special case */
@@ -118,15 +109,5 @@ int dup2(int fd1, int fd2)
 
   /* Perform the dup2 operation */
 
-  ret = file_dup2(filep1, filep2);
-  if (ret < 0)
-    {
-      goto errout;
-    }
-
-  return OK;
-
-errout:
-  set_errno(-ret);
-  return ERROR;
+  return file_dup2(filep1, filep2);
 }

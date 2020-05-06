@@ -59,6 +59,389 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nx_waitpid
+ ****************************************************************************/
+
+#ifndef CONFIG_SCHED_HAVE_PARENT
+pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
+{
+  FAR struct tcb_s *ctcb;
+  FAR struct task_group_s *group;
+  bool mystat = false;
+  int ret;
+
+  DEBUGASSERT(stat_loc);
+
+  /* Disable pre-emption so that nothing changes in the following tests */
+
+  sched_lock();
+
+  /* Get the TCB corresponding to this PID */
+
+  ctcb = sched_gettcb(pid);
+  if (ctcb == NULL)
+    {
+      ret = -ECHILD;
+      goto errout;
+    }
+
+  /* Then the task group corresponding to this PID */
+
+  group = ctcb->group;
+  DEBUGASSERT(group);
+
+  /* Lock this group so that it cannot be deleted until the wait completes */
+
+  group_addwaiter(group);
+
+  /* "If more than one thread is suspended in waitpid() awaiting termination
+   * of the same process, exactly one thread will return the process status
+   * at the time of the target process termination."  Hmmm.. what do we
+   * return to the others?
+   */
+
+  if (group->tg_waitflags == 0)
+    {
+      /* Save the waitpid() options, setting the non-standard WCLAIMED bit to
+       * assure that tg_waitflags is non-zero.
+       */
+
+      group->tg_waitflags = (uint8_t)options | WCLAIMED;
+
+      /* Save the return status location (which may be NULL) */
+
+      group->tg_statloc = stat_loc;
+
+      /* We are the waipid() instance that gets the return status */
+
+      mystat = true;
+    }
+
+  /* Then wait for the task to exit */
+
+  if ((options & WNOHANG) != 0)
+    {
+      /* Don't wait if status is not available */
+
+      ret = nxsem_trywait(&group->tg_exitsem);
+    }
+  else
+    {
+      /* Wait if necessary for status to become available */
+
+      ret = nxsem_wait(&group->tg_exitsem);
+    }
+
+  group_delwaiter(group);
+
+  if (ret < 0)
+    {
+      /* Handle the awkward case of whether or not we
+       * need to nullify the stat_loc value.
+       */
+
+      if (mystat)
+        {
+          group->tg_statloc   = NULL;
+          group->tg_waitflags = 0;
+        }
+
+      if ((options & WNOHANG) != 0)
+        {
+          pid = 0;
+        }
+      else
+        {
+          goto errout;
+        }
+    }
+
+  /* On success, return the PID */
+
+  sched_unlock();
+  return pid;
+
+errout:
+  sched_unlock();
+  return ret;
+}
+
+/****************************************************************************
+ *
+ * If CONFIG_SCHED_HAVE_PARENT is defined, then waitpid will use the SIGHCLD
+ * signal.  It can also handle the pid == (pid_t)-1 argument.  This is
+ * slightly more spec-compliant.
+ *
+ * But then I have to be concerned about the fact that NuttX does not queue
+ * signals.  This means that a flurry of signals can cause signals to be
+ * lost (or to have the data in the struct siginfo to be overwritten by
+ * the next signal).
+ *
+ ****************************************************************************/
+
+#else
+pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
+{
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *ctcb;
+#ifdef CONFIG_SCHED_CHILD_STATUS
+  FAR struct child_status_s *child = NULL;
+  bool retains;
+#endif
+  FAR struct siginfo info;
+  sigset_t set;
+  int ret;
+
+  DEBUGASSERT(stat_loc);
+
+  /* Create a signal set that contains only SIGCHLD */
+
+  sigemptyset(&set);
+  nxsig_addset(&set, SIGCHLD);
+
+  /* Disable pre-emption so that nothing changes while the loop executes */
+
+  sched_lock();
+
+  /* Verify that this task actually has children and that the requested PID
+   * is actually a child of this task.
+   */
+
+#ifdef CONFIG_SCHED_CHILD_STATUS
+  /* Does this task retain child status? */
+
+  retains = ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0);
+
+  if (rtcb->group->tg_children == NULL && retains)
+    {
+      ret = -ECHILD;
+      goto errout;
+    }
+  else if (pid != (pid_t)-1)
+    {
+      /* Get the TCB corresponding to this PID.  NOTE: If the child has
+       * already exited, then the PID will not map to a valid TCB.
+       */
+
+      ctcb = sched_gettcb(pid);
+      if (ctcb != NULL)
+        {
+          /* Make sure that the thread it is our child. */
+
+#ifdef HAVE_GROUP_MEMBERS
+          if (ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
+#else
+          if (ctcb->group->tg_ppid != rtcb->pid)
+#endif
+            {
+              ret = -ECHILD;
+              goto errout;
+            }
+        }
+
+      /* The child task is ours or it is no longer active.  Does the parent
+       * task retain child status?
+       */
+
+      if (retains)
+        {
+          /* Yes.. Check if this specific pid has allocated child status? */
+
+          if (group_findchild(rtcb->group, pid) == NULL)
+            {
+              ret = -ECHILD;
+              goto errout;
+            }
+        }
+    }
+
+#else /* CONFIG_SCHED_CHILD_STATUS */
+
+  if (rtcb->group->tg_nchildren == 0)
+    {
+      /* There are no children */
+
+      ret = -ECHILD;
+      goto errout;
+    }
+  else if (pid != (pid_t)-1)
+    {
+      /* Get the TCB corresponding to this PID and make sure that the
+       * thread it is our child.
+       */
+
+      ctcb = sched_gettcb(pid);
+
+#ifdef HAVE_GROUP_MEMBERS
+      if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
+#else
+      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
+#endif
+        {
+          ret = -ECHILD;
+          goto errout;
+        }
+    }
+
+#endif /* CONFIG_SCHED_CHILD_STATUS */
+
+  /* Loop until the child that we are waiting for dies */
+
+  for (; ; )
+    {
+#ifdef CONFIG_SCHED_CHILD_STATUS
+      /* Check if the task has already died. Signals are not queued in
+       * NuttX.  So a possibility is that the child has died and we
+       * missed the death of child signal (we got some other signal
+       * instead).
+       */
+
+      if (pid == (pid_t)-1)
+        {
+          /* We are waiting for any child, check if there are still
+           * children.
+           */
+
+          DEBUGASSERT(!retains || rtcb->group->tg_children);
+          if (retains && (child = group_exitchild(rtcb->group)) != NULL)
+            {
+              /* A child has exited.  Apparently we missed the signal.
+               * Return the saved exit status.
+               */
+
+              /* The child has exited. Return the saved exit status */
+
+              *stat_loc = child->ch_status << 8;
+
+              /* Discard the child entry and break out of the loop */
+
+              group_removechild(rtcb->group, child->ch_pid);
+              group_freechild(child);
+              break;
+            }
+        }
+
+      /* We are waiting for a specific PID. Does this task retain child
+       * status?
+       */
+
+      else if (retains)
+        {
+          /* Get the current status of the child task. */
+
+          child = group_findchild(rtcb->group, pid);
+          DEBUGASSERT(child);
+
+          /* Did the child exit? */
+
+          if ((child->ch_flags & CHILD_FLAG_EXITED) != 0)
+            {
+              /* The child has exited. Return the saved exit status */
+
+              *stat_loc = child->ch_status << 8;
+
+              /* Discard the child entry and break out of the loop */
+
+              group_removechild(rtcb->group, pid);
+              group_freechild(child);
+              break;
+            }
+        }
+      else
+        {
+          /* We can use nxsig_kill() with signal number 0 to determine if
+           * that task is still alive.
+           */
+
+          ret = nxsig_kill(pid, 0);
+          if (ret < 0)
+            {
+              /* It is no longer running.  We know that the child task
+               * was running okay when we started, so we must have lost
+               * the signal.  In this case, we know that the task exit'ed,
+               * but we do not know its exit status.  It would be better
+               * to reported ECHILD than bogus status.
+               */
+
+              ret = -ECHILD;
+              goto errout;
+            }
+        }
+
+#else  /* CONFIG_SCHED_CHILD_STATUS */
+
+      /* Check if the task has already died. Signals are not queued in
+       * NuttX.  So a possibility is that the child has died and we
+       * missed the death of child signal (we got some other signal
+       * instead).
+       */
+
+      if (rtcb->group->tg_nchildren == 0 ||
+          (pid != (pid_t)-1 && (ret = nxsig_kill(pid, 0)) < 0))
+        {
+          /* We know that the child task was running okay when we started,
+           * so we must have lost the signal.  What can we do?
+           * Let's return ECHILD.. that is at least informative.
+           */
+
+          ret = -ECHILD;
+          goto errout;
+        }
+
+#endif /* CONFIG_SCHED_CHILD_STATUS */
+
+      /* Wait for any death-of-child signal */
+
+      ret = nxsig_waitinfo(&set, &info);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      /* Was this the death of the thread we were waiting for? In the of
+       * pid == (pid_t)-1, we are waiting for any child thread.
+       */
+
+      if (info.si_signo == SIGCHLD &&
+         (pid == (pid_t)-1 || info.si_pid == pid))
+        {
+          /* Yes... return the status and PID (in the event it was -1) */
+
+          *stat_loc = info.si_status << 8;
+          pid = info.si_pid;
+
+#ifdef CONFIG_SCHED_CHILD_STATUS
+          if (retains)
+            {
+              /* Recover the exiting child */
+
+              child = group_exitchild(rtcb->group);
+              DEBUGASSERT(child != NULL);
+
+              /* Discard the child entry, if we have one */
+
+              if (child != NULL)
+                {
+                  group_removechild(rtcb->group, child->ch_pid);
+                  group_freechild(child);
+                }
+            }
+#endif /* CONFIG_SCHED_CHILD_STATUS */
+
+          break;
+        }
+    }
+
+  sched_unlock();
+  return pid;
+
+errout:
+  sched_unlock();
+  return ret;
+}
+#endif /* CONFIG_SCHED_HAVE_PARENT */
+
+/****************************************************************************
  * Name: waitpid
  *
  * Description:
@@ -182,402 +565,25 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_HAVE_PARENT
 pid_t waitpid(pid_t pid, int *stat_loc, int options)
 {
-  FAR struct tcb_s *ctcb;
-  FAR struct task_group_s *group;
-  bool mystat = false;
-  int errcode;
-  int ret;
-
-  DEBUGASSERT(stat_loc);
+  pid_t ret;
 
   /* waitpid() is a cancellation point */
 
   enter_cancellation_point();
 
-  /* Disable pre-emption so that nothing changes in the following tests */
+  /* Let nx_waitpid() do the work. */
 
-  sched_lock();
-
-  /* Get the TCB corresponding to this PID */
-
-  ctcb = sched_gettcb(pid);
-  if (ctcb == NULL)
+  ret = nx_waitpid(pid, stat_loc, options);
+  if (ret < 0)
     {
-      errcode = ECHILD;
-      goto errout_with_errno;
+      set_errno(-ret);
+      ret = ERROR;
     }
-
-  /* Then the task group corresponding to this PID */
-
-  group = ctcb->group;
-  DEBUGASSERT(group);
-
-  /* Lock this group so that it cannot be deleted until the wait completes */
-
-  group_addwaiter(group);
-
-  /* "If more than one thread is suspended in waitpid() awaiting termination
-   * of the same process, exactly one thread will return the process status
-   * at the time of the target process termination."  Hmmm.. what do we
-   * return to the others?
-   */
-
-  if (group->tg_waitflags == 0)
-    {
-      /* Save the waitpid() options, setting the non-standard WCLAIMED bit to
-       * assure that tg_waitflags is non-zero.
-       */
-
-      group->tg_waitflags = (uint8_t)options | WCLAIMED;
-
-      /* Save the return status location (which may be NULL) */
-
-      group->tg_statloc = stat_loc;
-
-      /* We are the waipid() instance that gets the return status */
-
-      mystat = true;
-    }
-
-  /* Then wait for the task to exit */
-
-  if ((options & WNOHANG) != 0)
-    {
-      /* Don't wait if status is not available */
-
-      ret = nxsem_trywait(&group->tg_exitsem);
-      group_delwaiter(group);
-
-      if (ret < 0)
-        {
-          pid = 0;
-        }
-    }
-  else
-    {
-      /* Wait if necessary for status to become available */
-
-      ret = nxsem_wait(&group->tg_exitsem);
-      group_delwaiter(group);
-
-      if (ret < 0)
-        {
-          /* Unlock pre-emption and return the ERROR (nxsem_wait has already
-           * set the errno).  Handle the awkward case of whether or not we
-           * need to nullify the stat_loc value.
-           */
-
-          if (mystat)
-            {
-              group->tg_statloc   = NULL;
-              group->tg_waitflags = 0;
-            }
-
-          errcode = -ret;
-          goto errout_with_errno;
-        }
-    }
-
-  /* On success, return the PID */
 
   leave_cancellation_point();
-  sched_unlock();
-  return pid;
-
-errout_with_errno:
-  set_errno(errcode);
-
-  leave_cancellation_point();
-  sched_unlock();
-  return ERROR;
+  return ret;
 }
-
-/****************************************************************************
- *
- * If CONFIG_SCHED_HAVE_PARENT is defined, then waitpid will use the SIGHCLD
- * signal.  It can also handle the pid == (pid_t)-1 argument.  This is
- * slightly more spec-compliant.
- *
- * But then I have to be concerned about the fact that NuttX does not queue
- * signals.  This means that a flurry of signals can cause signals to be
- * lost (or to have the data in the struct siginfo to be overwritten by
- * the next signal).
- *
- ****************************************************************************/
-
-#else
-pid_t waitpid(pid_t pid, int *stat_loc, int options)
-{
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct tcb_s *ctcb;
-#ifdef CONFIG_SCHED_CHILD_STATUS
-  FAR struct child_status_s *child = NULL;
-  bool retains;
-#endif
-  FAR struct siginfo info;
-  sigset_t set;
-  int errcode;
-  int ret;
-
-  DEBUGASSERT(stat_loc);
-
-  /* waitpid() is a cancellation point */
-
-  enter_cancellation_point();
-
-  /* Create a signal set that contains only SIGCHLD */
-
-  sigemptyset(&set);
-  nxsig_addset(&set, SIGCHLD);
-
-  /* Disable pre-emption so that nothing changes while the loop executes */
-
-  sched_lock();
-
-  /* Verify that this task actually has children and that the requested PID
-   * is actually a child of this task.
-   */
-
-#ifdef CONFIG_SCHED_CHILD_STATUS
-  /* Does this task retain child status? */
-
-  retains = ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0);
-
-  if (rtcb->group->tg_children == NULL && retains)
-    {
-      errcode = ECHILD;
-      goto errout_with_errno;
-    }
-  else if (pid != (pid_t)-1)
-    {
-      /* Get the TCB corresponding to this PID.  NOTE: If the child has
-       * already exited, then the PID will not map to a valid TCB.
-       */
-
-      ctcb = sched_gettcb(pid);
-      if (ctcb != NULL)
-        {
-          /* Make sure that the thread it is our child. */
-
-#ifdef HAVE_GROUP_MEMBERS
-          if (ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
-#else
-          if (ctcb->group->tg_ppid != rtcb->pid)
-#endif
-            {
-              errcode = ECHILD;
-              goto errout_with_errno;
-            }
-        }
-
-      /* The child task is ours or it is no longer active.  Does the parent
-       * task retain child status?
-       */
-
-      if (retains)
-        {
-          /* Yes.. Check if this specific pid has allocated child status? */
-
-          if (group_findchild(rtcb->group, pid) == NULL)
-            {
-              errcode = ECHILD;
-              goto errout_with_errno;
-            }
-        }
-    }
-
-#else /* CONFIG_SCHED_CHILD_STATUS */
-
-  if (rtcb->group->tg_nchildren == 0)
-    {
-      /* There are no children */
-
-      errcode = ECHILD;
-      goto errout_with_errno;
-    }
-  else if (pid != (pid_t)-1)
-    {
-      /* Get the TCB corresponding to this PID and make sure that the
-       * thread it is our child.
-       */
-
-      ctcb = sched_gettcb(pid);
-
-#ifdef HAVE_GROUP_MEMBERS
-      if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
-#else
-      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
-#endif
-        {
-          errcode = ECHILD;
-          goto errout_with_errno;
-        }
-    }
-
-#endif /* CONFIG_SCHED_CHILD_STATUS */
-
-  /* Loop until the child that we are waiting for dies */
-
-  for (; ; )
-    {
-#ifdef CONFIG_SCHED_CHILD_STATUS
-      /* Check if the task has already died. Signals are not queued in
-       * NuttX.  So a possibility is that the child has died and we
-       * missed the death of child signal (we got some other signal
-       * instead).
-       */
-
-      if (pid == (pid_t)-1)
-        {
-          /* We are waiting for any child, check if there are still
-           * children.
-           */
-
-          DEBUGASSERT(!retains || rtcb->group->tg_children);
-          if (retains && (child = group_exitchild(rtcb->group)) != NULL)
-            {
-              /* A child has exited.  Apparently we missed the signal.
-               * Return the saved exit status.
-               */
-
-              /* The child has exited. Return the saved exit status */
-
-              *stat_loc = child->ch_status << 8;
-
-              /* Discard the child entry and break out of the loop */
-
-              group_removechild(rtcb->group, child->ch_pid);
-              group_freechild(child);
-              break;
-            }
-        }
-
-      /* We are waiting for a specific PID. Does this task retain child
-       * status?
-       */
-
-      else if (retains)
-        {
-          /* Get the current status of the child task. */
-
-          child = group_findchild(rtcb->group, pid);
-          DEBUGASSERT(child);
-
-          /* Did the child exit? */
-
-          if ((child->ch_flags & CHILD_FLAG_EXITED) != 0)
-            {
-              /* The child has exited. Return the saved exit status */
-
-              *stat_loc = child->ch_status << 8;
-
-              /* Discard the child entry and break out of the loop */
-
-              group_removechild(rtcb->group, pid);
-              group_freechild(child);
-              break;
-            }
-        }
-      else
-        {
-          /* We can use nxsig_kill() with signal number 0 to determine if
-           * that task is still alive.
-           */
-
-          ret = nxsig_kill(pid, 0);
-          if (ret < 0)
-            {
-              /* It is no longer running.  We know that the child task
-               * was running okay when we started, so we must have lost
-               * the signal.  In this case, we know that the task exit'ed,
-               * but we do not know its exit status.  It would be better
-               * to reported ECHILD than bogus status.
-               */
-
-              errcode = ECHILD;
-              goto errout_with_errno;
-            }
-        }
-
-#else  /* CONFIG_SCHED_CHILD_STATUS */
-
-      /* Check if the task has already died. Signals are not queued in
-       * NuttX.  So a possibility is that the child has died and we
-       * missed the death of child signal (we got some other signal
-       * instead).
-       */
-
-      if (rtcb->group->tg_nchildren == 0 ||
-          (pid != (pid_t)-1 && (ret = nxsig_kill(pid, 0)) < 0))
-        {
-          /* We know that the child task was running okay when we started,
-           * so we must have lost the signal.  What can we do?
-           * Let's return ECHILD.. that is at least informative.
-           */
-
-          errcode = ECHILD;
-          goto errout_with_errno;
-        }
-
-#endif /* CONFIG_SCHED_CHILD_STATUS */
-
-      /* Wait for any death-of-child signal */
-
-      ret = nxsig_waitinfo(&set, &info);
-      if (ret < 0)
-        {
-          errcode = -ret;
-          goto errout_with_errno;
-        }
-
-      /* Was this the death of the thread we were waiting for? In the of
-       * pid == (pid_t)-1, we are waiting for any child thread.
-       */
-
-      if (info.si_signo == SIGCHLD &&
-         (pid == (pid_t)-1 || info.si_pid == pid))
-        {
-          /* Yes... return the status and PID (in the event it was -1) */
-
-          *stat_loc = info.si_status << 8;
-          pid = info.si_pid;
-
-#ifdef CONFIG_SCHED_CHILD_STATUS
-          if (retains)
-            {
-              /* Recover the exiting child */
-
-              child = group_exitchild(rtcb->group);
-              DEBUGASSERT(child != NULL);
-
-              /* Discard the child entry, if we have one */
-
-              if (child != NULL)
-                {
-                  group_removechild(rtcb->group, child->ch_pid);
-                  group_freechild(child);
-                }
-            }
-#endif /* CONFIG_SCHED_CHILD_STATUS */
-
-          break;
-        }
-    }
-
-  leave_cancellation_point();
-  sched_unlock();
-  return (int)pid;
-
-errout_with_errno:
-  set_errno(errcode);
-
-  leave_cancellation_point();
-  sched_unlock();
-  return ERROR;
-}
-#endif /* CONFIG_SCHED_HAVE_PARENT */
 
 #endif /* CONFIG_SCHED_WAITPID */

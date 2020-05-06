@@ -169,26 +169,14 @@
 
 /* Debug ********************************************************************/
 
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_NET_MLD_DEBUG
-#    define mlderr(format, ...)    _err(format, ##__VA_ARGS__)
-#    define mldwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#    define mldinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#  else
-#    define mlderr(format, ...)    nerr(format, ##__VA_ARGS__)
-#    define mldwarn(format, ...)   nwarn(format, ##__VA_ARGS__)
-#    define mldinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
-#  endif
+#ifdef CONFIG_NET_MLD_DEBUG
+#  define mlderr    _err
+#  define mldwarn   _warn
+#  define mldinfo   _info
 #else
-#  ifdef CONFIG_NET_MLD_DEBUG
-#    define mlderr    _err
-#    define mldwarn   _warn
-#    define mldinfo   _info
-#  else
-#    define mlderr    nerr
-#    define mldwarn   nwarn
-#    define mldinfo   ninfo
-#  endif
+#  define mlderr    nerr
+#  define mldwarn   nwarn
+#  define mldinfo   ninfo
 #endif
 
 /****************************************************************************

@@ -34,10 +34,10 @@
  *
  ****************************************************************************/
 
-/* "The MAX17040/MAX17041 are ultra-compact, low-cost, host-side fuel-gauge
- * systems for lithium-ion (Li+) batteries in handheld and portable equipment.
- * The MAX17040 is configured to operate with a single lithium cell and the
- * MAX17041 is configured for a dual-cell 2S pack.
+/* "MAX17040/MAX17041 are ultra-compact, low-cost, host-side fuel-gauge
+ * systems for lithium-ion (Li+) batteries in handheld and portable
+ * equipment. MAX17040 is configured to operate with a single lithium cell
+ * and the MAX17041 is configured for a dual-cell 2S pack.
  */
 
 /****************************************************************************
@@ -83,14 +83,14 @@
 
 /* MAX1704x Register Definitions ********************************************/
 
-/* "All host interaction with the MAX17040/MAX17041 is handled by writing to
- *  and reading from register locations. The MAX17040/MAX17041 have six 16-bit
+/* "All host interaction with MAX17040/MAX17041 is handled by writing to
+ *  and reading from register locations. MAX17040/MAX17041 have six 16-bit
  *  registers: SOC, VCELL, MODE, VERSION, RCOMP, and COMMAND. Register reads
  *  and writes are only valid if all 16 bits are transferred..."
  */
 
 /* "VCELL Register.  Battery voltage is measured at the CELL pin input with
- *  respect to GND over a 0 to 5.00V range for the MAX17040 and 0 to 10.00V
+ *  respect to GND over a 0 to 5.00V range for MAX17040 and 0 to 10.00V
  *  for the MAX17041 with resolutions of 1.25mV and 2.50mV, respectively..."
  */
 
@@ -111,8 +111,8 @@
 #endif
 
 /* "SOC Register. The SOC register is a read-only register that displays the
- *  state of charge of the cell as calculated by the ModelGauge algorithm. The
- *  result is displayed as a percentage of the cell’s full capacity...
+ *  state of charge of the cell as calculated by the ModelGauge algorithm.
+ *  The result is displayed as a percentage of the cell’s full capacity...
  *
  * "...Units of % can be directly determined by observing only the high byte
  *  of the SOC register. The low byte provides additional resolution in units
@@ -137,7 +137,7 @@
 #define MAX1407X_MODE_QUICKSTART 0x4000
 
 /* "The VERSION register is a read-only register that contains a value
- *  indicating the production version of the MAX17040/MAX17041."
+ *  indicating the production version of MAX17040/MAX17041."
  */
 
 #define MAX1407X_VERSION_ADDR    0x08  /* Bits 0-15: 16-bit VERSION */
@@ -165,11 +165,7 @@
 #ifdef CONFIG_DEBUG_MAX1704X
 #  define baterr  _err
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define baterr(x...)
-#  else
-#    define baterr (void)
-#  endif
+#  define baterr  _none
 #endif
 
 /****************************************************************************
@@ -181,7 +177,7 @@ struct max1704x_dev_s
   /* The common part of the battery driver visible to the upper-half driver */
 
   FAR const struct battery_gauge_operations_s *ops; /* Battery operations */
-  sem_t batsem;                 /* Enforce mutually exclusive access */
+  sem_t batsem;                                     /* Enforce mutually exclusive access */
 
   /* Data fields specific to the lower half MAX1704x driver follow */
 
@@ -196,10 +192,10 @@ struct max1704x_dev_s
 
 /* I2C support */
 
-static int max1704x_getreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
-                             FAR uint16_t *regval);
-static int max1704x_putreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
-                             uint16_t regval);
+static int max1704x_getreg16(FAR struct max1704x_dev_s *priv,
+                             uint8_t regaddr, FAR uint16_t *regval);
+static int max1704x_putreg16(FAR struct max1704x_dev_s *priv,
+                             uint8_t regaddr, uint16_t regval);
 
 static inline int max1704x_getvcell(FAR struct max1704x_dev_s *priv,
                                     b16_t *vcell);
@@ -244,8 +240,8 @@ static const struct battery_gauge_operations_s g_max1704xops =
  *
  ****************************************************************************/
 
-static int max1704x_getreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
-                             FAR uint16_t *regval)
+static int max1704x_getreg16(FAR struct max1704x_dev_s *priv,
+                             uint8_t regaddr, FAR uint16_t *regval)
 {
   struct i2c_config_s config;
   uint8_t buffer[2];
@@ -290,8 +286,8 @@ static int max1704x_getreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
  *
  ****************************************************************************/
 
-static int max1704x_putreg16(FAR struct max1704x_dev_s *priv, uint8_t regaddr,
-                             uint16_t regval)
+static int max1704x_putreg16(FAR struct max1704x_dev_s *priv,
+                             uint8_t regaddr, uint16_t regval)
 {
   struct i2c_config_s config;
   uint8_t buffer[3];
@@ -371,7 +367,8 @@ static inline int max1704x_getsoc(FAR struct max1704x_dev_s *priv,
 
 static inline int max1704x_setquikstart(FAR struct max1704x_dev_s *priv)
 {
-  return max1704x_putreg16(priv, MAX1407X_MODE_ADDR, MAX1407X_MODE_QUICKSTART);
+  return max1704x_putreg16(priv, MAX1407X_MODE_ADDR,
+                           MAX1407X_MODE_QUICKSTART);
 }
 
 /****************************************************************************
@@ -396,7 +393,8 @@ static inline int max1704x_getversion(FAR struct max1704x_dev_s *priv,
  *
  ****************************************************************************/
 
-static inline int max1704x_setrcomp(FAR struct max1704x_dev_s *priv, uint16_t rcomp)
+static inline int max1704x_setrcomp(FAR struct max1704x_dev_s *priv,
+                                    uint16_t rcomp)
 {
   return max1704x_putreg16(priv, MAX1407X_RCOMP_ADDR, rcomp);
 }
@@ -405,13 +403,14 @@ static inline int max1704x_setrcomp(FAR struct max1704x_dev_s *priv, uint16_t rc
  * Name: max1704x_reset
  *
  * Description:
- *   Reset the MAX1704x
+ *   Reset MAX1704x
  *
  ****************************************************************************/
 
 static inline int max1704x_reset(FAR struct max1704x_dev_s *priv)
 {
-  return max1704x_putreg16(priv, MAX1407X_COMMAND_ADDR, MAX1407X_COMMAND_POR);
+  return max1704x_putreg16(priv, MAX1407X_COMMAND_ADDR,
+                           MAX1407X_COMMAND_POR);
 }
 
 /****************************************************************************
@@ -510,7 +509,7 @@ static int max1704x_capacity(struct battery_gauge_dev_s *dev, b16_t *value)
  * Name: max1704x_initialize
  *
  * Description:
- *   Initialize the MAX1704x battery driver and return an instance of the
+ *   Initialize MAX1704x battery driver and return an instance of the
  *   lower_half interface that may be used with battery_register();
  *
  *   This driver requires:
@@ -522,31 +521,31 @@ static int max1704x_capacity(struct battery_gauge_dev_s *dev, b16_t *value)
  *     chip is on the board in order to scale the voltage correctly.
  *
  * Input Parameters:
- *   i2c - An instance of the I2C interface to use to communicate with the MAX1704x
- *   addr - The I2C address of the MAX1704x (Better be 0x36).
+ *   i2c - An instance of the I2C interface to communicate with MAX1704x
+ *   addr - The I2C address of MAX1704x (Better be 0x36).
  *   frequency - The I2C frequency
  *
  * Returned Value:
- *   A pointer to the initializeed lower-half driver instance.  A NULL pointer
- *   is returned on a failure to initialize the MAX1704x lower half.
+ *   A pointer to the initializeed lower-half driver instance. A NULL pointer
+ *   is returned on a failure to initialize MAX1704x lower half.
  *
  ****************************************************************************/
 
-FAR struct battery_gauge_dev_s *max1704x_initialize(FAR struct i2c_master_s *i2c,
-                                                    uint8_t addr,
-                                                    uint32_t frequency)
+FAR struct battery_gauge_dev_s *
+max1704x_initialize(FAR struct i2c_master_s *i2c,
+                    uint8_t addr, uint32_t frequency)
 {
   FAR struct max1704x_dev_s *priv;
 #if 0
   int ret;
 #endif
 
-  /* Initialize the MAX1704x device structure */
+  /* Initialize MAX1704x device structure */
 
-  priv = (FAR struct max1704x_dev_s *)kmm_zalloc(sizeof(struct max1704x_dev_s));
+  priv = kmm_zalloc(sizeof(struct max1704x_dev_s));
   if (priv)
     {
-      /* Initialize the MAX1704x device structure */
+      /* Initialize MAX1704x device structure */
 
       nxsem_init(&priv->batsem, 0, 1);
       priv->ops       = &g_max1704xops;
@@ -554,13 +553,13 @@ FAR struct battery_gauge_dev_s *max1704x_initialize(FAR struct i2c_master_s *i2c
       priv->addr      = addr;
       priv->frequency = frequency;
 
-      /* Reset the MAX1704x (mostly just to make sure that we can talk to it) */
+      /* Reset MAX1704x (mostly just to make sure that we can talk to it) */
 
 #if 0
       ret = max1704x_reset(priv);
       if (ret < 0)
         {
-          baterr("Failed to reset the MAX1704x: %d\n", ret);
+          baterr("Failed to reset MAX1704x: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }

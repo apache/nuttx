@@ -1,5 +1,9 @@
 /****************************************************************************
- * boards/sim/sim/sim/include/dummy.h
+ * arch/risc-v/src/k210/hardware/k210_sysctl.h
+ *
+ * Derives from software originally provided by Canaan Inc
+ *
+ *   Copyright 2018 Canaan Inc
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,29 +22,27 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_SIM_SIM_SIM_INCLUDE_DUMMY_H
-#define __BOARDS_SIM_SIM_SIM_INCLUDE_DUMMY_H
+#ifndef __ARCH_RISCV_SRC_K210_HARDWARE_K210_SYSCTL_H
+#define __ARCH_RISCV_SRC_K210_HARDWARE_K210_SYSCTL_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DUMMY_NAME(name) DUMMY_NAME_(dummy_, name)
-#define DUMMY_NAME_(prefix, name) prefix##name
+#define K210_SYSCTL_PLL0  (K210_SYSCTL_BASE + 0x08)
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+#define PLL_CLK_R(n)  (n & 0x00000f)
+#define PLL_CLK_F(n)  ((n & 0x0003f0) >> 4)
+#define PLL_CLK_OD(n) ((n & 0x003c00) >> 10)
 
-/* ranlib on macOS will generate "has no symbols" warning if the static
- * library don't expose any public symbol, so let's always generate a dummy
- * global function to overcome this issue.
- */
+#define K210_SYSCTL_CLKSEL0  (K210_SYSCTL_BASE + 0x20)
 
-#ifndef __ASSEMBLY__
-void DUMMY_NAME(CKSUM_SELF)(void)
-{
-}
-#endif
+#define CLKSEL0_ACLK_SEL(n) (n & 0x00000001)
 
-#endif /* __BOARDS_SIM_SIM_SIM_INCLUDE_DUMMY_H */
+#endif /* __ARCH_RISCV_SRC_K210_HARDWARE_K210_SYSCTL_H */

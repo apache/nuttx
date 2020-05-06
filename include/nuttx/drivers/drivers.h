@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/fs/drivers.h
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015-2016 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -165,8 +166,9 @@ int bchdev_register(FAR const char *blkdev, FAR const char *chardev,
 
 int bchdev_unregister(FAR const char *chardev);
 
-/* Low level, direct access.  NOTE:  low-level access and character driver access
- * are incompatible.  One and only one access method should be implemented.
+/* Low level, direct access. NOTE: low-level access and character driver
+ * access are incompatible. One and only one access method should be
+ * implemented.
  */
 
 /****************************************************************************
@@ -216,14 +218,14 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
                      size_t len);
 
 /****************************************************************************
- * Name: pipe2
+ * Name: nx_pipe
  *
  * Description:
- *   pipe() creates a pair of file descriptors, pointing to a pipe inode,
+ *   nx_pipe() creates a pair of file descriptors, pointing to a pipe inode,
  *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
  *   fd[1] is for writing.
  *
- *   NOTE: pipe2 is a special, non-standard, NuttX-only interface.  Since
+ *   NOTE: nx_pipe is a special, non-standard, NuttX-only interface.  Since
  *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
  *   to control the size of those buffers is critical for system tuning.
  *
@@ -233,25 +235,25 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
  *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
  * Returned Value:
- *   0 is returned on success; otherwise, -1 is returned with errno set
+ *   0 is returned on success; otherwise, the negative error code return
  *   appropriately.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
-int pipe2(int fd[2], size_t bufsize);
+int nx_pipe(int fd[2], size_t bufsize);
 #endif
 
 /****************************************************************************
- * Name: mkfifo2
+ * Name: nx_mkfifo
  *
  * Description:
- *   mkfifo() makes a FIFO device driver file with name 'pathname.'  Unlike
+ *   nx_mkfifo() makes a FIFO device driver file with name 'pathname.' Unlike
  *   Linux, a NuttX FIFO is not a special file type but simply a device
  *   driver instance.  'mode' specifies the FIFO's permissions.
  *
- *   Once the FIFO has been created by mkfifo(), any thread can open it for
- *   reading or writing, in the same way as an ordinary file. However, it
+ *   Once the FIFO has been created by nx_mkfifo(), any thread can open it
+ *   for reading or writing, in the same way as an ordinary file. However, it
  *   must have been opened from both reading and writing before input or
  *   output can be performed.  This FIFO implementation will block all
  *   attempts to open a FIFO read-only until at least one thread has opened
@@ -260,7 +262,7 @@ int pipe2(int fd[2], size_t bufsize);
  *   If all threads that write to the FIFO have closed, subsequent calls to
  *   read() on the FIFO will return 0 (end-of-file).
  *
- *   NOTE: mkfifo2 is a special, non-standard, NuttX-only interface.  Since
+ *   NOTE: nx_mkfifo is a special, non-standard, NuttX-only interface.  Since
  *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
  *   to control the size of those buffers is critical for system tuning.
  *
@@ -271,13 +273,13 @@ int pipe2(int fd[2], size_t bufsize);
  *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
  * Returned Value:
- *   0 is returned on success; otherwise, -1 is returned with errno set
+ *   0 is returned on success; otherwise, the negative error code return
  *   appropriately.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
-int mkfifo2(FAR const char *pathname, mode_t mode, size_t bufsize);
+int nx_mkfifo(FAR const char *pathname, mode_t mode, size_t bufsize);
 #endif
 
 #undef EXTERN

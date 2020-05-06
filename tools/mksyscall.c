@@ -1,35 +1,20 @@
 /****************************************************************************
  * tools/mksyscall.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -45,10 +30,6 @@
 #include <errno.h>
 
 #include "csvparser.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -221,7 +202,7 @@ static FILE *open_proxy(void)
   return stream;
 }
 
-static void generate_proxy(int nparms)
+static void generate_proxy(int nparms, csvparm_t *vartypes, int nvartypes)
 {
   FILE *stream = open_proxy();
   char formal[MAX_PARMSIZE];
@@ -315,20 +296,21 @@ static void generate_proxy(int nparms)
        * the varargs.
        */
 
-      if (nparms < 7)
+      if (nvartypes > 0)
         {
           fprintf(stream, "  va_list ap;\n");
 
-          for (i = nparms; i < 7; i++)
+          for (i = 0; i < nvartypes; i++)
             {
-              fprintf(stream, "  uintptr_t parm%d;\n", i);
+              fprintf(stream, "  %s parm%d;\n", vartypes[i], nparms + i);
             }
 
           fprintf(stream, "\n  va_start(ap, parm%d);\n", nparms - 1);
 
-          for (i = nparms; i < 7; i++)
+          for (i = 0; i < nvartypes; i++)
             {
-              fprintf(stream, "  parm%d = va_arg(ap, uintptr_t);\n", i);
+              fprintf(stream, "  parm%d = va_arg(ap, %s);\n",
+                      nparms + i, vartypes[i]);
             }
 
           fprintf(stream, "  va_end(ap);\n\n");
@@ -343,7 +325,12 @@ static void generate_proxy(int nparms)
    * are special cases.
    */
 
-  nactual = bvarargs ? 6 : nparms;
+  nactual = nformal;
+  if (bvarargs)
+    {
+      nactual += nvartypes;
+    }
+
   if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0)
     {
       fprintf(stream, "  (void)sys_call%d(", nactual);
@@ -441,7 +428,7 @@ static void stub_close(FILE *stream)
     }
 }
 
-static void generate_stub(int nparms)
+static void generate_stub(int nparms, csvparm_t *vartypes, int nvartypes)
 {
   FILE *stream = open_stub();
   char formal[MAX_PARMSIZE];
@@ -487,11 +474,9 @@ static void generate_stub(int nparms)
 
       if (is_vararg(g_parm[PARM1_INDEX + i], i, nparms))
         {
-          /* Always receive six arguments in this case */
-
-          for (j = i + 1; j <= 6; j++)
+          for (j = 0; j < nvartypes; j++)
             {
-              fprintf(stream, ", uintptr_t parm%d", j);
+              fprintf(stream, ", uintptr_t parm%d", nparms + j);
             }
         }
       else
@@ -542,11 +527,9 @@ static void generate_stub(int nparms)
 
           if (is_vararg(actual, i, nparms))
             {
-              /* Always pass six arguments */
-
-              for (j = i + 1; j <= 6; j++)
+              for (j = 0; j < nvartypes; j++)
                 {
-                  fprintf(stream, ", parm%d", j);
+                  fprintf(stream, ", (%s)parm%d", vartypes[j], i + j + 1);
                 }
             }
           else
@@ -618,6 +601,7 @@ int main(int argc, char **argv, char **envp)
   FILE *stream;
   char *ptr;
   int ch;
+  int i;
 
   /* Parse command line options */
 
@@ -684,6 +668,9 @@ int main(int argc, char **argv, char **envp)
 
   while ((ptr = read_line(stream)) != NULL)
     {
+      csvparm_t *vartypes = NULL;
+      int nvartypes = 0;
+
       /* Parse the line from the CVS file */
 
       int nargs = parse_csvline(ptr);
@@ -693,14 +680,35 @@ int main(int argc, char **argv, char **envp)
           exit(8);
         }
 
+      /* Search for an occurrence of "...".  This is followed by the list
+       * types in the variable arguments.  The number of types is the
+       * maximum number of variable arguments.
+       */
+
+      for (i = PARM1_INDEX; i < nargs; i++)
+        {
+          if (strcmp(g_parm[i], "...") == 0)
+            {
+              nvartypes = nargs - i - 1;
+              nargs     = i + 1;
+
+              if (nvartypes > 0)
+                {
+                  vartypes = &g_parm[i + 1];
+                }
+
+              break;
+            }
+        }
+
       if (proxies)
         {
-          generate_proxy(nargs - PARM1_INDEX);
+          generate_proxy(nargs - PARM1_INDEX, vartypes, nvartypes);
         }
       else
         {
           g_stubstream = NULL;
-          generate_stub(nargs - PARM1_INDEX);
+          generate_stub(nargs - PARM1_INDEX, vartypes, nvartypes);
           if (g_stubstream != NULL)
             {
               fprintf(g_stubstream, "\n#endif /* __STUB_H */\n");

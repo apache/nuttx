@@ -74,15 +74,15 @@ static const struct file_operations fifo_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mkfifo2
+ * Name: nx_mkfifo
  *
  * Description:
- *   mkfifo() makes a FIFO device driver file with name 'pathname.'  Unlike
+ *   nx_mkfifo() makes a FIFO device driver file with name 'pathname.' Unlike
  *   Linux, a NuttX FIFO is not a special file type but simply a device
  *   driver instance.  'mode' specifies the FIFO's permissions.
  *
- *   Once the FIFO has been created by mkfifo(), any thread can open it for
- *   reading or writing, in the same way as an ordinary file. However, it
+ *   Once the FIFO has been created by nx_mkfifo(), any thread can open it
+ *   for reading or writing, in the same way as an ordinary file. However, it
  *   must have been opened from both reading and writing before input or
  *   output can be performed.  This FIFO implementation will block all
  *   attempts to open a FIFO read-only until at least one thread has opened
@@ -91,7 +91,7 @@ static const struct file_operations fifo_fops =
  *   If all threads that write to the FIFO have closed, subsequent calls to
  *   read() on the FIFO will return 0 (end-of-file).
  *
- *   NOTE: mkfifo2 is a special, non-standard, NuttX-only interface.  Since
+ *   NOTE: nx_mkfifo is a special, non-standard, NuttX-only interface.  Since
  *   the NuttX FIFOs are based in in-memory, circular buffers, the ability
  *   to control the size of those buffers is critical for system tuning.
  *
@@ -102,15 +102,14 @@ static const struct file_operations fifo_fops =
  *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
  * Returned Value:
- *   0 is returned on success; otherwise, -1 is returned with errno set
+ *   0 is returned on success; otherwise, the negative error code return
  *   appropriately.
  *
  ****************************************************************************/
 
-int mkfifo2(FAR const char *pathname, mode_t mode, size_t bufsize)
+int nx_mkfifo(FAR const char *pathname, mode_t mode, size_t bufsize)
 {
   FAR struct pipe_dev_s *dev;
-  int errcode;
   int ret;
 
   /* Allocate and initialize a new device structure instance */
@@ -118,23 +117,16 @@ int mkfifo2(FAR const char *pathname, mode_t mode, size_t bufsize)
   dev = pipecommon_allocdev(bufsize);
   if (!dev)
     {
-      errcode = ENOMEM;
-      goto errout;
+      return -ENOMEM;
     }
 
   ret = register_driver(pathname, &fifo_fops, mode, (FAR void *)dev);
   if (ret != 0)
     {
       pipecommon_freedev(dev);
-      errcode = -ret;
-      goto errout;
     }
 
-  return OK;
-
-errout:
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
 
 #endif /* CONFIG_DEV_FIFO_SIZE > 0 */

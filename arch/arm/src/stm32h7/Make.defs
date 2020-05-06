@@ -117,6 +117,10 @@ ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += stm32_timerisr.c
 endif
 
+ifeq ($(CONFIG_STM32H7_ONESHOT),y)
+CHIP_CSRCS += stm32_oneshot.c stm32_oneshot_lowerhalf.c
+endif
+
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32_userspace.c stm32_mpuinit.c
 endif

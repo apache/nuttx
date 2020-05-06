@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/spiffs.h/spiffs_gc.h
+ * fs/spiffs/src/spiffs_gc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,17 +56,9 @@ extern "C"
 /* Debug */
 
 #ifdef CONFIG_SPIFFS_GCDBG
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define spiffs_gcinfo(format, ...)      _info(format, ##__VA_ARGS__)
-#  else
-#    define spiffs_gcinfo                   _info
-#  endif
+#  define spiffs_gcinfo                   _info
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define spiffs_gcinfo(format, ...)
-#  else
-#    define spiffs_gcinfo                   (void)
-#  endif
+#  define spiffs_gcinfo                   _none
 #endif
 
 /****************************************************************************
@@ -111,8 +103,8 @@ int spiffs_gc_quick(FAR struct spiffs_s *fs, uint16_t max_free_pages);
  *   this method in order to determine what amount of bytes to give.
  *
  *   NB: the garbage collector is automatically called when spiffs needs free
- *   pages. The reason for this function is to give possibility to do background
- *   tidying when user knows the system is idle.
+ *   pages. The reason for this function is to give possibility to do
+ *   background tidying when user knows the system is idle.
  *
  * Input Parameters:
  *   fs            the file system struct

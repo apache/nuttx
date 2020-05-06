@@ -72,11 +72,7 @@
  */
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define _NX_OPEN(p,f,...)  nx_open(p,f,##__VA_ARGS__)
-#  else
-#    define _NX_OPEN           nx_open
-#  endif
+#  define _NX_OPEN             nx_open
 #  define _NX_CLOSE(f)         nx_close(f)
 #  define _NX_READ(f,b,s)      nx_read(f,b,s)
 #  define _NX_WRITE(f,b,s)     nx_write(f,b,s)
@@ -87,11 +83,7 @@
 #  define _NX_SETERRNO(r)      set_errno(-(r))
 #  define _NX_GETERRVAL(r)     (r)
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define _NX_OPEN(p,f,...)  open(p,f,##__VA_ARGS__)
-#  else
-#    define _NX_OPEN           open
-#  endif
+#  define _NX_OPEN             open
 #  define _NX_CLOSE(f)         close(f)
 #  define _NX_READ(f,b,s)      read(f,b,s)
 #  define _NX_WRITE(f,b,s)     write(f,b,s)
@@ -721,8 +713,7 @@ void files_releaselist(FAR struct filelist *list);
  *
  * Description:
  *   Equivalent to the non-standard fs_dupfd() function except that it
- *   accepts a struct file instance instead of a file descriptor and does
- *   not set the errno variable.
+ *   accepts a struct file instance instead of a file descriptor.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -733,26 +724,40 @@ void files_releaselist(FAR struct filelist *list);
 int file_dup(FAR struct file *filep, int minfd);
 
 /****************************************************************************
- * Name: fs_dupfd OR dup
+ * Name: fs_dupfd
  *
  * Description:
  *   Clone a file descriptor 'fd' to an arbitrary descriptor number (any
- *   value greater than or equal to 'minfd'). If socket descriptors are
- *   implemented, then this is called by dup() for the case of file
- *   descriptors.  If socket descriptors are not implemented, then this
- *   function IS dup().
+ *   value greater than or equal to 'minfd').
  *
  *   This alternative naming is used when dup could operate on both file and
  *   socket descriptors to avoid drawing unused socket support into the link.
  *
  * Returned Value:
- *   fs_dupfd is sometimes an OS internal function and sometimes is a direct
- *   substitute for dup().  So it must return an errno value as though it
- *   were dup().
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
 int fs_dupfd(int fd, int minfd);
+
+/****************************************************************************
+ * Name: nx_dup
+ *
+ * Description:
+ *   nx_dup() is similar to the standard 'dup' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_dup() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   The new file descriptor is returned on success; a negated errno value is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+int nx_dup(int fd);
 
 /****************************************************************************
  * Name: file_dup2
@@ -762,8 +767,7 @@ int fs_dupfd(int fd, int minfd);
  *   dup2.
  *
  *   Equivalent to the non-standard fs_dupfd2() function except that it
- *   accepts struct file instances instead of file descriptors and it does
- *   not set the errno variable.
+ *   accepts struct file instances instead of file descriptors.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return on
@@ -774,29 +778,39 @@ int fs_dupfd(int fd, int minfd);
 int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
 
 /****************************************************************************
- * Name: fs_dupfd2 OR dup2
+ * Name: fs_dupfd2
  *
  * Description:
- *   Clone a file descriptor to a specific descriptor number. If socket
- *   descriptors are implemented, then this is called by dup2() for the
- *   case of file descriptors.  If socket descriptors are not implemented,
- *   then this function IS dup2().
+ *   Clone a file descriptor to a specific descriptor number.
  *
  *   This alternative naming is used when dup2 could operate on both file and
  *   socket descriptors to avoid drawing unused socket support into the link.
  *
  * Returned Value:
- *   fs_dupfd2 is sometimes an OS internal function and sometimes is a direct
- *   substitute for dup2().  So it must return an errno value as though it
- *   were dup2().
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET
 int fs_dupfd2(int fd1, int fd2);
-#else
-#  define fs_dupfd2(fd1, fd2) dup2(fd1, fd2)
-#endif
+
+/****************************************************************************
+ * Name: nx_dup2
+ *
+ * Description:
+ *   nx_dup2() is similar to the standard 'dup2' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_dup2() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int nx_dup2(int fd1, int fd2);
 
 /****************************************************************************
  * Name: file_open
@@ -1198,7 +1212,7 @@ int file_truncate(FAR struct file *filep, off_t length);
 #endif
 
 /****************************************************************************
- * Name: file_ioctl
+ * Name: file_ioctl and file_vioctl
  *
  * Description:
  *   Perform device specific operations.
@@ -1206,7 +1220,7 @@ int file_truncate(FAR struct file *filep, off_t length);
  * Input Parameters:
  *   file     File structure instance
  *   req      The ioctl command
- *   arg      The argument of the ioctl cmd
+ *   ap       The argument of the ioctl cmd
  *
  * Returned Value:
  *   Returns a non-negative number on success;  A negated errno value is
@@ -1215,10 +1229,11 @@ int file_truncate(FAR struct file *filep, off_t length);
  *
  ****************************************************************************/
 
-int file_ioctl(FAR struct file *filep, int req, unsigned long arg);
+int file_vioctl(FAR struct file *filep, int req, va_list ap);
+int file_ioctl(FAR struct file *filep, int req, ...);
 
 /****************************************************************************
- * Name: nx_ioctl
+ * Name: nx_ioctl and nx_vioctl
  *
  * Description:
  *   nx_ioctl() is similar to the standard 'ioctl' interface except that is
@@ -1234,40 +1249,8 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg);
  *
  ****************************************************************************/
 
-int nx_ioctl(int fd, int req, unsigned long arg);
-
-/****************************************************************************
- * Name: fs_ioctl
- *
- * Description:
- *   Perform device specific operations.
- *
- * Input Parameters:
- *   fd       File/socket descriptor of device
- *   req      The ioctl command
- *   arg      The argument of the ioctl cmd
- *
- * Returned Value:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   -1 on failure with errno set properly:
- *
- *   EBADF
- *     'fd' is not a valid descriptor.
- *   EFAULT
- *     'arg' references an inaccessible memory area.
- *   EINVAL
- *     'cmd' or 'arg' is not valid.
- *   ENOTTY
- *     'fd' is not associated with a character special device.
- *   ENOTTY
- *      The specified request does not apply to the kind of object that the
- *      descriptor 'fd' references.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LIBC_IOCTL_VARIADIC
-int fs_ioctl(int fd, int req, unsigned long arg);
-#endif
+int nx_vioctl(int fd, int req, va_list ap);
+int nx_ioctl(int fd, int req, ...);
 
 /****************************************************************************
  * Name: file_vfcntl
@@ -1374,6 +1357,23 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
  ****************************************************************************/
 
 int fs_poll(int fd, FAR struct pollfd *fds, bool setup);
+
+/****************************************************************************
+ * Name: nx_poll
+ *
+ * Description:
+ *   nx_poll() is similar to the standard 'poll' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_poll() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int nx_poll(FAR struct pollfd *fds, unsigned int nfds, int timeout);
 
 /****************************************************************************
  * Name: file_fstat

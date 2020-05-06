@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/spiffs.h/spiffs_check.h
+ * fs/spiffs/src/spiffs_check.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,19 +55,13 @@ extern "C"
 
 /* Consistency check output */
 
-#ifdef CONFIG_SPIFFS_CHECK_OUTPUT
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define spiffs_checkinfo(format, ...) \
-       syslog(LOG_NOTICE, "SPIFFS: " format, ##__VA_ARGS__)
-#  else
-#    define spiffs_checkinfo   _info
-#  endif
+#if !defined(CONFIG_SPIFFS_CHECK_OUTPUT)
+#  define spiffs_checkinfo   _none
+#elif defined(CONFIG_CPP_HAVE_VARARGS)
+#  define spiffs_checkinfo(format, ...) \
+     syslog(LOG_NOTICE, "SPIFFS: " format, ##__VA_ARGS__)
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define spiffs_checkinfo(format, ...)
-#  else
-#    define spiffs_checkinfo   (void)
-#  endif
+#  define spiffs_checkinfo   _info
 #endif
 
 /****************************************************************************
@@ -114,7 +108,8 @@ int spiffs_check_luconsistency(FAR struct spiffs_s *fs);
  *      - x011 used, referenced only once, not index
  *      - x101 used, unreferenced, index
  *
- *   The working memory might not fit all pages so several scans might be needed
+ *   The working memory might not fit all pages so several scans might be
+ *   needed
  *
  * Input Parameters:
  *   fs - A reference to the SPIFFS volume object instance
@@ -146,7 +141,6 @@ int spiffs_check_pgconsistency(FAR struct spiffs_s *fs);
  ****************************************************************************/
 
 int spiffs_check_objidconsistency(FAR struct spiffs_s *fs);
-
 
 /****************************************************************************
  * Name: spiffs_dump
