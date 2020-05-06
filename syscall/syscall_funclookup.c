@@ -119,8 +119,8 @@
 
 const uintptr_t g_funclookup[SYS_nsyscalls] =
 {
-#  define SYSCALL_LOOKUP1(f,n,p) (uintptr_t)f
-#  define SYSCALL_LOOKUP(f,n,p)  , (uintptr_t)f
+#  define SYSCALL_LOOKUP1(f,n) (uintptr_t)f
+#  define SYSCALL_LOOKUP(f,n)  , (uintptr_t)f
 #  include <sys/syscall_lookup.h>
 #  undef SYSCALL_LOOKUP1
 #  undef SYSCALL_LOOKUP

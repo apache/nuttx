@@ -53,8 +53,8 @@
 
 const uint8_t g_funcnparms[SYS_nsyscalls] =
 {
-#  define SYSCALL_LOOKUP1(f,n,p) n
-#  define SYSCALL_LOOKUP(f,n,p)  , n
+#  define SYSCALL_LOOKUP1(f,n) n
+#  define SYSCALL_LOOKUP(f,n)  , n
 #  include <sys/syscall_lookup.h>
 #  undef SYSCALL_LOOKUP1
 #  undef SYSCALL_LOOKUP
