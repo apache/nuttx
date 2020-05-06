@@ -78,7 +78,8 @@
  *
  * PLL source is HSE = 25,000,000
  *
- * When STM32_HSE_FREQUENCY / PLLM <= 2MHz VCOL must be selected. VCOH otherwise.
+ * When STM32_HSE_FREQUENCY / PLLM <= 2MHz VCOL must be selected.
+ * VCOH otherwise.
  *
  * PLL_VCOx = (STM32_HSE_FREQUENCY / PLLM) * PLLN
  * Subject to:
@@ -279,7 +280,7 @@
 
 #define STM32_SDMMC_INIT_CLKDIV     (250 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 
-/* Just set these to 25 MHz for now, PLL1Q/(2*4), for default speed 12.5MB/s */
+/* Just set these to 25 MHz for now, PLL1Q/(2*4), default speed 12.5MB/s */
 
 #define STM32_SDMMC_MMCXFR_CLKDIV   (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 #define STM32_SDMMC_SDXFR_CLKDIV    (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
@@ -351,8 +352,8 @@
  * LD3 Red     PI14
  * LD4 Blue    PI15
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
- * The following definitions are used to access individual LEDs.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs
+ * in any way. The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -376,13 +377,14 @@
 #define BOARD_LED4_BIT    (1 << BOARD_LED4)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c. The LEDs are used to encode
+ * OS-related events as follows:
  *
  *
  *   SYMBOL                     Meaning                      LED state
  *                                                        Red   Green Blue
- *   ----------------------  --------------------------  ------ ------ ---- */
+ *   ----------------------  --------------------------  ------ ------ ----
+ */
 
 #define LED_STARTED        0 /* NuttX has been started   OFF    OFF   OFF   */
 #define LED_HEAPALLOCATE   1 /* Heap has been allocated  OFF    OFF   ON    */
@@ -409,7 +411,7 @@
 #define GPIO_USART1_RX     GPIO_USART1_RX_2  /* PA10 */
 #define GPIO_USART1_TX     GPIO_USART1_TX_2  /* PA9 */
 
-/* UART4 ( PMOD/STMOD )*/
+/* UART4 ( PMOD/STMOD ) */
 
 #define GPIO_UART4_CTS     GPIO_UART4_CTS_2  /* PB15 */
 #define GPIO_UART4_RTS     GPIO_UART4_RTS_2  /* PB14 */
