@@ -41,7 +41,7 @@
 "if_indextoname","net/if.h","defined(CONFIG_NETDEV_IFINDEX)","FAR char *","unsigned int","FAR char *"
 "if_nametoindex","net/if.h","defined(CONFIG_NETDEV_IFINDEX)","unsigned int","FAR const char *"
 "insmod","nuttx/module.h","defined(CONFIG_MODULE)","FAR void *","FAR const char *","FAR const char *"
-"ioctl","sys/ioctl.h","","int","int","int","...","unsigned int"
+"ioctl","sys/ioctl.h","","int","int","int","...","unsigned long"
 "kill","signal.h","","int","pid_t","int"
 "link","unistd.h","defined(CONFIG_PSEUDOFS_SOFTLINKS)","int","FAR const char *","FAR const char *"
 "listen","sys/socket.h","defined(CONFIG_NET)","int","int","int"
