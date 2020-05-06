@@ -72,7 +72,6 @@
 #include <nuttx/pcie/pcie.h>
 
 #include <nuttx/board.h>
-#include <nuttx/serial/uart_16550.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
