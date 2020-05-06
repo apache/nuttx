@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/tls.h
+ * arch/misoc/include/tls.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_TLS_H
-#define __ARCH_ARM_INCLUDE_TLS_H
+#ifndef __ARCH_MISOC_INCLUDE_TLS_H
+#define __ARCH_MISOC_INCLUDE_TLS_H
 
 /****************************************************************************
  * Included Files
@@ -37,22 +37,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_getsp
+ * Name: misoc_getsp
  ****************************************************************************/
 
-/* I don't know if the builtin to get SP is enabled */
-
-static inline uint32_t arm_getsp(void)
+static inline uint32_t misoc_getsp(void)
 {
-  uint32_t sp;
-  __asm__
-  (
-    "\tmov %0, sp\n\t"
-    : "=r"(sp)
-  );
+  register uint32_t sp;
+
+  __asm__ __volatile__("addi %0, sp, 0" : "=r" (sp));
 
   return sp;
 }
+
 
 /****************************************************************************
  * Name: up_tls_info
@@ -86,11 +82,11 @@ static inline uint32_t arm_getsp(void)
 static inline FAR struct tls_info_s *up_tls_info(void)
 {
   DEBUGASSERT(!up_interrupt_context());
-  return TLS_INFO((uintptr_t)arm_getsp());
+  return TLS_INFO((uintptr_t)misoc_getsp());
 }
 #else
 #  define up_tls_info() tls_get_info()
 #endif
 
 #endif /* CONFIG_TLS */
-#endif /* __ARCH_ARM_INCLUDE_TLS_H */
+#endif /* __ARCH_MISOC_INCLUDE_TLS_H */
