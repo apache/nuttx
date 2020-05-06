@@ -78,11 +78,10 @@ int pcie_initialize(FAR struct pcie_bus_s *bus)
  * Name: pci_enable_device
  *
  * Description:
- *  Enable device with flags
+ *  Enable device with MMIO
  *
  * Input Parameters:
- *   bdf - device BDF
- *   flags - device ability to be enabled
+ *   dev - device
  *
  * Return value:
  *   -EINVAL: error
@@ -90,14 +89,14 @@ int pcie_initialize(FAR struct pcie_bus_s *bus)
  *
  ****************************************************************************/
 
-int pci_enable_device(FAR struct pcie_dev_s *dev, uint32_t flags)
+int pci_enable_device(FAR struct pcie_dev_s *dev)
 {
   uint16_t old_cmd;
   uint16_t cmd;
 
   dev->bus->ops->pci_cfg_read(dev, PCI_CFG_COMMAND, &old_cmd, 2);
 
-  cmd = old_cmd | flags;
+  cmd = old_cmd | (PCI_CMD_MASTER | PCI_CMD_MEM);
 
   dev->bus->ops->pci_cfg_write(dev, PCI_CFG_COMMAND, &cmd, 2);
 

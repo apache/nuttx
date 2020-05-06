@@ -168,11 +168,10 @@ int pcie_initialize(FAR struct pcie_bus_s *bus);
  * Name: pci_enable_device
  *
  * Description:
- *  Enable device with flags
+ *  Enable device with MMIO
  *
  * Input Parameters:
  *   dev - device
- *   flags - device ability to be enabled
  *
  * Return value:
  *   -EINVAL: error
@@ -180,7 +179,7 @@ int pcie_initialize(FAR struct pcie_bus_s *bus);
  *
  ****************************************************************************/
 
-int pci_enable_device(FAR struct pcie_dev_s *dev, uint32_t flags);
+int pci_enable_device(FAR struct pcie_dev_s *dev);
 
 /****************************************************************************
  * Name: pci_find_cap
