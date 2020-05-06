@@ -45,7 +45,7 @@ CMN_CSRCS += up_stackframe.c up_udelay.c up_unblocktask.c up_usestack.c
 CHIP_ASRCS = rx65n_vector.S
 CHIP_CSRCS = rx65n_lowputc.c rx65n_serial.c rx65n_copystate.c  rx65n_irq.c
 CHIP_CSRCS += rx65n_schedulesigaction.c rx65n_sigdeliver.c rx65n_initialstate.c
-CHIP_CSRCS += rx65n_hardware_setup.c rx65n_icu.c rx65n_port.c rx65n_sci.c
+CHIP_CSRCS += rx65n_hardware_setup.c rx65n_port.c rx65n_sci.c
 CHIP_CSRCS += rx65n_cgc.c rx65n_dumpstate.c rx65n_vector_table.c
 CHIP_CSRCS += rx65n_timerisr.c rx65n_sbram.c
 

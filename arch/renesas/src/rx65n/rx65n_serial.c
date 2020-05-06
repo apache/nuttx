@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -255,19 +256,19 @@
 
 struct up_dev_s
 {
-  uint32_t scibase;   /* Base address of SCI registers */
-  uint32_t baud;      /* Configured baud */
-  volatile  uint8_t scr;       /* Saved SCR value */
-  volatile  uint8_t ssr;       /* Saved SR value */
-  uint8_t xmitirq;   /* Base IRQ associated with xmit IRQ */
-  uint8_t recvirq;   /* Base IRQ associated with receive IRQ */
+  uint32_t scibase;      /* Base address of SCI registers */
+  uint32_t baud;         /* Configured baud */
+  volatile  uint8_t scr; /* Saved SCR value */
+  volatile  uint8_t ssr; /* Saved SR value */
+  uint8_t xmitirq;       /* Base IRQ associated with xmit IRQ */
+  uint8_t recvirq;       /* Base IRQ associated with receive IRQ */
   uint8_t eriirq;
   uint8_t teiirq;
   uint32_t grpibase;
   uint32_t erimask;
   uint32_t teimask;
-  uint8_t parity;    /* 0=none, 1=odd, 2=even */
-  uint8_t bits;      /* Number of bits (7 or 8) */
+  uint8_t parity; /* 0=none, 1=odd, 2=even */
+  uint8_t bits;   /* Number of bits (7 or 8) */
   bool stopbits2; /* true: Configure with 2 stop bits instead of 1 */
 };
 
@@ -1198,7 +1199,9 @@ static int up_eriinterrupt(int irq, void *context, void *arg)
 
       priv->ssr = up_serialin(priv, RX_SCI_SSR_OFFSET);
 
-      /* Clear all read related events (probably already done in up_receive)) */
+      /* Clear all read related events (probably already done in 
+	   * up_receive))
+	   */
 
       priv->ssr &= ~(RX_SCISSR_ORER | RX_SCISSR_FER | RX_SCISSR_PER);
       up_serialout(priv, RX_SCI_SSR_OFFSET, priv->ssr);
@@ -1223,7 +1226,9 @@ static int up_teiinterrupt(int irq, void *context, void *arg)
 
     priv->ssr = up_serialin(priv, RX_SCI_SSR_OFFSET);
 
-      /* Clear all read related events (probably already done in up_receive)) */
+      /* Clear all read related events (probably already done in 
+	   * up_receive))
+	   */
 
      priv->ssr &= ~(RX_SCISSR_TEND);
      up_serialout(priv, RX_SCI_SSR_OFFSET, priv->ssr);
