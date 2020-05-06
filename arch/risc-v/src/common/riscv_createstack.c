@@ -265,8 +265,9 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * water marks.
        */
 
-      riscv_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
-#endif
+      up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
+#endif /* CONFIG_STACK_COLORATION */
+#endif /* CONFIG_TLS */
 
       board_autoled_on(LED_STACKCREATED);
       return OK;
@@ -276,7 +277,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 }
 
 /****************************************************************************
- * Name: riscv_stack_color
+ * Name: up_stack_color
  *
  * Description:
  *   Write a well know value into the stack
@@ -284,7 +285,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
  ****************************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void riscv_stack_color(FAR void *stackbase, size_t nbytes)
+void up_stack_color(FAR void *stackbase, size_t nbytes)
 {
   /* Take extra care that we do not write outsize the stack boundaries */
 
