@@ -46,34 +46,50 @@
 
 #if defined(CONFIG_LIB_SYSCALL) && defined(__KERNEL__)
 
-#include <sys/stat.h>
-#include <sys/wait.h>
+#include <nuttx/arch.h>
+#include <nuttx/binfmt/binfmt.h>
+#include <nuttx/drivers/drivers.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/module.h>
+#include <nuttx/sched.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/spawn.h>
+#include <nuttx/syslog/syslog.h>
+
+#include <sys/boardctl.h>
 #include <sys/ioctl.h>
-#include <sys/time.h>
-#include <sys/select.h>
 #include <sys/mman.h>
+#include <sys/mount.h>
+#include <sys/prctl.h>
+#include <sys/random.h>
+#include <sys/select.h>
+#include <sys/sendfile.h>
+#include <sys/shm.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/statfs.h>
-#include <sys/prctl.h>
-#include <sys/socket.h>
-#include <sys/mount.h>
-#include <sys/boardctl.h>
+#include <sys/time.h>
+#include <sys/utsname.h>
+#include <sys/wait.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include <aio.h>
+#include <assert.h>
 #include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <mqueue.h>
+#include <net/if.h>
 #include <poll.h>
-#include <time.h>
-#include <sched.h>
 #include <pthread.h>
+#include <sched.h>
 #include <semaphore.h>
 #include <signal.h>
-#include <mqueue.h>
 #include <spawn.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <termios.h>
-#include <assert.h>
+#include <time.h>
+#include <unistd.h>
 
 /* Errno access is awkward. We need to generate get_errno() and set_errno()
  * interfaces to support the system calls, even though we don't use them
@@ -85,9 +101,6 @@
 
 #undef get_errno
 #undef set_errno
-
-#include <errno.h>
-#include <nuttx/clock.h>
 
 /****************************************************************************
  * Pre-processor Definitions

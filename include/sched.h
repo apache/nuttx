@@ -252,8 +252,8 @@ void   task_testcancel(void);
 
 /* Task Scheduling Interfaces (based on POSIX APIs) */
 
-int    sched_setparam(pid_t pid, const struct sched_param *param);
-int    sched_getparam(pid_t pid, struct sched_param *param);
+int    sched_setparam(pid_t pid, FAR const struct sched_param *param);
+int    sched_getparam(pid_t pid, FAR struct sched_param *param);
 int    sched_setscheduler(pid_t pid, int policy,
                           FAR const struct sched_param *param);
 int    sched_getscheduler(pid_t pid);

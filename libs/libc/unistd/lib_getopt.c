@@ -59,10 +59,10 @@ int optopt = '?'; /* unrecognized option character */
  * Private Data
  ****************************************************************************/
 
-static FAR char        *g_optptr       = NULL;
-static FAR char *const *g_argv         = NULL;
-static int              g_argc         = 0;
-static bool             g_binitialized = false;
+static FAR char         *g_optptr       = NULL;
+static FAR char * const *g_argv         = NULL;
+static int               g_argc         = 0;
+static bool              g_binitialized = false;
 
 /****************************************************************************
  * Public Functions
@@ -115,7 +115,7 @@ static bool             g_binitialized = false;
  *
  ****************************************************************************/
 
-int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
+int getopt(int argc, FAR char * const argv[], FAR const char *optstring)
 {
   /* Were new argc or argv passed in?  This detects misuse of getopt() by
    * applications that break out of the getopt() loop before getop() returns
@@ -138,8 +138,8 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
       FAR char *optchar;
       int noarg_ret = '?';
 
-      /* The initial value of optind is 1.  If getopt() is called again in the
-       * program, optind must be reset to some value <= 1.
+      /* The initial value of optind is 1.  If getopt() is called again in
+       * the program, optind must be reset to some value <= 1.
        */
 
       if (optind < 1 || !g_binitialized)
@@ -151,8 +151,8 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
           g_binitialized = true;  /* Now we are initialized */
         }
 
-      /* If the first character of opstring s ':', then ':' is in the event of
-       * a missing argument. Otherwise '?' is returned.
+      /* If the first character of opstring s ':', then ':' is in the event
+       * of a missing argument. Otherwise '?' is returned.
        */
 
       if (*optstring == ':')
@@ -161,21 +161,22 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
            optstring++;
         }
 
-      /* Are we resuming in the middle, or at the end of a string of arguments?
-       * g_optptr == NULL means that we are started at the beginning of argv[optind];
-       * *g_optptr == \0 means that we are starting at the beginning of optind+1
+      /* Are we resuming in the middle, or at the end of a string of
+       * arguments? g_optptr == NULL means that we are started at the
+       * beginning of argv[optind]; *g_optptr == \0 means that we are
+       * starting at the beginning of optind+1
        */
 
       while (!g_optptr || !*g_optptr)
         {
-          /* We need to start at the beginning of the next argv. Check if we need
-           * to increment optind
+          /* We need to start at the beginning of the next argv. Check if we
+           * need to increment optind
            */
 
           if (g_optptr)
             {
-              /* Yes.. Increment it and check for the case where where we have
-               * processed everything in the argv[] array.
+              /* Yes.. Increment it and check for the case where where we
+               * have processed everything in the argv[] array.
                */
 
               optind++;
@@ -192,8 +193,8 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
               return ERROR;
             }
 
-          /* We are starting at the beginning of argv[optind].  In this case, the
-           * first character must be '-'
+          /* We are starting at the beginning of argv[optind].  In this case,
+           * the first character must be '-'
            */
 
           if (*g_optptr != '-')
@@ -213,8 +214,8 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
 
       if (!*g_optptr)
         {
-           optopt = '\0'; /* We'll fix up g_optptr the next time we are called */
-           return '?';
+          optopt = '\0'; /* We'll fix up g_optptr the next time we are called */
+          return '?';
         }
 
       /* Handle the case of "-:" */
@@ -226,8 +227,8 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
           return '?';
         }
 
-      /* g_optptr now points at the next option and it is not something crazy.
-       * check if the option is in the list of valid options.
+      /* g_optptr now points at the next option and it is not something
+       * crazy. check if the option is in the list of valid options.
        */
 
       optchar = strchr(optstring, *g_optptr);
@@ -268,11 +269,11 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
 
       /* No.. is the optional argument the next argument in argv[] ? */
 
-      if (argv[optind+1] && *argv[optind+1] != '-')
+      if (argv[optind + 1] && *argv[optind + 1] != '-')
         {
           /* Yes.. return that */
 
-          optarg = argv[optind+1];
+          optarg = argv[optind + 1];
           optind += 2;
           g_optptr = NULL;
           return *optchar;

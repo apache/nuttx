@@ -54,7 +54,8 @@
  *
  ****************************************************************************/
 
-size_t mbrtowc(FAR wchar_t *pwc, FAR const char *s, size_t n, mbstate_t *ps)
+size_t mbrtowc(FAR wchar_t *pwc, FAR const char *s,
+               size_t n, FAR mbstate_t *ps)
 {
   int retval = 0;
 

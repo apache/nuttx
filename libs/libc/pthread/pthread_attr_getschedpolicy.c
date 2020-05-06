@@ -64,7 +64,8 @@
  *
  ****************************************************************************/
 
-int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr, int *policy)
+int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr,
+                                FAR int *policy)
 {
   int ret;
 
