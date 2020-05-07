@@ -648,6 +648,7 @@ struct tcb_s
 #ifdef CONFIG_CANCELLATION_POINTS
   int16_t  cpcount;                      /* Nested cancellation point count     */
 #endif
+  int16_t  errcode;                      /* Used to pass error information      */
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
   int32_t  timeslice;                    /* RR timeslice OR Sporadic budget     */
@@ -707,10 +708,6 @@ struct tcb_s
   uint32_t crit_start;                   /* Time critical section entered       */
   uint32_t crit_max;                     /* Max time in critical section        */
 #endif
-
-  /* Library related fields *****************************************************/
-
-  int pterrno;                           /* Current per-thread errno            */
 
   /* State save areas ***********************************************************/
 

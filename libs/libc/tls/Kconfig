@@ -45,9 +45,12 @@ config TLS_LOG2_MAXSTACK
 
 config TLS_NELEM
 	int "Number of TLS elements"
-	default 1
+	default 0
 	---help---
 		The number of unique TLS elements.  These can be accessed with
 		the user library functions tls_get_element() and tls_set_element().
+
+		NOTE that the special value of CONFIG_TLS_NELEM disables these
+		TLS interfaces.
 
 endmenu # Thread Local Storage (TLS)

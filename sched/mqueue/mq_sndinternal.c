@@ -260,8 +260,6 @@ int nxmq_wait_send(mqd_t mqdes)
 
           while (msgq->nmsgs >= msgq->maxmsgs)
             {
-              int saved_errno;
-
               /* Block until the message queue is no longer full.
                * When we are unblocked, we will try again
                */
@@ -270,12 +268,11 @@ int nxmq_wait_send(mqd_t mqdes)
               rtcb->msgwaitq = msgq;
               msgq->nwaitnotfull++;
 
-              /* "Borrow" the per-task errno to communication wake-up error
+              /* Initialize the errcode used to communication wake-up error
                * conditions.
                */
 
-              saved_errno   = rtcb->pterrno;
-              rtcb->pterrno = OK;
+              rtcb->errcode = OK;
 
               /* Make sure this is not the idle task, descheduling that
                * isn't going to end well.
@@ -290,9 +287,7 @@ int nxmq_wait_send(mqd_t mqdes)
                * per-task errno value (should be EINTR or ETIMEOUT).
                */
 
-              ret           = rtcb->pterrno;
-              rtcb->pterrno = saved_errno;
-
+              ret = rtcb->errcode;
               if (ret != OK)
                 {
                   return -ret;

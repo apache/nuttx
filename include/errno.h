@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/errno.h
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -46,74 +31,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* How can we access the errno variable? */
-
-#ifdef CONFIG_BUILD_FLAT
-  /* Flat build */
-
-#  if defined(CONFIG_LIB_SYSCALL) && !defined(__KERNEL__)
-  /* We still might be using system calls in user code.  If so, then
-   * user code will have no direct access to the errno variable.
-   */
-
-#    undef __DIRECT_ERRNO_ACCESS
-
-#   else
-  /* Flat build with no system calls OR internal kernel logic... There
-   * is direct access.
-   */
-
-#    define __DIRECT_ERRNO_ACCESS 1
-#  endif
-
-#else
-#  if defined(__KERNEL__)
-  /* Kernel portion of protected/kernel build. Kernel code has direct
-   * access
-   */
-
-#    define __DIRECT_ERRNO_ACCESS 1
-
-#  else
-  /* User portion of protected/kernel build. Application code has only
-   * indirect access
-   */
-
-#    undef __DIRECT_ERRNO_ACCESS
-#  endif
-#endif
-
-/* Convenience/compatibility definition.
- *
- * For a flat, all kernel-mode build, the error can be read and written
- * from all code using a simple pointer.
+/* Convenience/compatibility definition.  If the errno is accessed from the
+ * internal OS code, then the OS code should use the set_errno() and
+ * get_errno().  Currently, those are just placeholders but would be needed
+ * in the KERNEL mode build in order to instantiate the process address
+ * environment as necessary to access the TLS-based errno variable.
  */
 
-#ifdef __DIRECT_ERRNO_ACCESS
-
-#  define errno *__errno()
-#  define set_errno(e) do { errno = (int)(e); } while (0)
-#  define get_errno() errno
-
-#else
-
-/* We doing separate user-/kernel-mode builds, then the errno has to be
- * a little differently. In kernel-mode, the TCB errno value can still be
- * read and written using a pointer from code executing within the
- * kernel.
- *
- * But in user-mode, the errno can only be read using the name 'errno'.
- * The non-standard API set_errno() must explicitly be used from user-
- * mode code in order to set the errno value.
- *
- * The same is true of the case where we have syscalls enabled but this
- * is not a kernel build, then we really have no option but to use the
- * set_errno() accessor function explicitly, even from OS logic!
- */
-
-#  define errno get_errno()
-
-#endif /* __DIRECT_ERRNO_ACCESS */
+#define errno *__errno()
+#define set_errno(e) \
+  do \
+    { \
+       errno = (int)(e); \
+    } \
+  while (0)
+#define get_errno() errno
 
 /* Definitions of error numbers and the string that would be
  * returned by strerror().
@@ -398,20 +330,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Return a pointer to the thread specific errno.  NOTE:  When doing a
- * kernel-/user-mode build, this function can only be used within the
- * kernel-mode space.
- *
- * In the user-mode space, set_errno() and get_errno() are always available,
- * either as macros or via syscalls.
- */
+/* Return a pointer to the thread specific errno. */
 
 FAR int *__errno(void);
-
-#ifndef __DIRECT_ERRNO_ACCESS
-void set_errno(int errcode);
-int  get_errno(void);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
