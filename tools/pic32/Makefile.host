@@ -28,7 +28,7 @@ CFLAGS = -O2 -Wall -I.
 
 # mkpichex - Convert virtual addresses in nuttx.hex to physical addresses
 
-mkconfig: mkpichex.c mkpichex.c
+mkpichex: mkpichex.c
 	@gcc $(CFLAGS) -o mkpichex mkpichex.c
 
 clean:
