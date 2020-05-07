@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/fixedmath/tls_setelem.c
+ * sched/errno/lib_errno.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,53 +24,38 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
+#include <sched.h>
+#include <errno.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/tls.h>
 #include <arch/tls.h>
-
-#ifndef CONFIG_TLS_ALIGNED
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_info
+ * Name: __errno
  *
  * Description:
- *   Return a reference to the tls_info_s structure.  This is used as part
- *   of the internal implementation of tls_get/set_elem() and ONLY for the
- *   where CONFIG_TLS_ALIGNED is *not* defined
+ *   Return a pointer to the thread specific errno.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   A reference to the thread-specific tls_info_s structure is return on
- *   success.  NULL would be returned in the event of any failure.
+ *   A pointer to the per-thread errno variable.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-FAR struct tls_info_s *tls_get_info(void)
+FAR int *__errno(void)
 {
-  FAR struct tls_info_s *info = NULL;
-  struct stackinfo_s stackinfo;
-  int ret;
+  /* Get the TLS tls_info_s structure instance for this thread */
 
-  ret = sched_get_stackinfo(0, &stackinfo);
-  if (ret >= 0)
-    {
-      /* This currently assumes a push-down stack.  The TLS data lies at the
-       * lowest address of the stack allocation.
-       */
+  FAR struct tls_info_s *tlsinfo = up_tls_info();
 
-      info = (FAR struct tls_info_s *)stackinfo.stack_alloc_ptr;
-    }
+  /* And return the return refernce to the error number */
 
-  return info;
+  return &tlsinfo->tl_errno;
 }
-
-#endif /* !CONFIG_TLS_ALIGNED */

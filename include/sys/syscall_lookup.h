@@ -26,7 +26,6 @@
 
 SYSCALL_LOOKUP1(_exit,                     1)
 SYSCALL_LOOKUP(exit,                       1)
-SYSCALL_LOOKUP(get_errno,                  0)
 SYSCALL_LOOKUP(getpid,                     0)
 
 SYSCALL_LOOKUP(sched_getparam,             2)
@@ -46,7 +45,6 @@ SYSCALL_LOOKUP(sched_get_stackinfo,        2)
   SYSCALL_LOOKUP(sched_setaffinity,        3)
 #endif
 
-SYSCALL_LOOKUP(set_errno,                  1)
 SYSCALL_LOOKUP(uname,                      1)
 SYSCALL_LOOKUP(sethostname,                2)
 

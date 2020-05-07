@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/tls/Make.defs
+# libs/libc/errno/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,16 +18,9 @@
 #
 ############################################################################
 
-ifneq ($(CONFIG_TLS_NELEM),0)
-CSRCS += tls_setelem.c tls_getelem.c
-endif
+CSRCS += lib_errno.c
 
-ifneq ($(CONFIG_TLS_ALIGNED),y)
-CSRCS += tls_getinfo.c
-endif
+# Include errno build support
 
-# Include tls build support
-
-DEPPATH += --dep-path tls
-VPATH += :tls
-
+DEPPATH += --dep-path errno
+VPATH += :errno

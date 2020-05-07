@@ -177,9 +177,9 @@ o Task/Scheduler (sched/)
   Description: In NuttX, the errno value is unique for each thread.  But for
                bug-for-bug compatibility, the same errno should be shared by
                the task and each thread that it creates.  It is *very* easy
-               to make this change:  Just move the pterrno field from
-               struct tcb_s to struct task_group_s.   However, I am still not
-               sure if this should be done or not.
+               to make this change:  Just move the tls_errno field from
+               struct tls_info_s to struct task_group_s.   However, I am still
+               not sure if this should be done or not.
                NOTE: glibc behaves this way unless __thread is defined then,
                in that case, it behaves like NuttX (using TLS to save the
                thread local errno).

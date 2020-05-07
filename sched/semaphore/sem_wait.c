@@ -106,8 +106,6 @@ int nxsem_wait(FAR sem_t *sem)
 
       else
         {
-          int saved_errno;
-
           /* First, verify that the task is not already waiting on a
            * semaphore
            */
@@ -144,8 +142,7 @@ int nxsem_wait(FAR sem_t *sem)
            * between sem_waitirq() and this functions.
            */
 
-          saved_errno   = rtcb->pterrno;
-          rtcb->pterrno = OK;
+          rtcb->errcode = OK;
 
           /* Add the TCB to the prioritized semaphore wait queue, after
            * checking this is not the idle task - descheduling that
@@ -185,8 +182,7 @@ int nxsem_wait(FAR sem_t *sem)
            * thread was restarted.
            */
 
-          ret           = rtcb->pterrno != OK ? -rtcb->pterrno : OK;
-          rtcb->pterrno = saved_errno;
+          ret = rtcb->errcode != OK ? -rtcb->errcode : OK;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
           sched_unlock();

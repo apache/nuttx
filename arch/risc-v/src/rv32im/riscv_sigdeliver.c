@@ -82,7 +82,7 @@ void up_sigdeliver(void)
    * EINTR).
    */
 
-  int saved_errno = rtcb->pterrno;
+  int saved_errno = get_errno();
 
   board_autoled_on(LED_SIGNAL);
 
@@ -115,7 +115,7 @@ void up_sigdeliver(void)
         regs[REG_EPC], regs[REG_INT_CTX]);
 
   up_irq_save();
-  rtcb->pterrno        = saved_errno;
+  set_errno(saved_errno);
 
   /* Modify the saved return state with the actual saved values in the
    * TCB.  This depends on the fact that nested signal handling is

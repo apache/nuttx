@@ -157,20 +157,17 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
 
       if ((mqdes->oflags & O_NONBLOCK) == 0)
         {
-          int saved_errno;
-
           /* Yes.. Block and try again */
 
           rtcb           = this_task();
           rtcb->msgwaitq = msgq;
           msgq->nwaitnotempty++;
 
-          /* "Borrow" the per-task errno to communication wake-up error
+          /* Initialize the 'errcode" used to communication wake-up error
            * conditions.
            */
 
-          saved_errno    = rtcb->pterrno;
-          rtcb->pterrno  = OK;
+          rtcb->errcode  = OK;
 
           /* Make sure this is not the idle task, descheduling that
            * isn't going to end well.
@@ -185,9 +182,7 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
            * errno value (should be either EINTR or ETIMEDOUT).
            */
 
-          ret            = rtcb->pterrno;
-          rtcb->pterrno  = saved_errno;
-
+          ret = rtcb->errcode;
           if (ret != OK)
             {
               return -ret;
