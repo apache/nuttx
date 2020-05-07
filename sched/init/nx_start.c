@@ -545,6 +545,8 @@ void nx_start(void)
 
   nxsem_initialize();
 
+#if defined(MM_KERNEL_USRHEAP_INIT) || defined(CONFIG_MM_KERNEL_HEAP) || \
+    defined(CONFIG_MM_PGALLOC)
   /* Initialize the memory manager */
 
     {
@@ -579,6 +581,7 @@ void nx_start(void)
       mm_pginitialize(heap_start, heap_size);
 #endif
     }
+#endif
 
 #ifdef CONFIG_ARCH_USE_MODULE_TEXT
   up_module_text_init();
