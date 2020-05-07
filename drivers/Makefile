@@ -73,7 +73,7 @@ include wireless/Make.defs
 include contactless/Make.defs
 include 1wire/Make.defs
 include rf/Make.defs
-include pcie/Make.defs
+include pci/Make.defs
 include virt/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)

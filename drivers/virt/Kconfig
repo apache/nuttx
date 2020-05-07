@@ -15,7 +15,7 @@ if VIRT
 config VIRT_QEMU_PCI_TEST
 	bool "Driver for QEMU PCI test device"
 	default n
-	select PCIE
+	select PCI
 	---help---
 		Driver for QEMU PCI test device
 

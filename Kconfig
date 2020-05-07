@@ -1670,40 +1670,40 @@ config DEBUG_WATCHDOG_INFO
 
 endif # DEBUG_WATCHDOG
 
-config DEBUG_PCIE
-	bool "PCI-E Debug Features"
+config DEBUG_PCI
+	bool "PCI Debug Features"
 	default n
-	depends on PCIE
+	depends on PCI
 	---help---
-		Enable PCIE driver debug features.
+		Enable PCI driver debug features.
 
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
-if DEBUG_PCIE
+if DEBUG_PCI
 
-config DEBUG_PCIE_ERROR
-	bool "PCI-E Error Output"
+config DEBUG_PCI_ERROR
+	bool "PCI Error Output"
 	default n
 	depends on DEBUG_ERROR
 	---help---
-		Enable PCI-E driver error output to SYSLOG.
+		Enable PCI driver error output to SYSLOG.
 
-config DEBUG_PCIE_WARN
-	bool "PCI-E Warnings Output"
+config DEBUG_PCI_WARN
+	bool "PCI Warnings Output"
 	default n
 	depends on DEBUG_WARN
 	---help---
-		Enable PCI-E driver warning output to SYSLOG.
+		Enable PCI driver warning output to SYSLOG.
 
-config DEBUG_PCIE_INFO
-	bool "PCI-E Informational Output"
+config DEBUG_PCI_INFO
+	bool "PCI Informational Output"
 	default n
 	depends on DEBUG_INFO
 	---help---
-		Enable PCI-E driver informational output to SYSLOG.
+		Enable PCI driver informational output to SYSLOG.
 
-endif # DEBUG_PCIE
+endif # DEBUG_PCI
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK

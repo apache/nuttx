@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/pcie/Make.defs
+# drivers/pci/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,13 +20,13 @@
 
 # Don't build anything if there is no CAN support
 
-ifeq ($(CONFIG_PCIE),y)
+ifeq ($(CONFIG_PCI),y)
 
-CSRCS += pcie_root.c
+CSRCS += pci.c
 
-# Include PCIE device driver build support
+# Include PCI device driver build support
 
-DEPPATH += --dep-path pcie
-VPATH += :pcie
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)pcie}
+DEPPATH += --dep-path pci
+VPATH += :pci
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)pci}
 endif

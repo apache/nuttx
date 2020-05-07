@@ -3,18 +3,18 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menuconfig PCIE
-	bool "Support for PCI-E Bus"
+menuconfig PCI
+	bool "Support for PCI Bus"
 	default n
 	---help---
-		Enables support for the PCI-E bus.
+		Enables support for the PCI bus.
 		Backend bust be provided by per-arch or per-board implementation..
 
-if PCIE
-config PCIE_MAX_BDF
-	hex "Maximum bdf to scan on PCI-E bus"
+if PCI
+config PCI_MAX_BDF
+	hex "Maximum bdf to scan on PCI bus"
 	default 0x10000
 	---help---
-		The maximum bdf number to be scaned on PCI-E bus
+		The maximum bdf number to be scaned on PCI bus
 
 endif
