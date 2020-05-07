@@ -143,7 +143,7 @@ staging$(DELIM)libopenamp$(LIBEXT): openamp$(DELIM)libopenamp$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 syscall$(DELIM)libstubs$(LIBEXT): context
-	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT) # EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libstubs$(LIBEXT): syscall$(DELIM)libstubs$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
