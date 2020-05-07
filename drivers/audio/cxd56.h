@@ -169,6 +169,43 @@
 #  define CXD56_SP_DRIVER   3
 #endif
 
+/* Mic bias voltage select */
+
+#define  CXD56_MIC_BIAS_20V  1
+#define  CXD56_MIC_BIAS_28V  2
+
+#if defined(CONFIG_CXD56_AUDIO_MICBIAS_20V)
+#  define CXD56_MIC_BIAS  CXD56_MIC_BIAS_20V
+#else
+#  define CXD56_MIC_BIAS  CXD56_MIC_BIAS_28V
+#endif
+
+/* Mic select */
+
+#define CXD56_AUDIO_CFG_MIC CONFIG_CXD56_AUDIO_MIC_CHANNEL_SEL
+
+/* Mic boot wait time */
+
+#if defined(CONFIG_CXD56_AUDIO_MIC_BOOT_WAIT)
+#define CXD56_MIC_BOOT_WAIT  CONFIG_CXD56_AUDIO_MIC_BOOT_WAIT
+#else
+#define CXD56_MIC_BOOT_WAIT  1100
+#endif
+
+/* CIC filter input path */
+
+#define CXD56_AUDIO_CFG_CIC_IN_SEL_NONE   0
+#define CXD56_AUDIO_CFG_CIC_IN_SEL_CXD    1
+#define CXD56_AUDIO_CFG_CIC_IN_SEL_DMICIF 2
+
+#if defined(CONFIG_CXD56_AUDIO_CIC_IN_SEL_CXD)
+#  define CXD56_AUDIO_CFG_CIC_IN  CXD56_AUDIO_CFG_CIC_IN_SEL_CXD
+#elif defined (CONFIG_CXD56_AUDIO_CIC_IN_SEL_DMIC)
+#  define CXD56_AUDIO_CFG_CIC_IN  CXD56_AUDIO_CFG_CIC_IN_SEL_DMICIF
+#else
+#  define CXD56_AUDIO_CFG_CIC_IN  CXD56_AUDIO_CFG_CIC_IN_SEL_NONE
+#endif
+
 /* DMA format */
 
 #define CXD56_DMA_FORMAT_LR 0
@@ -243,7 +280,8 @@ struct cxd56_dev_s
 #endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
   uint8_t                 channels;         /* Number of channels (1..8) */
 
-  /* enum cxd56_audio_samp_fmt_e  format; */ /* Output bits per sample (16 or 24) */
+  uint16_t                mic_gain;         /* Mic gain */
+  uint64_t                mic_boot_start;   /* Mic startup wait time */
 
   uint8_t                 bitwidth;         /* Bits per sample (16 or 24) */
   bool                    muted;            /* True: Output is muted */
