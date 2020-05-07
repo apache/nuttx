@@ -106,7 +106,6 @@
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
-#ifdef CONFIG_TLS
   /* Add the size of the TLS information structure */
 
   stack_size += sizeof(struct tls_info_s);
@@ -121,7 +120,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
     {
       stack_size = TLS_MAXSTACK;
     }
-#endif
 #endif
 
   /* Is there already a stack allocated of a different size?  Because of
@@ -226,11 +224,9 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       tcb->adj_stack_ptr  = (FAR void *)top_of_stack;
       tcb->adj_stack_size = size_of_stack;
 
-#ifdef CONFIG_TLS
       /* Initialize the TLS data structure */
 
       memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
-#endif
 
       board_autoled_on(LED_STACKCREATED);
       return OK;

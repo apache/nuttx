@@ -30,8 +30,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>
 
-#ifdef CONFIG_TLS
-
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -70,5 +68,4 @@
 #  define up_tls_info() tls_get_info()
 #endif
 
-#endif /* CONFIG_TLS */
 #endif /* __ARCH_Z80_INCLUDE_TLS_H */

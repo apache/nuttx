@@ -1029,7 +1029,7 @@ o Kernel/Protected Build
                would not be an issue in the more general case.
 
                Update:
-               One solution might be to used CONFIG_TLS, add the PID to struct
+               One solution might be to use TLS, add the PID to struct
                tls_info_s.  Then the PID could be obtained without a system call.
                TLS is not very useful in the FLAT build, however.  TLS works by
                putting per-thread data at the bottom of an aligned stack.  The

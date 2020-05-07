@@ -29,8 +29,6 @@
 
 #include <sys/types.h>
 
-#ifdef CONFIG_TLS
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -148,5 +146,4 @@ void tls_set_element(int elem, uintptr_t value);
 FAR struct tls_info_s *tls_get_info(void);
 #endif
 
-#endif /* CONFIG_TLS */
 #endif /* __INCLUDE_NUTTX_TLS_H */

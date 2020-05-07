@@ -31,7 +31,7 @@
 #include <nuttx/tls.h>
 #include <arch/tls.h>
 
-#ifdef CONFIG_TLS
+#if CONFIG_TLS_NELEM > 0
 
 /****************************************************************************
  * Public Functions
@@ -75,4 +75,4 @@ uintptr_t tls_get_element(int elem)
   return ret;
 }
 
-#endif /* CONFIG_TLS */
+#endif /* CONFIG_TLS_NELEM > 0 */
