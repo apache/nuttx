@@ -91,6 +91,10 @@
 #include <time.h>
 #include <unistd.h>
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 /* Errno access is awkward. We need to generate get_errno() and set_errno()
  * interfaces to support the system calls, even though we don't use them
  * ourself.
@@ -101,10 +105,6 @@
 
 #undef get_errno
 #undef set_errno
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Data
@@ -119,16 +119,12 @@
 
 const uintptr_t g_funclookup[SYS_nsyscalls] =
 {
-#  undef SYSCALL_LOOKUP1
 #  define SYSCALL_LOOKUP1(f,n,p) (uintptr_t)f
-#  undef SYSCALL_LOOKUP
 #  define SYSCALL_LOOKUP(f,n,p)  , (uintptr_t)f
-#  include "syscall_lookup.h"
+#  include <sys/syscall_lookup.h>
+#  undef SYSCALL_LOOKUP1
+#  undef SYSCALL_LOOKUP
 };
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
