@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/pcie/Make.defs
+# drivers/pci/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -23,6 +23,12 @@
 ifeq ($(CONFIG_VIRT_QEMU_PCI_TEST),y)
 
 CSRCS += qemu_pci_test.c
+
+endif
+
+ifeq ($(CONFIG_VIRT_QEMU_EDU),y)
+
+CSRCS += qemu_edu.c
 
 endif
 
