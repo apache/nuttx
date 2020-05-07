@@ -42,31 +42,14 @@ static FILE *g_stubstream;
  * Private Functions
  ****************************************************************************/
 
-static bool is_vararg(const char *type, int ndx, int nparms)
+static bool is_vararg(const char *type)
 {
-  if (strcmp(type, "...") == 0)
-    {
-      if (ndx != (nparms - 1))
-        {
-          fprintf(stderr, "%d: ... is not the last in the argument list\n",
-                  g_lineno);
-          exit(11);
-        }
-      else if (nparms < 2)
-        {
-          fprintf(stderr, "%d: Need one parameter before ...\n", g_lineno);
-          exit(14);
-        }
-
-      return true;
-    }
-
-  return false;
+  return strcmp(type, "...") == 0;
 }
 
 static bool is_union(const char *type)
 {
-  return (strncmp(type, "union", 5) == 0);
+  return strncmp(type, "union ", 6) == 0;
 }
 
 static const char *check_funcptr(const char *type)
@@ -202,14 +185,12 @@ static FILE *open_proxy(void)
   return stream;
 }
 
-static void generate_proxy(int nparms, csvparm_t *vartypes, int nvartypes)
+static void generate_proxy(int nfixed, int nparms)
 {
   FILE *stream = open_proxy();
   char formal[MAX_PARMSIZE];
+  char actual[MAX_PARMSIZE];
   char fieldname[MAX_PARMSIZE];
-  bool bvarargs = false;
-  int nformal;
-  int nactual;
   int i;
 
   /* Generate "up-front" information, include correct header files */
@@ -228,15 +209,9 @@ static void generate_proxy(int nparms, csvparm_t *vartypes, int nvartypes)
    * final parameter type will be encoded as "..."
    */
 
-  if (is_vararg(g_parm[PARM1_INDEX + nparms - 1], nparms - 1, nparms))
+  if (nfixed != nparms)
     {
-      nformal = nparms - 1;
-      bvarargs = true;
       fprintf(stream, "#include <stdarg.h>\n");
-    }
-  else
-    {
-      nformal = nparms;
     }
 
   if (g_parm[HEADER_INDEX] && strlen(g_parm[HEADER_INDEX]) > 0)
@@ -259,13 +234,13 @@ static void generate_proxy(int nparms, csvparm_t *vartypes, int nvartypes)
 
   /* Generate the formal parameter list */
 
-  if (nformal <= 0)
+  if (nparms <= 0)
     {
       fprintf(stream, "void");
     }
   else
     {
-      for (i = 0; i < nformal; i++)
+      for (i = 0; i < nfixed; i++)
         {
           /* The formal and actual parameter types may be encoded.. extra the
            * formal parameter type.
@@ -288,7 +263,7 @@ static void generate_proxy(int nparms, csvparm_t *vartypes, int nvartypes)
 
   /* Handle the end of the formal parameter list */
 
-  if (bvarargs)
+  if (i < nparms)
     {
       fprintf(stream, ", ...)\n{\n");
 
@@ -296,25 +271,32 @@ static void generate_proxy(int nparms, csvparm_t *vartypes, int nvartypes)
        * the varargs.
        */
 
-      if (nvartypes > 0)
+      fprintf(stream, "  va_list ap;\n");
+      for (; i < nparms; i++)
         {
-          fprintf(stream, "  va_list ap;\n");
-
-          for (i = 0; i < nvartypes; i++)
-            {
-              fprintf(stream, "  %s parm%d;\n", vartypes[i], nparms + i);
-            }
-
-          fprintf(stream, "\n  va_start(ap, parm%d);\n", nparms - 1);
-
-          for (i = 0; i < nvartypes; i++)
-            {
-              fprintf(stream, "  parm%d = va_arg(ap, %s);\n",
-                      nparms + i, vartypes[i]);
-            }
-
-          fprintf(stream, "  va_end(ap);\n\n");
+          get_formalparmtype(g_parm[PARM1_INDEX + i], formal);
+          fprintf(stream, "  %s parm%d;\n", formal, i + 1);
         }
+
+      fprintf(stream, "\n  va_start(ap, parm%d);\n", nfixed);
+
+      for (i = nfixed; i < nparms; i++)
+        {
+          get_formalparmtype(g_parm[PARM1_INDEX + i], formal);
+          get_actualparmtype(g_parm[PARM1_INDEX + i], actual);
+
+          if (is_union(formal))
+            {
+              fprintf(stream, "  parm%d = (%s)va_arg(ap, %s);\n",
+                      i + 1, formal, actual);
+            }
+          else
+            {
+              fprintf(stream, "  parm%d = va_arg(ap, %s);\n", i + 1, actual);
+            }
+        }
+
+      fprintf(stream, "  va_end(ap);\n\n");
     }
   else
     {
@@ -325,20 +307,14 @@ static void generate_proxy(int nparms, csvparm_t *vartypes, int nvartypes)
    * are special cases.
    */
 
-  nactual = nformal;
-  if (bvarargs)
-    {
-      nactual += nvartypes;
-    }
-
   if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0)
     {
-      fprintf(stream, "  (void)sys_call%d(", nactual);
+      fprintf(stream, "  (void)sys_call%d(", nparms);
     }
   else
     {
       fprintf(stream, "  return (%s)sys_call%d(", g_parm[RETTYPE_INDEX],
-              nactual);
+              nparms);
     }
 
   /* Create the parameter list with the matching types.  The first parameter
@@ -347,11 +323,11 @@ static void generate_proxy(int nparms, csvparm_t *vartypes, int nvartypes)
 
   fprintf(stream, "(unsigned int)SYS_%s", g_parm[NAME_INDEX]);
 
-  for (i = 0; i < nactual; i++)
+  for (i = 0; i < nparms; i++)
     {
       /* Is the parameter a union member */
 
-      if (i < nparms && is_union(g_parm[PARM1_INDEX + i]))
+      if (is_union(g_parm[PARM1_INDEX + i]))
         {
           /* Then we will have to pick a field name that can be cast to a
            * uintptr_t.  There probably should be some error handling here
@@ -369,10 +345,10 @@ static void generate_proxy(int nparms, csvparm_t *vartypes, int nvartypes)
 
   /* Handle the tail end of the function. */
 
-  fprintf(stream, ");\n}\n\n");
+  fprintf(stream, ");\n}\n");
   if (g_parm[COND_INDEX][0] != '\0')
     {
-      fprintf(stream, "#endif /* %s */\n", g_parm[COND_INDEX]);
+      fprintf(stream, "\n#endif /* %s */\n", g_parm[COND_INDEX]);
     }
 
   fclose(stream);
@@ -428,13 +404,12 @@ static void stub_close(FILE *stream)
     }
 }
 
-static void generate_stub(int nparms, csvparm_t *vartypes, int nvartypes)
+static void generate_stub(int nfixed, int nparms)
 {
   FILE *stream = open_stub();
   char formal[MAX_PARMSIZE];
   char actual[MAX_PARMSIZE];
   int i;
-  int j;
 
   /* Generate "up-front" information, include correct header files */
 
@@ -470,19 +445,7 @@ static void generate_stub(int nparms, csvparm_t *vartypes, int nvartypes)
 
   for (i = 0; i < nparms; i++)
     {
-      /* Check for a variable number of arguments */
-
-      if (is_vararg(g_parm[PARM1_INDEX + i], i, nparms))
-        {
-          for (j = 0; j < nvartypes; j++)
-            {
-              fprintf(stream, ", uintptr_t parm%d", nparms + j);
-            }
-        }
-      else
-        {
-          fprintf(stream, ", uintptr_t parm%d", i + 1);
-        }
+      fprintf(stream, ", uintptr_t parm%d", i + 1);
     }
 
   fprintf(stream, ")\n{\n");
@@ -508,7 +471,7 @@ static void generate_stub(int nparms, csvparm_t *vartypes, int nvartypes)
     {
       /* Get the formal type of the parameter, and get the type that we
        * actually have to cast to.  For example for a formal type like
-       * 'int parm[]' we have to cast the actual parameter to 'int*'.
+       * 'int parm[]' we have to cast the actual parameter to 'int *'.
        * The worst is a union type like 'union sigval' where we have to
        * cast to (union sigval)((FAR void *)parm)
        * -- Yech.
@@ -523,57 +486,35 @@ static void generate_stub(int nparms, csvparm_t *vartypes, int nvartypes)
 
       if (i > 0)
         {
-          /* Check for a variable number of arguments */
+          fprintf(stream, ", ");
+        }
 
-          if (is_vararg(actual, i, nparms))
-            {
-              for (j = 0; j < nvartypes; j++)
-                {
-                  fprintf(stream, ", (%s)parm%d", vartypes[j], i + j + 1);
-                }
-            }
-          else
-            {
-              if (is_union(formal))
-                {
-                  fprintf(stream, ", (%s)((%s)parm%d)", formal, actual,
-                          i + 1);
-                }
-              else
-                {
-                  fprintf(stream, ", (%s)parm%d", actual, i + 1);
-                }
-            }
+      if (is_union(formal))
+        {
+          fprintf(stream, "(%s)((%s)parm%d)", formal, actual, i + 1);
         }
       else
         {
-          if (is_union(formal))
-            {
-              fprintf(stream, "(%s)((%s)parm%d)", formal, actual, i + 1);
-            }
-          else
-            {
-              fprintf(stream, "(%s)parm%d", actual, i + 1);
-            }
+          fprintf(stream, "(%s)parm%d", actual, i + 1);
         }
     }
 
-  /* Tail end of the function.  If the proxied function has no return
+  /* Tail end of the function.  If the stubs function has no return
    * value, just return zero (OK).
    */
 
   if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0)
     {
-      fprintf(stream, ");\n  return 0;\n}\n\n");
+      fprintf(stream, ");\n  return 0;\n}\n");
     }
   else
     {
-      fprintf(stream, ");\n}\n\n");
+      fprintf(stream, ");\n}\n");
     }
 
   if (g_parm[COND_INDEX][0] != '\0')
     {
-      fprintf(stream, "#endif /* %s */\n", g_parm[COND_INDEX]);
+      fprintf(stream, "\n#endif /* %s */\n", g_parm[COND_INDEX]);
     }
 
   stub_close(stream);
@@ -668,8 +609,7 @@ int main(int argc, char **argv, char **envp)
 
   while ((ptr = read_line(stream)) != NULL)
     {
-      csvparm_t *vartypes = NULL;
-      int nvartypes = 0;
+      int nfixed;
 
       /* Parse the line from the CVS file */
 
@@ -680,6 +620,10 @@ int main(int argc, char **argv, char **envp)
           exit(8);
         }
 
+      /* Assume no variable arguments by default */
+
+      nfixed = nargs - PARM1_INDEX;
+
       /* Search for an occurrence of "...".  This is followed by the list
        * types in the variable arguments.  The number of types is the
        * maximum number of variable arguments.
@@ -687,28 +631,40 @@ int main(int argc, char **argv, char **envp)
 
       for (i = PARM1_INDEX; i < nargs; i++)
         {
-          if (strcmp(g_parm[i], "...") == 0)
+          if (is_vararg(g_parm[i]))
             {
-              nvartypes = nargs - i - 1;
-              nargs     = i + 1;
+              /* "..." is the last argument? */
 
-              if (nvartypes > 0)
+              if (i == --nargs)
                 {
-                  vartypes = &g_parm[i + 1];
+                  /* Yes, generate the default variable arguments */
+
+                  while (nargs < PARM1_INDEX + 6)
+                    {
+                      strcpy(g_parm[nargs++], "uintptr_t");
+                    }
+                }
+              else
+                {
+                  /* Move up one slot to overwrite "..." */
+
+                  memmove(g_parm[i], g_parm[i + 1],
+                          sizeof(g_parm[i]) * (nargs - i));
                 }
 
+              nfixed = i - PARM1_INDEX;
               break;
             }
         }
 
       if (proxies)
         {
-          generate_proxy(nargs - PARM1_INDEX, vartypes, nvartypes);
+          generate_proxy(nfixed, nargs - PARM1_INDEX);
         }
       else
         {
           g_stubstream = NULL;
-          generate_stub(nargs - PARM1_INDEX, vartypes, nvartypes);
+          generate_stub(nfixed, nargs - PARM1_INDEX);
           if (g_stubstream != NULL)
             {
               fprintf(g_stubstream, "\n#endif /* __STUB_H */\n");
