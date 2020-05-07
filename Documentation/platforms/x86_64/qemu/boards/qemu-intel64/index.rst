@@ -71,6 +71,14 @@ Use control-a x to terminate the emulation.
 P.S. Make sure that you CPU supports the mandatory features. Look at Real machine
 section for more information.
 
+For testing the PCI bus and driver layers.  This QEMU configuration can be used
+with the pcitest NuttX configuration::
+
+    qemu-system-x86_64  -cpu host,+pcid,+x2apic,+tsc-deadline,+xsave,+rdrand --enable-kvm -smp 1 -m 2G -cdrom boot.iso --nographic -s -no-reboot -device edu -device pci-testdev
+  
+This will enable the QEMU pci-test and edu PCI test devices which test PIO, MMIO, IRQ, and DMA
+functions.  Additionally it will show detailed information about the enumeration of the PCI bus.
+
 Bochs
 =====
 
