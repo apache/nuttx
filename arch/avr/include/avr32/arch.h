@@ -56,6 +56,7 @@ static inline uint32_t avr_getsp(void)
       : "=r" (retval)
       :
     );
+
   return retval;
 }
 

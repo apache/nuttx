@@ -90,7 +90,6 @@ static void _up_assert(int errorcode)
 
   if (g_current_regs || running_task()->flink == NULL)
     {
-      up_irq_save();
       for (; ; )
         {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1

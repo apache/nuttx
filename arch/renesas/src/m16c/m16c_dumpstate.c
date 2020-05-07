@@ -69,8 +69,8 @@ static uint8_t s_last_regs[XCPTCONTEXT_REGS];
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 static inline uint16_t m16c_getusersp(void)
 {
-  uint8_t *ptr = (uint8_t*) g_current_regs;
-  return (uint16_t)ptr[REG_SP] << 8 | ptr[REG_SP+1];
+  uint8_t *ptr = (uint8_t *) g_current_regs;
+  return (uint16_t)ptr[REG_SP] << 8 | ptr[REG_SP + 1];
 }
 #endif
 
@@ -84,9 +84,10 @@ static void m16c_stackdump(uint16_t sp, uint16_t stack_base)
 
   for (stack = sp & ~7; stack < stack_base; stack += 8)
     {
-      uint8_t *ptr = (uint8_t*)stack;
+      uint8_t *ptr = (uint8_t *)stack;
       _alert("%04x: %02x %02x %02x %02x %02x %02x %02x %02x\n",
-             stack, ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7]);
+             stack, ptr[0], ptr[1], ptr[2], ptr[3], ptr[4],
+             ptr[5], ptr[6], ptr[7]);
     }
 }
 
@@ -96,7 +97,7 @@ static void m16c_stackdump(uint16_t sp, uint16_t stack_base)
 
 static inline void m16c_registerdump(void)
 {
-  uint8_t *ptr = (uint8_t*) g_current_regs;
+  uint8_t *ptr = (uint8_t *) g_current_regs;
 
   /* Are user registers available from interrupt processing? */
 
@@ -110,17 +111,19 @@ static inline void m16c_registerdump(void)
 
   /* Dump the interrupt registers */
 
-  _alert("PC: %02x%02x%02x FLG: %02x00%02x FB: %02x%02x SB: %02x%02x SP: %02x%02x\n",
-        ptr[REG_FLGPCHI] & 0xff, ptr[REG_PC], ptr[REG_PC+1],
+  _alert("PC: %02x%02x%02x FLG: %02x00%02x FB: %02x%02x SB: %02x%02x "
+         "SP: %02x%02x\n",
+        ptr[REG_FLGPCHI] & 0xff, ptr[REG_PC], ptr[REG_PC + 1],
         ptr[REG_FLGPCHI] >> 8, ptr[REG_FLG],
-        ptr[REG_FB], ptr[REG_FB+1],
-        ptr[REG_SB], ptr[REG_SB+1],
-        ptr[REG_SP], ptr[REG_SP+1]);
+        ptr[REG_FB], ptr[REG_FB + 1],
+        ptr[REG_SB], ptr[REG_SB + 1],
+        ptr[REG_SP], ptr[REG_SP + 1]);
 
-  _alert("R0: %02x%02x R1: %02x%02x R2: %02x%02x A0: %02x%02x A1: %02x%02x\n",
-        ptr[REG_R0], ptr[REG_R0+1], ptr[REG_R1], ptr[REG_R1+1],
-        ptr[REG_R2], ptr[REG_R2+1], ptr[REG_R3], ptr[REG_R3+1],
-        ptr[REG_A0], ptr[REG_A0+1], ptr[REG_A1], ptr[REG_A1+1]);
+  _alert("R0: %02x%02x R1: %02x%02x R2: %02x%02x A0: %02x%02x "
+         "A1: %02x%02x\n",
+        ptr[REG_R0], ptr[REG_R0 + 1], ptr[REG_R1], ptr[REG_R1 + 1],
+        ptr[REG_R2], ptr[REG_R2 + 1], ptr[REG_R3], ptr[REG_R3 + 1],
+        ptr[REG_A0], ptr[REG_A0 + 1], ptr[REG_A1], ptr[REG_A1 + 1]);
 }
 
 /****************************************************************************
@@ -159,13 +162,14 @@ void up_dumpstate(void)
       ustacksize = (uint16_t)rtcb->adj_stack_size;
     }
 
-  /* Get the limits on the interrupt stack memory. The near RAM memory map is as follows:
+  /* Get the limits on the interrupt stack memory.
+   * The near RAM memory map is as follows:
    *
-   * 0x00400 - DATA		Size: Determined by linker
-   *           BSS		Size: Determined by linker
-   *           Interrupt stack	Size: CONFIG_ARCH_INTERRUPTSTACK
-   *           Idle stack		Size: CONFIG_IDLETHREAD_STACKSIZE
-   *           Heap		Size: Everything remaining
+   * 0x00400 - DATA   Size: Determined by linker
+   *           BSS    Size: Determined by linker
+   *           Interrupt stack Size: CONFIG_ARCH_INTERRUPTSTACK
+   *           Idle stack  Size: CONFIG_IDLETHREAD_STACKSIZE
+   *           Heap        Size: Everything remaining
    * 0x00bff - (end+1)
    */
 

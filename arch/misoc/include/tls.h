@@ -49,7 +49,6 @@ static inline uint32_t misoc_getsp(void)
   return sp;
 }
 
-
 /****************************************************************************
  * Name: up_tls_info
  *

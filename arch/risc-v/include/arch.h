@@ -111,7 +111,8 @@ uint32_t time_hard_mul(uint32_t a, uint32_t b, uint32_t *t);
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
