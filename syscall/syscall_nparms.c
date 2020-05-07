@@ -1,5 +1,5 @@
 /****************************************************************************
- * syscall/syscall_stublookup.c
+ * syscall/syscall_nparms.c
  *
  *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,10 +43,6 @@
 #ifdef CONFIG_LIB_SYSCALL
 
 /****************************************************************************
- * Pre-processor definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -57,16 +53,12 @@
 
 const uint8_t g_funcnparms[SYS_nsyscalls] =
 {
-#  undef SYSCALL_LOOKUP1
 #  define SYSCALL_LOOKUP1(f,n,p) n
-#  undef SYSCALL_LOOKUP
 #  define SYSCALL_LOOKUP(f,n,p)  , n
-#  include "syscall_lookup.h"
+#  include <sys/syscall_lookup.h>
+#  undef SYSCALL_LOOKUP1
+#  undef SYSCALL_LOOKUP
 };
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions

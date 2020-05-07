@@ -417,16 +417,12 @@ uintptr_t STUB_getrandom(int nbr, uintptr_t parm1, uintptr_t parm2);
 
 const uintptr_t g_stublookup[SYS_nsyscalls] =
 {
-#  undef SYSCALL_LOOKUP1
 #  define SYSCALL_LOOKUP1(f,n,p) (uintptr_t)p
-#  undef SYSCALL_LOOKUP
 #  define SYSCALL_LOOKUP(f,n,p)  , (uintptr_t)p
-#  include "syscall_lookup.h"
+#  include <sys/syscall_lookup.h>
+#  undef SYSCALL_LOOKUP1
+#  undef SYSCALL_LOOKUP
 };
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
