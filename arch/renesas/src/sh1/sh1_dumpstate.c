@@ -71,7 +71,7 @@ static void sh1_stackdump(uint32_t sp, uint32_t stack_base)
 
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
-      uint32_t *ptr = (uint32_t*)stack;
+      uint32_t *ptr = (uint32_t *)stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
@@ -84,7 +84,7 @@ static void sh1_stackdump(uint32_t sp, uint32_t stack_base)
 
 static inline void sh1_registerdump(void)
 {
-  uint32_t *ptr = (uint32_t*)g_current_regs;
+  uint32_t *ptr = (uint32_t *)g_current_regs;
 
   /* Are user registers available from interrupt processing? */
 

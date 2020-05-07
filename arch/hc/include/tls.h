@@ -46,7 +46,7 @@ static inline uint16_t hc_getsp(void)
   __asm__
   (
     "\tsts %0\n"
-	: "=m"(ret) :
+  : "=m"(ret) :
   );
   return ret;
 }

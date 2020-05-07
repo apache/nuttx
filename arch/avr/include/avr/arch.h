@@ -59,6 +59,7 @@ static inline uint16_t avr_getsp(void)
     : "=r" (spl), "=r" (sph)
     :
   );
+
   return (uint16_t)sph << 8 | spl;
 }
 
