@@ -315,8 +315,8 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_setschedprio,     2, STUB_pthread_setschedprio)
   SYSCALL_LOOKUP(pthread_setspecific,      2, STUB_pthread_setspecific)
 #ifdef CONFIG_SMP
-  SYSCALL_LOOKUP(pthread_setaffinity,      3, STUB_pthread_setaffinity)
-  SYSCALL_LOOKUP(pthread_getaffinity,      3, STUB_pthread_getaffinity)
+  SYSCALL_LOOKUP(pthread_setaffinity_np,   3, STUB_pthread_setaffinity_np)
+  SYSCALL_LOOKUP(pthread_getaffinity_np,   3, STUB_pthread_getaffinity_np)
 #endif
   SYSCALL_LOOKUP(pthread_cond_timedwait,   3, STUB_pthread_cond_timedwait)
   SYSCALL_LOOKUP(pthread_kill,             2, STUB_pthread_kill)
