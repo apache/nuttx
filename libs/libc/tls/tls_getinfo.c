@@ -60,8 +60,6 @@ FAR struct tls_info_s *tls_get_info(void)
   struct stackinfo_s stackinfo;
   int ret;
 
-  DEBUGASSERT(!up_interrupt_context());
-
   ret = sched_get_stackinfo(0, &stackinfo);
   if (ret >= 0)
     {

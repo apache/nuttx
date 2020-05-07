@@ -81,7 +81,7 @@ void up_sigdeliver(void)
    * EINTR).
    */
 
-  int saved_errno = rtcb->pterrno;
+  int saved_errno = get_errno();
 
   /* Save the real return state on the stack ASAP before any chance we went
    * sleeping and break the register profile.  We entered this function with
@@ -122,7 +122,7 @@ void up_sigdeliver(void)
 
   sinfo("Resuming\n");
   (void)up_irq_save();
-  rtcb->pterrno = saved_errno;
+  set_errno(saved_errno);
 
   /* Modify the saved return state with the actual saved values in the
    * TCB.  This depends on the fact that nested signal handling is

@@ -29,8 +29,6 @@
 
 #include <sys/types.h>
 
-#ifdef CONFIG_TLS
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -45,13 +43,7 @@
 
 #ifndef CONFIG_TLS_NELEM
 #  warning CONFIG_TLS_NELEM is not defined
-#  define CONFIG_TLS_NELEM 1
-#endif
-
-#if CONFIG_TLS_NELEM < 1
-#  error CONFIG_TLS_NELEM must be at least one
-#  undef CONFIG_TLS_NELEM
-#  define CONFIG_TLS_NELEM 1
+#  define CONFIG_TLS_NELEM 0
 #endif
 
 /* TLS Definitions **********************************************************/
@@ -83,7 +75,10 @@
 
 struct tls_info_s
 {
+#if CONFIG_TLS_NELEM > 0
   uintptr_t tl_elem[CONFIG_TLS_NELEM]; /* TLS elements */
+#endif
+  int tl_errno;                        /* Per-thread error number */
 };
 
 /****************************************************************************
@@ -148,5 +143,4 @@ void tls_set_element(int elem, uintptr_t value);
 FAR struct tls_info_s *tls_get_info(void);
 #endif
 
-#endif /* CONFIG_TLS */
 #endif /* __INCLUDE_NUTTX_TLS_H */

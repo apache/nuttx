@@ -30,8 +30,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>
 
-#ifdef CONFIG_TLS
-
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -73,5 +71,4 @@ static inline FAR struct tls_info_s *up_tls_info(void)
 #  define up_tls_info() tls_get_info()
 #endif
 
-#endif /* CONFIG_TLS */
 #endif /* __ARCH_SIM_INCLUDE_TLS_H */

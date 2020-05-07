@@ -97,9 +97,9 @@ void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode)
           msgq->nwaitnotfull--;
         }
 
-      /* Mark the errno value for the thread. */
+      /* Mark the error value for the thread. */
 
-      wtcb->pterrno = errcode;
+      wtcb->errcode = errcode;
 
       /* Restart the task. */
 

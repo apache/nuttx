@@ -106,7 +106,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
   FAR uint8_t *stack_alloc_ptr;
   int ret = ERROR;
 
-#ifdef CONFIG_TLS
   /* Add the size of the TLS information structure */
 
   stack_size += sizeof(struct tls_info_s);
@@ -122,7 +121,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       stack_size = TLS_MAXSTACK;
     }
 #endif
-#endif
 
   /* Move up to next even word boundary if necessary */
 
@@ -133,15 +131,15 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 #ifdef CONFIG_TLS_ALIGNED
   stack_alloc_ptr = (FAR uint8_t *)kumm_memalign(TLS_STACK_ALIGN,
                                                  adj_stack_size);
-#else /* CONFIG_TLS */
+#else
   stack_alloc_ptr = (FAR uint8_t *)kumm_malloc(adj_stack_size);
-#endif /* CONFIG_TLS */
+#endif
 
   /* Was the allocation successful? */
 
   if (stack_alloc_ptr)
     {
-#if defined(CONFIG_TLS) && defined(CONFIG_STACK_COLORATION)
+#if defined(CONFIG_STACK_COLORATION)
       uintptr_t stack_base;
 #endif
 
@@ -160,7 +158,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       tcb->stack_alloc_ptr = stack_alloc_ptr;
       tcb->adj_stack_ptr   = (FAR void *)adj_stack_addr;
 
-#ifdef CONFIG_TLS
       /* Initialize the TLS data structure */
 
       memset(stack_alloc_ptr, 0, sizeof(struct tls_info_s));
@@ -177,17 +174,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       up_stack_color((FAR void *)stack_base, stack_size);
 
 #endif /* CONFIG_STACK_COLORATION */
-#else /* CONFIG_TLS */
-#ifdef CONFIG_STACK_COLORATION
-      /* If stack debug is enabled, then fill the stack with a
-       * recognizable value that we can use later to test for high
-       * water marks.
-       */
-
-      up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
-
-#endif /* CONFIG_STACK_COLORATION */
-#endif /* CONFIG_TLS */
 
       ret = OK;
     }

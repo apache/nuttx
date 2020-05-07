@@ -95,17 +95,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Errno access is awkward. We need to generate get_errno() and set_errno()
- * interfaces to support the system calls, even though we don't use them
- * ourself.
- *
- * The "normal" pre-processor definitions for these functions is in errno.h
- * but we need the internal function prototypes in nuttx/errno.h.
- */
-
-#undef get_errno
-#undef set_errno
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/

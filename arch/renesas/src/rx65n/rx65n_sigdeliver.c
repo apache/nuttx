@@ -77,7 +77,7 @@ void up_sigdeliver(void)
    * EINTR).
    */
 
-  int saved_errno = rtcb->pterrno;
+  int saved_errno = get_errno();
 
   board_autoled_on(LED_SIGNAL);
 
@@ -119,7 +119,7 @@ void up_sigdeliver(void)
 
   sinfo("Resuming\n");
   up_irq_save();
-  rtcb->pterrno = saved_errno;
+  set_errno(saved_errno);
 
   /* Then restore the correct state for this thread of
    * execution.
