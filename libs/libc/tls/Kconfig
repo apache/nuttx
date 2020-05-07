@@ -3,23 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config ARCH_HAVE_TLS
-	bool
-	default n
-	---help---
-		Selected by the configuration system if the current architecture
-		supports TLS.
-
 menu "Thread Local Storage (TLS)"
-	depends on ARCH_HAVE_TLS
-
-config TLS
-	bool "Thread Local Storage (TLS)"
-	default n
-	---help---
-		Build in support for stack based thread local storage (TLS).
-
-if TLS
 
 config TLS_ALIGNED
 	bool "Require stack alignment"
@@ -66,5 +50,4 @@ config TLS_NELEM
 		The number of unique TLS elements.  These can be accessed with
 		the user library functions tls_get_element() and tls_set_element().
 
-endif # TLS
 endmenu # Thread Local Storage (TLS)

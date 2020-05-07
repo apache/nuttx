@@ -126,11 +126,9 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
   tcb->stack_alloc_ptr = stack;
   tcb->adj_stack_ptr   = (FAR void *)adj_stack_addr;
 
-#ifdef CONFIG_TLS
   /* Initialize the TLS data structure */
 
   memset(stack, 0, sizeof(struct tls_info_s));
-#endif
 
   return OK;
 }

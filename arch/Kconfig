@@ -10,7 +10,6 @@ choice
 config ARCH_ARM
 	bool "ARM"
 	select ARCH_HAVE_INTERRUPTSTACK
-	select ARCH_HAVE_TLS
 	select ARCH_HAVE_VFORK
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
@@ -68,7 +67,6 @@ config ARCH_SIM
 	bool "Simulation"
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_RTC_SUBSECONDS
-	select ARCH_HAVE_TLS
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_TESTSET

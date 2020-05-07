@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_TLS),y)
+ifneq ($(CONFIG_TLS_NELEM),0)
 
 CSRCS += tls_setelem.c tls_getelem.c
 
