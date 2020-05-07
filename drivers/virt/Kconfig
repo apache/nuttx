@@ -15,8 +15,15 @@ if VIRT
 config VIRT_QEMU_PCI_TEST
 	bool "Driver for QEMU PCI test device"
 	default n
-	select PCIE
+	select PCI
 	---help---
 		Driver for QEMU PCI test device
+
+config VIRT_QEMU_EDU
+	bool "Driver for QEMU EDU test device"
+	default n
+	select PCI
+	---help---
+		Driver for QEMU EDU test device
 
 endif # VIRT

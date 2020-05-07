@@ -66,8 +66,6 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-void qemu_pcie_init(void);
-
 #undef EXTERN
 #if defined(__cplusplus)
 }

@@ -77,7 +77,7 @@ include rc/Make.defs
 include segger/Make.defs
 include usrsock/Make.defs
 include reset/Make.defs
-include pcie/Make.defs
+include pci/Make.defs
 include virt/Make.defs
 include wiegand/Make.defs
 
