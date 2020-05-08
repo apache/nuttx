@@ -50,6 +50,10 @@ ifeq ($(CONFIG_SENSORS_LM75),y)
   CSRCS += stm32_lm75.c
 endif
 
+ifeq ($(CONFIG_WL_NRF24L01),y)
+  CSRCS += stm32_nrf24l01.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
