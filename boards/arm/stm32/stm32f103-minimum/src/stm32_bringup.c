@@ -109,6 +109,9 @@
 #include "stm32_tone.h"
 #endif
 
+#ifdef CONFIG_SENSORS_LM75
+#include "stm32_lm75.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -308,7 +311,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_LM75_I2C
   /* Configure and initialize the LM75 sensor */
 
-  ret = stm32_lm75initialize("/dev/temp");
+  ret = board_lm75_initialize(0, 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_lm75initialize() failed: %d\n", ret);
