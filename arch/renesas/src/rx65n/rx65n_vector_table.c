@@ -210,7 +210,7 @@ const void *except_vectors[] EXVECT_SECT  =
     r_reserved_exception,      /* 0xffffffd8  Reserved  */
     r_undefined_exception,     /* 0xffffffdc  Exception */
     r_reserved_exception,      /* 0xffffffe0  Reserved  */
-    r_floatingpoint_exception,    /* 0xffffffe4  Exception */
+    r_floatingpoint_exception, /* 0xffffffe4  Exception */
     r_undefined_exception,     /* 0xffffffe8  Reserved  */
     r_undefined_exception,     /* 0xffffffec  Reserved  */
     r_undefined_exception,     /* 0xfffffff0  Reserved  */
