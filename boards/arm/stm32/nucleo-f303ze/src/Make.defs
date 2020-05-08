@@ -57,7 +57,9 @@ CSRCS += stm32_adc.c
 endif
 
 ifeq ($(CONFIG_LCD_SSD1306),y)
-CSRCS += stm32_ssd1306.c
+CSRCS += stm32_lcd.c
 endif
 
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

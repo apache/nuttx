@@ -105,6 +105,11 @@
 #include "stm32_nunchuck.h"
 #endif
 
+#ifdef CONFIG_AUDIO_TONE
+#include "stm32_tone.h"
+#endif
+
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -137,6 +142,19 @@
 #  define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
 #else
 #  define MMCSD_MINOR 0
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_TONE
+struct board_tone_config_s g_tone_cfg =
+{
+  .pwm_timer                = 2,
+  .oneshot_timer            = 3,
+  .oneshot_timer_resolution = 10
+};
 #endif
 
 /****************************************************************************
@@ -270,7 +288,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_AUDIO_TONE
   /* Configure and initialize the tone generator. */
 
-  ret = stm32_tone_setup();
+  ret = board_tone_initialize(&g_tone_cfg, 0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_tone_setup() failed: %d\n", ret);
