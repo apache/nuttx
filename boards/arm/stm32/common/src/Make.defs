@@ -38,6 +38,14 @@ ifeq ($(CONFIG_INPUT_NUNCHUCK),y)
 CSRCS += stm32_nunchuck.c
 endif
 
+ifeq ($(CONFIG_AUDIO_TONE),y)
+  CSRCS += stm32_tone.c
+endif
+
+ifeq ($(CONFIG_LCD_SSD1306),y)
+  CSRCS += stm32_ssd1306.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)

@@ -1,8 +1,8 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f103minimum/src/stm32_tone.c
+ * boards/arm/stm32/stm32f103-minimum/src/stm32_ssd1306.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,113 +39,63 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/timers/pwm.h>
-#include <nuttx/timers/oneshot.h>
-#include <nuttx/audio/tone.h>
-#include <arch/board/board.h>
+#include <nuttx/board.h>
+#include <nuttx/lcd/lcd.h>
+#include <nuttx/lcd/ssd1306.h>
 
-#include "chip.h"
-#include "arm_arch.h"
-#include "stm32_pwm.h"
+#include "stm32.h"
 #include "stm32f103_minimum.h"
+
+#include "stm32_ssd1306.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
+#define OLED_I2C_PORT         1 /* OLED display connected to I2C1 */
 
-#define HAVE_TONE 1
-
-/* TIMx used to generate PWM signal to Buzzer/Speaker */
-
-#define TONE_PWM_TIMER 2
-
-/* TIMx used to generate oneshot */
-
-#define ONESHOT_TIMER 3
-
-/* Oneshot timer resolution in microseconds */
-
-#define OST_RES        10
-
-#ifndef CONFIG_PWM
-#  undef HAVE_TONE
-#endif
-
-#ifndef CONFIG_STM32_TIM2
-#  undef HAVE_TONE
-#endif
-
-#ifndef CONFIG_STM32_TIM2_PWM
-#  undef HAVE_TONE
-#endif
-
-#ifdef HAVE_TONE
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_tone_setup
- *
- * Description:
- *   Configure and initialize the tone generator.
- *
+ * Name: board_lcd_initialize
  ****************************************************************************/
 
-int stm32_tone_setup(void)
+int board_lcd_initialize(void)
 {
-  static bool                initialized = false;
-  struct pwm_lowerhalf_s     *tone;
-  struct oneshot_lowerhalf_s *oneshot = NULL;
-  int                        ret;
+  int ret;
 
-  /* Have we already initialized? */
-
-  if (!initialized)
+  ret = board_ssd1306_initialize(OLED_I2C_PORT);
+  if (ret < 0)
     {
-      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
-
-      tone = stm32_pwminitialize(TONE_PWM_TIMER);
-      if (!tone)
-        {
-          auderr("Failed to get the STM32 PWM lower half to AUDIO TONE\n");
-          return -ENODEV;
-        }
-
-      /* Initialize TONE PWM */
-
-      tone->ops->setup(tone);
-
-      /* Initialize ONESHOT Timer */
-
-      oneshot = oneshot_initialize(ONESHOT_TIMER, OST_RES);
-      if (!oneshot)
-        {
-          auderr("Failed to initialize ONESHOT Timer!\n");
-          return -ENODEV;
-        }
-
-      /* Register the Audio Tone driver at "/dev/tone0" */
-
-      ret = tone_register("/dev/tone0", tone, oneshot);
-      if (ret < 0)
-        {
-          auderr("ERROR: tone_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
+      lcderr("ERROR: Failed to initialize SSD1306\n");
+      return ret;
     }
 
   return OK;
 }
 
-#endif /* HAVE_TONE */
+/****************************************************************************
+ * Name: board_lcd_getdev
+ ****************************************************************************/
+
+FAR struct lcd_dev_s *board_lcd_getdev(int devno)
+{
+  return board_ssd1306_getdev();
+}
+
+/****************************************************************************
+ * Name: board_lcd_uninitialize
+ ****************************************************************************/
+
+void board_lcd_uninitialize(void)
+{
+  /* TO-FIX */
+}

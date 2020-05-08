@@ -95,10 +95,6 @@ CSRCS += stm32_at24.c
 endif
 endif
 
-ifeq ($(CONFIG_AUDIO_TONE),y)
-  CSRCS += stm32_tone.c
-endif
-
 ifeq ($(CONFIG_CAN_MCP2515),y)
   CSRCS += stm32_mcp2515.c
 endif
@@ -120,11 +116,11 @@ ifeq ($(CONFIG_INPUT_NUNCHUCK),y)
 endif
 
 ifeq ($(CONFIG_LCD_SSD1306_I2C),y)
-CSRCS += stm32_ssd1306.c
+CSRCS += stm32_lcd_ssd1306.c
 endif
 
 ifeq ($(CONFIG_LCD_ST7567),y)
-  CSRCS += stm32_lcd.c
+  CSRCS += stm32_lcd_st7567.c
 endif
 
 ifeq ($(CONFIG_LCD_PCD8544),y)
