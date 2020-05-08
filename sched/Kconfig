@@ -642,17 +642,7 @@ config SCHED_USER_IDENTITY
 endmenu # Tasks and Scheduling
 
 menu "Pthread Options"
-
-config NPTHREAD_KEYS
-	int "Maximum number of pthread keys"
-	default 4 if !DISABLE_PTHREAD
-	default 0 if DISABLE_PTHREAD
-	range 0 32
-	---help---
-		The number of items of thread-specific data that can be retained.
-		The value zero disables support for pthread-specific data.
-
-if !DISABLE_PTHREAD
+	depends on !DISABLE_PTHREAD
 
 config PTHREAD_MUTEX_TYPES
 	bool "Enable mutex types"
@@ -731,8 +721,6 @@ config CANCELLATION_POINTS
 		Enable POSIX cancellation points for pthread_cancel().  If selected,
 		cancellation points will also used with the () task_delete() API even if
 		pthreads are not enabled.
-
-endif # !DISABLE_PTHREAD
 
 endmenu # Pthread Options
 
