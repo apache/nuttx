@@ -113,6 +113,10 @@
 #include "stm32_lm75.h"
 #endif
 
+#ifdef CONFIG_WL_NRF24L01
+#include "stm32_nrf24l01.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -157,6 +161,14 @@ struct board_tone_config_s g_tone_cfg =
   .pwm_timer                = 2,
   .oneshot_timer            = 3,
   .oneshot_timer_resolution = 10
+};
+#endif
+
+#ifdef CONFIG_WL_NRF24L01
+struct board_nrf24l01_config_s g_nrf24l01_cfg =
+{
+  .ce_pincfg  = GPIO_NRF24L01_CE,
+  .irq_pincfg = GPIO_NRF24L01_IRQ
 };
 #endif
 
@@ -448,7 +460,11 @@ int stm32_bringup(void)
 #if defined(CONFIG_WL_NRF24L01)
   /* Initialize the NRF24L01 wireless module */
 
-  stm32_wlinitialize();
+  ret = board_nrf24l01_initialize(&g_nrf24l01_cfg, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_nrf24l01_initialize failed: %d\n", ret);
+    }
 #endif
 
   return ret;
