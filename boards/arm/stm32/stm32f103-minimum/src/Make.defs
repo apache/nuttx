@@ -73,10 +73,6 @@ ifeq ($(CONFIG_LCD_BACKPACK),y)
   CSRCS += stm32_lcd_backpack.c
 endif
 
-ifeq ($(CONFIG_LM75_I2C),y)
-  CSRCS += stm32_lm75.c
-endif
-
 ifeq ($(CONFIG_RGBLED),y)
   CSRCS += stm32_rgbled.c
 endif
