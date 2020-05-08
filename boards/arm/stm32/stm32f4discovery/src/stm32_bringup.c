@@ -443,7 +443,9 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_STM32F4DISCO_LIS3DSH
-  /* Create a lis3dsh driver instance fitting the chip built into stm32f4discovery */
+  /* Create a lis3dsh driver instance fitting the chip built into
+   * stm32f4discovery
+   */
 
   ret = stm32_lis3dshinitialize("/dev/acc0");
   if (ret < 0)
@@ -483,7 +485,8 @@ int stm32_bringup(void)
   ret = stm32_lpwaninitialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver:"
+                      " %d\n", ret);
     }
 #endif /* CONFIG_LPWAN_SX127X */
 

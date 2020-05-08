@@ -111,8 +111,8 @@
 #  undef HAVE_USBMONITOR
 #endif
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
- * is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO
+ * support is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SDIO)
@@ -251,8 +251,8 @@
 
 /* PWM
  *
- * The STM32F4 Discovery has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using TIM4 CH2 on PD13.
+ * The STM32F4 Discovery has no real on-board PWM devices, but the board can
+ * be configured to output a pulse train using TIM4 CH2 on PD13.
  */
 
 #define STM32F4DISCOVERY_PWMTIMER   4
@@ -739,8 +739,8 @@ int stm32_max31855initialize(FAR const char *devpath, int bus,
  * Name: stm32_mlx90614init
  *
  * Description:
- *   Called to configure an I2C and to register MLX90614 for the stm32f103-minimum
- *   board.
+ *   Called to configure an I2C and to register MLX90614 for the
+ *   stm32f103-minimum board.
  *
  ****************************************************************************/
 
