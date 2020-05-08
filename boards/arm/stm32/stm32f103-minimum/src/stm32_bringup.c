@@ -89,6 +89,18 @@
 #include "stm32_bmp180.h"
 #endif
 
+#ifdef CONFIG_LEDS_APA102
+#include "stm32_apa102.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MAX6675
+#include "stm32_max6675.h"
+#endif
+
+#ifdef CONFIG_SENSORS_VEML6070
+#include "stm32_veml6070.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -264,7 +276,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_LEDS_APA102
   /* Configure and initialize the APA102 LED Strip. */
 
-  ret = stm32_apa102init("/dev/leddrv0");
+  ret = board_apa102_initialize(0, 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_apa102init() failed: %d\n", ret);
@@ -302,7 +314,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_MAX6675
-  ret = stm32_max6675initialize("/dev/temp0");
+  ret = board_max6675_initialize(0, 1);
   if (ret < 0)
     {
       serr("ERROR:  stm32_max6675initialize failed: %d\n", ret);
@@ -391,7 +403,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_VEML6070
   /* Register the UV-A light sensor */
 
-  ret = stm32_veml6070initialize("/dev/uvlight0");
+  ret = board_veml6070_initialize(0, 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_veml6070initialize() failed: %d\n", ret);

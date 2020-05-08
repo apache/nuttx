@@ -86,6 +86,10 @@
 #include "stm32_bmp180.h"
 #endif
 
+#ifdef CONFIG_SENSORS_MAX6675
+#include "stm32_max6675.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -407,7 +411,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_MAX6675
-  ret = stm32_max6675initialize("/dev/temp0");
+  ret = board_max6675_initialize(0, 2);
   if (ret < 0)
     {
       serr("ERROR:  stm32_max6675initialize failed: %d\n", ret);
