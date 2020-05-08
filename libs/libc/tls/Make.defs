@@ -19,7 +19,7 @@
 ############################################################################
 
 ifneq ($(CONFIG_TLS_NELEM),0)
-CSRCS += tls_setelem.c tls_getelem.c
+CSRCS += tls_setvalue.c tls_getvalue.c
 endif
 
 ifneq ($(CONFIG_TLS_ALIGNED),y)

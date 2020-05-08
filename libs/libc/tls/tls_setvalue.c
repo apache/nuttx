@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_getinfo.c
+ * libs/libc/tls/tls_setvalue.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,46 +31,49 @@
 #include <nuttx/tls.h>
 #include <arch/tls.h>
 
-#ifndef CONFIG_TLS_ALIGNED
+#if CONFIG_TLS_NELEM > 0
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_info
+ * Name: tls_set_value
  *
  * Description:
- *   Return a reference to the tls_info_s structure.  This is used as part
- *   of the internal implementation of tls_get/set_elem() and ONLY for the
- *   where CONFIG_TLS_ALIGNED is *not* defined
+ *   Set the TLS element associated with the 'tlsindex' to 'tlsvalue'
  *
  * Input Parameters:
- *   None
+ *   tlsindex - Index of TLS data element to set
+ *   tlsvalue - The new value of the TLS data element
  *
  * Returned Value:
- *   A reference to the thread-specific tls_info_s structure is return on
- *   success.  NULL would be returned in the event of any failure.
+ *   Zero is returned on success, a negated errno value is return on
+ *   failure:
+ *
+ *     EINVAL - tlsindex is not in range.
  *
  ****************************************************************************/
 
-FAR struct tls_info_s *tls_get_info(void)
+int tls_set_value(int tlsindex, uintptr_t tlsvalue)
 {
-  FAR struct tls_info_s *info = NULL;
-  struct stackinfo_s stackinfo;
-  int ret;
+  FAR struct tls_info_s *info;
 
-  ret = sched_get_stackinfo(0, &stackinfo);
-  if (ret >= 0)
+  DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
+  if (tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM)
     {
-      /* This currently assumes a push-down stack.  The TLS data lies at the
-       * lowest address of the stack allocation.
-       */
+      /* Get the TLS info structure from the current threads stack */
 
-      info = (FAR struct tls_info_s *)stackinfo.stack_alloc_ptr;
+      info = up_tls_info();
+      DEBUGASSERT(info != NULL);
+
+      /* Set the element value int the TLS info. */
+
+      info->tl_elem[tlsindex] = tlsvalue;
+      return OK;
     }
 
-  return info;
+  return -EINVAL;
 }
 
-#endif /* !CONFIG_TLS_ALIGNED */
+#endif /* CONFIG_TLS_NELEM > 0 */

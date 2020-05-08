@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_getinfo.c
+ * libs/libc/pthread/pthread_keydelete.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,53 +24,36 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
+#include <pthread.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/tls.h>
-#include <arch/tls.h>
-
-#ifndef CONFIG_TLS_ALIGNED
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_info
+ * Name: pthread_key_delete
  *
  * Description:
- *   Return a reference to the tls_info_s structure.  This is used as part
- *   of the internal implementation of tls_get/set_elem() and ONLY for the
- *   where CONFIG_TLS_ALIGNED is *not* defined
+ *   This POSIX function deletes a thread-specific data key
+ *   previously returned by pthread_key_create().
  *
  * Input Parameters:
- *   None
+ *   key - the key to delete
  *
  * Returned Value:
- *   A reference to the thread-specific tls_info_s structure is return on
- *   success.  NULL would be returned in the event of any failure.
+ *   Returns zero (OK) on success.  EINVAL may be returned if an invalid
+ *   key is received.
+ *
+ * POSIX Compatibility:
  *
  ****************************************************************************/
 
-FAR struct tls_info_s *tls_get_info(void)
+int pthread_key_delete(pthread_key_t key)
 {
-  FAR struct tls_info_s *info = NULL;
-  struct stackinfo_s stackinfo;
-  int ret;
+  /* Free the TLS index */
 
-  ret = sched_get_stackinfo(0, &stackinfo);
-  if (ret >= 0)
-    {
-      /* This currently assumes a push-down stack.  The TLS data lies at the
-       * lowest address of the stack allocation.
-       */
-
-      info = (FAR struct tls_info_s *)stackinfo.stack_alloc_ptr;
-    }
-
-  return info;
+  int ret = tls_free((int)key);
+  return ret < 0 ? -ret : 0;
 }
-
-#endif /* !CONFIG_TLS_ALIGNED */
