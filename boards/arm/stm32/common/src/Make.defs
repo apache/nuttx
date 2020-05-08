@@ -34,6 +34,10 @@ ifeq ($(CONFIG_SENSORS_VEML6070),y)
   CSRCS += stm32_veml6070.c
 endif
 
+ifeq ($(CONFIG_INPUT_NUNCHUCK),y)
+CSRCS += stm32_nunchuck.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)

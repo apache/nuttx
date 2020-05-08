@@ -101,6 +101,10 @@
 #include "stm32_veml6070.h"
 #endif
 
+#ifdef CONFIG_INPUT_NUNCHUCK
+#include "stm32_nunchuck.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -360,7 +364,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_INPUT_NUNCHUCK
   /* Register the Nunchuck driver */
 
-  ret = nunchuck_initialize("/dev/nunchuck0");
+  ret = board_nunchuck_initialize(0, 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: nunchuck_initialize() failed: %d\n", ret);
