@@ -46,6 +46,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/tls.h>
 
 #include "mips_internal.h"
 
