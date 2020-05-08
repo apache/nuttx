@@ -35,6 +35,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* For now hard code jailhouse as a flag. In the future we can determine this
+ * by looking at the CPUID base for "Jailhouse\0\0\0"
+ */
+
+#define JAILHOUSE_ENABLED 1
+
 #define PCI_BDF(bus, slot, func) (((uint32_t)bus << 8) | \
                                   ((uint32_t)slot << 3) | \
                                   func)
@@ -235,7 +241,13 @@ static void pci_scan_device(FAR struct pci_bus_s *root_bus,
 
   multi_function = root_bus->ops->pci_cfg_read(
     &tmp_dev, PCI_CONFIG_HEADER_TYPE, 1) & PCI_HEADER_MASK_MULTI;
-  if (multi_function)
+
+  /* Jailhouse breaks the PCI spec by allowing you to pass individual
+   * functions of a multi-function device.  In this case we need to
+   * scan each of the functions not just function 0.
+   */
+
+  if (multi_function || JAILHOUSE_ENABLED)
     {
       /* This is a multi-function device that we need to iterate over */
 
