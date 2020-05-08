@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/fixedmath/tls_setelem.c
+ * sched/group/group_tlsalloc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,12 +24,16 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <sched.h>
+#include <errno.h>
 #include <assert.h>
+#include <debug.h>
 
-#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/tls.h>
-#include <arch/tls.h>
+
+#include "sched/sched.h"
+#include "group/group.h"
 
 #if CONFIG_TLS_NELEM > 0
 
@@ -38,37 +42,60 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_element
+ * Name: tls_alloc
  *
  * Description:
- *   Set the TLS element associated with the 'elem' index to 'value'
+ *   Allocate a group-unique TLS data index
  *
  * Input Parameters:
- *   elem  - Index of TLS element to set
- *   value - The new value of the TLS element
+ *   None
  *
  * Returned Value:
- *   None.  Errors are not reported.  The only possible error would be if
- *   elem >=CONFIG_TLS_NELEM.
+ *   A TLS index that is unique for use within this task group.
  *
  ****************************************************************************/
 
-void tls_set_element(int elem, uintptr_t value)
+int tls_alloc(void)
 {
-  FAR struct tls_info_s *info;
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct task_group_s *group = rtcb->group;
+  irqstate_t flags;
+  int candidate;
+  int ret = -EAGAIN;
 
-  DEBUGASSERT(elem >= 0 && elem < CONFIG_TLS_NELEM);
-  if (elem >= 0 && elem < CONFIG_TLS_NELEM)
+  DEBUGASSERT(group != NULL);
+
+  /* Search for an unused index.  This is done in a critical section here to
+   * avoid concurrent modification of the group TLS index set.
+   */
+
+  flags = spin_lock_irqsave();
+  for (candidate = 0; candidate < CONFIG_TLS_NELEM; candidate++)
     {
-      /* Get the TLS info structure from the current threads stack */
+      /* Is this candidate index available? */
 
-      info = up_tls_info();
-      DEBUGASSERT(info != NULL);
+      tls_ndxset_t mask = (1 << candidate);
+      if ((group->tg_tlsset & mask) == 0)
+        {
+          /* Yes.. allocate the index and break out of the loop */
 
-      /* Set the element value int the TLS info. */
-
-      info->tl_elem[elem] = value;
+          group->tg_tlsset |= mask;
+          break;
+        }
     }
+
+  spin_unlock_irqrestore(flags);
+
+  /* Check if found a valid TLS data index. */
+
+  if (candidate < CONFIG_TLS_NELEM)
+    {
+      /* Yes.. Return the TLS index and success */
+
+      ret = candidate;
+    }
+
+  return ret;
 }
 
 #endif /* CONFIG_TLS_NELEM > 0 */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_getinfo.c
+ * libs/libc/pthread/pthread_getspecific.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,53 +24,40 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
+#include <pthread.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/tls.h>
-#include <arch/tls.h>
-
-#ifndef CONFIG_TLS_ALIGNED
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_info
+ * Name: pthread_getspecific
  *
  * Description:
- *   Return a reference to the tls_info_s structure.  This is used as part
- *   of the internal implementation of tls_get/set_elem() and ONLY for the
- *   where CONFIG_TLS_ALIGNED is *not* defined
+ *   The pthread_getspecific() function returns the value currently
+ *   bound to the specified key on behalf of the calling thread.
+ *
+ *   The effect of calling pthread_getspecific() with a key value
+ *   not obtained from pthread_key_create() or after a key has been
+ *   deleted with pthread_key_delete() is undefined.
  *
  * Input Parameters:
- *   None
+ *   key = The data key to get or set
  *
  * Returned Value:
- *   A reference to the thread-specific tls_info_s structure is return on
- *   success.  NULL would be returned in the event of any failure.
+ *   The function pthread_getspecific() returns the thread-specific data
+ *   associated with the given key.  If no thread specific data is
+ *   associated with the key, then the value NULL is returned.
+ *
+ * POSIX Compatibility:
+ *   - Both pthread_setspecific() and pthread_getspecific() may be
+ *     called from a thread-specific data destructor function.
  *
  ****************************************************************************/
 
-FAR struct tls_info_s *tls_get_info(void)
+FAR void *pthread_getspecific(pthread_key_t key)
 {
-  FAR struct tls_info_s *info = NULL;
-  struct stackinfo_s stackinfo;
-  int ret;
-
-  ret = sched_get_stackinfo(0, &stackinfo);
-  if (ret >= 0)
-    {
-      /* This currently assumes a push-down stack.  The TLS data lies at the
-       * lowest address of the stack allocation.
-       */
-
-      info = (FAR struct tls_info_s *)stackinfo.stack_alloc_ptr;
-    }
-
-  return info;
+  return (FAR void *)tls_get_value((int)key);
 }
-
-#endif /* !CONFIG_TLS_ALIGNED */

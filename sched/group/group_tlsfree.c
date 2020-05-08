@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_getinfo.c
+ * sched/group/group_tlsfree.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,53 +24,65 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <sched.h>
+#include <errno.h>
 #include <assert.h>
 
-#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/tls.h>
-#include <arch/tls.h>
 
-#ifndef CONFIG_TLS_ALIGNED
+#include "sched/sched.h"
+#include "group/group.h"
+
+#if CONFIG_TLS_NELEM > 0
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_info
+ * Name: tls_free
  *
  * Description:
- *   Return a reference to the tls_info_s structure.  This is used as part
- *   of the internal implementation of tls_get/set_elem() and ONLY for the
- *   where CONFIG_TLS_ALIGNED is *not* defined
+ *   Release a group-unique TLS data index previous obtained by tls_alloc()
  *
  * Input Parameters:
- *   None
+ *   tlsindex - The previously allocated TLS index to be freed
  *
  * Returned Value:
- *   A reference to the thread-specific tls_info_s structure is return on
- *   success.  NULL would be returned in the event of any failure.
+ *   OK is returned on success; a negated errno value will be returned on
+ *   failure:
+ *
+ *     -EINVAL - the index to be freed is out of range.
  *
  ****************************************************************************/
 
-FAR struct tls_info_s *tls_get_info(void)
+int tls_free(int tlsindex)
 {
-  FAR struct tls_info_s *info = NULL;
-  struct stackinfo_s stackinfo;
-  int ret;
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct task_group_s *group = rtcb->group;
+  tls_ndxset_t mask;
+  irqstate_t flags;
+  int ret = -EINVAL;
 
-  ret = sched_get_stackinfo(0, &stackinfo);
-  if (ret >= 0)
+  DEBUGASSERT((unsigned)tlsindex < CONFIG_TLS_NELEM && group != NULL);
+  if ((unsigned)tlsindex < CONFIG_TLS_NELEM)
     {
-      /* This currently assumes a push-down stack.  The TLS data lies at the
-       * lowest address of the stack allocation.
+      /* This is done in a critical section here to avoid concurrent
+       * modification of the group TLS index set.
        */
 
-      info = (FAR struct tls_info_s *)stackinfo.stack_alloc_ptr;
+      mask  = (1 << tlsindex);
+      flags = spin_lock_irqsave();
+
+      DEBUGASSERT((group->tg_tlsset & mask) != 0);
+      group->tg_tlsset &= ~mask;
+      spin_unlock_irqrestore(flags);
+
+      ret = OK;
     }
 
-  return info;
+  return ret;
 }
 
-#endif /* !CONFIG_TLS_ALIGNED */
+#endif /* CONFIG_TLS_NELEM > 0 */

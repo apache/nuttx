@@ -283,6 +283,9 @@ SYSCALL_LOOKUP(telldir,                    1)
   SYSCALL_LOOKUP(shmdt,                    1)
 #endif
 
+  SYSCALL_LOOKUP(tls_alloc,                0)
+  SYSCALL_LOOKUP(tls_free,                 1)
+
 /* The following are defined if pthreads are enabled */
 
 #ifndef CONFIG_DISABLE_PTHREAD
@@ -294,10 +297,7 @@ SYSCALL_LOOKUP(telldir,                    1)
   SYSCALL_LOOKUP(pthread_detach,           1)
   SYSCALL_LOOKUP(pthread_exit,             1)
   SYSCALL_LOOKUP(pthread_getschedparam,    3)
-  SYSCALL_LOOKUP(pthread_getspecific,      1)
   SYSCALL_LOOKUP(pthread_join,             2)
-  SYSCALL_LOOKUP(pthread_key_create,       2)
-  SYSCALL_LOOKUP(pthread_key_delete,       1)
   SYSCALL_LOOKUP(pthread_mutex_destroy,    1)
   SYSCALL_LOOKUP(pthread_mutex_init,       2)
   SYSCALL_LOOKUP(pthread_mutex_timedlock,  2)
@@ -308,7 +308,6 @@ SYSCALL_LOOKUP(telldir,                    1)
 #endif
   SYSCALL_LOOKUP(pthread_setschedparam,    3)
   SYSCALL_LOOKUP(pthread_setschedprio,     2)
-  SYSCALL_LOOKUP(pthread_setspecific,      2)
 #ifdef CONFIG_SMP
   SYSCALL_LOOKUP(pthread_setaffinity_np,   3)
   SYSCALL_LOOKUP(pthread_getaffinity_np,   3)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/fixedmath/tls_getelem.c
+ * libs/libc/pthread/pthread_setspecific.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,12 +24,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
+#include <pthread.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/tls.h>
-#include <arch/tls.h>
 
 #if CONFIG_TLS_NELEM > 0
 
@@ -38,41 +35,46 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_element
+ * Name: pthread_setspecific
  *
  * Description:
- *   Return an the TLS element associated with the 'elem' index
+ *   The pthread_setspecific() function associates a thread-
+ *   specific value with a key obtained via a previous call
+ *   to pthread_key_create().  Different threads may bind
+ *   different values to the same key.  These values are
+ *   typically pointers to blocks of dynamically allocated
+ *   memory that have been reserved for use by the calling
+ *   thread.
+ *
+ *   The effect of calling pthread_setspecific() with
+ *   a key value not obtained from pthread_key_create() or
+ *   after a key has been deleted with pthread_key_delete()
+ *   is undefined.
  *
  * Input Parameters:
- *   elem - Index of TLS element to return
+ *   key = The data key to get or set
+ *   value = The value to bind to the key.
  *
  * Returned Value:
- *   The value of TLS element associated with 'elem'. Errors are not
- *   reported.  Zero is returned in the event of an error, but zero may also
- *   be valid value and returned when there is no error.  The only possible
- *   error would be if elem < 0 or elem >=CONFIG_TLS_NELEM.
+ *   If successful, pthread_setspecific() will return zero (OK).
+ *   Otherwise, an error number will be returned:
+ *
+ *      ENOMEM - Insufficient memory exists to associate
+ *         the value with the key.
+ *      EINVAL - The key value is invalid.
+ *
+ * POSIX Compatibility:
+ *   - Both pthread_setspecific() and pthread_getspecific()
+ *     may be called from a thread-specific data destructor
+ *     function.
  *
  ****************************************************************************/
 
-uintptr_t tls_get_element(int elem)
+int pthread_setspecific(pthread_key_t key, FAR const void *value)
 {
-  FAR struct tls_info_s *info;
-  uintptr_t ret = 0;
-
-  DEBUGASSERT(elem >= 0 && elem < CONFIG_TLS_NELEM);
-  if (elem >= 0 && elem < CONFIG_TLS_NELEM)
-    {
-      /* Get the TLS info structure from the current threads stack */
-
-      info = up_tls_info();
-      DEBUGASSERT(info != NULL);
-
-      /* Get the element value from the TLS info. */
-
-      ret = info->tl_elem[elem];
-    }
-
-  return ret;
+  int ret = tls_set_value((int)key, (uintptr_t)value);
+  return ret < 0 ? -ret : 0;
 }
 
-#endif /* CONFIG_TLS_NELEM > 0 */
+#endif /* CONFIG_TLS_NELEM */
+

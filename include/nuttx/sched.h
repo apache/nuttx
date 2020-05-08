@@ -333,19 +333,21 @@ struct pthread_cleanup_s
 };
 #endif
 
-/* type pthread_keyset_t ********************************************************/
+/* type tls_ndxset_t ************************************************************/
 
-/* Smallest addressable type that can hold the entire configured number of keys */
+/* Smallest addressable type that can hold the entire configured number of TLS
+ * data indexes.
+ */
 
-#if defined(CONFIG_NPTHREAD_KEYS) && CONFIG_NPTHREAD_KEYS > 0
-#  if CONFIG_NPTHREAD_KEYS > 32
-#    error Too many pthread keys
-#  elif CONFIG_NPTHREAD_KEYS > 16
-     typedef uint32_t pthread_keyset_t;
-#  elif CONFIG_NPTHREAD_KEYS > 8
-     typedef uint16_t pthread_keyset_t;
+#if CONFIG_TLS_NELEM > 0
+#  if CONFIG_TLS_NELEM > 32
+#    error Too many TLS elements
+#  elif CONFIG_TLS_NELEM > 16
+     typedef uint32_t tls_ndxset_t;
+#  elif CONFIG_TLS_NELEM > 8
+     typedef uint16_t tls_ndxset_t;
 #  else
-     typedef uint8_t pthread_keyset_t;
+     typedef uint8_t tls_ndxset_t;
 #  endif
 #endif
 
@@ -525,8 +527,11 @@ struct task_group_s
   FAR struct join_s *tg_joinhead;   /*   Head of a list of join data            */
   FAR struct join_s *tg_jointail;   /*   Tail of a list of join data            */
 #endif
-#if CONFIG_NPTHREAD_KEYS > 0
-  pthread_keyset_t tg_keyset;       /* Set of pthread keys allocated            */
+
+  /* Thread local storage *******************************************************/
+
+#if CONFIG_TLS_NELEM > 0
+  tls_ndxset_t tg_tlsset;           /* Set of TLS data indexes allocated        */
 #endif
 
   /* POSIX Signal Control Fields ************************************************/
@@ -692,12 +697,6 @@ struct tcb_s
 
 #ifndef CONFIG_DISABLE_MQUEUE
   FAR struct mqueue_inode_s *msgwaitq;   /* Waiting for this message queue      */
-#endif
-
-  /* POSIX Thread Specific Data *************************************************/
-
-#if CONFIG_NPTHREAD_KEYS > 0
-  FAR void *pthread_data[CONFIG_NPTHREAD_KEYS];
 #endif
 
   /* Pre-emption monitor support ************************************************/
