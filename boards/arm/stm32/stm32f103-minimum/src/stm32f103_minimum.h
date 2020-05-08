@@ -105,7 +105,8 @@
 #  undef CONFIG_STM32_SPI2
 #endif
 
-/* GPIOs **************************************************************/
+/* GPIOs ********************************************************************/
+
 /* LEDs */
 
 /* The Blue/Red pills have a different pinout to the Black pill,
@@ -220,7 +221,7 @@
 #define GPIO_INT1         (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN2)
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -297,7 +298,8 @@ int stm32_apds9960initialize(FAR const char *devpath);
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Hy-Mini STM32v board.
+ *   Called to configure SPI chip select GPIO pins for the Hy-Mini STM32v
+ *   board.
  *
  ****************************************************************************/
 
@@ -495,7 +497,8 @@ int stm32_mfrc522initialize(FAR const char *devpath);
  * Name: stm32_tone_setup
  *
  * Description:
- *   Function used to initialize a PWM and Oneshot timers to Audio Tone Generator.
+ *   Function used to initialize a PWM and Oneshot timers to Audio Tone
+ *   Generator.
  *
  ****************************************************************************/
 
@@ -507,8 +510,8 @@ int stm32_tone_setup(void);
  * Name: stm32_veml6070initialize
  *
  * Description:
- *   Called to configure an I2C and to register VEML6070 for the stm32f103-minimum
- *   board.
+ *   Called to configure an I2C and to register VEML6070 for the
+ *   stm32f103-minimum board.
  *
  ****************************************************************************/
 

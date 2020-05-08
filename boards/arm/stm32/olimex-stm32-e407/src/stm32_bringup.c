@@ -202,8 +202,8 @@ int stm32_bringup(void)
 #endif
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
+   * thread will monitor for USB connection and disconnection events.
    */
 
   ret = stm32_usbhost_initialize();
@@ -256,7 +256,7 @@ int stm32_bringup(void)
 #endif
 
 #if defined(CONFIG_TIMER)
-  /*Initialize the timer, at this moment it's only Timer 1,2,3*/
+  /* Initialize the timer, at this moment it's only Timer 1,2,3 */
 
   #if defined(CONFIG_STM32_TIM1)
     stm32_timer_driver_setup("/dev/timer1", 1);
@@ -275,7 +275,8 @@ int stm32_bringup(void)
   ret = stm32_mrf24j40_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_mrf24j40_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_mrf24j40_initialize() failed:"
+                      " %d\n", ret);
     }
 #endif
 
