@@ -57,6 +57,12 @@
 #include "stm32.h"
 #include "olimex-stm32-e407.h"
 
+/* The following are includes from board-common logic */
+
+#ifdef CONFIG_SENSORS_BMP180
+#include "stm32_bmp180.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -221,7 +227,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_BMP180
   /* Initialize the BMP180 pressure sensor. */
 
-  ret = stm32_bmp180initialize("/dev/press0");
+  ret = board_bmp180_initialize(0, 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180, error %d\n", ret);

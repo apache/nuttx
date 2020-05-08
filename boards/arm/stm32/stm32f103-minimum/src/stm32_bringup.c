@@ -83,6 +83,12 @@
 #  include "stm32_rtc.h"
 #endif
 
+/* The following are includes from board-common logic */
+
+#ifdef CONFIG_SENSORS_BMP180
+#include "stm32_bmp180.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -191,7 +197,9 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_BMP180
-  ret = stm32_bmp180initialize("/dev/press0");
+  /* Initialize the BMP180 pressure sensor. */
+
+  ret = board_bmp180_initialize(0, 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180, error %d\n", ret);

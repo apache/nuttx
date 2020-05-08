@@ -22,3 +22,4 @@ cscope.out
 /*.adb
 /*.lib
 /*.src
+/*/*/common/board

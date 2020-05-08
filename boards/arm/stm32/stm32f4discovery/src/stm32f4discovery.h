@@ -471,19 +471,6 @@ int stm32_bh1750initialize(FAR const char *devpath);
 #endif
 
 /****************************************************************************
- * Name: stm32_bmp180initialize
- *
- * Description:
- *   Called to configure an I2C and to register BMP180 for the
- *   stm32f4discovery board.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SENSORS_BMP180
-int stm32_bmp180initialize(FAR const char *devpath);
-#endif
-
-/****************************************************************************
  * Name: stm32_lis3dshinitialize
  *
  * Description:
