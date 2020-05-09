@@ -121,7 +121,7 @@ typedef unsigned int       _size_t;
  * up_irq_save()
  */
 
-typedef unsigned int       irqstate_t;
+typedef _uint64_t          irqstate_t;
 
 #endif /* __ASSEMBLY__ */
 
