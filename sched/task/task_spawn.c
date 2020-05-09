@@ -112,7 +112,7 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
 
       /* Set the default priority to the same priority as this task */
 
-      ret = nxsched_getparam(0, &param);
+      ret = nxsched_get_param(0, &param);
       if (ret < 0)
         {
           ret = -ret;
@@ -366,10 +366,10 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
 
   /* Get the priority of this (parent) task */
 
-  ret = nxsched_getparam(0, &param);
+  ret = nxsched_get_param(0, &param);
   if (ret < 0)
     {
-      serr("ERROR: nxsched_getparam failed: %d\n", ret);
+      serr("ERROR: nxsched_get_param failed: %d\n", ret);
       spawn_semgive(&g_spawn_parmsem);
       return -ret;
     }

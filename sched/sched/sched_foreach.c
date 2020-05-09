@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_foreach.c
+ * sched/sched/nxsched_foreach.c
  *
  *   Copyright (C) 2007, 2009, 2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_foreach
+ * Name: nxsched_foreach
  *
  * Description:
  *   Enumerate over each task and provide the TCB of each task to a user
@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-void sched_foreach(sched_foreach_t handler, FAR void *arg)
+void nxsched_foreach(nxsched_foreach_t handler, FAR void *arg)
 {
   irqstate_t flags;
   int ndx;

@@ -174,10 +174,10 @@ int sim_tsc_setup(int minor)
   /* Set the client task priority */
 
   param.sched_priority = CONFIG_SIM_CLIENTPRIO;
-  ret = nxsched_setparam(0, &param);
+  ret = nxsched_set_param(0, &param);
   if (ret < 0)
     {
-      gerr("ERROR: nxsched_setparam failed: %d\n" , ret);
+      gerr("ERROR: nxsched_set_param failed: %d\n" , ret);
       return ret;
     }
 

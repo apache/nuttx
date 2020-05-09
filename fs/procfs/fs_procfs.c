@@ -588,7 +588,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
        */
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
-      sched_foreach(procfs_enum, level0);
+      nxsched_foreach(procfs_enum, level0);
 #else
       level0->base.index = 0;
       level0->base.nentries = 0;
@@ -841,7 +841,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
           pid = level0->pid[index];
 
-          tcb = sched_gettcb(pid);
+          tcb = nxsched_get_tcb(pid);
           if (!tcb)
             {
               ferr("ERROR: PID %d is no longer valid\n", (int)pid);

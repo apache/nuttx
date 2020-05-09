@@ -332,7 +332,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
        * thread.
        */
 
-      ret = nxsched_getparam(0, &param);
+      ret = nxsched_get_param(0, &param);
       if (ret < 0)
         {
           errcode = -ret;
@@ -341,7 +341,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
       /* Get the scheduler policy for this thread */
 
-      policy = nxsched_getscheduler(0);
+      policy = nxsched_get_scheduler(0);
       if (policy < 0)
         {
           errcode = -policy;
@@ -621,6 +621,6 @@ errout_with_tcb:
       ptcb->cmn.group = NULL;
     }
 
-  sched_releasetcb((FAR struct tcb_s *)ptcb, TCB_FLAG_TTYPE_PTHREAD);
+  nxsched_release_tcb((FAR struct tcb_s *)ptcb, TCB_FLAG_TTYPE_PTHREAD);
   return errcode;
 }

@@ -188,7 +188,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
       return -EBADF;
     }
 
-  list = sched_getfiles();
+  list = nxsched_get_files();
 
   /* The file list can be NULL under two cases:  (1) One is an obscure
    * cornercase:  When memory management debug output is enabled.  Then
@@ -306,7 +306,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
 
   /* Get the file descriptor list.  It should not be NULL in this context. */
 
-  list = sched_getfiles();
+  list = nxsched_get_files();
   DEBUGASSERT(list != NULL);
 
   ret = _files_semtake(list);
@@ -355,7 +355,7 @@ int files_close(int fd)
    * context.
    */
 
-  list = sched_getfiles();
+  list = nxsched_get_files();
   DEBUGASSERT(list != NULL);
 
   /* If the file was properly opened, there should be an inode assigned */
@@ -392,7 +392,7 @@ void files_release(int fd)
   FAR struct filelist *list;
   int ret;
 
-  list = sched_getfiles();
+  list = nxsched_get_files();
   DEBUGASSERT(list != NULL);
 
   if (fd >= 0 && fd < CONFIG_NFILE_DESCRIPTORS)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_getstreams.c
+ * sched/sched/nxsched_get_streams.c
  *
  *   Copyright (C) 2007, 2008, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_getstreams
+ * Name: nxsched_get_streams
  *
  * Description:
  *   Return a pointer to the streams list for this thread
@@ -63,7 +63,7 @@
 
 #if CONFIG_NFILE_STREAMS > 0
 
-FAR struct streamlist *sched_getstreams(void)
+FAR struct streamlist *nxsched_get_streams(void)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;

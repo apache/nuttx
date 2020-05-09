@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_setaffinity
+ * Name: nxsched_set_affinity
  *
  * Description:
  *   sched_setaffinity() sets the CPU affinity mask of the thread whose ID
@@ -66,7 +66,7 @@
  *   CPUs specified in mask, then that thread is migrated to one of the
  *   CPUs specified in mask.
  *
- *   nxsched_setaffinity() is identical to the function sched_setparam(),
+ *   nxsched_set_affinity() is identical to the function sched_setparam(),
  *   differing only in its return value:  This function does not modify
  *   the errno variable.  This is a non-standard, internal OS function and
  *   is not intended for use by application logic.  Applications should
@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-int nxsched_setaffinity(pid_t pid, size_t cpusetsize,
+int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
                         FAR const cpu_set_t *mask)
 {
   FAR struct tcb_s *tcb;
@@ -102,7 +102,7 @@ int nxsched_setaffinity(pid_t pid, size_t cpusetsize,
     }
   else
     {
-      tcb = sched_gettcb(pid);
+      tcb = nxsched_get_tcb(pid);
     }
 
   if (tcb == NULL)
@@ -177,7 +177,7 @@ errout_with_lock:
  *   CPUs specified in mask, then that thread is migrated to one of the
  *   CPUs specified in mask.
  *
- *   This function is a simply wrapper around nxsched_setaffinity() that sets
+ *   This function is a simply wrapper around nxsched_set_affinity() that sets
  *   the errno value in the event of an error.
  *
  * Input Parameters:
@@ -196,7 +196,7 @@ errout_with_lock:
 int sched_setaffinity(pid_t pid, size_t cpusetsize,
                       FAR const cpu_set_t *mask)
 {
-  int ret = nxsched_setaffinity(pid, cpusetsize, mask);
+  int ret = nxsched_set_affinity(pid, cpusetsize, mask);
   if (ret < 0)
     {
       set_errno(-ret);

@@ -164,7 +164,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
        * thread it is our child.
        */
 
-      ctcb = sched_gettcb((pid_t)id);
+      ctcb = nxsched_get_tcb((pid_t)id);
 
 #ifdef HAVE_GROUP_MEMBERS
       if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
@@ -207,7 +207,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
        * thread is our child.
        */
 
-      ctcb = sched_gettcb((pid_t)id);
+      ctcb = nxsched_get_tcb((pid_t)id);
 
 #ifdef HAVE_GROUP_MEMBERS
       if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)

@@ -95,7 +95,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
 
   /* Get the TCB associated with the group member */
 
-  tcb = sched_gettcb(pid);
+  tcb = nxsched_get_tcb(pid);
   DEBUGASSERT(tcb != NULL && tcb->group != NULL && info != NULL);
 
   if (tcb)

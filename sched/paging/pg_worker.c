@@ -153,7 +153,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
   if (g_pftcb)
     {
       FAR struct tcb_s *htcb = (FAR struct tcb_s *)g_waitingforfill.head;
-      FAR struct tcb_s *wtcb = sched_gettcb(g_pgworker);
+      FAR struct tcb_s *wtcb = nxsched_get_tcb(g_pgworker);
 
       /* Find the higher priority between the task waiting for the fill to
        * complete in g_pftcb and the task waiting at the head of the

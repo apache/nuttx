@@ -61,7 +61,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
 
   /* Get the TCB of the low priority worker thread from the process ID. */
 
-  wtcb = sched_gettcb(wpid);
+  wtcb = nxsched_get_tcb(wpid);
   DEBUGASSERT(wtcb);
 
 #if CONFIG_SEM_NNESTPRIO > 0
@@ -180,7 +180,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
 
   /* Get the TCB of the low priority worker thread from the process ID. */
 
-  wtcb = sched_gettcb(wpid);
+  wtcb = nxsched_get_tcb(wpid);
   DEBUGASSERT(wtcb);
 
   /* Was the priority of the worker thread boosted? If so, then drop its

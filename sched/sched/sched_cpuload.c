@@ -133,7 +133,7 @@ static inline void nxsched_cpu_process_cpuload(int cpu)
    * NOTE also that CPU load measurement data is retained in the g_pidhash
    * table vs. in the TCB which would seem to be the more logic place.  It
    * is place in the hash table, instead, to facilitate CPU load adjustments
-   * on all threads during timer interrupt handling. sched_foreach() could
+   * on all threads during timer interrupt handling. nxsched_foreach() could
    * do this too, but this would require a little more overhead.
    */
 
@@ -266,7 +266,7 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
    * NOTE also that CPU load measurement data is retained in the g_pidhash
    * table vs. in the TCB which would seem to be the more logic place.  It
    * is place in the hash table, instead, to facilitate CPU load adjustments
-   * on all threads during timer interrupt handling. sched_foreach() could
+   * on all threads during timer interrupt handling. nxsched_foreach() could
    * do this too, but this would require a little more overhead.
    */
 

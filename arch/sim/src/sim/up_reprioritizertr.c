@@ -134,7 +134,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           /* Update scheduler parameters */
 
-          sched_suspend_scheduler(rtcb);
+          nxsched_suspend_scheduler(rtcb);
 
           /* Copy the exception context into the TCB at the (old) head of the
            * ready-to-run Task list. if up_setjmp returns a non-zero
@@ -165,7 +165,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
               /* Update scheduler parameters */
 
-              sched_resume_scheduler(rtcb);
+              nxsched_resume_scheduler(rtcb);
 
               /* Then switch contexts */
 

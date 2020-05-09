@@ -120,10 +120,10 @@ int nxtask_exit(void)
 
 #ifdef CONFIG_SMP
   /* Because clearing the global IRQ control in sched_removereadytorun()
-   * was moved to sched_resume_scheduler(). So call the API here.
+   * was moved to nxsched_resume_scheduler(). So call the API here.
    */
 
-  sched_resume_scheduler(rtcb);
+  nxsched_resume_scheduler(rtcb);
 #endif
 
   /* We are now in a bad state -- the head of the ready to run task list

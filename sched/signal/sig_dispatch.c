@@ -513,7 +513,7 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info)
 
   /* Get the TCB associated with the pid */
 
-  stcb = sched_gettcb(pid);
+  stcb = nxsched_get_tcb(pid);
   if (stcb != NULL)
     {
       /* The task/thread associated with this PID is still active.  Get its
@@ -552,7 +552,7 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info)
 
   /* Get the TCB associated with the pid */
 
-  stcb = sched_gettcb(pid);
+  stcb = nxsched_get_tcb(pid);
   if (stcb == NULL)
     {
       return -ESRCH;

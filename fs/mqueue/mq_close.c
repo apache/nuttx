@@ -124,7 +124,7 @@ int nxmq_close_group(mqd_t mqdes, FAR struct task_group_s *group)
 
 int nxmq_close(mqd_t mqdes)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)sched_self();
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)nxsched_self();
   int ret;
 
   /* Lock the scheduler to prevent any asynchronous task delete operation
@@ -133,7 +133,7 @@ int nxmq_close(mqd_t mqdes)
 
   sched_lock();
 
-  rtcb = (FAR struct tcb_s *)sched_self();
+  rtcb = (FAR struct tcb_s *)nxsched_self();
   DEBUGASSERT(mqdes != NULL && rtcb != NULL && rtcb->group != NULL);
 
   /* Then perform the close operation */

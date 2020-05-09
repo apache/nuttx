@@ -141,7 +141,7 @@ void _exit(int status)
 
 #ifdef CONFIG_DUMP_ON_EXIT
   sinfo("Other tasks:\n");
-  sched_foreach(_up_dumponexit, NULL);
+  nxsched_foreach(_up_dumponexit, NULL);
 #endif
 
   /* Destroy the task at the head of the ready to run list. */

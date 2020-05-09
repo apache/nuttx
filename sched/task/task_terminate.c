@@ -115,7 +115,7 @@ int nxtask_terminate(pid_t pid, bool nonblocking)
 
   /* Find for the TCB associated with matching PID */
 
-  dtcb = sched_gettcb(pid);
+  dtcb = nxsched_get_tcb(pid);
   if (!dtcb)
     {
       /* This PID does not correspond to any known task */
@@ -197,7 +197,7 @@ int nxtask_terminate(pid_t pid, bool nonblocking)
 
   /* Deallocate its TCB */
 
-  return sched_releasetcb(dtcb, dtcb->flags & TCB_FLAG_TTYPE_MASK);
+  return nxsched_release_tcb(dtcb, dtcb->flags & TCB_FLAG_TTYPE_MASK);
 
 errout_with_lock:
   leave_critical_section(flags);

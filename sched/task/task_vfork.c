@@ -358,7 +358,7 @@ FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize)
   return child;
 
 errout_with_tcb:
-  sched_releasetcb((FAR struct tcb_s *)child, ttype);
+  nxsched_release_tcb((FAR struct tcb_s *)child, ttype);
   set_errno(-ret);
   return NULL;
 }
@@ -509,7 +509,7 @@ void nxtask_vforkabort(FAR struct task_tcb_s *child, int errcode)
 
   /* Release the TCB */
 
-  sched_releasetcb((FAR struct tcb_s *)child,
+  nxsched_release_tcb((FAR struct tcb_s *)child,
                    child->cmn.flags & TCB_FLAG_TTYPE_MASK);
   set_errno(errcode);
 }

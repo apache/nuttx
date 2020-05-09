@@ -86,7 +86,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
    * thread-specific file list.
    */
 
-  list = sched_getfiles();
+  list = nxsched_get_files();
 
   /* The file list can be NULL under two cases:  (1) One is an obscure
    * cornercase:  When memory management debug output is enabled.  Then

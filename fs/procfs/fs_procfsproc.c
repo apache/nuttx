@@ -1328,7 +1328,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 
   pid = (pid_t)tmp;
 
-  tcb = sched_gettcb(pid);
+  tcb = nxsched_get_tcb(pid);
   if (tcb == NULL)
     {
       ferr("ERROR: PID %d is no longer valid\n", (int)pid);
@@ -1414,7 +1414,7 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
 
   /* Verify that the thread is still valid */
 
-  tcb = sched_gettcb(procfile->pid);
+  tcb = nxsched_get_tcb(procfile->pid);
   if (tcb == NULL)
     {
       ferr("ERROR: PID %d is not valid\n", (int)procfile->pid);
@@ -1578,7 +1578,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
   pid = (pid_t)tmp;
 
-  tcb = sched_gettcb(pid);
+  tcb = nxsched_get_tcb(pid);
   if (tcb == NULL)
     {
       ferr("ERROR: PID %d is not valid\n", (int)pid);
@@ -1706,7 +1706,7 @@ static int proc_readdir(struct fs_dirent_s *dir)
 
       pid = procdir->pid;
 
-      tcb = sched_gettcb(pid);
+      tcb = nxsched_get_tcb(pid);
       if (tcb == NULL)
         {
           ferr("ERROR: PID %d is no longer valid\n", (int)pid);
@@ -1824,7 +1824,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
 
   pid = (pid_t)tmp;
 
-  tcb = sched_gettcb(pid);
+  tcb = nxsched_get_tcb(pid);
   if (tcb == NULL)
     {
       ferr("ERROR: PID %d is no longer valid\n", (int)pid);

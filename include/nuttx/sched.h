@@ -151,12 +151,12 @@
  */
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-#  define _SCHED_GETPARAM(t,p)       nxsched_getparam(t,p)
-#  define _SCHED_SETPARAM(t,p)       nxsched_setparam(t,p)
-#  define _SCHED_GETSCHEDULER(t)     nxsched_getscheduler(t)
-#  define _SCHED_SETSCHEDULER(t,s,p) nxsched_setscheduler(t,s,p)
-#  define _SCHED_GETAFFINITY(t,c,m)  nxsched_getaffinity(t,c,m)
-#  define _SCHED_SETAFFINITY(t,c,m)  nxsched_setaffinity(t,c,m)
+#  define _SCHED_GETPARAM(t,p)       nxsched_get_param(t,p)
+#  define _SCHED_SETPARAM(t,p)       nxsched_set_param(t,p)
+#  define _SCHED_GETSCHEDULER(t)     nxsched_get_scheduler(t)
+#  define _SCHED_SETSCHEDULER(t,s,p) nxsched_set_scheduler(t,s,p)
+#  define _SCHED_GETAFFINITY(t,c,m)  nxsched_get_affinity(t,c,m)
+#  define _SCHED_SETAFFINITY(t,c,m)  nxsched_set_affinity(t,c,m)
 #  define _SCHED_ERRNO(r)            (-(r))
 #  define _SCHED_ERRVAL(r)           (r)
 #else
@@ -790,9 +790,9 @@ struct pthread_tcb_s
 };
 #endif /* !CONFIG_DISABLE_PTHREAD */
 
-/* This is the callback type used by sched_foreach() */
+/* This is the callback type used by nxsched_foreach() */
 
-typedef CODE void (*sched_foreach_t)(FAR struct tcb_s *tcb, FAR void *arg);
+typedef CODE void (*nxsched_foreach_t)(FAR struct tcb_s *tcb, FAR void *arg);
 
 #endif /* __ASSEMBLY__ */
 
@@ -827,7 +827,7 @@ EXTERN uint32_t g_crit_max[1];
  ********************************************************************************/
 
 /********************************************************************************
- * Name: sched_self
+ * Name: nxsched_self
  *
  * Description:
  *   Return the current threads TCB.  Basically, this function just wraps the
@@ -836,10 +836,10 @@ EXTERN uint32_t g_crit_max[1];
  *
  ********************************************************************************/
 
-FAR struct tcb_s *sched_self(void);
+FAR struct tcb_s *nxsched_self(void);
 
 /********************************************************************************
- * Name: sched_foreach
+ * Name: nxsched_foreach
  *
  * Description:
  *   Enumerate over each task and provide the TCB of each task to a user
@@ -861,10 +861,10 @@ FAR struct tcb_s *sched_self(void);
  *
  ********************************************************************************/
 
-void sched_foreach(sched_foreach_t handler, FAR void *arg);
+void nxsched_foreach(nxsched_foreach_t handler, FAR void *arg);
 
 /********************************************************************************
- * Name: sched_gettcb
+ * Name: nxsched_get_tcb
  *
  * Description:
  *   Given a task ID, this function will return the a pointer to the
@@ -879,7 +879,7 @@ void sched_foreach(sched_foreach_t handler, FAR void *arg);
  *
  ********************************************************************************/
 
-FAR struct tcb_s *sched_gettcb(pid_t pid);
+FAR struct tcb_s *nxsched_get_tcb(pid_t pid);
 
 /********************************************************************************
  * Name:  nxsched_releasepid
@@ -890,7 +890,7 @@ FAR struct tcb_s *sched_gettcb(pid_t pid);
  *
  ********************************************************************************/
 
-int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype);
+int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype);
 
 /* File system helpers **********************************************************/
 
@@ -898,13 +898,13 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype);
  * currently executing task.
  */
 
-FAR struct filelist *sched_getfiles(void);
+FAR struct filelist *nxsched_get_files(void);
 #if CONFIG_NFILE_STREAMS > 0
-FAR struct streamlist *sched_getstreams(void);
+FAR struct streamlist *nxsched_get_streams(void);
 #endif /* CONFIG_NFILE_STREAMS */
 
 #ifdef CONFIG_NET
-FAR struct socketlist *sched_getsockets(void);
+FAR struct socketlist *nxsched_get_sockets(void);
 #endif
 
 /********************************************************************************
@@ -985,7 +985,7 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo);
 #endif
 
 /********************************************************************************
- * Name: sched_resume_scheduler
+ * Name: nxsched_resume_scheduler
  *
  * Description:
  *   Called by architecture specific implementations that block task execution.
@@ -1001,13 +1001,13 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo);
  ********************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_RESUMESCHEDULER)
-void sched_resume_scheduler(FAR struct tcb_s *tcb);
+void nxsched_resume_scheduler(FAR struct tcb_s *tcb);
 #else
-#  define sched_resume_scheduler(tcb)
+#  define nxsched_resume_scheduler(tcb)
 #endif
 
 /********************************************************************************
- * Name: sched_suspend_scheduler
+ * Name: nxsched_suspend_scheduler
  *
  * Description:
  *   Called by architecture specific implementations to resume task execution.
@@ -1023,13 +1023,13 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb);
  ********************************************************************************/
 
 #ifdef CONFIG_SCHED_SUSPENDSCHEDULER
-void sched_suspend_scheduler(FAR struct tcb_s *tcb);
+void nxsched_suspend_scheduler(FAR struct tcb_s *tcb);
 #else
-#  define sched_suspend_scheduler(tcb)
+#  define nxsched_suspend_scheduler(tcb)
 #endif
 
 /********************************************************************************
- * Name: nxsched_getparam
+ * Name: nxsched_get_param
  *
  * Description:
  *   This function gets the scheduling priority of the task specified by
@@ -1057,10 +1057,10 @@ void sched_suspend_scheduler(FAR struct tcb_s *tcb);
  ********************************************************************************/
 
 struct sched_param;  /* Forward reference */
-int nxsched_getparam (pid_t pid, FAR struct sched_param *param);
+int nxsched_get_param (pid_t pid, FAR struct sched_param *param);
 
 /********************************************************************************
- * Name:  nxsched_setparam
+ * Name:  nxsched_set_param
  *
  * Description:
  *   This function sets the priority of a specified task.  It is identical
@@ -1094,10 +1094,10 @@ int nxsched_getparam (pid_t pid, FAR struct sched_param *param);
  ********************************************************************************/
 
 struct sched_param;  /* Forward reference */
-int nxsched_setparam(pid_t pid, FAR const struct sched_param *param);
+int nxsched_set_param(pid_t pid, FAR const struct sched_param *param);
 
 /********************************************************************************
- * Name: nxsched_getscheduler
+ * Name: nxsched_get_scheduler
  *
  * Description:
  *   sched_getscheduler() returns the scheduling policy currently
@@ -1125,18 +1125,18 @@ int nxsched_setparam(pid_t pid, FAR const struct sched_param *param);
  *
  ********************************************************************************/
 
-int nxsched_getscheduler(pid_t pid);
+int nxsched_get_scheduler(pid_t pid);
 
 /********************************************************************************
- * Name: nxsched_setscheduler
+ * Name: nxsched_set_scheduler
  *
  * Description:
- *   nxsched_setscheduler() sets both the scheduling policy and the priority
+ *   nxsched_set_scheduler() sets both the scheduling policy and the priority
  *   for the task identified by pid. If pid equals zero, the scheduler of
  *   the calling task will be set.  The parameter 'param' holds the priority
  *   of the thread under the new policy.
  *
- *   nxsched_setscheduler() is identical to the function sched_getparam(),
+ *   nxsched_set_scheduler() is identical to the function sched_getparam(),
  *   differing only in its return value:  This function does not modify the
  *    errno variable.
  *
@@ -1153,7 +1153,7 @@ int nxsched_getscheduler(pid_t pid);
  *      through SCHED_PRIORITY_MAX.
  *
  * Returned Value:
- *   On success, nxsched_setscheduler() returns OK (zero).  On error, a
+ *   On success, nxsched_set_scheduler() returns OK (zero).  On error, a
  *   negated errno value is returned:
  *
  *   EINVAL The scheduling policy is not one of the recognized policies.
@@ -1161,19 +1161,19 @@ int nxsched_getscheduler(pid_t pid);
  *
  ********************************************************************************/
 
-int nxsched_setscheduler(pid_t pid, int policy,
+int nxsched_set_scheduler(pid_t pid, int policy,
                          FAR const struct sched_param *param);
 
 /********************************************************************************
- * Name: nxsched_getaffinity
+ * Name: nxsched_get_affinity
  *
  * Description:
- *   nxsched_getaffinity() writes the affinity mask of the thread whose ID
+ *   nxsched_get_affinity() writes the affinity mask of the thread whose ID
  *   is pid into the cpu_set_t pointed to by mask.  The  cpusetsize
  *   argument specifies the size (in bytes) of mask.  If pid is zero, then
  *   the mask of the calling thread is returned.
  *
- *   nxsched_getaffinity() is identical to the function sched_getaffinity(),
+ *   nxsched_get_affinity() is identical to the function sched_getaffinity(),
  *   differing only in its return value:  This function does not modify the
  *   errno variable.
  *
@@ -1194,11 +1194,11 @@ int nxsched_setscheduler(pid_t pid, int policy,
  ********************************************************************************/
 
 #ifdef CONFIG_SMP
-int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
+int nxsched_get_affinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
 #endif
 
 /********************************************************************************
- * Name: nxsched_setaffinity
+ * Name: nxsched_set_affinity
  *
  * Description:
  *   sched_setaffinity() sets the CPU affinity mask of the thread whose ID
@@ -1211,7 +1211,7 @@ int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
  *   CPUs specified in mask, then that thread is migrated to one of the
  *   CPUs specified in mask.
  *
- *   nxsched_setaffinity() is identical to the function sched_setparam(),
+ *   nxsched_set_affinity() is identical to the function sched_setparam(),
  *   differing only in its return value:  This function does not modify
  *   the errno variable.  This is a non-standard, internal OS function and
  *   is not intended for use by application logic.  Applications should
@@ -1230,12 +1230,12 @@ int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
  ********************************************************************************/
 
 #ifdef CONFIG_SMP
-int nxsched_setaffinity(pid_t pid, size_t cpusetsize,
+int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
                         FAR const cpu_set_t *mask);
 #endif
 
 /********************************************************************************
- * Name: sched_get_stackinfo
+ * Name: nxsched_get_stackinfo
  *
  * Description:
  *   Report information about a thread's stack allocation.
@@ -1254,7 +1254,7 @@ int nxsched_setaffinity(pid_t pid, size_t cpusetsize,
  *
  ********************************************************************************/
 
-int sched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo);
+int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo);
 
 /********************************************************************************
  * Name: nx_wait/nx_waitid/nx_waitpid

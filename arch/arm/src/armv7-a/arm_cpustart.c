@@ -117,7 +117,7 @@ int arm_start_handler(int irq, FAR void *context, FAR void *arg)
 
   /* Reset scheduler parameters */
 
-  sched_resume_scheduler(tcb);
+  nxsched_resume_scheduler(tcb);
 
   /* Dump registers so that we can see what is going to happen on return */
 

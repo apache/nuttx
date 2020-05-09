@@ -101,7 +101,7 @@ int file_detach(int fd, FAR struct file *filep)
    * context.
    */
 
-  list = sched_getfiles();
+  list = nxsched_get_files();
   DEBUGASSERT(list != NULL);
 
   /* If the file was properly opened, there should be an inode assigned */

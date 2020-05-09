@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_getfiles.c
+ * sched/sched/nxsched_get_files.c
  *
  *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_getfiles
+ * Name: nxsched_get_files
  *
  * Description:
  *   Return a pointer to the file list for this thread
@@ -65,7 +65,7 @@
  *
  ****************************************************************************/
 
-FAR struct filelist *sched_getfiles(void)
+FAR struct filelist *nxsched_get_files(void)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;

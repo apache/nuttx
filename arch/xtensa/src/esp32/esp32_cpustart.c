@@ -191,7 +191,7 @@ void xtensa_appcpu_start(void)
 
   /* Reset scheduler parameters */
 
-  sched_resume_scheduler(tcb);
+  nxsched_resume_scheduler(tcb);
 
   /* Move CPU0 exception vectors to IRAM */
 

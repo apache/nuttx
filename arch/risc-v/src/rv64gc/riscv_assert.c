@@ -129,7 +129,7 @@ static inline void up_showtasks(void)
 {
   /* Dump interesting properties of each task in the crash environment */
 
-  sched_foreach(up_taskdump, NULL);
+  nxsched_foreach(up_taskdump, NULL);
 }
 #else
 #  define up_showtasks()

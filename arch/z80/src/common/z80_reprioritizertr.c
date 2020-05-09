@@ -122,7 +122,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
 
           /* Update scheduler parameters */
 
-          sched_suspend_scheduler(rtcb);
+          nxsched_suspend_scheduler(rtcb);
 
           /* Are we in an interrupt handler? */
 
@@ -142,7 +142,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
 
               /* Update scheduler parameters */
 
-              sched_resume_scheduler(rtcb);
+              nxsched_resume_scheduler(rtcb);
 
               /* Then setup so that the context will be performed on exit
                * from the interrupt.  Any necessary address environment
@@ -177,7 +177,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
 #endif
               /* Update scheduler parameters */
 
-              sched_resume_scheduler(rtcb);
+              nxsched_resume_scheduler(rtcb);
 
               /* Then switch contexts */
 
