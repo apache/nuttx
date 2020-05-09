@@ -167,7 +167,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
       case SYS_syscall_return:
         {
-          FAR struct tcb_s *rtcb = sched_self();
+          FAR struct tcb_s *rtcb = nxsched_self();
           int index = (int)rtcb->xcp.nsyscalls - 1;
 
           /* Make sure that there is a saved SYSCALL return address. */
@@ -323,7 +323,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
       case SYS_signal_handler:
         {
-          FAR struct tcb_s *rtcb = sched_self();
+          FAR struct tcb_s *rtcb = nxsched_self();
 
           /* Remember the caller's return address */
 
@@ -380,7 +380,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
       case SYS_signal_handler_return:
         {
-          FAR struct tcb_s *rtcb = sched_self();
+          FAR struct tcb_s *rtcb = nxsched_self();
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
 
@@ -418,7 +418,7 @@ uint32_t *arm_syscall(uint32_t *regs)
       default:
         {
 #ifdef CONFIG_LIB_SYSCALL
-          FAR struct tcb_s *rtcb = sched_self();
+          FAR struct tcb_s *rtcb = nxsched_self();
           int index = rtcb->xcp.nsyscalls;
 
           /* Verify that the SYS call number is within range */

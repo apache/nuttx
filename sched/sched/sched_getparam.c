@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_getparam
+ * Name: nxsched_get_param
  *
  * Description:
  *   This function gets the scheduling priority of the task specified by
@@ -80,7 +80,7 @@
  *
  ****************************************************************************/
 
-int nxsched_getparam(pid_t pid, FAR struct sched_param *param)
+int nxsched_get_param(pid_t pid, FAR struct sched_param *param)
 {
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *tcb;
@@ -108,7 +108,7 @@ int nxsched_getparam(pid_t pid, FAR struct sched_param *param)
       /* Get the TCB associated with this PID */
 
       sched_lock();
-      tcb = sched_gettcb(pid);
+      tcb = nxsched_get_tcb(pid);
       if (!tcb)
         {
           /* This PID does not correspond to any known task */
@@ -162,7 +162,7 @@ int nxsched_getparam(pid_t pid, FAR struct sched_param *param)
  *
  * Description:
  *   This function gets the scheduling priority of the task specified by
- *   pid.  This function is a simply wrapper around nxsched_getparam() that
+ *   pid.  This function is a simply wrapper around nxsched_get_param() that
  *   sets the errno value in the event of an error.
  *
  * Input Parameters:
@@ -183,7 +183,7 @@ int nxsched_getparam(pid_t pid, FAR struct sched_param *param)
 
 int sched_getparam(pid_t pid, FAR struct sched_param *param)
 {
-  int ret = nxsched_getparam(pid, param);
+  int ret = nxsched_get_param(pid, param);
   if (ret < 0)
     {
       set_errno(-ret);

@@ -68,7 +68,7 @@
  *   OK on success; negative error value on failure appropriately.  (See
  *   nxtask_schedsetup() for possible failure conditions).  On failure, the
  *   caller is responsible for freeing the stack memory and for calling
- *   sched_releasetcb() to free the TCB (which could be in most any state).
+ *   nxsched_release_tcb() to free the TCB (which could be in most any state).
  *
  ****************************************************************************/
 

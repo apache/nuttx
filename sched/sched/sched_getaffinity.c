@@ -53,15 +53,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_getaffinity
+ * Name: nxsched_get_affinity
  *
  * Description:
- *   nxsched_getaffinity() writes the affinity mask of the thread whose ID
+ *   nxsched_get_affinity() writes the affinity mask of the thread whose ID
  *   is pid into the cpu_set_t pointed to by mask.  The  cpusetsize
  *   argument specifies the size (in bytes) of mask.  If pid is zero, then
  *   the mask of the calling thread is returned.
  *
- *   nxsched_getaffinity() is identical to the function sched_getaffinity(),
+ *   nxsched_get_affinity() is identical to the function sched_getaffinity(),
  *   differing only in its return value:  This function does not modify the
  *   errno variable.
  *
@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
+int nxsched_get_affinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
 {
   FAR struct tcb_s *tcb;
   int ret;
@@ -97,7 +97,7 @@ int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
     }
   else
     {
-      tcb = sched_gettcb(pid);
+      tcb = nxsched_get_tcb(pid);
     }
 
   if (tcb == NULL)
@@ -125,7 +125,7 @@ int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
  *   argument specifies the size (in bytes) of mask.  If pid is zero, then
  *   the mask of the calling thread is returned.
  *
- *   This function is a simply wrapper around nxsched_getaffinity() that
+ *   This function is a simply wrapper around nxsched_get_affinity() that
  *   sets the errno value in the event of an error.
  *
  * Input Parameters:
@@ -143,7 +143,7 @@ int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
 
 int sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
 {
-  int ret = nxsched_getaffinity(pid, cpusetsize, mask);
+  int ret = nxsched_get_affinity(pid, cpusetsize, mask);
   if (ret < 0)
     {
       set_errno(-ret);

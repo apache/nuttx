@@ -111,7 +111,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
     {
       /* Update scheduler parameters */
 
-      sched_suspend_scheduler(rtcb);
+      nxsched_suspend_scheduler(rtcb);
 
       /* Copy the exception context into the TCB at the (old) head of the
        * ready-to-run Task list. if up_setjmp returns a non-zero
@@ -141,7 +141,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
           /* Reset scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+          nxsched_resume_scheduler(rtcb);
 
           /* Then switch contexts */
 

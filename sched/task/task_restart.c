@@ -113,7 +113,7 @@ int task_restart(pid_t pid)
 
   /* Find for the TCB associated with matching pid  */
 
-  tcb = (FAR struct task_tcb_s *)sched_gettcb(pid);
+  tcb = (FAR struct task_tcb_s *)nxsched_get_tcb(pid);
 #ifndef CONFIG_DISABLE_PTHREAD
   if (!tcb || (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) ==
       TCB_FLAG_TTYPE_PTHREAD)

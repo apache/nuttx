@@ -145,7 +145,7 @@ int sockfd_allocate(int minsd)
 
   /* Get the socket list for this task/thread */
 
-  list = sched_getsockets();
+  list = nxsched_get_sockets();
   if (list)
     {
       /* Search for a socket structure with no references */
@@ -235,7 +235,7 @@ void sockfd_release(int sockfd)
        * to this socket structure.
        */
 
-      FAR struct socketlist *list = sched_getsockets();
+      FAR struct socketlist *list = nxsched_get_sockets();
       if (list)
         {
           _net_semtake(list);
@@ -267,7 +267,7 @@ FAR struct socket *sockfd_socket(int sockfd)
 
   if (ndx >= 0 && ndx < CONFIG_NSOCKET_DESCRIPTORS)
     {
-      list = sched_getsockets();
+      list = nxsched_get_sockets();
       if (list)
         {
           return &list->sl_sockets[ndx];

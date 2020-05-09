@@ -108,12 +108,12 @@ int pthread_setschedparam(pthread_t thread, int policy,
 
   sinfo("thread ID=%d policy=%d param=0x%p\n", thread, policy, param);
 
-  /* Let nxsched_setscheduler do all of the work */
+  /* Let nxsched_set_scheduler do all of the work */
 
-  ret = nxsched_setscheduler((pid_t)thread, policy, param);
+  ret = nxsched_set_scheduler((pid_t)thread, policy, param);
   if (ret < 0)
     {
-      /* If nxsched_setscheduler() fails, return the positive errno value */
+      /* If nxsched_set_scheduler() fails, return the positive errno value */
 
       ret = -ret;
     }

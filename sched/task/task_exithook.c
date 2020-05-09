@@ -462,7 +462,7 @@ static inline void nxtask_signalparent(FAR struct tcb_s *ctcb, int status)
    * handle multiple calls to nxtask_signalparent.
    */
 
-  ptcb = sched_gettcb(ctcb->group->tg_ppid);
+  ptcb = nxsched_get_tcb(ctcb->group->tg_ppid);
   if (ptcb == NULL)
     {
       /* The parent no longer exists... bail */

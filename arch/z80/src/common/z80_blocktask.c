@@ -98,7 +98,7 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
     {
       /* Update scheduler parameters */
 
-      sched_suspend_scheduler(rtcb);
+      nxsched_suspend_scheduler(rtcb);
 
       /* Are we in an interrupt handler? */
 
@@ -118,7 +118,7 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
 
           /* Reset scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+          nxsched_resume_scheduler(rtcb);
 
           /* Then setup so that the context will be performed on exit
            * from the interrupt.  Any necessary address environment
@@ -152,7 +152,7 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
 #endif
           /* Reset scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+          nxsched_resume_scheduler(rtcb);
 
           /* Then switch contexts */
 

@@ -303,7 +303,7 @@ static inline void nxtask_dupdspace(FAR struct tcb_s *tcb)
     {
       /* Copy the D-Space structure reference and increment the reference
        * count on the memory.  The D-Space memory will persist until the
-       * last thread exits (see sched_releasetcb()).
+       * last thread exits (see nxsched_release_tcb()).
        */
 
       tcb->dspace = rtcb->dspace;

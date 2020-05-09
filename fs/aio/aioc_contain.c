@@ -121,7 +121,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
       aioc->aioc_pid    = getpid();
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      DEBUGVERIFY(nxsched_getparam (aioc->aioc_pid, &param));
+      DEBUGVERIFY(nxsched_get_param (aioc->aioc_pid, &param));
       aioc->aioc_prio   = param.sched_priority;
 #endif
 

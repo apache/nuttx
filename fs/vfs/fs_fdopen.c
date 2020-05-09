@@ -147,7 +147,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
   if (!tcb)
     {
-      tcb = sched_self();
+      tcb = nxsched_self();
     }
 
   DEBUGASSERT(tcb && tcb->group);

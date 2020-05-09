@@ -76,7 +76,7 @@ static int group_continue_handler(pid_t pid, FAR void *arg)
 
   /* Resume all threads */
 
-  rtcb = sched_gettcb(pid);
+  rtcb = nxsched_get_tcb(pid);
   if (rtcb != NULL)
     {
       sched_continue(rtcb);

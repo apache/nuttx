@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_getsockets.c
+ * sched/sched/nxsched_get_sockets.c
  *
  *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_getsockets
+ * Name: nxsched_get_sockets
  *
  * Description:
  *   Return a pointer to the socket list for this thread
@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET
-FAR struct socketlist *sched_getsockets(void)
+FAR struct socketlist *nxsched_get_sockets(void)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct task_group_s *group = rtcb->group;

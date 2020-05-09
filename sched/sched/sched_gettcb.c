@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_gettcb.c
+ * sched/sched/nxsched_get_tcb.c
  *
  *   Copyright (C) 2007, 2009, 2011, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_gettcb
+ * Name: nxsched_get_tcb
  *
  * Description:
  *   Given a task ID, this function will return the a pointer to the
@@ -65,7 +65,7 @@
  *
  ****************************************************************************/
 
-FAR struct tcb_s *sched_gettcb(pid_t pid)
+FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
 {
   FAR struct tcb_s *ret = NULL;
   irqstate_t flags;

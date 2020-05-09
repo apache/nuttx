@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_self.c
+ * sched/sched/nxsched_self.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_self
+ * Name: nxsched_self
  *
  * Description:
  *   Return the current threads TCB.  Basically, this function just wraps the
@@ -55,7 +55,7 @@
  *
  ****************************************************************************/
 
-FAR struct tcb_s *sched_self(void)
+FAR struct tcb_s *nxsched_self(void)
 {
   return this_task();
 }

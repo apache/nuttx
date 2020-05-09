@@ -84,7 +84,7 @@ void nxsem_timeout(int argc, wdparm_t pid, ...)
    * task may no longer be active when this watchdog goes off.
    */
 
-  wtcb = sched_gettcb((pid_t)pid);
+  wtcb = nxsched_get_tcb((pid_t)pid);
 
   /* It is also possible that an interrupt/context switch beat us to the
    * punch and already changed the task's state.

@@ -96,11 +96,11 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
            * (see pthread_mutex_consistent()).
            *
            * If the holding thread is still valid, then we should be able to
-           * map its PID to the underlying TCB. That is what sched_gettcb()
+           * map its PID to the underlying TCB. That is what nxsched_get_tcb()
            * does.
            */
 
-          if (sched_gettcb(mutex->pid) == NULL)
+          if (nxsched_get_tcb(mutex->pid) == NULL)
             {
               /* The thread associated with the PID no longer exists */
 

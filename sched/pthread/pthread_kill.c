@@ -125,7 +125,7 @@ int pthread_kill(pthread_t thread, int signo)
 
   /* Get the TCB associated with the thread */
 
-  stcb = sched_gettcb((pid_t)thread);
+  stcb = nxsched_get_tcb((pid_t)thread);
   if (!stcb)
     {
       ret = -ESRCH;

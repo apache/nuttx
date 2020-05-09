@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_get_stackinfo.c
+ * sched/sched/nxsched_get_stackinfo.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_get_stackinfo
+ * Name: nxsched_get_stackinfo
  *
  * Description:
  *   Report information about a thread's stack allocation.
@@ -54,7 +54,7 @@
  *
  ****************************************************************************/
 
-int sched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
+int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
 {
   FAR struct tcb_s *rtcb = this_task();  /* TCB of running task */
   FAR struct tcb_s *qtcb;                /* TCB of queried task */
@@ -73,7 +73,7 @@ int sched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
     {
       /* Get the task to be queried */
 
-      qtcb = sched_gettcb(pid);
+      qtcb = nxsched_get_tcb(pid);
       if (qtcb == NULL)
         {
           return -ENOENT;

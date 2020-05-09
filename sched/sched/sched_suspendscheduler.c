@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_suspend_scheduler
+ * Name: nxsched_suspend_scheduler
  *
  * Description:
  *   Called by architecture specific implementations that starts task
@@ -72,7 +72,7 @@
  *
  ****************************************************************************/
 
-void sched_suspend_scheduler(FAR struct tcb_s *tcb)
+void nxsched_suspend_scheduler(FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SCHED_SPORADIC
   /* Perform sporadic schedule operations */

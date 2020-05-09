@@ -103,7 +103,7 @@ int up_cpu_paused(int cpu)
 
   /* Update scheduler parameters */
 
-  sched_suspend_scheduler(rtcb);
+  nxsched_suspend_scheduler(rtcb);
 
   /* Copy the exception context into the TCB at the (old) head of the
    * CPUs assigned task list. if up_setjmp returns a non-zero value, then
@@ -147,7 +147,7 @@ int up_cpu_paused(int cpu)
 
       /* Reset scheduler parameters */
 
-      sched_resume_scheduler(rtcb);
+      nxsched_resume_scheduler(rtcb);
 
       /* Then switch contexts */
 

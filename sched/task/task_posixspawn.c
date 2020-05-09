@@ -374,10 +374,10 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
 
   /* Get the priority of this (parent) task */
 
-  ret = nxsched_getparam(0, &param);
+  ret = nxsched_get_param(0, &param);
   if (ret < 0)
     {
-      serr("ERROR: nxsched_getparam failed: %d\n", ret);
+      serr("ERROR: nxsched_get_param failed: %d\n", ret);
       spawn_semgive(&g_spawn_parmsem);
       return -ret;
     }

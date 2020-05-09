@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_releasetcb.c
+ * sched/sched/nxsched_release_tcb.c
  *
  *   Copyright (C) 2007, 2009, 2012-2014, 2019 Gregory Nutt. All rights
  *     reserved.
@@ -90,7 +90,7 @@ static void nxsched_releasepid(pid_t pid)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_releasetcb
+ * Name: nxsched_release_tcb
  *
  * Description:
  *   Free all resources contained in a TCB
@@ -101,7 +101,7 @@ static void nxsched_releasepid(pid_t pid)
  *
  *   This thread type is normally available in the flags field of the TCB,
  *   however, there are certain error recovery contexts where the TCB my
- *   not be fully initialized when sched_releasetcb is called.
+ *   not be fully initialized when nxsched_release_tcb is called.
  *
  * Returned Value:
  *   OK on success; ERROR on failure
@@ -111,7 +111,7 @@ static void nxsched_releasepid(pid_t pid)
  *
  ****************************************************************************/
 
-int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
+int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 {
   int ret = OK;
 

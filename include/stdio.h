@@ -78,9 +78,9 @@
 
 /* The first three _iob entries are reserved for standard I/O */
 
-#define stdin      (&sched_getstreams()->sl_streams[0])
-#define stdout     (&sched_getstreams()->sl_streams[1])
-#define stderr     (&sched_getstreams()->sl_streams[2])
+#define stdin      (&nxsched_get_streams()->sl_streams[0])
+#define stdout     (&nxsched_get_streams()->sl_streams[1])
+#define stderr     (&nxsched_get_streams()->sl_streams[2])
 
 /* These APIs are not implemented and/or can be synthesized from
  * supported APIs.

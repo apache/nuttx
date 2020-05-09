@@ -85,7 +85,7 @@ static int group_killchildren_handler(pid_t pid, FAR void *arg)
        * to do.
        */
 
-      rtcb = sched_gettcb(pid);
+      rtcb = nxsched_get_tcb(pid);
       if (rtcb != NULL)
         {
           /* This is a forced cancellation.  Make sure that cancellation is

@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_resume_scheduler
+ * Name: nxsched_resume_scheduler
  *
  * Description:
  *   Called by architecture specific implementations that block task
@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-void sched_resume_scheduler(FAR struct tcb_s *tcb)
+void nxsched_resume_scheduler(FAR struct tcb_s *tcb)
 {
 #if CONFIG_RR_INTERVAL > 0
 #ifdef CONFIG_SCHED_SPORADIC

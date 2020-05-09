@@ -976,7 +976,7 @@ int sched_sporadic_reset(FAR struct tcb_s *tcb)
  *   Called to start the next replenishment interval.  This function is
  *   called in the following circumstances:
  *
- *     - From up_unblocktask() via sched_resume_scheduler() when a task
+ *     - From up_unblocktask() via nxsched_resume_scheduler() when a task
  *       using the sporadic scheduling policy.
  *
  *   This function does nothing if the budget phase as already elapsed or

@@ -90,9 +90,9 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpusetsize,
   DEBUGASSERT(thread > 0 && cpusetsize == sizeof(cpu_set_t) &&
               cpuset != NULL);
 
-  /* Let nxsched_setaffinity do all of the work, adjusting the return value */
+  /* Let nxsched_set_affinity do all of the work, adjusting the return value */
 
-  ret = nxsched_setaffinity((pid_t)thread, cpusetsize, cpuset);
+  ret = nxsched_set_affinity((pid_t)thread, cpusetsize, cpuset);
   return ret < 0 ? -ret : OK;
 }
 

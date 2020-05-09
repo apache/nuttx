@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_getscheduler
+ * Name: nxsched_get_scheduler
  *
  * Description:
  *   sched_getscheduler() returns the scheduling policy currently
@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-int nxsched_getscheduler(pid_t pid)
+int nxsched_get_scheduler(pid_t pid)
 {
   FAR struct tcb_s *tcb;
   int policy;
@@ -94,7 +94,7 @@ int nxsched_getscheduler(pid_t pid)
     }
   else
     {
-      tcb = sched_gettcb(pid);
+      tcb = nxsched_get_tcb(pid);
     }
 
   if (tcb == NULL)
@@ -118,7 +118,7 @@ int nxsched_getscheduler(pid_t pid)
  *   applied to the task identified by pid. If pid equals zero, the
  *   policy of the calling task will be retrieved.
  *
- *   sched_getscheduler() is a simply wrapper around nxsched_getscheduler()
+ *   sched_getscheduler() is a simply wrapper around nxsched_get_scheduler()
  *   that sets the errno value in the event of an error.
  *
  * Input Parameters:
@@ -136,7 +136,7 @@ int nxsched_getscheduler(pid_t pid)
 
 int sched_getscheduler(pid_t pid)
 {
-  int ret = nxsched_getscheduler(pid);
+  int ret = nxsched_get_scheduler(pid);
   if (ret < 0)
     {
       set_errno(-ret);

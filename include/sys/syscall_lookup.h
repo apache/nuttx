@@ -37,7 +37,7 @@ SYSCALL_LOOKUP(sched_setparam,             2)
 SYSCALL_LOOKUP(sched_setscheduler,         3)
 SYSCALL_LOOKUP(sched_unlock,               0)
 SYSCALL_LOOKUP(sched_yield,                0)
-SYSCALL_LOOKUP(sched_get_stackinfo,        2)
+SYSCALL_LOOKUP(nxsched_get_stackinfo,        2)
 
 #ifdef CONFIG_SMP
   SYSCALL_LOOKUP(sched_getaffinity,        3)
@@ -256,7 +256,7 @@ SYSCALL_LOOKUP(telldir,                    1)
 
 #if CONFIG_NFILE_STREAMS > 0
   SYSCALL_LOOKUP(fs_fdopen,                3)
-  SYSCALL_LOOKUP(sched_getstreams,         0)
+  SYSCALL_LOOKUP(nxsched_get_streams,         0)
 #endif
 
 #ifdef CONFIG_NET_SENDFILE

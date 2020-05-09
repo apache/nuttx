@@ -78,10 +78,10 @@ static int load_default_priority(FAR struct binary_s *bin)
 
   /* Get the priority of this thread */
 
-  ret = nxsched_getparam(0, &param);
+  ret = nxsched_get_param(0, &param);
   if (ret < 0)
     {
-      berr("ERROR: nxsched_getparam failed: %d\n", ret);
+      berr("ERROR: nxsched_get_param failed: %d\n", ret);
       return ret;
     }
 

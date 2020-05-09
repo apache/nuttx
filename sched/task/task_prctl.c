@@ -102,11 +102,11 @@ int prctl(int option, ...)
             }
           else
             {
-              tcb = sched_gettcb(pid);
+              tcb = nxsched_get_tcb(pid);
             }
 
           /* An invalid pid will be indicated by a NULL TCB returned from
-           * sched_gettcb()
+           * nxsched_get_tcb()
            */
 
           if (tcb == NULL)

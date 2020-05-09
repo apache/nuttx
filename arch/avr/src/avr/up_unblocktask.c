@@ -93,7 +93,7 @@ void up_unblock_task(struct tcb_s *tcb)
 
       /* Update scheduler parameters */
 
-      sched_suspend_scheduler(rtcb);
+      nxsched_suspend_scheduler(rtcb);
 
       /* Are we in an interrupt handler? */
 
@@ -113,7 +113,7 @@ void up_unblock_task(struct tcb_s *tcb)
 
           /* Update scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+          nxsched_resume_scheduler(rtcb);
 
           /* Then switch contexts */
 
@@ -128,7 +128,7 @@ void up_unblock_task(struct tcb_s *tcb)
 
           /* Update scheduler parameters */
 
-          sched_resume_scheduler(nexttcb);
+          nxsched_resume_scheduler(nexttcb);
 
           /* Switch context to the context of the task at the head of the
            * ready to run list.

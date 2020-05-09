@@ -67,7 +67,7 @@ int pthread_cancel(pthread_t thread)
       return ESRCH;
     }
 
-  tcb = (FAR struct pthread_tcb_s *)sched_gettcb((pid_t)thread);
+  tcb = (FAR struct pthread_tcb_s *)nxsched_get_tcb((pid_t)thread);
   if (tcb == NULL)
     {
       /* The pid does not correspond to any known thread.  The thread

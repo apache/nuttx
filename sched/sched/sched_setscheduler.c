@@ -58,15 +58,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_setscheduler
+ * Name: nxsched_set_scheduler
  *
  * Description:
- *   nxsched_setscheduler() sets both the scheduling policy and the priority
+ *   nxsched_set_scheduler() sets both the scheduling policy and the priority
  *   for the task identified by pid. If pid equals zero, the scheduler of
  *   the calling task will be set.  The parameter 'param' holds the priority
  *   of the thread under the new policy.
  *
- *   nxsched_setscheduler() is identical to the function sched_getparam(),
+ *   nxsched_set_scheduler() is identical to the function sched_getparam(),
  *   differing only in its return value:  This function does not modify the
  *    errno variable.
  *
@@ -83,7 +83,7 @@
  *      through SCHED_PRIORITY_MAX.
  *
  * Returned Value:
- *   On success, nxsched_setscheduler() returns OK (zero).  On error, a
+ *   On success, nxsched_set_scheduler() returns OK (zero).  On error, a
  *   negated errno value is returned:
  *
  *   EINVAL The scheduling policy is not one of the recognized policies.
@@ -91,7 +91,7 @@
  *
  ****************************************************************************/
 
-int nxsched_setscheduler(pid_t pid, int policy,
+int nxsched_set_scheduler(pid_t pid, int policy,
                          FAR const struct sched_param *param)
 {
   FAR struct tcb_s *tcb;
@@ -121,7 +121,7 @@ int nxsched_setscheduler(pid_t pid, int policy,
 
   /* Verify that the pid corresponds to a real task */
 
-  tcb = sched_gettcb(pid);
+  tcb = nxsched_get_tcb(pid);
   if (!tcb)
     {
       return -ESRCH;
@@ -306,7 +306,7 @@ errout_with_irq:
  *   the calling task will be set.  The parameter 'param' holds the priority
  *   of the thread under the new policy.
  *
- *   This function is a simply wrapper around nxsched_getparam() that
+ *   This function is a simply wrapper around nxsched_get_param() that
  *   sets the errno value in the event of an error.
  *
  * Input Parameters:
@@ -329,7 +329,7 @@ errout_with_irq:
 int sched_setscheduler(pid_t pid, int policy,
                        FAR const struct sched_param *param)
 {
-  int ret = nxsched_setscheduler(pid, policy, param);
+  int ret = nxsched_set_scheduler(pid, policy, param);
   if (ret < 0)
     {
       set_errno(-ret);
