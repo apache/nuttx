@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_removereadytorun
+ * Name: nxsched_remove_readytorun
  *
  * Description:
  *   This function removes a TCB from the ready to run list.
@@ -75,7 +75,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_SMP
-bool sched_removereadytorun(FAR struct tcb_s *rtcb)
+bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
 {
   bool doswitch = false;
 
@@ -112,7 +112,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 #endif /* !CONFIG_SMP */
 
 /****************************************************************************
- * Name: sched_removereadytorun
+ * Name: nxsched_remove_readytorun
  *
  * Description:
  *   This function removes a TCB from the ready to run list.
@@ -134,7 +134,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-bool sched_removereadytorun(FAR struct tcb_s *rtcb)
+bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
 {
   FAR dq_queue_t *tasklist;
   bool doswitch = false;
@@ -142,7 +142,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 
   /* Lock the tasklists before accessing */
 
-  irqstate_t lock = sched_tasklist_lock();
+  irqstate_t lock = nxsched_lock_tasklist();
 
   /* Which CPU (if any) is the task running on?  Which task list holds the
    * TCB?
@@ -188,9 +188,9 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
       me = this_cpu();
       if (cpu != me)
         {
-          sched_tasklist_unlock(lock);
+          nxsched_unlock_tasklist(lock);
           DEBUGVERIFY(up_cpu_pause(cpu));
-          lock = sched_tasklist_lock();
+          lock = nxsched_lock_tasklist();
         }
 
       /* The task is running but the CPU that it was running on has been
@@ -211,7 +211,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
        * REVISIT: What if it is not the IDLE thread?
        */
 
-      if (!sched_islocked_global() && !irq_cpu_locked(me))
+      if (!nxsched_islocked_global() && !irq_cpu_locked(me))
         {
           /* Search for the highest priority task that can run on this
            * CPU.
@@ -338,7 +338,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 
   /* Unlock the tasklists */
 
-  sched_tasklist_unlock(lock);
+  nxsched_unlock_tasklist(lock);
   return doswitch;
 }
 #endif /* CONFIG_SMP */

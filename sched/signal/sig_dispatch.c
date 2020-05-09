@@ -461,7 +461,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 #ifdef HAVE_GROUP_MEMBERS
           group_continue(stcb);
 #else
-          sched_continue(stcb);
+          nxsched_continue(stcb);
 #endif
         }
 #endif

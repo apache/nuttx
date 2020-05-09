@@ -369,15 +369,15 @@ extern volatile int16_t g_global_lockcount;
 
 /* Task list manipulation functions */
 
-bool sched_addreadytorun(FAR struct tcb_s *rtrtcb);
-bool sched_removereadytorun(FAR struct tcb_s *rtrtcb);
-bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list);
-void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
+bool nxsched_add_readytorun(FAR struct tcb_s *rtrtcb);
+bool nxsched_remove_readytorun(FAR struct tcb_s *rtrtcb);
+bool nxsched_add_prioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list);
+void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
                             uint8_t task_state);
-bool sched_mergepending(void);
-void sched_addblocked(FAR struct tcb_s *btcb, tstate_t task_state);
-void sched_removeblocked(FAR struct tcb_s *btcb);
-int  nxsched_setpriority(FAR struct tcb_s *tcb, int sched_priority);
+bool nxsched_merge_pending(void);
+void nxsched_add_blocked(FAR struct tcb_s *btcb, tstate_t task_state);
+void nxsched_remove_blocked(FAR struct tcb_s *btcb);
+int  nxsched_set_priority(FAR struct tcb_s *tcb, int sched_priority);
 
 /* Priority inheritance support */
 
@@ -385,43 +385,43 @@ int  nxsched_setpriority(FAR struct tcb_s *tcb, int sched_priority);
 int  nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 #else
 #  define nxsched_reprioritize(tcb,sched_priority) \
-     nxsched_setpriority(tcb,sched_priority)
+     nxsched_set_priority(tcb,sched_priority)
 #endif
 
 /* Support for tickless operation */
 
 #ifdef CONFIG_SCHED_TICKLESS
-unsigned int sched_timer_cancel(void);
-void sched_timer_resume(void);
-void sched_timer_reassess(void);
+unsigned int nxsched_cancel_timer(void);
+void nxsched_resume_timer(void);
+void nxsched_reassess_timer(void);
 #else
-#  define sched_timer_cancel() (0)
-#  define sched_timer_resume()
-#  define sched_timer_reassess()
+#  define nxsched_cancel_timer() (0)
+#  define nxsched_resume_timer()
+#  define nxsched_reassess_timer()
 #endif
 
 /* Scheduler policy support */
 
 #if CONFIG_RR_INTERVAL > 0
-uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
+uint32_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, uint32_t ticks,
                                   bool noswitches);
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
-int  sched_sporadic_initialize(FAR struct tcb_s *tcb);
-int  sched_sporadic_start(FAR struct tcb_s *tcb);
-int  sched_sporadic_stop(FAR struct tcb_s *tcb);
-int  sched_sporadic_reset(FAR struct tcb_s *tcb);
-int  sched_sporadic_resume(FAR struct tcb_s *tcb);
-int  sched_sporadic_suspend(FAR struct tcb_s *tcb);
-uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
+int  nxsched_initialize_sporadic(FAR struct tcb_s *tcb);
+int  nxsched_start_sporadic(FAR struct tcb_s *tcb);
+int  nxsched_stop_sporadic(FAR struct tcb_s *tcb);
+int  nxsched_reset_sporadic(FAR struct tcb_s *tcb);
+int  nxsched_resume_sporadic(FAR struct tcb_s *tcb);
+int  nxsched_suspend_sporadic(FAR struct tcb_s *tcb);
+uint32_t nxsched_process_sporadic(FAR struct tcb_s *tcb, uint32_t ticks,
                                 bool noswitches);
-void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);
+void nxsched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
-void sched_suspend(FAR struct tcb_s *tcb);
-void sched_continue(FAR struct tcb_s *tcb);
+void nxsched_suspend(FAR struct tcb_s *tcb);
+void nxsched_continue(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SMP
@@ -429,26 +429,26 @@ void sched_continue(FAR struct tcb_s *tcb);
 FAR struct tcb_s *this_task(void);
 #endif
 
-int  sched_cpu_select(cpu_set_t affinity);
-int  sched_cpu_pause(FAR struct tcb_s *tcb);
+int  nxsched_select_cpu(cpu_set_t affinity);
+int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
 
-irqstate_t sched_tasklist_lock(void);
-void sched_tasklist_unlock(irqstate_t lock);
+irqstate_t nxsched_lock_tasklist(void);
+void nxsched_unlock_tasklist(irqstate_t lock);
 
 #if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
-#  define sched_islocked_global() \
+#  define nxsched_islocked_global() \
      (spin_islocked(&g_cpu_schedlock) || g_global_lockcount > 0)
 #else
-#  define sched_islocked_global() \
+#  define nxsched_islocked_global() \
      spin_islocked(&g_cpu_schedlock)
 #endif
 
-#  define sched_islocked_tcb(tcb) sched_islocked_global()
+#  define nxsched_islocked_tcb(tcb) nxsched_islocked_global()
 
 #else
-#  define sched_cpu_select(a)     (0)
-#  define sched_cpu_pause(t)      (-38)  /* -ENOSYS */
-#  define sched_islocked_tcb(tcb) ((tcb)->lockcount > 0)
+#  define nxsched_select_cpu(a)     (0)
+#  define nxsched_pause_cpu(t)      (-38)  /* -ENOSYS */
+#  define nxsched_islocked_tcb(tcb) ((tcb)->lockcount > 0)
 #endif
 
 #if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
@@ -460,14 +460,14 @@ void weak_function nxsched_process_cpuload(void);
 /* Critical section monitor */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state);
-void sched_critmon_csection(FAR struct tcb_s *tcb, bool state);
-void sched_critmon_resume(FAR struct tcb_s *tcb);
-void sched_critmon_suspend(FAR struct tcb_s *tcb);
+void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state);
+void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state);
+void nxsched_resume_critmon(FAR struct tcb_s *tcb);
+void nxsched_suspend_critmon(FAR struct tcb_s *tcb);
 #endif
 
 /* TCB operations */
 
-bool sched_verifytcb(FAR struct tcb_s *tcb);
+bool nxsched_verify_tcb(FAR struct tcb_s *tcb);
 
 #endif /* __SCHED_SCHED_SCHED_H */

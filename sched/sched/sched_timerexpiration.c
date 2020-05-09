@@ -48,7 +48,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* In the original design, it was planned that sched_timer_reassess() be
+/* In the original design, it was planned that nxsched_reassess_timer() be
  * called whenever there was a change at the head of the ready-to-run
  * list.  That call was intended to establish a new time-slice or to
  * stop an old time-slice timer.  However, it turns out that that
@@ -185,7 +185,7 @@ static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
        * timeslice.
        */
 
-      ret = sched_roundrobin_process(rtcb, ticks, noswitches);
+      ret = nxsched_process_roundrobin(rtcb, ticks, noswitches);
     }
 #endif
 
@@ -212,7 +212,7 @@ static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
        * budget.
        */
 
-      ret = sched_sporadic_process(rtcb, ticks, noswitches);
+      ret = nxsched_process_sporadic(rtcb, ticks, noswitches);
     }
 #endif
 
@@ -558,12 +558,12 @@ void nxsched_timer_expiration(void)
 #endif
 
 /****************************************************************************
- * Name:  sched_timer_cancel
+ * Name:  nxsched_cancel_timer
  *
  * Description:
  *   Stop the current timing activity.  This is currently called just before
  *   a new entry is inserted at the head of a timer list and also as part
- *   of the processing of sched_timer_reassess().
+ *   of the processing of nxsched_reassess_timer().
  *
  *   This function(1) cancels the current timer, (2) determines how much of
  *   the interval has elapsed, (3) completes any partially timed events
@@ -581,7 +581,7 @@ void nxsched_timer_expiration(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
-unsigned int sched_timer_cancel(void)
+unsigned int nxsched_cancel_timer(void)
 {
   struct timespec ts;
   unsigned int elapsed;
@@ -631,7 +631,7 @@ unsigned int sched_timer_cancel(void)
   return nxsched_timer_process(elapsed, true);
 }
 #else
-unsigned int sched_timer_cancel(void)
+unsigned int nxsched_cancel_timer(void)
 {
   struct timespec ts;
   unsigned int ticks;
@@ -674,7 +674,7 @@ unsigned int sched_timer_cancel(void)
 #endif
 
 /****************************************************************************
- * Name:  sched_timer_resume
+ * Name:  nxsched_resume_timer
  *
  * Description:
  *   Re-assess the next deadline and restart the interval timer.  This is
@@ -688,13 +688,13 @@ unsigned int sched_timer_cancel(void)
  *   None.
  *
  * Assumptions:
- *   This function is called right after sched_timer_cancel().  If
+ *   This function is called right after nxsched_cancel_timer().  If
  *   CONFIG_SCHED_TICKLESS_ALARM=y, then g_stop_time must be the value time
  *   when the timer was cancelled.
  *
  ****************************************************************************/
 
-void sched_timer_resume(void)
+void nxsched_resume_timer(void)
 {
   unsigned int nexttime;
 
@@ -713,7 +713,7 @@ void sched_timer_resume(void)
 }
 
 /****************************************************************************
- * Name:  sched_timer_reassess
+ * Name:  nxsched_reassess_timer
  *
  * Description:
  *   It is necessary to re-assess the timer interval in several
@@ -725,7 +725,7 @@ void sched_timer_resume(void)
  *   - When pre-emption is re-enabled.  A previous time slice may have
  *     expired while pre-emption was enabled and now needs to be executed.
  *
- *   In the original design, it was also planned that sched_timer_reassess()
+ *   In the original design, it was also planned that nxsched_reassess_timer()
  *   be called whenever there was a change at the head of the ready-to-run
  *   list.  That call was intended to establish a new time-slice for the
  *   newly activated task or to stop the timer if time-slicing is no longer
@@ -746,13 +746,13 @@ void sched_timer_resume(void)
  *
  ****************************************************************************/
 
-void sched_timer_reassess(void)
+void nxsched_reassess_timer(void)
 {
   unsigned int nexttime;
 
   /* Cancel and restart the timer */
 
-  nexttime = sched_timer_cancel();
+  nexttime = nxsched_cancel_timer();
   nxsched_timer_start(nexttime);
 }
 

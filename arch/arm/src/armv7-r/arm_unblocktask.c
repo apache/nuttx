@@ -77,13 +77,13 @@ void up_unblock_task(struct tcb_s *tcb)
 
   /* Remove the task from the blocked task list */
 
-  sched_removeblocked(tcb);
+  nxsched_remove_blocked(tcb);
 
   /* Add the task in the correct location in the prioritized
    * ready-to-run task list
    */
 
-  if (sched_addreadytorun(tcb))
+  if (nxsched_add_readytorun(tcb))
     {
       /* The currently active task has changed! We need to do
        * a context switch to the new task.

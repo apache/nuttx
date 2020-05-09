@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_addprioritized
+ * Name: nxsched_add_prioritized
  *
  * Description:
  *  This function adds a TCB to a prioritized TCB list.
@@ -76,7 +76,7 @@
  *
  ****************************************************************************/
 
-bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
+bool nxsched_add_prioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
 {
   FAR struct tcb_s *next;
   FAR struct tcb_s *prev;

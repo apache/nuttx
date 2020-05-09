@@ -591,10 +591,10 @@ o SMP
 
                The log below was reported is Nuttx running on two cores
                Cortex-A7 architecture in SMP mode.  You can notice see that
-               when sched_addreadytorun() was called, the g_cpu_irqset is 3.
+               when nxsched_add_readytorun() was called, the g_cpu_irqset is 3.
 
-                 sched_addreadytorun: irqset cpu 1, me 0 btcbname init, irqset 1 irqcount 2.
-                 sched_addreadytorun: sched_addreadytorun line 338 g_cpu_irqset = 3.
+                 nxsched_add_readytorun: irqset cpu 1, me 0 btcbname init, irqset 1 irqcount 2.
+                 nxsched_add_readytorun: nxsched_add_readytorun line 338 g_cpu_irqset = 3.
 
                This can happen, but only under a very certain condition.
                g_cpu_irqset only exists to support this certain condition:

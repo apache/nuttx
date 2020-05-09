@@ -177,7 +177,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
         {
           pginfo("New worker priority. %d->%d\n",
                  wtcb->sched_priority, priority);
-          nxsched_setpriority(wtcb, priority);
+          nxsched_set_priority(wtcb, priority);
         }
 
       /* Save the page fill result (don't permit the value -EBUSY) */
@@ -289,7 +289,7 @@ static inline bool pg_dequeue(void)
 
                   pginfo("New worker priority. %d->%d\n",
                          wtcb->sched_priority, priority);
-                  nxsched_setpriority(wtcb, priority);
+                  nxsched_set_priority(wtcb, priority);
                 }
 
               /* Return with g_pftcb holding the pointer to
@@ -456,7 +456,7 @@ static inline void pg_alldone(void)
   g_pftcb = NULL;
   pginfo("New worker priority. %d->%d\n",
          wtcb->sched_priority, CONFIG_PAGING_DEFPRIO);
-  nxsched_setpriority(wtcb, CONFIG_PAGING_DEFPRIO);
+  nxsched_set_priority(wtcb, CONFIG_PAGING_DEFPRIO);
 }
 
 /****************************************************************************

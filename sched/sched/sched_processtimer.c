@@ -87,7 +87,7 @@ static inline void nxsched_cpu_scheduler(int cpu)
        * timeslice.
        */
 
-      sched_roundrobin_process(rtcb, 1, false);
+      nxsched_process_roundrobin(rtcb, 1, false);
     }
 #endif
 
@@ -100,7 +100,7 @@ static inline void nxsched_cpu_scheduler(int cpu)
        * budget.
        */
 
-      sched_sporadic_process(rtcb, 1, false);
+      nxsched_process_sporadic(rtcb, 1, false);
     }
 #endif
 }

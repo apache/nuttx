@@ -166,7 +166,7 @@ void pg_miss(void)
 
       pginfo("New worker priority. %d->%d\n",
              wtcb->sched_priority, ftcb->sched_priority);
-      nxsched_setpriority(wtcb, ftcb->sched_priority);
+      nxsched_set_priority(wtcb, ftcb->sched_priority);
     }
 
   /* Signal the page fill worker thread.

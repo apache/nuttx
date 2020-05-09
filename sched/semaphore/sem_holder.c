@@ -326,7 +326,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
    * Perhaps its plan is to kill a thread, then destroy the semaphore.
    */
 
-  if (!sched_verifytcb(htcb))
+  if (!nxsched_verify_tcb(htcb))
     {
       swarn("WARNING: TCB 0x%08x is a stale handle, counts lost\n", htcb);
       nxsem_freeholder(sem, pholder);
@@ -377,7 +377,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
            * switch may occur during up_block_task() processing.
            */
 
-          nxsched_setpriority(htcb, rtcb->sched_priority);
+          nxsched_set_priority(htcb, rtcb->sched_priority);
         }
       else
         {
@@ -415,7 +415,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
        * will occur during up_block_task() processing.
        */
 
-      nxsched_setpriority(htcb, rtcb->sched_priority);
+      nxsched_set_priority(htcb, rtcb->sched_priority);
     }
 #endif
 
@@ -490,7 +490,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
    * Perhaps its plan is to kill a thread, then destroy the semaphore.
    */
 
-  if (!sched_verifytcb(htcb))
+  if (!nxsched_verify_tcb(htcb))
     {
       swarn("WARNING: TCB 0x%08x is a stale handle, counts lost\n", htcb);
 
@@ -570,7 +570,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
            * base_priority)
            */
 
-          nxsched_setpriority(htcb, rpriority);
+          nxsched_set_priority(htcb, rpriority);
         }
       else
         {

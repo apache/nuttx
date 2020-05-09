@@ -196,7 +196,7 @@ static void pthread_start(void)
 
   if (ptcb->cmn.sched_priority > ptcb->cmn.init_priority)
     {
-      DEBUGVERIFY(nxsched_setpriority(&ptcb->cmn, ptcb->cmn.init_priority));
+      DEBUGVERIFY(nxsched_set_priority(&ptcb->cmn, ptcb->cmn.init_priority));
     }
 
   /* Pass control to the thread entry point. In the kernel build this has to
@@ -389,7 +389,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
       /* Initialize the sporadic policy */
 
-      ret = sched_sporadic_initialize(&ptcb->cmn);
+      ret = nxsched_initialize_sporadic(&ptcb->cmn);
       if (ret >= 0)
         {
           sporadic               = ptcb->cmn.sporadic;
@@ -405,7 +405,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
           /* And start the first replenishment interval */
 
-          ret = sched_sporadic_start(&ptcb->cmn);
+          ret = nxsched_start_sporadic(&ptcb->cmn);
         }
 
       /* Handle any failures */
@@ -556,7 +556,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
       if (ptcb->cmn.sched_priority < parent->sched_priority)
         {
-          ret = nxsched_setpriority(&ptcb->cmn, parent->sched_priority);
+          ret = nxsched_set_priority(&ptcb->cmn, parent->sched_priority);
           if (ret < 0)
             {
               ret = -ret;

@@ -117,7 +117,7 @@ int task_restart(pid_t pid)
    * that CPU, the restart take effect.
    */
 
-  cpu = sched_cpu_pause(&tcb->cmn);
+  cpu = nxsched_pause_cpu(&tcb->cmn);
 #endif /* CONFIG_SMP */
 
   /* Try to recover from any bad states */

@@ -68,7 +68,7 @@ static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
    * then use the 'nxttcb' which will probably be the IDLE thread.
    */
 
-  if (!sched_islocked_global() && !irq_cpu_locked(cpu))
+  if (!nxsched_islocked_global() && !irq_cpu_locked(cpu))
     {
       /* Search for the highest priority task that can run on this CPU. */
 
@@ -188,7 +188,7 @@ static void nxsched_readytorun_setpriority(FAR struct tcb_s *tcb,
 
   if (tcb->task_state == TSTATE_TASK_READYTORUN)
     {
-      cpu = sched_cpu_select(tcb->affinity);
+      cpu = nxsched_select_cpu(tcb->affinity);
     }
 
   /* CASE 2b.  The task is ready to run, and assigned to a CPU.  An increase
@@ -236,7 +236,7 @@ static void nxsched_readytorun_setpriority(FAR struct tcb_s *tcb,
        * It should not be at the head of the list.
        */
 
-      bool check = sched_removereadytorun(tcb);
+      bool check = nxsched_remove_readytorun(tcb);
       DEBUGASSERT(check == false);
       UNUSED(check);
 
@@ -248,7 +248,7 @@ static void nxsched_readytorun_setpriority(FAR struct tcb_s *tcb,
        * end up at the head of the list.
        */
 
-      check = sched_addreadytorun(tcb);
+      check = nxsched_add_readytorun(tcb);
       DEBUGASSERT(check == false);
       UNUSED(check);
     }
@@ -291,7 +291,7 @@ static inline void nxsched_blocked_setpriority(FAR struct tcb_s *tcb,
 
       /* Put it back into the prioritized list at the correct position. */
 
-      sched_addprioritized(tcb, tasklist);
+      nxsched_add_prioritized(tcb, tasklist);
     }
 
   /* CASE 3b. The task resides in a non-prioritized list. */
@@ -309,7 +309,7 @@ static inline void nxsched_blocked_setpriority(FAR struct tcb_s *tcb,
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  nxsched_setpriority
+ * Name:  nxsched_set_priority
  *
  * Description:
  *   This function sets the priority of a specified task.
@@ -323,7 +323,7 @@ static inline void nxsched_blocked_setpriority(FAR struct tcb_s *tcb,
  *   sched_priority - The new task priority
  *
  * Returned Value:
- *   On success, nxsched_setpriority() returns 0 (OK). On error, a negated
+ *   On success, nxsched_set_priority() returns 0 (OK). On error, a negated
  *   errno value is returned.
  *
  *  EINVAL The parameter 'param' is invalid or does not make sense for the
@@ -333,7 +333,7 @@ static inline void nxsched_blocked_setpriority(FAR struct tcb_s *tcb,
  *
  ****************************************************************************/
 
-int nxsched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
+int nxsched_set_priority(FAR struct tcb_s *tcb, int sched_priority)
 {
   irqstate_t flags;
 

@@ -79,7 +79,7 @@ uint32_t g_crit_max[1];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_critmon_preemption
+ * Name: nxsched_critmon_preemption
  *
  * Description:
  *   Called when there is any change in pre-emptible state of a thread.
@@ -90,7 +90,7 @@ uint32_t g_crit_max[1];
  *
  ****************************************************************************/
 
-void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
+void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
 {
   int cpu = this_cpu();
 
@@ -144,7 +144,7 @@ void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
 }
 
 /****************************************************************************
- * Name: sched_critmon_csection
+ * Name: nxsched_critmon_csection
  *
  * Description:
  *   Called when a thread enters or leaves a critical section.
@@ -155,7 +155,7 @@ void sched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
  *
  ****************************************************************************/
 
-void sched_critmon_csection(FAR struct tcb_s *tcb, bool state)
+void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state)
 {
   int cpu = this_cpu();
 
@@ -208,7 +208,7 @@ void sched_critmon_csection(FAR struct tcb_s *tcb, bool state)
 }
 
 /****************************************************************************
- * Name: sched_critmon_resume
+ * Name: nxsched_resume_critmon
  *
  * Description:
  *   Called when a thread resumes execution, perhaps re-establishing a
@@ -220,7 +220,7 @@ void sched_critmon_csection(FAR struct tcb_s *tcb, bool state)
  *
  ****************************************************************************/
 
-void sched_critmon_resume(FAR struct tcb_s *tcb)
+void nxsched_resume_critmon(FAR struct tcb_s *tcb)
 {
   uint32_t elapsed;
   int cpu = this_cpu();
@@ -285,7 +285,7 @@ void sched_critmon_resume(FAR struct tcb_s *tcb)
 }
 
 /****************************************************************************
- * Name: sched_critmon_suspend
+ * Name: nxsched_suspend_critmon
  *
  * Description:
  *   Called when a thread suspends execution, perhaps terminating a
@@ -297,7 +297,7 @@ void sched_critmon_resume(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-void sched_critmon_suspend(FAR struct tcb_s *tcb)
+void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
 {
   uint32_t elapsed;
 
