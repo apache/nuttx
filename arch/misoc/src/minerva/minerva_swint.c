@@ -65,13 +65,16 @@ static void up_registerdump(const uint32_t * regs)
 {
 #if 0
   svcinfo("EPC:%08x\n", regs[REG_CSR_MEPC]);
-  svcinfo("A0:%08x A1:%08x A2:%08x A3:%08x A4:%08x A5:%08x A6:%08x A7:%08x\n",
+  svcinfo("A0:%08x A1:%08x A2:%08x A3:%08x "
+          "A4:%08x A5:%08x A6:%08x A7:%08x\n",
           regs[REG_A0], regs[REG_A1], regs[REG_A2], regs[REG_A3],
           regs[REG_A4], regs[REG_A5], regs[REG_A6], regs[REG_A7]);
-  svcinfo("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x\n",
+  svcinfo("T0:%08x T1:%08x T2:%08x T3:%08x "
+          "T4:%08x T5:%08x T6:%08x\n",
           regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3],
           regs[REG_T4], regs[REG_T5], regs[REG_T6]);
-  svcinfo("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x S6:%08x S7:%08x\n",
+  svcinfo("S0:%08x S1:%08x S2:%08x S3:%08x "
+          "S4:%08x S5:%08x S6:%08x S7:%08x\n",
           regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3],
           regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
   svcinfo("S8:%08x S9:%08x S10:%08x S11:%08x\n",
@@ -104,23 +107,25 @@ static void dispatch_syscall(void) naked_function;
 {
 #error "Missing logic"
 
-/* Refer to arch/arm/src/armv7-m/up_svcall.h for how this is done for ARM */
+  /* Refer to arch/arm/src/armv7-m/up_svcall.h for how this is done for
+   * ARM
+   */
 
-/* __asm__ __volatile__ */
+  /* __asm__ __volatile__ */
 
-/* Save registers */
+  /* Save registers */
 
-/* Get the base of the stub lookup table */
+  /* Get the base of the stub lookup table */
 
-/* Get the offset of the stub for this syscall */
+  /* Get the offset of the stub for this syscall */
 
-/* Load the entry of the stub for this syscall */
+  /* Load the entry of the stub for this syscall */
 
-/* Call the stub */
+  /* Call the stub */
 
-/* Restore registers */
+  /* Restore registers */
 
-/* Return from the syscall */
+  /* Return from the syscall */
 }
 #endif
 
@@ -192,9 +197,9 @@ int minerva_swint(int irq, FAR void *context, FAR void *arg)
       break;
 
       /* A0=SYS_syscall_return: This a switch context command: void
-       * up_sycall_return(void); At this point, the following values are saved
-       * in context: A0 = SYS_syscall_return We need to restore the saved
-       * return address and return in unprivileged thread mode.
+       * up_sycall_return(void); At this point, the following values are
+       * saved in context: A0 = SYS_syscall_return We need to restore the
+       * saved return address and return in unprivileged thread mode.
        */
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -207,8 +212,8 @@ int minerva_swint(int irq, FAR void *context, FAR void *arg)
 
         DEBUGASSERT(index >= 0);
 
-        /* Setup to return to the saved syscall return address in the original
-         * mode.
+        /* Setup to return to the saved syscall return address in the
+         * original mode.
          */
 
         g_current_regs[REG_CSR_MEPC] = rtcb->xcp.syscall[index].sysreturn;

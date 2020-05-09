@@ -174,7 +174,9 @@ FAR struct aiocb *aioc_decant(FAR struct aio_container_s *aioc)
     {
       dq_rem(&aioc->aioc_link, &g_aio_pending);
 
-      /* De-cant the AIO control block and return the container to the free list */
+      /* De-cant the AIO control block and return the container to the
+       * free list.
+       */
 
       aiocbp = aioc->aioc_aiocbp;
       aioc_free(aioc);

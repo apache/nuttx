@@ -85,14 +85,14 @@ void up_unblock_task(struct tcb_s *tcb)
 
   sched_removeblocked(tcb);
 
-  /* Add the task in the correct location in the prioritized ready-to-run task
-   * list
+  /* Add the task in the correct location in the prioritized ready-to-run
+   * task list
    */
 
   if (sched_addreadytorun(tcb))
     {
-      /* The currently active task has changed! We need to do a context switch
-       * to the new task.
+      /* The currently active task has changed! We need to do a context
+       * switch to the new task.
        */
 
       /* Update scheduler parameters */
@@ -138,10 +138,10 @@ void up_unblock_task(struct tcb_s *tcb)
           struct tcb_s *nexttcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
-          /* Make sure that the address environment for the previously running
-           * task is closed down gracefully (data caches dump, MMU flushed)
-           * and set up the address environment for the new thread at the
-           * head of the ready-to-run list.
+          /* Make sure that the address environment for the previously
+           * running task is closed down gracefully (data caches dump, MMU
+           * flushed) and set up the address environment for the new thread
+           * at the head of the ready-to-run list.
            */
 
           group_addrenv(nexttcb);
