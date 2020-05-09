@@ -32,4 +32,5 @@ jobs:
         cd nuttx
         commits=`git log -1 --merges --pretty=format:%P | awk -F" " '{ print $1 ".." $2 }'`
         git log --oneline $commits
-        git diff $commits | ../nuttx/tools/checkpatch.sh -
+        echo "../nuttx/tools/checkpatch.sh -g $commits"
+        ../nuttx/tools/checkpatch.sh -g $commits
