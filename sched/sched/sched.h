@@ -373,7 +373,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *rtrtcb);
 bool nxsched_remove_readytorun(FAR struct tcb_s *rtrtcb);
 bool nxsched_add_prioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list);
 void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
-                            uint8_t task_state);
+                               uint8_t task_state);
 bool nxsched_merge_pending(void);
 void nxsched_add_blocked(FAR struct tcb_s *btcb, tstate_t task_state);
 void nxsched_remove_blocked(FAR struct tcb_s *btcb);
@@ -415,7 +415,7 @@ int  nxsched_reset_sporadic(FAR struct tcb_s *tcb);
 int  nxsched_resume_sporadic(FAR struct tcb_s *tcb);
 int  nxsched_suspend_sporadic(FAR struct tcb_s *tcb);
 uint32_t nxsched_process_sporadic(FAR struct tcb_s *tcb, uint32_t ticks,
-                                bool noswitches);
+                                  bool noswitches);
 void nxsched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 #endif
 
