@@ -725,13 +725,13 @@ void nxsched_resume_timer(void)
  *   - When pre-emption is re-enabled.  A previous time slice may have
  *     expired while pre-emption was enabled and now needs to be executed.
  *
- *   In the original design, it was also planned that nxsched_reassess_timer()
- *   be called whenever there was a change at the head of the ready-to-run
- *   list.  That call was intended to establish a new time-slice for the
- *   newly activated task or to stop the timer if time-slicing is no longer
- *   needed.  However, it turns out that that solution is too fragile:  The
- *   system is too vulnerable at the time that the ready-to-run list is
- *   modified in order to muck with timers.
+ *   In the original design, it was also planned that
+ *   nxsched_reassess_timer() be called whenever there was a change at the
+ *   head of the ready-to-run list.  That call was intended to establish a
+ *   new time-slice for the newly activated task or to stop the timer if
+ *   time-slicing is no longer needed.  However, it turns out that that
+ *   solution is too fragile:  The system is too vulnerable at the time
+ *   that the ready-to-run list is modified in order to muck with timers.
  *
  *   The kludge/work-around is simple to keep the timer running all of the
  *   time with an interval of no more than the timeslice interval.  If we
