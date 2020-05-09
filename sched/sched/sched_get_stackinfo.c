@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/nxsched_get_stackinfo.c
+ * sched/sched/sched_get_stackinfo.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

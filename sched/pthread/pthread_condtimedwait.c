@@ -92,8 +92,8 @@ static void pthread_condtimedout(int argc, wdparm_t arg1, ...)
        * the signal.
        */
 
-      /* Get the waiting TCB.  nxsched_get_tcb() might return NULL if the task
-       * has exited for some reason.
+      /* Get the waiting TCB.  nxsched_get_tcb() might return NULL if the
+       * task has exited for some reason.
        */
 
       tcb = nxsched_get_tcb(pid);

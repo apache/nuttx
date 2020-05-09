@@ -69,10 +69,12 @@ static void up_registerdump(const uint32_t *regs)
   svcinfo("AT:%08x V0:%08x V1:%08x A0:%08x A1:%08x A2:%08x A3:%08x\n",
           regs[REG_AT], regs[REG_V0], regs[REG_V1], regs[REG_A0],
           regs[REG_A1], regs[REG_A2], regs[REG_A3]);
-  svcinfo("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x T7:%08x\n",
+  svcinfo("T0:%08x T1:%08x T2:%08x T3:%08x "
+          "T4:%08x T5:%08x T6:%08x T7:%08x\n",
           regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3],
           regs[REG_T4], regs[REG_T5], regs[REG_T6], regs[REG_T7]);
-  svcinfo("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x S6:%08x S7:%08x\n",
+  svcinfo("S0:%08x S1:%08x S2:%08x S3:%08x "
+          "S4:%08x S5:%08x S6:%08x S7:%08x\n",
           regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3],
           regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
 #ifdef MIPS32_SAVE_GP
@@ -101,22 +103,30 @@ static void up_registerdump(const uint32_t *regs)
 static void dispatch_syscall(void) naked_function;
 static void dispatch_syscall(void)
 {
-#  error "Missing logic"
+#error "Missing logic"
 
   /* Refer to arch/arm/src/armv7-m/up_svcall.h for how this is done for ARM */
 
-#  if 0
+#if 0 /* REVISIT */
   __asm__ __volatile__
   (
-    Save registers
-    Get the base of the stub lookup table
-    Get the offset of the stub for this syscall
-    Load the entry of the stub for this syscall
-    Call the stub
-    Restore registers
-    Return from the syscall
+
+      /* Save registers */
+
+      /* Get the base of the stub lookup table */
+
+      /* Get the offset of the stub for this syscall */
+
+      /* Load the entry of the stub for this syscall */
+
+      /* Call the stub */
+
+      /* Restore registers */
+
+      /* Return from the syscall */
+
   );
-#  endif
+#endif
 }
 #endif
 
@@ -286,7 +296,7 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
     }
 
   /* Report what happened.  That might difficult in the case of a context
-   * switch 
+   * switch.
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
