@@ -134,7 +134,7 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 
           if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
             {
-              DEBUGVERIFY(sched_sporadic_stop(tcb));
+              DEBUGVERIFY(nxsched_stop_sporadic(tcb));
             }
 #endif
 
@@ -155,7 +155,7 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 
           if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
             {
-              DEBUGVERIFY(sched_sporadic_stop(tcb));
+              DEBUGVERIFY(nxsched_stop_sporadic(tcb));
             }
 #endif
 
@@ -220,11 +220,11 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 
           if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
             {
-              ret = sched_sporadic_reset(tcb);
+              ret = nxsched_reset_sporadic(tcb);
             }
           else
             {
-              ret = sched_sporadic_initialize(tcb);
+              ret = nxsched_initialize_sporadic(tcb);
             }
 
           /* Save the sporadic scheduling parameters. */
@@ -245,7 +245,7 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 
               /* And restart at the next replenishment interval */
 
-              ret = sched_sporadic_start(tcb);
+              ret = nxsched_start_sporadic(tcb);
             }
 
           /* Handle errors */

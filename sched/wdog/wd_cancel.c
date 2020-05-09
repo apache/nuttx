@@ -121,7 +121,7 @@ int wd_cancel(WDOG_ID wdog)
            * interval event.
            */
 
-          sched_timer_reassess();
+          nxsched_reassess_timer();
         }
 
       /* Mark the watchdog inactive */

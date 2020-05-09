@@ -47,7 +47,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_mergepending
+ * Name: nxsched_merge_pending
  *
  * Description:
  *   This function merges the prioritized g_pendingtasks list into the
@@ -69,7 +69,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_SMP
-bool sched_mergepending(void)
+bool nxsched_merge_pending(void)
 {
   FAR struct tcb_s *ptcb;
   FAR struct tcb_s *pnext;
@@ -90,7 +90,7 @@ bool sched_mergepending(void)
       pnext = ptcb->flink;
 
       /* REVISIT:  Why don't we just remove the ptcb from pending task list
-       * and call sched_addreadytorun?
+       * and call nxsched_add_readytorun?
        */
 
       /* Search the ready-to-run list to find the location to insert the
@@ -153,7 +153,7 @@ bool sched_mergepending(void)
 #endif /* !CONFIG_SMP */
 
 /****************************************************************************
- * Name: sched_mergepending
+ * Name: nxsched_merge_pending
  *
  * Description:
  *   This function merges the prioritized g_pendingtasks list into the
@@ -175,7 +175,7 @@ bool sched_mergepending(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-bool sched_mergepending(void)
+bool nxsched_merge_pending(void)
 {
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *ptcb;
@@ -186,7 +186,7 @@ bool sched_mergepending(void)
 
   /* Lock the tasklist before accessing */
 
-  irqstate_t lock = sched_tasklist_lock();
+  irqstate_t lock = nxsched_lock_tasklist();
 
   /* Remove and process every TCB in the g_pendingtasks list.
    *
@@ -195,7 +195,7 @@ bool sched_mergepending(void)
    */
 
   me = this_cpu();
-  if (!sched_islocked_global() && !irq_cpu_locked(me))
+  if (!nxsched_islocked_global() && !irq_cpu_locked(me))
     {
       /* Find the CPU that is executing the lowest priority task */
 
@@ -207,7 +207,7 @@ bool sched_mergepending(void)
           goto errout_with_lock;
         }
 
-      cpu  = sched_cpu_select(ALL_CPUS); /* REVISIT:  Maybe ptcb->affinity */
+      cpu  = nxsched_select_cpu(ALL_CPUS); /* REVISIT:  Maybe ptcb->affinity */
       rtcb = current_task(cpu);
 
       /* Loop while there is a higher priority task in the pending task list
@@ -228,24 +228,24 @@ bool sched_mergepending(void)
 
           /* Add the pending task to the correct ready-to-run list. */
 
-          sched_tasklist_unlock(lock);
-          ret |= sched_addreadytorun(tcb);
-          lock = sched_tasklist_lock();
+          nxsched_unlock_tasklist(lock);
+          ret |= nxsched_add_readytorun(tcb);
+          lock = nxsched_lock_tasklist();
 
           /* This operation could cause the scheduler to become locked.
            * Check if that happened.
            */
 
-          if (sched_islocked_global() || irq_cpu_locked(me))
+          if (nxsched_islocked_global() || irq_cpu_locked(me))
             {
               /* Yes.. then we may have incorrectly placed some TCBs in the
                * g_readytorun list (unlikely, but possible).  We will have to
                * move them back to the pending task list.
                */
 
-              sched_mergeprioritized((FAR dq_queue_t *)&g_readytorun,
-                                     (FAR dq_queue_t *)&g_pendingtasks,
-                                     TSTATE_TASK_PENDING);
+              nxsched_merge_prioritized((FAR dq_queue_t *)&g_readytorun,
+                                        (FAR dq_queue_t *)&g_pendingtasks,
+                                        TSTATE_TASK_PENDING);
 
               /* And return with the scheduler locked and tasks in the
                * pending task list.
@@ -265,7 +265,7 @@ bool sched_mergepending(void)
               goto errout_with_lock;
             }
 
-          cpu  = sched_cpu_select(ALL_CPUS); /* REVISIT:  Maybe ptcb->affinity */
+          cpu  = nxsched_select_cpu(ALL_CPUS); /* REVISIT:  Maybe ptcb->affinity */
           rtcb = current_task(cpu);
         }
 
@@ -273,7 +273,7 @@ bool sched_mergepending(void)
        * tasks in the pending task list to the ready-to-run task list.
        */
 
-      sched_mergeprioritized((FAR dq_queue_t *)&g_pendingtasks,
+      nxsched_merge_prioritized((FAR dq_queue_t *)&g_pendingtasks,
                              (FAR dq_queue_t *)&g_readytorun,
                              TSTATE_TASK_READYTORUN);
     }
@@ -282,7 +282,7 @@ errout_with_lock:
 
   /* Unlock the tasklist */
 
-  sched_tasklist_unlock(lock);
+  nxsched_unlock_tasklist(lock);
   return ret;
 }
 #endif /* CONFIG_SMP */

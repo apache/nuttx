@@ -68,7 +68,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_roundrobin_process
+ * Name:  nxsched_process_roundrobin
  *
  * Description:
  *   Check if the currently executing task has exceeded its time slice.
@@ -96,7 +96,7 @@
  *
  ****************************************************************************/
 
-uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
+uint32_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, uint32_t ticks,
                                   bool noswitches)
 {
   uint32_t ret;
@@ -121,10 +121,10 @@ uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
   /* Did decrementing the timeslice counter cause the timeslice to expire? */
 
   ret = tcb->timeslice;
-  if (tcb->timeslice <= 0 && !sched_islocked_tcb(tcb))
+  if (tcb->timeslice <= 0 && !nxsched_islocked_tcb(tcb))
     {
       /* We will also suppress context switches if we were called via one
-       * of the unusual cases handled by sched_timer_reassess().  In that
+       * of the unusual cases handled by nxsched_reassess_timer().  In that
        * case, we will return a value of one so that the timer will expire
        * as soon as possible and we can perform this action in the normal
        * timer expiration context.

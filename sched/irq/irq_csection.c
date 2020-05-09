@@ -376,7 +376,7 @@ try_again:
               /* Note that we have entered the critical section */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-              sched_critmon_csection(rtcb, true);
+              nxsched_critmon_csection(rtcb, true);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
               sched_note_csection(rtcb, true);
@@ -419,7 +419,7 @@ irqstate_t enter_critical_section(void)
           /* Note that we have entered the critical section */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-          sched_critmon_csection(rtcb, true);
+          nxsched_critmon_csection(rtcb, true);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
           sched_note_csection(rtcb, true);
@@ -526,7 +526,7 @@ void leave_critical_section(irqstate_t flags)
               /* No.. Note that we have left the critical section */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-              sched_critmon_csection(rtcb, false);
+              nxsched_critmon_csection(rtcb, false);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
               sched_note_csection(rtcb, false);
@@ -550,7 +550,7 @@ void leave_critical_section(irqstate_t flags)
                    * because we were within a critical section then.
                    */
 
-                  if (g_pendingtasks.head != NULL && !sched_islocked_global())
+                  if (g_pendingtasks.head != NULL && !nxsched_islocked_global())
                     {
                       /* Release any ready-to-run tasks that have collected
                        * in g_pendingtasks.  NOTE: This operation has a very
@@ -604,7 +604,7 @@ void leave_critical_section(irqstate_t flags)
           /* Note that we have left the critical section */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-          sched_critmon_csection(rtcb, false);
+          nxsched_critmon_csection(rtcb, false);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
           sched_note_csection(rtcb, false);

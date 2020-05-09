@@ -104,11 +104,11 @@ int nxtask_exit(void)
    * context switch will definitely be necessary -- that must be done
    * by the architecture-specific logic.
    *
-   * sched_removereadytorun will mark the task at the head of the
+   * nxsched_remove_readytorun will mark the task at the head of the
    * ready-to-run with state == TSTATE_TASK_RUNNING
    */
 
-  sched_removereadytorun(dtcb);
+  nxsched_remove_readytorun(dtcb);
 
   /* Get the new task at the head of the ready to run list */
 
@@ -119,7 +119,7 @@ int nxtask_exit(void)
 #endif
 
 #ifdef CONFIG_SMP
-  /* Because clearing the global IRQ control in sched_removereadytorun()
+  /* Because clearing the global IRQ control in nxsched_remove_readytorun()
    * was moved to nxsched_resume_scheduler(). So call the API here.
    */
 
@@ -153,7 +153,7 @@ int nxtask_exit(void)
    * behavior.
    */
 
-  sched_addblocked(dtcb, TSTATE_TASK_INACTIVE);
+  nxsched_add_blocked(dtcb, TSTATE_TASK_INACTIVE);
   ret = nxtask_terminate(dtcb->pid, true);
   rtcb->task_state = TSTATE_TASK_RUNNING;
 
@@ -177,7 +177,7 @@ int nxtask_exit(void)
 
   if (g_pendingtasks.head != NULL)
     {
-      sched_mergepending();
+      nxsched_merge_pending();
     }
 
   return ret;

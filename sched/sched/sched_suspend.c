@@ -39,7 +39,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_suspend
+ * Name: nxsched_suspend
  *
  * Description:
  *   Suspend/pause the specified thread.  This is normally calling indirectly
@@ -47,7 +47,7 @@
  *
  ****************************************************************************/
 
-void sched_suspend(FAR struct tcb_s *tcb)
+void nxsched_suspend(FAR struct tcb_s *tcb)
 {
   irqstate_t flags;
 
@@ -62,7 +62,7 @@ void sched_suspend(FAR struct tcb_s *tcb)
     {
       /* Remove the TCB from the the blocked task list. */
 
-      sched_removeblocked(tcb);
+      nxsched_remove_blocked(tcb);
 
       /* Set the errno value to EINTR.  The task will be restarted in the
        * running or runnable state and will appear to have awakened from
@@ -73,7 +73,7 @@ void sched_suspend(FAR struct tcb_s *tcb)
 
       /* Move the TCB to the g_stoppedtasks list. */
 
-      sched_addblocked(tcb, TSTATE_TASK_STOPPED);
+      nxsched_add_blocked(tcb, TSTATE_TASK_STOPPED);
     }
   else
     {

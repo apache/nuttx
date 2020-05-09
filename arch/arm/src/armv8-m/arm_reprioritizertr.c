@@ -82,24 +82,24 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
       sinfo("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
-       * sched_removereadytorun will return true if we just removed the head
+       * nxsched_remove_readytorun will return true if we just removed the head
        * of the ready to run list.
        */
 
-      switch_needed = sched_removereadytorun(tcb);
+      switch_needed = nxsched_remove_readytorun(tcb);
 
       /* Setup up the new task priority */
 
       tcb->sched_priority = (uint8_t)priority;
 
-      /* Return the task to the ready-to-run task list. sched_addreadytorun
+      /* Return the task to the ready-to-run task list. nxsched_add_readytorun
        * will return true if the task was added to the head of ready-to-run
        * list.  We will need to perform a context switch only if the
        * EXCLUSIVE or of the two calls is non-zero (i.e., one and only one
        * the calls changes the head of the ready-to-run list).
        */
 
-      switch_needed ^= sched_addreadytorun(tcb);
+      switch_needed ^= nxsched_add_readytorun(tcb);
 
       /* Now, perform the context switch if one is needed (i.e. if the head
        * of the ready-to-run list is no longer the same).
@@ -114,7 +114,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           if (g_pendingtasks.head)
             {
-              sched_mergepending();
+              nxsched_merge_pending();
             }
 
           /* Update scheduler parameters */

@@ -130,13 +130,13 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
           /* No.. then we will need to move the task from the assigned
            * task list to some other ready to run list.
            *
-           * nxsched_setpriority() will do just what we want... it will
+           * nxsched_set_priority() will do just what we want... it will
            * remove the task from its current position in the some assigned
            * task list and then simply put it back in the right place.  This
            * works even if the task is this task.
            */
 
-          ret = nxsched_setpriority(tcb, tcb->sched_priority);
+          ret = nxsched_set_priority(tcb, tcb->sched_priority);
         }
     }
 

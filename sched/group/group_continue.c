@@ -64,7 +64,7 @@ static int group_continue_handler(pid_t pid, FAR void *arg)
   rtcb = nxsched_get_tcb(pid);
   if (rtcb != NULL)
     {
-      sched_continue(rtcb);
+      nxsched_continue(rtcb);
     }
 
   /* Always return zero.  We need to visit each member of the group */

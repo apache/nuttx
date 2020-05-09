@@ -39,7 +39,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_continue
+ * Name: nxsched_continue
  *
  * Description:
  *   Resume the specified thread.  This is normally calling indirectly
@@ -47,7 +47,7 @@
  *
  ****************************************************************************/
 
-void sched_continue(FAR struct tcb_s *tcb)
+void nxsched_continue(FAR struct tcb_s *tcb)
 {
   irqstate_t flags;
 

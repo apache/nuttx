@@ -59,7 +59,7 @@ void up_release_pending(void)
   sched_lock();
 #endif
 
-  if (sched_mergepending())
+  if (nxsched_merge_pending())
     {
       /* The currently active task has changed!  We will need to switch
        * contexts.

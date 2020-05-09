@@ -106,7 +106,7 @@ int sched_unlock(void)
           /* Note that we no longer have pre-emption disabled. */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-          sched_critmon_preemption(rtcb, false);
+          nxsched_critmon_preemption(rtcb, false);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, false);
@@ -142,7 +142,7 @@ int sched_unlock(void)
            * There are certain conditions that we must avoid by preventing
            * releasing the pending tasks while within the critical section
            * of other CPUs.  This logic does that and there is matching
-           * logic in sched_addreadytorun to avoid starting new tasks within
+           * logic in nxsched_add_readytorun to avoid starting new tasks within
            * the critical section (unless the CPU is the holder of the lock).
            *
            * REVISIT: If this CPU is only one that holds the IRQ lock, then
@@ -151,7 +151,7 @@ int sched_unlock(void)
            * BEFORE it clears IRQ lock.
            */
 
-          if (!sched_islocked_global() && !irq_cpu_locked(cpu) &&
+          if (!nxsched_islocked_global() && !irq_cpu_locked(cpu) &&
               g_pendingtasks.head != NULL)
             {
               up_release_pending();
@@ -182,7 +182,7 @@ int sched_unlock(void)
 #ifdef CONFIG_SCHED_TICKLESS
               else
                 {
-                  sched_timer_reassess();
+                  nxsched_reassess_timer();
                 }
 #endif
             }
@@ -206,7 +206,7 @@ int sched_unlock(void)
                * now
                */
 
-              sched_sporadic_lowpriority(rtcb);
+              nxsched_sporadic_lowpriority(rtcb);
 
 #ifdef CONFIG_SCHED_TICKLESS
               /* Make sure that the call to up_release_pending() did not
@@ -215,7 +215,7 @@ int sched_unlock(void)
 
               if (rtcb == current_task(cpu))
                 {
-                  sched_timer_reassess();
+                  nxsched_reassess_timer();
                 }
 #endif
             }
@@ -261,7 +261,7 @@ int sched_unlock(void)
           /* Note that we no longer have pre-emption disabled. */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-          sched_critmon_preemption(rtcb, false);
+          nxsched_critmon_preemption(rtcb, false);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, false);
@@ -313,7 +313,7 @@ int sched_unlock(void)
 #ifdef CONFIG_SCHED_TICKLESS
               else
                 {
-                  sched_timer_reassess();
+                  nxsched_reassess_timer();
                 }
 #endif
             }
@@ -337,7 +337,7 @@ int sched_unlock(void)
                * now
                */
 
-              sched_sporadic_lowpriority(rtcb);
+              nxsched_sporadic_lowpriority(rtcb);
 
 #ifdef CONFIG_SCHED_TICKLESS
               /* Make sure that the call to up_release_pending() did not
@@ -346,7 +346,7 @@ int sched_unlock(void)
 
               if (rtcb == this_task())
                 {
-                  sched_timer_reassess();
+                  nxsched_reassess_timer();
                 }
 #endif
             }

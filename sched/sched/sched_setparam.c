@@ -186,7 +186,7 @@ int nxsched_set_param(pid_t pid, FAR const struct sched_param *param)
       /* Stop/reset current sporadic scheduling */
 
       flags = enter_critical_section();
-      ret = sched_sporadic_reset(tcb);
+      ret = nxsched_reset_sporadic(tcb);
       if (ret >= 0)
         {
           /* Save the sporadic scheduling parameters and reset to the
@@ -206,7 +206,7 @@ int nxsched_set_param(pid_t pid, FAR const struct sched_param *param)
 
           /* And restart at the next replenishment interval */
 
-          ret = sched_sporadic_start(tcb);
+          ret = nxsched_start_sporadic(tcb);
         }
 
       /* Restore interrupts and handler errors */

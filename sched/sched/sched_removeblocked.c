@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_removeblocked
+ * Name: nxsched_remove_blocked
  *
  * Description:
  *   This function removes a TCB from one of the blocked state task
@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-void sched_removeblocked(FAR struct tcb_s *btcb)
+void nxsched_remove_blocked(FAR struct tcb_s *btcb)
 {
   tstate_t task_state = btcb->task_state;
 

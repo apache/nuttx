@@ -91,14 +91,14 @@ void nxsched_resume_scheduler(FAR struct tcb_s *tcb)
     {
       /* Reset the replenishment cycle if it is appropriate to do so */
 
-      DEBUGVERIFY(sched_sporadic_resume(tcb));
+      DEBUGVERIFY(nxsched_resume_sporadic(tcb));
     }
 #endif
 
   /* Indicate the task has been resumed */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-  sched_critmon_resume(tcb);
+  nxsched_resume_critmon(tcb);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   sched_note_resume(tcb);
@@ -106,7 +106,7 @@ void nxsched_resume_scheduler(FAR struct tcb_s *tcb)
 
 #ifdef CONFIG_SMP
   /* NOTE: The following logic for adjusting global IRQ controls were
-   * derived from sched_addreadytorun() and sched_removedreadytorun()
+   * derived from nxsched_add_readytorun() and sched_removedreadytorun()
    * Here, we only handles clearing logic to defer unlocking IRQ lock
    * followed by context switching.
    */
@@ -120,8 +120,8 @@ void nxsched_resume_scheduler(FAR struct tcb_s *tcb)
   if (tcb->irqcount > 0)
     {
       /* Do notihing here
-       * NOTE: spin_setbit() is done in sched_addreadytorun()
-       * and sched_removereadytorun()
+       * NOTE: spin_setbit() is done in nxsched_add_readytorun()
+       * and nxsched_remove_readytorun()
        */
     }
 

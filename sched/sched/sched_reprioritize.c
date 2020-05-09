@@ -80,12 +80,12 @@
 
 int nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority)
 {
-  /* This function is equivalent to nxsched_setpriority() BUT it also has the
+  /* This function is equivalent to nxsched_set_priority() BUT it also has the
    * side effect of discarding all priority inheritance history.  This is
    * done only on explicit, user-initiated reprioritization.
    */
 
-  int ret = nxsched_setpriority(tcb, sched_priority);
+  int ret = nxsched_set_priority(tcb, sched_priority);
   if (ret == 0)
     {
       /* Reset the base_priority -- the priority that the thread would return

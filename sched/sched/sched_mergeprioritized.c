@@ -36,7 +36,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_mergeprioritized
+ * Name: nxsched_merge_prioritized
  *
  * Description:
  *  This function merges the content of the prioritized task list '1ist1'
@@ -60,7 +60,7 @@
  *
  ****************************************************************************/
 
-void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
+void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
                             uint8_t task_state)
 {
   dq_queue_t clone;
@@ -71,7 +71,7 @@ void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
 #ifdef CONFIG_SMP
   /* Lock the tasklists before accessing */
 
-  irqstate_t lock = sched_tasklist_lock();
+  irqstate_t lock = nxsched_lock_tasklist();
 #endif
 
   DEBUGASSERT(list1 != NULL && list2 != NULL);
@@ -168,7 +168,7 @@ ret_with_lock:
 #ifdef CONFIG_SMP
   /* Unlock the tasklists */
 
-  sched_tasklist_unlock(lock);
+  nxsched_unlock_tasklist(lock);
 #endif
   return;
 }

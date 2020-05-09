@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_cpu_select
+ * Name:  nxsched_select_cpu
  *
  * Description:
  *   Return the index to the CPU with the lowest priority running task,
@@ -76,7 +76,7 @@
  *
  ****************************************************************************/
 
-int sched_cpu_select(cpu_set_t affinity)
+int nxsched_select_cpu(cpu_set_t affinity)
 {
   uint8_t minprio;
   int cpu;

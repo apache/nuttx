@@ -142,7 +142,7 @@ int nxtask_terminate(pid_t pid, bool nonblocking)
    * the case, then we will pause the CPU that the thread is running on.
    */
 
-  cpu = sched_cpu_pause(dtcb);
+  cpu = nxsched_pause_cpu(dtcb);
 
   /* Get the task list associated with the thread's state and CPU */
 

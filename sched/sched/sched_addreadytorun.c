@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_addreadytorun
+ * Name:  nxsched_add_readytorun
  *
  * Description:
  *   This function adds a TCB to the ready to run list.  If the currently
@@ -80,7 +80,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_SMP
-bool sched_addreadytorun(FAR struct tcb_s *btcb)
+bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 {
   FAR struct tcb_s *rtcb = this_task();
   bool ret;
@@ -97,14 +97,14 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
        * g_pendingtasks task list for now.
        */
 
-      sched_addprioritized(btcb, (FAR dq_queue_t *)&g_pendingtasks);
+      nxsched_add_prioritized(btcb, (FAR dq_queue_t *)&g_pendingtasks);
       btcb->task_state = TSTATE_TASK_PENDING;
       ret = false;
     }
 
   /* Otherwise, add the new task to the ready-to-run task list */
 
-  else if (sched_addprioritized(btcb, (FAR dq_queue_t *)&g_readytorun))
+  else if (nxsched_add_prioritized(btcb, (FAR dq_queue_t *)&g_readytorun))
     {
       /* The new btcb was added at the head of the ready-to-run list.  It
        * is now the new active task!
@@ -129,7 +129,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 #endif /* !CONFIG_SMP */
 
 /****************************************************************************
- * Name:  sched_addreadytorun
+ * Name:  nxsched_add_readytorun
  *
  * Description:
  *   This function adds a TCB to one of the ready to run lists.  That might
@@ -164,7 +164,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-bool sched_addreadytorun(FAR struct tcb_s *btcb)
+bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 {
   FAR struct tcb_s *rtcb;
   FAR dq_queue_t *tasklist;
@@ -176,7 +176,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
   /* Lock the tasklists before accessing */
 
-  irqstate_t lock = sched_tasklist_lock();
+  irqstate_t lock = nxsched_lock_tasklist();
 
   /* Check if the blocked TCB is locked to this CPU */
 
@@ -192,7 +192,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
        * (possibly its IDLE task).
        */
 
-      cpu = sched_cpu_select(btcb->affinity);
+      cpu = nxsched_select_cpu(btcb->affinity);
     }
 
   /* Get the task currently running on the CPU (may be the IDLE task) */
@@ -242,14 +242,14 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
    */
 
   me = this_cpu();
-  if ((sched_islocked_global() || irq_cpu_locked(me)) &&
+  if ((nxsched_islocked_global() || irq_cpu_locked(me)) &&
       task_state != TSTATE_TASK_ASSIGNED)
     {
       /* Add the new ready-to-run task to the g_pendingtasks task list for
        * now.
        */
 
-      sched_addprioritized(btcb, (FAR dq_queue_t *)&g_pendingtasks);
+      nxsched_add_prioritized(btcb, (FAR dq_queue_t *)&g_pendingtasks);
       btcb->task_state = TSTATE_TASK_PENDING;
       doswitch = false;
     }
@@ -263,7 +263,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
        * Add the task to the ready-to-run (but not running) task list
        */
 
-      sched_addprioritized(btcb, (FAR dq_queue_t *)&g_readytorun);
+      nxsched_add_prioritized(btcb, (FAR dq_queue_t *)&g_readytorun);
 
       btcb->task_state = TSTATE_TASK_READYTORUN;
       doswitch         = false;
@@ -276,9 +276,9 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       if (cpu != me)
         {
-          sched_tasklist_unlock(lock);
+          nxsched_unlock_tasklist(lock);
           DEBUGVERIFY(up_cpu_pause(cpu));
-          lock = sched_tasklist_lock();
+          lock = nxsched_lock_tasklist();
         }
 
       /* Add the task to the list corresponding to the selected state
@@ -286,7 +286,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
        */
 
       tasklist = (FAR dq_queue_t *)&g_assignedtasks[cpu];
-      switched = sched_addprioritized(btcb, tasklist);
+      switched = nxsched_add_prioritized(btcb, tasklist);
 
       /* If the selected task list was the g_assignedtasks[] list and if the
        * new tasks is the highest priority (RUNNING) task, then a context
@@ -391,7 +391,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
                * different CPU the next time that it runs.
                */
 
-              if (sched_islocked_global())
+              if (nxsched_islocked_global())
                 {
                   next->task_state = TSTATE_TASK_PENDING;
                   tasklist         = (FAR dq_queue_t *)&g_pendingtasks;
@@ -402,7 +402,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
                   tasklist         = (FAR dq_queue_t *)&g_readytorun;
                 }
 
-              sched_addprioritized(next, tasklist);
+              nxsched_add_prioritized(next, tasklist);
             }
 
           doswitch = true;
@@ -413,7 +413,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
            *
            * REVISIT: I have seen this assertion fire.  Apparently another
            * CPU may add another, higher priority task to the same
-           * g_assignedtasks[] list sometime after sched_cpu_select() was
+           * g_assignedtasks[] list sometime after nxsched_select_cpu() was
            * called above, leaving this TCB in the wrong task list if
            * task_state is TSTATE_TASK_ASSIGNED).
            */
@@ -435,7 +435,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
   /* Unlock the tasklists */
 
-  sched_tasklist_unlock(lock);
+  nxsched_unlock_tasklist(lock);
   return doswitch;
 }
 
