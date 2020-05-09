@@ -94,5 +94,17 @@ void up_exit(int status)
 
   /* Then switch contexts */
 
+#ifdef CONFIG_SIM_PREEMPTIBLE
+  FAR void *restore_context = tcb->xcp.sig_jump_buffer;
+  if (tcb->xcp.is_initialized == 0)
+    restore_context = tcb->xcp.regs;
+  up_siglongjmp(restore_context,
+                &tcb->xcp.is_initialized);
+#else
   up_longjmp(tcb->xcp.regs, 1);
+#endif
+
+  /* The function does not return */
+
+  while (1);
 }

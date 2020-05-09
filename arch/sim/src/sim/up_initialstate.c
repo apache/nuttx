@@ -39,16 +39,21 @@
 
 #include <nuttx/config.h>
 
+#include <setjmp.h>
 #include <stdint.h>
 #include <string.h>
 
 #include <nuttx/arch.h>
 
+#include "sched/sched.h"
 #include "up_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+#ifdef CONFIG_SIM_PREEMPTIBLE
+static sigjmp_buf g_jmpbuf[CONFIG_MAX_TASKS];
+#endif
 
 /****************************************************************************
  * Name: up_initial_state
@@ -66,7 +71,23 @@
 
 void up_initial_state(struct tcb_s *tcb)
 {
+#ifdef CONFIG_SIM_PREEMPTIBLE
+  int task_index = PIDHASH(tcb->pid);
+  tcb->xcp.sig_jump_buffer = &g_jmpbuf[task_index];
+  if (up_setjmp(tcb->xcp.regs))
+    {
+      tcb->start();
+    }
+  else
+    {
+      tcb->xcp.regs[JB_SP] = (xcpt_reg_t)tcb->adj_stack_ptr -
+        sizeof(xcpt_reg_t);
+      tcb->xcp.regs[JB_PC] = (xcpt_reg_t)tcb->start;
+      tcb->xcp.is_initialized = 0;
+    }
+#else
   memset(&tcb->xcp, 0, sizeof(struct xcptcontext));
   tcb->xcp.regs[JB_SP] = (xcpt_reg_t)tcb->adj_stack_ptr - sizeof(xcpt_reg_t);
   tcb->xcp.regs[JB_PC] = (xcpt_reg_t)tcb->start;
+#endif
 }

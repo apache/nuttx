@@ -43,9 +43,46 @@
 #include <nuttx/arch.h>
 #include "up_internal.h"
 
+#ifdef CONFIG_SIM_PREEMPTIBLE
+uint32_t host_signal_save(void);
+void host_signal_restore(uint32_t flags);
+#else
+#  define host_signal_save()     0
+#  define host_signal_restore(f) (void)(f)
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_irq_save
+ *
+ * Description:
+ *   Disable interrupts and returned the mask before disabling them.
+ *
+ ****************************************************************************/
+
+irqstate_t up_irq_save(void)
+{
+  return host_signal_save();
+}
+
+/****************************************************************************
+ * Name: up_irq_restore
+ *
+ * Input Parameters:
+ *   flags - the mask used to restore interrupts
+ *
+ * Description:
+ *   Re-enable interrupts using the specified mask in flags argument.
+ *
+ ****************************************************************************/
+
+void up_irq_restore(irqstate_t flags)
+{
+  host_signal_restore(flags);
+}
 
 /****************************************************************************
  * Name: up_interrupt_context
