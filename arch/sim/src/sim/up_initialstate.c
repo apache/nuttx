@@ -39,11 +39,13 @@
 
 #include <nuttx/config.h>
 
+#include <setjmp.h>
 #include <stdint.h>
 #include <string.h>
 
 #include <nuttx/arch.h>
 
+#include "sched/sched.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -66,7 +68,13 @@
 
 void up_initial_state(struct tcb_s *tcb)
 {
+#ifdef CONFIG_SIM_PREEMPTIBLE
+  FAR struct tcb_s *rtcb = this_task();
+  tcb->xcp.ucontext_buffer = up_create_context(&tcb->xcp.ucontext_sp,
+      rtcb->xcp.ucontext_buffer, tcb->start);
+#else
   memset(&tcb->xcp, 0, sizeof(struct xcptcontext));
   tcb->xcp.regs[JB_SP] = (xcpt_reg_t)tcb->adj_stack_ptr - sizeof(xcpt_reg_t);
   tcb->xcp.regs[JB_PC] = (xcpt_reg_t)tcb->start;
+#endif
 }

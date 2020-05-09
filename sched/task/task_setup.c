@@ -50,6 +50,11 @@
 
 #define MAX_STACK_ARGS 256
 
+#ifdef CONFIG_SIM_PREEMPTIBLE
+void up_setup_args_context(void *current_ucontext, void (*entry_point)(void),
+    int argc, char *argv[]);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -592,6 +597,11 @@ static inline int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
 
   stackargv[argc + 1] = NULL;
   tcb->argv = stackargv;
+
+#ifdef CONFIG_SIM_PREEMPTIBLE
+  up_setup_args_context(tcb->cmn.xcp.ucontext_buffer, tcb->cmn.start, argc,
+      tcb->argv);
+#endif
 
   return OK;
 }

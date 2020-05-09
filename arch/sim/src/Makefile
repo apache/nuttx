@@ -79,6 +79,7 @@ VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
 HOSTCFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)}
+HOSTCFLAGS += -DCONFIG_USEC_PER_TICK=$(CONFIG_USEC_PER_TICK)
 HOSTSRCS = up_hostmemory.c up_hosttime.c
 ifneq ($(CONFIG_HOST_MACOS),y)
   STDLIBS += -lrt
@@ -90,6 +91,17 @@ endif
 
 ifeq ($(CONFIG_SPINLOCK),y)
   HOSTSRCS += up_testset.c
+endif
+
+ifeq ($(CONFIG_SIM_PREEMPTIBLE),y)
+  HOSTSRCS += up_ucontext.c
+  HOSTCFLAGS += -DCONFIG_SIM_PREEMPTIBLE=$(CONFIG_SIM_PREEMPTIBLE)
+ifeq ($(CONFIG_HOST_MACOS), y)
+  CFLAGS += -D_XOPEN_SOURCE -Wno-deprecated-declarations
+  HOSTCFLAGS += -D_XOPEN_SOURCE -Wno-deprecated-declarations
+  HOSTCFLAGS += -pthread
+endif
+  STDLIBS += -lpthread
 endif
 
 ifeq ($(CONFIG_SMP),y)

@@ -42,6 +42,8 @@
 #include <semaphore.h>
 #include <signal.h>
 #include <sched.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include <errno.h>
 
 /****************************************************************************
@@ -99,7 +101,8 @@ volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
 
 void nx_start(void);
 void up_cpu_started(void);
-int  up_cpu_paused(int cpu);
+int up_cpu_paused(int cpu);
+int up_cpu_simulated_interrupt(void);
 void host_sleepuntil(uint64_t nsec);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION

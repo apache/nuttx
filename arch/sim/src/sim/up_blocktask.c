@@ -82,7 +82,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
   DEBUGASSERT((tcb->task_state >= FIRST_READY_TO_RUN_STATE) &&
               (tcb->task_state <= LAST_READY_TO_RUN_STATE));
 
-  /* sinfo("Blocking TCB=%p\n", tcb); */
+  sinfo("Blocking TCB=%p %s\n", tcb, tcb->name);
 
   /* Remove the tcb task from the ready-to-run list.  If we are blocking the
    * task at the head of the task list (the most likely case), then a
@@ -118,14 +118,18 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
        * value, then this is really the previously running task restarting!
        */
 
+#ifdef CONFIG_SIM_PREEMPTIBLE
+      FAR struct tcb_s *prev_tcb = rtcb;
+#else
       if (!up_setjmp(rtcb->xcp.regs))
+#endif
         {
           /* Restore the exception context of the rtcb at the (new) head
            * of the ready-to-run task list.
            */
 
           rtcb = this_task();
-          sinfo("New Active Task TCB=%p\n", rtcb);
+          sinfo("New Active Task TCB=%p %s\n", rtcb, rtcb->name);
 
           /* The way that we handle signals in the simulation is kind of
            * a kludge.  This would be unsafe in a truly multi-threaded,
@@ -134,7 +138,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
           if (rtcb->xcp.sigdeliver)
             {
-              sinfo("Delivering signals TCB=%p\n", rtcb);
+              sinfo("Delivering signals TCB=%p %s\n", rtcb, rtcb->name);
               ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
               rtcb->xcp.sigdeliver = NULL;
             }
@@ -145,7 +149,12 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
           /* Then switch contexts */
 
+#ifdef CONFIG_SIM_PREEMPTIBLE
+          up_swap_context(prev_tcb->xcp.ucontext_buffer,
+                          rtcb->xcp.ucontext_buffer);
+#else
           up_longjmp(rtcb->xcp.regs, 1);
+#endif
         }
     }
 }

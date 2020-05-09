@@ -89,6 +89,14 @@ void up_idle(void)
     }
 #endif
 
+#ifndef CONFIG_SIM_PREEMPTIBLE
+  /* If the system is idle, then process "fake" timer interrupts.
+   * Hopefully, something will wake up.
+   */
+
+  nxsched_process_timer();
+#endif /* CONFIG_SIM_PREEMPTIBLE */
+
 #ifdef USE_DEVCONSOLE
   /* Handle UART data availability */
 
@@ -111,7 +119,7 @@ void up_idle(void)
   up_rptun_loop();
 #endif
 
-#ifdef CONFIG_ONESHOT
+#if defined(CONFIG_ONESHOT) && !defined(CONFIG_SIM_PREEMPTIBLE)
   /* Driver the simulated interval timer */
 
   up_timer_update();

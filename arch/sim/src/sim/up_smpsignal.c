@@ -116,7 +116,11 @@ int up_cpu_paused(int cpu)
    * this is really the previously running task restarting!
    */
 
-  if (up_setjmp(rtcb->xcp.regs) == 0)
+#ifdef CONFIG_SIM_PREEMPTIBLE
+  FAR struct tcb_s *prev_tcb = rtcb;
+#else
+  if (!up_setjmp(rtcb->xcp.regs))
+#endif
     {
       /* Unlock the g_cpu_paused spinlock to indicate that we are in the
        * paused state
@@ -128,8 +132,10 @@ int up_cpu_paused(int cpu)
        * inicate that we are not longer paused.
        */
 
+      sinfo("CPU%d: enter waiting spinlock\n", cpu);
       spin_lock(&g_cpu_wait[cpu]);
       spin_unlock(&g_cpu_wait[cpu]);
+      sinfo("CPU%d: exit waiting spinlock\n", cpu);
 
       /* While we were paused, logic on a different CPU probably changed
        * the task as that head of the assigned task list.  So now we need
@@ -163,7 +169,12 @@ int up_cpu_paused(int cpu)
 
       /* Then switch contexts */
 
+#ifdef CONFIG_SIM_PREEMPTIBLE
+          up_swap_context(prev_tcb->xcp.ucontext_buffer,
+              rtcb->xcp.ucontext_buffer);
+#else
       up_longjmp(rtcb->xcp.regs, 1);
+#endif
     }
 
   return OK;

@@ -41,10 +41,6 @@
 #define __ARCH_SIM_INCLUDE_IRQ_H
 
 /****************************************************************************
- * Included Files
- ****************************************************************************/
-
-/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -82,11 +78,15 @@ typedef int xcpt_reg_t;
 
 struct xcptcontext
 {
-  void *sigdeliver; /* Actual type is sig_deliver_t */
+  void *sigdeliver;
+
+#ifdef CONFIG_SIM_PREEMPTIBLE
+  void *ucontext_buffer; /* Actual type is ucontext_t */
+  void *ucontext_sp;
+#endif
 
   xcpt_reg_t regs[XCPTCONTEXT_REGS];
 };
-#endif
 
 /****************************************************************************
  * Inline functions
@@ -110,23 +110,36 @@ static inline void up_irqinitialize(void)
 {
 }
 
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /* Name: up_irq_save, up_irq_restore, and friends.
  *
- * NOTE: This function should never be called from application code and,
+ * NOTE: These functions should never be called from application code and,
  * as a general rule unless you really know what you are doing, this
  * function should not be called directly from operation system code either:
  * Typically, the wrapper functions, enter_critical_section() and
  * leave_critical section(), are probably what you really want.
  */
 
-static inline irqstate_t up_irq_save(void)
-{
-  return 0;
-}
+irqstate_t up_irq_save(void);
 
-static inline void up_irq_restore(irqstate_t flags)
-{
-}
+void up_irq_restore(irqstate_t flags);
 
 #undef EXTERN
 #ifdef __cplusplus

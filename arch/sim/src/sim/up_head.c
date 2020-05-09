@@ -81,6 +81,9 @@ int main(int argc, char **argv, char **envp)
   syslog_rpmsg_init_early("server", g_logbuffer, sizeof(g_logbuffer));
 #endif
 
+#ifdef CONFIG_SIM_PREEMPTIBLE
+  up_setup_sigstack();
+#endif
   /* Start NuttX */
 
   if (setjmp(g_simabort) == 0)

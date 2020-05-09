@@ -3,6 +3,7 @@
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Sebastian Ene <nuttx@fitbit.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -58,7 +59,8 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure describes the state of the oneshot timer lower-half driver */
+/* This structure describes the state of the oneshot timer lower-half driver
+ */
 
 struct sim_oneshot_lowerhalf_s
 {
@@ -357,6 +359,17 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
 
 void up_timer_initialize(void)
 {
+  /* Block the signals for the new threads created on the host to prevent
+   * a race condition where the simulated interrupt handler runs on another
+   * host thread. The new threads will inherit the signal mask which has
+   * blocked signals.
+   */
+
+#ifdef CONFIG_SIM_PREEMPTIBLE
+  host_prepare_timer();
+  host_init_timer(up_timer_update);
+#endif
+
   up_alarm_set_lowerhalf(oneshot_initialize(0, 0));
 }
 

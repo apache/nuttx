@@ -87,7 +87,11 @@ void up_release_pending(void)
        * this is really the previously running task restarting!
        */
 
+#ifdef CONFIG_SIM_PREEMPTIBLE
+      FAR struct tcb_s *prev_tcb = rtcb;
+#else
       if (!up_setjmp(rtcb->xcp.regs))
+#endif
         {
           /* Restore the exception context of the rtcb at the (new) head
            * of the ready-to-run task list.
@@ -114,7 +118,12 @@ void up_release_pending(void)
 
           /* Then switch contexts */
 
+#ifdef CONFIG_SIM_PREEMPTIBLE
+          up_swap_context(prev_tcb->xcp.ucontext_buffer,
+                          rtcb->xcp.ucontext_buffer);
+#else
           up_longjmp(rtcb->xcp.regs, 1);
+#endif
         }
     }
 }

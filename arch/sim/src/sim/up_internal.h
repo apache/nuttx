@@ -219,6 +219,20 @@ extern volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_SIM_PREEMPTIBLE
+int host_init_timer(void (*nxsched_process_timer)(void));
+int host_prepare_timer(void);
+void *up_create_context(void **ucontext_sp, void *prev_ucontext,
+    void (*entry_point)(void));
+void up_destroy_context(void *current_ucontext, void *ucontext_sp,
+    void *next_ucontext, int cpu_id);
+void up_setup_args_context(void *current_ucontext, void (*entry_point)(void),
+    int argc, char *argv[]);
+void up_swap_context(void *old_ucontext, void *activate_ucontext);
+void up_set_context(void *current_context);
+void up_setup_sigstack(void);
+#endif
+
 /* up_setjmp32.S ************************************************************/
 
 int  up_setjmp(xcpt_reg_t *jb);

@@ -475,4 +475,12 @@ config SIM_QSPIFLASH_PAGESIZE
 		"wrap" causing the initial data sent to be overwritten.
 		This is consistent with standard SPI FLASH operation.
 
+config SIM_PREEMPTIBLE
+	bool "Preempt tasks on a periodic tick"
+	default false
+	---help---
+		Setup a timer on the host that generates periodic signals
+		used to simulate the tick interrupt. In the context of this
+		tick interrupt we query the scheduler for the next task
+		and preempt the one that is running.
 endif # ARCH_SIM
