@@ -274,8 +274,8 @@ bool nxsched_merge_pending(void)
        */
 
       nxsched_merge_prioritized((FAR dq_queue_t *)&g_pendingtasks,
-                             (FAR dq_queue_t *)&g_readytorun,
-                             TSTATE_TASK_READYTORUN);
+                                (FAR dq_queue_t *)&g_readytorun,
+                                TSTATE_TASK_READYTORUN);
     }
 
 errout_with_lock:
