@@ -235,7 +235,7 @@ static inline void nxsem_findandfreeholder(sem_t *sem,
   FAR struct semholder_s *pholder = nxsem_findholder(sem, htcb);
 
   /* When no more counts are held, remove the holder from the list.  The
-   * count was decremented in nxsem_releaseholder.
+   * count was decremented in nxsem_release_holder.
    */
 
   if (pholder != NULL && pholder->counts <= 0)
@@ -685,7 +685,7 @@ static int nxsem_restoreholderprio_self(FAR struct semholder_s *pholder,
 }
 
 /****************************************************************************
- * Name: nxsem_restorebaseprio_irq
+ * Name: nxsem_restore_baseprio_irq
  *
  * Description:
  *   This function is called after an interrupt handler posts a count on
@@ -716,8 +716,8 @@ static int nxsem_restoreholderprio_self(FAR struct semholder_s *pholder,
  *
  ****************************************************************************/
 
-static inline void nxsem_restorebaseprio_irq(FAR struct tcb_s *stcb,
-                                             FAR sem_t *sem)
+static inline void nxsem_restore_baseprio_irq(FAR struct tcb_s *stcb,
+                                              FAR sem_t *sem)
 {
   /* Perform the following actions only if a new thread was given a count.
    * The thread that received the count should be the highest priority
@@ -746,7 +746,7 @@ static inline void nxsem_restorebaseprio_irq(FAR struct tcb_s *stcb,
 }
 
 /****************************************************************************
- * Name: nxsem_restorebaseprio_task
+ * Name: nxsem_restore_baseprio_task
  *
  * Description:
  *   This function is called after the current running task releases a
@@ -777,8 +777,8 @@ static inline void nxsem_restorebaseprio_irq(FAR struct tcb_s *stcb,
  *
  ****************************************************************************/
 
-static inline void nxsem_restorebaseprio_task(FAR struct tcb_s *stcb,
-                                              FAR sem_t *sem)
+static inline void nxsem_restore_baseprio_task(FAR struct tcb_s *stcb,
+                                               FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
 
@@ -831,7 +831,7 @@ static inline void nxsem_restorebaseprio_task(FAR struct tcb_s *stcb,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsem_initholders
+ * Name: nxsem_initialize_holders
  *
  * Description:
  *   Called from nxsem_initialize() to set up semaphore holder information.
@@ -846,7 +846,7 @@ static inline void nxsem_restorebaseprio_task(FAR struct tcb_s *stcb,
  *
  ****************************************************************************/
 
-void nxsem_initholders(void)
+void nxsem_initialize_holders(void)
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
   int i;
@@ -920,7 +920,7 @@ void nxsem_destroyholder(FAR sem_t *sem)
 }
 
 /****************************************************************************
- * Name: nxsem_addholder_tcb
+ * Name: nxsem_add_holder_tcb
  *
  * Description:
  *   Called from nxsem_wait() when the calling thread obtains the semaphore;
@@ -938,7 +938,7 @@ void nxsem_destroyholder(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-void nxsem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
+void nxsem_add_holder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
 {
   FAR struct semholder_s *pholder;
 
@@ -965,7 +965,7 @@ void nxsem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
 }
 
 /****************************************************************************
- * Name: nxsem_addholder
+ * Name: nxsem_add_holder
  *
  * Description:
  *   Called from nxsem_wait() when the calling thread obtains the semaphore
@@ -981,13 +981,13 @@ void nxsem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
  *
  ****************************************************************************/
 
-void nxsem_addholder(FAR sem_t *sem)
+void nxsem_add_holder(FAR sem_t *sem)
 {
-  nxsem_addholder_tcb(this_task(), sem);
+  nxsem_add_holder_tcb(this_task(), sem);
 }
 
 /****************************************************************************
- * Name: void nxsem_boostpriority(sem_t *sem)
+ * Name: void nxsem_boost_priority(sem_t *sem)
  *
  * Description:
  *
@@ -1002,7 +1002,7 @@ void nxsem_addholder(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-void nxsem_boostpriority(FAR sem_t *sem)
+void nxsem_boost_priority(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
 
@@ -1015,7 +1015,7 @@ void nxsem_boostpriority(FAR sem_t *sem)
 }
 
 /****************************************************************************
- * Name: nxsem_releaseholder
+ * Name: nxsem_release_holder
  *
  * Description:
  *   Called from sem_post() after a thread releases one count on the
@@ -1031,7 +1031,7 @@ void nxsem_boostpriority(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-void nxsem_releaseholder(FAR sem_t *sem)
+void nxsem_release_holder(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct semholder_s *pholder;
@@ -1042,7 +1042,7 @@ void nxsem_releaseholder(FAR sem_t *sem)
   if (pholder != NULL && pholder->counts > 0)
     {
       /* Decrement the counts on this holder -- the holder will be freed
-       * later in nxsem_restorebaseprio.
+       * later in nxsem_restore_baseprio.
        */
 
       pholder->counts--;
@@ -1050,7 +1050,7 @@ void nxsem_releaseholder(FAR sem_t *sem)
 }
 
 /****************************************************************************
- * Name: nxsem_restorebaseprio
+ * Name: nxsem_restore_baseprio
  *
  * Description:
  *   This function is called after the current running task releases a
@@ -1082,7 +1082,7 @@ void nxsem_releaseholder(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-void nxsem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
+void nxsem_restore_baseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
 {
 #if 0  /* DSA: sometimes crashes when Telnet calls external cmd (i.e. 'i2c') */
   /* Check our assumptions */
@@ -1101,11 +1101,11 @@ void nxsem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
 
   if (up_interrupt_context())
     {
-      nxsem_restorebaseprio_irq(stcb, sem);
+      nxsem_restore_baseprio_irq(stcb, sem);
     }
   else
     {
-      nxsem_restorebaseprio_task(stcb, sem);
+      nxsem_restore_baseprio_task(stcb, sem);
     }
 }
 

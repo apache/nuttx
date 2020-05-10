@@ -168,7 +168,9 @@ static bool nxsched_period_callback(FAR uint32_t *next_interval_us,
 
   DEBUGASSERT(*next_interval_us > 0); /* Check for overflow to negative or zero */
 
-  /* Make sure that the accumulated value does not exceed the maximum timeout */
+  /* Make sure that the accumulated value does not exceed the maximum
+   * timeout.
+   */
 
   if (*next_interval_us > g_sched_period.maxtimeout)
     {
@@ -201,7 +203,7 @@ static bool nxsched_period_callback(FAR uint32_t *next_interval_us,
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_period_extclk
+ * Name:  nxsched_period_extclk
  *
  * Description:
  *   Configure to use a period timer as described in
@@ -217,7 +219,7 @@ static bool nxsched_period_callback(FAR uint32_t *next_interval_us,
  *
  ****************************************************************************/
 
-void sched_period_extclk(FAR struct timer_lowerhalf_s *lower)
+void nxsched_period_extclk(FAR struct timer_lowerhalf_s *lower)
 {
   DEBUGASSERT(lower != NULL && lower->ops != NULL);
   DEBUGASSERT(lower->ops->setcallback != NULL);

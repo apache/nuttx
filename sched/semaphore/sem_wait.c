@@ -95,7 +95,7 @@ int nxsem_wait(FAR sem_t *sem)
           /* It is, let the task take the semaphore. */
 
           sem->semcount--;
-          nxsem_addholder(sem);
+          nxsem_add_holder(sem);
           rtcb->waitsem = NULL;
           ret = OK;
         }
@@ -135,7 +135,7 @@ int nxsem_wait(FAR sem_t *sem)
            * semaphore.
            */
 
-          nxsem_boostpriority(sem);
+          nxsem_boost_priority(sem);
 #endif
           /* Set the errno value to zero (preserving the original errno)
            * value).  We reuse the per-thread errno to pass information
@@ -178,7 +178,7 @@ int nxsem_wait(FAR sem_t *sem)
            * sem_timedwait().
            *
            * If we were not awakened by a signal or a timeout, then
-           * nxsem_addholder() was called by logic in sem_wait() fore this
+           * nxsem_add_holder() was called by logic in sem_wait() fore this
            * thread was restarted.
            */
 
