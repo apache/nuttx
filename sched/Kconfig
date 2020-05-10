@@ -850,7 +850,7 @@ config CPULOAD_ONESHOT
 		oneshot timer must be configured by board specific logic which must
 		then call:
 
-			void sched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower);
+			void nxsched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower);
 
 		To start the CPU load measurement. See include/nuttx/clock.h
 
@@ -868,7 +868,7 @@ config CPULOAD_PERIOD
 		period timer must be configured by board specific logic which must
 		then call:
 
-			void sched_period_extclk(FAR struct timer_lowerhalf_s *lower);
+			void nxsched_period_extclk(FAR struct timer_lowerhalf_s *lower);
 
 		To start the CPU load measurement. See include/nuttx/clock.h
 
