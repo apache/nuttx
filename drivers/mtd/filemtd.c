@@ -506,9 +506,9 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path,
       return NULL;
     }
 
-  /* Determine the file open mode */
+  /* Set the file open mode. */
 
-  mode = O_RDOK |= O_WROK;
+  mode = O_RDOK | O_WROK;
 
   /* Try to open the file.  NOTE that block devices will use a character
    * driver proxy.
