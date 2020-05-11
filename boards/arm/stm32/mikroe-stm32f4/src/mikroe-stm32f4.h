@@ -47,7 +47,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ****************************************************************************/
+
+/* Configuration ************************************************************/
+
 /* How many SPI modules does this chip support? */
 
 #if STM32_NSPI < 1
@@ -61,13 +63,15 @@
 #  undef CONFIG_STM32_SPI3
 #endif
 
-/* Mikroe STM32F4 GPIOs **************************************************************************/
-/* LEDs - There are no user LEDs on this board unless you add some manually. */
+/* Mikroe STM32F4 GPIOs *****************************************************/
+
+/* LEDs - There are no user LEDs on this board unless you add some manually */
 
 #define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN12)
 
 /* BUTTONS -- NOTE that all have EXTI interrupts configured */
+
 /* There are no user buttons on this board unless you add some externally. */
 
 #define MIN_IRQBUTTON   BUTTON_USER
@@ -201,14 +205,15 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the mikroe-stm32f4 board.
+ *   Called to configure SPI chip select GPIO pins for the mikroe-stm32f4
+ *   board.
  *
  ****************************************************************************/
 
@@ -218,8 +223,8 @@ void weak_function stm32_spidev_initialize(void);
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in initialization to setup USB-related
- *   GPIO pins for the Mikroe-stm32f4 board.
+ *   Called from stm32_usbinitialize very early in initialization to setup
+ *   USB-related GPIO pins for the Mikroe-stm32f4 board.
  *
  ****************************************************************************/
 
@@ -243,8 +248,9 @@ int stm32_pwm_setup(void);
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality. This function will
- *   start a thread that will monitor for device connection/disconnection events.
+ *   Called at application startup time to initialize the USB host
+ *   functionality. This function will start a thread that will monitor
+ *   for device connection/disconnection events.
  *
  ****************************************************************************/
 
@@ -256,8 +262,9 @@ int stm32_pwm_setup(void);
  * Name: stm32_lcdinitialize
  *
  * Description:
- *   Initialize the LCD.  This function should be called early in the boot sequendce -- Even if the
- *   LCD is not enabled.  In that case we should at a minimum at least disable the LCD backlight.
+ *   Initialize the LCD.  This function should be called early in the boot
+ *   sequendce -- Even if the LCD is not enabled.  In that case we should at
+ *   a minimum at least disable the LCD backlight.
  *
  ****************************************************************************/
 
@@ -269,15 +276,16 @@ void stm32_lcdinitialize(void);
  * Name: stm32_tsc_setup
  *
  * Description:
- *   This function is called by board-bringup logic to configure the touchscreen device.  This
- *   function will register the driver as /dev/inputN where N is the minor device number.
+ *   This function is called by board-bringup logic to configure the
+ *   touchscreen device.  This function will register the driver as
+ *   /dev/inputN where N is the minor device number.
  *
  * Input Parameters:
  *   minor - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned to indicate the
- *   nature of the failure.
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 

@@ -118,8 +118,8 @@
 #  undef HAVE_USBMONITOR
 #endif
 
-/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
- * is not enabled.
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO
+ * support is not enabled.
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_STM32_SPI3)
@@ -209,11 +209,13 @@ int board_app_initialize(uintptr_t arg)
   mtd = m25p_initialize(spi);
   if (!mtd)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 3 to the SPI FLASH driver\n");
+      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 3 to the SPI"
+                      " FLASH driver\n");
     }
   else
     {
-      syslog(LOG_INFO, "Successfully bound SPI port 3 to the SPI FLASH driver\n");
+      syslog(LOG_INFO, "Successfully bound SPI port 3 to the SPI"
+                       " FLASH driver\n");
 
 #ifdef CONFIG_MIKROE_FLASH_PART
       {
@@ -236,7 +238,7 @@ int board_app_initialize(uintptr_t arg)
             /* Get the partition size */
 
             partsize = atoi(ptr);
-            mtd_part = mtd_partition(mtd, partoffset, (partsize>>2)*16);
+            mtd_part = mtd_partition(mtd, partoffset, (partsize >> 2) * 16);
             partoffset += (partsize >> 2) * 16;
 
 #ifdef CONFIG_MIKROE_FLASH_CONFIG_PART
