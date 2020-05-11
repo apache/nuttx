@@ -145,8 +145,8 @@ static int hcsr04_irq_attach(FAR struct hcsr04_config_s *state, xcpt_t isr,
   priv->isr     = isr;
   priv->arg     = arg;
 
-  stm32_gpiosetevent(BOARD_HCSR04_GPIO_INT, priv->rising, priv->falling, true,
-                     isr, arg);
+  stm32_gpiosetevent(BOARD_HCSR04_GPIO_INT, priv->rising, priv->falling,
+                     true, isr, arg);
 
   leave_critical_section(flags);
 
@@ -155,7 +155,8 @@ static int hcsr04_irq_attach(FAR struct hcsr04_config_s *state, xcpt_t isr,
 
 /* Setup the interruption mode: Rising or Falling */
 
-static void hcsr04_irq_setmode(FAR struct hcsr04_config_s *state, bool rise_mode)
+static void hcsr04_irq_setmode(FAR struct hcsr04_config_s *state,
+                               bool rise_mode)
 {
   FAR struct stm32_hcsr04config_s *priv =
              (FAR struct stm32_hcsr04config_s *)state;
@@ -182,20 +183,21 @@ static void hcsr04_irq_enable(FAR const struct hcsr04_config_s *state,
 
   iinfo("%d\n", enable);
 
-  stm32_gpiosetevent(BOARD_HCSR04_GPIO_INT, priv->rising, priv->falling, true,
-                     enable ? priv->isr : NULL, priv->arg);
+  stm32_gpiosetevent(BOARD_HCSR04_GPIO_INT, priv->rising, priv->falling,
+                     true, enable ? priv->isr : NULL, priv->arg);
 }
 
 /* Acknowledge/clear any pending GPIO interrupt */
 
 static void hcsr04_irq_clear(FAR const struct hcsr04_config_s *state)
 {
-  // FIXME  Nothing to do ?
+  /* FIXME: Nothing to do ? */
 }
 
 /* Set the Trigger pin state */
 
-static void hcsr04_set_trigger(FAR const struct hcsr04_config_s *state, bool on)
+static void hcsr04_set_trigger(FAR const struct hcsr04_config_s *state,
+                               bool on)
 {
   stm32_gpiowrite(BOARD_HCSR04_GPIO_TRIG, on);
 }

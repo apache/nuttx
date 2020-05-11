@@ -94,9 +94,9 @@ static int  apds9960_irq_attach(FAR struct apds9960_config_s *state,
 static struct stm32_apds9960config_s g_apds9960config =
 {
   .config =
-  {
-    .irq_attach  = apds9960_irq_attach,
-  },
+    {
+      .irq_attach  = apds9960_irq_attach,
+    },
 };
 
 /****************************************************************************
