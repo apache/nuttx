@@ -137,10 +137,6 @@
 
 #define GPIO_ZEROCROSS    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
 
-/* Pin for APDS-9960 sensor */
-
-#define GPIO_APDS9960_INT (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
-
 /* SPI chip selects */
 
 #define FLASH_SPI1_CS     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
@@ -265,18 +261,6 @@ int stm32_zerocross_initialize(void);
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
-#endif
-
-/****************************************************************************
- * Name: stm32_apds9960initialize
- *
- * Description:
- *   Initialize APDS-9960 gesture sensor
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SENSORS_APDS9960
-int stm32_apds9960initialize(FAR const char *devpath);
 #endif
 
 /****************************************************************************

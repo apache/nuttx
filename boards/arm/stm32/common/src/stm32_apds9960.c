@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f103-minimum/src/stm32_apds9960.c
+ * boards/arm/stm32/common/src/stm32_apds9960.c
  *
  *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
@@ -41,21 +41,18 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <stdio.h>
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/apds9960.h>
+#include <arch/board/board.h>
 
 #include "stm32.h"
 #include "stm32_i2c.h"
-#include "stm32f103_minimum.h"
-
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_APDS9960)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define APDS9960_I2C_PORTNO 1   /* On I2C1 */
 
 /****************************************************************************
  * Public Functions
@@ -77,8 +74,8 @@ struct stm32_apds9960config_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  apds9960_irq_attach(FAR struct apds9960_config_s *state, xcpt_t isr,
-                                FAR void *arg);
+static int  apds9960_irq_attach(FAR struct apds9960_config_s *state,
+                                xcpt_t isr, FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -108,8 +105,8 @@ static struct stm32_apds9960config_s g_apds9960config =
 
 /* Attach the APDS-9960 interrupt handler to the GPIO interrupt */
 
-static int apds9960_irq_attach(FAR struct apds9960_config_s *state, xcpt_t isr,
-                               FAR void *arg)
+static int apds9960_irq_attach(FAR struct apds9960_config_s *state,
+                               xcpt_t isr, FAR void *arg)
 {
   irqstate_t flags;
 
@@ -119,7 +116,7 @@ static int apds9960_irq_attach(FAR struct apds9960_config_s *state, xcpt_t isr,
 
   /* Setup interrupt for Falling Edge */
 
-  stm32_gpiosetevent(GPIO_APDS9960_INT, false, true, true, isr, arg);
+  stm32_gpiosetevent(BOARD_APDS9960_GPIO_INT, false, true, true, isr, arg);
 
   leave_critical_section(flags);
 
@@ -131,33 +128,35 @@ static int apds9960_irq_attach(FAR struct apds9960_config_s *state, xcpt_t isr,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_apds9960initialize
+ * Name: board_apds9960_initialize
  *
  * Description:
  *   Initialize and register the APDS9960 gesture sensor.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/gest0"
+ *   devno - The device number, used to build the device path as /dev/gestN
+ *   busno - The I2C bus number
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int stm32_apds9960initialize(FAR const char *devpath)
+int board_apds9960_initialize(int devno, int busno)
 {
   FAR struct i2c_master_s *i2c;
+  char devpath[12];
   int ret;
 
   sninfo("Initializing APDS9960!\n");
 
   /* Configure the GPIO interrupt */
 
-  stm32_configgpio(GPIO_APDS9960_INT);
+  stm32_configgpio(BOARD_APDS9960_GPIO_INT);
 
   /* Initialize I2C */
 
-  i2c = stm32_i2cbus_initialize(APDS9960_I2C_PORTNO);
+  i2c = stm32_i2cbus_initialize(busno);
   if (i2c == NULL)
     {
       return -ENODEV;
@@ -170,6 +169,7 @@ int stm32_apds9960initialize(FAR const char *devpath)
 
   /* Then register the gesture sensor */
 
+  snprintf(devpath, 12, "/dev/gest%d", devno);
   ret = apds9960_register(devpath, &g_apds9960config.config);
   if (ret < 0)
     {
@@ -178,5 +178,3 @@ int stm32_apds9960initialize(FAR const char *devpath)
 
   return ret;
 }
-
-#endif /* CONFIG_I2C && CONFIG_SENSORS_APDS9960 && CONFIG_STM32_I2C1 */
