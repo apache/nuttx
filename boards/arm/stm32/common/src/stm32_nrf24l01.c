@@ -83,8 +83,6 @@ static FAR struct nrf24l01_config_s nrf_cfg =
 static xcpt_t g_isr;
 static FAR void *g_arg;
 
-struct board_nrf24l01_config_s g_cfg;
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -98,14 +96,14 @@ static int nrf24l01_irq_attach(xcpt_t isr, FAR void *arg)
   wlinfo("Attach IRQ\n");
   g_isr = isr;
   g_arg = arg;
-  stm32_gpiosetevent(g_cfg.irq_pincfg, false, true, false, g_isr, g_arg);
+  stm32_gpiosetevent(BOARD_NRF24L01_GPIO_IRQ, false, true, false, g_isr, g_arg);
   return OK;
 }
 
 static void nrf24l01_chip_enable(bool enable)
 {
   wlinfo("CE:%d\n", enable);
-  stm32_gpiowrite(g_cfg.ce_pincfg, enable);
+  stm32_gpiowrite(BOARD_NRF24L01_GPIO_CE, enable);
 }
 
 /****************************************************************************
@@ -119,7 +117,6 @@ static void nrf24l01_chip_enable(bool enable)
  *   Initialize the NRF24L01 wireless module
  *
  * Input Parameters:
- *   cfg   - Instance configuration data
  *   busno - The SPI bus number
  *
  * Returned Value:
@@ -127,20 +124,15 @@ static void nrf24l01_chip_enable(bool enable)
  *
  ****************************************************************************/
 
-int board_nrf24l01_initialize(FAR struct board_nrf24l01_config_s *cfg,
-                               int busno)
+int board_nrf24l01_initialize(int busno)
 {
   FAR struct spi_dev_s *spidev;
   int result;
 
-  DEBUGASSERT(cfg);
-
-  memcpy(&g_cfg, cfg, sizeof(g_cfg));
-
   /* Setup CE & IRQ line IOs */
 
-  stm32_configgpio(g_cfg.ce_pincfg);
-  stm32_configgpio(g_cfg.irq_pincfg);
+  stm32_configgpio(BOARD_NRF24L01_GPIO_CE);
+  stm32_configgpio(BOARD_NRF24L01_GPIO_IRQ);
 
   /* Init SPI bus */
 

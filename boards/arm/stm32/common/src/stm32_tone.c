@@ -71,7 +71,6 @@
  * Name: board_tone_initialize
  *
  * Input Parameters:
- *   cfg   - Configuration for the driver
  *   devno - The device number, used to build the device path as /dev/toneN
  *
  * Description:
@@ -79,7 +78,7 @@
  *
  ****************************************************************************/
 
-int board_tone_initialize(FAR struct board_tone_config_s *cfg, int devno)
+int board_tone_initialize(int devno)
 {
   static bool                initialized = false;
   struct pwm_lowerhalf_s     *tone;
@@ -93,7 +92,7 @@ int board_tone_initialize(FAR struct board_tone_config_s *cfg, int devno)
     {
       /* Call stm32_pwminitialize() to get an instance of the PWM interface */
 
-      tone = stm32_pwminitialize(cfg->pwm_timer);
+      tone = stm32_pwminitialize(BOARD_TONE_PWM_TIM);
       if (!tone)
         {
           auderr("Failed to get the STM32 PWM lower half to AUDIO TONE\n");
@@ -106,8 +105,8 @@ int board_tone_initialize(FAR struct board_tone_config_s *cfg, int devno)
 
       /* Initialize ONESHOT Timer */
 
-      oneshot = oneshot_initialize(cfg->oneshot_timer,
-                                   cfg->oneshot_timer_resolution);
+      oneshot = oneshot_initialize(BOARD_TONE_ONESHOT_TIM,
+                                   BOARD_TONE_ONESHOT_TIM_RES);
       if (!oneshot)
         {
           auderr("Failed to initialize ONESHOT Timer!\n");

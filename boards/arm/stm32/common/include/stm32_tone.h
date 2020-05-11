@@ -35,13 +35,6 @@
  * Public Types
  ****************************************************************************/
 
-struct board_tone_config_s
-{
-  int pwm_timer;                  /* PWM timer number for tone generation */
-  int oneshot_timer;              /* Oneshot timer for note intervals */
-  int oneshot_timer_resolution;   /* Oneshot timer resolution in us */
-};
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -66,7 +59,6 @@ extern "C"
  * Name: board_tone_initialize
  *
  * Input Parameters:
- *   cfg   - Configuration for the driver
  *   devno - The device number, used to build the device path as /dev/toneN
  *
  * Description:
@@ -74,7 +66,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int board_tone_initialize(FAR struct board_tone_config_s *cfg, int devno);
+int board_tone_initialize(int devno);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -35,12 +35,6 @@
  * Public Types
  ****************************************************************************/
 
-struct board_nrf24l01_config_s
-{
-  uint32_t ce_pincfg;             /* CE pin config */
-  uint32_t irq_pincfg;            /* IRQ pin config */
-};
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -68,7 +62,6 @@ extern "C"
  *   Initialize the NRF24L01 wireless module
  *
  * Input Parameters:
- *   cfg   - Instance configuration data
  *   busno - The SPI bus number
  *
  * Returned Value:
@@ -76,8 +69,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int board_nrf24l01_initialize(FAR struct board_nrf24l01_config_s *cfg,
-                              int busno);
+int board_nrf24l01_initialize(int busno);
 
 #undef EXTERN
 #ifdef __cplusplus
