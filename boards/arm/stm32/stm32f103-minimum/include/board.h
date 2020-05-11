@@ -194,4 +194,24 @@
 #define RGBLED_BPWMTIMER   4
 #define RGBLED_BPWMCHANNEL 4
 
+/* Tone Driver **************************************************************/
+
+#define BOARD_TONE_PWM_TIM         2   /* PWM timer for tone generation  */
+#define BOARD_TONE_ONESHOT_TIM     3   /* Oneshot timer for note timings */
+#define BOARD_TONE_ONESHOT_TIM_RES 10  /* Oneshot timer resolution (us)  */
+
+/* NRF24L01 Driver **********************************************************/
+
+/* Chip enable:  PB.1 */
+
+#define GPIO_NRF24L01_CE  (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
+
+/* IRQ line:  PA.0 */
+
+#define GPIO_NRF24L01_IRQ (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
+
+#define BOARD_NRF24L01_GPIO_CE     GPIO_NRF24L01_CE
+#define BOARD_NRF24L01_GPIO_IRQ    GPIO_NRF24L01_IRQ
+
 #endif /* __BOARDS_ARM_STM32_STM32F103_MINIMUM_INCLUDE_BOARD_H */
