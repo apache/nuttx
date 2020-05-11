@@ -80,7 +80,7 @@ FAR struct lcd_dev_s    *g_lcddev;
 
 int board_ssd1306_initialize(int busno)
 {
-  FAR struct i2c_master_s* i2c;
+  FAR struct i2c_master_s *i2c;
 
   /* Initialize I2C */
 
@@ -125,4 +125,3 @@ FAR struct lcd_dev_s *board_ssd1306_getdev(void)
 {
   return g_lcddev;
 }
-
