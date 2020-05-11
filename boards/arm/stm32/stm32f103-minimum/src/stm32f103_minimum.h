@@ -293,18 +293,6 @@ int stm32_max6675initialize(FAR const char *devpath);
 int stm32_w25initialize(int minor);
 
 /****************************************************************************
- * Name: stm32_qencoder_initialize
- *
- * Description:
- *   Initialize and register a qencoder
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SENSORS_QENCODER
-int stm32_qencoder_initialize(FAR const char *devpath, int timer);
-#endif
-
-/****************************************************************************
  * Name: stm32_rgbled_setup
  *
  * Description:

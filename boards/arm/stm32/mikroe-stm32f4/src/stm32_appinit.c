@@ -76,6 +76,10 @@
 #include "stm32.h"
 #include "mikroe-stm32f4.h"
 
+#ifdef CONFIG_SENSORS_QENCODER
+#include "board_qencoder.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -385,7 +389,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_SENSORS_QENCODER
   /* Initialize and register the qencoder driver */
 
-  ret = stm32_qencoder_initialize("/dev/qe0", CONFIG_MIKROE_QETIMER);
+  ret = board_qencoder_initialize(0, CONFIG_MIKROE_QETIMER);
   if (ret != OK)
     {
       syslog(LOG_ERR,

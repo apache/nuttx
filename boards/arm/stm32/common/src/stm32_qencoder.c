@@ -1,7 +1,7 @@
 /****************************************************************************
- * boards/arm/stm32/stm32ldiscovery/src/up_qencoder.c
+ * boards/arm/stm32/common/src/stm32_qencoder.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <stdio.h>
 
 #include <nuttx/sensors/qencoder.h>
 #include <arch/board/board.h>
@@ -48,29 +49,29 @@
 #include "chip.h"
 #include "arm_arch.h"
 #include "stm32_qencoder.h"
-#include "stm32ldiscovery.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_qencoder_initialize
+ * Name: board_qencoder_initialize
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/qencoder.
+ *   Initialize the quadrature encoder driver for the given timer
  *
  ****************************************************************************/
 
-int stm32_qencoder_initialize(FAR const char *devpath, int timer)
+int board_qencoder_initialize(int devno, int timerno)
 {
   int ret;
+  char devpath[12];
 
   /* Initialize a quadrature encoder interface. */
 
-  sninfo("Initializing the quadrature encoder using TIM%d\n", timer);
-  ret = stm32_qeinitialize(devpath, timer);
+  sninfo("Initializing the quadrature encoder using TIM%d\n", timerno);
+  snprintf(devpath, 12, "/dev/qe%d", devno);
+  ret = stm32_qeinitialize(devpath, timerno);
   if (ret < 0)
     {
       snerr("ERROR: stm32_qeinitialize failed: %d\n", ret);
@@ -78,5 +79,3 @@ int stm32_qencoder_initialize(FAR const char *devpath, int timer)
 
   return ret;
 }
-
-#endif /* HAVE_QENCODER */
