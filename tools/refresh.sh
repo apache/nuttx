@@ -244,7 +244,7 @@ for CONFIG in ${CONFIGS}; do
       if [ "X${debug}" == "Xy" ]; then
         make oldconfig V=1
       else
-        make oldconfig 1>/dev/null
+        make oldconfig
       fi
     fi
   fi
