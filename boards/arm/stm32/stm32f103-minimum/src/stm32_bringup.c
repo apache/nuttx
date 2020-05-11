@@ -121,6 +121,10 @@
 #include "stm32_hcsr04.h"
 #endif
 
+#ifdef CONFIG_SENSORS_APDS9960
+#include "stm32_apds9960.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -417,7 +421,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_APDS9960
   /* Register the APDS-9960 gesture sensor */
 
-  ret = stm32_apds9960initialize("/dev/gest0");
+  ret = board_apds9960_initialize(0, 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_apds9960initialize() failed: %d\n", ret);

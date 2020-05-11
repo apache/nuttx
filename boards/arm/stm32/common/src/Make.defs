@@ -58,6 +58,10 @@ ifeq ($(CONFIG_SENSORS_HCSR04),y)
   CSRCS += stm32_hcsr04.c
 endif
 
+ifeq ($(CONFIG_SENSORS_APDS9960),y)
+  CSRCS += stm32_apds9960.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
