@@ -111,36 +111,6 @@ if [ ! -x tools/${MYNAME} ] ; then
   exit 1
 fi
 
-# If the cmpconfig executable does not exist, then build it
-
-CMPCONFIG_TARGET=cmpconfig
-CMPCONFIG1=tools/cmpconfig
-CMPCONFIG2=tools/cmpconfig.exe
-CMPCONFIGMAKEFILE=Makefile.host
-CMPCONFIGMAKEDIR=tools
-
-if [ -x ${CMPCONFIG1} ]; then
-  CMPCONFIG=${CMPCONFIG1}
-else
-  if [ -x ${CMPCONFIG2} ]; then
-    CMPCONFIG=${CMPCONFIG2}
-  else
-    make -C ${CMPCONFIGMAKEDIR} -f ${CMPCONFIGMAKEFILE} ${CMPCONFIG_TARGET} 1>/dev/null || \
-      { echo "ERROR: make ${CMPCONFIG1} failed" ; exit 1 ; }
-  fi
-fi
-
-if [ -x ${CMPCONFIG1} ]; then
-  CMPCONFIG=${CMPCONFIG1}
-else
-  if [ -x ${CMPCONFIG2} ]; then
-    CMPCONFIG=${CMPCONFIG2}
-  else
-    echo "ERROR: Failed to create  ${CMPCONFIG1}"
-    exit 1
-  fi
-fi
-
 # Get the board configuration
 
 if [ -z "${CONFIGS}" ]; then
@@ -259,7 +229,7 @@ for CONFIG in ${CONFIGS}; do
 
   # Show differences
 
-  if ! $CMPCONFIG $DEFCONFIG defconfig; then
+  if ! diff $DEFCONFIG defconfig; then
 
     # Save the refreshed configuration
 
