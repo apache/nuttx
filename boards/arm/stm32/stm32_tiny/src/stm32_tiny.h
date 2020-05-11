@@ -76,15 +76,6 @@
 #define GPIO_NRF24L01_CS   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN12)
 
-/* NRF24L01 chip enable:  PB.1 */
-
-#define GPIO_NRF24L01_CE   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
-
-/* NRF24L01 IRQ line:  PA.0 */
-
-#define GPIO_NRF24L01_IRQ  (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
-
 /* PWM
  *
  * Let's use the LED.  It is connected to PB.5, which can be used as PWM output of channel 2 of timer 3

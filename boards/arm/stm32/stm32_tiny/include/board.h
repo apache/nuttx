@@ -161,4 +161,18 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 */
 #define LED_PANIC         7  /* LED1 / LED2 blinking */
 
+/* NRF24L01 Driver **********************************************************/
+
+/* NRF24L01 chip enable:  PB.1 */
+
+#define GPIO_NRF24L01_CE   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
+
+/* NRF24L01 IRQ line:  PA.0 */
+
+#define GPIO_NRF24L01_IRQ  (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
+
+#define BOARD_NRF24L01_GPIO_CE     GPIO_NRF24L01_CE
+#define BOARD_NRF24L01_GPIO_IRQ    GPIO_NRF24L01_IRQ
+
 #endif /* __ARCH_ARM_STM32_STM32_TINY_INCLUDE_BOARD_H */

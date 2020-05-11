@@ -84,9 +84,9 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifdef CONFIG_PWM
-  int ret;
+  int ret = OK;
 
+#ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 
   ret = stm32_pwm_setup();
@@ -99,12 +99,12 @@ int board_app_initialize(uintptr_t arg)
 #if defined(CONFIG_WL_NRF24L01)
   /* Initialize the NRF24L01 wireless module */
 
-  ret = board_nrf24l01_initialize(&g_nrf24l01_cfg, 2);
+  ret = board_nrf24l01_initialize(2);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_nrf24l01_initialize failed: %d\n", ret);
     }
 #endif
 
-  return OK;
+  return ret;
 }
