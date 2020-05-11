@@ -329,8 +329,8 @@
  * 7  A0|D/C     | 9 A0|D/C  | P2 PB8 (Arbitrary selection)
  * 9  LED+ (N/C) | -----     | -----
  * 2  5V Vcc     | 1,2 Vcc   | P2 5V
- * 4  DI         | 18 D1/SI  | P1 PA7 (GPIO_SPI1_MOSI == GPIO_SPI1_MOSI_1 (1))
- * 6  SCLK       | 19 D0/SCL | P1 PA5 (GPIO_SPI1_SCK == GPIO_SPI1_SCK_1 (1))
+ * 4  DI         | 18 D1/SI  | P1 PA7 (GPIO_SPI1_MOSI == GPIO_SPI1_MOSI_1(1))
+ * 6  SCLK       | 19 D0/SCL | P1 PA5 (GPIO_SPI1_SCK == GPIO_SPI1_SCK_1(1))
  * 8  LED- (N/C) | -----     | ------
  * 10 GND        | 20 GND    | P2 GND
  * --------------+-----------+----------------------------------------------

@@ -60,7 +60,8 @@
 #  undef CONFIG_STM32_SPI2
 #endif
 
-/* GPIOs **************************************************************/
+/* GPIOs ********************************************************************/
+
 /* LEDs */
 
 #define GPIO_LED        (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
@@ -78,7 +79,8 @@
 
 /* PWM
  *
- * Let's use the LED.  It is connected to PB.5, which can be used as PWM output of channel 2 of timer 3
+ * Let's use the LED.  It is connected to PB.5, which can be used as
+ * PWM output of channel 2 of timer 3
  * (STM32_TIM3_PARTIAL_REMAP must be enabled)
  */
 
@@ -101,14 +103,15 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Hy-Mini STM32v board.
+ *   Called to configure SPI chip select GPIO pins for the Hy-Mini STM32v
+ *   board.
  *
  ****************************************************************************/
 
