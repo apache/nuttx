@@ -152,10 +152,6 @@ ifeq ($(CONFIG_PM_BUTTONS),y)
 CSRCS += stm32_pmbuttons.c
 endif
 
-ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
-CSRCS += stm32_zerocross.c
-endif
-
 ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CSRCS += stm32_idle.c
 endif

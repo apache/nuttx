@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_zerocross.c
+ * boards/arm/stm32/common/src/stm32_zerocross.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,12 +44,10 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 #include <nuttx/sensors/zerocross.h>
 
 #include "stm32_gpio.h"
-#include "stm32f103_minimum.h"
-
-#ifdef CONFIG_SENSORS_ZEROCROSS
 
 /****************************************************************************
  * Private Function Prototypes
@@ -110,7 +108,7 @@ static void zcross_enable(FAR const struct zc_lowerhalf_s *lower,
       g_zcrossarg     = arg;
     }
 
-  stm32_gpiosetevent(GPIO_ZEROCROSS, rising, falling,
+  stm32_gpiosetevent(BOARD_ZEROCROSS_GPIO, rising, falling,
                      true, zcross_interrupt, NULL);
 
   leave_critical_section(flags);
@@ -132,7 +130,7 @@ static void zcross_disable(void)
 
   flags = enter_critical_section();
 
-  stm32_gpiosetevent(GPIO_ZEROCROSS, false, false, false, NULL, NULL);
+  stm32_gpiosetevent(BOARD_ZEROCROSS_GPIO, false, false, false, NULL, NULL);
 
   leave_critical_section(flags);
 
@@ -173,13 +171,13 @@ static int zcross_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-int stm32_zerocross_initialize(void)
+int board_zerocross_initialize(int devno)
 {
   /* Configure the GPIO pin as input.    NOTE: This is unnecessary for
    * interrupting pins since it will also be done by stm32_gpiosetevent().
    */
 
-  stm32_configgpio(GPIO_ZEROCROSS);
+  stm32_configgpio(BOARD_ZEROCROSS_GPIO);
 
   /* Make sure that all interrupts are disabled */
 
@@ -189,5 +187,3 @@ int stm32_zerocross_initialize(void)
 
   return zc_register("/dev/zc0", &g_zcrosslower);
 }
-
-#endif /* CONFIG_SENSORS_ZEROCROSS */
