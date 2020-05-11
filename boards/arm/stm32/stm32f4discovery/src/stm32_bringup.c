@@ -94,6 +94,10 @@
 #include "stm32_nunchuck.h"
 #endif
 
+#ifdef CONFIG_SENSORS_ZEROCROSS
+#include "stm32_zerocross.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -198,7 +202,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_ZEROCROSS
   /* Configure the zero-crossing driver */
 
-  stm32_zerocross_initialize();
+  board_zerocross_initialize(0);
 #endif
 
 #ifdef CONFIG_LEDS_MAX7219

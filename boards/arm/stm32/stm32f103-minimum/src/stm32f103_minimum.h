@@ -133,10 +133,6 @@
 #define MAX_IRQBUTTON     BUTTON_USER2
 #define NUM_IRQBUTTONS    (BUTTON_USER1 - BUTTON_USER2 + 1)
 
-/* ZERO CROSS pin definition */
-
-#define GPIO_ZEROCROSS    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN0)
-
 /* SPI chip selects */
 
 #define FLASH_SPI1_CS     (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
@@ -237,18 +233,6 @@ int stm32_bringup(void);
 
 #ifdef CONFIG_DEV_GPIO
 int stm32_gpio_initialize(void);
-#endif
-
-/****************************************************************************
- * Name: stm32_zerocross_initialize
- *
- * Description:
- *   Initialize and register the zero cross driver
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SENSORS_ZEROCROSS
-int stm32_zerocross_initialize(void);
 #endif
 
 /****************************************************************************

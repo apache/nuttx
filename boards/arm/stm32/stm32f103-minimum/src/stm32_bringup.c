@@ -125,6 +125,10 @@
 #include "stm32_apds9960.h"
 #endif
 
+#ifdef CONFIG_SENSORS_ZEROCROSS
+#include "stm32_zerocross.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -219,7 +223,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_ZEROCROSS
   /* Configure the zero-crossing driver */
 
-  ret = stm32_zerocross_initialize();
+  ret = board_zerocross_initialize(0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize Zero-Cross, error %d\n", ret);
