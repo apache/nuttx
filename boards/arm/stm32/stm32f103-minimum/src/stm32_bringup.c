@@ -129,6 +129,10 @@
 #include "stm32_zerocross.h"
 #endif
 
+#ifdef CONFIG_SENSORS_QENCODER
+#include "board_qencoder.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -402,7 +406,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_QENCODER
   /* Initialize and register the qencoder driver */
 
-  ret = stm32_qencoder_initialize("/dev/qe0",
+  ret = board_qencoder_initialize(0,
                                   CONFIG_STM32F103MINIMUM_QETIMER);
   if (ret != OK)
     {

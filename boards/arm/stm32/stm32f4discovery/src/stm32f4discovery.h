@@ -687,18 +687,6 @@ void weak_function stm32_netinitialize(void);
 #endif
 
 /****************************************************************************
- * Name: stm32_qencoder_initialize
- *
- * Description:
- *   Initialize and register a qencoder
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SENSORS_QENCODER
-int stm32_qencoder_initialize(FAR const char *devpath, int timer);
-#endif
-
-/****************************************************************************
  * Name: stm32_zerocross_initialize
  *
  * Description:
