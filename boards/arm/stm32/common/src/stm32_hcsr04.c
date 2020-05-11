@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f103-minimum/src/stm32_hcsr04.c
+ * boards/arm/stm32/common/src/stm32_hcsr04.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.
@@ -41,29 +41,24 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
+#include <stdio.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <arch/board/board.h>
 #include <nuttx/sensors/hc_sr04.h>
 
 #include "stm32.h"
 #include "stm32_freerun.h"
-#include "stm32f103_minimum.h"
-
-#if defined(CONFIG_STM32_FREERUN) && defined (CONFIG_SENSORS_HCSR04)
-
-#if !defined(CONFIG_STM32_TIM1)
-# error STM32 TIM1 is not defined
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Use TIM1 as free running timer for HC-SR04 sensor */
-
-#define HCSR04_FRTIMER  1
+#ifndef CONFIG_STM32_FREERUN
+#error "This implementation requires support for free running timers"
+#endif
 
 /****************************************************************************
  * Private Types
@@ -150,7 +145,7 @@ static int hcsr04_irq_attach(FAR struct hcsr04_config_s *state, xcpt_t isr,
   priv->isr     = isr;
   priv->arg     = arg;
 
-  stm32_gpiosetevent(GPIO_HCSR04_INT, priv->rising, priv->falling, true,
+  stm32_gpiosetevent(BOARD_HCSR04_GPIO_INT, priv->rising, priv->falling, true,
                      isr, arg);
 
   leave_critical_section(flags);
@@ -187,7 +182,7 @@ static void hcsr04_irq_enable(FAR const struct hcsr04_config_s *state,
 
   iinfo("%d\n", enable);
 
-  stm32_gpiosetevent(GPIO_HCSR04_INT, priv->rising, priv->falling, true,
+  stm32_gpiosetevent(BOARD_HCSR04_GPIO_INT, priv->rising, priv->falling, true,
                      enable ? priv->isr : NULL, priv->arg);
 }
 
@@ -202,7 +197,7 @@ static void hcsr04_irq_clear(FAR const struct hcsr04_config_s *state)
 
 static void hcsr04_set_trigger(FAR const struct hcsr04_config_s *state, bool on)
 {
-  stm32_gpiowrite(GPIO_HCSR04_TRIG, on);
+  stm32_gpiowrite(BOARD_HCSR04_GPIO_TRIG, on);
 }
 
 /* Return the current Free Running clock tick */
@@ -227,11 +222,10 @@ static int64_t hcsr04_get_clock(FAR const struct hcsr04_config_s *state)
  *
  * Description:
  *   This function is called by application-specific, setup logic to
- *   configure the HC-SR04 sensor.  This function will register the driver
- *   as /dev/dist0 or any other name passed at *devname.
+ *   configure the HC-SR04 sensor.
  *
  * Input Parameters:
- *   devname   - The device name to register (i.e. "/dev/dist0").
+ *   devno - The device number, used to build the device path as /dev/distN
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -239,30 +233,28 @@ static int64_t hcsr04_get_clock(FAR const struct hcsr04_config_s *state)
  *
  ****************************************************************************/
 
-int stm32_hcsr04_initialize(FAR const char *devname)
+int board_hcsr04_initialize(int devno)
 {
   int ret;
-
-  sinfo("devname = %s\n", devname);
+  char devpath[12];
 
   /* Configure the PIO interrupt */
 
-  stm32_configgpio(GPIO_HCSR04_INT);
+  stm32_configgpio(BOARD_HCSR04_GPIO_INT);
 
   /* Configure the Trigger pin */
 
-  stm32_configgpio(GPIO_HCSR04_TRIG);
+  stm32_configgpio(BOARD_HCSR04_GPIO_TRIG);
 
   /* Initialize the free-running timer with 1uS resolution */
 
-  ret = stm32_freerun_initialize(&g_freerun, HCSR04_FRTIMER, 1);
+  ret = stm32_freerun_initialize(&g_freerun, BOARD_HCSR04_FRTIMER, 1);
   if (ret < 0)
     {
       serr("Failed to initialize the free running timer! Err = %d\n", ret);
       return -ENODEV;
     }
 
-  return hcsr04_register(devname, &g_hcsr04config.config);
+  snprintf(devpath, 12, "/dev/dist%d", devno);
+  return hcsr04_register(devpath, &g_hcsr04config.config);
 }
-
-#endif /* CONFIG_STM32_FREERUN and CONFIG_SENSORS_HCSR04 */

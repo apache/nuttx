@@ -99,10 +99,6 @@ ifeq ($(CONFIG_CL_MFRC522),y)
   CSRCS += stm32_mfrc522.c
 endif
 
-ifeq ($(CONFIG_SENSORS_HCSR04),y)
-  CSRCS += stm32_hcsr04.c
-endif
-
 ifeq ($(CONFIG_LCD_MAX7219),y)
   CSRCS += stm32_max7219.c
 endif

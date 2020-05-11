@@ -117,6 +117,10 @@
 #include "stm32_nrf24l01.h"
 #endif
 
+#ifdef CONFIG_SENSORS_HCSR04
+#include "stm32_hcsr04.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -326,7 +330,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_HCSR04
   /* Configure and initialize the HC-SR04 distance sensor */
 
-  ret = stm32_hcsr04_initialize("/dev/dist0");
+  ret = board_hcsr04_initialize(0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_hcsr04_initialize() failed: %d\n", ret);
