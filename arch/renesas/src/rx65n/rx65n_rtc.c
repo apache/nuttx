@@ -562,7 +562,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   volatile uint8_t dummy_byte;
   volatile uint16_t dummy_word;
 
-  /* Break out the time values (note that the time is set only to units of 
+  /* Break out the time values (note that the time is set only to units of
    * seconds)
    */
 

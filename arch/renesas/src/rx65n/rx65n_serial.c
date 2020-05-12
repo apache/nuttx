@@ -1199,9 +1199,9 @@ static int up_eriinterrupt(int irq, void *context, void *arg)
 
       priv->ssr = up_serialin(priv, RX_SCI_SSR_OFFSET);
 
-      /* Clear all read related events (probably already done in 
-	   * up_receive))
-	   */
+      /* Clear all read related events (probably already done in
+       * up_receive))
+       */
 
       priv->ssr &= ~(RX_SCISSR_ORER | RX_SCISSR_FER | RX_SCISSR_PER);
       up_serialout(priv, RX_SCI_SSR_OFFSET, priv->ssr);
@@ -1226,9 +1226,9 @@ static int up_teiinterrupt(int irq, void *context, void *arg)
 
     priv->ssr = up_serialin(priv, RX_SCI_SSR_OFFSET);
 
-      /* Clear all read related events (probably already done in 
-	   * up_receive))
-	   */
+      /* Clear all read related events (probably already done in
+       * up_receive))
+       */
 
      priv->ssr &= ~(RX_SCISSR_TEND);
      up_serialout(priv, RX_SCI_SSR_OFFSET, priv->ssr);

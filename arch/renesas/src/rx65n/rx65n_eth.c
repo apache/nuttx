@@ -371,7 +371,7 @@ struct eth_rxdesc_s
  * Private Types
  ****************************************************************************/
 
-/* The rx65n_ethmac_s encapsulates all state information for a single 
+/* The rx65n_ethmac_s encapsulates all state information for a single
  * hardware interface
  */
 
@@ -834,7 +834,7 @@ static int rx65n_transmit(FAR struct rx65n_ethmac_s *priv)
   struct eth_txdesc_s *txfirst;
   uint32_t regval;
 
-  /* The internal (optimal) network buffer size may be configured to be 
+  /* The internal (optimal) network buffer size may be configured to be
    * larger than the Ethernet buffer size.
    */
 
@@ -1128,7 +1128,7 @@ static int rx65n_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections 
+  /* If zero is returned, the polling will continue until all connections
    * have been examined.
    */
 
@@ -1167,7 +1167,7 @@ static void rx65n_dopoll(FAR struct rx65n_ethmac_s *priv)
    * another packet for transmission.
    *
    * In a race condition, TACT may be cleared BUT still not available
-   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has 
+   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has
    * run, the buffer1 pointer (tdes2) will be nullified (and inflight
    * should be < CONFIG_RX65N_ETH_NTXDESC).
    */
@@ -1240,7 +1240,7 @@ static void rx65n_enableint(FAR struct rx65n_ethmac_s *priv, uint32_t ierbit)
  *   None
  ****************************************************************************/
 
-static void rx65n_disableint(FAR struct rx65n_ethmac_s *priv, 
+static void rx65n_disableint(FAR struct rx65n_ethmac_s *priv,
                              uint32_t ierbit)
 {
   uint32_t regval;
@@ -1345,7 +1345,7 @@ static int rx65n_recvframe(FAR struct rx65n_ethmac_s *priv)
   ninfo("rxhead: %p rxcurr: %p segments: %d\n",
         priv->rxhead, priv->rxcurr, priv->segments);
 
-  /* Check if there are free buffers.  We cannot receive new frames in 
+  /* Check if there are free buffers.  We cannot receive new frames in
    * this design unless there is at least one free buffer.
    */
 
@@ -1446,7 +1446,7 @@ static int rx65n_recvframe(FAR struct rx65n_ethmac_s *priv)
   (priv->dev.d_statistics.rx_packets)++;
 #endif
 
-              /* Return success, remembering where we should re-start 
+              /* Return success, remembering where we should re-start
                * scanning and resetting the segment scanning logic
                */
 
@@ -1524,9 +1524,9 @@ static void rx65n_receive(FAR struct rx65n_ethmac_s *priv)
     {
 #ifdef CONFIG_NET_PKT
 
-      /* When packet sockets are enabled, feed the frame into the packet 
-	   * tap
-	   */
+      /* When packet sockets are enabled, feed the frame into the packet
+       * tap
+       */
 
       pkt_input(&priv->dev);
 #endif
@@ -1693,7 +1693,7 @@ static void rx65n_receive(FAR struct rx65n_ethmac_s *priv)
  * Function: rx65n_freeframe
  *
  * Description:
- *   Scans the TX descriptors and frees the buffers of completed TX 
+ *   Scans the TX descriptors and frees the buffers of completed TX
  *   transfers.
  *
  * Input Parameters:
@@ -1885,8 +1885,8 @@ static void rx65n_interrupt_work(FAR void *arg)
                                          PHY_STS_READ_REG, &phyreg);
       if (OK == phyreg_read_status)
         {
-          regval = (uint32_t)(phyreg & PHY_STS_BIT_MASK) 
-		             >> PHY_STS_SHIFT_COUNT;
+          regval = (uint32_t)(phyreg & PHY_STS_BIT_MASK)
+                    >> PHY_STS_SHIFT_COUNT;
         }
 
       if (regval != priv->prevlinkstatus) /* Check link status by 0th bit */
@@ -2122,8 +2122,8 @@ static void rx65n_poll_work(FAR void *arg)
    * a transmit in progress, we will miss TCP time state updates?
    *
    * In a race condition, TACT may be cleared BUT still not available
-   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has 
-   * run, the buffer1 pointer (tdes2) will be nullified (and inflight 
+   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has
+   * run, the buffer1 pointer (tdes2) will be nullified (and inflight
    * should be < CONFIG_RX65N_ETH_NTXDESC).
    */
 
@@ -2581,9 +2581,9 @@ static void rx65n_txdescinit(FAR struct rx65n_ethmac_s *priv)
       txdesc->tdes1 = (uint32_t)(1 << 16);
       txdesc->tdes2 = 0;
 
-      /* Initialize the next descriptor with the Next Descriptor Polling 
-	   * Enable
-	   */
+      /* Initialize the next descriptor with the Next Descriptor Polling
+       * Enable
+       */
 
       if (i < (CONFIG_RX65N_ETH_NTXDESC - 1))
         {
@@ -2663,9 +2663,9 @@ static void rx65n_rxdescinit(FAR struct rx65n_ethmac_s *priv)
 
       rxdesc->rdes2 = (uint32_t)&priv->rxbuffer[i*CONFIG_RX65N_ETH_BUFSIZE];
 
-      /* Initialize the next descriptor with the Next Descriptor Polling 
-	   * Enable
-	   */
+      /* Initialize the next descriptor with the Next Descriptor Polling
+       * Enable
+       */
 
       if (i < (CONFIG_RX65N_ETH_NRXDESC - 1))
         {
@@ -2978,7 +2978,7 @@ void phy_start_autonegotiate (uint8_t pause)
                      PHY_AN_ADVERTISEMENT_SELECTOR);
     }
 
-  /* Configure what the PHY and the Ethernet controller on this board 
+  /* Configure what the PHY and the Ethernet controller on this board
    * supports
    */
 
