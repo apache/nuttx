@@ -86,8 +86,11 @@ struct lis3dsh_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_DEBUG_SENSORS_INFO
 static void lis3dsh_read_register(FAR struct lis3dsh_dev_s *dev,
                                   uint8_t const reg_addr, uint8_t *reg_data);
+#endif
+
 static void lis3dsh_write_register(FAR struct lis3dsh_dev_s *dev,
                                    uint8_t const reg_addr,
                                    uint8_t const reg_data);
@@ -96,7 +99,8 @@ static void lis3dsh_read_measurement_data(FAR struct lis3dsh_dev_s *dev);
 static void lis3dsh_read_acclerometer_data(FAR struct lis3dsh_dev_s *dev,
                                            uint16_t *x_acc, uint16_t *y_acc,
                                            uint16_t *z_acc);
-static int lis3dsh_interrupt_handler(int irq, FAR void *context);
+static int lis3dsh_interrupt_handler(int irq, FAR void *context,
+                                     FAR void *arg);
 static void lis3dsh_worker(FAR void *arg);
 
 static int lis3dsh_open(FAR struct file *filep);
@@ -133,6 +137,7 @@ static struct lis3dsh_dev_s *g_lis3dsh_list = NULL;
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_DEBUG_SENSORS_INFO
 /****************************************************************************
  * Name: lis3dsh_read_register
  ****************************************************************************/
@@ -166,6 +171,7 @@ static void lis3dsh_read_register(FAR struct lis3dsh_dev_s *dev,
 
   SPI_LOCK(dev->spi, false);
 }
+#endif
 
 /****************************************************************************
  * Name: lis3dsh_write_register
@@ -296,7 +302,8 @@ static void lis3dsh_read_acclerometer_data(FAR struct lis3dsh_dev_s *dev,
  * Name: lis3dsh_interrupt_handler
  ****************************************************************************/
 
-static int lis3dsh_interrupt_handler(int irq, FAR void *context)
+static int lis3dsh_interrupt_handler(int irq, FAR void *context,
+                                     FAR void *arg)
 {
   /* This function should be called upon a rising edge on the LIS3DSH new data
    * interrupt pin since it signals that new data has been measured.
@@ -309,7 +316,7 @@ static int lis3dsh_interrupt_handler(int irq, FAR void *context)
 
   for (priv = g_lis3dsh_list;
        priv && priv->config->irq != irq;
-       priv = priv->flink);
+       priv = priv->flink)
     {
     }
 

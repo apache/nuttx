@@ -1,8 +1,8 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_bh1750fvi.c
+ * boards/arm/stm32/common/src/stm32_lis3dsh.c
  *
- *   Copyright (C) 2016 Alan Carvalho de Assis. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *   Copyright (C) 2017 Florian Olbrich. All rights reserved.
+ *   Author: Florian Olbrich <flox@posteo.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,65 +41,90 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <stdio.h>
 
 #include <nuttx/spi/spi.h>
-#include <nuttx/sensors/bh1750fvi.h>
+#include <nuttx/sensors/lis3dsh.h>
+#include <arch/board/board.h>
 
 #include "stm32.h"
-#include "stm32_i2c.h"
-#include "stm32f4discovery.h"
-
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BH1750FVI)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BH1750FVI_I2C_PORTNO 1   /* On I2C1 */
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: attach_disc_lis3dsh
+ *
+ * Description:
+ *   Attach the lis3dsh interrupt handler to PE0/EXT0 on the STM32F4 as wired
+ *   on STM32F4Discovery
+ *
+ * Input Parameters:
+ *   *config - The lis3dsh instance configuration data containing the IRQ number,
+ *     device ID and interrupt handler
+ *   interrupt_handler - The interrupt handler to attach
+ *   arg -
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+int attach_disc_lis3dsh(FAR struct lis3dsh_config_s *config,
+                        xcpt_t interrupt_handler)
+{
+    return stm32_gpiosetevent(BOARD_LIS3DSH_GPIO_EXT0, true, false, false,
+                              interrupt_handler, NULL);
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bh1750initialize
+ * Name: board_lis3dsh_initialize
  *
  * Description:
- *   Initialize and register the MPL115A Pressure Sensor driver.
+ *   Initialize and register the LIS3DSH 3-axis accelerometer.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/light0"
+ *   devno - The device number, used to build the device path as /dev/accN
+ *   busno - The SPI bus number
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int stm32_bh1750initialize(FAR const char *devpath)
+int board_lis3dsh_initialize(int devno, int busno)
 {
-  FAR struct i2c_master_s *i2c;
+  static struct lis3dsh_config_s acc0_config;
+  char devpath[12];
+  struct spi_dev_s *spi;
   int ret;
 
-  sninfo("Initializing BH1750FVI!\n");
+  sninfo("Initializing LIS3DSH\n");
 
-  /* Initialize I2C */
+  acc0_config.irq = 22;
+  acc0_config.spi_devid = 0;
+  acc0_config.attach = &attach_disc_lis3dsh;
 
-  i2c = stm32_i2cbus_initialize(BH1750FVI_I2C_PORTNO);
-
-  if (!i2c)
+  spi = stm32_spibus_initialize(1);
+  if (!spi)
     {
-      return -ENODEV;
+      spiinfo("Failed to initialize SPI port\n");
+      ret = -ENODEV;
     }
-
-  /* Then register the barometer sensor */
-
-  ret = bh1750fvi_register(devpath, i2c, BH1750FVI_I2C_ADDR);
-  if (ret < 0)
+  else
     {
-      snerr("ERROR: Error registering BM180\n");
+      snprintf(devpath, 12, "/dev/acc%d", devno);
+      ret = lis3dsh_register(devpath, spi, &acc0_config);
     }
 
   return ret;
 }
 
-#endif /* CONFIG_I2C && CONFIG_SENSORS_BH1750FVI && CONFIG_STM32_I2C1 */

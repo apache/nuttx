@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_xen1210.c
+ * boards/arm/stm32/common/src/stm32_xen1210.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author:  Alan Carvalho de Assis <acassis@gmail.com>
@@ -58,35 +58,9 @@
 #include "stm32_spi.h"
 #include "stm32_pwm.h"
 
-#include "stm32f4discovery.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifdef CONFIG_SENSORS_XEN1210
-#ifndef CONFIG_STM32_SPI1
-#  error "XEN1210 support requires CONFIG_STM32_SPI1"
-#endif
-
-#define BOARD_XEN1210_SPIDEV 1
-
-#ifndef BOARD_XEN1210_DEVMINOR
-#  define BOARD_XEN1210_DEVMINOR 0
-#endif
-
-#ifndef CONFIG_STM32_TIM1
-#  error "XEN1210 needs PWM on TIM1 CH1 to be its clock!"
-#endif
-
-#ifndef CONFIG_STM32_TIM1_PWM
-#  error "XEN1210 needs PWM on TIM1 CH1 to be its clock!"
-#endif
-
-#if CONFIG_STM32_TIM1_CHANNEL != XEN1210_PWMCHANNEL
-#  error "XEN1210 needs PWM on TIM1 CH1 to be its clock!"
-#endif
 
 /****************************************************************************
  * Private Types
@@ -154,7 +128,7 @@ static struct stm32_xen1210config_s g_xen1210config =
 
 /* This is the XEN1210 Interrupt handler */
 
-int xen1210_interrupt(int irq, FAR void *context, FAR void *arg)
+static int xen1210_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* Verify that we have a handler attached */
 
@@ -209,15 +183,15 @@ static void xen1210_enable(FAR struct xen1210_config_s *state, bool enable)
     {
       /* Configure the interrupt using the SAVED handler */
 
-      stm32_configgpio(GPIO_XEN1210_INT);
-      stm32_gpiosetevent(GPIO_XEN1210_INT, false, true,
+      stm32_configgpio(BOARD_XEN1210_GPIO_INT);
+      stm32_gpiosetevent(BOARD_XEN1210_GPIO_INT, false, true,
                          true, xen1210_interrupt, NULL);
     }
   else
     {
       /* Configure the interrupt with a NULL handler to disable it */
 
-      stm32_gpiosetevent(GPIO_XEN1210_INT, false, false, false,
+      stm32_gpiosetevent(BOARD_XEN1210_GPIO_INT, false, false, false,
                          NULL, NULL);
     }
 
@@ -242,7 +216,7 @@ static void xen1210_clear(FAR struct xen1210_config_s *state)
  *
  ****************************************************************************/
 
-int xen1210_pwm_setup(void)
+static int xen1210_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;
@@ -254,7 +228,7 @@ int xen1210_pwm_setup(void)
     {
       /* Call stm32_pwminitialize() to get an instance of the PWM interface */
 
-      pwm = stm32_pwminitialize(XEN1210_PWMTIMER);
+      pwm = stm32_pwminitialize(BOARD_XEN1210_PWMTIMER);
       if (!pwm)
         {
           _err("ERROR: Failed to get the STM32 PWM lower half\n");
@@ -283,13 +257,11 @@ int xen1210_pwm_setup(void)
  * Name: xen1210_archinitialize
  *
  * Description:
- *   Each board that supports an xen1210 device must provide this function.
- *   This function is called by application-specific, setup logic to
- *   configure the accelerometer device.  This function will register the
- *   driver as /dev/accelN where N is the minor device number.
+ *   Initialize the XEN1210 device driver
  *
  * Input Parameters:
- *   minor   - The input device minor number
+ *   devno - The device number, used to build the device path as /dev/accelN
+ *   busno - The SPI bus number
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -297,13 +269,10 @@ int xen1210_pwm_setup(void)
  *
  ****************************************************************************/
 
-int xen1210_archinitialize(int minor)
+int board_xen1210_initialize(int devno, int busno)
 {
   FAR struct spi_dev_s *dev;
   int ret;
-
-  sninfo("minor %d\n", minor);
-  DEBUGASSERT(minor == 0);
 
   /* Check if we are already initialized */
 
@@ -319,14 +288,14 @@ int xen1210_archinitialize(int minor)
 
       /* Configure the XEN1210 interrupt pin as an input */
 
-      stm32_configgpio(GPIO_XEN1210_INT);
+      stm32_configgpio(BOARD_XEN1210_GPIO_INT);
 
       /* Get an instance of the I2C interface */
 
-      dev = stm32_spibus_initialize(BOARD_XEN1210_SPIDEV);
+      dev = stm32_spibus_initialize(busno);
       if (!dev)
         {
-          snerr("ERROR: Failed to initialize SPI bus %d\n", BOARD_XEN1210_SPIDEV);
+          snerr("ERROR: Failed to initialize SPI bus %d\n", busno);
           return -ENODEV;
         }
 
@@ -342,7 +311,7 @@ int xen1210_archinitialize(int minor)
 
       /* Initialize and register the XEN1210 driver */
 
-      ret = xen1210_register(g_xen1210config.handle, BOARD_XEN1210_DEVMINOR);
+      ret = xen1210_register(g_xen1210config.handle, devno);
       if (ret < 0)
         {
           snerr("ERROR: Failed to register XEN1210 driver: %d\n", ret);
@@ -352,5 +321,3 @@ int xen1210_archinitialize(int minor)
 
   return OK;
 }
-
-#endif /* CONFIG_SENSORS_XEN1210 */

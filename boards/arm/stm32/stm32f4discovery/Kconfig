@@ -55,6 +55,7 @@ config STM32F4DISCO_LIS3DSH
 	depends on SPI
 	depends on LIS3DSH
 	default n
+	select SENSORS_LIS3DSH
 	---help---
 		Select to create a LIS3DSH driver instance for the builtin accelerometer of
 		STM32F4Discovery. Provides /dev/acc0 device file.

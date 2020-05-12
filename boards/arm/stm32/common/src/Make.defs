@@ -74,6 +74,38 @@ ifeq ($(CONFIG_SENSORS_INA219),y)
   CSRCS += stm32_ina219.c
 endif
 
+ifeq ($(CONFIG_SENSORS_L3GD20),y)
+  CSRCS += stm32_l3gd20.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MPL115A),y)
+  CSRCS += stm32_mpl115a.c
+endif
+
+ifeq ($(CONFIG_SENSORS_DHTXX),y)
+  CSRCS += stm32_dhtxx.c
+endif
+
+ifeq ($(CONFIG_SENSORS_XEN1210),y)
+  CSRCS += stm32_xen1210.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BH1750FVI),y)
+  CSRCS += stm32_bh1750.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MLX90614),y)
+  CSRCS += stm32_mlx90614.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MAX31855),y)
+  CSRCS += stm32_max31855.c
+endif
+
+ifeq ($(CONFIG_LIS3DSH),y)
+  CSRCS += stm32_lis3dsh.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)

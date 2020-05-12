@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/common/src/stm32_bmp180.c
+ * /home/v01d/coding/nuttx_latest/nuttx/boards/arm/stm32/common/include/stm32_dhtxx.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,86 +18,64 @@
  *
  ****************************************************************************/
 
+#ifndef __STM32_DHTXX_H
+#define __STM32_DHTXX_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
-#include <nuttx/sensors/bmp180.h>
-#include <nuttx/i2c/i2c_master.h>
-#include <stdio.h>
-#include "stm32_i2c.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
- * Private Functions
+ * Inline Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_bmp180_initialize
+ * Name: board_dhtxx_initialize
  *
  * Description:
- *   Initialize and register the BMP180 Pressure Sensor driver.
+ *   This function is called by application-specific, setup logic to
+ *   configure the DHTxx sensor.
  *
  * Input Parameters:
- *   devno - The device number, used to build the device path as /dev/pressN
- *   busno - The I2C bus number
+ *   devno - The device number, used to build the device path as /dev/humN.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Zero (OK) returned on success;
+ *   a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int board_bmp180_initialize(int devno, int busno)
-{
-  FAR struct i2c_master_s *i2c;
-  char devpath[12];
-  int ret;
+int board_dhtxx_initialize(int devno);
 
-  sninfo("Initializing BMP180!\n");
-
-  /* Initialize I2C */
-
-  i2c = stm32_i2cbus_initialize(busno);
-
-  if (!i2c)
-    {
-      return -ENODEV;
-    }
-
-  /* Then register the barometer sensor */
-
-  snprintf(devpath, 12, "/dev/press%d", devno);
-  ret = bmp180_register(devpath, i2c);
-  if (ret < 0)
-    {
-      snerr("ERROR: Error registering BM180\n");
-    }
-
-  return ret;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
+#endif // __STM32_DHTXX_H

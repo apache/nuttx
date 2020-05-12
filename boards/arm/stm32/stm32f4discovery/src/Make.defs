@@ -65,14 +65,6 @@ ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_SENSORS_BH1750FVI),y)
-CSRCS += stm32_bh1750fvi.c
-endif
-
-ifeq ($(CONFIG_SENSORS_MLX90614),y)
-CSRCS += stm32_mlx90614.c
-endif
-
 ifeq ($(CONFIG_LCD_ST7567),y)
 CSRCS += stm32_st7567.c
 endif
@@ -83,14 +75,6 @@ endif
 
 ifeq ($(CONFIG_LPWAN_SX127X),y)
 CSRCS += stm32_sx127x.c
-endif
-
-ifeq ($(CONFIG_SENSORS_MAX31855),y)
-CSRCS += stm32_max31855.c
-endif
-
-ifeq ($(CONFIG_STM32F4DISCO_LIS3DSH),y)
-CSRCS += stm32_lis3dsh.c
 endif
 
 ifeq ($(CONFIG_LCD_MAX7219),y)
@@ -127,10 +111,6 @@ endif
 
 ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
-endif
-
-ifeq ($(CONFIG_SENSORS_XEN1210),y)
-CSRCS += stm32_xen1210.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

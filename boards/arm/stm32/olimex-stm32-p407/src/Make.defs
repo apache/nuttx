@@ -68,10 +68,6 @@ ifeq ($(CONFIG_CAN),y)
   CSRCS += stm32_can.c
 endif
 
-ifeq ($(CONFIG_SENSORS_DHTXX),y)
-  CSRCS += stm32_dhtxx.c
-endif
-
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

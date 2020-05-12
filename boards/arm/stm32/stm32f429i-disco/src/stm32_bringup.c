@@ -81,6 +81,10 @@
 #include "stm32.h"
 #include "stm32f429i-disco.h"
 
+#ifdef CONFIG_SENSORS_L3GD20
+#include "stm32_l3gd20.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -358,7 +362,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_L3GD20
-  ret = stm32_l3gd20initialize("/dev/gyr0");
+  ret = board_l3gd20_initialize(0, 5);
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize l3gd20 sensor: %d\n", ret);

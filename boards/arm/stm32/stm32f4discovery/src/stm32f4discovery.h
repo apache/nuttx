@@ -52,11 +52,6 @@
 
 /* Configuration ************************************************************/
 
-/* Define what timer and channel to use as XEN1210 CLK */
-
-#define XEN1210_PWMTIMER   1
-#define XEN1210_PWMCHANNEL 1
-
 /* How many SPI modules does this chip support? */
 
 #if STM32_NSPI < 1
@@ -274,13 +269,6 @@
 #define GPIO_GS2200M_CS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN5)
 
-/* XEN1210 magnetic sensor */
-
-#define GPIO_XEN1210_INT  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
-                           GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN5)
-
-#define GPIO_CS_XEN1210   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                           GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
 #define GPIO_ENC28J60_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                              GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
@@ -464,19 +452,6 @@ FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port);
 
 #ifdef CONFIG_SENSORS_BH1750FVI
 int stm32_bh1750initialize(FAR const char *devpath);
-#endif
-
-/****************************************************************************
- * Name: stm32_lis3dshinitialize
- *
- * Description:
- *   Called to configure SPI 1, and to register LIS3DSH and its external
- *   interrupt for the stm32f4discovery board.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32F4DISCO_LIS3DSH
-int stm32_lis3dshinitialize(FAR const char *devpath);
 #endif
 
 /****************************************************************************

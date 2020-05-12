@@ -89,8 +89,10 @@ struct l3gd20_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_DEBUG_SENSORS_INFO
 static void l3gd20_read_register(FAR struct l3gd20_dev_s *dev,
                                  uint8_t const reg_addr, uint8_t *reg_data);
+#endif
 static void l3gd20_write_register(FAR struct l3gd20_dev_s *dev,
                                   uint8_t const reg_addr,
                                   uint8_t const reg_data);
@@ -101,7 +103,8 @@ static void l3gd20_read_gyroscope_data(FAR struct l3gd20_dev_s *dev,
                                        uint16_t *z_gyr);
 static void l3gd20_read_temperature(FAR struct l3gd20_dev_s *dev,
                                     uint8_t * temperature);
-static int l3gd20_interrupt_handler(int irq, FAR void *context);
+static int l3gd20_interrupt_handler(int irq, FAR void *context,
+                                    FAR void *arg);
 static void l3gd20_worker(FAR void *arg);
 
 static int l3gd20_open(FAR struct file *filep);
@@ -138,6 +141,7 @@ static struct l3gd20_dev_s *g_l3gd20_list = NULL;
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_DEBUG_SENSORS_INFO
 /****************************************************************************
  * Name: l3gd20_read_register
  ****************************************************************************/
@@ -171,6 +175,7 @@ static void l3gd20_read_register(FAR struct l3gd20_dev_s *dev,
 
   SPI_LOCK(dev->spi, false);
 }
+#endif
 
 /****************************************************************************
  * Name: l3gd20_write_register
@@ -342,7 +347,8 @@ static void l3gd20_read_temperature(FAR struct l3gd20_dev_s *dev,
  * Name: l3gd20_interrupt_handler
  ****************************************************************************/
 
-static int l3gd20_interrupt_handler(int irq, FAR void *context)
+static int l3gd20_interrupt_handler(int irq, FAR void *context,
+                                    FAR void *arg)
 {
   /* This function should be called upon a rising edge on the L3GD20 new data
    * interrupt pin since it signals that new data has been measured.
