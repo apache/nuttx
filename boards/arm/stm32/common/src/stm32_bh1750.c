@@ -1,8 +1,8 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_lis3dsh.c
+ * boards/arm/stm32/common/src/stm32_bh1750fvi.c
  *
- *   Copyright (C) 2017 Florian Olbrich. All rights reserved.
- *   Author: Florian Olbrich <flox@posteo.de>
+ *   Copyright (C) 2016 Alan Carvalho de Assis. All rights reserved.
+ *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,95 +41,62 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <stdio.h>
 
 #include <nuttx/spi/spi.h>
-#include <nuttx/sensors/lis3dsh.h>
+#include <arch/board/board.h>
+#include <nuttx/sensors/bh1750fvi.h>
 
 #include "stm32.h"
-#include "stm32f4discovery.h"
-
-#if defined(CONFIG_STM32F4DISCO_LIS3DSH) && defined(CONFIG_LIS3DSH)
+#include "stm32_i2c.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define GPIO_STM32F4DISCO_LIS3DSH_EXT0 \
-  (GPIO_INPUT|GPIO_FLOAT|GPIO_AF0|GPIO_SPEED_50MHz|GPIO_PORTE|GPIO_PIN0)
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: attach_disc_lis3dsh
- *
- * Description:
- *   Attach the lis3dsh interrupt handler to PE0/EXT0 on the STM32F4 as wired
- *   on STM32F4Discovery
- *
- * Input Parameters:
- *   *config - The lis3dsh instance configuration data containing the IRQ number,
- *     device ID and interrupt handler
- *   interrupt_handler - The interrupt handler to attach
- *   arg -
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-int attach_disc_lis3dsh(FAR struct lis3dsh_config_s *config, xcpt_t interrupt_handler)
-{
-    return stm32_gpiosetevent(GPIO_STM32F4DISCO_LIS3DSH_EXT0,
-                              true,
-                              false,
-                              false,
-                              interrupt_handler,
-                              NULL );
-}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_lis3dshinitialize
+ * Name: stm32_bh1750initialize
  *
  * Description:
- *   Initialize and register the LIS3DSH 3-axis accelerometer.
+ *   Initialize and register the MPL115A Pressure Sensor driver.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/acc0"
+ *   devno - The device number, used to build the device path as /dev/lightN
+ *   busno - The I2C bus number
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int stm32_lis3dshinitialize(FAR const char *devpath)
+int board_bh1750_initialize(int devno, int busno)
 {
-  static struct lis3dsh_config_s acc0_config;
-  struct spi_dev_s *spi;
+  FAR struct i2c_master_s *i2c;
   int ret;
 
-  sninfo("Initializing LIS3DSH\n");
+  sninfo("Initializing BH1750FVI!\n");
 
-  acc0_config.irq=22;
-  acc0_config.spi_devid=0;
-  acc0_config.attach = &attach_disc_lis3dsh;
+  /* Initialize I2C */
 
-  spi = stm32_spibus_initialize(1);
-  if (!spi)
+  i2c = stm32_i2cbus_initialize(busno);
+
+  if (!i2c)
     {
-      spiinfo("Failed to initialize SPI port\n");
-      ret = -ENODEV;
+      return -ENODEV;
     }
-  else
+
+  /* Then register the barometer sensor */
+
+  ret = bh1750fvi_register(devpath, i2c, BH1750FVI_I2C_ADDR);
+  if (ret < 0)
     {
-      ret = lis3dsh_register(devpath, spi, &acc0_config);
+      snerr("ERROR: Error registering BM180\n");
     }
 
   return ret;
 }
 
-#endif /* CONFIG_STM32F4DISCO_LIS3DSH && CONFIG_LIS3DSH */

@@ -1,8 +1,8 @@
 /****************************************************************************
- * boards/arm/stm32/viewtool-stm32f107/src/stm32_mpl115a.c
+ * boards/arm/stm32/common/src/stm32_l3gd20.c
  *
- *   Copyright (C) 2015 Alan Carvalho de Assis. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ *   Copyright (C) 2017 Gregory Nutt.  All rights reserved.
+ *   Author: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,61 +41,103 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <stdio.h>
 
 #include <nuttx/spi/spi.h>
-#include <nuttx/sensors/mpl115a.h>
+#include <nuttx/sensors/l3gd20.h>
+#include <arch/board/board.h>
 
 #include "stm32.h"
 #include "stm32_spi.h"
-#include "viewtool_stm32f107.h"
-
-#if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MPL115A) && defined(CONFIG_STM32_SPI3)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MPL115A_SPI_PORTNO 3   /* On SPI3 */
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static int l3gd20_attach(FAR struct l3gd20_config_s * cfg, xcpt_t irq);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Only one L3GD20 device on board */
+
+static struct l3gd20_config_s g_l3gd20_config =
+{
+  .attach = l3gd20_attach,
+  .irq = BOARD_L3GD20_IRQ,
+  .spi_devid = SPIDEV_ACCELEROMETER(0)
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: l3gd20_attach()
+ *
+ * Description: Attach the l3gd20 interrupt handler to the GPIO interrupt
+ *
+ ****************************************************************************/
+
+static int l3gd20_attach(FAR struct l3gd20_config_s *cfg, xcpt_t irq)
+{
+  return stm32_gpiosetevent(BOARD_L3GD20_GPIO_DREADY, true, false,
+                            true, irq, NULL);
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_mpl115ainitialize
+ * Name: board_l3gd20_initialize()
  *
  * Description:
- *   Initialize and register the MPL115A Pressure Sensor driver.
+ *   Initialize and register the L3GD20 3 axis gyroscope sensor driver.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/press0"
+ *   devno - The device number, used to build the device path as /dev/gyroN
+ *   busno - The SPI bus number
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int stm32_mpl115ainitialize(FAR const char *devpath)
+int board_l3gd20_initialize(int devno, int busno)
 {
-  FAR struct spi_dev_s *spi;
-  int ret;
+  int ret = 0;
+  struct spi_dev_s *spi;
+  char devpath[12];
 
-  spi = stm32_spibus_initialize(MPL115A_SPI_PORTNO);
+  /* Configure DREADY IRQ input */
+
+  stm32_configgpio(BOARD_L3GD20_GPIO_DREADY);
+
+  /* Initialize SPI */
+
+  spi = stm32_spibus_initialize(busno);
 
   if (!spi)
     {
-      return -ENODEV;
+      ret = -ENODEV;
+      goto errout;
     }
 
-  /* Then register the barometer sensor */
+  /* Then register the gyro */
 
-  ret = mpl115a_register(devpath, spi);
-  if (ret < 0)
+  snprintf(devpath, 12, "/dev/gyro%d", devno);
+  ret = l3gd20_register(devpath, spi, &g_l3gd20_config);
+  if (ret != OK)
     {
-      snerr("ERROR: Error registering MPL115A\n");
+      goto errout;
     }
 
+errout:
   return ret;
 }
-
-#endif /* CONFIG_SPI && CONFIG_SENSORS_MPL115A && CONFIG_STM32_SPI3 */

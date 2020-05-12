@@ -1,7 +1,7 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_mlx90614.c
+ * boards/arm/stm32/common/src/stm32_max31855.c
  *
- *   Copyright (C) 2016 Alan Carvalho de Assis. All rights reserved.
+ *   Copyright (C) 2015 Alan Carvalho de Assis. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,67 +41,55 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <stdio.h>
 
-#include <nuttx/i2c/i2c_master.h>
-#include <nuttx/sensors/mlx90614.h>
+#include <nuttx/spi/spi.h>
+#include <arch/board/board.h>
+#include <nuttx/sensors/max31855.h>
 
 #include "stm32.h"
-#include "stm32_i2c.h"
-#include "stm32f4discovery.h"
-
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MLX90614)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define MLX90614_I2C_PORTNO 1    /* On I2C1 */
-
-#define MLX90614_ADDRESS    0x5a /* Default I2C Address, can be chanced in EEPROM */
+#include "stm32_spi.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_mlx90614init
+ * Name: board_max31855_initialize
  *
  * Description:
- *   Initialize and register the MLX90614 Infrared Thermometer.
+ *   Initialize and register the MAX31855 Temperature Sensor driver.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/therm0"
+ *   devno - The device number, used to build the device path as /dev/tempN
+ *   busno - The SPI bus number
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int stm32_mlx90614init(FAR const char *devpath)
+int board_max31855_initialize(int devno, int busno)
 {
-  FAR struct i2c_master_s *i2c;
+  FAR struct spi_dev_s *spi;
+  char devpath[12];
   int ret;
 
-  sninfo("Initializing MLX90614!\n");
+  spi = stm32_spibus_initialize(busno);
 
-  /* Initialize I2C */
-
-  i2c = stm32_i2cbus_initialize(MLX90614_I2C_PORTNO);
-
-  if (!i2c)
+  if (!spi)
     {
       return -ENODEV;
     }
 
-  /* Then register the light sensor */
+  /* Then register the barometer sensor */
 
-  ret = mlx90614_register(devpath, i2c, MLX90614_ADDRESS);
+  snprintf(devpath, 12, "/dev/temp%d", devno);
+  ret = max31855_register(devpath, spi, devno);
   if (ret < 0)
     {
-      snerr("ERROR: Error registering BM180\n");
+      snerr("ERROR: Error registering MAX31855\n");
     }
 
   return ret;
 }
-
-#endif /* CONFIG_I2C && CONFIG_SENSORS_MLX90614 && CONFIG_STM32_I2C1 */

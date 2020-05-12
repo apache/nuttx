@@ -102,6 +102,26 @@
 #include "board_qencoder.h"
 #endif
 
+#ifdef CONFIG_SENSORS_BH1750FVI
+#include "stm32_bh1750.h"
+#endif
+
+#ifdef CONFIG_LIS3DSH
+#include "stm32_lis3dsh.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MAX31855
+#include "stm32_max31855.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MLX90614
+#include "stm32_mlx90614.h"
+#endif
+
+#ifdef CONFIG_SENSORS_XEN1210
+#include "stm32_xen1210.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -196,7 +216,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_BH1750FVI
-  ret = stm32_bh1750initialize("/dev/light0");
+  ret = board_bh1750_initialize(0, 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_bh1750initialize() failed: %d\n", ret);
@@ -338,7 +358,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_MLX90614
-  ret = stm32_mlx90614init("/dev/therm0");
+  ret = board_mlx90614_initialize(0, 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize MLX90614, error %d\n", ret);
@@ -415,7 +435,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_MAX31855
   /* Register device 0 on spi channel 2 */
 
-  ret = stm32_max31855initialize("/dev/temp0", 2, 0);
+  ret = board_max31855_initialize(0, 2);
   if (ret < 0)
     {
       serr("ERROR:  stm32_max31855initialize failed: %d\n", ret);
@@ -451,19 +471,19 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_XEN1210
-  ret = xen1210_archinitialize(0);
+  ret = board_xen1210_initialize(0, 1);
   if (ret < 0)
     {
       serr("ERROR:  xen1210_archinitialize failed: %d\n", ret);
     }
 #endif
 
-#ifdef CONFIG_STM32F4DISCO_LIS3DSH
+#ifdef CONFIG_LIS3DSH
   /* Create a lis3dsh driver instance fitting the chip built into
    * stm32f4discovery
    */
 
-  ret = stm32_lis3dshinitialize("/dev/acc0");
+  ret = board_lis3dsh_initialize(0, 1);
   if (ret < 0)
     {
       serr("ERROR: Failed to initialize LIS3DSH driver: %d\n", ret);

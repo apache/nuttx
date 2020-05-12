@@ -1,8 +1,8 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f429i-disco/src/stm32_l3gd20.c
+ * boards/arm/stm32/common/src/stm32_mpl115a.c
  *
- *   Copyright (C) 2017 Gregory Nutt.  All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ *   Copyright (C) 2015 Alan Carvalho de Assis. All rights reserved.
+ *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,102 +41,58 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <stdio.h>
 
 #include <nuttx/spi/spi.h>
-#include <nuttx/sensors/l3gd20.h>
+#include <nuttx/sensors/mpl115a.h>
 
 #include "stm32.h"
 #include "stm32_spi.h"
-#include "stm32f429i-disco.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#if defined(CONFIG_SPI) & defined(CONFIG_SENSORS_L3GD20)
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static int l3gd20_attach(FAR struct l3gd20_config_s * cfg, xcpt_t irq);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* Only one L3GD20 device on board */
-
-static struct l3gd20_config_s g_l3gd20_config =
-{
-  .attach = l3gd20_attach,
-  .irq = L3GD20_IRQ,
-  .spi_devid = SPIDEV_ACCELEROMETER(0)
-};
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: l3gd20_attach()
- *
- * Description: Attach the l3gd20 interrupt handler to the GPIO interrupt
- *
- ****************************************************************************/
-
-static int l3gd20_attach(FAR struct l3gd20_config_s *cfg, xcpt_t irq)
-{
-  return stm32_gpiosetevent(GPIO_L3GD20_DREADY, true, false, true, irq, NULL);
-}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_l3gd20initialize()
+ * Name: board_mpl115a_initialize
  *
  * Description:
- *   Initialize and register the L3GD20 3 axis gyroscope sensor driver.
+ *   Initialize and register the MPL115A Pressure Sensor driver.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/gyro0"
+ *   devno - The device number, used to build the device path as /dev/pressN
+ *   busno - The SPI bus number
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int stm32_l3gd20initialize(FAR const char *devpath)
+int board_mpl115a_initialize(int devno, int busno)
 {
-  int ret = 0;
-  struct spi_dev_s *spi;
+  FAR struct spi_dev_s *spi;
+  char devpath[12];
+  int ret;
 
-  /* Configure DREADY IRQ input */
-
-  stm32_configgpio(GPIO_L3GD20_DREADY);
-
-  /* Initialize SPI */
-
-  spi = stm32_spi5initialize();
+  spi = stm32_spibus_initialize(busno);
 
   if (!spi)
     {
-      ret = -ENODEV;
-      goto errout;
+      return -ENODEV;
     }
 
-  /* Then register the gyro */
+  /* Then register the barometer sensor */
 
-  ret = l3gd20_register(devpath, spi, &g_l3gd20_config);
-  if (ret != OK)
+  snprintf(devpath, 12, "/dev/press%d", devno);
+  ret = mpl115a_register(devpath, spi);
+  if (ret < 0)
     {
-      goto errout;
+      snerr("ERROR: Error registering MPL115A\n");
     }
 
-errout:
   return ret;
 }
-
-#endif /* CONFIG_SPI && CONFIG_SENSORS_L3GD20 */

@@ -169,12 +169,6 @@
 #define GPIO_BTN_DOWN     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN8)
 #define GPIO_BTN_CENTER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN15)
 
-/* DHTxx pin configuration */
-
-#define GPIO_DHTXX_PIN          (GPIO_PORTG|GPIO_PIN9)
-#define GPIO_DHTXX_PIN_OUTPUT   (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_DHTXX_PIN)
-#define GPIO_DHTXX_PIN_INPUT    (GPIO_INPUT|GPIO_FLOAT|GPIO_DHTXX_PIN)
-
 /* USB OTG FS
  *
  * PA9  OTG_FS_VBUS VBUS sensing (also connected to the green LED)
@@ -293,18 +287,6 @@ int stm32_adc_setup(void);
 
 #ifdef CONFIG_CAN
 int stm32_can_setup(void);
-#endif
-
-/****************************************************************************
- * Name: stm32_dhtxx_initialize
- *
- * Description:
- *   Called to initialize the DHTxx sensor
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SENSORS_DHTXX
-int stm32_dhtxx_initialize(FAR const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -43,23 +43,18 @@
 #include <unistd.h>
 #include <errno.h>
 #include <debug.h>
+#include <stdio.h>
 
 #include <nuttx/board.h>
 #include <nuttx/sensors/dhtxx.h>
+#include <arch/board/board.h>
 
 #include "stm32.h"
 #include "stm32_freerun.h"
-#include "olimex-stm32-p407.h"
-
-#if defined(CONFIG_SENSORS_DHTXX)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Use TIM1 as free running timer for the DHTXX sensor. */
-
-#define DHTXX_FREE_TIMER  1
 
 /****************************************************************************
  * Private Function Prototypes
@@ -94,22 +89,22 @@ static void dhtxx_config_data_pin(FAR struct dhtxx_config_s *state, bool mode)
 {
   if (mode)
     {
-      stm32_configgpio(GPIO_DHTXX_PIN_INPUT);
+      stm32_configgpio(BOARD_DHTXX_GPIO_INPUT);
     }
   else
     {
-      stm32_configgpio(GPIO_DHTXX_PIN_OUTPUT);
+      stm32_configgpio(BOARD_DHTXX_GPIO_OUTPUT);
     }
 }
 
 static void dhtxx_set_data_pin(FAR struct dhtxx_config_s *state, bool value)
 {
-  stm32_gpiowrite(GPIO_DHTXX_PIN_OUTPUT, value);
+  stm32_gpiowrite(BOARD_DHTXX_GPIO_OUTPUT, value);
 }
 
 static bool dhtxx_read_data_pin(FAR struct dhtxx_config_s *state)
 {
-  return stm32_gpioread(GPIO_DHTXX_PIN_INPUT);
+  return stm32_gpioread(BOARD_DHTXX_GPIO_INPUT);
 }
 
 static int64_t dhtxx_get_clock(FAR struct dhtxx_config_s *state)
@@ -128,15 +123,14 @@ static int64_t dhtxx_get_clock(FAR struct dhtxx_config_s *state)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_dhtxx_initialize
+ * Name: board_dhtxx_initialize
  *
  * Description:
  *   This function is called by application-specific, setup logic to
- *   configure the DHTxx sensor.  This function will register the driver
- *   with the name passed at *devpath.
+ *   configure the DHTxx sensor.
  *
  * Input Parameters:
- *   devpath   - The device name to register.
+ *   devno - The device number, used to build the device path as /dev/humN.
  *
  * Returned Value:
  *   Zero (OK) returned on success;
@@ -144,23 +138,25 @@ static int64_t dhtxx_get_clock(FAR struct dhtxx_config_s *state)
  *
  ****************************************************************************/
 
-int stm32_dhtxx_initialize(FAR const char *devpath)
+int board_dhtxx_initialize(int devno)
 {
   int ret;
+  char devpath[12];
 
-  stm32_configgpio(GPIO_DHTXX_PIN);
+  stm32_configgpio(BOARD_DHTXX_GPIO_OUTPUT);
 
-  stm32_gpiowrite(GPIO_DHTXX_PIN, false);
+  stm32_gpiowrite(BOARD_DHTXX_GPIO_OUTPUT, false);
 
   /* Initialize the free-running timer with 1uS resolution */
 
-  ret = stm32_freerun_initialize(&g_freerun, DHTXX_FREE_TIMER, 1);
+  ret = stm32_freerun_initialize(&g_freerun, BOARD_DHTXX_FRTIMER, 1);
   if (ret < 0)
     {
       snerr("Failed to initialize the free running timer! Err = %d\n", ret);
       return -ENODEV;
     }
 
+  snprintf(devpath, 12, "/dev/hum%d", devno);
   ret = dhtxx_register(devpath, &g_dhtxx_config);
   if (ret < 0)
     {
@@ -169,5 +165,3 @@ int stm32_dhtxx_initialize(FAR const char *devpath)
 
   return ret;
 }
-
-#endif /* CONFIG_SENSORS_DHTXX */
