@@ -1,35 +1,20 @@
 /****************************************************************************
  * sched/sched/sched_timerexpiration.c
  *
- *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -63,7 +48,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* In the original design, it was planned that sched_timer_reassess() be
+/* In the original design, it was planned that nxsched_reassess_timer() be
  * called whenever there was a change at the head of the ready-to-run
  * list.  That call was intended to establish a new time-slice or to
  * stop an old time-slice timer.  However, it turns out that that
@@ -200,7 +185,7 @@ static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
        * timeslice.
        */
 
-      ret = sched_roundrobin_process(rtcb, ticks, noswitches);
+      ret = nxsched_process_roundrobin(rtcb, ticks, noswitches);
     }
 #endif
 
@@ -227,7 +212,7 @@ static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
        * budget.
        */
 
-      ret = sched_sporadic_process(rtcb, ticks, noswitches);
+      ret = nxsched_process_sporadic(rtcb, ticks, noswitches);
     }
 #endif
 
@@ -573,12 +558,12 @@ void nxsched_timer_expiration(void)
 #endif
 
 /****************************************************************************
- * Name:  sched_timer_cancel
+ * Name:  nxsched_cancel_timer
  *
  * Description:
  *   Stop the current timing activity.  This is currently called just before
  *   a new entry is inserted at the head of a timer list and also as part
- *   of the processing of sched_timer_reassess().
+ *   of the processing of nxsched_reassess_timer().
  *
  *   This function(1) cancels the current timer, (2) determines how much of
  *   the interval has elapsed, (3) completes any partially timed events
@@ -596,7 +581,7 @@ void nxsched_timer_expiration(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
-unsigned int sched_timer_cancel(void)
+unsigned int nxsched_cancel_timer(void)
 {
   struct timespec ts;
   unsigned int elapsed;
@@ -646,7 +631,7 @@ unsigned int sched_timer_cancel(void)
   return nxsched_timer_process(elapsed, true);
 }
 #else
-unsigned int sched_timer_cancel(void)
+unsigned int nxsched_cancel_timer(void)
 {
   struct timespec ts;
   unsigned int ticks;
@@ -689,7 +674,7 @@ unsigned int sched_timer_cancel(void)
 #endif
 
 /****************************************************************************
- * Name:  sched_timer_resume
+ * Name:  nxsched_resume_timer
  *
  * Description:
  *   Re-assess the next deadline and restart the interval timer.  This is
@@ -703,13 +688,13 @@ unsigned int sched_timer_cancel(void)
  *   None.
  *
  * Assumptions:
- *   This function is called right after sched_timer_cancel().  If
+ *   This function is called right after nxsched_cancel_timer().  If
  *   CONFIG_SCHED_TICKLESS_ALARM=y, then g_stop_time must be the value time
  *   when the timer was cancelled.
  *
  ****************************************************************************/
 
-void sched_timer_resume(void)
+void nxsched_resume_timer(void)
 {
   unsigned int nexttime;
 
@@ -728,7 +713,7 @@ void sched_timer_resume(void)
 }
 
 /****************************************************************************
- * Name:  sched_timer_reassess
+ * Name:  nxsched_reassess_timer
  *
  * Description:
  *   It is necessary to re-assess the timer interval in several
@@ -740,13 +725,13 @@ void sched_timer_resume(void)
  *   - When pre-emption is re-enabled.  A previous time slice may have
  *     expired while pre-emption was enabled and now needs to be executed.
  *
- *   In the original design, it was also planned that sched_timer_reassess()
- *   be called whenever there was a change at the head of the ready-to-run
- *   list.  That call was intended to establish a new time-slice for the
- *   newly activated task or to stop the timer if time-slicing is no longer
- *   needed.  However, it turns out that that solution is too fragile:  The
- *   system is too vulnerable at the time that the ready-to-run list is
- *   modified in order to muck with timers.
+ *   In the original design, it was also planned that
+ *   nxsched_reassess_timer() be called whenever there was a change at the
+ *   head of the ready-to-run list.  That call was intended to establish a
+ *   new time-slice for the newly activated task or to stop the timer if
+ *   time-slicing is no longer needed.  However, it turns out that that
+ *   solution is too fragile:  The system is too vulnerable at the time
+ *   that the ready-to-run list is modified in order to muck with timers.
  *
  *   The kludge/work-around is simple to keep the timer running all of the
  *   time with an interval of no more than the timeslice interval.  If we
@@ -761,13 +746,13 @@ void sched_timer_resume(void)
  *
  ****************************************************************************/
 
-void sched_timer_reassess(void)
+void nxsched_reassess_timer(void)
 {
   unsigned int nexttime;
 
   /* Cancel and restart the timer */
 
-  nexttime = sched_timer_cancel();
+  nexttime = nxsched_cancel_timer();
   nxsched_timer_start(nexttime);
 }
 

@@ -108,6 +108,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
   UNUSED(int_stack);
   start = alloc & ~3;
 #endif
+
   end   = (alloc + size + 3) & ~3;
 
   /* Get the adjusted size based on the top and bottom of the stack */

@@ -345,7 +345,7 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
 
 #ifdef CONFIG_LIBC_EXECFUNCS
 int     execl(FAR const char *path, ...);
-int     execv(FAR const char *path, FAR char *const argv[]);
+int     execv(FAR const char *path, FAR char * const argv[]);
 #endif
 
 /* Byte operations */
@@ -354,7 +354,7 @@ void    swab(FAR const void *src, FAR void *dest, ssize_t nbytes);
 
 /* getopt and friends */
 
-int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
+int     getopt(int argc, FAR char * const argv[], FAR const char *optstring);
 
 /* Accessor functions intended for use only by external NXFLAT
  * modules.  The global variables optarg, optind, and optopt cannot

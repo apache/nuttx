@@ -49,6 +49,11 @@
 
 #ifdef CONFIG_ARCH_RV32IM
 #  include "rv32im/csr.h"
+#  include "rv32im/arch.h"
+#endif
+
+#ifdef CONFIG_ARCH_RV64GC
+#  include "rv64gc/arch.h"
 #endif
 
 /****************************************************************************
@@ -57,6 +62,7 @@
 
 /* Macros to get the core and vendor ID, HART, arch and ISA codes, etc.
  */
+
 #ifdef CONFIG_RV32IM_SYSTEM_CSRRS_SUPPORT
 
 uint32_t up_getmisa(void);
@@ -105,7 +111,8 @@ uint32_t time_hard_mul(uint32_t a, uint32_t b, uint32_t *t);
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

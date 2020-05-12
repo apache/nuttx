@@ -91,7 +91,8 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
 
   /* Get aligned addresses of the top and bottom of the stack */
 
-#ifdef CONFIG_TLS
+#ifdef CONFIG_TLS_ALIGNED
+
   /* Skip over the TLS data structure at the bottom of the stack */
 
   DEBUGASSERT((alloc & TLS_STACK_MASK) == 0);
@@ -99,6 +100,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
 #else
   start = alloc & ~3;
 #endif
+
   end   = (alloc + size + 3) & ~3;
 
   /* Get the adjusted size based on the top and bottom of the stack */

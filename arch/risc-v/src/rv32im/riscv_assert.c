@@ -81,21 +81,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_getsp
- ****************************************************************************/
-
-static inline uint32_t up_getsp(void)
-{
-  register uint32_t sp;
-  __asm__
-  (
-    "\tadd  %0, x0, x2\n"
-    : "=r"(sp)
-  );
-  return sp;
-}
-
-/****************************************************************************
  * Name: up_stackdump
  ****************************************************************************/
 
@@ -142,7 +127,7 @@ static inline void up_showtasks(void)
 {
   /* Dump interesting properties of each task in the crash environment */
 
-  sched_foreach(up_taskdump, NULL);
+  nxsched_foreach(up_taskdump, NULL);
 }
 #else
 #  define up_showtasks()
@@ -200,7 +185,7 @@ static inline void up_registerdump(void)
 static void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp = up_getsp();
+  uint32_t sp = riscv_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
@@ -335,14 +320,13 @@ static void _up_assert(int errorcode)
 static int usbtrace_syslog(FAR const char *fmt, ...)
 {
   va_list ap;
-  int ret;
 
-  /* Let nx_vsyslog do the real work */
+  /* Let vsyslog do the real work */
 
   va_start(ap, fmt);
-  ret = nx_vsyslog(LOG_EMERG, fmt, &ap);
+  vsyslog(LOG_EMERG, fmt, ap);
   va_end(ap);
-  return ret;
+  return OK;
 }
 
 static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
@@ -397,7 +381,7 @@ void up_assert(const uint8_t *filename, int lineno)
   syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), running_task(), filename, lineno);
+  board_crashdump(riscv_getsp(), running_task(), filename, lineno);
 #endif
 
   _up_assert(EXIT_FAILURE);

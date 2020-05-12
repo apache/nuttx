@@ -18,9 +18,9 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_TLS),y)
-
-CSRCS += tls_setelem.c tls_getelem.c
+ifneq ($(CONFIG_TLS_NELEM),0)
+CSRCS += tls_setvalue.c tls_getvalue.c
+endif
 
 ifneq ($(CONFIG_TLS_ALIGNED),y)
 CSRCS += tls_getinfo.c
@@ -31,4 +31,3 @@ endif
 DEPPATH += --dep-path tls
 VPATH += :tls
 
-endif

@@ -171,7 +171,7 @@ extern "C"
 
 /* POSIX-like File System Interfaces */
 
-int open(const char *path, int oflag, ...);
+int open(FAR const char *path, int oflag, ...);
 int fcntl(int fd, int cmd, ...);
 
 #undef EXTERN

@@ -121,13 +121,13 @@
 
 struct stm32_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
-  uint32_t lsifreq;   /* The calibrated frequency of the LSI oscillator */
-  uint32_t timeout;   /* The (actual) selected timeout */
-  uint32_t lastreset; /* The last reset time */
-  bool     started;   /* true: The watchdog timer has been started */
-  uint8_t  prescaler; /* Clock prescaler value */
-  uint16_t reload;    /* Timer reload value */
+  FAR const struct watchdog_ops_s  *ops; /* Lower half operations */
+  uint32_t lsifreq;                      /* The calibrated frequency of the LSI oscillator */
+  uint32_t timeout;                      /* The (actual) selected timeout */
+  uint32_t lastreset;                    /* The last reset time */
+  bool     started;                      /* true: The watchdog timer has been started */
+  uint8_t  prescaler;                    /* Clock prescaler value */
+  uint16_t reload;                       /* Timer reload value */
 };
 
 /****************************************************************************
@@ -358,7 +358,7 @@ static int stm32_start(FAR struct watchdog_lowerhalf_s *lower)
 
       flags           = enter_critical_section();
       stm32_putreg(IWDG_KR_KEY_START, STM32_IWDG_KR);
-      priv->lastreset = clock_systimer();
+      priv->lastreset = clock_systime_ticks();
       priv->started   = true;
       leave_critical_section(flags);
     }
@@ -417,7 +417,7 @@ static int stm32_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 
   flags = enter_critical_section();
   stm32_putreg(IWDG_KR_KEY_RELOAD, STM32_IWDG_KR);
-  priv->lastreset = clock_systimer();
+  priv->lastreset = clock_systime_ticks();
   leave_critical_section(flags);
 
   return OK;
@@ -463,7 +463,7 @@ static int stm32_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Get the elapsed time since the last ping */
 
-  ticks   = clock_systimer() - priv->lastreset;
+  ticks   = clock_systime_ticks() - priv->lastreset;
   elapsed = (int32_t)TICK2MSEC(ticks);
 
   if (elapsed > priv->timeout)

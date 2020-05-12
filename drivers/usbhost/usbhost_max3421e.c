@@ -1849,7 +1849,7 @@ static ssize_t max3421e_out_transfer(FAR struct max3421e_usbhost_s *priv,
    * or a fatal error occurs (any error other than a simple NAK)
    */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   xfrd  = 0;
 
   while (buflen > 0)
@@ -1873,7 +1873,7 @@ static ssize_t max3421e_out_transfer(FAR struct max3421e_usbhost_s *priv,
           return (ssize_t)ret;
         }
 
-      /* Set up for the transfer based on the direction and the endpoint type */
+      /* Set up for the transfer based on the direction and the endpoint */
 
       max3421e_lock(priv);
       ret = max3421e_out_setup(priv, chan);
@@ -1902,7 +1902,7 @@ static ssize_t max3421e_out_transfer(FAR struct max3421e_usbhost_s *priv,
            * pointer and buffer size will be unaltered.
            */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
           if (ret != -EAGAIN ||                     /* Not a NAK condition OR */
               elapsed >= MAX3421E_DATANAK_DELAY ||  /* Timeout has elapsed OR */
               priv->xfrd > 0)                       /* Data has been partially transferred */
@@ -1921,7 +1921,7 @@ static ssize_t max3421e_out_transfer(FAR struct max3421e_usbhost_s *priv,
         }
       else
         {
-          /* Successfully transferred.  Update the buffer pointer and length */
+          /* Successfully transferred. Update the buffer pointer/length */
 
           buffer += xfrlen;
           buflen -= xfrlen;
@@ -1953,7 +1953,7 @@ static void max3421e_out_next(FAR struct max3421e_usbhost_s *priv,
   int result;
   int ret;
 
-  /* Is the full transfer complete? Did the last chunk transfer complete OK? */
+  /* Is the full transfer complete? Did the last chunk transfer OK? */
 
   result = -(int)priv->result;
   if (priv->xfrd < priv->buflen && result == OK)
@@ -2018,7 +2018,7 @@ static int max3421e_out_asynch(FAR struct max3421e_usbhost_s *priv,
 {
   int ret;
 
-  /* Set up for the transfer data and callback BEFORE starting the first transfer */
+  /* Set up for the transfer BEFORE starting the first transfer */
 
   priv->buffer = buffer;
   priv->buflen = buflen;
@@ -2071,7 +2071,7 @@ static int max3421e_ctrl_sendsetup(FAR struct max3421e_usbhost_s *priv,
 
   /* Loop while the device reports NAK (and a timeout is not exceeded */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   do
     {
       /* Send the  SETUP packet */
@@ -2146,7 +2146,7 @@ static int max3421e_ctrl_sendsetup(FAR struct max3421e_usbhost_s *priv,
 
       /* Get the elapsed time (in frames) */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
     }
   while (elapsed < MAX3421E_SETUP_DELAY);
 
@@ -2687,7 +2687,7 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
   priv->xfrd   = 0;
   xfrd         = 0;
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   while (priv->xfrd < priv->buflen)
     {
       /* Set up for the wait BEFORE starting the transfer */
@@ -2699,7 +2699,7 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
           return (ssize_t)ret;
         }
 
-      /* Set up for the transfer based on the direction and the endpoint type */
+      /* Set up for the transfer based on the direction and the endpoint */
 
       max3421e_lock(priv);
       ret = max3421e_in_setup(priv, chan);
@@ -2747,7 +2747,7 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
                    * if not then try again.
                    */
 
-                  clock_t elapsed = clock_systimer() - start;
+                  clock_t elapsed = clock_systime_ticks() - start;
                   if (elapsed >= MAX3421E_DATANAK_DELAY)
                     {
                       /* Timeout out... break out returning the NAK as
@@ -2867,7 +2867,7 @@ static void max3421e_in_next(FAR struct max3421e_usbhost_s *priv,
   int result;
   int ret;
 
-  /* Is the full transfer complete? Did the last chunk transfer complete OK? */
+  /* Is the full transfer complete? Did the last chunk transfer OK? */
 
   result = -(int)priv->result;
   if (priv->xfrd < priv->buflen && result == OK)
@@ -2933,7 +2933,7 @@ static int max3421e_in_asynch(FAR struct max3421e_usbhost_s *priv,
 {
   int ret;
 
-  /* Set up for the transfer data and callback BEFORE starting the first transfer */
+  /* Set up for the transfer BEFORE starting the first transfer */
 
   priv->buffer = buffer;
   priv->buflen = buflen;
@@ -3134,7 +3134,7 @@ static void max3421e_irqwork(FAR void *arg)
       pending = max3421e_int_status(priv);
       priv->lower->acknowledge(lower);
 
-      /* Break out of the loop when there are no further pending interrupts. */
+      /* Break out of the loop when there are no pending interrupts. */
 
       if (pending == 0)
         {
@@ -3398,7 +3398,7 @@ static int max3421e_wait(FAR struct usbhost_connection_s *conn,
 
   for (; ; )
     {
-      /* We must have exclusive access to the USB host hardware and state structures */
+      /* We must have exclusive access to USB host hardware and structures */
 
       ret = max3421e_take_exclsem(priv);
       if (ret < 0)
@@ -3577,7 +3577,7 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
   DEBUGASSERT(maxconn != NULL && maxconn->priv != NULL);
   priv = maxconn->priv;
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = max3421e_take_exclsem(priv);
   if (ret < 0)
@@ -3685,7 +3685,7 @@ static int max3421e_ep0configure(FAR struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(drvr != NULL && funcaddr < 128 && maxpacketsize <= 64);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = max3421e_take_exclsem(priv);
   if (ret < 0)
@@ -3746,7 +3746,7 @@ static int max3421e_epalloc(FAR struct usbhost_driver_s *drvr,
   hport = epdesc->hport;
   DEBUGASSERT(hport != NULL);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = max3421e_take_exclsem(priv);
   if (ret < 0)
@@ -3816,7 +3816,7 @@ static int max3421e_epfree(FAR struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(priv);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = max3421e_take_exclsem(priv);
   if (ret >= 0)
@@ -4067,7 +4067,7 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr,
 
   buflen = max3421e_getle16(req->len);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = max3421e_take_exclsem(priv);
   if (ret < 0)
@@ -4090,7 +4090,7 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr,
 
       /* Get the start time.  Loop again until the timeout expires */
 
-      start = clock_systimer();
+      start = clock_systime_ticks();
       do
         {
           /* Handle the IN data phase (if any) */
@@ -4127,12 +4127,12 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr,
 
           /* Get the elapsed time (in frames) */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
         }
       while (elapsed < MAX3421E_DATANAK_DELAY);
     }
 
-  /* All failures exit here after all retries and timeouts have been exhausted */
+  /* All failures exit here after all retries and timeouts are exhausted */
 
   max3421e_give_exclsem(priv);
   return -ETIMEDOUT;
@@ -4167,7 +4167,7 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr,
 
   buflen = max3421e_getle16(req->len);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = max3421e_take_exclsem(priv);
   if (ret < 0)
@@ -4190,7 +4190,7 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr,
 
       /* Get the start time.  Loop again until the timeout expires */
 
-      start = clock_systimer();
+      start = clock_systime_ticks();
       do
         {
           /* Handle the data OUT phase (if any) */
@@ -4229,12 +4229,12 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr,
 
           /* Get the elapsed time (in frames) */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
         }
       while (elapsed < MAX3421E_DATANAK_DELAY);
     }
 
-  /* All failures exit here after all retries and timeouts have been exhausted */
+  /* All failures exit here after all retries and timeouts are exhausted */
 
   max3421e_give_exclsem(priv);
   return -ETIMEDOUT;
@@ -4295,7 +4295,7 @@ static ssize_t max3421e_transfer(FAR struct usbhost_driver_s *drvr,
 
   usbhost_vtrace2(MAX3421E_VTRACE2_TRANSFER, (unsigned int)ep, buflen);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = max3421e_take_exclsem(priv);
   if (ret < 0)
@@ -4371,7 +4371,7 @@ static int max3421e_asynch(FAR struct usbhost_driver_s *drvr,
 
   usbhost_vtrace2(MAX3421E_VTRACE2_ASYNCH, (unsigned int)ep, buflen);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = max3421e_take_exclsem(priv);
   if (ret < 0)

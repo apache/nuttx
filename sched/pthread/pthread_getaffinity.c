@@ -88,12 +88,12 @@ int pthread_getaffinity_np(pthread_t thread, size_t cpusetsize,
   DEBUGASSERT(thread > 0 && cpusetsize == sizeof(cpu_set_t) &&
               cpuset != NULL);
 
-  /* Let nxsched_getaffinity do all of the work */
+  /* Let nxsched_get_affinity do all of the work */
 
-  ret = nxsched_getaffinity((pid_t)thread, cpusetsize, cpuset);
+  ret = nxsched_get_affinity((pid_t)thread, cpusetsize, cpuset);
   if (ret < 0)
     {
-      /* If nxsched_getaffinity() fails, return the positive errno */
+      /* If nxsched_get_affinity() fails, return the positive errno */
 
       ret = -ret;
     }

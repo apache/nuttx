@@ -62,24 +62,6 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sh1_getsp
- ****************************************************************************/
-
-static inline uint32_t sh1_getsp(void)
-{
-  uint32_t sp;
-
-  __asm__ __volatile__
-    (
-      "mov   r15, %0\n\t"
-      : "=&z" (sp)
-      :
-      : "memory"
-    );
-  return sp;
-}
-
-/****************************************************************************
  * Name: sh1_stackdump
  ****************************************************************************/
 
@@ -89,7 +71,7 @@ static void sh1_stackdump(uint32_t sp, uint32_t stack_base)
 
   for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
     {
-      uint32_t *ptr = (uint32_t*)stack;
+      uint32_t *ptr = (uint32_t *)stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
@@ -102,7 +84,7 @@ static void sh1_stackdump(uint32_t sp, uint32_t stack_base)
 
 static inline void sh1_registerdump(void)
 {
-  uint32_t *ptr = (uint32_t*)g_current_regs;
+  uint32_t *ptr = (uint32_t *)g_current_regs;
 
   /* Are user registers available from interrupt processing? */
 
@@ -142,7 +124,7 @@ static inline void sh1_registerdump(void)
 void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp = sh1_getsp();
+  uint32_t sp = renesas_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3

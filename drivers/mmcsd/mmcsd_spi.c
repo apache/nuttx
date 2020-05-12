@@ -118,8 +118,8 @@
 #define MMCSD_DELAY_1SEC             (CLK_TCK      + 1)
 #define MMCSD_DELAY_10SEC            (10 * CLK_TCK + 1)
 
-#define ELAPSED_TIME(t)              (clock_systimer()-(t))
-#define START_TIME                   (clock_systimer())
+#define ELAPSED_TIME(t)              (clock_systime_ticks()-(t))
+#define START_TIME                   (clock_systime_ticks())
 
 /* SD read timeout: ~100msec, Write Time out ~250ms.  Units of clock ticks */
 

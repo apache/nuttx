@@ -207,7 +207,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
        * modified.
        */
 
-      ret = nxsched_getparam(pid, &param);
+      ret = nxsched_get_param(pid, &param);
       if (ret < 0)
         {
           return ret;
@@ -219,7 +219,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
       param.sched_priority = attr->priority;
 
       /* If we are setting *both* the priority and the scheduler,
-       * then we will call nxsched_setscheduler() below.
+       * then we will call nxsched_set_scheduler() below.
        */
 
       if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) == 0)
@@ -227,7 +227,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
           sinfo("Setting priority=%d for pid=%d\n",
                 param.sched_priority, pid);
 
-          ret = nxsched_setparam(pid, &param);
+          ret = nxsched_set_param(pid, &param);
           if (ret < 0)
             {
               return ret;
@@ -237,12 +237,12 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 
   /* If we are only changing the scheduling policy, then reset
    * the priority to the default value (the same as this thread) in
-   * preparation for the nxsched_setscheduler() call below.
+   * preparation for the nxsched_set_scheduler() call below.
    */
 
   else if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0)
     {
-      ret = nxsched_getparam(0, &param);
+      ret = nxsched_get_param(0, &param);
       if (ret < 0)
         {
           return ret;
@@ -268,7 +268,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
       param.sched_ss_init_budget.tv_sec  = attr->budget.tv_sec;
       param.sched_ss_init_budget.tv_nsec = attr->budget.tv_nsec;
 #endif
-      nxsched_setscheduler(pid, attr->policy, &param);
+      nxsched_set_scheduler(pid, attr->policy, &param);
     }
 
   return OK;

@@ -78,7 +78,7 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
 
   /* Get the TCB corresponding to this PID */
 
-  ctcb = sched_gettcb(pid);
+  ctcb = nxsched_get_tcb(pid);
   if (ctcb == NULL)
     {
       ret = -ECHILD;
@@ -223,7 +223,7 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
        * already exited, then the PID will not map to a valid TCB.
        */
 
-      ctcb = sched_gettcb(pid);
+      ctcb = nxsched_get_tcb(pid);
       if (ctcb != NULL)
         {
           /* Make sure that the thread it is our child. */
@@ -270,7 +270,7 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
        * thread it is our child.
        */
 
-      ctcb = sched_gettcb(pid);
+      ctcb = nxsched_get_tcb(pid);
 
 #ifdef HAVE_GROUP_MEMBERS
       if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)

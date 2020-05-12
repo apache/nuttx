@@ -105,7 +105,7 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
 
   else
     {
-      rrtcb = sched_gettcb(pid);
+      rrtcb = nxsched_get_tcb(pid);
       if (rrtcb == NULL)
         {
           set_errno(ESRCH);

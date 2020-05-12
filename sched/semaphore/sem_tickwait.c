@@ -121,7 +121,7 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
 
   /* Adjust the delay for any time since the delay was calculated */
 
-  elapsed = clock_systimer() - start;
+  elapsed = clock_systime_ticks() - start;
   if (/* elapsed >= (UINT32_MAX / 2) || */ elapsed >= delay)
     {
       ret = -ETIMEDOUT;

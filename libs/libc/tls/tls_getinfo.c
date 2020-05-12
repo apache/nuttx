@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/fixedmath/tls_setelem.c
+ * libs/libc/tls/tls_getinfo.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -60,9 +60,7 @@ FAR struct tls_info_s *tls_get_info(void)
   struct stackinfo_s stackinfo;
   int ret;
 
-  DEBUGASSERT(!up_interrupt_context());
-
-  ret = sched_get_stackinfo(0, &stackinfo);
+  ret = nxsched_get_stackinfo(0, &stackinfo);
   if (ret >= 0)
     {
       /* This currently assumes a push-down stack.  The TLS data lies at the

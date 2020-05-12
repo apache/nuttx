@@ -1583,7 +1583,9 @@ static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
 
       if (minsize <= avail)
         {
-          /* Yes.. Get the size of the biggest thing that we can put in the Tx FIFO now */
+          /* Yes.. Get the size of the biggest thing that we can put
+           * in the Tx FIFO now
+           */
 
           wrsize = chan->buflen;
           if (wrsize > avail)
@@ -1652,7 +1654,7 @@ static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
   /* Loop while the device reports NAK (and a timeout is not exceeded */
 
   chan  = &priv->chan[ep0->outndx];
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   do
     {
@@ -1701,7 +1703,7 @@ static int stm32_ctrl_sendsetup(FAR struct stm32_usbhost_s *priv,
 
       /* Get the elapsed time (in frames) */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
     }
   while (elapsed < STM32_SETUP_DELAY);
 
@@ -1890,7 +1892,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
   chan->xfrd   = 0;
   xfrd         = 0;
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   while (chan->xfrd < chan->buflen)
     {
       /* Set up for the wait BEFORE starting the transfer */
@@ -1902,7 +1904,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           return (ssize_t)ret;
         }
 
-      /* Set up for the transfer based on the direction and the endpoint type */
+      /* Set up for the transfer based on the direction and the endpoint */
 
       ret = stm32_in_setup(priv, chidx);
       if (ret < 0)
@@ -1947,7 +1949,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                    * if not then try again.
                    */
 
-                  clock_t elapsed = clock_systimer() - start;
+                  clock_t elapsed = clock_systime_ticks() - start;
                   if (elapsed >= STM32_DATANAK_DELAY)
                     {
                       /* Timeout out... break out returning the NAK as
@@ -2068,7 +2070,7 @@ static void stm32_in_next(FAR struct stm32_usbhost_s *priv,
   int result;
   int ret;
 
-  /* Is the full transfer complete? Did the last chunk transfer complete OK? */
+  /* Is the full transfer complete? Did the last chunk transfer OK? */
 
   result = -(int)chan->result;
   if (chan->xfrd < chan->buflen && result == OK)
@@ -2131,7 +2133,7 @@ static int stm32_in_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
   FAR struct stm32_chan_s *chan;
   int ret;
 
-  /* Set up for the transfer data and callback BEFORE starting the first transfer */
+  /* Set up for the transfer BEFORE starting the first transfer */
 
   chan         = &priv->chan[chidx];
   chan->buffer = buffer;
@@ -2249,7 +2251,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv,
    */
 
   chan  = &priv->chan[chidx];
-  start = clock_systimer();
+  start = clock_systime_ticks();
   xfrd  = 0;
   zlp   = (buflen == 0);
 
@@ -2274,7 +2276,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv,
           return (ssize_t)ret;
         }
 
-      /* Set up for the transfer based on the direction and the endpoint type */
+      /* Set up for the transfer based on the direction and the endpoint */
 
       ret = stm32_out_setup(priv, chidx);
       if (ret < 0)
@@ -2300,7 +2302,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv,
            * pointer and buffer size will be unaltered.
            */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
           if (ret != -EAGAIN ||                  /* Not a NAK condition OR */
               elapsed >= STM32_DATANAK_DELAY ||  /* Timeout has elapsed OR */
               chan->xfrd > 0)                    /* Data has been partially transferred */
@@ -2325,7 +2327,7 @@ static ssize_t stm32_out_transfer(FAR struct stm32_usbhost_s *priv,
         }
       else
         {
-          /* Successfully transferred.  Update the buffer pointer and length */
+          /* Successfully transferred.  Update the buffer pointe/length */
 
           buffer += xfrlen;
           buflen -= xfrlen;
@@ -2358,7 +2360,7 @@ static void stm32_out_next(FAR struct stm32_usbhost_s *priv,
   int result;
   int ret;
 
-  /* Is the full transfer complete? Did the last chunk transfer complete OK? */
+  /* Is the full transfer complete? Did the last chunk transfer OK? */
 
   result = -(int)chan->result;
   if (chan->xfrd < chan->buflen && result == OK)
@@ -2421,7 +2423,7 @@ static int stm32_out_asynch(FAR struct stm32_usbhost_s *priv, int chidx,
   FAR struct stm32_chan_s *chan;
   int ret;
 
-  /* Set up for the transfer data and callback BEFORE starting the first transfer */
+  /* Set up for the transfer BEFORE starting the first transfer */
 
   chan         = &priv->chan[chidx];
   chan->buffer = buffer;
@@ -2527,11 +2529,11 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
   pending &= regval;
   uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
-  /* Check for a pending ACK response received/transmitted (ACK) interrupt */
+  /* Check for a pending ACK response received/transmitted interrupt */
 
   if ((pending & OTG_HCINT_ACK) != 0)
     {
-      /* Clear the pending the ACK response received/transmitted (ACK) interrupt */
+      /* Clear the pending the ACK response received/transmitted interrupt */
 
       stm32_putreg(STM32_OTG_HCINT(chidx), OTG_HCINT_ACK);
     }
@@ -2593,7 +2595,7 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
 
       stm32_putreg(STM32_OTG_HCINT(chidx), OTG_HCINT_XFRC);
 
-      /* Then handle the transfer completion event based on the endpoint type */
+      /* Then handle the transfer completion event based on the endpoint */
 
       if (chan->eptype == OTG_EPTYPE_CTRL || chan->eptype == OTG_EPTYPE_BULK)
         {
@@ -2727,7 +2729,7 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
         }
 
 #else
-      /* Halt all transfers on the NAK -- the CHH interrupt is expected next */
+      /* Halt all transfers on the NAK -- CHH interrupt is expected next */
 
       stm32_chan_halt(priv, chidx, CHREASON_NAK);
 #endif
@@ -2780,11 +2782,11 @@ static inline void stm32_gint_hcoutisr(FAR struct stm32_usbhost_s *priv,
   pending &= regval;
   uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
-  /* Check for a pending ACK response received/transmitted (ACK) interrupt */
+  /* Check for a pending ACK response received/transmitted interrupt */
 
   if ((pending & OTG_HCINT_ACK) != 0)
     {
-      /* Clear the pending the ACK response received/transmitted (ACK) interrupt */
+      /* Clear the pending the ACK response received/transmitted interrupt */
 
       stm32_putreg(STM32_OTG_HCINT(chidx), OTG_HCINT_ACK);
     }
@@ -3104,7 +3106,7 @@ static inline void stm32_gint_rxflvlisr(FAR struct stm32_usbhost_s *priv)
 
   chidx = (grxsts & OTG_GRXSTSH_CHNUM_MASK) >> OTG_GRXSTSH_CHNUM_SHIFT;
 
-  /* Get the host channel characteristics register (HCCHAR) for this channel */
+  /* Get the host channel characteristics register (HCCHAR) */
 
   hcchar = stm32_getreg(STM32_OTG_HCCHAR(chidx));
 
@@ -3753,7 +3755,7 @@ static inline void stm32_hostinit_enable(void)
 
   stm32_putreg(STM32_OTG_GINTSTS, 0xffffffff);
 
-  /* Clear any pending USB OTG Interrupts (should be done elsewhere if OTG is supported) */
+  /* Clear any pending USB OTG Interrupts */
 
   stm32_putreg(STM32_OTG_GOTGINT, 0xffffffff);
 
@@ -4118,7 +4120,7 @@ static int stm32_ep0configure(FAR struct usbhost_driver_s *drvr,
   DEBUGASSERT(drvr != NULL && ep0info != NULL && funcaddr < 128 &&
               maxpacketsize <= 64);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = stm32_takesem(&priv->exclsem);
   if (ret < 0)
@@ -4238,7 +4240,7 @@ static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   DEBUGASSERT(priv);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = stm32_takesem_noncancelable(&priv->exclsem);
 
@@ -4502,7 +4504,7 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   buflen = stm32_getle16(req->len);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = stm32_takesem(&priv->exclsem);
   if (ret < 0)
@@ -4537,7 +4539,7 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
       /* Get the start time.  Loop again until the timeout expires */
 
-      start = clock_systimer();
+      start = clock_systime_ticks();
       do
         {
           /* Handle the status OUT phase */
@@ -4556,12 +4558,12 @@ static int stm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           /* Get the elapsed time (in frames) */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
         }
       while (elapsed < STM32_DATANAK_DELAY);
     }
 
-  /* All failures exit here after all retries and timeouts have been exhausted */
+  /* All failures exit here after all retries and timeouts are exhausted */
 
   stm32_givesem(&priv->exclsem);
   return -ETIMEDOUT;
@@ -4589,7 +4591,7 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   buflen = stm32_getle16(req->len);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = stm32_takesem(&priv->exclsem);
   if (ret < 0)
@@ -4612,7 +4614,7 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
       /* Get the start time.  Loop again until the timeout expires */
 
-      start = clock_systimer();
+      start = clock_systime_ticks();
       do
         {
           /* Handle the data OUT phase (if any) */
@@ -4648,12 +4650,12 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           /* Get the elapsed time (in frames) */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
         }
       while (elapsed < STM32_DATANAK_DELAY);
     }
 
-  /* All failures exit here after all retries and timeouts have been exhausted */
+  /* All failures exit here after all retries and timeouts are exhausted */
 
   stm32_givesem(&priv->exclsem);
   return -ETIMEDOUT;
@@ -4711,7 +4713,7 @@ static ssize_t stm32_transfer(FAR struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(priv && buffer && chidx < STM32_MAX_TX_FIFOS && buflen > 0);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = stm32_takesem(&priv->exclsem);
   if (ret < 0)
@@ -4783,7 +4785,7 @@ static int stm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   DEBUGASSERT(priv && buffer && chidx < STM32_MAX_TX_FIFOS && buflen > 0);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = stm32_takesem(&priv->exclsem);
   if (ret < 0)

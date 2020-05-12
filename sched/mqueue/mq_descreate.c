@@ -115,7 +115,7 @@ mqd_t nxmq_create_des(FAR struct tcb_s *mtcb,
 
   if (!mtcb)
     {
-      mtcb = sched_self();
+      mtcb = nxsched_self();
     }
 
   group = mtcb->group;

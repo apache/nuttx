@@ -110,7 +110,7 @@ config USEC_PER_TICK
 		If SCHED_TICKLESS is selected, then there are no system timer
 		interrupts.  In this case, USEC_PER_TICK does not control any timer
 		rates.  Rather, it only determines the resolution of time reported
-		by clock_systimer() and the resolution of times that can be set for
+		by clock_systime_ticks() and the resolution of times that can be set for
 		certain delays including watchdog timers and delayed work.  In this
 		case there is a trade-off:  It is better to have the USEC_PER_TICK as
 		low as possible for higher timing resolution.  However, the time
@@ -642,17 +642,7 @@ config SCHED_USER_IDENTITY
 endmenu # Tasks and Scheduling
 
 menu "Pthread Options"
-
-config NPTHREAD_KEYS
-	int "Maximum number of pthread keys"
-	default 4 if !DISABLE_PTHREAD
-	default 0 if DISABLE_PTHREAD
-	range 0 32
-	---help---
-		The number of items of thread-specific data that can be retained.
-		The value zero disables support for pthread-specific data.
-
-if !DISABLE_PTHREAD
+	depends on !DISABLE_PTHREAD
 
 config PTHREAD_MUTEX_TYPES
 	bool "Enable mutex types"
@@ -731,8 +721,6 @@ config CANCELLATION_POINTS
 		Enable POSIX cancellation points for pthread_cancel().  If selected,
 		cancellation points will also used with the () task_delete() API even if
 		pthreads are not enabled.
-
-endif # !DISABLE_PTHREAD
 
 endmenu # Pthread Options
 
@@ -862,7 +850,7 @@ config CPULOAD_ONESHOT
 		oneshot timer must be configured by board specific logic which must
 		then call:
 
-			void sched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower);
+			void nxsched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower);
 
 		To start the CPU load measurement. See include/nuttx/clock.h
 
@@ -880,7 +868,7 @@ config CPULOAD_PERIOD
 		period timer must be configured by board specific logic which must
 		then call:
 
-			void sched_period_extclk(FAR struct timer_lowerhalf_s *lower);
+			void nxsched_period_extclk(FAR struct timer_lowerhalf_s *lower);
 
 		To start the CPU load measurement. See include/nuttx/clock.h
 

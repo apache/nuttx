@@ -276,7 +276,7 @@ int exec_module(FAR const struct binary_s *binp)
 
 errout_with_tcbinit:
   tcb->cmn.stack_alloc_ptr = NULL;
-  sched_releasetcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
+  nxsched_release_tcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
   kumm_free(stack);
   return ret;
 

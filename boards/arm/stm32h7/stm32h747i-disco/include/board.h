@@ -78,7 +78,8 @@
  *
  * PLL source is HSE = 25,000,000
  *
- * When STM32_HSE_FREQUENCY / PLLM <= 2MHz VCOL must be selected. VCOH otherwise.
+ * When STM32_HSE_FREQUENCY / PLLM <= 2MHz VCOL must be selected.
+ * VCOH otherwise.
  *
  * PLL_VCOx = (STM32_HSE_FREQUENCY / PLLM) * PLLN
  * Subject to:
@@ -279,7 +280,7 @@
 
 #define STM32_SDMMC_INIT_CLKDIV     (250 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 
-/* Just set these to 25 MHz for now, PLL1Q/(2*4), for default speed 12.5MB/s */
+/* Just set these to 25 MHz for now, PLL1Q/(2*4), default speed 12.5MB/s */
 
 #define STM32_SDMMC_MMCXFR_CLKDIV   (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 #define STM32_SDMMC_SDXFR_CLKDIV    (4 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
@@ -287,6 +288,61 @@
 #define STM32_SDMMC_CLKCR_EDGE      STM32_SDMMC_CLKCR_NEGEDGE
 
 /* Ethernet definitions *****************************************************/
+
+/* SDRAM FMC definitions ****************************************************/
+
+#define BOARD_FMC_CLK                   RCC_D1CCIPR_FMCSEL_HCLK
+#define BOARD_SDRAM2_SIZE               (32*1024*1024)
+
+/* BOARD_FMC_SDCR[1..2] - Initial value for SDRAM control registers for SDRAM
+ *      bank 1-2. Note that some bits in SDCR1 influence both SDRAM banks and
+ *      are unused in SDCR2!
+ */
+
+#define BOARD_FMC_SDCR1 \
+      (FMC_SDCR_SDCLK_2X | FMC_SDCR_BURST_READ | FMC_SDCR_RPIPE_0)
+#define BOARD_FMC_SDCR2 \
+      (FMC_SDCR_COLBITS_9 | FMC_SDCR_ROWBITS_12 | FMC_SDCR_WIDTH_32 |\
+       FMC_SDCR_BANKS_4 | FMC_SDCR_CASLAT_2)
+
+/* BOARD_FMC_SDTR[1..2] - Initial value for SDRAM timing registeres for SDRAM
+ *      bank 1-2. Note that some bits in SDTR1 influence both SDRAM banks and
+ *      are unused in SDTR2!
+ */
+
+#define BOARD_FMC_SDTR1 \
+      (FMC_SDTR_TRC(6) | FMC_SDTR_TRP(2))
+#define BOARD_FMC_SDTR2 \
+      (FMC_SDTR_TMRD(2) | FMC_SDTR_TXSR(6) | FMC_SDTR_TRAS(4) |\
+       FMC_SDTR_TWR(2) | FMC_SDTR_TRCD(2))
+
+#define BOARD_FMC_SDRAM_REFR_CYCLES     4096
+#define BOARD_FMC_SDRAM_REFR_PERIOD     64
+#define BOARD_FMC_SDRAM_AUTOREFRESH     8
+#define BOARD_FMC_SDRAM_MODE \
+      (FMC_SDCMR_MRD_BURST_LENGTH_1 |\
+       FMC_SDCMR_MRD_BURST_TYPE_SEQUENTIAL |\
+       FMC_SDCMR_MRD_CAS_LATENCY_2 |\
+       FMC_SDCMR_MRD_WRITEBURST_MODE_SINGLE)
+
+#define BOARD_FMC_GPIO_CONFIGS \
+       GPIO_FMC_A0, GPIO_FMC_A1, GPIO_FMC_A2, GPIO_FMC_A3, \
+       GPIO_FMC_A4, GPIO_FMC_A5, GPIO_FMC_A6, GPIO_FMC_A7, \
+       GPIO_FMC_A8, GPIO_FMC_A9, GPIO_FMC_A10, GPIO_FMC_A11, \
+       GPIO_FMC_A12, \
+       GPIO_FMC_D0, GPIO_FMC_D1, GPIO_FMC_D2, GPIO_FMC_D3, \
+       GPIO_FMC_D4, GPIO_FMC_D5, GPIO_FMC_D6, GPIO_FMC_D7, \
+       GPIO_FMC_D8, GPIO_FMC_D9, GPIO_FMC_D10, GPIO_FMC_D11, \
+       GPIO_FMC_D12, GPIO_FMC_D13, GPIO_FMC_D14, GPIO_FMC_D15, \
+       GPIO_FMC_D16, GPIO_FMC_D17, GPIO_FMC_D18, GPIO_FMC_D19, \
+       GPIO_FMC_D20, GPIO_FMC_D21, GPIO_FMC_D22, GPIO_FMC_D23, \
+       GPIO_FMC_D24, GPIO_FMC_D25, GPIO_FMC_D26, GPIO_FMC_D27, \
+       GPIO_FMC_D28, GPIO_FMC_D29, GPIO_FMC_D30, GPIO_FMC_D31, \
+       GPIO_FMC_NBL0, GPIO_FMC_NBL1, GPIO_FMC_NBL2, GPIO_FMC_NBL3, \
+       GPIO_FMC_BA0, GPIO_FMC_BA1, \
+       GPIO_FMC_SDNCAS, GPIO_FMC_SDNRAS, \
+       GPIO_FMC_SDNWE_3, GPIO_FMC_SDNE1_2, GPIO_FMC_SDCKE1_2, \
+       GPIO_FMC_SDCLK
 
 /* LED definitions **********************************************************/
 
@@ -296,8 +352,8 @@
  * LD3 Red     PI14
  * LD4 Blue    PI15
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
- * The following definitions are used to access individual LEDs.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs
+ * in any way. The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -321,13 +377,14 @@
 #define BOARD_LED4_BIT    (1 << BOARD_LED4)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c. The LEDs are used to encode
+ * OS-related events as follows:
  *
  *
  *   SYMBOL                     Meaning                      LED state
  *                                                        Red   Green Blue
- *   ----------------------  --------------------------  ------ ------ ---- */
+ *   ----------------------  --------------------------  ------ ------ ----
+ */
 
 #define LED_STARTED        0 /* NuttX has been started   OFF    OFF   OFF   */
 #define LED_HEAPALLOCATE   1 /* Heap has been allocated  OFF    OFF   ON    */
@@ -354,7 +411,7 @@
 #define GPIO_USART1_RX     GPIO_USART1_RX_2  /* PA10 */
 #define GPIO_USART1_TX     GPIO_USART1_TX_2  /* PA9 */
 
-/* UART4 ( PMOD/STMOD )*/
+/* UART4 ( PMOD/STMOD ) */
 
 #define GPIO_UART4_CTS     GPIO_UART4_CTS_2  /* PB15 */
 #define GPIO_UART4_RTS     GPIO_UART4_RTS_2  /* PB14 */

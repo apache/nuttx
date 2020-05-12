@@ -28,11 +28,9 @@
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
 
 define POSTBUILD
-	$(Q)echo "Converting the hex file"; 
+	$(Q)echo "Converting the hex file"
 
-	$(Q) if [ ! -f "tools/pic32/mkpichex" ] ; then \
-		$(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)pic32 -f Makefile.host; \
-	fi
+	+$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)pic32 -f Makefile.host
 	tools$(DELIM)pic32$(DELIM)mkpichex$(HOSTEXEEXT) $(PWD)
 	$(Q)([ $$? -eq 0 ] && echo "Done.")
 endef

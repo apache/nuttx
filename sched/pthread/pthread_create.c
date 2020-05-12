@@ -196,7 +196,7 @@ static void pthread_start(void)
 
   if (ptcb->cmn.sched_priority > ptcb->cmn.init_priority)
     {
-      DEBUGVERIFY(nxsched_setpriority(&ptcb->cmn, ptcb->cmn.init_priority));
+      DEBUGVERIFY(nxsched_set_priority(&ptcb->cmn, ptcb->cmn.init_priority));
     }
 
   /* Pass control to the thread entry point. In the kernel build this has to
@@ -332,7 +332,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
        * thread.
        */
 
-      ret = nxsched_getparam(0, &param);
+      ret = nxsched_get_param(0, &param);
       if (ret < 0)
         {
           errcode = -ret;
@@ -341,7 +341,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
       /* Get the scheduler policy for this thread */
 
-      policy = nxsched_getscheduler(0);
+      policy = nxsched_get_scheduler(0);
       if (policy < 0)
         {
           errcode = -policy;
@@ -389,7 +389,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
       /* Initialize the sporadic policy */
 
-      ret = sched_sporadic_initialize(&ptcb->cmn);
+      ret = nxsched_initialize_sporadic(&ptcb->cmn);
       if (ret >= 0)
         {
           sporadic               = ptcb->cmn.sporadic;
@@ -405,7 +405,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
           /* And start the first replenishment interval */
 
-          ret = sched_sporadic_start(&ptcb->cmn);
+          ret = nxsched_start_sporadic(&ptcb->cmn);
         }
 
       /* Handle any failures */
@@ -556,7 +556,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
       if (ptcb->cmn.sched_priority < parent->sched_priority)
         {
-          ret = nxsched_setpriority(&ptcb->cmn, parent->sched_priority);
+          ret = nxsched_set_priority(&ptcb->cmn, parent->sched_priority);
           if (ret < 0)
             {
               ret = -ret;
@@ -621,6 +621,6 @@ errout_with_tcb:
       ptcb->cmn.group = NULL;
     }
 
-  sched_releasetcb((FAR struct tcb_s *)ptcb, TCB_FLAG_TTYPE_PTHREAD);
+  nxsched_release_tcb((FAR struct tcb_s *)ptcb, TCB_FLAG_TTYPE_PTHREAD);
   return errcode;
 }

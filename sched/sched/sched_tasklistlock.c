@@ -62,7 +62,7 @@ static volatile uint8_t g_tasklist_lock_count[CONFIG_SMP_NCPUS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_tasklist_lock()
+ * Name: nxsched_lock_tasklist()
  *
  * Description:
  *   Disable local interrupts and take the global spinlock (g_tasklist_lock)
@@ -74,10 +74,10 @@ static volatile uint8_t g_tasklist_lock_count[CONFIG_SMP_NCPUS];
  *
  * Returned Value:
  *   An opaque, architecture-specific value that represents the state of
- *   the interrupts prior to the call to sched_tasklist_lock();
+ *   the interrupts prior to the call to nxsched_lock_tasklist();
  ****************************************************************************/
 
-irqstate_t sched_tasklist_lock(void)
+irqstate_t nxsched_lock_tasklist(void)
 {
   int me;
   irqstate_t ret;
@@ -96,26 +96,26 @@ irqstate_t sched_tasklist_lock(void)
 }
 
 /****************************************************************************
- * Name: sched_tasklist_unlock()
+ * Name: nxsched_unlock_tasklist()
  *
  * Description:
  *   Decrement the call counter (g_tasklist_lock_count[cpu]) and if it
  *   decrements to zero then release the spinlock (g_tasklist_lock) and
  *   restore the interrupt state as it was prior to the previous call to
- *   sched_tasklist_lock().
+ *   nxsched_lock_tasklist().
  *
  *   NOTE: This API is used to protect tasklists in the scheduler. So do not
  *   use this API for other purposes.
  *
  * Input Parameters:
  *   lock - The architecture-specific value that represents the state of
- *          the interrupts prior to the call to sched_tasklist_lock().
+ *          the interrupts prior to the call to nxsched_lock_tasklist().
  *
  * Returned Value:
  *   None
  ****************************************************************************/
 
-void sched_tasklist_unlock(irqstate_t lock)
+void nxsched_unlock_tasklist(irqstate_t lock)
 {
   int me;
 

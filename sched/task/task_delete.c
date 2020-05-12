@@ -101,7 +101,7 @@ int task_delete(pid_t pid)
 
   /* Get the TCB of the task to be deleted */
 
-  dtcb = (FAR struct tcb_s *)sched_gettcb(pid);
+  dtcb = (FAR struct tcb_s *)nxsched_get_tcb(pid);
   if (dtcb == NULL)
     {
       /* The pid does not correspond to any known thread.  The task

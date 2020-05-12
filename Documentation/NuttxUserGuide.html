@@ -913,7 +913,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   <ul><pre>
 #include &lt;unistd.h&gt;
 #ifdef CONFIG_LIBC_EXECFUNCS
-int execv(FAR const char *path, FAR char *const argv[]);
+int execv(FAR const char *path, FAR char * const argv[]);
 #endif
 </pre></ul>
 <p>
@@ -1045,11 +1045,11 @@ int execl(FAR const char *path, ...);
 int posix_spawn(FAR pid_t *pid, FAR const char *path,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
-      FAR char *const argv[], FAR char *const envp[]);
+      FAR char * const argv[], FAR char * const envp[]);
 int posix_spawnp(FAR pid_t *pid, FAR const char *file,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
-      FAR char *const argv[], FAR char *const envp[]);
+      FAR char * const argv[], FAR char * const envp[]);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -1632,7 +1632,7 @@ int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr, FAR const sigset_t *
 int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
-      FAR char *const argv[], FAR char *const envp[]);
+      FAR char * const argv[], FAR char * const envp[]);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -1863,7 +1863,7 @@ int posix_spawn_file_actions_init(FAR posix_spawn_file_actions_t *file_actions);
   <b>Function Prototype:</b>
 <pre>
     #include &lt;sched.h&gt;
-    int sched_setparam(pid_t pid, const struct sched_param *param);
+    int sched_setparam(pid_t pid, FAR const struct sched_param *param);
 </pre>
 <p>
   <b>Description:</b>
@@ -1927,7 +1927,7 @@ int posix_spawn_file_actions_init(FAR posix_spawn_file_actions_t *file_actions);
 <b>Function Prototype:</b>
 <pre>
     #include &lt;sched.h&gt;
-    int sched_getparam (pid_t pid, struct sched_param *param);
+    int sched_getparam(pid_t pid, FAR struct sched_param *param);
 </pre>
 
 <p>
@@ -3308,7 +3308,7 @@ interface of the same name.
   <b>Function Prototype:</b>
 <pre>
     #include &lt;mqueue.h&gt;
-    int mq_notify(mqd_t mqdes, const struct sigevent *notification);
+    int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification);
 </pre>
 </p>
 <p>
@@ -5934,7 +5934,7 @@ interface of the same name.
 <p>
 <pre>
     #include &lt;pthread.h&gt;
-    int pthread_attr_destroy(pthread_attr_t *attr);
+    int pthread_attr_destroy(FAR pthread_attr_t *attr);
 </pre>
 <p>
 <b>Description:</b>
@@ -5997,7 +5997,7 @@ interface of the same name.
 <p>
 <pre>
     #include &lt;pthread.h&gt;
-    int pthread_attr_getschedpolicy(pthread_attr_t *attr, int *policy);
+    int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr, FAR int *policy);
 </pre>
 <p>
 <b>Description:</b>
@@ -6187,7 +6187,7 @@ interface of the same name.
 <p>
 <pre>
     #include &lt;pthread.h&gt;
-    int pthread_attr_getstacksize(pthread_attr_t *attr, long *stackaddr);
+    int pthread_attr_getstacksize(FAR const pthread_attr_t *attr, FAR size_t *stackaddr);
 </pre>
 <p>
 <b>Description:</b>
@@ -7154,7 +7154,7 @@ interface of the same name.
 <pre>
     #include &lt;pthread.h&gt;
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
-    int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type);
+    int pthread_mutexattr_gettype(FAR const pthread_mutexattr_t *attr, FAR int *type);
 #endif
 </pre>
 <p>
@@ -8574,8 +8574,8 @@ interface of the same name.
 
 <ul><pre>
   #include &lt;fcntl.h&gt;
-  int creat(const char *path, mode_t mode);
-  int open(const char *path, int oflag, ...);
+  int creat(FAR const char *path, mode_t mode);
+  int open(FAR const char *path, int oflag, ...);
   int fcntl(int fd, int cmd, ...);
 </pre></ul>
 
@@ -8783,7 +8783,7 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
 
 #ifdef CONFIG_LIBC_EXECFUNCS
 int     execl(FAR const char *path, ...);
-int     execv(FAR const char *path, FAR char *const argv[]);
+int     execv(FAR const char *path, FAR char * const argv[]);
 #endif
 
 /* Networking */
@@ -8795,7 +8795,7 @@ int     sethostname(FAR const char *name, size_t size);
 
 /* Other */
 
-int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
+int     getopt(int argc, FAR char * const argv[], FAR const char *optstring);
 
 </pre></ul>
 </a>
@@ -8806,27 +8806,27 @@ int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 
 /* Operations on streams (FILE) */
 
-void   clearerr(register FILE *stream);
-int    fclose(FILE *stream);
-int    fflush(FILE *stream);
-int    feof(FILE *stream);
-int    ferror(FILE *stream);
+void   clearerr(FAR FILE *stream);
+int    fclose(FAR FILE *stream);
+int    fflush(FAR FILE *stream);
+int    feof(FAR FILE *stream);
+int    ferror(FAR FILE *stream);
 int    fileno(FAR FILE *stream);
-int    fgetc(FILE *stream);
-int    fgetpos(FILE *stream, fpos_t *pos);
-char  *fgets(char *s, int n, FILE *stream);
-FILE  *fopen(const char *path, const char *type);
-int    fprintf(FILE *stream, const char *format, ...);
-int    fputc(int c, FILE *stream);
-int    fputs(const char *s, FILE *stream);
-size_t fread(void *ptr, size_t size, size_t n_items, FILE *stream);
+int    fgetc(FAR FILE *stream);
+int    fgetpos(FAR FILE *stream, FAR fpos_t *pos);
+FAR char *fgets(FAR char *s, int n, FAR FILE *stream);
+FAR FILE *fopen(FAR const char *path, FAR const char *type);
+int    fprintf(FAR FILE *stream, FAR const char *format, ...);
+int    fputc(int c, FAR FILE *stream);
+int    fputs(FAR const char *s, FAR FILE *stream);
+size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream);
 FAR FILE *freopen(FAR const char *path, FAR const char *mode,
          FAR FILE *stream);
-int    fseek(FILE *stream, long int offset, int whence);
-int    fsetpos(FILE *stream, fpos_t *pos);
-long   ftell(FILE *stream);
-size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
-FAR char *gets(char *s);
+int    fseek(FAR FILE *stream, long int offset, int whence);
+int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
+long   ftell(FAR FILE *stream);
+size_t fwrite(FAR const void *ptr, size_t size, size_t n_items, FAR FILE *stream);
+FAR char *gets(FAR char *s);
 FAR char *gets_s(FAR char *s, rsize_t n);
 void   setbuf(FAR FILE *stream, FAR char *buf);
 int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
@@ -8834,21 +8834,21 @@ int    ungetc(int c, FAR FILE *stream);
 
 /* Operations on the stdout stream, buffers, paths, and the whole printf-family *    /
 
-int    printf(const char *format, ...);
-int    puts(const char *s);
-int    rename(const char *source, const char *target);
-int    sprintf(char *dest, const char *format, ...);
-int    asprintf (FAR char **ptr, FAR const char *fmt, ...);
-int    snprintf(FAR char *buf, size_t size, const char *format, ...);
-int    sscanf(const char *buf, const char *fmt, ...);
+int    printf(FAR const char *format, ...);
+int    puts(FAR const char *s);
+int    rename(FAR const char *source, FAR const char *target);
+int    sprintf(FAR char *dest, FAR const char *format, ...);
+int    asprintf(FAR char **ptr, FAR const char *fmt, ...);
+int    snprintf(FAR char *buf, size_t size, FAR const char *format, ...);
+int    sscanf(FAR const char *buf, FAR const char *fmt, ...);
 void   perror(FAR const char *s);
 
-int    vprintf(const char *s, va_list ap);
-int    vfprintf(FILE *stream, const char *s, va_list ap);
-int    vsprintf(char *buf, const char *s, va_list ap);
-int    vasprintf(FAR char **ptr, const char *fmt, va_list ap);
-int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
-int    vsscanf(char *buf, const char *s, va_list ap);
+int    vprintf(FAR const char *s, va_list ap);
+int    vfprintf(FAR FILE *stream, FAR const char *s, va_list ap);
+int    vsprintf(FAR char *buf, FAR const char *s, va_list ap);
+int    vasprintf(FAR char **ptr, FAR const char *fmt, va_list ap);
+int    vsnprintf(FAR char *buf, size_t size, FAR const char *format, va_list ap);
+int    vsscanf(FAR char *buf, FAR const char *s, va_list ap);
 
 /* Operations on file descriptors including:
  *
@@ -8871,7 +8871,7 @@ int       remove(FAR const char *path);
 
 int mkdir(FAR const char *pathname, mode_t mode);
 int mkfifo(FAR const char *pathname, mode_t mode);
-int stat(const char *path, FAR struct stat *buf);
+int stat(FAR const char *path, FAR struct stat *buf);
 int fstat(int fd, FAR struct stat *buf);
 
 #include &lt;sys/statfs.h&gt;
@@ -8901,10 +8901,10 @@ int aio_error(FAR const struct aiocb *aiocbp);
 int aio_fsync(int, FAR struct aiocb *aiocbp);
 int aio_read(FAR struct aiocb *aiocbp);
 ssize_t aio_return(FAR struct aiocb *aiocbp);
-int aio_suspend(FAR const struct aiocb *const list[], int nent,
+int aio_suspend(FAR const struct aiocb * const list[], int nent,
                 FAR const struct timespec *timeout);
 int aio_write(FAR struct aiocb *aiocbp);
-int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
+int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
                FAR struct sigevent *sig);
 </pre></ul>
 

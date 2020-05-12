@@ -188,6 +188,10 @@
 #define OPEN_SETFD(f)   ((f) | OPEN_MAGIC)
 #define OPEN_GETFD(r)   ((r) & OPEN_MASK)
 
+/* nx_umount() is equivalent to nx_umount2() with flags = 0 */
+
+#define umount(t)       umount2(t,0)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -679,14 +683,44 @@ int unregister_mtddriver(FAR const char *path);
 #endif
 
 /****************************************************************************
- * Name: inode_checkflags
+ * Name: nx_mount
  *
  * Description:
- *   Check if the access described by 'oflags' is supported on 'inode'
+ *   nx_mount() is similar to the standard 'mount' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_mount() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated value is returned on any failure.
  *
  ****************************************************************************/
 
-int inode_checkflags(FAR struct inode *inode, int oflags);
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+int nx_mount(FAR const char *source, FAR const char *target,
+             FAR const char *filesystemtype, unsigned long mountflags,
+             FAR const void *data);
+#endif
+
+/****************************************************************************
+ * Name: nx_umount2
+ *
+ * Description:
+ *   nx_umount2() is similar to the standard 'umount2' interface except that
+ *   is not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_umount2() is an internal NuttX interface and should not be called
+ *   from applications.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated value is returned on any failure.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+int nx_umount2(FAR const char *target, unsigned int flags);
+#endif
 
 /****************************************************************************
  * Name: files_initlist

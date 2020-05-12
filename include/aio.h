@@ -166,10 +166,10 @@ int aio_error(FAR const struct aiocb *aiocbp);
 int aio_fsync(int op, FAR struct aiocb *aiocbp);
 int aio_read(FAR struct aiocb *aiocbp);
 ssize_t aio_return(FAR struct aiocb *aiocbp);
-int aio_suspend(FAR const struct aiocb *const list[], int nent,
+int aio_suspend(FAR const struct aiocb * const list[], int nent,
                 FAR const struct timespec *timeout);
 int aio_write(FAR struct aiocb *aiocbp);
-int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
+int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
                FAR struct sigevent *sig);
 
 #undef EXTERN

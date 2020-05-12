@@ -117,11 +117,11 @@
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
-#ifdef CONFIG_TLS
   /* Add the size of the TLS information structure */
 
   stack_size += sizeof(struct tls_info_s);
 
+#ifdef CONFIG_TLS_ALIGNED
   /* The allocated stack size must not exceed the maximum possible for the
    * TLS feature.
    */
@@ -154,7 +154,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * If TLS is enabled, then we must allocate aligned stacks.
        */
 
-#ifdef CONFIG_TLS
+#ifdef CONFIG_TLS_ALIGNED
 #ifdef CONFIG_MM_KERNEL_HEAP
       /* Use the kernel allocator if this is a kernel thread */
 
@@ -172,7 +172,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
             (uint32_t *)kumm_memalign(TLS_STACK_ALIGN, stack_size);
         }
 
-#else /* CONFIG_TLS */
+#else /* CONFIG_TLS_ALIGNED */
 #ifdef CONFIG_MM_KERNEL_HEAP
       /* Use the kernel allocator if this is a kernel thread */
 
@@ -187,7 +187,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
           tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
         }
-#endif /* CONFIG_TLS */
+#endif /* CONFIG_TLS_ALIGNED */
 
 #ifdef CONFIG_DEBUG_FEATURES
       /* Was the allocation successful? */
@@ -203,7 +203,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   if (tcb->stack_alloc_ptr)
     {
-#if defined(CONFIG_TLS) && defined(CONFIG_STACK_COLORATION)
+#if defined(CONFIG_STACK_COLORATION)
       uintptr_t stack_base;
 #endif
       size_t top_of_stack;
@@ -218,7 +218,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       tcb->adj_stack_ptr  = (uint32_t *)top_of_stack;
       tcb->adj_stack_size = size_of_stack;
 
-#ifdef CONFIG_TLS
       /* Initialize the TLS data structure */
 
       memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
@@ -236,17 +235,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       up_stack_color((FAR void *)stack_base, stack_size);
 
 #endif /* CONFIG_STACK_COLORATION */
-#else /* CONFIG_TLS */
-#ifdef CONFIG_STACK_COLORATION
-      /* If stack debug is enabled, then fill the stack with a
-       * recognizable value that we can use later to test for high
-       * water marks.
-       */
-
-      up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
-
-#endif /* CONFIG_STACK_COLORATION */
-#endif /* CONFIG_TLS */
 
       board_autoled_on(LED_STACKCREATED);
       return OK;

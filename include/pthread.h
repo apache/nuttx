@@ -438,12 +438,12 @@ int pthread_attr_init(FAR pthread_attr_t *attr);
 
 /* An attributes object can be deleted when it is no longer needed. */
 
-int pthread_attr_destroy(pthread_attr_t *attr);
+int pthread_attr_destroy(FAR pthread_attr_t *attr);
 
 /* Set or obtain the default scheduling algorithm */
 
 int pthread_attr_setschedpolicy(FAR pthread_attr_t *attr, int policy);
-int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr, int *policy);
+int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr, FAR int *policy);
 int pthread_attr_setschedparam(FAR pthread_attr_t *attr,
                                FAR const struct sched_param *param);
 int pthread_attr_getschedparam(FAR const pthread_attr_t *attr,
@@ -466,7 +466,8 @@ int pthread_attr_getaffinity_np(FAR const pthread_attr_t *attr,
 /* Set or obtain the default stack size */
 
 int pthread_attr_setstacksize(FAR pthread_attr_t *attr, size_t stacksize);
-int pthread_attr_getstacksize(FAR const pthread_attr_t *attr, size_t *stackaddr);
+int pthread_attr_getstacksize(FAR const pthread_attr_t *attr,
+                              FAR size_t *stackaddr);
 
 /* Set or obtain stack address and size attributes */
 
@@ -566,8 +567,9 @@ int pthread_mutexattr_getpshared(FAR const pthread_mutexattr_t *attr,
                                  FAR int *pshared);
 int pthread_mutexattr_setpshared(FAR pthread_mutexattr_t *attr,
                                  int pshared);
-int pthread_mutexattr_gettype(const pthread_mutexattr_t *attr, int *type);
-int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type);
+int pthread_mutexattr_gettype(FAR const pthread_mutexattr_t *attr,
+                              FAR int *type);
+int pthread_mutexattr_settype(FAR pthread_mutexattr_t *attr, int type);
 int pthread_mutexattr_getprotocol(FAR const pthread_mutexattr_t *attr,
                                   FAR int *protocol);
 int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
@@ -682,8 +684,16 @@ int pthread_spin_unlock(FAR pthread_spinlock_t *lock);
 
 #else /* __INCLUDE_PTHREAD_H */
 
+/********************************************************************************
+ * Included Files
+ ********************************************************************************/
+
 #include <sys/types.h>
 #include <stdbool.h>
+
+/********************************************************************************
+ * Public Type Definitions
+ ********************************************************************************/
 
 /* Avoid circular dependencies by assuring that simple type definitions are
  * available in any inclusion ordering.

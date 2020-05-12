@@ -80,13 +80,13 @@ void up_unblock_task(struct tcb_s *tcb)
 
   /* Remove the task from the blocked task list */
 
-  sched_removeblocked(tcb);
+  nxsched_remove_blocked(tcb);
 
   /* Add the task in the correct location in the prioritized
    * ready-to-run task list
    */
 
-  if (sched_addreadytorun(tcb))
+  if (nxsched_add_readytorun(tcb))
     {
       /* The currently active task has changed! We need to do
        * a context switch to the new task.
@@ -94,7 +94,7 @@ void up_unblock_task(struct tcb_s *tcb)
 
       /* Update scheduler parameters */
 
-      sched_suspend_scheduler(rtcb);
+      nxsched_suspend_scheduler(rtcb);
 
       /* Are we in an interrupt handler? */
 
@@ -114,7 +114,7 @@ void up_unblock_task(struct tcb_s *tcb)
 
           /* Update scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+          nxsched_resume_scheduler(rtcb);
 
           /* Then switch contexts.  Any new address environment needed by
            * the new thread will be instantiated before the return from
@@ -146,7 +146,7 @@ void up_unblock_task(struct tcb_s *tcb)
 #endif
           /* Update scheduler parameters */
 
-          sched_resume_scheduler(nexttcb);
+          nxsched_resume_scheduler(nexttcb);
 
           /* Then switch contexts */
 

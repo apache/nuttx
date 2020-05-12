@@ -329,7 +329,7 @@ static void cxd56_rtc_initialize(int argc, uint32_t arg, ...)
     {
       /* Keep the system operating time before RTC is enabled. */
 
-      clock_systimespec(&ts);
+      clock_systime_timespec(&ts);
     }
 
   /* Synchronize the system time to the RTC time */

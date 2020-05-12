@@ -236,7 +236,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
    * could even remove it).
    */
 
-  sched_timer_cancel();
+  nxsched_cancel_timer();
 #endif
 
   /* Do the easy case first -- when the watchdog timer queue is empty. */
@@ -246,7 +246,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
 #ifdef CONFIG_SCHED_TICKLESS
       /* Update clock tickbase */
 
-      g_wdtickbase = clock_systimer();
+      g_wdtickbase = clock_systime_ticks();
 #endif
 
       /* Add the watchdog to the head == tail of the queue. */
@@ -340,7 +340,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
    * new delay.
    */
 
-  sched_timer_resume();
+  nxsched_resume_timer();
 #endif
 
   leave_critical_section(flags);

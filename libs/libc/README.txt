@@ -32,6 +32,7 @@ we have:
   builtin   - Support for builtin applications.  Used by nuttx/binfmt and NSH.
   dlfcn     - dlfcn.h
   endian    - endian.h
+  errno     - errno.h
   hex2bin   - hex2bin.h
   libgen    - libgen.h
   locale    - locale.h

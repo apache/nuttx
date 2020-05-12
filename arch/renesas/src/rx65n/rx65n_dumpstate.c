@@ -49,19 +49,6 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_getsp
- ****************************************************************************/
-
-uint16_t up_getsp(void)
-{
-  uint16_t sp;
-
-  __asm__ __volatile__("\tmvfc usp, %0\n\t": "=r" (sp):: "memory"); /* check */
-
-  return sp;
-}
-
-/****************************************************************************
  * Name: rx65n_getusersp
  ****************************************************************************/
 
@@ -141,7 +128,7 @@ static inline void rx65n_registerdump(void)
 void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp = up_getsp();
+  uint32_t sp = renesas_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3

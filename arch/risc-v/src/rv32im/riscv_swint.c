@@ -217,7 +217,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
 #ifdef CONFIG_BUILD_KERNEL
       case SYS_syscall_return:
         {
-          struct tcb_s *rtcb = sched_self();
+          struct tcb_s *rtcb = nxsched_self();
           int index = (int)rtcb->xcp.nsyscalls - 1;
 
           /* Make sure that there is a saved syscall return address. */
@@ -250,7 +250,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
       default:
         {
 #ifdef CONFIG_BUILD_KERNEL
-          FAR struct tcb_s *rtcb = sched_self();
+          FAR struct tcb_s *rtcb = nxsched_self();
           int index = rtcb->xcp.nsyscalls;
 
           /* Verify that the SYS call number is within range */

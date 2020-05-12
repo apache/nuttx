@@ -68,7 +68,7 @@ FAR void *pthread_get_stackaddr_np(pthread_t thread)
   struct stackinfo_s stackinfo;
   int ret;
 
-  ret = sched_get_stackinfo((pid_t)thread, &stackinfo);
+  ret = nxsched_get_stackinfo((pid_t)thread, &stackinfo);
   if (ret < 0)
     {
       return NULL;

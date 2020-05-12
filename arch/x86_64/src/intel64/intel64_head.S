@@ -89,11 +89,11 @@
     .set    HEADER_LENGTH, header_end - header_start
     .set    CHECKSUM, -(MULTIBOOT2_HEADER_MAGIC + MULTIBOOT_ARCHITECTURE_I386 + HEADER_LENGTH)
 
-#ifndef CONFIG_ARCH_EXCLUDE_MULTIBOOT
     .section ".multiboot", "a"
     .align    8
 
 header_start:
+#ifndef CONFIG_ARCH_EXCLUDE_MULTIBOOT
     .long MULTIBOOT2_HEADER_MAGIC
     .long MULTIBOOT_ARCHITECTURE_I386
     .long HEADER_LENGTH
@@ -104,9 +104,41 @@ header_start:
     .short MULTIBOOT_HEADER_TAG_END
     .short 0    // flags, none set
     .long 8     // size, including itself (short + short + long)
+#endif
 header_end:
 
-#endif
+	.code16
+	.section ".realmode", "ax"
+
+    .type   __reset_entry, @function
+__reset_entry:
+    // Load a GDT for protected mode
+    movl $loader_gdt_ptr, %ebx
+	lgdtl (%ebx)
+
+    // enable protected mode in CR0
+	mov %cr0,%eax
+	or $X86_CR0_PE,%al
+	mov %eax,%cr0
+
+    // Long jump into protected mode
+    // Hardcode the address
+	ljmpl $0x8,$0x100000
+
+    // Loader GDT and GDTR
+	.align(16)
+	.global loader_gdt
+loader_gdt:
+	.quad	0
+	.quad	0x00cf9a000000ffff
+	.quad	0x00cf92000000ffff
+
+loader_gdt_ptr:
+	.short	loader_gdt_ptr - loader_gdt - 1
+	.long	loader_gdt
+
+    .size	__reset_entry, . - __reset_entry
+
 
 /****************************************************************************
  * .text
@@ -123,6 +155,11 @@ header_end:
  *   Function to transit protected mode to 64-bit long mode
  *
  ****************************************************************************/
+
+start32_0:
+    mov $0x10, %ax
+    mov %ax, %ss
+    mov %ax, %ds
 
     .type   __pmode_entry, @function
 __pmode_entry:

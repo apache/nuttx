@@ -337,7 +337,7 @@ static void nxsig_stop_task(int signo)
 #endif
 
   /* Lock the scheduler so this thread is not pre-empted until after we
-   * call sched_suspend().
+   * call nxsched_suspend().
    */
 
   sched_lock();
@@ -377,7 +377,7 @@ static void nxsig_stop_task(int signo)
 
   /* Then, finally, suspend this the final thread of the task group */
 
-  sched_suspend(rtcb);
+  nxsched_suspend(rtcb);
   sched_unlock();
 }
 #endif

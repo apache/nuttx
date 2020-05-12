@@ -86,7 +86,7 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo)
 
   /* Get the TCB associated with the PID */
 
-  tcb = sched_gettcb(pid);
+  tcb = nxsched_get_tcb(pid);
   if (tcb == NULL)
     {
       spin_unlock_irqrestore(flags);

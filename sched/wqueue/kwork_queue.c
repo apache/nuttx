@@ -104,7 +104,7 @@ static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
 
   /* Now, time-tag that entry and put it in the work queue */
 
-  work->qtime  = clock_systimer(); /* Time work queued */
+  work->qtime  = clock_systime_ticks(); /* Time work queued */
 
   dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
 

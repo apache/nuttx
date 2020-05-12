@@ -617,7 +617,7 @@ int spirit_update_status(FAR struct spirit_library_s *spirit)
   return spirit_reg_read(spirit, MC_STATE1_BASE, &regval, 1);
 }
 
-/****************************************************************************
+/******************************************************************************
  * Name: spirit_waitstatus
  *
  * Description:
@@ -635,7 +635,7 @@ int spirit_update_status(FAR struct spirit_library_s *spirit)
  * Assumptions:
  *   We have exclusive access to the driver state and to the spirit library.
  *
- ****************************************************************************/
+ ******************************************************************************/
 
 int spirit_waitstatus(FAR struct spirit_library_s *spirit,
                       enum spirit_state_e state, unsigned int msec)
@@ -670,7 +670,7 @@ int spirit_waitstatus(FAR struct spirit_library_s *spirit,
 
   /* The time that we started the wait */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   /* Loop until the status change occurs (or the wait times out) */
 
@@ -682,7 +682,7 @@ int spirit_waitstatus(FAR struct spirit_library_s *spirit,
           return ret;
         }
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
     }
   while (spirit->u.state.MC_STATE != state && elapsed <= ticks);
 

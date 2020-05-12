@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/fixedmath/tls_setelem.c
+ * arch/x86/include/tls.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,57 +18,58 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_X86_INCLUDE_TLS_H
+#define __ARCH_X86_INCLUDE_TLS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
 #include <assert.h>
-
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>
-#include <arch/tls.h>
-
-#ifdef CONFIG_TLS
 
 /****************************************************************************
- * Public Functions
+ * Inline Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_element
+ * Name: up_tls_info
  *
  * Description:
- *   Set the TLS element associated with the 'elem' index to 'value'
+ *   Return the TLS information structure for the currently executing thread.
+ *   When TLS is enabled, up_createstack() will align allocated stacks to
+ *   the TLS_STACK_ALIGN value.  An instance of the following structure will
+ *   be implicitly positioned at the "lower" end of the stack.  Assuming a
+ *   "push down" stack, this is at the "far" end of the stack (and can be
+ *   clobbered if the stack overflows).
+ *
+ *   If an MCU has a "push up" then that TLS structure will lie at the top
+ *   of the stack and stack allocation and initialization logic must take
+ *   care to preserve this structure content.
+ *
+ *   The stack memory is fully accessible to user mode threads.
  *
  * Input Parameters:
- *   elem  - Index of TLS element to set
- *   value - The new value of the TLS element
+ *   None
  *
  * Returned Value:
- *   None.  Errors are not reported.  The only possible error would be if
- *   elem >=CONFIG_TLS_NELEM.
+ *   A pointer to TLS info structure at the beginning of the STACK memory
+ *   allocation.  This is essentially an application of the TLS_INFO(sp)
+ *   macro and has a platform dependency only in the manner in which the
+ *   stack pointer (sp) is obtained and interpreted.
  *
  ****************************************************************************/
 
-void tls_set_element(int elem, uintptr_t value)
+#ifdef CONFIG_TLS_ALIGNED
+static inline FAR struct tls_info_s *up_tls_info(void)
 {
-  FAR struct tls_info_s *info;
-
-  DEBUGASSERT(elem >= 0 && elem < CONFIG_TLS_NELEM);
-  if (elem >= 0 && elem < CONFIG_TLS_NELEM)
-    {
-      /* Get the TLS info structure from the current threads stack */
-
-      info = up_tls_info();
-      DEBUGASSERT(info != NULL);
-
-      /* Set the element value int the TLS info. */
-
-      info->tl_elem[elem] = value;
-    }
+  DEBUGASSERT(!up_interrupt_context());
+  return TLS_INFO((uintptr_t)up_getsp());
 }
+#else
+#  define up_tls_info() tls_get_info()
+#endif
 
-#endif /* CONFIG_TLS */
+#endif /* __ARCH_X86_INCLUDE_TLS_H */

@@ -22,12 +22,20 @@ OUTPUT_ARCH(i386:x86-64)
 ENTRY(__pmode_entry)
 SECTIONS
 {
+
+    . = 0x0;
+
+    .realmode : {
+        . = ALIGN(8);
+        KEEP(*(.multiboot))
+        *(.realmode)
+    }
+
     . = 0x1M;
     _kernel_physical_start = .;
 
     .loader.text : {
         . = ALIGN(8);
-        KEEP(*(.multiboot))
         *(.loader.text)
     }
 

@@ -1,7 +1,8 @@
 /****************************************************************************
  * drivers/syslog/vsyslog.c
  *
- *   Copyright (C) 2007-2009, 2011-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014, 2016-2017 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,7 +98,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #else
       /* Otherwise, fall back to the system timer */
 
-      ret = clock_systimespec(&ts);
+      ret = clock_systime_timespec(&ts);
 #endif
     }
 
@@ -132,7 +133,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   /* Pre-pend the message with the current time, if available */
 
   ret = lib_sprintf(&stream.public, "[%5d.%06d] ",
-                    ts.tv_sec, ts.tv_nsec/1000);
+                    ts.tv_sec, ts.tv_nsec / 1000);
 #else
   ret = 0;
 #endif

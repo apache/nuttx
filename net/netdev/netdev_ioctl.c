@@ -1759,7 +1759,7 @@ int netdev_vioctl(int sockfd, int cmd, va_list ap)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
 
-  return psock_ioctl(psock, cmd, ap);
+  return psock_vioctl(psock, cmd, ap);
 }
 
 /****************************************************************************

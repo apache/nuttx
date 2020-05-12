@@ -121,7 +121,7 @@ FAR struct aio_container_s *aio_contain(FAR struct aiocb *aiocbp)
       aioc->aioc_pid    = getpid();
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      DEBUGVERIFY(nxsched_getparam (aioc->aioc_pid, &param));
+      DEBUGVERIFY(nxsched_get_param (aioc->aioc_pid, &param));
       aioc->aioc_prio   = param.sched_priority;
 #endif
 
@@ -174,7 +174,9 @@ FAR struct aiocb *aioc_decant(FAR struct aio_container_s *aioc)
     {
       dq_rem(&aioc->aioc_link, &g_aio_pending);
 
-      /* De-cant the AIO control block and return the container to the free list */
+      /* De-cant the AIO control block and return the container to the
+       * free list.
+       */
 
       aiocbp = aioc->aioc_aiocbp;
       aioc_free(aioc);

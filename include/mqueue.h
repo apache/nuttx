@@ -85,7 +85,7 @@ extern "C"
  ********************************************************************************/
 
 mqd_t   mq_open(FAR const char *mq_name, int oflags, ...);
-int     mq_close(mqd_t mqdes );
+int     mq_close(mqd_t mqdes);
 int     mq_unlink(FAR const char *mq_name);
 int     mq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
                 unsigned int prio);
@@ -96,7 +96,7 @@ ssize_t mq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
 ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
                         FAR unsigned int *prio,
                         FAR const struct timespec *abstime);
-int     mq_notify(mqd_t mqdes, const struct sigevent *notification);
+int     mq_notify(mqd_t mqdes, FAR const struct sigevent *notification);
 int     mq_setattr(mqd_t mqdes, FAR const struct mq_attr *mq_stat,
                    FAR struct mq_attr *oldstat);
 int     mq_getattr(mqd_t mqdes, FAR struct mq_attr *mq_stat);

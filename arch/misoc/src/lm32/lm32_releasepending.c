@@ -74,8 +74,7 @@ void up_release_pending(void)
 
   /* Merge the g_pendingtasks list into the ready-to-run task list */
 
-  /* sched_lock(); */
-  if (sched_mergepending())
+  if (nxsched_merge_pending())
     {
       /* The currently active task has changed!  We will need to switch
        * contexts.
@@ -83,7 +82,7 @@ void up_release_pending(void)
        * Update scheduler parameters.
        */
 
-      sched_suspend_scheduler(rtcb);
+      nxsched_suspend_scheduler(rtcb);
 
       /* Are we operating in interrupt context? */
 
@@ -103,7 +102,7 @@ void up_release_pending(void)
 
           /* Update scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+          nxsched_resume_scheduler(rtcb);
 
           /* Then switch contexts.  Any necessary address environment
            * changes will be made when the interrupt returns.
@@ -133,7 +132,7 @@ void up_release_pending(void)
 #endif
           /* Update scheduler parameters */
 
-          sched_resume_scheduler(nexttcb);
+          nxsched_resume_scheduler(nexttcb);
 
           /* Then switch contexts */
 

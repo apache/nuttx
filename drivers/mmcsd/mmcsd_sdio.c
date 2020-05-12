@@ -1233,7 +1233,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
     }
 #endif
 
-  starttime = clock_systimer();
+  starttime = clock_systime_ticks();
   do
     {
       /* Get the current R1 status from the card */
@@ -1280,7 +1280,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
        * time... we can't stay in this loop forever!
        */
 
-      elapsed = clock_systimer() - starttime;
+      elapsed = clock_systime_ticks() - starttime;
     }
   while (elapsed < TICK_PER_SEC);
 
@@ -1786,7 +1786,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) == 0)
     {
-      /* Send CMD24, WRITE_BLOCK, and verify that good R1 status is returned */
+      /* Send CMD24, WRITE_BLOCK, and verify good R1 status is returned */
 
       mmcsd_sendcmdpoll(priv, MMCSD_CMD24, offset);
       ret = mmsd_recv_r1(priv, MMCSD_CMD24);
@@ -1823,7 +1823,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   if ((priv->caps & SDIO_CAPS_DMABEFOREWRITE) != 0)
     {
-      /* Send CMD24, WRITE_BLOCK, and verify that good R1 status is returned */
+      /* Send CMD24, WRITE_BLOCK, and verify good R1 status is returned */
 
       mmcsd_sendcmdpoll(priv, MMCSD_CMD24, offset);
       ret = mmsd_recv_r1(priv, MMCSD_CMD24);
@@ -3195,7 +3195,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
    * but not MMC
    */
 
-  start   = clock_systimer();
+  start   = clock_systime_ticks();
   elapsed = 0;
   do
     {
@@ -3276,7 +3276,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
                           priv->type |= MMCSD_CARDTYPE_BLOCK;
                         }
 
-                      /* And break out of the loop with an SD card identified */
+                      /* And break out of the loop with an card identified */
 
                       break;
                     }
@@ -3360,7 +3360,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
       /* Check the elapsed time.  We won't keep trying this forever! */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
     }
   while (elapsed < TICK_PER_SEC); /* On successful reception while 'breaks', see above. */
 
@@ -3432,7 +3432,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
         }
       else
         {
-          /* Then initialize the driver according to the identified card type */
+          /* Then initialize the driver according to the card type */
 
           switch (priv->type)
             {

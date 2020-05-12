@@ -80,10 +80,10 @@ static int group_suspendchildren_handler(pid_t pid, FAR void *arg)
     {
       /* Suspend this thread if it is still alive. */
 
-      rtcb = sched_gettcb(pid);
+      rtcb = nxsched_get_tcb(pid);
       if (rtcb != NULL)
         {
-          sched_suspend(rtcb);
+          nxsched_suspend(rtcb);
         }
     }
 

@@ -77,11 +77,11 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
    * it should also be true that rtcb == tcb.
    */
 
-  switch_needed = sched_removereadytorun(tcb);
+  switch_needed = nxsched_remove_readytorun(tcb);
 
   /* Add the task to the specified blocked task list */
 
-  sched_addblocked(tcb, (tstate_t)task_state);
+  nxsched_add_blocked(tcb, (tstate_t)task_state);
 
   /* If there are any pending tasks, then add them to the ready-to-run
    * task list now
@@ -89,7 +89,7 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
 
   if (g_pendingtasks.head)
     {
-      switch_needed |= sched_mergepending();
+      switch_needed |= nxsched_merge_pending();
     }
 
   /* Now, perform the context switch if one is needed */
@@ -98,7 +98,7 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
     {
       /* Update scheduler parameters */
 
-      sched_suspend_scheduler(rtcb);
+      nxsched_suspend_scheduler(rtcb);
 
       /* Are we in an interrupt handler? */
 
@@ -118,7 +118,7 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
 
           /* Reset scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+          nxsched_resume_scheduler(rtcb);
 
           /* Then setup so that the context will be performed on exit
            * from the interrupt.  Any necessary address environment
@@ -152,7 +152,7 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
 #endif
           /* Reset scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+          nxsched_resume_scheduler(rtcb);
 
           /* Then switch contexts */
 

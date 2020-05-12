@@ -137,12 +137,12 @@ void _exit(int status)
 
 #ifdef CONFIG_DUMP_ON_EXIT
   sinfo("Other tasks:\n");
-  sched_foreach(_z16_dumponexit, NULL);
+  nxsched_foreach(_z16_dumponexit, NULL);
 #endif
 
   /* Update scheduler parameters */
 
-  sched_suspend_scheduler(tcb);
+  nxsched_suspend_scheduler(tcb);
 
   /* Destroy the task at the head of the ready to run list. */
 
@@ -157,7 +157,7 @@ void _exit(int status)
 
   /* Reset scheduler parameters */
 
-  sched_resume_scheduler(tcb);
+  nxsched_resume_scheduler(tcb);
 
   /* Then switch contexts */
 

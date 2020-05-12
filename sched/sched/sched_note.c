@@ -149,7 +149,7 @@ static void note_common(FAR struct tcb_s *tcb,
                         FAR struct note_common_s *note,
                         uint8_t length, uint8_t type)
 {
-  uint32_t systime    = (uint32_t)clock_systimer();
+  uint32_t systime    = (uint32_t)clock_systime_ticks();
 
   /* Save all of the common fields */
 

@@ -153,7 +153,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
   if (g_pftcb)
     {
       FAR struct tcb_s *htcb = (FAR struct tcb_s *)g_waitingforfill.head;
-      FAR struct tcb_s *wtcb = sched_gettcb(g_pgworker);
+      FAR struct tcb_s *wtcb = nxsched_get_tcb(g_pgworker);
 
       /* Find the higher priority between the task waiting for the fill to
        * complete in g_pftcb and the task waiting at the head of the
@@ -177,7 +177,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
         {
           pginfo("New worker priority. %d->%d\n",
                  wtcb->sched_priority, priority);
-          nxsched_setpriority(wtcb, priority);
+          nxsched_set_priority(wtcb, priority);
         }
 
       /* Save the page fill result (don't permit the value -EBUSY) */
@@ -289,7 +289,7 @@ static inline bool pg_dequeue(void)
 
                   pginfo("New worker priority. %d->%d\n",
                          wtcb->sched_priority, priority);
-                  nxsched_setpriority(wtcb, priority);
+                  nxsched_set_priority(wtcb, priority);
                 }
 
               /* Return with g_pftcb holding the pointer to
@@ -401,7 +401,7 @@ static inline bool pg_startfill(void)
        */
 
 #ifdef CONFIG_PAGING_TIMEOUT_TICKS
-      g_starttime = clock_systimer();
+      g_starttime = clock_systime_ticks();
 #endif
 
       /* Return and wait to be signaled for the next event -- the fill
@@ -456,7 +456,7 @@ static inline void pg_alldone(void)
   g_pftcb = NULL;
   pginfo("New worker priority. %d->%d\n",
          wtcb->sched_priority, CONFIG_PAGING_DEFPRIO);
-  nxsched_setpriority(wtcb, CONFIG_PAGING_DEFPRIO);
+  nxsched_set_priority(wtcb, CONFIG_PAGING_DEFPRIO);
 }
 
 /****************************************************************************
@@ -612,7 +612,7 @@ int pg_worker(int argc, char *argv[])
           else
             {
               pgerr("ERROR: Timeout!\n");
-              DEBUGASSERT(clock_systimer() - g_starttime <
+              DEBUGASSERT(clock_systime_ticks() - g_starttime <
                           CONFIG_PAGING_TIMEOUT_TICKS);
             }
 #endif

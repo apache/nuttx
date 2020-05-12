@@ -638,11 +638,11 @@ static int lpc54_ciu_sendcmd(uint32_t cmd, uint32_t arg)
 
   /* Poll until command is accepted by the CIU, or we timeout */
 
-  watchtime = clock_systimer();
+  watchtime = clock_systime_ticks();
 
   while ((lpc54_getreg(LPC54_SDMMC_CMD) & SDMMC_CMD_STARTCMD) != 0)
     {
-      if (watchtime - clock_systimer() > SDCARD_CMDTIMEOUT)
+      if (watchtime - clock_systime_ticks() > SDCARD_CMDTIMEOUT)
         {
           mcerr("TMO Timed out (%08X)\n",
                 lpc54_getreg(LPC54_SDMMC_CMD));
@@ -1944,10 +1944,10 @@ static int lpc54_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the response (or timeout or error) */
 
-  watchtime = clock_systimer();
+  watchtime = clock_systime_ticks();
   while ((lpc54_getreg(LPC54_SDMMC_RINTSTS) & events) != events)
     {
-      if (clock_systimer() - watchtime > timeout)
+      if (clock_systime_ticks() - watchtime > timeout)
         {
           mcerr("ERROR: Timeout cmd: %04x events: %04x STA: %08x "
                 "RINTSTS: %08x\n",

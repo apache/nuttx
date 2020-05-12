@@ -18,6 +18,11 @@
 #
 ############################################################################
 
+ifneq ($(CONFIG_TLS_NELEM),0)
+CSRCS += pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c
+CSRCS += pthread_keydelete.c
+endif
+
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 
 # Add the pthread C files to the build
@@ -57,9 +62,10 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CSRCS += pthread_startup.c
 endif
 
+endif # CONFIG_DISABLE_PTHREAD
+
 # Add the pthread directory to the build
 
 DEPPATH += --dep-path pthread
 VPATH += :pthread
 
-endif # CONFIG_DISABLE_PTHREAD

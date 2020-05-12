@@ -51,6 +51,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE
@@ -71,6 +72,7 @@
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
+
 /* "The spawn.h header shall define the posix_spawnattr_t and
  * posix_spawn_file_actions_t types used in performing spawn operations.
  *
@@ -88,7 +90,7 @@ struct posix_spawnattr_s
   uint8_t  policy;               /* Task scheduling policy */
 
 #ifdef CONFIG_SCHED_SPORADIC
-  uint8_t  low_priority;         /* Low scheduling priority*/
+  uint8_t  low_priority;         /* Low scheduling priority */
   uint8_t  max_repl;             /* Maximum pending replenishments */
 #endif
 
@@ -121,6 +123,7 @@ typedef FAR void *posix_spawn_file_actions_t;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /* "The following shall be declared as functions and may also be defined as
  * macros. Function prototypes shall be provided."
  */
@@ -131,6 +134,7 @@ extern "C"
 #endif
 
 /* Spawn interfaces *********************************************************/
+
 /* Standard posix_spawn[p] interfaces.  These functions execute files in the
  * file system at 'path'
  */
@@ -139,14 +143,14 @@ extern "C"
 int posix_spawnp(FAR pid_t *pid, FAR const char *path,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
-      FAR char *const argv[], FAR char *const envp[]);
+      FAR char * const argv[], FAR char * const envp[]);
 #define posix_spawn(pid,path,file_actions,attr,argv,envp) \
       posix_spawnp(pid,path,file_actions,attr,argv,envp)
 #else
 int posix_spawn(FAR pid_t *pid, FAR const char *path,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
-      FAR char *const argv[], FAR char *const envp[]);
+      FAR char * const argv[], FAR char * const envp[]);
 #define posix_spawnp(pid,path,file_actions,attr,argv,envp) \
       posix_spawn(pid,path,file_actions,attr,argv,envp)
 #endif
@@ -160,25 +164,32 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
 int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
-      FAR char *const argv[], FAR char *const envp[]);
+      FAR char * const argv[], FAR char * const envp[]);
 #endif
 
 /* File action interfaces ***************************************************/
+
 /* File action initialization and destruction */
 
-int posix_spawn_file_actions_init(FAR posix_spawn_file_actions_t *file_actions);
-int posix_spawn_file_actions_destroy(FAR posix_spawn_file_actions_t *file_actions);
+int posix_spawn_file_actions_init(
+      FAR posix_spawn_file_actions_t *file_actions);
+int posix_spawn_file_actions_destroy(
+      FAR posix_spawn_file_actions_t *file_actions);
 
 /* Add file action interfaces */
 
-int posix_spawn_file_actions_addclose(FAR posix_spawn_file_actions_t *file_actions,
+int posix_spawn_file_actions_addclose(
+      FAR posix_spawn_file_actions_t *file_actions,
       int fd);
-int posix_spawn_file_actions_adddup2(FAR posix_spawn_file_actions_t *file_actions,
+int posix_spawn_file_actions_adddup2(
+      FAR posix_spawn_file_actions_t *file_actions,
       int fd1, int fd2);
-int posix_spawn_file_actions_addopen(FAR posix_spawn_file_actions_t *file_actions,
+int posix_spawn_file_actions_addopen(
+      FAR posix_spawn_file_actions_t *file_actions,
       int fd, FAR const char *path, int oflags, mode_t mode);
 
 /* Spawn attributes interfaces **********************************************/
+
 /* Spawn attributes initialization and destruction */
 
 int posix_spawnattr_init(FAR posix_spawnattr_t *attr);
@@ -188,12 +199,13 @@ int posix_spawnattr_init(FAR posix_spawnattr_t *attr);
 
 /* Get spawn attributes interfaces */
 
-int posix_spawnattr_getflags(FAR const posix_spawnattr_t *attr, FAR short *flags);
+int posix_spawnattr_getflags(FAR const posix_spawnattr_t *attr,
+                             FAR short *flags);
 #define posix_spawnattr_getpgroup(attr,group) (ENOSYS)
 int posix_spawnattr_getschedparam(FAR const posix_spawnattr_t *attr,
-      FAR struct sched_param *param);
+                                  FAR struct sched_param *param);
 int posix_spawnattr_getschedpolicy(FAR const posix_spawnattr_t *attr,
-      FAR int *policy);
+                                   FAR int *policy);
 #define posix_spawnattr_getsigdefault(attr,sigdefault) (ENOSYS)
 int posix_spawnattr_getsigmask(FAR const posix_spawnattr_t *attr,
                                FAR sigset_t *sigmask);
@@ -203,7 +215,7 @@ int posix_spawnattr_getsigmask(FAR const posix_spawnattr_t *attr,
 int posix_spawnattr_setflags(FAR posix_spawnattr_t *attr, short flags);
 #define posix_spawnattr_setpgroup(attr,group) (ENOSYS)
 int posix_spawnattr_setschedparam(FAR posix_spawnattr_t *attr,
-      FAR const struct sched_param *param);
+                                  FAR const struct sched_param *param);
 int posix_spawnattr_setschedpolicy(FAR posix_spawnattr_t *attr, int policy);
 #define posix_spawnattr_setsigdefault(attr,sigdefault) (ENOSYS)
 int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr,
@@ -214,14 +226,15 @@ int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr,
  */
 
 int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
-      size_t *stacksize);
+                                size_t *stacksize);
 int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
-      size_t stacksize);
+                                size_t stacksize);
 
 /* Non standard debug functions */
 
 #ifdef CONFIG_DEBUG_FEATURES
-void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions);
+void posix_spawn_file_actions_dump(
+                          FAR posix_spawn_file_actions_t *file_actions);
 void posix_spawnattr_dump(FAR posix_spawnattr_t *attr);
 #else
 #  define posix_spawn_file_actions_dump(fa)

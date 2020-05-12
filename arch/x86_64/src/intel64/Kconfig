@@ -53,4 +53,12 @@ config ARCH_INTEL64_HAVE_RDRAND
 	---help---
 		Select to enable the use of RDRAND for /dev/random
 
+config ARCH_INTEL64_DISABLE_INT_INIT
+    bool "Disable Initialization of 8259/APIC/IO-APIC"
+    default n
+	---help---
+		Select to disable all initialization related to interrupt 
+		controllers. This is necessary if those are already
+		initialized, i.e. Jailhouse system.
+
 endif

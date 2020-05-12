@@ -1,3 +1,4 @@
+__errno        NX__errno
 _exit          NX_exit
 accept         NXaccept
 asprintf       NXasprintf

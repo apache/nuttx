@@ -285,7 +285,7 @@ static int sporadic_budget_start(FAR struct replenishment_s *mrepl)
 
   /* Save the time that the budget was started */
 
-  sporadic->eventtime = clock_systimer();
+  sporadic->eventtime = clock_systime_ticks();
 
   /* And start the timer for the budget interval */
 
@@ -470,12 +470,12 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
    * violating the lock.
    *
    * What we do instead is just deallocate all timers.  When the lock is
-   * finally released, sched_sporadic_lowpriority() and that will restart
+   * finally released, nxsched_sporadic_lowpriority() and that will restart
    * the interval period. timeslice == -1 is the cue to sched_unlock() that
    * this operation is needed.
    */
 
-  if (sched_islocked_tcb(tcb))
+  if (nxsched_islocked_tcb(tcb))
     {
       DEBUGASSERT((mrepl->flags && SPORADIC_FLAG_ALLOCED) != 0 &&
                   sporadic->nrepls > 0);
@@ -507,7 +507,7 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
        * that the thread was delayed for the entire interval).
        */
 
-      unrealized = sporadic->eventtime - clock_systimer();
+      unrealized = sporadic->eventtime - clock_systime_ticks();
       if (unrealized > 0)
         {
           /* Allocate a new replenishment timer.  This will limit us to the
@@ -619,12 +619,12 @@ static void sporadic_replenish_expire(int argc, wdparm_t arg1, ...)
    * violating the lock.
    *
    * What we do instead is just deallocate all timers.  When the lock is
-   * finally released, sched_sporadic_lowpriority() and that will restart
+   * finally released, nxsched_sporadic_lowpriority() and that will restart
    * the interval period. timeslice == -1 is the cue to sched_unlock() that
    * this operation is needed.
    */
 
-  if (sched_islocked_tcb(tcb))
+  if (nxsched_islocked_tcb(tcb))
     {
       /* Set the timeslice to the magic value */
 
@@ -768,7 +768,7 @@ FAR struct replenishment_s *
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_sporadic_initialize
+ * Name: nxsched_initialize_sporadic
  *
  * Description:
  *   Allocate resources needed by the sporadic scheduling policy.
@@ -781,7 +781,7 @@ FAR struct replenishment_s *
  *
  ****************************************************************************/
 
-int sched_sporadic_initialize(FAR struct tcb_s *tcb)
+int nxsched_initialize_sporadic(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
   int i;
@@ -815,7 +815,7 @@ int sched_sporadic_initialize(FAR struct tcb_s *tcb)
 }
 
 /****************************************************************************
- * Name: sched_sporadic_start
+ * Name: nxsched_start_sporadic
  *
  * Description:
  *   Called to initialize sporadic scheduling on a given thread.  This
@@ -841,7 +841,7 @@ int sched_sporadic_initialize(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int sched_sporadic_start(FAR struct tcb_s *tcb)
+int nxsched_start_sporadic(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
   FAR struct replenishment_s *mrepl;
@@ -857,7 +857,7 @@ int sched_sporadic_start(FAR struct tcb_s *tcb)
 
   /* Save the time that the scheduler was started */
 
-  sporadic->eventtime = clock_systimer();
+  sporadic->eventtime = clock_systime_ticks();
   sporadic->suspended = true;
 
   /* Then start the first interval */
@@ -866,7 +866,7 @@ int sched_sporadic_start(FAR struct tcb_s *tcb)
 }
 
 /****************************************************************************
- * Name: sched_sporadic_stop
+ * Name: nxsched_stop_sporadic
  *
  * Description:
  *   Called to terminate sporadic scheduling on a given thread and to
@@ -890,13 +890,13 @@ int sched_sporadic_start(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int sched_sporadic_stop(FAR struct tcb_s *tcb)
+int nxsched_stop_sporadic(FAR struct tcb_s *tcb)
 {
   DEBUGASSERT(tcb && tcb->sporadic);
 
   /* Stop all timers, reset scheduling */
 
-  sched_sporadic_reset(tcb);
+  nxsched_reset_sporadic(tcb);
 
   /* The free the container holder the sporadic scheduling parameters */
 
@@ -906,7 +906,7 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
 }
 
 /****************************************************************************
- * Name: sched_sporadic_reset
+ * Name: nxsched_reset_sporadic
  *
  * Description:
  *   Called to stop sporadic scheduling on a given thread.  This
@@ -914,7 +914,7 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
  *
  *     - When the sporadic scheduling parameters are changed via
  *       sched_setparam()
- *     - From sched_sporadic_stop when under those conditions.
+ *     - From nxsched_stop_sporadic when under those conditions.
  *
  * Input Parameters:
  *   tcb - The TCB of the thread that is beginning sporadic scheduling.
@@ -929,7 +929,7 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int sched_sporadic_reset(FAR struct tcb_s *tcb)
+int nxsched_reset_sporadic(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
   FAR struct replenishment_s *repl;
@@ -970,13 +970,13 @@ int sched_sporadic_reset(FAR struct tcb_s *tcb)
 }
 
 /****************************************************************************
- * Name: sched_sporadic_resume
+ * Name: nxsched_resume_sporadic
  *
  * Description:
  *   Called to start the next replenishment interval.  This function is
  *   called in the following circumstances:
  *
- *     - From up_unblocktask() via sched_resume_scheduler() when a task
+ *     - From up_unblocktask() via nxsched_resume_scheduler() when a task
  *       using the sporadic scheduling policy.
  *
  *   This function does nothing if the budget phase as already elapsed or
@@ -995,7 +995,7 @@ int sched_sporadic_reset(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int sched_sporadic_resume(FAR struct tcb_s *tcb)
+int nxsched_resume_sporadic(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
   FAR struct replenishment_s *repl;
@@ -1025,7 +1025,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 
   /* Get the time that the thread was [re-]started */
 
-  now = clock_systimer();
+  now = clock_systime_ticks();
 
   /* Check if are in the budget portion of the replenishment interval.  We
    * know this is the case if the current timeslice is non-zero.
@@ -1115,7 +1115,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 }
 
 /****************************************************************************
- * Name: sched_sporadic_suspend
+ * Name: nxsched_suspend_sporadic
  *
  * Description:
  *   Called to when a thread with sporadic scheduling is suspended.  In this
@@ -1131,7 +1131,7 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int sched_sporadic_suspend(FAR struct tcb_s *tcb)
+int nxsched_suspend_sporadic(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
 
@@ -1154,14 +1154,14 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb)
 
       /* Save the time that the thread was suspended */
 
-      sporadic->eventtime = clock_systimer();
+      sporadic->eventtime = clock_systime_ticks();
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: sched_sporadic_process
+ * Name: nxsched_process_sporadic
  *
  * Description:
  *   Process the elapsed time interval. Called from this context:
@@ -1188,7 +1188,7 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
+uint32_t nxsched_process_sporadic(FAR struct tcb_s *tcb, uint32_t ticks,
                                 bool noswitches)
 {
   FAR struct sporadic_s *sporadic;
@@ -1225,7 +1225,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
       /* Does the thread have the scheduler locked? */
 
       sporadic = tcb->sporadic;
-      if (sched_islocked_tcb(tcb))
+      if (nxsched_islocked_tcb(tcb))
         {
           /* Yes... then we have no option but to give the thread more
            * time at the higher priority.  Dropping the priority could
@@ -1241,7 +1241,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
         }
 
       /* We will also suppress context switches if we were called via one of
-       * the unusual cases handled by sched_timer_reassess(). In that case,
+       * the unusual cases handled by nxsched_reassess_timer(). In that case,
        * we will return a value of one so that the timer will expire as soon
        * as possible and we can perform this action in the normal timer
        * expiration context.
@@ -1287,7 +1287,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
 }
 
 /****************************************************************************
- * Name: sched_sporadic_lowpriority
+ * Name: nxsched_sporadic_lowpriority
  *
  * Description:
  *   Drop to the lower priority for the duration of the replenishment
@@ -1309,7 +1309,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
  *
  ****************************************************************************/
 
-void sched_sporadic_lowpriority(FAR struct tcb_s *tcb)
+void nxsched_sporadic_lowpriority(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
   FAR struct replenishment_s *mrepl;
@@ -1324,7 +1324,7 @@ void sched_sporadic_lowpriority(FAR struct tcb_s *tcb)
   tcb->timeslice = 0;
 
   /* Allocate a new main timer.  There should be no timers active at this
-   * phase since they were stopped in sched_sporadic_process().
+   * phase since they were stopped in nxsched_process_sporadic().
    */
 
   DEBUGASSERT(sporadic->nrepls < sporadic->max_repl);

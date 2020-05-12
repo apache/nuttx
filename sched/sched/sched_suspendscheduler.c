@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_suspend_scheduler
+ * Name: nxsched_suspend_scheduler
  *
  * Description:
  *   Called by architecture specific implementations that starts task
@@ -72,21 +72,21 @@
  *
  ****************************************************************************/
 
-void sched_suspend_scheduler(FAR struct tcb_s *tcb)
+void nxsched_suspend_scheduler(FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SCHED_SPORADIC
   /* Perform sporadic schedule operations */
 
   if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
-      DEBUGVERIFY(sched_sporadic_suspend(tcb));
+      DEBUGVERIFY(nxsched_suspend_sporadic(tcb));
     }
 #endif
 
   /* Indicate that the task has been suspended */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-  sched_critmon_suspend(tcb);
+  nxsched_suspend_critmon(tcb);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   sched_note_suspend(tcb);

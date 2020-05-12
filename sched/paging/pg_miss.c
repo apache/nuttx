@@ -157,7 +157,7 @@ void pg_miss(void)
    *   of the page fill worker thread to that priority.
    */
 
-  wtcb = sched_gettcb(g_pgworker);
+  wtcb = nxsched_get_tcb(g_pgworker);
   DEBUGASSERT(wtcb != NULL);
 
   if (wtcb->sched_priority < ftcb->sched_priority)
@@ -166,7 +166,7 @@ void pg_miss(void)
 
       pginfo("New worker priority. %d->%d\n",
              wtcb->sched_priority, ftcb->sched_priority);
-      nxsched_setpriority(wtcb, ftcb->sched_priority);
+      nxsched_set_priority(wtcb, ftcb->sched_priority);
     }
 
   /* Signal the page fill worker thread.

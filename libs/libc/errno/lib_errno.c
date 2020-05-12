@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/fixedmath/tls_getelem.c
+ * sched/errno/lib_errno.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,55 +24,38 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
+#include <sched.h>
+#include <errno.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/tls.h>
 #include <arch/tls.h>
-
-#ifdef CONFIG_TLS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_element
+ * Name: __errno
  *
  * Description:
- *   Return an the TLS element associated with the 'elem' index
+ *   Return a pointer to the thread specific errno.
  *
  * Input Parameters:
- *   elem - Index of TLS element to return
+ *   None
  *
  * Returned Value:
- *   The value of TLS element associated with 'elem'. Errors are not
- *   reported.  Zero is returned in the event of an error, but zero may also
- *   be valid value and returned when there is no error.  The only possible
- *   error would be if elem < 0 or elem >=CONFIG_TLS_NELEM.
+ *   A pointer to the per-thread errno variable.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-uintptr_t tls_get_element(int elem)
+FAR int *__errno(void)
 {
-  FAR struct tls_info_s *info;
-  uintptr_t ret = 0;
+  /* Get the TLS tls_info_s structure instance for this thread */
 
-  DEBUGASSERT(elem >= 0 && elem < CONFIG_TLS_NELEM);
-  if (elem >= 0 && elem < CONFIG_TLS_NELEM)
-    {
-      /* Get the TLS info structure from the current threads stack */
+  FAR struct tls_info_s *tlsinfo = up_tls_info();
 
-      info = up_tls_info();
-      DEBUGASSERT(info != NULL);
+  /* And return the return refernce to the error number */
 
-      /* Get the element value from the TLS info. */
-
-      ret = info->tl_elem[elem];
-    }
-
-  return ret;
+  return &tlsinfo->tl_errno;
 }
-
-#endif /* CONFIG_TLS */

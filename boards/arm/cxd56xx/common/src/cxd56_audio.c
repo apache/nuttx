@@ -476,7 +476,7 @@ void board_audio_finalize(void)
  *
  ****************************************************************************/
 
-static struct cxd56_lower_s g_cxd56_lower;
+static struct cxd56_lower_s g_cxd56_lower[2];
 
 int board_audio_initialize_driver(int minor)
 {
@@ -485,9 +485,9 @@ int board_audio_initialize_driver(int minor)
   char devname[12];
   int ret;
 
-  /* Initialize CXD56 device driver */
+  /* Initialize CXD56 output device driver */
 
-  cxd56 = cxd56_initialize(&g_cxd56_lower);
+  cxd56 = cxd56_initialize(&g_cxd56_lower[0]);
   if (!cxd56)
     {
       auderr("ERROR: Failed to initialize the CXD56 audio\n");
@@ -512,6 +512,31 @@ int board_audio_initialize_driver(int minor)
   /* Finally, we can register the PCM/CXD56 audio device. */
 
   ret = audio_register(devname, pcm);
+  if (ret < 0)
+    {
+      auderr("ERROR: Failed to register /dev/%s device: %d\n",
+             devname, ret);
+    }
+
+  /* Initialize CXD56 input device driver */
+
+  cxd56 = cxd56_initialize(&g_cxd56_lower[1]);
+  if (!cxd56)
+    {
+      auderr("ERROR: Failed to initialize the CXD56 audio\n");
+
+      return -ENODEV;
+    }
+
+  /* No decoder support at the moment, only raw PCM data. */
+
+  /* Create a device name */
+
+  snprintf(devname, 12, "pcm_in%d",  minor);
+
+  /* Finally, we can register the CXD56 audio input device. */
+
+  ret = audio_register(devname, cxd56);
   if (ret < 0)
     {
       auderr("ERROR: Failed to register /dev/%s device: %d\n",

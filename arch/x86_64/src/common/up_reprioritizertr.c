@@ -83,25 +83,25 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
       sinfo("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
-       * sched_removereadytorun will return true if we just
+       * nxsched_remove_readytorun will return true if we just
        * remove the head of the ready to run list.
        */
 
-      switch_needed = sched_removereadytorun(tcb);
+      switch_needed = nxsched_remove_readytorun(tcb);
 
       /* Setup up the new task priority */
 
       tcb->sched_priority = (uint8_t)priority;
 
       /* Return the task to the specified blocked task list.
-       * sched_addreadytorun will return true if the task was
+       * nxsched_add_readytorun will return true if the task was
        * added to the new list.  We will need to perform a context
        * switch only if the EXCLUSIVE or of the two calls is non-zero
        * (i.e., one and only one the calls changes the head of the
        * ready-to-run list).
        */
 
-      switch_needed ^= sched_addreadytorun(tcb);
+      switch_needed ^= nxsched_add_readytorun(tcb);
 
       /* Now, perform the context switch if one is needed */
 
@@ -114,12 +114,12 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           if (g_pendingtasks.head)
             {
-              sched_mergepending();
+              nxsched_merge_pending();
             }
 
           /* Update scheduler parameters */
 
-          sched_suspend_scheduler(rtcb);
+          nxsched_suspend_scheduler(rtcb);
 
           /* Are we in an interrupt handler? */
 
@@ -140,7 +140,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
               /* Update scheduler parameters */
 
-              sched_resume_scheduler(rtcb);
+              nxsched_resume_scheduler(rtcb);
 
               /* Then switch contexts.  Any necessary address environment
                * changes will be made when the interrupt returns.
@@ -151,7 +151,8 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           /* Copy the exception context into the TCB at the (old) head of the
            * ready-to-run Task list. if up_saveusercontext returns a non-zero
-           * value, then this is really the previously running task restarting!
+           * value, then this is really the previously running task
+           * restarting!
            */
 
           else if (!up_saveusercontext(rtcb->xcp.regs))
@@ -174,7 +175,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 #endif
               /* Update scheduler parameters */
 
-              sched_resume_scheduler(rtcb);
+              nxsched_resume_scheduler(rtcb);
 
               /* Then switch contexts */
 

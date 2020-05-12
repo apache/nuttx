@@ -76,12 +76,12 @@ ifneq ($(CONFIG_ARCH_FAMILY),)
 endif
 
 ifneq ($(ZDSVERSION),)
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  USRINCLUDES = -usrinc:".;$(SCHEDSRCDIR);$(ARCHSRCDIR)$(DELIM)chip;$(ARCHSRCDIR)$(DELIM)common"
+else
   WSCHEDSRCDIR = ${shell cygpath -w $(SCHEDSRCDIR)}
   WARCHSRCDIR = ${shell cygpath -w $(ARCHSRCDIR)}
   USRINCLUDES = -usrinc:'.;$(WSCHEDSRCDIR);$(WARCHSRCDIR)\chip;$(WARCHSRCDIR)\common'
-else
-  USRINCLUDES = -usrinc:".;$(SCHEDSRCDIR);$(ARCHSRCDIR)$(DELIM)chip;$(ARCHSRCDIR)$(DELIM)common"
 endif
 else
 ifeq ($(WINTOOL),y)

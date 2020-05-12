@@ -56,7 +56,8 @@
  *
  ****************************************************************************/
 
-static int match_one(const char *pattern, int patlen, const char *string)
+static int match_one(FAR const char *pattern, int patlen,
+                     FAR const char *string)
 {
   const char *p;
   char first;
@@ -80,17 +81,17 @@ static int match_one(const char *pattern, int patlen, const char *string)
               p++;
 
               if (*string == *p)
-              {
-                /* Match found.  Advance to the ']' */
+                {
+                  /* Match found.  Advance to the ']' */
 
-                i = 1;
-                while (*p != ']' && *p != '\0')
-                  {
-                    p++;
-                  }
+                  i = 1;
+                  while (*p != ']' && *p != '\0')
+                    {
+                      p++;
+                    }
 
-                break;
-              }
+                  break;
+                }
 
               /* Prepare to test for range */
 
@@ -187,7 +188,7 @@ static int match_one(const char *pattern, int patlen, const char *string)
  *
  ****************************************************************************/
 
-int match(const char *pattern, const char *string)
+int match(FAR const char *pattern, FAR const char *string)
 {
   const char *or;
 

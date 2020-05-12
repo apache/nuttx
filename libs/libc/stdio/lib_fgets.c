@@ -59,7 +59,7 @@
  *
  ****************************************************************************/
 
-char *fgets(FAR char *buf, int buflen, FILE *stream)
+char *fgets(FAR char *buf, int buflen, FAR FILE *stream)
 {
   /* Handle negative buffer size */
 

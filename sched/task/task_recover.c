@@ -97,7 +97,7 @@ void nxtask_recover(FAR struct tcb_s *tcb)
     {
       /* Stop current sporadic scheduling */
 
-      DEBUGVERIFY(sched_sporadic_stop(tcb));
+      DEBUGVERIFY(nxsched_stop_sporadic(tcb));
     }
 #endif
 }

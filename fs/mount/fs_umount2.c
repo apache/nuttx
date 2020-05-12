@@ -38,36 +38,32 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: umount2
+ * Name: nx_umount2
  *
  * Description:
- *   umount() detaches the filesystem mounted at the path specified by
- *  'target.'
+ *   nx_umount2() is similar to the standard 'umount2' interface except that
+ *   is not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_umount2() is an internal NuttX interface and should not be called
+ *   from applications.
  *
  * Returned Value:
- *   Zero is returned on success; -1 is returned on an error and errno is
- *   set appropriately:
- *
- *   EACCES A component of a path was not searchable or mounting a read-only
- *      filesystem was attempted without giving the MS_RDONLY flag.
- *   EBUSY The target could not be unmounted because it is busy.
- *   EFAULT The pointer argument points outside the user address space.
+ *   Zero is returned on success; a negated value is returned on any failure.
  *
  ****************************************************************************/
 
-int umount2(FAR const char *target, unsigned int flags)
+int nx_umount2(FAR const char *target, unsigned int flags)
 {
   FAR struct inode *mountpt_inode;
   FAR struct inode *blkdrvr_inode = NULL;
   struct inode_search_s desc;
-  int errcode = OK;
   int ret;
 
   /* Verify required pointer arguments */
 
   if (!target)
     {
-      errcode = EFAULT;
+      ret = -EFAULT;
       goto errout;
     }
 
@@ -78,7 +74,6 @@ int umount2(FAR const char *target, unsigned int flags)
   ret = inode_find(&desc);
   if (ret < 0)
     {
-      errcode = ENOENT;
       goto errout_with_search;
     }
 
@@ -91,7 +86,7 @@ int umount2(FAR const char *target, unsigned int flags)
 
   if (!INODE_IS_MOUNTPT(mountpt_inode))
     {
-      errcode = EINVAL;
+      ret = -EINVAL;
       goto errout_with_mountpt;
     }
 
@@ -103,7 +98,7 @@ int umount2(FAR const char *target, unsigned int flags)
     {
       /* The filesystem does not support the unbind operation ??? */
 
-      errcode = EINVAL;
+      ret = -EINVAL;
       goto errout_with_mountpt;
     }
 
@@ -117,7 +112,6 @@ int umount2(FAR const char *target, unsigned int flags)
   ret = inode_semtake();
   if (ret < 0)
     {
-      errcode = -ret;
       goto errout_with_mountpt;
     }
 
@@ -127,12 +121,11 @@ int umount2(FAR const char *target, unsigned int flags)
     {
       /* The inode is unhappy with the blkdrvr for some reason */
 
-      errcode = -ret;
       goto errout_with_semaphore;
     }
   else if (ret > 0)
     {
-      errcode = EBUSY;
+      ret = -EBUSY;
       goto errout_with_semaphore;
     }
 
@@ -171,7 +164,6 @@ int umount2(FAR const char *target, unsigned int flags)
 
       if (ret != OK && ret != -EBUSY)
         {
-          errcode = -ret;
           goto errout_with_mountpt;
         }
 
@@ -209,6 +201,37 @@ errout_with_search:
   RELEASE_SEARCH(&desc);
 
 errout:
-  set_errno(errcode);
-  return ERROR;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: umount2
+ *
+ * Description:
+ *   umount() detaches the filesystem mounted at the path specified by
+ *  'target.'
+ *
+ * Returned Value:
+ *   Zero is returned on success; -1 is returned on an error and errno is
+ *   set appropriately:
+ *
+ *   EACCES A component of a path was not searchable or mounting a read-only
+ *      filesystem was attempted without giving the MS_RDONLY flag.
+ *   EBUSY The target could not be unmounted because it is busy.
+ *   EFAULT The pointer argument points outside the user address space.
+ *
+ ****************************************************************************/
+
+int umount2(FAR const char *target, unsigned int flags)
+{
+  int ret;
+
+  ret = nx_umount2(target, flags);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }

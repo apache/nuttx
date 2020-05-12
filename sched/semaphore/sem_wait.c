@@ -95,7 +95,7 @@ int nxsem_wait(FAR sem_t *sem)
           /* It is, let the task take the semaphore. */
 
           sem->semcount--;
-          nxsem_addholder(sem);
+          nxsem_add_holder(sem);
           rtcb->waitsem = NULL;
           ret = OK;
         }
@@ -106,8 +106,6 @@ int nxsem_wait(FAR sem_t *sem)
 
       else
         {
-          int saved_errno;
-
           /* First, verify that the task is not already waiting on a
            * semaphore
            */
@@ -137,15 +135,14 @@ int nxsem_wait(FAR sem_t *sem)
            * semaphore.
            */
 
-          nxsem_boostpriority(sem);
+          nxsem_boost_priority(sem);
 #endif
           /* Set the errno value to zero (preserving the original errno)
            * value).  We reuse the per-thread errno to pass information
            * between sem_waitirq() and this functions.
            */
 
-          saved_errno   = rtcb->pterrno;
-          rtcb->pterrno = OK;
+          rtcb->errcode = OK;
 
           /* Add the TCB to the prioritized semaphore wait queue, after
            * checking this is not the idle task - descheduling that
@@ -181,12 +178,11 @@ int nxsem_wait(FAR sem_t *sem)
            * sem_timedwait().
            *
            * If we were not awakened by a signal or a timeout, then
-           * nxsem_addholder() was called by logic in sem_wait() fore this
+           * nxsem_add_holder() was called by logic in sem_wait() fore this
            * thread was restarted.
            */
 
-          ret           = rtcb->pterrno != OK ? -rtcb->pterrno : OK;
-          rtcb->pterrno = saved_errno;
+          ret = rtcb->errcode != OK ? -rtcb->errcode : OK;
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
           sched_unlock();

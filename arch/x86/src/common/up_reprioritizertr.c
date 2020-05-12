@@ -1,35 +1,20 @@
 /****************************************************************************
  *  arch/arm/src/arm/up_reprioritizertr.c
  *
- *   Copyright (C) 2011, 2013-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -98,25 +83,25 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
       sinfo("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
-       * sched_removereadytorun will return true if we just
+       * nxsched_remove_readytorun will return true if we just
        * remove the head of the ready to run list.
        */
 
-      switch_needed = sched_removereadytorun(tcb);
+      switch_needed = nxsched_remove_readytorun(tcb);
 
       /* Setup up the new task priority */
 
       tcb->sched_priority = (uint8_t)priority;
 
       /* Return the task to the specified blocked task list.
-       * sched_addreadytorun will return true if the task was
+       * nxsched_add_readytorun will return true if the task was
        * added to the new list.  We will need to perform a context
        * switch only if the EXCLUSIVE or of the two calls is non-zero
        * (i.e., one and only one the calls changes the head of the
        * ready-to-run list).
        */
 
-      switch_needed ^= sched_addreadytorun(tcb);
+      switch_needed ^= nxsched_add_readytorun(tcb);
 
       /* Now, perform the context switch if one is needed */
 
@@ -129,14 +114,14 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           if (g_pendingtasks.head)
             {
-              sched_mergepending();
+              nxsched_merge_pending();
             }
 
           /* Update scheduler parameters */
 
-          sched_suspend_scheduler(rtcb);
+          nxsched_suspend_scheduler(rtcb);
 
-         /* Are we in an interrupt handler? */
+          /* Are we in an interrupt handler? */
 
           if (g_current_regs)
             {
@@ -154,7 +139,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
               /* Update scheduler parameters */
 
-              sched_resume_scheduler(rtcb);
+              nxsched_resume_scheduler(rtcb);
 
               /* Then switch contexts.  Any necessary address environment
                * changes will be made when the interrupt returns.
@@ -165,7 +150,8 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           /* Copy the exception context into the TCB at the (old) head of the
            * ready-to-run Task list. if up_saveusercontext returns a non-zero
-           * value, then this is really the previously running task restarting!
+           * value, then this is really the previously running task
+           * restarting!
            */
 
           else if (!up_saveusercontext(rtcb->xcp.regs))
@@ -187,7 +173,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 #endif
               /* Update scheduler parameters */
 
-              sched_resume_scheduler(rtcb);
+              nxsched_resume_scheduler(rtcb);
 
               /* Then switch contexts */
 

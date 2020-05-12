@@ -110,12 +110,12 @@
 
 struct nrf52_wdt_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
-  uint32_t timeout;   /* The (actual) timeout */
-  uint32_t lastreset; /* The last reset time */
-  bool     started;   /* true: The watchdog timer has been started */
-  uint16_t reload;    /* Timer reload value */
-  uint16_t mode;      /* watchdog mode under sleep and halt of CPU */
+  FAR const struct watchdog_ops_s  *ops; /* Lower half operations */
+  uint32_t timeout;                      /* The (actual) timeout */
+  uint32_t lastreset;                    /* The last reset time */
+  bool     started;                      /* true: The watchdog timer has been started */
+  uint16_t reload;                       /* Timer reload value */
+  uint16_t mode;                         /* watchdog mode under sleep and halt of CPU */
 };
 
 /****************************************************************************
@@ -283,7 +283,7 @@ static int nrf52_start(FAR struct watchdog_lowerhalf_s *lower)
   if (!priv->started)
     {
       flags = enter_critical_section();
-      priv->lastreset = clock_systimer();
+      priv->lastreset = clock_systime_ticks();
       priv->started   = true;
       nrf52_wdt_int_enable(WDT_INT_TIMEOUT);
       nrf52_wdt_task_trigger();
@@ -345,7 +345,7 @@ static int nrf52_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 
   flags = enter_critical_section();
 
-  priv->lastreset = clock_systimer();
+  priv->lastreset = clock_systime_ticks();
   nrf52_wdt_reload_request_set(0);
 
   leave_critical_section(flags);
@@ -394,7 +394,7 @@ static int nrf52_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Get the elapsed time since the last ping */
 
-  ticks   = clock_systimer() - priv->lastreset;
+  ticks   = clock_systime_ticks() - priv->lastreset;
   elapsed = (int32_t)TICK2MSEC(ticks);
 
   if (elapsed > priv->timeout)

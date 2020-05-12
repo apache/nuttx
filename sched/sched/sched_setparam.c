@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  nxsched_setparam
+ * Name:  nxsched_set_param
  *
  * Description:
  *   This function sets the priority of a specified task.  It is identical
@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-int nxsched_setparam(pid_t pid, FAR const struct sched_param *param)
+int nxsched_set_param(pid_t pid, FAR const struct sched_param *param)
 {
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *tcb;
@@ -121,7 +121,7 @@ int nxsched_setparam(pid_t pid, FAR const struct sched_param *param)
 
   else
     {
-      tcb = sched_gettcb(pid);
+      tcb = nxsched_get_tcb(pid);
       if (!tcb)
         {
           /* No task with this PID was found */
@@ -186,7 +186,7 @@ int nxsched_setparam(pid_t pid, FAR const struct sched_param *param)
       /* Stop/reset current sporadic scheduling */
 
       flags = enter_critical_section();
-      ret = sched_sporadic_reset(tcb);
+      ret = nxsched_reset_sporadic(tcb);
       if (ret >= 0)
         {
           /* Save the sporadic scheduling parameters and reset to the
@@ -206,7 +206,7 @@ int nxsched_setparam(pid_t pid, FAR const struct sched_param *param)
 
           /* And restart at the next replenishment interval */
 
-          ret = sched_sporadic_start(tcb);
+          ret = nxsched_start_sporadic(tcb);
         }
 
       /* Restore interrupts and handler errors */
@@ -233,7 +233,7 @@ errout_with_lock:
  *
  * Description:
  *   This function sets the priority of a specified task.  This function is
- *   a simply wrapper around nxsched_setparam() that sets the errno value in
+ *   a simply wrapper around nxsched_set_param() that sets the errno value in
  *   the event of an error.
  *
  *   NOTE: Setting a task's priority to the same value has a similar effect
@@ -262,7 +262,7 @@ errout_with_lock:
 
 int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 {
-  int ret = nxsched_setparam(pid, param);
+  int ret = nxsched_set_param(pid, param);
   if (ret < 0)
     {
       set_errno(-ret);

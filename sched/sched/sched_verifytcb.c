@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_verifytcb
+ * Name: nxsched_verify_tcb
  *
  * Description:
  *   Return true if the tcb refers to an active task; false if it is a stale
@@ -57,7 +57,7 @@
  *
  ****************************************************************************/
 
-bool sched_verifytcb(FAR struct tcb_s *tcb)
+bool nxsched_verify_tcb(FAR struct tcb_s *tcb)
 {
   /* Return true if the PID hashes to this TCB.  This will catch the case
    * where the task associated with the TCB has terminated (note that

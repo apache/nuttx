@@ -154,12 +154,12 @@ void _exit(int status)
 
 #ifdef CONFIG_DUMP_ON_EXIT
   sinfo("Other tasks:\n");
-  sched_foreach(_xtensa_dumponexit, NULL);
+  nxsched_foreach(_xtensa_dumponexit, NULL);
 #endif
 
   /* Update scheduler parameters */
 
-  sched_suspend_scheduler(tcb);
+  nxsched_suspend_scheduler(tcb);
 
 #if XCHAL_CP_NUM > 0
   /* Disable co-processor support for the task that is exit-ing. */
@@ -195,7 +195,7 @@ void _exit(int status)
 
   /* Reset scheduler parameters */
 
-  sched_resume_scheduler(tcb);
+  nxsched_resume_scheduler(tcb);
 
   /* Then switch contexts */
 

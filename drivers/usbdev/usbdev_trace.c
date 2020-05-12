@@ -100,14 +100,13 @@ static usbtrace_idset_t g_maskedidset = CONFIG_USBDEV_TRACE_INITIALIDSET;
 static int usbtrace_syslog(const char *fmt, ...)
 {
   va_list ap;
-  int ret;
 
-  /* Let nx_vsyslog do the real work */
+  /* Let vsyslog do the real work */
 
   va_start(ap, fmt);
-  ret = nx_vsyslog(LOG_INFO, fmt, &ap);
+  vsyslog(LOG_INFO, fmt, ap);
   va_end(ap);
-  return ret;
+  return OK;
 }
 #endif
 
@@ -119,11 +118,12 @@ static int usbtrace_syslog(const char *fmt, ...)
  * Name: usbtrace_enable
  *
  * Description:
- *  Enable/disable tracing per trace ID.  The initial state is all IDs enabled.
+ *  Enable/disable tracing per trace ID.  The initial state is all IDs
+ *  enabled.
  *
  * Input Parameters:
- *  idset - The bitset of IDs to be masked.  TRACE_ALLIDS enables all IDS; zero
- *  masks all IDs.
+ *  idset - The bitset of IDs to be masked.  TRACE_ALLIDS enables all IDS;
+ *  zero masks all IDs.
  *
  * Returned Value:
  *  The previous idset value.

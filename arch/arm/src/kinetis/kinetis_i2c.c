@@ -830,11 +830,11 @@ static int kinetis_i2c_start(struct kinetis_i2cdev_s *priv)
     {
       /* We are not currently the bus master, wait for bus ready or timeout */
 
-      start = clock_systimer();
+      start = clock_systime_ticks();
 
       while (kinetis_i2c_getreg(priv, KINETIS_I2C_S_OFFSET) & I2C_S_BUSY)
         {
-          if (clock_systimer() - start > I2C_TIMEOUT)
+          if (clock_systime_ticks() - start > I2C_TIMEOUT)
             {
               priv->state = STATE_TIMEOUT;
               return -EIO;
@@ -854,12 +854,12 @@ static int kinetis_i2c_start(struct kinetis_i2cdev_s *priv)
        * a timeout occurs
        */
 
-      start = clock_systimer();
+      start = clock_systime_ticks();
 
       while ((kinetis_i2c_getreg(priv, KINETIS_I2C_S_OFFSET) & I2C_S_BUSY)
              == 0)
         {
-          if (clock_systimer() - start > I2C_TIMEOUT)
+          if (clock_systime_ticks() - start > I2C_TIMEOUT)
             {
               priv->state = STATE_TIMEOUT;
               return -EIO;

@@ -172,7 +172,7 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
 
   flags = enter_critical_section();
   memcpy(&copy, info, sizeof(struct irq_info_s));
-  now           = clock_systimer();
+  now           = clock_systime_ticks();
   info->start   = now;
 #ifdef CONFIG_HAVE_LONG_LONG
   info->count   = 0;

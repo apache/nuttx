@@ -644,13 +644,13 @@ static inline int am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv)
 #endif
 
   priv->intstate = INTSTATE_WAITING;
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   do
     {
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
 
       /* Poll by simply calling the timer interrupt handler until it
        * reports that it is done.
@@ -704,12 +704,12 @@ static inline bool
    * detected, set by hardware when a timeout error is detected."
    */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   do
     {
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
 
       /* Check for Bus Free condition */
 
@@ -808,7 +808,7 @@ static void am335x_i2c_tracereset(FAR struct am335x_i2c_priv_s *priv)
   /* Reset the trace info for a new data collection */
 
   priv->tndx       = 0;
-  priv->start_time = clock_systimer();
+  priv->start_time = clock_systime_ticks();
   am335x_i2c_traceclear(priv);
 }
 
@@ -825,7 +825,7 @@ static void am335x_i2c_tracenew(FAR struct am335x_i2c_priv_s *priv,
 
       if (trace->count != 0)
         {
-          /* Yes.. bump up the trace index (unless we are out of trace entries) */
+          /* Yes.. bump up the trace index (unless out of trace entries) */
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE - 1))
             {
@@ -842,7 +842,7 @@ static void am335x_i2c_tracenew(FAR struct am335x_i2c_priv_s *priv,
       am335x_i2c_traceclear(priv);
       trace->status = status;
       trace->count  = 1;
-      trace->time   = clock_systimer();
+      trace->time   = clock_systime_ticks();
     }
   else
     {
@@ -885,7 +885,7 @@ static void am335x_i2c_tracedump(FAR struct am335x_i2c_priv_s *priv)
   int i;
 
   syslog(LOG_DEBUG, "Elapsed time: %ld\n",
-         (long)(clock_systimer() - priv->start_time));
+         (long)(clock_systime_ticks() - priv->start_time));
 
   for (i = 0; i < priv->tndx; i++)
     {
@@ -941,7 +941,9 @@ static void am335x_i2c_setclock(FAR struct am335x_i2c_priv_s *priv,
                                    I2C_CON_EN, 0);
             }
 
-          /* I2C bus clock is Source Clock (Hz) / ((psc + 1) * (scll + 7 + sclh + 5)) */
+          /* I2C bus clock is:
+           * Source Clock (Hz) / ((psc + 1) * (scll + 7 + sclh + 5))
+           */
 
           for (scl = 14; scl < 522; scl += 2)
             {
@@ -1479,7 +1481,7 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
 
       else if ((priv->status & I2C_IRQ_ERRORMASK) != 0)
         {
-          /* I2C_IRQ_ERRORMASK is the 'OR' of the following individual bits: */
+          /* I2C_IRQ_ERRORMASK is the OR of the following individual bits: */
 
           if (priv->status & I2C_IRQ_AL)
             {
@@ -1531,7 +1533,7 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
 
       am335x_i2c_tracedump(priv);
 
-      /* Ensure that any ISR happening after we finish can't overwrite any user data */
+      /* Ensure ISR happening after we finish can't overwrite any user data */
 
       priv->dcnt = 0;
       priv->ptr = NULL;

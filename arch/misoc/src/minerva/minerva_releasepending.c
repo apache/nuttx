@@ -76,13 +76,13 @@ void up_release_pending(void)
 
   /* sched_lock(); */
 
-  if (sched_mergepending())
+  if (nxsched_merge_pending())
     {
       /* The currently active task has changed! We will need to switch
        * contexts. Update scheduler parameters.
        */
 
-      sched_suspend_scheduler(rtcb);
+      nxsched_suspend_scheduler(rtcb);
 
       /* Are we operating in interrupt context? */
 
@@ -102,7 +102,7 @@ void up_release_pending(void)
 
           /* Update scheduler parameters */
 
-          sched_resume_scheduler(rtcb);
+          nxsched_resume_scheduler(rtcb);
 
           /* Then switch contexts.  Any necessary address environment changes
            * will be made when the interrupt returns.
@@ -122,17 +122,17 @@ void up_release_pending(void)
           struct tcb_s *nexttcb = this_task();
 
 #ifdef CONFIG_ARCH_ADDRENV
-          /* Make sure that the address environment for the previously running
-           * task is closed down gracefully (data caches dump, MMU flushed)
-           * and set up the address environment for the new thread at the head
-           * of the ready-to-run list.
+          /* Make sure that the address environment for the previously
+           * running task is closed down gracefully (data caches dump, MMU
+           * flushed) and set up the address environment for the new thread
+           * at the head of the ready-to-run list.
            */
 
           group_addrenv(nexttcb);
 #endif
           /* Update scheduler parameters */
 
-          sched_resume_scheduler(nexttcb);
+          nxsched_resume_scheduler(nexttcb);
 
           /* Then switch contexts */
 

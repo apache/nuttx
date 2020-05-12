@@ -455,7 +455,7 @@ static int slip_txtask(int argc, FAR char *argv[])
 
   /* Loop forever */
 
-  start_ticks = clock_systimer();
+  start_ticks = clock_systime_ticks();
   for (; ; )
     {
       /* Wait for the timeout to expire (or until we are signaled by  */
@@ -489,7 +489,7 @@ static int slip_txtask(int argc, FAR char *argv[])
 
           /* Has a half second elapsed since the last timer poll? */
 
-          now_ticks = clock_systimer();
+          now_ticks = clock_systime_ticks();
           hsec = (unsigned int)((now_ticks - start_ticks) / TICK_PER_HSEC);
           if (hsec > 0)
             {

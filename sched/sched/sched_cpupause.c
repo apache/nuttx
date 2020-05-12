@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sched_cpu_pause
+ * Name: nxsched_pause_cpu
  *
  * Description:
  *   Check if task associated with 'tcb' is running on a different CPU.  If
@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-int sched_cpu_pause(FAR struct tcb_s *tcb)
+int nxsched_pause_cpu(FAR struct tcb_s *tcb)
 {
   int cpu;
   int ret;
