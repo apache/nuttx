@@ -121,6 +121,7 @@ int stm32_bringup(void)
 
 #ifdef HAVE_MMCSD
   /* Mount the SDIO-based MMC/SD block driver */
+
   /* First, get an instance of the SDIO interface */
 
   sdio = sdio_initialize(MMCSD_SLOTNO);
@@ -148,7 +149,7 @@ int stm32_bringup(void)
    * the slot so we are reduced to guessing.
    */
 
-   sdio_mediachange(sdio, true);
+  sdio_mediachange(sdio, true);
 #endif
 
 #ifdef CONFIG_CAN

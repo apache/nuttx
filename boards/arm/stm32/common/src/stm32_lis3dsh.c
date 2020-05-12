@@ -65,8 +65,8 @@
  *   on STM32F4Discovery
  *
  * Input Parameters:
- *   *config - The lis3dsh instance configuration data containing the IRQ number,
- *     device ID and interrupt handler
+ *   config - The lis3dsh instance configuration data containing
+ *            the IRQ number, device ID and interrupt handler
  *   interrupt_handler - The interrupt handler to attach
  *   arg -
  *
@@ -74,11 +74,12 @@
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
+
 int attach_disc_lis3dsh(FAR struct lis3dsh_config_s *config,
                         xcpt_t interrupt_handler)
 {
-    return stm32_gpiosetevent(BOARD_LIS3DSH_GPIO_EXT0, true, false, false,
-                              interrupt_handler, NULL);
+  return stm32_gpiosetevent(BOARD_LIS3DSH_GPIO_EXT0, true, false, false,
+                            interrupt_handler, NULL);
 }
 
 /****************************************************************************
@@ -127,4 +128,3 @@ int board_lis3dsh_initialize(int devno, int busno)
 
   return ret;
 }
-

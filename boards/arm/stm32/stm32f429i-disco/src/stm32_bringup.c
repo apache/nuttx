@@ -157,15 +157,18 @@ int stm32_bringup(void)
   mtd = sst25xx_initialize(spi);
   if (!mtd)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 4 to the SPI FLASH driver\n");
+      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 4 to the SPI FLASH"
+                      " driver\n");
     }
   else
     {
-      syslog(LOG_INFO, "Successfully bound SPI port 4 to the SPI FLASH driver\n");
+      syslog(LOG_INFO, "Successfully bound SPI port 4 to the SPI FLASH"
+                       " driver\n");
 
       /* Get the geometry of the FLASH device */
 
-      ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
+      ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY,
+                       (unsigned long)((uintptr_t)&geo));
       if (ret < 0)
         {
           ferr("ERROR: mtd->ioctl failed: %d\n", ret);
