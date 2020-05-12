@@ -63,6 +63,10 @@
 #include "stm32_bmp180.h"
 #endif
 
+#ifdef CONFIG_SENSORS_INA219
+#include "stm32_ina219.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -248,7 +252,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_INA219
   /* Configure and initialize the INA219 sensor */
 
-  ret = stm32_ina219initialize("/dev/ina219");
+  ret = board_ina219_initialize(0, 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_ina219initialize() failed: %d\n", ret);

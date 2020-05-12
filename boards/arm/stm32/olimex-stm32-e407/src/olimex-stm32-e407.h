@@ -309,24 +309,6 @@ int stm32_dac_setup(void);
 #endif
 
 /****************************************************************************
- * Name: stm32_ina219initialize
- *
- * Description:
- *   Initialize and register the INA219 voltage/current sensor.
- *
- * Input parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/ina219"
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_INA219)
-int stm32_ina219initialize(FAR const char *devpath);
-#endif
-
-/****************************************************************************
  * Name: stm32_timer_driver_setup
  *
  * Description:
