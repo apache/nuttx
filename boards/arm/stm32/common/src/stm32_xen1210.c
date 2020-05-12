@@ -211,8 +211,8 @@ static void xen1210_clear(FAR struct xen1210_config_s *state)
  * Name: xen1210_pwm_setup
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   All STM32 architectures must provide the following interface to
+ *   work with examples/pwm.
  *
  ****************************************************************************/
 
@@ -302,7 +302,9 @@ int board_xen1210_initialize(int devno, int busno)
       /* Instantiate the XEN1210 driver */
 
       g_xen1210config.handle =
-        xen1210_instantiate(dev, (FAR struct xen1210_config_s *)&g_xen1210config);
+          xen1210_instantiate(dev,
+                              (FAR struct xen1210_config_s *)
+                              &g_xen1210config);
       if (!g_xen1210config.handle)
         {
           snerr("ERROR: Failed to instantiate the XEN1210 driver\n");

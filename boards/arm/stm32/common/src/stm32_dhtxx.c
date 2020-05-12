@@ -60,7 +60,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void dhtxx_config_data_pin(FAR struct dhtxx_config_s *state, bool mode);
+static void dhtxx_config_data_pin(FAR struct dhtxx_config_s *state,
+                                  bool mode);
 static void dhtxx_set_data_pin(FAR struct dhtxx_config_s *state, bool value);
 static bool dhtxx_read_data_pin(FAR struct dhtxx_config_s *state);
 static int64_t dhtxx_get_clock(FAR struct dhtxx_config_s *state);
@@ -85,7 +86,8 @@ struct timespec ts;
  * Private Functions
  ****************************************************************************/
 
-static void dhtxx_config_data_pin(FAR struct dhtxx_config_s *state, bool mode)
+static void dhtxx_config_data_pin(FAR struct dhtxx_config_s *state,
+                                  bool mode)
 {
   if (mode)
     {
