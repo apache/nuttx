@@ -1199,9 +1199,9 @@ static int up_eriinterrupt(int irq, void *context, void *arg)
 
       priv->ssr = up_serialin(priv, RX_SCI_SSR_OFFSET);
 
-      /* Clear all read related events (probably already done in 
-	   * up_receive))
-	   */
+      /* Clear all read related events (probably already done in
+       * up_receive))
+       */
 
       priv->ssr &= ~(RX_SCISSR_ORER | RX_SCISSR_FER | RX_SCISSR_PER);
       up_serialout(priv, RX_SCI_SSR_OFFSET, priv->ssr);
@@ -1226,9 +1226,9 @@ static int up_teiinterrupt(int irq, void *context, void *arg)
 
     priv->ssr = up_serialin(priv, RX_SCI_SSR_OFFSET);
 
-      /* Clear all read related events (probably already done in 
-	   * up_receive))
-	   */
+      /* Clear all read related events (probably already done in
+       * up_receive))
+       */
 
      priv->ssr &= ~(RX_SCISSR_TEND);
      up_serialout(priv, RX_SCI_SSR_OFFSET, priv->ssr);
@@ -1273,8 +1273,8 @@ static int  up_xmtinterrupt(int irq, void *context, FAR void *arg)
   DEBUGASSERT((NULL != dev));
 
   /* Handle outgoing, transmit bytes (TDRE: Transmit Data Register Empty)
-   * when TIE is enabled.  TIE is only enabled when the driver is waiting with
-   * buffered data.  Since TDRE is usually true,
+   * when TIE is enabled.  TIE is only enabled when the driver is waiting
+   * with buffered data.  Since TDRE is usually true,
    */
 
   uart_xmitchars(dev);
@@ -1302,8 +1302,8 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 
   rdr  = up_serialin(priv, RX_SCI_RDR_OFFSET);
 
-  /* Clear all read related status in  real ssr (so that when when rxavailable
-   * is called again, it will return false.
+  /* Clear all read related status in  real ssr (so that when when
+   * rx available is called again, it will return false.
    */
 
   ssr = up_serialin(priv, RX_SCI_SSR_OFFSET);
@@ -1311,7 +1311,7 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
            RX_SCISSR_FER  | RX_SCISSR_PER) ;
   up_serialout(priv, RX_SCI_SSR_OFFSET, ssr);
 
-  /* For status, return the SSR at the time that the interrupt was received */
+  /* For status, return SSR at the time that the interrupt was received */
 
   *status = (uint32_t)priv->ssr << 8 | rdr;
 
