@@ -290,6 +290,7 @@ struct dma_channel_s
   dmac_lli_t * list;             /* Link list */
   dma_callback_t callback;       /* Callback invoked when the DMA completes */
   void *arg;                     /* Argument passed to callback function */
+  unsigned int dummy;            /* Dummy buffer */
 };
 
 /****************************************************************************
@@ -902,10 +903,21 @@ void cxd56_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   uintptr_t dst;
   size_t rest;
   int peri;
+  int di;
 
   DEBUGASSERT(dmach != NULL && dmach->inuse && dmach->list != NULL);
 
-  dst = maddr;
+  if (maddr)
+    {
+      dst = maddr;
+      di = 1;
+    }
+  else
+    {
+      dst = (uintptr_t)&dmach->dummy;
+      di = 0;
+    }
+
   rest = nbytes;
 
   list_num = (nbytes + CXD56_DMAC_MAX_SIZE - 1) / CXD56_DMAC_MAX_SIZE;
@@ -914,7 +926,7 @@ void cxd56_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
       dmach->list[i].src_addr = paddr;
       dmach->list[i].dest_addr = dst;
       dmach->list[i].nextlli = (uint32_t)&dmach->list[i + 1];
-      dmach->list[i].control = DMAC_EX_CTRL_HELPER(0, 1, 0,            /* interrupt / Dest inc / Src inc */
+      dmach->list[i].control = DMAC_EX_CTRL_HELPER(0, di, 0,           /* interrupt / Dest inc / Src inc */
                                CXD56_DMAC_MASTER1, CXD56_DMAC_MASTER2, /* AHB dst master / AHB src master (fixed) */
                                config.dest_width, config.src_width,    /* Dest / Src transfer width */
                                CXD56_DMAC_BSIZE4, CXD56_DMAC_BSIZE4,   /* Dest / Src burst size (fixed) */
@@ -927,7 +939,7 @@ void cxd56_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   dmach->list[i].src_addr = paddr;
   dmach->list[i].dest_addr = dst;
   dmach->list[i].nextlli = 0;
-  dmach->list[i].control = DMAC_EX_CTRL_HELPER(1, 1, 0,                /* interrupt / Dest inc / Src inc */
+  dmach->list[i].control = DMAC_EX_CTRL_HELPER(1, di, 0,               /* interrupt / Dest inc / Src inc */
                                CXD56_DMAC_MASTER1, CXD56_DMAC_MASTER2, /* AHB dst master / AHB src master (fixed) */
                                config.dest_width, config.src_width,    /* Dest / Src transfer width */
                                CXD56_DMAC_BSIZE4, CXD56_DMAC_BSIZE4,   /* Dest / Src burst size (fixed) */
@@ -961,10 +973,21 @@ void cxd56_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   uintptr_t src;
   size_t rest;
   int peri;
+  int si;
 
   DEBUGASSERT(dmach != NULL && dmach->inuse && dmach->list != NULL);
 
-  src = maddr;
+  if (maddr)
+    {
+      src = maddr;
+      si = 1;
+    }
+  else
+    {
+      src = (uintptr_t)&dmach->dummy;
+      si = 0;
+    }
+
   rest = nbytes;
 
   list_num = (nbytes + CXD56_DMAC_MAX_SIZE - 1) / CXD56_DMAC_MAX_SIZE;
@@ -973,7 +996,7 @@ void cxd56_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
       dmach->list[i].src_addr = src;
       dmach->list[i].dest_addr = paddr;
       dmach->list[i].nextlli = (uint32_t)&dmach->list[i + 1];
-      dmach->list[i].control = DMAC_EX_CTRL_HELPER(0, 0, 1,                /* interrupt / Dest inc / Src inc */
+      dmach->list[i].control = DMAC_EX_CTRL_HELPER(0, 0, si,               /* interrupt / Dest inc / Src inc */
                                    CXD56_DMAC_MASTER2, CXD56_DMAC_MASTER1, /* AHB dst master / AHB src master (fixed) */
                                    config.dest_width, config.src_width,    /* Dest / Src transfer width (fixed) */
                                    CXD56_DMAC_BSIZE1, CXD56_DMAC_BSIZE1,   /* Dest / Src burst size (fixed) */
@@ -986,7 +1009,7 @@ void cxd56_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   dmach->list[i].src_addr = src;
   dmach->list[i].dest_addr = paddr;
   dmach->list[i].nextlli = 0;
-  dmach->list[i].control = DMAC_EX_CTRL_HELPER(1, 0, 1,                    /* interrupt / Dest inc / Src inc */
+  dmach->list[i].control = DMAC_EX_CTRL_HELPER(1, 0, si,                   /* interrupt / Dest inc / Src inc */
                                    CXD56_DMAC_MASTER2, CXD56_DMAC_MASTER1, /* AHB dst master / AHB src master (fixed) */
                                    config.dest_width, config.src_width,    /* Dest / Src transfer width (fixed) */
                                    CXD56_DMAC_BSIZE4, CXD56_DMAC_BSIZE4,   /* Dest / Src burst size (fixed) */
