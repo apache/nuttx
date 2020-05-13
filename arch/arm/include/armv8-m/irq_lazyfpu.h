@@ -129,7 +129,13 @@
 
 /* The total number of registers saved by software */
 
-#define SW_XCPT_REGS        (SW_INT_REGS + SW_FPU_REGS)
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+#  define REG_SPLIM         (SW_INT_REGS + SW_FPU_REGS + 0) /* REG_SPLIM */
+#  define SW_XCPT_REGS      (SW_INT_REGS + SW_FPU_REGS + 1)
+#else
+#  define SW_XCPT_REGS      (SW_INT_REGS + SW_FPU_REGS)
+#endif
+
 #define SW_XCPT_SIZE        (4 * SW_XCPT_REGS)
 
 /* On entry into an IRQ, the hardware automatically saves the following
