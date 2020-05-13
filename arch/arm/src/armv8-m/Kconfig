@@ -155,14 +155,15 @@ config ARMV8M_TARGET2_PREL
 	---help---
 		Perform a PC relative relocation for relocation type R_ARM_TARGET2
 
-config ARMV8M_HAVE_STACKCHECK
-	bool
-	default n
+choice
+	prompt "Select the stack protection Schema"
+	default ARMV8M_STACKCHECK_NONE
+
+config ARMV8M_STACKCHECK_NONE
+	bool "Do not check for stack overflow"
 
 config ARMV8M_STACKCHECK
 	bool "Check for stack overflow on each function call"
-	default n
-	depends on ARMV8M_HAVE_STACKCHECK
 	---help---
 		This check uses R10 to check for a stack overflow within each
 		function call. This has performances and code size impacts, but it
@@ -176,6 +177,23 @@ config ARMV8M_STACKCHECK
 		you also include -finstrument-functions in your CFLAGS when you
 		compile.  This addition to your CFLAGS should probably be added
 		to the definition of the CFFLAGS in your board Make.defs file.
+
+config ARMV8M_STACKCHECK_HARDWARE
+	bool "Check for stack overflow by stack pointer limit register"
+	---help---
+		This option signifies the CPU has the MSPLIM, PSPLIM registers.
+
+		The stack pointer limit registers, MSPLIM, PSPLIM, limit the
+		extend to which the Main and Process Stack Pointers, respectively,
+		can descend. MSPLIM, PSPLIM are always present in ARMv8-M
+		MCUs that implement the ARMv8-M Main Extension (Mainline).
+
+		In an ARMv8-M Mainline implementation with the Security Extension
+		the MSPLIM, PSPLIM registers have additional Secure instances.
+		In an ARMv8-M Baseline implementation with the Security Extension
+		the MSPLIM, PSPLIM registers have only Secure instances.
+
+endchoice
 
 config ARMV8M_ITMSYSLOG
 	bool "ITM SYSLOG support"

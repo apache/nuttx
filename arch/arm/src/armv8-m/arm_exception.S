@@ -105,6 +105,10 @@
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 	.macro	setintstack, tmp1, tmp2
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+	ldr		\tmp1, =g_intstackalloc
+	msr		msplim, \tmp1
+#endif
 	ldr		sp, =g_intstackbase
 	.endm
 #endif
@@ -148,12 +152,23 @@ exception_common:
 	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
 	beq		1f						/* Branch if context already on the MSP */
 	mrs		r1, psp					/* R1=The process stack pointer (PSP) */
-	mov     sp, r1					/* Set the MSP to the PSP */
-
+	mov		sp, r1					/* Set the MSP to the PSP */
 1:
 	mov		r2, sp					/* R2=Copy of the main/process stack pointer */
 	add		r2, #HW_XCPT_SIZE		/* R2=MSP/PSP before the interrupt was taken */
 									/* (ignoring the xPSR[9] alignment bit) */
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+	mov		r3, #0x0
+
+	ittee		eq
+	mrseq	r1, msplim
+	msreq	msplim, r3
+	mrsne	r1, psplim
+	msrne	psplim, r3
+
+	stmdb	sp!, {r1}
+#endif
+
 #ifdef CONFIG_ARMV8M_USEBASEPRI
 	mrs		r3, basepri				/* R3=Current BASEPRI setting */
 #else
@@ -249,7 +264,11 @@ exception_common:
 	stmdb	r1!, {r4-r11}			/* Store eight registers on the return stack */
 	ldmia	r0!, {r2-r11,r14}		/* Recover R4-R11, r14 + 2 temp values */
 #ifdef CONFIG_ARCH_FPU
-	vldmia	r0, {s16-s31}			/* Recover S16-S31 */
+	vldmia	r0!, {s16-s31}			/* Recover S16-S31 */
+#endif
+
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+	ldmia	r0, {r0}				/* Get psplim/msplim*/
 #endif
 
 	b		3f						/* Re-join common logic */
@@ -261,7 +280,11 @@ exception_common:
 
 	ldmia	r1!, {r2-r11,r14}		/* Recover R4-R11, r14 + 2 temp values */
 #ifdef CONFIG_ARCH_FPU
-	vldmia  r1!, {s16-s31}			/* Recover S16-S31 */
+	vldmia	r1!, {s16-s31}			/* Recover S16-S31 */
+#endif
+
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+	ldmia	r1!, {r0}				/* Get psplim/msplim */
 #endif
 
 3:
@@ -279,15 +302,26 @@ exception_common:
 	beq		4f						/* Branch if privileged */
 
 	orr		r2, r2, #1				/* Unprivileged mode */
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+	msr		psplim, r0
+#endif
 	msr		psp, r1					/* R1=The process stack pointer */
 	b		5f
 4:
 	bic		r2, r2, #1				/* Privileged mode */
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+	msr		msplim, r0
+#endif
 	msr		msp, r1					/* R1=The main stack pointer */
 5:
 	msr		control, r2				/* Save the updated control register */
 #else
 	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
+#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+	ite		eq
+	msreq	msplim, r0
+	msrne	psplim, r0
+#endif
 	ite		eq						/* next two instructions conditional */
 	msreq	msp, r1					/* R1=The main stack pointer */
 	msrne	psp, r1					/* R1=The process stack pointer */
