@@ -126,8 +126,6 @@ static inline void spi_putreg(FAR struct cxd56_spidev_s *priv,
 static void __unused spi_dmaexchange(FAR struct spi_dev_s *dev,
                                      FAR const void *txbuffer,
                                      FAR void *rxbuffer, size_t nwords);
-static void spi_dmatxwait(FAR struct cxd56_spidev_s *priv);
-static void spi_dmarxwait(FAR struct cxd56_spidev_s *priv);
 static void spi_dmatrxwait(FAR struct cxd56_spidev_s *priv);
 static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *data);
 static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *data);
@@ -1438,42 +1436,17 @@ static void spi_dmaexchange(FAR struct spi_dev_s *dev,
 
   /* Setup DMAs */
 
-  if (txbuffer)
-    {
-      spi_dmatxsetup(priv, txbuffer, nwords);
-    }
-
-  if (rxbuffer)
-    {
-      spi_dmarxsetup(priv, rxbuffer, nwords);
-    }
+  spi_dmatxsetup(priv, txbuffer, nwords);
+  spi_dmarxsetup(priv, rxbuffer, nwords);
 
   /* Start the DMAs */
 
-  if (rxbuffer)
-    {
-      cxd56_dmastart(priv->rxdmach, spi_dmarxcallback, priv);
-    }
-
-  if (txbuffer)
-    {
-      cxd56_dmastart(priv->txdmach, spi_dmatxcallback, priv);
-    }
+  cxd56_dmastart(priv->rxdmach, spi_dmarxcallback, priv);
+  cxd56_dmastart(priv->txdmach, spi_dmatxcallback, priv);
 
   /* Then wait for each to complete */
 
-  if (txbuffer && rxbuffer)
-    {
-      spi_dmatrxwait(priv);
-    }
-  else if (txbuffer)
-    {
-      spi_dmatxwait(priv);
-    }
-  else if (rxbuffer)
-    {
-      spi_dmarxwait(priv);
-    }
+  spi_dmatrxwait(priv);
 
   if (priv->port == 3)
     {
@@ -1606,54 +1579,6 @@ static void spi_dmarxsetup(FAR struct cxd56_spidev_s *priv,
   src = (priv->spibase + CXD56_SPI_DR_OFFSET) & 0x03ffffffu;
   cxd56_rxdmasetup(priv->rxdmach, (uintptr_t)src, (uintptr_t)rxbuffer,
                    nwords, priv->rxconfig);
-}
-
-/****************************************************************************
- * Name: spi_dmatxwait
- *
- * Description:
- *   Wait for TX DMA to complete.
- *
- ****************************************************************************/
-
-static void spi_dmatxwait(FAR struct cxd56_spidev_s *priv)
-{
-  uint32_t val;
-
-  if (nxsem_wait(&priv->dmasem) != OK)
-    {
-      spierr("dma error\n");
-    }
-
-  cxd56_dmastop(priv->txdmach);
-
-  val = spi_getreg(priv, CXD56_SPI_DMACR_OFFSET);
-  val &= ~SPI_DMACR_TXDMAE;
-  spi_putreg(priv, CXD56_SPI_DMACR_OFFSET, val);
-}
-
-/****************************************************************************
- * Name: spi_dmarxwait
- *
- * Description:
- *   Wait for RX DMA to complete.
- *
- ****************************************************************************/
-
-static void spi_dmarxwait(FAR struct cxd56_spidev_s *priv)
-{
-  uint32_t val;
-
-  if (nxsem_wait(&priv->dmasem) != OK)
-    {
-      spierr("dma error\n");
-    }
-
-  cxd56_dmastop(priv->rxdmach);
-
-  val = spi_getreg(priv, CXD56_SPI_DMACR_OFFSET);
-  val &= ~SPI_DMACR_RXDMAE;
-  spi_putreg(priv, CXD56_SPI_DMACR_OFFSET, val);
 }
 
 /****************************************************************************
