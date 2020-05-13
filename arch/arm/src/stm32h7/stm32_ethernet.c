@@ -333,7 +333,8 @@
  * ETH_MACCR_BL    Back-off limit                 0 (10)
  * ETH_MACCR_ACS   Automatic pad/CRC stripping    0 (disabled)
  * ETH_MACCR_DR    Retry disable                  1 (disabled)
- * ETH_MACCR_IPC   IPv4 checksum offload          Depends on CONFIG_STM32H7_ETH_HWCHECKSUM
+ * ETH_MACCR_IPC   IPv4 checksum offload
+ *                 Depends on CONFIG_STM32H7_ETH_HWCHECKSUM
  * ETH_MACCR_LM    Loopback mode                  0 (disabled)
  * ETH_MACCR_DO    Receive own disable            0 (enabled)
  * ETH_MACCR_DCRS  Carrier sense disable          0 (enabled)
@@ -356,9 +357,9 @@
   (ETH_MACCR_BL_10 | ETH_MACCR_DR | ETH_MACCR_IPG(96))
 #endif
 
-/* Clear the MACPFR bits that will be setup during MAC initialization (or that
- * are cleared unconditionally).  Per the reference manual, all reserved bits
- * must be retained at their reset value.
+/* Clear the MACPFR bits that will be setup during MAC initialization (or
+ * that are cleared unconditionally).  Per the reference manual, all reserved
+ * bits must be retained at their reset value.
  *
  * ETH_MACPFR_PR    Bit 0: Promiscuous mode
  * ETH_MACPFR_HUC   Bit 1: Hash unicast
@@ -385,15 +386,20 @@
 /* The following bits are set or left zero unconditionally in all modes.
  *
  * ETH_MACPFR_PR    Promiscuous mode                       0 (disabled)
- * ETH_MACPFR_HUC   Hash unicast                           0 (perfect dest filtering)
- * ETH_MACPFR_HMC   Hash multicast                         0 (perfect dest filtering)
+ * ETH_MACPFR_HUC   Hash unicast                           0 (perfect
+ *                                                            dest filtering)
+ * ETH_MACPFR_HMC   Hash multicast                         0 (perfect
+ *                                                            dest filtering)
  * ETH_MACPFR_DAIF  Destination address inverse filtering  0 (normal)
- * ETH_MACPFR_PM    Pass all multicast                     0 (Depends on HMC bit)
+ * ETH_MACPFR_PM    Pass all multicast                     0 (Depends on HMC
+ *                                                            bit)
  * ETH_MACPFR_DBF   Broadcast frames disable               0 (enabled)
- * ETH_MACPFR_PCF   Pass control frames                    1 (block all but PAUSE)
+ * ETH_MACPFR_PCF   Pass control frames                    1 (block all but
+ *                                                            PAUSE)
  * ETH_MACPFR_SAIF  Source address inverse filtering       0 (not used)
  * ETH_MACPFR_SAF   Source address filter                  0 (disabled)
- * ETH_MACPFR_HPF   Hash or perfect filter                 0 (Only matching frames passed)
+ * ETH_MACPFR_HPF   Hash or perfect filter                 0 (Only matching
+ *                                                            frames passed)
  * ETH_MACPFR_RA    Receive all                            0 (disabled)
  */
 
@@ -423,21 +429,27 @@
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- * ETH_MACQTXFCR_FCB_BPA Flow control busy/back pressure activate   0 (no pause control frame)
- * ETH_MACQTXFCR_TFE     Transmit flow control enable               0 (disabled)
- * ETH_MACQTXFCR_PLT     Pause low threshold                        0 (pause time - 4)
- * ETH_MACQTXFCR_DZPQ    Zero-quanta pause disable                  1 (disabled)
+ * ETH_MACQTXFCR_FCB_BPA Flow control busy/back pressure activate   0
+ *   (no pause control frame)
+ * ETH_MACQTXFCR_TFE     Transmit flow control enable               0
+ *   (disabled)
+ * ETH_MACQTXFCR_PLT     Pause low threshold                        0
+ *   (pause time - 4)
+ * ETH_MACQTXFCR_DZPQ    Zero-quanta pause disable                  1
+ *   (disabled)
  * ETH_MACQTXFCR_PT      Pause time                                 0
- * ETH_MACRXFCR_RFE      Receive flow control enable                0 (disabled)
- * ETH_MACRXFCR_UP       Unicast pause frame detect                 0 (disabled)
+ * ETH_MACRXFCR_RFE      Receive flow control enable                0
+ *   (disabled)
+ * ETH_MACRXFCR_UP       Unicast pause frame detect                 0
+ *   (disabled)
  */
 
 #define MACQTXFCR_SET_MASK (ETH_MACQTXFCR_PLT_M4 | ETH_MACQTXFCR_DZPQ)
 #define MACRXFCR_SET_MASK (0)
 
-/* Clear the MTLTXQOMR bits that will be setup during MAC initialization (or that
- * are cleared unconditionally).  Per the reference manual, all reserved bits
- * must be retained at their reset value.
+/* Clear the MTLTXQOMR bits that will be setup during MAC initialization
+ * (or that are cleared unconditionally).  Per the reference manual, all
+ * reserved bits must be retained at their reset value.
  * ETH_MTLTXQOMR_FTQ      Bit 0: Flush Transmit Queue
  * ETH_MTLTXQOMR_TSF      Bit 1: Transmit Store and Forward
  * ETH_MTLTXQOMR_TXQEN    Bits 2-3: Transmit Queue Enable
@@ -450,18 +462,20 @@
    ETH_MTLTXQOMR_TXQEN_MASK | ETH_MTLTXQOMR_TTC_MASK |  \
    ETH_MTLTXQOMR_TQS_MASK)
 
-/* Clear the MTLRXQOMR bits that will be setup during MAC initialization (or that
- * are cleared unconditionally).  Per the reference manual, all reserved bits
- * must be retained at their reset value.
+/* Clear the MTLRXQOMR bits that will be setup during MAC initialization
+ * (or that are cleared unconditionally).  Per the reference manual, all
+ * reserved bits must be retained at their reset value.
  *
  * ETH_MTLRXQOMR_RTC_MASK    Bits 0-1: Receive Queue Threshold Control
  * ETH_MTLRXQOMR_FUP         Bit 3: Forward Undersized Good Packets
  * ETH_MTLRXQOMR_FEP         Bit 4: Forward Error Packets
  * ETH_MTLRXQOMR_RSF         Bit 5: Receive Queue Store and Forward
- * ETH_MTLRXQOMR_DIS_TCP_EF  Bit 6: Disable Dropping of TCP/IP Checksum Error Packets
+ * ETH_MTLRXQOMR_DIS_TCP_EF  Bit 6: Disable Dropping of TCP/IP Checksum Error
+ *                                  Packets
  * ETH_MTLRXQOMR_EHFC        Bit 7: Enable Hardware Flow Control
  * ETH_MTLRXQOMR_RFA_MASK    Bits 8-10: Threshold for Activating Flow Control
- * ETH_MTLRXQOMR_RFD_MASK    Bits 14-16: Threshold for Deactivating Flow Control
+ * ETH_MTLRXQOMR_RFD_MASK    Bits 14-16: Threshold for Deactivating Flow
+ *                                       Control
  * ETH_MTLRXQOMR_RQS_MASK    Bits 20-22: Receive Queue Size
  */
 
@@ -1767,7 +1781,8 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                    */
 
                   up_clean_dcache((uintptr_t)rxcurr,
-                                  (uintptr_t)rxdesc + sizeof(struct eth_desc_s));
+                                  (uintptr_t)rxdesc +
+                                  sizeof(struct eth_desc_s));
 
                   /* Remember where we should re-start scanning and reset the
                    * segment scanning logic
@@ -1862,7 +1877,9 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
   while (stm32_recvframe(priv) == OK)
     {
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the packet
+       * tap
+       */
 
       pkt_input(&priv->dev);
 #endif
@@ -2110,7 +2127,8 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
           /* Force re-reading of the TX descriptor for physical memory */
 
           up_invalidate_dcache((uintptr_t)txdesc,
-                               (uintptr_t)txdesc + sizeof(struct eth_desc_s));
+                               (uintptr_t)txdesc +
+                               sizeof(struct eth_desc_s));
         }
 
       /* We get here if (1) there are still frames "in-flight". Remember
@@ -3171,7 +3189,9 @@ static int stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr,
   volatile uint32_t timeout;
   uint32_t regval;
 
-  /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[3:0] bits */
+  /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[3:0]
+   * bits
+   */
 
   regval  = stm32_getreg(STM32_ETH_MACMDIOAR);
   regval &= ETH_MACMDIOAR_CR_MASK;
@@ -3230,7 +3250,9 @@ static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
   uint32_t regval;
   uint16_t value;
 
-  /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[3:0] bits */
+  /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[3:0]
+   * bits
+   */
 
   regval  = stm32_getreg(STM32_ETH_MACMDIOAR);
   regval &= ETH_MACMDIOAR_CR_MASK;
@@ -3279,8 +3301,8 @@ static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr,
         }
     }
 
-  ninfo("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
-        phydevaddr, phyregaddr, value);
+  ninfo("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: "
+        "%04x\n", phydevaddr, phyregaddr, value);
 
   return -ETIMEDOUT;
 }
@@ -3320,7 +3342,9 @@ static inline int stm32_dm9161(struct stm32_ethmac_s *priv)
       return ret;
     }
 
-  /* If we failed to read the PHY ID1 register, the reset the MCU to recover */
+  /* If we failed to read the PHY ID1 register, the reset the MCU to
+   * recover
+   */
 
   else if (phyval == 0xffff)
     {
@@ -3329,7 +3353,9 @@ static inline int stm32_dm9161(struct stm32_ethmac_s *priv)
 
   ninfo("PHY ID1: 0x%04X\n", phyval);
 
-  /* Now check the "DAVICOM Specified Configuration Register (DSCR)", Register 16 */
+  /* Now check the "DAVICOM Specified Configuration Register (DSCR)",
+   * Register 16
+   */
 
   ret = stm32_phyread(CONFIG_STM32H7_PHYADDR, 16, &phyval);
   if (ret < 0)
@@ -3418,7 +3444,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   priv->mbps100 = 0;
   priv->fduplex = 0;
 
-  /* Setup up PHY clocking by setting the CR field in the MACMDIOAR register */
+  /* Setup up PHY clocking by setting the CR field in the MACMDIOAR reg */
 
   regval  = stm32_getreg(STM32_ETH_MACMDIOAR);
   regval &= ~ETH_MACMDIOAR_CR_MASK;
@@ -3580,7 +3606,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
    */
 
 #else
-  if ((phyval & CONFIG_STM32H7_PHYSR_MODE) == CONFIG_STM32H7_PHYSR_FULLDUPLEX)
+  if ((phyval & CONFIG_STM32H7_PHYSR_MODE) ==
+      CONFIG_STM32H7_PHYSR_FULLDUPLEX)
     {
       priv->fduplex = 1;
     }
@@ -4342,7 +4369,8 @@ static inline int stm32_ethinitialize(int intf)
 #ifdef CONFIG_NETDEV_PHY_IOCTL
   priv->dev.d_ioctl   = stm32_ioctl;    /* Support PHY ioctl() calls */
 #endif
-  priv->dev.d_private = (void *)g_stm32ethmac; /* Used to recover private state from dev */
+  priv->dev.d_private =
+    (void *)g_stm32ethmac;              /* Used to recover private state */
   priv->intf          = intf;           /* Remember the interface number */
 
   /* Create a watchdog for timing polling for and timing of transmissions */
@@ -4389,7 +4417,7 @@ static inline int stm32_ethinitialize(int intf)
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in arm_initialize.c.  If STM32H7_NETHERNET
+ *   low-level initialization logic in arm_initialize.c. If STM32H7_NETHERNET
  *   greater than one, then board specific logic will have to supply a
  *   version of arm_netinitialize() that calls stm32_ethinitialize() with
  *   the appropriate interface number.
