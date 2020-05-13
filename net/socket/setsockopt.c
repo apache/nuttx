@@ -470,7 +470,7 @@ int setsockopt(int sockfd, int level, int option, const void *value,
   ret = psock_setsockopt(psock, level, option, value, value_len);
   if (ret < 0)
     {
-      _SO_SETERRNO(psock, -ret);
+      set_errno(-ret);
       return ERROR;
     }
 
