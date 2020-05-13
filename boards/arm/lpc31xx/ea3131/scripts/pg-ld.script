@@ -80,16 +80,16 @@ SECTIONS
     .locked : {
         _slocked = ABSOLUTE(.);
         *(.vectors)
-        up_head.o locked.r (.text .text.*)
-        up_head.o locked.r (.fixup)
-        up_head.o locked.r (.gnu.warning)
-        up_head.o locked.r (.rodata .rodata.*)
-        up_head.o locked.r (.gnu.linkonce.t.*)
-        up_head.o locked.r (.glue_7)
-        up_head.o locked.r (.glue_7t)
-        up_head.o locked.r (.got)
-        up_head.o locked.r (.gcc_except_table)
-        up_head.o locked.r (.gnu.linkonce.r.*)
+        arm_head.o locked.r (.text .text.*)
+        arm_head.o locked.r (.fixup)
+        arm_head.o locked.r (.gnu.warning)
+        arm_head.o locked.r (.rodata .rodata.*)
+        arm_head.o locked.r (.gnu.linkonce.t.*)
+        arm_head.o locked.r (.glue_7)
+        arm_head.o locked.r (.glue_7t)
+        arm_head.o locked.r (.got)
+        arm_head.o locked.r (.gcc_except_table)
+        arm_head.o locked.r (.gnu.linkonce.r.*)
         _elocked = ABSOLUTE(.);
     } >locked
 
