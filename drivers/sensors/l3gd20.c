@@ -149,7 +149,9 @@ static struct l3gd20_dev_s *g_l3gd20_list = NULL;
 static void l3gd20_read_register(FAR struct l3gd20_dev_s *dev,
                                  uint8_t const reg_addr, uint8_t *reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the
+   * same time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -185,7 +187,9 @@ static void l3gd20_write_register(FAR struct l3gd20_dev_s *dev,
                                   uint8_t const reg_addr,
                                   uint8_t const reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -218,7 +222,7 @@ static void l3gd20_reset(FAR struct l3gd20_dev_s *dev)
 {
   /* Reboot memory content */
 
-  l3gd20_write_register(dev, L3GD20_CTRL_REG_5, L3GD20_CTRL_REG_5_BOOT_bm);
+  l3gd20_write_register(dev, L3GD20_CTRL_REG_5, L3GD20_CTRL_REG_5_BOOT_BM);
 
   up_mdelay(100);
 }
@@ -275,7 +279,9 @@ static void l3gd20_read_gyroscope_data(FAR struct l3gd20_dev_s *dev,
                                        uint16_t * x_gyr, uint16_t * y_gyr,
                                        uint16_t * z_gyr)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -316,7 +322,9 @@ static void l3gd20_read_gyroscope_data(FAR struct l3gd20_dev_s *dev,
 static void l3gd20_read_temperature(FAR struct l3gd20_dev_s *dev,
                                     FAR uint8_t *temperature)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -367,8 +375,8 @@ static int l3gd20_interrupt_handler(int irq, FAR void *context,
     }
 
   /* Task the worker with retrieving the latest sensor data. We should not do
-   * this in a interrupt since it might take too long. Also we cannot lock the
-   * SPI bus from within an interrupt.
+   * this in a interrupt since it might take too long. Also we cannot lock
+   * the SPI bus from within an interrupt.
    */
 
   DEBUGASSERT(priv->work.worker == NULL);
@@ -419,7 +427,7 @@ static int l3gd20_open(FAR struct file *filep)
 
   l3gd20_write_register(priv,
                         L3GD20_CTRL_REG_3,
-                        L3GD20_CTRL_REG_3_I2_DRDY_bm);
+                        L3GD20_CTRL_REG_3_I2_DRDY_BM);
 
   /* Enable the maximum full scale mode.
    * Enable block data update for gyro sensor data.
@@ -428,9 +436,9 @@ static int l3gd20_open(FAR struct file *filep)
 
   l3gd20_write_register(priv,
                         L3GD20_CTRL_REG_4,
-                        L3GD20_CTRL_REG_4_BDU_bm |
-                        L3GD20_CTRL_REG_4_FS_1_bm |
-                        L3GD20_CTRL_REG_4_FS_0_bm);
+                        L3GD20_CTRL_REG_4_BDU_BM |
+                        L3GD20_CTRL_REG_4_FS_1_BM |
+                        L3GD20_CTRL_REG_4_FS_0_BM);
 
   /* Enable X,Y,Z axis
    * DR=00 -> Output data rate = 95 Hz, Cut-off = 12.5
@@ -438,10 +446,10 @@ static int l3gd20_open(FAR struct file *filep)
 
   l3gd20_write_register(priv,
                         L3GD20_CTRL_REG_1,
-                        L3GD20_CTRL_REG_1_POWERDOWN_bm |
-                        L3GD20_CTRL_REG_1_X_EN_bm |
-                        L3GD20_CTRL_REG_1_Y_EN_bm |
-                        L3GD20_CTRL_REG_1_Z_EN_bm);
+                        L3GD20_CTRL_REG_1_POWERDOWN_BM |
+                        L3GD20_CTRL_REG_1_X_EN_BM |
+                        L3GD20_CTRL_REG_1_Y_EN_BM |
+                        L3GD20_CTRL_REG_1_Z_EN_BM);
 
   /* Read measurement data to ensure DRDY is low */
 
@@ -505,7 +513,8 @@ static ssize_t l3gd20_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen < sizeof(FAR struct l3gd20_sensor_data_s))
     {
-      snerr("ERROR: Not enough memory for reading out a sensor data sample\n");
+      snerr("ERROR: Not enough memory for reading out a sensor data"
+            " sample\n");
       return -ENOSYS;
     }
 

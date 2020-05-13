@@ -218,68 +218,70 @@ int board_app_initialize(uintptr_t arg)
                        " FLASH driver\n");
 
 #ifdef CONFIG_MIKROE_FLASH_PART
-      {
-        int partno;
-        int partsize;
-        int partoffset;
-        const char *partstring = CONFIG_MIKROE_FLASH_PART_LIST;
-        const char *ptr;
-        FAR struct mtd_dev_s *mtd_part;
-        char  partname[4];
+        {
+          int partno;
+          int partsize;
+          int partoffset;
+          const char *partstring = CONFIG_MIKROE_FLASH_PART_LIST;
+          const char *ptr;
+          FAR struct mtd_dev_s *mtd_part;
+          char  partname[4];
 
-        /* Now create a partition on the FLASH device */
+          /* Now create a partition on the FLASH device */
 
-        partno = 0;
-        ptr = partstring;
-        partoffset = 0;
+          partno = 0;
+          ptr = partstring;
+          partoffset = 0;
 
-        while (*ptr != '\0')
-          {
-            /* Get the partition size */
+          while (*ptr != '\0')
+            {
+              /* Get the partition size */
 
-            partsize = atoi(ptr);
-            mtd_part = mtd_partition(mtd, partoffset, (partsize >> 2) * 16);
-            partoffset += (partsize >> 2) * 16;
+              partsize = atoi(ptr);
+              mtd_part = mtd_partition(mtd, partoffset,
+                                       (partsize >> 2) * 16);
+              partoffset += (partsize >> 2) * 16;
 
 #ifdef CONFIG_MIKROE_FLASH_CONFIG_PART
-            /* Test if this is the config partition */
+              /* Test if this is the config partition */
 
-            if (CONFIG_MIKROE_FLASH_CONFIG_PART_NUMBER == partno)
-              {
-                /* Register the partition as the config device */
+              if (CONFIG_MIKROE_FLASH_CONFIG_PART_NUMBER == partno)
+                {
+                  /* Register the partition as the config device */
 
-                mtdconfig_register(mtd_part);
-              }
-            else
+                  mtdconfig_register(mtd_part);
+                }
+              else
 #endif
-              {
-                /* Now initialize a SMART Flash block device and bind it
-                 * to the MTD device.
-                 */
+                {
+                  /* Now initialize a SMART Flash block device and bind it
+                   * to the MTD device.
+                   */
 
-#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-                sprintf(partname, "p%d", partno);
-                smart_initialize(CONFIG_MIKROE_FLASH_MINOR, mtd_part, partname);
+  #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
+                  sprintf(partname, "p%d", partno);
+                  smart_initialize(CONFIG_MIKROE_FLASH_MINOR, mtd_part,
+                                   partname);
 #endif
-              }
+                }
 
-            /* Update the pointer to point to the next size in the list */
+              /* Update the pointer to point to the next size in the list */
 
-            while ((*ptr >= '0') && (*ptr <= '9'))
-              {
-                ptr++;
-              }
+              while ((*ptr >= '0') && (*ptr <= '9'))
+                {
+                  ptr++;
+                }
 
-            if (*ptr == ',')
-              {
-                ptr++;
-              }
+              if (*ptr == ',')
+                {
+                  ptr++;
+                }
 
-            /* Increment the part number */
+              /* Increment the part number */
 
-            partno++;
-          }
-      }
+              partno++;
+            }
+        }
 #else /* CONFIG_MIKROE_FLASH_PART */
 
       /* Configure the device with no partition support */
@@ -292,17 +294,20 @@ int board_app_initialize(uintptr_t arg)
   /* Create a RAM MTD device if configured */
 
 #if defined(CONFIG_RAMMTD) && defined(CONFIG_MIKROE_RAMMTD)
-  {
-    uint8_t *start = (uint8_t *) kmm_malloc(CONFIG_MIKROE_RAMMTD_SIZE * 1024);
-    mtd = rammtd_initialize(start, CONFIG_MIKROE_RAMMTD_SIZE * 1024);
-    mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
+    {
+      uint8_t *start =
+          (uint8_t *) kmm_malloc(CONFIG_MIKROE_RAMMTD_SIZE * 1024);
+      mtd = rammtd_initialize(start, CONFIG_MIKROE_RAMMTD_SIZE * 1024);
+      mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
 
-    /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the
+       * MTD device
+       */
 
 #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-    smart_initialize(CONFIG_MIKROE_RAMMTD_MINOR, mtd, NULL);
+      smart_initialize(CONFIG_MIKROE_RAMMTD_MINOR, mtd, NULL);
 #endif
-  }
+    }
 
 #endif /* CONFIG_RAMMTD && CONFIG_MIKROE_RAMMTD */
 
@@ -310,6 +315,7 @@ int board_app_initialize(uintptr_t arg)
 #endif /* CONFIG_STM32_SPI3 */
 
   /* Create the SPI FLASH MTD instance */
+
   /* The M25Pxx is not a good media to implement a file system..
    * its block sizes are too large
    */
@@ -322,10 +328,12 @@ int board_app_initialize(uintptr_t arg)
   syslog(LOG_INFO, "Bind SDIO to the MMC/SD driver, minor=%d\n",
          CONFIG_NSH_MMCSDMINOR);
 
-  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
+                                CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SPI to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to bind SPI to the MMC/SD driver:"
+                      " %d\n", ret);
     }
   else
     {
@@ -334,8 +342,8 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation. stm32_usbhost_initialize() starts a
+   * thread will monitor for USB connection and disconnection events.
    */
 
   ret = stm32_usbhost_initialize();

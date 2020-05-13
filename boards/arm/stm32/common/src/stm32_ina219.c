@@ -1,7 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_ina219.c
  *
- *   Copyright (C) 2018 Erle Robotics (Juan Flores Muñoz). All rights reserved.
+ *   Copyright (C) 2018 Erle Robotics (Juan Flores Muñoz). All rights
+ *     reserved.
  *   Author: Erle Robotics (Juan Flores Muñoz) <juan@erlerobotics.com>
  *
  * Redistribution and use in source and binary forms, with or without

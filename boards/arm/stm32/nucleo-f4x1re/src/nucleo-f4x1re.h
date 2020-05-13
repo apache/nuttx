@@ -50,7 +50,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
 #define HAVE_MMCSD 1
 #if !defined(CONFIG_STM32_SDIO) || !defined(CONFIG_MMCSD) || \
@@ -58,10 +58,9 @@
 #  undef HAVE_MMCSD
 #endif
 
-/* LED.  User LD2: the green LED is a user LED connected to Arduino signal D13
- * corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on the
- * STM32
- * target.
+/* LED.  User LD2: the green LED is a user LED connected to Arduino signal
+ * D13 corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on
+ * the STM32 target.
  *
  * - When the I/O is HIGH value, the LED is on.
  * - When the I/O is LOW, the LED is off.
@@ -233,7 +232,7 @@ extern struct sdio_dev_s *g_sdio;
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
