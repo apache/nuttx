@@ -1527,7 +1527,9 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, clrbits, setbits);
       spi_enable(priv, true);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so the subsequence re-configurations will be
+       * faster
+       */
 
       priv->nbits = savbits;  /* nbits has been clobbered... save the signed value */
     }
@@ -1821,7 +1823,9 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   size_t nbytes = (priv->nbits > 8) ? nwords << 1 : nwords;
 
 #ifdef CONFIG_STM32H7_SPI_DMATHRESHOLD
-  /* If this is a small SPI transfer, then let spi_exchange_nodma() do the work. */
+  /* If this is a small SPI transfer, then let spi_exchange_nodma() do the
+   * work.
+   */
 
   if (nbytes <= CONFIG_STM32H7_SPI_DMATHRESHOLD)
     {
@@ -2151,7 +2155,9 @@ static int spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
       if (sval <= 0)
         {
-          /* Exclusive lock is held, do not allow entry to deeper PM states. */
+          /* Exclusive lock is held, do not allow entry to deeper PM
+           * states.
+           */
 
           return -EBUSY;
         }
