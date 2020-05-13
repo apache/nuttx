@@ -83,7 +83,7 @@
 int board_nunchuck_initialize(int devno, int busno)
 {
   FAR struct i2c_master_s *i2c;
-  char devpath[14];
+  char devpath[15];
   int ret;
 
   iinfo("Initializing Wii Nunchuck!\n");
@@ -98,10 +98,10 @@ int board_nunchuck_initialize(int devno, int busno)
 
   /* Register the joystick device as /dev/nunchuck0 */
 
-  iinfo("Initialize joystick driver: %s\n", devname);
+  snprintf(devpath, 15, "/dev/nunchuck%d", devno);
+  iinfo("Initialize joystick driver: %s\n", devpath);
 
-  snprintf(devpath, 14, "/dev/nunchuck%d", devno);
-  ret = nunchuck_register(devname, i2c);
+  ret = nunchuck_register(devpath, i2c);
   if (ret < 0)
     {
       ierr("ERROR: nunchuck_register failed: %d\n", ret);
