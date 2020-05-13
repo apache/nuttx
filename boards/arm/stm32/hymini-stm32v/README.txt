@@ -483,7 +483,7 @@ Where <subdir> is one of the following:
     more information.
 
       CONFIG_HOST_LINUX=y                      : Linux host
-      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery toolchain under Linux
+      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y      : GNU EABI toolchain for Linux
 
     USB debug output can be enabled as by changing the following
     settings in the configuration file:

@@ -625,27 +625,6 @@ GNU Toolchain Options
   You may also have to modify the PATH environment variable if your make cannot
   find the tools.
 
-  NOTE:  Using native Windows toolchains under Cygwin has some limitations.
-  This incuudes the CodeSourcery (for Windows) and devkitARM toolchains are
-  Windows native toolchains.  The biggest limitations are:
-
-  1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
-     performed automatically in the Cygwin makefiles using the 'cygpath' utility
-     but you might easily find some new path problems.  If so, check out 'cygpath -w'
-
-  2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic links
-     are used in Nuttx (e.g., include/arch).  The make system works around these
-     problems for the Windows tools by copying directories instead of linking them.
-     But this can also cause some confusion for you:  For example, you may edit
-     a file in a "linked" directory and find that your changes had no effect.
-     That is because you are building the copy of the file in the "fake" symbolic
-     directory.  If you use a Windows toolchain, you should get in the habit of
-     making like this:
-
-       make clean_context all
-
-     An alias in your .bashrc file might make that less painful.
-
 Freedom K64F Configuration Options
 ==================================
 

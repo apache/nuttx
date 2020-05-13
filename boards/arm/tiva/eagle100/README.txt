@@ -210,12 +210,12 @@ Configuration Sub-Directories
 
     NOTES:
 
-    1. This configuration is set to use Cygwin under Windows and the
-       CodeSourcery toolchain.  That, however, is easily reconfigurable:
+    1. This configuration is set to use Cygwin under Windows and the ARM
+       EABI GCC toolchain.  That, however, is easily reconfigurable:
 
          CONFIG_HOST_WINDOWS=y
          CONFIG_WINDOWS_CYGWIN=y
-         CONFIG_ARM7M_TOOLCHAIN_CODESOURCERYW=y
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y
 
   httpd:
     This builds the uIP web server example using the examples/webserver application
@@ -223,12 +223,13 @@ Configuration Sub-Directories
 
     NOTES:
 
-    1. This configuration is set to use Cygwin under Windows and the
-       CodeSourcery toolchain.  That, however, is easily reconfigurable:
+    1. This configuration is set to use Cygwin under Windows and the ARM
+       EABI GCC toolchain.  That, however, is easily reconfigurable:
 
          CONFIG_HOST_WINDOWS=y
          CONFIG_WINDOWS_CYGWIN=y
-         CONFIG_ARM7M_TOOLCHAIN_CODESOURCERYW=y
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y
 
        This example can only be built using the buildroot toolchain
        with NXFLAT support

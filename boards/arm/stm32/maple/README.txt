@@ -28,11 +28,9 @@ Contents
 Development Environment
 =======================
 
-  Either Linux (recommended), Mac or Cygwin on Windows can be used for the development environment.
-  The source has been built only using the GNU toolchain (see below).  Other
-  toolchains will likely cause problems. Testing was performed using the Cygwin
-  environment because the Raisonance R-Link emulatator and some RIDE7 development tools
-  were used and those tools works only under Windows.
+  Either Linux (recommended), Mac or Cygwin on Windows can be used for the development
+  environment.  The source has been built only using the GNU toolchain (see below).
+  Other toolchains will likely cause problems.
 
 DFU
 ===

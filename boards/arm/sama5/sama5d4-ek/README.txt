@@ -124,41 +124,9 @@ GNU Toolchain Options
   a different toolchain, you simply need to add change to one of the following
   configuration options to your .config (or defconfig) file:
 
-    CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV7A_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windows
-    CONFIG_ARMV7A_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_ARMV7A_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
-    CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
-    CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
-
-  The CodeSourcery GCC toolchain is selected with
-  CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y and setting the PATH variable
-  appropriately.
-
-  NOTE about Windows native toolchains
-  ------------------------------------
-
-  There are several limitations to using a Windows based toolchain in a
-  Cygwin environment.  The three biggest are:
-
-  1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
-     performed automatically in the Cygwin makefiles using the 'cygpath'
-     utility but you might easily find some new path problems.  If so, check
-     out 'cygpath -w'
-
-  2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic
-     links are used in Nuttx (e.g., include/arch).  The make system works
-     around these problems for the Windows tools by copying directories
-     instead of linking them.  But this can also cause some confusion for
-     you:  For example, you may edit a file in a "linked" directory and find
-     that your changes had no effect.  That is because you are building the
-     copy of the file in the "fake" symbolic directory.  If you use a\
-     Windows toolchain, you should get in the habit of making like this:
-
-       make clean_context all
-
-     An alias in your .bashrc file might make that less painful.
+    CONFIG_ARMV7A_TOOLCHAIN_BUILDROOT=y  : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIL=y  : Generic GCC ARM EABI toolchain for Linux
+    CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y  : Generic GCC ARM EABI toolchain for Windows
 
 IDEs
 ====
@@ -3607,23 +3575,6 @@ Configurations
      System Type -> Toolchain:
        CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y : GNU EABI toolchain for windows
 
-     That same configuration will work with Atmel GCC toolchain.  The only
-     change required to use the Atmel GCC toolchain is to change the PATH
-     variable so that those tools are selected instead of the CodeSourcery
-     tools.  Try 'which arm-none-eabi-gcc' to make sure that you are
-     selecting the right tool.
-
-     See also the "NOTE about Windows native toolchains" in the section call
-     "GNU Toolchain Options" above.
-
-     !!!WARNING!!! The first time that you type 'make', the system will
-     configure itself based on the settings in the .config file.  One of
-     these settings can cause a lot of confusion if you configure the build
-     in the wrong state:  If you are running on Linux, make *certain* that
-     you have CONFIG_HOST_LINUX=y *before* the first make or you will
-     create a very corrupt configuration that may not be easy to recover
-     from.
-
   4. The SAMA5Dx is running at 528MHz by default in these configurations.
 
        Board Selection -> CPU Frequency
@@ -3714,8 +3665,8 @@ Configurations
        selection can easily be changed by reconfiguring:
 
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
-       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
-       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under Windows
+       CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
        If you are running on Linux, make *certain* that you have
        CONFIG_HOST_LINUX=y *before* the first make or you will create a
@@ -3783,8 +3734,8 @@ Configurations
        selection can easily be changed by reconfiguring:
 
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
-       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
-       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under Windows
+       CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
        If you are running on Linux, make *certain* that you have
        CONFIG_HOST_LINUX=y *before* the first make or you will create a
@@ -3863,7 +3814,7 @@ Configurations
 
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
-       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+       CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIL=y     : GNU EABI toolchain for Windows
 
        If you are running on Linux, make *certain* that you have
        CONFIG_HOST_LINUX=y *before* the first make or you will create a
@@ -4028,13 +3979,12 @@ Configurations
 
     2. By default, this configuration is set up to build on Windows
        under either a Cygwin or MSYS environment using a recent, Windows-
-       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
-       toolchain).  Both the build environment and the toolchain
-       selection can easily be changed by reconfiguring:
+       native, generic ARM EABI GCC toolchain.  Both the build environment
+       and the toolchain selection can easily be changed by reconfiguring:
 
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
-       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
-       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under Windows
+       CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
        If you are running on Linux, make *certain* that you have
        CONFIG_HOST_LINUX=y *before* the first make or you will create a
@@ -4278,13 +4228,12 @@ Configurations
 
     3. By default, this configuration is set up to build on Windows
        under either a Cygwin or MSYS environment using a recent, Windows-
-       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
-       toolchain).  Both the build environment and the toolchain
-       selection can easily be changed by reconfiguring:
+       native, generic ARM EABI GCC toolchain.  Both the build environment
+       and the toolchain selection can easily be changed by reconfiguring:
 
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
-       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+       CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
        If you are running on Linux, make *certain* that you have
        CONFIG_HOST_LINUX=y *before* the first make or you will create a
@@ -4931,13 +4880,12 @@ Configurations
 
     2. By default, this configuration is set up to build on Windows
        under either a Cygwin or MSYS environment using a recent, Windows-
-       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
-       toolchain).  Both the build environment and the toolchain
-       selection can easily be changed by reconfiguring:
+       native, generic ARM EABI GCC toolchain.  Both the build environment
+       and the toolchain selection can easily be changed by reconfiguring:
 
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
-       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
-       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under Windows
+       CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
        If you are running on Linux, make *certain* that you have
        CONFIG_HOST_LINUX=y *before* the first make or you will create a

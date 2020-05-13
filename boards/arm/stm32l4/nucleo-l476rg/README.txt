@@ -99,92 +99,14 @@ GNU Toolchain Options
   The NuttX make system has been modified to support the following different
   toolchain options.
 
-    1. The CodeSourcery GNU toolchain,
-    2. The Atollic Toolchain,
-    3. The devkitARM GNU toolchain,
-    4. Raisonance GNU toolchain, or
-    5. The NuttX buildroot Toolchain (see below).
+  1. The NuttX buildroot Toolchain (see below), or
+  2. Any generic arm-none-eabi GNU toolchain.
 
-  All testing has been conducted using the CodeSourcery toolchain for Linux.
-  To use the Atollic, devkitARM, Raisonance GNU, or NuttX buildroot toolchain,
-  you simply need to add one of the following configuration options to your
-  .config (or defconfig) file:
+  All testing has been conducted using the NuttX Codesourcery toolchain.  To use
+  a different toolchain, you simply need to modify the configuration.  As an
+  example:
 
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=n  : CodeSourcery under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : The Atollic toolchain under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=n      : devkitARM under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=n      : NuttX buildroot under Linux or Cygwin (default)
-
-  If you change the default toolchain, then you may also have to modify the
-  PATH environment variable to include the path to the toolchain binaries.
-
-  NOTE: There are several limitations to using a Windows based toolchain in a
-  Cygwin environment.  The three biggest are:
-
-  1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
-     performed automatically in the Cygwin makefiles using the 'cygpath' utility
-     but you might easily find some new path problems.  If so, check out 'cygpath -w'
-
-  2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic links
-     are used in Nuttx (e.g., include/arch).  The make system works around these
-     problems for the Windows tools by copying directories instead of linking them.
-     But this can also cause some confusion for you:  For example, you may edit
-     a file in a "linked" directory and find that your changes had no effect.
-     That is because you are building the copy of the file in the "fake" symbolic
-     directory.  If you use a Windows toolchain, you should get in the habit of
-     making like this:
-
-       V=1 make clean_context all 2>&1 |tee mout
-
-     An alias in your .bashrc file might make that less painful.
-
-  3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows paths which do not
-     work with the Cygwin make.
-
-       MKDEP = $(TOPDIR)/tools/mknulldeps.sh
-
-  The Atollic "Pro" and "Lite" Toolchain
-  --------------------------------------
-  One problem that I had with the Atollic toolchains is that the provide a gcc.exe
-  and g++.exe in the same bin/ file as their ARM binaries.  If the Atollic bin/ path
-  appears in your PATH variable before /usr/bin, then you will get the wrong gcc
-  when you try to build host executables.  This will cause to strange, uninterpretable
-  errors build some host binaries in tools/ when you first make.
-
-  Also, the Atollic toolchains are the only toolchains that have built-in support for
-  the FPU in these configurations.  If you plan to use the Cortex-M4 FPU, you will
-  need to use the Atollic toolchain for now.  See the FPU section below for more
-  information.
-
-  The Atollic "Lite" Toolchain
-  ----------------------------
-  The free, "Lite" version of the Atollic toolchain does not support C++ nor
-  does it support ar, nm, objdump, or objdcopy. If you use the Atollic "Lite"
-  toolchain, you will have to set:
-
-    CONFIG_HAVE_CXX=n
-
-  In order to compile successfully.  Otherwise, you will get errors like:
-
-    "C++ Compiler only available in TrueSTUDIO Professional"
-
-  The make may then fail in some of the post link processing because of some of
-  the other missing tools.  The Make.defs file replaces the ar and nm with
-  the default system x86 tool versions and these seem to work okay.  Disable all
-  of the following to avoid using objcopy:
-
-    CONFIG_INTELHEX_BINARY=n
-    CONFIG_MOTOROLA_SREC=n
-    CONFIG_RAW_BINARY=n
-
-  devkitARM
-  ---------
-  The devkitARM toolchain includes a version of MSYS make.  Make sure that the
-  the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
-  path or will get the wrong version of make.
+    CONFIG_ARM_TOOLCHAIN_GNU_EABIL : Generic arm-none-eabi toolchain
 
 IDEs
 ====
@@ -639,11 +561,11 @@ Configurations
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. By default, this configuration uses the CodeSourcery toolchain
+    2. By default, this configuration uses the ARM EABI toolchain
        for Linux.  That can easily be reconfigured, of course.
 
        CONFIG_HOST_LINUX=y                     : Builds under Linux
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y : CodeSourcery for Linux
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     : GNU EABI toolchain for Linux
 
     3. Although the default console is USART2 (which would correspond to
        the Virtual COM port) I have done all testing with the console

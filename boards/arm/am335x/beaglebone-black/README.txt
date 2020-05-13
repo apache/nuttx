@@ -210,7 +210,7 @@ Configurations
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin or other POSIX environment
 
      System Type -> Toolchain:
-       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+       CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
   Configuration Sub-directories
   -----------------------------

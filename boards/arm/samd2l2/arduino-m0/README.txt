@@ -130,7 +130,7 @@ Configuration sub-directories
     NOTES:
 
     1. This configuration is set up to build on Windows using the Cygwin
-       environment using the CodeSourcery toolchain.  This can be easily
+       environment using the ARM EABI toolchain.  This can be easily
        changed as described above under "Configurations."
 
     2. By default, this configuration provides a serial console on SERCOM5

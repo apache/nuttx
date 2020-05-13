@@ -534,7 +534,7 @@ Where <subdir> is one of the following:
 
       CONFIG_HOST_WINDOWS=y
       CONFIG_WINDOWS_CYGWIN=y
-      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y
+      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y
 
   nettest:
   -------
@@ -564,7 +564,7 @@ Where <subdir> is one of the following:
 
         CONFIG_HOST_WINDOWS=y                    : Windows
         CONFIG_WINDOWS_CYGWIN=y                  : Under Cygwin
-        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y      : GNU EABI toolchain for Windows
 
        Than can, of course, be easily changes by reconfiguring per Note 1.
 
@@ -573,7 +573,7 @@ Where <subdir> is one of the following:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
 
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y       : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y           : GNU EABI toolchain for Windows
     CONFIG_NSH_DHCPC=n                            : DHCP is disabled
     CONFIG_NSH_IPADDR=(192<<24|168<<16|13<<8|161) : Target IP address 192.168.8.161
     CONFIG_NSH_DRIPADDR=(192<<24|168<<16|13<<8|1) : Host IP address 192.168.8.1
@@ -815,7 +815,7 @@ Where <subdir> is one of the following:
           reconfiguration process.
 
     2. This configuration is currently set up to build under Cygwin on
-       a Windows machine using the CodeSourcery Windows toolchain.
+       a Windows machine using the ARM EABI GCC Windows toolchain.
        That configuration can be easy changed as described in Note 1.
 
   telnetd:
@@ -843,4 +843,4 @@ Where <subdir> is one of the following:
 
       CONFIG_HOST_WINDOWS=y
       CONFIG_WINDOWS_CYGWIN=y
-      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y
+      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y
