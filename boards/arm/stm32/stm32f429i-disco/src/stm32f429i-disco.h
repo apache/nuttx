@@ -117,15 +117,13 @@
 
 /* STMPE811 on I2C3 */
 
-//#define GPIO_I2C3_SCL GPIO_I2C3_SCL_1
-//#define GPIO_I2C3_SDA GPIO_I2C3_SDA_1
-
 #define STMPE811_ADDR1    0x41
 #define STMPE811_ADDR2    0x44
 
 #define GPIO_IO_EXPANDER (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN15)
 
 /* STM32F429 Discovery GPIOs ************************************************/
+
 /* LEDs */
 
 #define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
@@ -143,8 +141,8 @@
 
 /* PWM
  *
- * The STM32F429 Discovery has no real on-board PWM devices, but the board can be
- * configured to output a pulse train using TIM4 CH2 on PD13.
+ * The STM32F429 Discovery has no real on-board PWM devices, but the board
+ * can be configured to output a pulse train using TIM4 CH2 on PD13.
  */
 
 #define STM32F429I_DISCO_PWMTIMER   4
@@ -192,8 +190,7 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
-
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -297,7 +294,6 @@ void stm32_ledpminitialize(void);
 #endif
 
 /****************************************************************************
-
  * Name: stm32_pmbuttons
  *
  * Description:

@@ -176,122 +176,125 @@ int stm32_bringup(void)
         }
 
 #ifdef CONFIG_STM32F429I_DISCO_FLASH_PART
-      {
-        int partno;
-        int partsize;
-        int partoffset;
-        int partszbytes;
-        int erasesize;
-        const char *partstring = CONFIG_STM32F429I_DISCO_FLASH_PART_LIST;
-        const char *ptr;
-        FAR struct mtd_dev_s *mtd_part;
-        char  partref[4];
+        {
+          int partno;
+          int partsize;
+          int partoffset;
+          int partszbytes;
+          int erasesize;
+          const char *partstring = CONFIG_STM32F429I_DISCO_FLASH_PART_LIST;
+          const char *ptr;
+          FAR struct mtd_dev_s *mtd_part;
+          char  partref[4];
 
-        /* Now create a partition on the FLASH device */
+          /* Now create a partition on the FLASH device */
 
-        partno = 0;
-        ptr = partstring;
-        partoffset = 0;
+          partno = 0;
+          ptr = partstring;
+          partoffset = 0;
 
-        /* Get the Flash erase size */
+          /* Get the Flash erase size */
 
-        erasesize = geo.erasesize;
+          erasesize = geo.erasesize;
 
-        while (*ptr != '\0')
-          {
-            /* Get the partition size */
+          while (*ptr != '\0')
+            {
+              /* Get the partition size */
 
-            partsize = atoi(ptr);
-            partszbytes = (partsize << 10); /* partsize is defined in KB */
+              partsize = atoi(ptr);
+              partszbytes = (partsize << 10); /* partsize is defined in KB */
 
-            /* Check if partition size is bigger then erase block */
+              /* Check if partition size is bigger then erase block */
 
-            if (partszbytes < erasesize)
-              {
-                ferr("ERROR: Partition size is lesser than erasesize!\n");
-                return -1;
-              }
+              if (partszbytes < erasesize)
+                {
+                  ferr("ERROR: Partition size is lesser than erasesize!\n");
+                  return -1;
+                }
 
-            /* Check if partition size is multiple of erase block */
+              /* Check if partition size is multiple of erase block */
 
-            if ((partszbytes % erasesize) != 0)
-              {
-                ferr("ERROR: Partition size is not multiple of erasesize!\n");
-                return -1;
-              }
+              if ((partszbytes % erasesize) != 0)
+                {
+                  ferr("ERROR: Partition size is not multiple of"
+                       " erasesize!\n");
+                  return -1;
+                }
 
-            mtd_part    = mtd_partition(mtd, partoffset, partszbytes / erasesize);
-            partoffset += partszbytes / erasesize;
+              mtd_part    = mtd_partition(mtd, partoffset,
+                                          partszbytes / erasesize);
+              partoffset += partszbytes / erasesize;
 
 #ifdef CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART
-            /* Test if this is the config partition */
+              /* Test if this is the config partition */
 
-            if (CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART_NUMBER == partno)
-              {
-                /* Register the partition as the config device */
+              if (CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART_NUMBER == partno)
+                {
+                  /* Register the partition as the config device */
 
-                mtdconfig_register(mtd_part);
-              }
-            else
+                  mtdconfig_register(mtd_part);
+                }
+              else
 #endif
-              {
-                /* Now initialize a SMART Flash block device and bind it
-                 * to the MTD device.
-                 */
+                {
+                  /* Now initialize a SMART Flash block device and bind it
+                   * to the MTD device.
+                   */
 
 #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-                sprintf(partref, "p%d", partno);
-                smart_initialize(CONFIG_STM32F429I_DISCO_FLASH_MINOR, mtd_part, partref);
+                  sprintf(partref, "p%d", partno);
+                  smart_initialize(CONFIG_STM32F429I_DISCO_FLASH_MINOR,
+                                   mtd_part, partref);
 #endif
-              }
+                }
 
 #if defined(CONFIG_MTD_PARTITION_NAMES)
-            /* Set the partition name */
+              /* Set the partition name */
 
-            if (mtd_part == NULL)
-              {
-                ferr("ERROR: failed to create partition %s\n", partname);
-                return -1;
-              }
+              if (mtd_part == NULL)
+                {
+                  ferr("ERROR: failed to create partition %s\n", partname);
+                  return -1;
+                }
 
-            mtd_setpartitionname(mtd_part, partname);
+              mtd_setpartitionname(mtd_part, partname);
 
-            /* Now skip to next name.  We don't need to split the string here
-             * because the MTD partition logic will only display names up to
-             * the comma, thus allowing us to use a single static name
-             * in the code.
-             */
+              /* Now skip to next name.  We don't need to split the string
+               * here because the MTD partition logic will only display names
+               * up to the comma, thus allowing us to use a single static
+               * name in the code.
+               */
 
-            while (*partname != ',' && *partname != '\0')
-              {
-                /* Skip to next ',' */
+              while (*partname != ',' && *partname != '\0')
+                {
+                  /* Skip to next ',' */
 
-                partname++;
-              }
+                  partname++;
+                }
 
-            if (*partname == ',')
-              {
-                partname++;
-              }
+              if (*partname == ',')
+                {
+                  partname++;
+                }
 #endif
 
-            /* Update the pointer to point to the next size in the list */
+              /* Update the pointer to point to the next size in the list */
 
-            while ((*ptr >= '0') && (*ptr <= '9'))
-              {
-                ptr++;
-              }
+              while ((*ptr >= '0') && (*ptr <= '9'))
+                {
+                  ptr++;
+                }
 
-            if (*ptr == ',')
-              {
-                ptr++;
-              }
+              if (*ptr == ',')
+                {
+                  ptr++;
+                }
 
-            /* Increment the part number */
+              /* Increment the part number */
 
-            partno++;
-          }
-      }
+              partno++;
+            }
+        }
 #else /* CONFIG_STM32F429I_DISCO_FLASH_PART */
 
       /* Configure the device with no partition support */
@@ -317,23 +320,27 @@ int stm32_bringup(void)
 #if defined(CONFIG_RAMMTD) && defined(CONFIG_STM32F429I_DISCO_RAMMTD)
   /* Create a RAM MTD device if configured */
 
-  {
-    uint8_t *start = (uint8_t *) kmm_malloc(CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
-    mtd = rammtd_initialize(start, CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
-    mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
+    {
+      uint8_t *start =
+          (uint8_t *) kmm_malloc(CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
+      mtd = rammtd_initialize(start,
+                              CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
+      mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
 
-    /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the MTD
+       * device
+       */
 
 #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-    smart_initialize(CONFIG_STM32F429I_DISCO_RAMMTD_MINOR, mtd, NULL);
+      smart_initialize(CONFIG_STM32F429I_DISCO_RAMMTD_MINOR, mtd, NULL);
 #endif
-  }
+    }
 
 #endif /* CONFIG_RAMMTD && CONFIG_STM32F429I_DISCO_RAMMTD */
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
+   * thread will monitor for USB connection and disconnection events.
    */
 
   ret = stm32_usbhost_initialize();
@@ -368,10 +375,10 @@ int stm32_bringup(void)
   ret = board_l3gd20_initialize(0, 5);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize l3gd20 sensor: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize l3gd20 sensor:"
+             " %d\n", ret);
     }
 #endif
-
 
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
