@@ -420,7 +420,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
       (gdb) target remote localhost:3333
 
     NOTE:  The name of your GDB program may differ.  For example, with the
-    CodeSourcery toolchain, the ARM GDB would be called arm-none-eabi-gdb.
+    ARM EABI toolchain, the ARM GDB would be called arm-none-eabi-gdb.
 
     After starting GDB, you can load the NuttX ELF file:
 
@@ -780,7 +780,7 @@ Configuration Sub-Directories
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
     2. The mouse is really useless with no display and no cursor.  So this
        configuration is only suited for low-level testing.  It is also awkward
@@ -888,12 +888,12 @@ Configuration Sub-Directories
 
     NOTES:
 
-    1. Uses the CodeSourcery EABI toolchain under Windows.  But that is
+    1. Uses the ARM EABI toolchain under Windows.  But that is
        easily reconfigured:
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_HOST_WINDOWS_CYGWIN=y            : under Cygwin
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery toolchain
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
   STATUS:
     2015-06-02.  This configuration was added in an attempt to replace

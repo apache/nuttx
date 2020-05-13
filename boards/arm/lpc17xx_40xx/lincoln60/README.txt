@@ -293,7 +293,7 @@ Where <subdir> is one of the following:
           reconfiguration process.
 
     2. This configuration is setup to build under Windows with Cygwin using
-       the CodeSourcery toolchain.  That is, however, easily reconfigured.
+       the ARM EABI toolchain.  That is, however, easily reconfigured.
 
     3. This configuration uses a serial console on UART0 at 115200 8N1.
        This is the serial port at the connector labelled COM1 on the
@@ -343,12 +343,12 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. Uses the CodeSourcery EABI toolchain under Windows.  But that is
+    1. Uses the ARM EABI toolchain under Windows.  But that is
        easily reconfigured:
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_HOST_WINDOWS_CYGWIN=y            : under Cygwin
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery toolchain
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
   STATUS:
     2015-06-06:  The BINFS CGI files are seems to be running, but the

@@ -521,7 +521,7 @@ Where <subdir> is one of the following:
     =========== ======================= ================================
     Platform    Windows with Cygwin (2) Windows with Cygwin (2)
     ----------- ----------------------- --------------------------------
-    Toolchain:  NuttX buildroot (1)     Codesourcery for Windows (1)
+    Toolchain:  NuttX buildroot (1)     ARM EABI GCC for Windows (1)
     ----------- ----------------------- --------------------------------
     Loader:     DfuSe                   DfuSe
     ----------- ----------------------- --------------------------------
@@ -606,8 +606,8 @@ Where <subdir> is one of the following:
     focuses on general window controls, movement, mouse and keyboard
     input.
 
-      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
-      CONFIG_LCD_RPORTRAIT=y        : 240x320 reverse portrait
+      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU EABI toolchain for Windows
+      CONFIG_LCD_RPORTRAIT=y              : 240x320 reverse portrait
 
     NOTES:
 
@@ -795,12 +795,12 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. Default configuration is Cygwin under windows using the CodeSourcery
+    2. Default configuration is Cygwin under windows using the ARM EABI
        toolchain:
 
          CONFIG_HOST_WINDOWS=y                   : Windows
          CONFIG_WINDOWS_CYGWIN=y                 : Cygwin
-         CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
     3. CONFIG_ARCH_CUSTOM_PMINIT and CONFIG_ARCH_IDLE_CUSTOM are necessary
        parts of the PM configuration:

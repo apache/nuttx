@@ -116,9 +116,9 @@ GNU Toolchain Options
   The NuttX make system has been modified to support the following different
   toolchain options.
 
-  1. The NuttX buildroot Toolchain (see below).
-  2. The CodeSourcery GNU toolchain,
-  3. The devkitARM GNU toolchain, or
+  1. The NuttX buildroot Toolchain (see below),
+  2. The ARM EABI GNU toolchain, or
+  3. The devkitARM GNU toolchain.
 
   All testing has been conducted using the NuttX buildroot toolchain.  To use
   the CodeSourcery or devkitARM GNU toolchain, you simply need to build the
@@ -126,7 +126,7 @@ GNU Toolchain Options
 
      make                         # Will build for the NuttX buildroot toolchain
      make CROSSDEV=arm-eabi-      # Will build for the devkitARM toolchain
-     make CROSSDEV=arm-none-eabi- # Will build for the CodeSourcery toolchain
+     make CROSSDEV=arm-none-eabi- # Will build for the ARM EABI GCC toolchain
      make CROSSDEV=arm-nuttx-elf- # Will build for the NuttX buildroot toolchain
 
   Of course, hard coding this CROSS_COMPILE value in Make.defs file will save

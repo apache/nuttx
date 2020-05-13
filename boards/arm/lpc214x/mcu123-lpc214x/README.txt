@@ -31,9 +31,8 @@ GNU Toolchain Options
   The NuttX make system has been modified to support the following different
   toolchain options.
 
-  1. The NuttX buildroot Toolchain (see below).
-  2. The CodeSourcery GNU toolchain,
-  3. The devkitARM GNU toolchain, or
+  1. The NuttX buildroot Toolchain (see below), or
+  2. The GNU EABI toolchain,
 
   All testing has been conducted using the NuttX buildroot toolchain.  To use
   the CodeSourcery or devkitARM GNU toolchain, you simply need to build the
@@ -41,40 +40,11 @@ GNU Toolchain Options
 
      make                         # Will build for the NuttX buildroot toolchain
      make CROSSDEV=arm-eabi-      # Will build for the devkitARM toolchain
-     make CROSSDEV=arm-none-eabi- # Will build for the CodeSourcery toolchain
+     make CROSSDEV=arm-none-eabi- # Will build for the ARM EABI toolchain
      make CROSSDEV=arm-nuttx-elf- # Will build for the NuttX buildroot toolchain
 
   Of course, hard coding this CROSS_COMPILE value in Make.defs file will save
   some repetitive typing.
-
-  NOTE: the CodeSourcery and devkitARM toolchains are Windows native toolchains.
-  The NuttX buildroot toolchain is a Cygwin toolchain.  There are several limitations
-  to using a Windows based toolchain in a Cygwin environment.  The three biggest are:
-
-  1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
-     performed automatically in the Cygwin makefiles using the 'cygpath' utility
-     but you might easily find some new path problems.  If so, check out 'cygpath -w'
-
-  2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic links
-     are used in Nuttx (e.g., include/arch).  The make system works around these
-     problems for the Windows tools by copying directories instead of linking them.
-     But this can also cause some confusion for you:  For example, you may edit
-     a file in a "linked" directory and find that your changes had no effect.
-     That is because you are building the copy of the file in the "fake" symbolic
-     directory.  If you use a Windows toolchain, you should get in the habit of
-     making like this:
-
-       make clean_context; make CROSSDEV=arm-none-eabi-
-
-     An alias in your .bashrc file might make that less painful.
-
-  NOTE 1: The CodeSourcery toolchain (2009q1) may not work with default optimization
-  level of -Os (See Make.defs).  It will work with -O0, -O1, or -O2, but not with
-  -Os.
-
-  NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
-  the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
-  path or will get the wrong version of make.
 
 NuttX buildroot Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^

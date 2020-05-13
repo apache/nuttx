@@ -287,10 +287,6 @@ Debugging
   --------------------------------
   This is an open source server for the ST-Link that I have never used.
 
-  Atollic GDB Server
-  ------------------
-  You can use the Atollic IDE, but I have never done that either.
-
 STM32L-Discovery-specific Configuration Options
 ===============================================
 
@@ -514,7 +510,7 @@ Configuration sub-directories
 
     2. Support for NSH built-in applications is *not* enabled.
 
-    3. By default, this configuration uses the CodeSourcery toolchain
+    3. By default, this configuration uses the ARM EABI toolchain
        for Windows and builds under Cygwin (or probably MSYS).  That
        can easily be reconfigured, of course.
 
@@ -523,7 +519,7 @@ Configuration sub-directories
          CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
 
        System Type:
-         CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
     4. To enable SLCD support:
 

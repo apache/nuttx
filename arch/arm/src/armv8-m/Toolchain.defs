@@ -28,51 +28,9 @@
 #
 
 ifeq ($(filter y, \
-      $(CONFIG_ARMV8M_TOOLCHAIN_ATOLLIC) \
-    ),y)
-  CONFIG_ARMV8M_TOOLCHAIN ?= ATOLLIC
-endif
-
-ifeq ($(filter y, \
       $(CONFIG_ARMV8M_TOOLCHAIN_BUILDROOT) \
     ),y)
   CONFIG_ARMV8M_TOOLCHAIN ?= BUILDROOT
-endif
-
-ifeq ($(filter y, \
-      $(CONFIG_ARMV8M_TOOLCHAIN_CODEREDL) \
-    ),y)
-  CONFIG_ARMV8M_TOOLCHAIN ?= CODEREDL
-endif
-
-ifeq ($(filter y, \
-      $(CONFIG_ARMV8M_TOOLCHAIN_CODEREDW) \
-    ),y)
-  CONFIG_ARMV8M_TOOLCHAIN ?= CODEREDW
-endif
-
-ifeq ($(filter y, \
-      $(CONFIG_ARMV8M_TOOLCHAIN_CODESOURCERYL) \
-    ),y)
-  CONFIG_ARMV8M_TOOLCHAIN ?= CODESOURCERYL
-endif
-
-ifeq ($(filter y, \
-      $(CONFIG_ARMV8M_TOOLCHAIN_CODESOURCERYW) \
-    ),y)
-  CONFIG_ARMV8M_TOOLCHAIN ?= CODESOURCERYW
-endif
-
-ifeq ($(filter y, \
-      $(CONFIG_ARMV8M_TOOLCHAIN_DEVKITARM) \
-    ),y)
-  CONFIG_ARMV8M_TOOLCHAIN ?= DEVKITARM
-endif
-
-ifeq ($(filter y, \
-      $(CONFIG_ARMV8M_TOOLCHAIN_RAISONANCE) \
-    ),y)
-  CONFIG_ARMV8M_TOOLCHAIN ?= RAISONANCE
 endif
 
 ifeq ($(filter y, \
@@ -140,17 +98,6 @@ else ifeq ($(CONFIG_ARCH_CORTEXM35P),y)
   endif
 endif
 
-# Atollic toolchain under Windows
-
-ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),ATOLLIC)
-  CROSSDEV ?= arm-atollic-eabi-
-  ARCROSSDEV ?= arm-atollic-eabi-
-  MAXOPTIMIZATION ?= -Os
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
-endif
 
 # NuttX buildroot under Linux or Cygwin
 
@@ -165,59 +112,6 @@ else
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
   MAXOPTIMIZATION ?= -Os
-endif
-
-# Code Red RedSuite under Linux
-
-ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),CODEREDL)
-  CROSSDEV ?= arm-none-eabi-
-  ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION ?= -Os
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-endif
-
-# Code Red RedSuite under Windows
-
-ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),CODEREDW)
-  CROSSDEV ?= arm-none-eabi-
-  ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION ?= -Os
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
-endif
-
-# CodeSourcery under Linux
-
-ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),CODESOURCERYL)
-  CROSSDEV ?= arm-none-eabi-
-  ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION ?= -O2
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-endif
-
-# CodeSourcery under Windows
-
-ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),CODESOURCERYW)
-  CROSSDEV ?= arm-none-eabi-
-  ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION ?= -Os
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
-endif
-
-# devkitARM under Windows
-
-ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),DEVKITARM)
-  CROSSDEV ?= arm-none-eabi-
-  ARCROSSDEV ?= arm-none-eabi-
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
 
 # Generic GNU EABI toolchain on OS X, Linux or any typical Posix system
@@ -262,13 +156,3 @@ ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),CLANGW)
   endif
 endif
 
-# Raisonance RIDE7 under Windows
-
-ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),RAISONANCE)
-  CROSSDEV ?= arm-none-eabi-
-  ARCROSSDEV ?= arm-none-eabi-
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-endif

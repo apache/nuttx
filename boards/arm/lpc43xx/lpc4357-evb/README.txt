@@ -271,8 +271,8 @@ Code Red IDE/Tools
   By default, the configurations here assume that you are executing directly
   from SRAM.
 
-    CONFIG_LPC43_BOOT_SRAM=y           : Executing in SRAM
-    CONFIG_ARMV7M_TOOLCHAIN_CODEREDW=y : Code Red under Windows
+    CONFIG_LPC43_BOOT_SRAM=y            : Executing in SRAM
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y : GNU EABI toolchain for Linux
 
   To execute from SPIFI, you would need to set:
 
@@ -410,31 +410,6 @@ the following lines in each Make.defs file:
   else
     ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
   endif
-
-Configuration Changes
----------------------
-
-Below are all of the configuration changes that I had to make to boards/stm3240g-eval/nsh2
-in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
-
-  -CONFIG_ARCH_FPU=n                       : Enable FPU support
-  +CONFIG_ARCH_FPU=y
-
-  -CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : Disable the CodeSourcery toolchain
-  +CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=n
-
-  -CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=n       : Enable the Atollic toolchains
-  +CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y       :
-
-  -CONFIG_INTELHEX_BINARY=y                : Suppress generation FLASH download formats
-  +CONFIG_INTELHEX_BINARY=n                : (Only necessary with the "Lite" version)
-
-  -CONFIG_HAVE_CXX=y                       : Suppress generation of C++ code
-  +CONFIG_HAVE_CXX=n                       : (Only necessary with the "Lite" version)
-
-See the section above on Toolchains, NOTE 2, for explanations for some of
-the configuration settings.  Some of the usual settings are just not supported
-by the "Lite" version of the Atollic toolchain.
 
 LPC4357-EVB Configuration Options
 =====================================
@@ -649,8 +624,8 @@ Where <subdir> is one of the following:
     2. The project can exucute directly from SRAM with NuttX loaded by a debugger
        by setting the following configuration options.
 
-         CONFIG_LPC43_BOOT_SRAM=y           : Executing in SRAM
-         CONFIG_ARMV7M_TOOLCHAIN_CODEREDW=y : Code Red under Windows
+         CONFIG_LPC43_BOOT_SRAM=y            : Executing in SRAM
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU EABI toolchain for Windows
 
     3. To execute from SPIFI, you would need to set:
 

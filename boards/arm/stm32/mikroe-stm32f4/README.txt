@@ -181,31 +181,6 @@ the following lines in each Make.defs file:
     ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
   endif
 
-Configuration Changes
----------------------
-
-Below are all of the configuration changes that I had to make to boards/stm3240g-eval/nsh2
-in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
-
-  -CONFIG_ARCH_FPU=n                       : Enable FPU support
-  +CONFIG_ARCH_FPU=y
-
-  -CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : Disable the CodeSourcery toolchain
-  +CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=n
-
-  -CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=n       : Enable the Atollic toolchain
-  +CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y       :
-
-  -CONFIG_INTELHEX_BINARY=y                : Suppress generation FLASH download formats
-  +CONFIG_INTELHEX_BINARY=n                : (Only necessary with the "Lite" version)
-
-  -CONFIG_HAVE_CXX=y                       : Suppress generation of C++ code
-  +CONFIG_HAVE_CXX=n                       : (Only necessary with the "Lite" version)
-
-See the section above on Toolchains, NOTE 2, for explanations for some of
-the configuration settings.  Some of the usual settings are just not supported
-by the "Lite" version of the Atollic toolchain.
-
 Mikroe-STM32F4-specific Configuration Options
 ===============================================
 
@@ -518,7 +493,7 @@ Where <subdir> is one of the following:
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
        This is easily changed by modifying the configuration.
 
@@ -647,13 +622,13 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. By default, this configuration uses the CodeSourcery toolchain
+    2. By default, this configuration uses the ARM EABI toolchain
        for Windows and builds under Cygwin (or probably MSYS).  That
        can easily be reconfigured, of course.
 
        CONFIG_HOST_WINDOWS=y                   : Builds under Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y     : GNU EABI toolchain for Windows
 
     3. This configuration does have UART2 output enabled and set up as
        the system logging device:

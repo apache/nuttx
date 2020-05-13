@@ -136,25 +136,6 @@ config ARMV7R_TOOLCHAIN_BUILDROOT
 	select ARCH_TOOLCHAIN_GNU
 	depends on !WINDOWS_NATIVE
 
-config ARMV7R_TOOLCHAIN_CODESOURCERYL
-	bool "CodeSourcery GNU toolchain under Linux"
-	select ARCH_TOOLCHAIN_GNU
-	depends on HOST_LINUX
-	---help---
-		For use with the GNU toolchain built with the NuttX buildroot package.
-		This tools may be arm-nuttx-eabi- or, if ARMV7R_OABI_TOOLCHAIN is set,
-		arm-nuttx-elf-.
-
-config ARMV7R_TOOLCHAIN_CODESOURCERYW
-	bool "CodeSourcery GNU toolchain under Windows"
-	select ARCH_TOOLCHAIN_GNU
-	depends on TOOLCHAIN_WINDOWS
-
-config ARMV7R_TOOLCHAIN_DEVKITARM
-	bool "devkitARM GNU toolchain"
-	select ARCH_TOOLCHAIN_GNU
-	depends on TOOLCHAIN_WINDOWS
-
 config ARMV7R_TOOLCHAIN_GNU_EABIL
 	bool "Generic GNU EABI toolchain under Linux (or other POSIX environment)"
 	select ARCH_TOOLCHAIN_GNU
