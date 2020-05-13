@@ -445,7 +445,7 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
   ret = psock_getsockopt(psock, level, option, value, value_len);
   if (ret < 0)
     {
-      _SO_SETERRNO(psock, -ret);
+      set_errno(-ret);
       return ERROR;
     }
 
