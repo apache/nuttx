@@ -297,6 +297,20 @@ config STM32H7_FLASH_OVERRIDE_I
 
 endchoice # "Override Flash Size Designator"
 
+config STM32H7_FLASH_CR_PSIZE
+	int "Flash program size width"
+	depends on ARCH_CHIP_STM32H7
+	default 3
+	range 0 3
+	---help---
+		On some hardware the fastest 64 bit wide flash writes cause too
+		high power consumption which may compromize the system stability.
+		This option can be used to reduce the program size. The options are:
+		0: 8 bits
+		1: 16 bits
+		2: 32 bits
+		3: 64 bits (default)
+
 config STM32H7_AXI_SRAM_CORRUPTION_WAR
 	bool "Errata 2.2.9 Reading from AXI SRAM data read corruption Workaround"
 	default y

@@ -140,6 +140,12 @@
 
 #endif
 
+#ifndef CONFIG_STM32H7_FLASH_CR_PSIZE
+#define FLASH_CR_PSIZE FLASH_CR_PSIZE_X64
+#else
+#define FLASH_CR_PSIZE (CONFIG_STM32H7_FLASH_CR_PSIZE << FLASH_CR_PSIZE_SHIFT)
+#endif
+
 #define FLASH_KEY1           0x45670123
 #define FLASH_KEY2           0xcdef89ab
 #define FLASH_OPTKEY1        0x08192a3b
@@ -871,7 +877,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
   stm32h7_unlock_flash(priv);
 
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET,
-                            FLASH_CR_PSIZE_MASK, FLASH_CR_PSIZE_X32);
+                            FLASH_CR_PSIZE_MASK, FLASH_CR_PSIZE);
 
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, 0, FLASH_CR_PG);
 
