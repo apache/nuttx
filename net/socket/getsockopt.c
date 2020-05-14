@@ -92,7 +92,8 @@
  ****************************************************************************/
 
 static int psock_socketlevel_option(FAR struct socket *psock, int option,
-                                    FAR void *value, FAR socklen_t *value_len)
+                                    FAR void *value,
+                                    FAR socklen_t *value_len)
 {
   /* Verify that the socket option if valid (but might not be supported ) */
 
@@ -121,7 +122,8 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           default:          /* Other options are passed to usrsock daemon. */
             {
-              return usrsock_getsockopt(conn, SOL_SOCKET, option, value, value_len);
+              return usrsock_getsockopt(conn, SOL_SOCKET,
+                                        option, value, value_len);
             }
         }
     }
@@ -276,7 +278,9 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
         }
         break;
 
-      /* The following are not yet implemented (return values other than {0,1) */
+      /* The following are not yet implemented
+       * (return values other than {0,1})
+       */
 
       case SO_LINGER:     /* Lingers on a close() if data is present */
       case SO_RCVBUF:     /* Sets receive buffer size */
@@ -431,7 +435,8 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
  *
  ****************************************************************************/
 
-int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_len)
+int getsockopt(int sockfd, int level, int option,
+               void *value, socklen_t *value_len)
 {
   FAR struct socket *psock;
   int ret;
