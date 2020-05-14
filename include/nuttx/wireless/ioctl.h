@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/wireless/ioctl.h
  * Wireless character driver IOCTL commands
  *
@@ -33,48 +33,52 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This file includes common definitions to be used in all wireless character drivers
- * (when applicable).
+/* This file includes common definitions to be used in all wireless
+ * character drivers (when applicable).
  */
 
 #ifndef __INCLUDE_NUTTX_WIRELESS_IOCTL_H
 #define __INCLUDE_NUTTX_WIRELESS_IOCTL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
 #ifdef CONFIG_DRIVERS_WIRELESS
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Character Driver IOCTL commands *************************************************/
-/* Non-compatible, NuttX only IOCTL definitions for use with low-level wireless
- * drivers that are accessed via a character device.  Use of these IOCTL commands
- * requires a file descriptor created by the open() interface.
- */
+/****************************************************************************
+ * Character Driver IOCTL commands
+ * Non-compatible, NuttX only IOCTL definitions for use with low-level
+ * wireless drivers that are accessed via a character device.
+ * Use of these IOCTL commands requires a file descriptor created by
+ * the open() interface.
+ ****************************************************************************/
 
-#define WLIOC_SETRADIOFREQ  _WLCIOC(0x0001)  /* arg: Pointer to uint32_t, frequency
-                                             * value (in MHz) */
-#define WLIOC_GETRADIOFREQ  _WLCIOC(0x0002)  /* arg: Pointer to uint32_t, frequency
-                                             * value (in MHz) */
+#define WLIOC_SETRADIOFREQ  _WLCIOC(0x0001)  /* arg: Pointer to uint32_t, */
+                                             /* frequency value (in MHz) */
+#define WLIOC_GETRADIOFREQ  _WLCIOC(0x0002)  /* arg: Pointer to uint32_t, */
+                                             /* frequency value (in MHz) */
 #define WLIOC_SETADDR       _WLCIOC(0x0003)  /* arg: Pointer to address value, format
                                              * of the address is driver specific */
 #define WLIOC_GETADDR       _WLCIOC(0x0004)  /* arg: Pointer to address value, format
                                              * of the address is driver specific */
-#define WLIOC_SETTXPOWER    _WLCIOC(0x0005)  /* arg: Pointer to int32_t, output power
-                                             * (in dBm) */
-#define WLIOC_GETTXPOWER    _WLCIOC(0x0006)  /* arg: Pointer to int32_t, output power
-                                             * (in dBm) */
+#define WLIOC_SETTXPOWER    _WLCIOC(0x0005)  /* arg: Pointer to int32_t, */
+                                             /* output power (in dBm) */
+#define WLIOC_GETTXPOWER    _WLCIOC(0x0006)  /* arg: Pointer to int32_t, */
+                                             /* output power (in dBm) */
 
-/* Device-specific IOCTL commands **************************************************/
+/****************************************************************************
+ * Device-specific IOCTL commands
+ ****************************************************************************/
 
 #define WL_FIRST            0x0001          /* First common command */
 #define WL_NCMDS            0x0006          /* Number of common commands */
@@ -85,7 +89,6 @@
  * must reserve a block of commands as follows in order prevent IOCTL
  * command numbers from overlapping.
  */
-
 
 /* See include/nuttx/wireless/nrf24l01.h */
 
@@ -102,9 +105,9 @@
 #define GS2200M_FIRST       (SX127X_FIRST + SX127X_NCMDS)
 #define GS2200M_NCMDS       9
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* CONFIG_DRIVERS_WIRELESS */
 #endif /* __INCLUDE_NUTTX_WIRELESS_IOCTL_H */
