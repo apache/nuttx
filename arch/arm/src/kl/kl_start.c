@@ -179,7 +179,7 @@ void __start(void)
 
   nx_start();
 
-  /* Shoulnd't get here */
+  /* Shouldn't get here */
 
   for (; ; );
 }

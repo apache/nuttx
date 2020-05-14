@@ -172,7 +172,7 @@ void __start(void)
   showprogress('\n');
   nx_start();
 
-  /* Shoulnd't get here */
+  /* Shouldn't get here */
 
   for (; ; );
 }
