@@ -1725,7 +1725,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, ...)
 }
 
 /****************************************************************************
- * Name: netdev_ioctl
+ * Name: netdev_vioctl
  *
  * Description:
  *   Perform network device specific operations.
