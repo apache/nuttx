@@ -87,7 +87,8 @@
  ****************************************************************************/
 
 static int psock_socketlevel_option(FAR struct socket *psock, int option,
-                                    FAR const void *value, socklen_t value_len)
+                                    FAR const void *value,
+                                    socklen_t value_len)
 {
   /* Verify that the socket option if valid (but might not be supported ) */
 
@@ -259,7 +260,9 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           net_lock();
 
-          /* Set or clear the linger option bit and linger time (in deciseconds) */
+          /* Set or clear the linger option bit and linger time
+           * (in deciseconds)
+           */
 
           if (setting->l_onoff)
             {
@@ -315,8 +318,8 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
  *   See <sys/socket.h> a complete list of values for the socket level
  *   'option' argument.
  *
- *   Protocol level options, such as SOL_TCP, are defined in protocol-specific
- *   header files, for example include/netinet/tcp.h
+ *   Protocol level options, such as SOL_TCP, are defined in
+ *   protocol-specific header files, for example include/netinet/tcp.h
  *
  * Input Parameters:
  *   psock     Socket structure of socket to operate on
@@ -419,8 +422,8 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
  *   See <sys/socket.h> a complete list of values for the socket level
  *   'option' argument.
  *
- *   Protocol level options, such as SOL_TCP, are defined in protocol-specific
- *   header files, for example include/netinet/tcp.h
+ *   Protocol level options, such as SOL_TCP, are defined in
+ *   protocol-specific header files, for example include/netinet/tcp.h
  *
  * Input Parameters:
  *   sockfd    Socket descriptor of socket
