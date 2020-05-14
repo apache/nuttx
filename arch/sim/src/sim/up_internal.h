@@ -373,6 +373,7 @@ void vpnkit_ifdown(void);
 #ifdef CONFIG_SIM_NETDEV
 int netdriver_init(void);
 void netdriver_setmacaddr(unsigned char *macaddr);
+void netdriver_setmtu(int mtu);
 void netdriver_loop(void);
 #endif
 

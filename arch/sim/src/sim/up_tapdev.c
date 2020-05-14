@@ -92,6 +92,7 @@ struct sel_arg_struct
  ****************************************************************************/
 
 void netdriver_setmacaddr(unsigned char *macaddr);
+void netdriver_setmtu(int mtu);
 
 /****************************************************************************
  * Private Data
@@ -219,15 +220,29 @@ void tapdev_init(void)
   ifr.ifr_ifindex = if_nametoindex(gdevname);
 
   ret = ioctl(sockfd, SIOCBRADDIF, &ifr);
-  close(sockfd);
   if (ret < 0)
     {
       printf("TAPDEV: ioctl failed (can't add interface %s to "
              "bridge %s): %d\r\n",
              gdevname, CONFIG_SIM_NET_BRIDGE_DEVICE, -ret);
+      close(sockfd);
       close(tapdevfd);
       return;
-   }
+    }
+
+  ret = ioctl(sockfd, SIOCGIFMTU, &ifr);
+  close(sockfd);
+  if (ret < 0)
+    {
+      printf("TAPDEV: ioctl failed (can't get MTU "
+             "from %s): %d\r\n", gdevname, -ret);
+      close(tapdevfd);
+      return;
+    }
+  else
+    {
+      netdriver_setmtu(ifr.ifr_mtu);
+    }
 #endif
 
   gtapdevfd = tapdevfd;
@@ -341,7 +356,8 @@ void tapdev_ifup(in_addr_t ifaddr)
   ret = ioctl(sockfd, SIOCGIFFLAGS, (unsigned long)&ifr);
   if (ret < 0)
     {
-      printf("TAPDEV: ioctl failed (can't get interface flags): %d\r\n", -ret);
+      printf("TAPDEV: ioctl failed "
+             "(can't get interface flags): %d\r\n", -ret);
       close(sockfd);
       return;
     }
@@ -350,7 +366,8 @@ void tapdev_ifup(in_addr_t ifaddr)
   ret = ioctl(sockfd, SIOCSIFFLAGS, (unsigned long)&ifr);
   if (ret < 0)
     {
-      printf("TAPDEV: ioctl failed (can't set interface flags): %d\r\n", -ret);
+      printf("TAPDEV: ioctl failed "
+             "(can't set interface flags): %d\r\n", -ret);
       close(sockfd);
       return;
     }
@@ -405,7 +422,8 @@ void tapdev_ifdown(void)
       ret = ioctl(sockfd, SIOCDELRT, (unsigned long)&ghostroute);
       if (ret < 0)
         {
-          printf("TAPDEV: ioctl failed (can't delete host route): %d\r\n", -ret);
+          printf("TAPDEV: ioctl failed "
+                 "(can't delete host route): %d\r\n", -ret);
         }
 
       close(sockfd);
