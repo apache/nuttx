@@ -84,7 +84,10 @@
 #define SPI_MAXFREQ  CONFIG_WL_GS2200M_SPI_FREQUENCY
 #define NRESPMSG     (16 + 2)
 
+#define BULK_CMD_HDR_SIZE_WITH_GUARD 36
+
 #define MAX_PKT_LEN  1500
+#define MAX_PAYLOAD  (MAX_PKT_LEN - BULK_CMD_HDR_SIZE_WITH_GUARD)
 #define MAX_NOTIF_Q  16
 
 #define WR_REQ       0x01
@@ -1853,6 +1856,11 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
 
   memset(cmd, 0, sizeof(cmd));
 
+  if (MAX_PAYLOAD <= msg->len)
+    {
+      msg->len = MAX_PAYLOAD;
+    }
+
   /* Convert the data length to 4 ascii char */
 
   _to_ascii_char(msg->len, digits);
@@ -1883,7 +1891,6 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
     }
 
   bulk_hdr_size = strlen(cmd);
-  memset(dev->tx_buff, 0, sizeof(dev->tx_buff));
   memcpy(dev->tx_buff, cmd, bulk_hdr_size);
   memcpy(dev->tx_buff + bulk_hdr_size, msg->buf, msg->len);
 
