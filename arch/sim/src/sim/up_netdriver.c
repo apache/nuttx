@@ -48,6 +48,7 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -68,10 +69,6 @@
 static struct work_s g_timer_work;
 static struct work_s g_avail_work;
 static struct work_s g_recv_work;
-
-/* A single packet buffer is used */
-
-static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /* Ethernet peripheral state */
 
@@ -126,10 +123,12 @@ static void netdriver_recv_work(FAR void *arg)
 
   net_lock();
 
-  /* netdev_read will return 0 on a timeout event and >0 on a data received event */
+  /* netdev_read will return 0 on a timeout event and > 0
+   * on a data received event
+   */
 
   dev->d_len = netdev_read((FAR unsigned char *)dev->d_buf,
-                           CONFIG_NET_ETH_PKTSIZE);
+                           dev->d_pktsize);
   if (dev->d_len > 0)
     {
       NETDEV_RXPACKETS(dev);
@@ -149,7 +148,9 @@ static void netdriver_recv_work(FAR void *arg)
           pkt_input(dev);
 #endif /* CONFIG_NET_PKT */
 
-          /* We only accept IP packets of the configured type and ARP packets */
+          /* We only accept IP packets of the configured type
+           * and ARP packets
+           */
 
 #ifdef CONFIG_NET_IPv4
           if (eth->type == HTONS(ETHTYPE_IP))
@@ -325,14 +326,29 @@ static int netdriver_txavail(FAR struct net_driver_s *dev)
 int netdriver_init(void)
 {
   FAR struct net_driver_s *dev = &g_sim_dev;
+  void *pktbuf;
+  int pktsize;
 
   /* Internal initialization */
 
   netdev_init();
 
+  /* Update the buffer size */
+
+  pktsize = dev->d_pktsize ? dev->d_pktsize :
+            (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE);
+
+  /* Allocate packet buffer */
+
+  pktbuf = kmm_malloc(pktsize);
+  if (pktbuf == NULL)
+    {
+      return -ENOMEM;
+    }
+
   /* Set callbacks */
 
-  dev->d_buf     = g_pktbuf;         /* Single packet buffer */
+  dev->d_buf     = pktbuf;
   dev->d_ifup    = netdriver_ifup;
   dev->d_ifdown  = netdriver_ifdown;
   dev->d_txavail = netdriver_txavail;
@@ -345,6 +361,11 @@ int netdriver_init(void)
 void netdriver_setmacaddr(unsigned char *macaddr)
 {
   memcpy(g_sim_dev.d_mac.ether.ether_addr_octet, macaddr, IFHWADDRLEN);
+}
+
+void netdriver_setmtu(int mtu)
+{
+  g_sim_dev.d_pktsize = mtu;
 }
 
 void netdriver_loop(void)
