@@ -100,6 +100,9 @@
 #define HAL_TIMEOUT  5000000  /* in us */
 #define WR_MAX_RETRY 100
 
+#define PORT_START   50000
+#define PORT_END     59999
+
 /****************************************************************************
  * Private Data Types
  ****************************************************************************/
@@ -2102,17 +2105,38 @@ static int gs2200m_ioctl_bind(FAR struct gs2200m_dev_s *dev,
                               FAR struct gs2200m_bind_msg *msg)
 {
   enum pkt_type_e type = TYPE_OK;
+  bool auto_assign = false;
+  char port_str[6];
+  uint16_t port;
   char cid = 'z';
   int ret = OK;
 
   wlinfo("+++ start: (cid=%c, port=%s) \n", msg->cid, msg->port);
 
+  port = (uint16_t)strtol(msg->port, NULL, 10);
+
+  if (0 == port)
+    {
+      auto_assign = true;
+      port = PORT_START;
+    }
+
+retry:
+
+  snprintf(port_str, sizeof(port_str), "%d", port);
+
   /* Start TCP/UDP server and retrieve cid */
 
-  type = gs2200m_start_server(dev, msg->port, msg->is_tcp, &cid);
+  type = gs2200m_start_server(dev, port_str, msg->is_tcp, &cid);
 
   if (type != TYPE_OK)
     {
+      if (auto_assign && (port < PORT_END))
+        {
+          port++;
+          goto retry;
+        }
+
       ret = -EINVAL;
       goto errout;
     }
@@ -2200,8 +2224,6 @@ static int gs2200m_ioctl_send(FAR struct gs2200m_dev_s *dev,
 {
   FAR struct gs2200m_bind_msg bmsg;
   enum pkt_type_e type;
-  bool assigned = false;
-  uint16_t s_port;
   int ret = OK;
 
   wlinfo("+++ start: (cid=%c) \n", msg->cid);
@@ -2214,20 +2236,12 @@ static int gs2200m_ioctl_send(FAR struct gs2200m_dev_s *dev,
 
   if (!msg->is_tcp && 'z' == msg->cid)
     {
+      /* NOTE: need to assign port automatically */
+
       memset(&bmsg, 0, sizeof(bmsg));
+      ret = gs2200m_ioctl_bind(dev, &bmsg);
+      ASSERT(0 == ret);
 
-      for (s_port = 50000; s_port < 60000; s_port++)
-        {
-          snprintf(bmsg.port, sizeof(bmsg.port), "%d", s_port);
-
-          if (0 == gs2200m_ioctl_bind(dev, &bmsg))
-            {
-              assigned = true;
-              break;
-            }
-        }
-
-      ASSERT(assigned);
       wlinfo("+++ cid is assigned for udp (cid=%c) \n", bmsg.cid);
       msg->cid = bmsg.cid;
     }
