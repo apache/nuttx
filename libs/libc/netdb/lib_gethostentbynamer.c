@@ -487,9 +487,12 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent_s *host,
 
   /* Verify that we have a buffer big enough to get started (it still may not
    * be big enough).
+   * Verify that there is space for at least one address.
    */
 
-  if (buflen <= sizeof(struct hostent_info_s))
+  namelen = strlen(name);
+  if (buflen < sizeof(struct hostent_info_s) - 1 + sizeof(union dns_addr_u) +
+      namelen + 1)
     {
       return -ERANGE;
     }
@@ -500,13 +503,6 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent_s *host,
   ptr     = info->hi_data;
   buflen -= (sizeof(struct hostent_info_s) - 1);
 
-  /* Verify again that there is space for at least one address. */
-
-  if (buflen < sizeof(union dns_addr_u))
-    {
-      return -ERANGE;
-    }
-
   memset(host, 0, sizeof(struct hostent_s));
   memset(info, 0, sizeof(struct hostent_info_s));
 
@@ -516,7 +512,8 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent_s *host,
 
   /* Try to get the host address using the DNS name server */
 
-  naddr = buflen / sizeof(union dns_addr_u);
+  naddr = (buflen - (namelen + 1)) / sizeof(union dns_addr_u);
+  DEBUGASSERT(naddr >= 1);
   ret = lib_dns_query(name, (FAR union dns_addr_u *)ptr, &naddr);
   if (ret < 0)
     {
@@ -555,18 +552,14 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent_s *host,
       info->hi_lengths[i]   = addrlen;
       info->hi_addrlist[i]  = addrdata;
 
+      DEBUGASSERT(buflen >= namelen + 1 + sizeof(union dns_addr_u));
       ptr    += sizeof(union dns_addr_u);
       buflen -= sizeof(union dns_addr_u);
     }
 
   /* And copy name */
 
-  namelen = strlen(name);
-  if ((namelen + 1) > buflen)
-    {
-      return -ERANGE;
-    }
-
+  DEBUGASSERT(buflen >= namelen + 1);
   strncpy(ptr, name, buflen);
 
   /* Set the address to h_name */
