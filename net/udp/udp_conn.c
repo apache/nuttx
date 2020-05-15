@@ -778,7 +778,9 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
       net_lock();
 
-      /* Is any other UDP connection already bound to this address and port? */
+      /* Is any other UDP connection already bound to this address
+       * and port ?
+       */
 
       if (udp_find_conn(conn->domain, &conn->u, portno) == NULL)
         {
