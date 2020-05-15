@@ -1526,17 +1526,6 @@ static void stm32_endtransfer(struct stm32_dev_s *priv,
 
   sdmmc_putreg32(priv, STM32_SDMMC_XFRDONE_ICR, STM32_SDMMC_ICR_OFFSET);
 
-#if defined(CONFIG_STM32H7_SDMMC_IDMA) && \
-    !defined(CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT)
-  /* invalidate dcache in case of DMA receive. */
-
-  if (priv->receivecnt)
-    {
-      up_invalidate_dcache((uintptr_t)priv->buffer,
-                           (uintptr_t)priv->buffer + priv->remaining);
-    }
-#endif
-
   /* DMA debug instrumentation */
 
   stm32_sample(priv, SAMPLENDX_END_TRANSFER);
@@ -1748,7 +1737,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                */
 
               mcerr("ERROR: Data block CRC failure, remaining: %d\n",
-                   priv->remaining);
+                    priv->remaining);
 
               stm32_endtransfer(priv,
                                 SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
@@ -3081,8 +3070,8 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
           (uintptr_t)buffer + buflen <= SRAM4_END))
         {
           mcerr("invalid IDMA address "
-                  "buffer:0x%08x end:0x%08x\n",
-                  buffer, buffer + buflen - 1);
+                "buffer:0x%08x end:0x%08x\n",
+                buffer, buffer + buflen - 1);
           return -EFAULT;
         }
     }
@@ -3101,8 +3090,8 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
       ((uintptr_t)(buffer + buflen) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0))
     {
       mcerr("dcache unaligned "
-              "buffer:0x%08x end:0x%08x\n",
-              buffer, buffer + buflen - 1);
+            "buffer:0x%08x end:0x%08x\n",
+            buffer, buffer + buflen - 1);
       return -EFAULT;
     }
 #  endif
