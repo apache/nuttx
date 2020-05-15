@@ -54,6 +54,7 @@
 
 #include <arch/irq.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -88,10 +89,6 @@ static dq_queue_t g_free_tcp_connections;
 /* A list of all connected TCP connections */
 
 static dq_queue_t g_active_tcp_connections;
-
-/* Last port used by a TCP connection connection. */
-
-static uint16_t g_last_tcp_port;
 
 /****************************************************************************
  * Private Functions
@@ -263,6 +260,20 @@ static FAR struct tcp_conn_s *
 static int tcp_selectport(uint8_t domain, FAR const union ip_addr_u *ipaddr,
                           uint16_t portno)
 {
+  static uint16_t g_last_tcp_port;
+
+  /* Generate port base dynamically */
+
+  if (g_last_tcp_port == 0)
+    {
+      g_last_tcp_port = clock_systime_ticks() % 32000;
+
+      if (g_last_tcp_port < 4096)
+        {
+          g_last_tcp_port += 4096;
+        }
+    }
+
   if (portno == 0)
     {
       /* No local port assigned. Loop until we find a valid listen port
@@ -604,8 +615,6 @@ void tcp_initialize(void)
       g_tcp_connections[i].tcpstateflags = TCP_CLOSED;
       dq_addlast(&g_tcp_connections[i].node, &g_free_tcp_connections);
     }
-
-  g_last_tcp_port = 1024;
 }
 
 /****************************************************************************
