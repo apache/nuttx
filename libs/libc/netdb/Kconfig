@@ -20,7 +20,7 @@ config LIBC_GAISTRERROR
 
 config NETDB_BUFSIZE
 	int "gethostbyname/gethostbyaddr buffer size"
-	default 128
+	default 256
 
 config NETDB_MAX_IPADDR
 	int "Max number of IP addresses per host"
