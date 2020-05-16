@@ -83,8 +83,8 @@
  *
  *   1) User code calls vfork().  vfork() collects context information and
  *      transfers control up up_vfork().
- *   2) up_vfork()and calls nxtask_vforksetup().
- *   3) nxtask_vforksetup() allocates and configures the child task's TCB.
+ *   2) up_vfork()and calls nxtask_setup_vfork().
+ *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
  *     This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
@@ -95,10 +95,10 @@
  *      - Allocate and initialize the stack
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_vfork() then calls nxtask_vforkstart()
- *   6) nxtask_vforkstart() then executes the child thread.
+ *   5) up_vfork() then calls nxtask_start_vfork()
+ *   6) nxtask_start_vfork() then executes the child thread.
  *
- * nxtask_vforkabort() may be called if an error occurs between steps 3
+ * nxtask_abort_vfork() may be called if an error occurs between steps 3
  * and 6.
  *
  * Input Parameters:
@@ -156,10 +156,10 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_vforksetup((start_t)context->ra, &argsize);
+  child = nxtask_setup_vfork((start_t)context->ra, &argsize);
   if (!child)
     {
-      sinfo("nxtask_vforksetup failed\n");
+      sinfo("nxtask_setup_vfork failed\n");
       return (pid_t)ERROR;
     }
 
@@ -179,7 +179,7 @@ pid_t up_vfork(const struct vfork_s *context)
   if (ret != OK)
     {
       serr("ERROR: up_create_stack failed: %d\n", ret);
-      nxtask_vforkabort(child, -ret);
+      nxtask_abort_vfork(child, -ret);
       return (pid_t)ERROR;
     }
 
@@ -259,11 +259,11 @@ pid_t up_vfork(const struct vfork_s *context)
   child->cmn.xcp.regs[REG_GP]  = newsp;        /* Global pointer */
 #endif
 
-  /* And, finally, start the child task.  On a failure, nxtask_vforkstart()
-   * will discard the TCB by calling nxtask_vforkabort().
+  /* And, finally, start the child task.  On a failure, nxtask_start_vfork()
+   * will discard the TCB by calling nxtask_abort_vfork().
    */
 
-  return nxtask_vforkstart(child);
+  return nxtask_start_vfork(child);
 }
 
 #endif /* CONFIG_ARCH_HAVE_VFORK */

@@ -121,7 +121,7 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   /* Initialize the task control block */
 
-  ret = nxtask_schedsetup(tcb, priority, nxtask_start, entry, ttype);
+  ret = nxtask_setup_scheduler(tcb, priority, nxtask_start, entry, ttype);
   if (ret < OK)
     {
       goto errout_with_tcb;
@@ -129,7 +129,7 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   /* Setup to pass parameters to the new task */
 
-  nxtask_argsetup(tcb, name, argv);
+  nxtask_setup_arguments(tcb, name, argv);
 
   /* Now we have enough in place that we can join the group */
 
@@ -148,7 +148,7 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
   ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret < OK)
     {
-      /* The TCB was added to the active task list by nxtask_schedsetup() */
+      /* The TCB was added to the active task list by nxtask_setup_scheduler() */
 
       dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
       goto errout_with_tcb;

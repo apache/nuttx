@@ -144,7 +144,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 #ifdef CONFIG_SCHED_CHILD_STATUS
   /* Remove the child status entry from old parent task group */
 
-  child = group_removechild(ogrp, chpid);
+  child = group_remove_child(ogrp, chpid);
   if (child)
     {
       /* Has the new parent's task group suppressed child exit status? */
@@ -153,13 +153,13 @@ int task_reparent(pid_t ppid, pid_t chpid)
         {
           /* No.. Add the child status entry to the new parent's task group */
 
-          group_addchild(pgrp, child);
+          group_add_child(pgrp, child);
         }
       else
         {
           /* Yes.. Discard the child status entry */
 
-          group_freechild(child);
+          group_free_child(child);
         }
 
       /* Either case is a success */
@@ -259,7 +259,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 #ifdef CONFIG_SCHED_CHILD_STATUS
   /* Remove the child status entry from old parent TCB */
 
-  child = group_removechild(otcb->group, chpid);
+  child = group_remove_child(otcb->group, chpid);
   if (child)
     {
       /* Has the new parent's task group suppressed child exit status? */
@@ -268,13 +268,13 @@ int task_reparent(pid_t ppid, pid_t chpid)
         {
           /* No.. Add the child status entry to the new parent's task group */
 
-          group_addchild(ptcb->group, child);
+          group_add_child(ptcb->group, child);
         }
       else
         {
           /* Yes.. Discard the child status entry */
 
-          group_freechild(child);
+          group_free_child(child);
         }
 
       /* Either case is a success */

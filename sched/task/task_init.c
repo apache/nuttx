@@ -66,7 +66,7 @@
  *
  * Returned Value:
  *   OK on success; negative error value on failure appropriately.  (See
- *   nxtask_schedsetup() for possible failure conditions).  On failure, the
+ *   nxtask_setup_scheduler() for possible failure conditions).  On failure, the
  *   caller is responsible for freeing the stack memory and for calling
  *   nxsched_release_tcb() to free the TCB (which could be in most any
  *   state).
@@ -109,7 +109,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Initialize the task control block */
 
-  ret = nxtask_schedsetup(ttcb, priority, nxtask_start, entry,
+  ret = nxtask_setup_scheduler(ttcb, priority, nxtask_start, entry,
                           TCB_FLAG_TTYPE_TASK);
   if (ret < OK)
     {
@@ -118,7 +118,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Setup to pass parameters to the new task */
 
-  nxtask_argsetup(ttcb, name, argv);
+  nxtask_setup_arguments(ttcb, name, argv);
 
   /* Now we have enough in place that we can join the group */
 

@@ -936,8 +936,8 @@ void nxtask_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
  *
  * 1) User code calls vfork().  vfork() is provided in architecture-specific
  *    code.
- * 2) vfork()and calls nxtask_vforksetup().
- * 3) nxtask_vforksetup() allocates and configures the child task's TCB.  This
+ * 2) vfork()and calls nxtask_setup_vfork().
+ * 3) nxtask_setup_vfork() allocates and configures the child task's TCB.  This
  *    consists of:
  *    - Allocation of the child task's TCB.
  *    - Initialization of file descriptors and streams
@@ -948,16 +948,16 @@ void nxtask_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
  *    - Allocate and initialize the stack
  *    - Initialize special values in any CPU registers that were not
  *      already configured by up_initial_state()
- * 5) vfork() then calls nxtask_vforkstart()
- * 6) nxtask_vforkstart() then executes the child thread.
+ * 5) vfork() then calls nxtask_start_vfork()
+ * 6) nxtask_start_vfork() then executes the child thread.
  *
- * nxtask_vforkabort() may be called if an error occurs between steps 3 and 6.
+ * nxtask_abort_vfork() may be called if an error occurs between steps 3 and 6.
  *
  ********************************************************************************/
 
-FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize);
-pid_t nxtask_vforkstart(FAR struct task_tcb_s *child);
-void nxtask_vforkabort(FAR struct task_tcb_s *child, int errcode);
+FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr, size_t *argsize);
+pid_t nxtask_start_vfork(FAR struct task_tcb_s *child);
+void nxtask_abort_vfork(FAR struct task_tcb_s *child, int errcode);
 
 /********************************************************************************
  * Name: group_exitinfo

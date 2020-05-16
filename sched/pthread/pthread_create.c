@@ -420,7 +420,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
   /* Initialize the task control block */
 
-  ret = pthread_schedsetup(ptcb, param.sched_priority, pthread_start,
+  ret = pthread_setup_scheduler(ptcb, param.sched_priority, pthread_start,
                            start_routine);
   if (ret != OK)
     {
@@ -429,7 +429,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
     }
 
 #ifdef CONFIG_SMP
-  /* pthread_schedsetup() will set the affinity mask by inheriting the
+  /* pthread_setup_scheduler() will set the affinity mask by inheriting the
    * setting from the parent task.  We need to override this setting
    * with the value from the pthread attributes unless that value is
    * zero:  Zero is the default value and simply means to inherit the

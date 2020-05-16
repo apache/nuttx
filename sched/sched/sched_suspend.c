@@ -43,7 +43,7 @@
  *
  * Description:
  *   Suspend/pause the specified thread.  This is normally calling indirectly
- *   via group_suspendchildren();
+ *   via group_suspend_children();
  *
  ****************************************************************************/
 

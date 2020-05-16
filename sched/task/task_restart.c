@@ -127,7 +127,7 @@ int task_restart(pid_t pid)
   /* Kill any children of this thread */
 
 #ifdef HAVE_GROUP_MEMBERS
-  group_killchildren(tcb);
+  group_kill_children(tcb);
 #endif
 
   /* Remove the TCB from whatever list it is in.  After this point, the TCB

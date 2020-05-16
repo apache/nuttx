@@ -273,7 +273,7 @@ static void nxsig_abnormal_termination(int signo)
    * task group if this_task is a pthread.
    */
 
-  group_killchildren((FAR struct task_tcb_s *)rtcb);
+  group_kill_children((FAR struct task_tcb_s *)rtcb);
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
@@ -333,7 +333,7 @@ static void nxsig_stop_task(int signo)
    * main thread of the task group if this_task is a pthread.
    */
 
-  group_suspendchildren(rtcb);
+  group_suspend_children(rtcb);
 #endif
 
   /* Lock the scheduler so this thread is not pre-empted until after we
