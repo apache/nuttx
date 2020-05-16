@@ -1,15 +1,4 @@
-/Make.dep
-/.depend
 /z80_mem.h
-/*.sym
-/*.asm
-/*.rel
-/*.lst
-/*.adb
 /*.rst
-/*.lib
 /*.lnk
-/*.map
 /*.mem
-/*.ihx
-/*.hex
