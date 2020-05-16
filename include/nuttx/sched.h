@@ -1162,7 +1162,7 @@ int nxsched_get_scheduler(pid_t pid);
  ********************************************************************************/
 
 int nxsched_set_scheduler(pid_t pid, int policy,
-                         FAR const struct sched_param *param);
+                          FAR const struct sched_param *param);
 
 /********************************************************************************
  * Name: nxsched_get_affinity
@@ -1231,7 +1231,7 @@ int nxsched_get_affinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
 
 #ifdef CONFIG_SMP
 int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
-                        FAR const cpu_set_t *mask);
+                         FAR const cpu_set_t *mask);
 #endif
 
 /********************************************************************************
