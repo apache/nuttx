@@ -197,7 +197,7 @@ static inline void nx_workqueues(void)
    * halves.
    */
 
-  work_hpstart();
+  work_start_highpri();
 
 #endif /* CONFIG_SCHED_HPWORK */
 
@@ -206,7 +206,7 @@ static inline void nx_workqueues(void)
    * tasks
    */
 
-  work_lpstart();
+  work_start_lowpri();
 
 #endif /* CONFIG_SCHED_LPWORK */
 

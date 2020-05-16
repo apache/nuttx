@@ -1,35 +1,20 @@
 /****************************************************************************
  * sched/task/task_vfork
  *
- *   Copyright (C) 2013-2014, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -73,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxvfork_namesetup
+ * Name: nxvfork_setup_name
  *
  * Description:
  *   Copy the task name.
@@ -88,19 +73,19 @@
  ****************************************************************************/
 
 #if CONFIG_TASK_NAME_SIZE > 0
-static inline void nxvfork_namesetup(FAR struct tcb_s *parent,
-                                     FAR struct task_tcb_s *child)
+static inline void nxvfork_setup_name(FAR struct tcb_s *parent,
+                                      FAR struct task_tcb_s *child)
 {
   /* Copy the name from the parent into the child TCB */
 
   strncpy(child->cmn.name, parent->name, CONFIG_TASK_NAME_SIZE);
 }
 #else
-#  define nxvfork_namesetup(p,c)
+#  define nxvfork_setup_name(p,c)
 #endif /* CONFIG_TASK_NAME_SIZE */
 
 /****************************************************************************
- * Name: nxvfork_stackargsetup
+ * Name: nxvfork_setup_stackargs
  *
  * Description:
  *   Clone the task arguments in the same relative positions on the child's
@@ -115,8 +100,8 @@ static inline void nxvfork_namesetup(FAR struct tcb_s *parent,
  *
  ****************************************************************************/
 
-static inline int nxvfork_stackargsetup(FAR struct tcb_s *parent,
-                                        FAR struct task_tcb_s *child)
+static inline int nxvfork_setup_stackargs(FAR struct tcb_s *parent,
+                                          FAR struct task_tcb_s *child)
 {
   /* Is the parent a task? or a pthread?  Only tasks (and kernel threads)
    * have command line arguments.
@@ -169,7 +154,7 @@ static inline int nxvfork_stackargsetup(FAR struct tcb_s *parent,
 }
 
 /****************************************************************************
- * Name: nxvfork_argsetup
+ * Name: nxvfork_setup_arguments
  *
  * Description:
  *   Clone the argument list from the parent to the child.
@@ -183,20 +168,20 @@ static inline int nxvfork_stackargsetup(FAR struct tcb_s *parent,
  *
  ****************************************************************************/
 
-static inline int nxvfork_argsetup(FAR struct tcb_s *parent,
-                                   FAR struct task_tcb_s *child)
+static inline int nxvfork_setup_arguments(FAR struct tcb_s *parent,
+                                          FAR struct task_tcb_s *child)
 {
   /* Clone the task name */
 
-  nxvfork_namesetup(parent, child);
+  nxvfork_setup_name(parent, child);
 
   /* Adjust and copy the argv[] array. */
 
-  return nxvfork_stackargsetup(parent, child);
+  return nxvfork_setup_stackargs(parent, child);
 }
 
 /****************************************************************************
- * Name: nxvfork_argsize
+ * Name: nxvfork_sizeof_arguments
  *
  * Description:
  *   Get the parent's argument size.
@@ -209,7 +194,7 @@ static inline int nxvfork_argsetup(FAR struct tcb_s *parent,
  *
  ****************************************************************************/
 
-static inline size_t nxvfork_argsize(FAR struct tcb_s *parent)
+static inline size_t nxvfork_sizeof_arguments(FAR struct tcb_s *parent)
 {
   if ((parent->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
     {
@@ -239,7 +224,7 @@ static inline size_t nxvfork_argsize(FAR struct tcb_s *parent)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtask_vforksetup
+ * Name: nxtask_setup_vfork
  *
  * Description:
  *   The vfork() function has the same effect as fork(), except that the
@@ -255,8 +240,8 @@ static inline size_t nxvfork_argsize(FAR struct tcb_s *parent)
  *
  *   1) User code calls vfork().  vfork() is provided in
  *      architecture-specific code.
- *   2) vfork()and calls nxtask_vforksetup().
- *   3) nxtask_vforksetup() allocates and configures the child task's TCB.
+ *   2) vfork()and calls nxtask_setup_vfork().
+ *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
@@ -267,21 +252,21 @@ static inline size_t nxvfork_argsize(FAR struct tcb_s *parent)
  *      - Allocate and initialize the stack
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) up_vfork() then calls nxtask_vforkstart()
- *   6) nxtask_vforkstart() then executes the child thread.
+ *   5) up_vfork() then calls nxtask_start_vfork()
+ *   6) nxtask_start_vfork() then executes the child thread.
  *
  * Input Parameters:
  *   retaddr - Return address
  *   argsize - Location to return the argument size
  *
  * Returned Value:
- *   Upon successful completion, nxtask_vforksetup() returns a pointer to
+ *   Upon successful completion, nxtask_setup_vfork() returns a pointer to
  *   newly allocated and initialized child task's TCB.  NULL is returned
  *   on any failure and the errno is set appropriately.
  *
  ****************************************************************************/
 
-FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize)
+FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr, size_t *argsize)
 {
   FAR struct tcb_s *parent = this_task();
   FAR struct task_tcb_s *child;
@@ -343,7 +328,7 @@ FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize)
   /* Initialize the task control block.  This calls up_initial_state() */
 
   sinfo("Child priority=%d start=%p\n", priority, retaddr);
-  ret = nxtask_schedsetup(child, priority, retaddr, parent->entry.main,
+  ret = nxtask_setup_scheduler(child, priority, retaddr, parent->entry.main,
                           ttype);
   if (ret < OK)
     {
@@ -352,7 +337,7 @@ FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize)
 
   /* Return the argument size */
 
-  *argsize = nxvfork_argsize(parent);
+  *argsize = nxvfork_sizeof_arguments(parent);
 
   sinfo("parent=%p, returning child=%p\n", parent, child);
   return child;
@@ -364,7 +349,7 @@ errout_with_tcb:
 }
 
 /****************************************************************************
- * Name: nxtask_vforkstart
+ * Name: nxtask_start_vfork
  *
  * Description:
  *   The vfork() function has the same effect as fork(), except that the
@@ -380,8 +365,8 @@ errout_with_tcb:
  *
  *   1) User code calls vfork()
  *   2) Architecture-specific code provides vfork()and calls
- *      nxtask_vforksetup().
- *   3) nxtask_vforksetup() allocates and configures the child task's TCB.
+ *      nxtask_setup_vfork().
+ *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
@@ -392,8 +377,8 @@ errout_with_tcb:
  *      - Allocate and initialize the stack
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) vfork() then calls nxtask_vforkstart()
- *   6) nxtask_vforkstart() then executes the child thread.
+ *   5) vfork() then calls nxtask_start_vfork()
+ *   6) nxtask_start_vfork() then executes the child thread.
  *
  * Input Parameters:
  *   retaddr - The return address from vfork() where the child task
@@ -407,7 +392,7 @@ errout_with_tcb:
  *
  ****************************************************************************/
 
-pid_t nxtask_vforkstart(FAR struct task_tcb_s *child)
+pid_t nxtask_start_vfork(FAR struct task_tcb_s *child)
 {
   FAR struct tcb_s *parent = this_task();
   pid_t pid;
@@ -419,10 +404,10 @@ pid_t nxtask_vforkstart(FAR struct task_tcb_s *child)
 
   /* Duplicate the original argument list in the forked child TCB */
 
-  ret = nxvfork_argsetup(parent, child);
+  ret = nxvfork_setup_arguments(parent, child);
   if (ret < 0)
     {
-      nxtask_vforkabort(child, -ret);
+      nxtask_abort_vfork(child, -ret);
       return ERROR;
     }
 
@@ -431,7 +416,7 @@ pid_t nxtask_vforkstart(FAR struct task_tcb_s *child)
   ret = group_initialize(child);
   if (ret < 0)
     {
-      nxtask_vforkabort(child, -ret);
+      nxtask_abort_vfork(child, -ret);
       return ERROR;
     }
 
@@ -452,7 +437,7 @@ pid_t nxtask_vforkstart(FAR struct task_tcb_s *child)
   ret = task_activate((FAR struct tcb_s *)child);
   if (ret < OK)
     {
-      nxtask_vforkabort(child, -ret);
+      nxtask_abort_vfork(child, -ret);
       sched_unlock();
       return ERROR;
     }
@@ -491,19 +476,19 @@ pid_t nxtask_vforkstart(FAR struct task_tcb_s *child)
 }
 
 /****************************************************************************
- * Name: nxtask_vforkabort
+ * Name: nxtask_abort_vfork
  *
  * Description:
- *   Recover from any errors after nxtask_vforksetup() was called.
+ *   Recover from any errors after nxtask_setup_vfork() was called.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void nxtask_vforkabort(FAR struct task_tcb_s *child, int errcode)
+void nxtask_abort_vfork(FAR struct task_tcb_s *child, int errcode)
 {
-  /* The TCB was added to the active task list by nxtask_schedsetup() */
+  /* The TCB was added to the active task list by nxtask_setup_scheduler() */
 
   dq_rem((FAR dq_entry_t *)child, (FAR dq_queue_t *)&g_inactivetasks);
 

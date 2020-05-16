@@ -115,7 +115,7 @@ static int work_lpthread(int argc, char *argv[])
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_lpstart
+ * Name: work_start_lowpri
  *
  * Description:
  *   Start the low-priority, kernel-mode worker thread(s)
@@ -129,7 +129,7 @@ static int work_lpthread(int argc, char *argv[])
  *
  ****************************************************************************/
 
-int work_lpstart(void)
+int work_start_lowpri(void)
 {
   pid_t pid;
   int wndx;

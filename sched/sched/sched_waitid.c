@@ -83,8 +83,8 @@ static void exited_child(FAR struct tcb_s *rtcb,
 
   /* Discard the child entry */
 
-  group_removechild(rtcb->group, child->ch_pid);
-  group_freechild(child);
+  group_remove_child(rtcb->group, child->ch_pid);
+  group_free_child(child);
 }
 #endif
 
@@ -182,7 +182,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
         {
           /* Check if this specific pid has allocated child status? */
 
-          if (group_findchild(rtcb->group, (pid_t)id) == NULL)
+          if (group_find_child(rtcb->group, (pid_t)id) == NULL)
             {
               /* This specific pid is not a child */
 
@@ -237,7 +237,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
         {
           /* We are waiting for any child to exit */
 
-          if (retains && (child = group_exitchild(rtcb->group)) != NULL)
+          if (retains && (child = group_exit_child(rtcb->group)) != NULL)
             {
               /* A child has exited.  Apparently we missed the signal.
                * Return the exit status and break out of the loop.
@@ -256,7 +256,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
         {
           /* Yes ... Get the current status of the child task. */
 
-          child = group_findchild(rtcb->group, (pid_t)id);
+          child = group_find_child(rtcb->group, (pid_t)id);
           DEBUGASSERT(child);
 
           /* Did the child exit? */

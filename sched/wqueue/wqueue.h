@@ -114,7 +114,7 @@ extern struct lp_wqueue_s g_lpwork;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_hpstart
+ * Name: work_start_highpri
  *
  * Description:
  *   Start the high-priority, kernel-mode work queue.
@@ -129,11 +129,11 @@ extern struct lp_wqueue_s g_lpwork;
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_HPWORK
-int work_hpstart(void);
+int work_start_highpri(void);
 #endif
 
 /****************************************************************************
- * Name: work_lpstart
+ * Name: work_start_lowpri
  *
  * Description:
  *   Start the low-priority, kernel-mode worker thread(s)
@@ -148,7 +148,7 @@ int work_hpstart(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_LPWORK
-int work_lpstart(void);
+int work_start_lowpri(void);
 #endif
 
 /****************************************************************************
@@ -172,7 +172,7 @@ int work_lpstart(void);
 void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx);
 
 /****************************************************************************
- * Name: work_notifier_initialize
+ * Name: work_initialize_notifier
  *
  * Description:
  *   Set up the notification data structures for normal operation.
@@ -180,7 +180,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx);
  ****************************************************************************/
 
 #ifdef CONFIG_WQUEUE_NOTIFIER
-void work_notifier_initialize(void);
+void work_initialize_notifier(void);
 #endif
 
 #endif /* CONFIG_SCHED_WORKQUEUE */

@@ -92,7 +92,7 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
 
   /* Lock this group so that it cannot be deleted until the wait completes */
 
-  group_addwaiter(group);
+  group_add_waiter(group);
 
   /* "If more than one thread is suspended in waitpid() awaiting termination
    * of the same process, exactly one thread will return the process status
@@ -132,7 +132,7 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
       ret = nxsem_wait(&group->tg_exitsem);
     }
 
-  group_delwaiter(group);
+  group_del_waiter(group);
 
   if (ret < 0)
     {
@@ -247,7 +247,7 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
         {
           /* Yes.. Check if this specific pid has allocated child status? */
 
-          if (group_findchild(rtcb->group, pid) == NULL)
+          if (group_find_child(rtcb->group, pid) == NULL)
             {
               ret = -ECHILD;
               goto errout;
@@ -303,7 +303,7 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
            */
 
           DEBUGASSERT(!retains || rtcb->group->tg_children);
-          if (retains && (child = group_exitchild(rtcb->group)) != NULL)
+          if (retains && (child = group_exit_child(rtcb->group)) != NULL)
             {
               /* A child has exited.  Apparently we missed the signal.
                * Return the saved exit status.
@@ -315,8 +315,8 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
 
               /* Discard the child entry and break out of the loop */
 
-              group_removechild(rtcb->group, child->ch_pid);
-              group_freechild(child);
+              group_remove_child(rtcb->group, child->ch_pid);
+              group_free_child(child);
               break;
             }
         }
@@ -329,7 +329,7 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
         {
           /* Get the current status of the child task. */
 
-          child = group_findchild(rtcb->group, pid);
+          child = group_find_child(rtcb->group, pid);
           DEBUGASSERT(child);
 
           /* Did the child exit? */
@@ -342,8 +342,8 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
 
               /* Discard the child entry and break out of the loop */
 
-              group_removechild(rtcb->group, pid);
-              group_freechild(child);
+              group_remove_child(rtcb->group, pid);
+              group_free_child(child);
               break;
             }
         }
@@ -415,15 +415,15 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
             {
               /* Recover the exiting child */
 
-              child = group_exitchild(rtcb->group);
+              child = group_exit_child(rtcb->group);
               DEBUGASSERT(child != NULL);
 
               /* Discard the child entry, if we have one */
 
               if (child != NULL)
                 {
-                  group_removechild(rtcb->group, child->ch_pid);
-                  group_freechild(child);
+                  group_remove_child(rtcb->group, child->ch_pid);
+                  group_free_child(child);
                 }
             }
 #endif /* CONFIG_SCHED_CHILD_STATUS */

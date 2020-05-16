@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  group_addwaiter
+ * Name:  group_add_waiter
  *
  * Description:
  *   Increment the number of instances of waitpid that are waiting for this
@@ -62,14 +62,14 @@
  *
  ****************************************************************************/
 
-void group_addwaiter(FAR struct task_group_s *group)
+void group_add_waiter(FAR struct task_group_s *group)
 {
   group->tg_nwaiters++;
   DEBUGASSERT(group->tg_nwaiters > 0);
 }
 
 /****************************************************************************
- * Name:  group_addwaiter
+ * Name:  group_add_waiter
  *
  * Description:
  *   Decrement the number of instances of waitpid that are waiting for this
@@ -81,7 +81,7 @@ void group_addwaiter(FAR struct task_group_s *group)
  *
  ****************************************************************************/
 
-void group_delwaiter(FAR struct task_group_s *group)
+void group_del_waiter(FAR struct task_group_s *group)
 {
   DEBUGASSERT(group->tg_nwaiters > 0);
   group->tg_nwaiters--;
