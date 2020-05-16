@@ -404,7 +404,7 @@ void nxsched_reassess_timer(void);
 
 #if CONFIG_RR_INTERVAL > 0
 uint32_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, uint32_t ticks,
-                                  bool noswitches);
+                                    bool noswitches);
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
@@ -425,7 +425,8 @@ void nxsched_continue(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SMP
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE) || defined(CONFIG_ARCH_HAVE_FETCHADD)
+#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE) || \
+    defined(CONFIG_ARCH_HAVE_FETCHADD)
 FAR struct tcb_s *this_task(void);
 #endif
 
@@ -435,7 +436,8 @@ int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
 irqstate_t nxsched_lock_tasklist(void);
 void nxsched_unlock_tasklist(irqstate_t lock);
 
-#if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+#if defined(CONFIG_ARCH_HAVE_FETCHADD) && \
+   !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
 #  define nxsched_islocked_global() \
      (spin_islocked(&g_cpu_schedlock) || g_global_lockcount > 0)
 #else
