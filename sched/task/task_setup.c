@@ -464,10 +464,10 @@ static void nxtask_setup_name(FAR struct task_tcb_s *tcb,
  * Name: nxtask_setup_stackargs
  *
  * Description:
- *   This functions is called only from nxtask_setup_arguments()  It will allocate
- *   space on the new task's stack and will copy the argv[] array and all
- *   strings to the task's stack where it is readily accessible to the
- *   task.  Data on the stack, on the other hand, is guaranteed to be
+ *   This functions is called only from nxtask_setup_arguments()  It will
+ *   allocate space on the new task's stack and will copy the argv[] array
+ *   and all strings to the task's stack where it is readily accessible to
+ *   the task.  Data on the stack, on the other hand, is guaranteed to be
  *   accessible no matter what privilege mode the task runs in.
  *
  * Input Parameters:
@@ -629,8 +629,8 @@ int nxtask_setup_scheduler(FAR struct task_tcb_s *tcb, int priority,
 {
   /* Perform common thread setup */
 
-  return nxthread_setup_scheduler((FAR struct tcb_s *)tcb, priority, start,
-                                  (CODE void *)main, ttype);
+  return nxthread_setup_scheduler((FAR struct tcb_s *)tcb, priority,
+                                  start, (CODE void *)main, ttype);
 }
 
 /****************************************************************************
@@ -663,8 +663,9 @@ int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
 {
   /* Perform common thread setup */
 
-  return nxthread_setup_scheduler((FAR struct tcb_s *)tcb, priority, start,
-                                  (CODE void *)entry, TCB_FLAG_TTYPE_PTHREAD);
+  return nxthread_setup_scheduler((FAR struct tcb_s *)tcb, priority,
+                                  start, (CODE void *)entry,
+                                  TCB_FLAG_TTYPE_PTHREAD);
 }
 #endif
 
@@ -675,9 +676,9 @@ int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
  *   This functions sets up parameters in the Task Control Block (TCB) in
  *   preparation for starting a new thread.
  *
- *   nxtask_setup_arguments() is called only from task_init() and nxtask_start() to
- *   create a new task.  In the "normal" case, the argv[] array is a
- *   structure in the TCB, the arguments are cloned via strdup.
+ *   nxtask_setup_arguments() is called only from task_init() and
+ *   nxtask_start() to create a new task.  In the "normal" case, the argv[]
+ *   array is a structure in the TCB, the arguments are cloned via strdup.
  *
  *   In the kernel build case, the argv[] array and all strings are copied
  *   to the task's stack.  This is done because the TCB (and kernel allocated
