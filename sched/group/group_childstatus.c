@@ -38,10 +38,10 @@
  ****************************************************************************/
 
 /* Note that there cannot be more that CONFIG_MAX_TASKS tasks in total.
- * However, the number of child status structures may need to be significantly
- * larger because this number includes the maximum number of tasks that are
- * running PLUS the number of tasks that have exit'ed without having their
- * exit status reaped (via wait(), waitid(), or waitpid()).
+ * However, the number of child status structures may need to be
+ * significantly larger because this number includes the maximum number of
+ * tasks that are running PLUS the number of tasks that have exit'ed without
+ * having their exit status reaped (via wait(), waitid(), or waitpid()).
  *
  * Obviously, if tasks spawn children indefinitely and never have the exit
  * status reaped, then you have a memory leak!
@@ -165,7 +165,8 @@ void task_initialize(void)
  *
  * Returned Value:
  *   On success, a non-NULL pointer to a child status structure.  NULL is
- *   returned if there are no remaining, pre-allocated child status structures.
+ *   returned if there are no remaining, pre-allocated child status
+ *   structures.
  *
  * Assumptions:
  *   Called during task creation in a safe context.  No special precautions
@@ -413,7 +414,9 @@ void group_remove_children(FAR struct task_group_s *group)
   FAR struct child_status_s *curr;
   FAR struct child_status_s *next;
 
-  /* Remove all child structures for the TCB and return them to the freelist  */
+  /* Remove all child structures for the TCB and return them to the
+   * freelist.
+   */
 
   for (curr = group->tg_children; curr; curr = next)
     {
