@@ -356,7 +356,7 @@ ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
    */
 
   nxsem_init(&state.snd_sem, 0, 0);
-  nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_result = -ENOMEM;           /* Assume allocation failure */
   state.snd_buf    = buf;               /* ICMPv6 header + data payload */

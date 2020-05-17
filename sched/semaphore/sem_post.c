@@ -105,7 +105,7 @@ int nxsem_post(FAR sem_t *sem)
        * not possible to know which thread/holder should be released.
        *
        * For this reason, it is recommended that priority inheritance be
-       * disabled via nxsem_setprotocol(SEM_PRIO_NONE) when the semaphore is
+       * disabled via nxsem_set_protocol(SEM_PRIO_NONE) when the semaphore is
        * initialized if the semaphore is to used for signaling purposes.
        */
 

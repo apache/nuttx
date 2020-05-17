@@ -304,7 +304,7 @@ static int hostfs_rpmsg_send_recv(uint32_t command, bool copy,
 
   memset(&cookie, 0, sizeof(cookie));
   nxsem_init(&cookie.sem, 0, 0);
-  nxsem_setprotocol(&cookie.sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&cookie.sem, SEM_PRIO_NONE);
 
   if (data)
     {

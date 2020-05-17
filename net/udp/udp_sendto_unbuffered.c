@@ -414,7 +414,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    */
 
   nxsem_init(&state.st_sem, 0, 0);
-  nxsem_setprotocol(&state.st_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&state.st_sem, SEM_PRIO_NONE);
 
   state.st_buflen = len;
   state.st_buffer = buf;

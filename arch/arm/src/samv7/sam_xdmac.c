@@ -1593,7 +1593,7 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
    * hence, should not have priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&xdmac->dsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&xdmac->dsem, SEM_PRIO_NONE);
 }
 
 /****************************************************************************

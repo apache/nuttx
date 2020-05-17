@@ -655,7 +655,7 @@ static inline void stm32_1wire_sem_init(FAR struct stm32_1wire_priv_s *priv)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
 }
 
 /****************************************************************************
@@ -1175,7 +1175,7 @@ static int stm32_1wire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
       /* Check if exclusive lock for 1-Wire bus is held. */
 
-      if (nxsem_getvalue(&priv->sem_excl, &sval) < 0)
+      if (nxsem_get_value(&priv->sem_excl, &sval) < 0)
         {
           DEBUGASSERT(false);
           return -EINVAL;

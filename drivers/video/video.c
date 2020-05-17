@@ -448,7 +448,7 @@ static bool is_sem_waited(FAR sem_t *sem)
   int ret;
   int semcount;
 
-  ret = nxsem_getvalue(sem, &semcount);
+  ret = nxsem_get_value(sem, &semcount);
   if ((ret == OK) && (semcount < 0))
     {
       return true;

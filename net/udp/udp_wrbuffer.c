@@ -116,7 +116,7 @@ void udp_wrbuffer_initialize(void)
     }
 
   nxsem_init(&g_wrbuffer.sem, 0, CONFIG_NET_UDP_NWRBCHAINS);
-  nxsem_setprotocol(&g_wrbuffer.sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_wrbuffer.sem, SEM_PRIO_NONE);
 }
 
 /****************************************************************************
@@ -269,7 +269,7 @@ void udp_wrbuffer_release(FAR struct udp_wrbuffer_s *wrb)
 int udp_wrbuffer_test(void)
 {
   int val = 0;
-  nxsem_getvalue(&g_wrbuffer.sem, &val);
+  nxsem_get_value(&g_wrbuffer.sem, &val);
   return val > 0 ? OK : -ENOSPC;
 }
 

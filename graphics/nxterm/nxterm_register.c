@@ -99,7 +99,7 @@ FAR struct nxterm_state_s *
    */
 
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 
   /* Connect to the font cache for the configured font characteristics */

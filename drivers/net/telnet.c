@@ -1012,7 +1012,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
    * priority inheritance.
    */
 
-  nxsem_setprotocol(&priv->td_iosem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->td_iosem, SEM_PRIO_NONE);
 
   priv->td_state     = STATE_NORMAL;
   priv->td_crefs     = 0;
@@ -1112,7 +1112,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
        * priority inheritance.
        */
 
-      nxsem_setprotocol(&g_iosem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&g_iosem, SEM_PRIO_NONE);
 
       /* Start the I/O thread */
 

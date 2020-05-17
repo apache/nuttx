@@ -325,7 +325,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
        */
 
       nxsem_init(&state.cl_sem, 0, 0);
-      nxsem_setprotocol(&state.cl_sem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&state.cl_sem, SEM_PRIO_NONE);
 
       /* Notify the device driver of the availability of TX data */
 

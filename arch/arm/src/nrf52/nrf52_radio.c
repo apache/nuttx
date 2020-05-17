@@ -1171,7 +1171,7 @@ nrf52_radio_initialize(int intf, FAR struct nrf52_radio_board_s *board)
    */
 
   nxsem_init(&dev->sem_isr, 0, 0);
-  nxsem_setprotocol(&dev->sem_isr, SEM_PRIO_NONE);
+  nxsem_set_protocol(&dev->sem_isr, SEM_PRIO_NONE);
 
   /* Connect board-specific data */
 

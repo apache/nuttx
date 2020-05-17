@@ -282,7 +282,7 @@ static ssize_t stm32_rngread(struct file *filep, char *buffer, size_t buflen)
    */
 
   nxsem_init(&g_rngdev.rd_readsem, 0, 0);
-  nxsem_setprotocol(&g_rngdev.rd_readsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_rngdev.rd_readsem, SEM_PRIO_NONE);
 
   g_rngdev.rd_buflen = buflen;
   g_rngdev.rd_buf = buffer;

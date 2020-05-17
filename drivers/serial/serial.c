@@ -171,7 +171,7 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
                */
 
               flags = enter_critical_section();
-              nxsem_getvalue(fds->sem, &semcount);
+              nxsem_get_value(fds->sem, &semcount);
               if (semcount < 1)
                 {
                   nxsem_post(fds->sem);
@@ -1628,8 +1628,8 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&dev->xmitsem, SEM_PRIO_NONE);
-  nxsem_setprotocol(&dev->recvsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&dev->xmitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&dev->recvsem, SEM_PRIO_NONE);
 
   /* Register the serial driver */
 

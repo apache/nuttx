@@ -1078,7 +1078,7 @@ static inline void stm32_i2c_sem_init(FAR struct i2c_master_s *dev)
    */
 
   nxsem_init(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, 0, 0);
-  nxsem_setprotocol(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_set_protocol(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, SEM_PRIO_NONE);
 #endif
 }
 
@@ -2698,7 +2698,7 @@ static int stm32_i2c_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
       /* Check if exclusive lock for I2C bus is held. */
 
-      if (nxsem_getvalue(&priv->sem_excl, &sval) < 0)
+      if (nxsem_get_value(&priv->sem_excl, &sval) < 0)
         {
           DEBUGASSERT(false);
           return -EINVAL;

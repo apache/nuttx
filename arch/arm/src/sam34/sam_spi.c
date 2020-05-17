@@ -1888,7 +1888,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
        */
 
       nxsem_init(&spics->dmawait, 0, 0);
-      nxsem_setprotocol(&spics->dmawait, SEM_PRIO_NONE);
+      nxsem_set_protocol(&spics->dmawait, SEM_PRIO_NONE);
 
       /* Create a watchdog time to catch DMA timeouts */
 

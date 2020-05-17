@@ -179,7 +179,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
   client->lc_state = LOCAL_STATE_ACCEPT;
   local_accept_pollnotify(server, POLLIN);
 
-  if (nxsem_getvalue(&server->lc_waitsem, &sval) >= 0 && sval < 1)
+  if (nxsem_get_value(&server->lc_waitsem, &sval) >= 0 && sval < 1)
     {
       _local_semgive(&server->lc_waitsem);
     }

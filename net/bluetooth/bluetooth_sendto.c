@@ -296,7 +296,7 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
    */
 
   nxsem_init(&state.is_sem, 0, 0); /* Doesn't really fail */
-  nxsem_setprotocol(&state.is_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&state.is_sem, SEM_PRIO_NONE);
 
   state.is_sock   = psock;          /* Socket descriptor to use */
   state.is_buflen = len;            /* Number of bytes to send */

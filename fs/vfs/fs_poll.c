@@ -426,7 +426,7 @@ int nx_poll(FAR struct pollfd *fds, unsigned int nfds, int timeout)
    */
 
   nxsem_init(&sem, 0, 0);
-  nxsem_setprotocol(&sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&sem, SEM_PRIO_NONE);
 
   ret = poll_setup(fds, nfds, &sem);
   if (ret >= 0)

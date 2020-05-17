@@ -282,7 +282,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
        */
 
       nxsem_init(&state.acpt_sem, 0, 0);
-      nxsem_setprotocol(&state.acpt_sem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&state.acpt_sem, SEM_PRIO_NONE);
 
       /* Set up the callback in the connection */
 

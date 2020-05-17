@@ -671,7 +671,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
        * not have priority inheritance enabled.
        */
 
-      nxsem_setprotocol(&priv->rl_waitsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&priv->rl_waitsem, SEM_PRIO_NONE);
 #endif
 
       priv->rl_bufsize = buflen;

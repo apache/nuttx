@@ -116,7 +116,7 @@ static int hcsr04_read_distance(FAR struct hcsr04_dev_s *priv)
 {
   int done;
 
-  nxsem_getvalue(&priv->conv_donesem, &done);
+  nxsem_get_value(&priv->conv_donesem, &done);
 
   if (done == 0)
     {
@@ -279,7 +279,7 @@ static bool hcsr04_sample(FAR struct hcsr04_dev_s *priv)
 {
   int done;
 
-  nxsem_getvalue(&priv->conv_donesem, &done);
+  nxsem_get_value(&priv->conv_donesem, &done);
 
   return (done == 0);
 }

@@ -511,11 +511,11 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
   if (ret == OK)
     {
-      ret = nxsem_setprotocol(&pjoin->data_sem, SEM_PRIO_NONE);
+      ret = nxsem_set_protocol(&pjoin->data_sem, SEM_PRIO_NONE);
 
       if (ret == OK)
         {
-          ret = nxsem_setprotocol(&pjoin->exit_sem, SEM_PRIO_NONE);
+          ret = nxsem_set_protocol(&pjoin->exit_sem, SEM_PRIO_NONE);
         }
 
       if (ret < 0)

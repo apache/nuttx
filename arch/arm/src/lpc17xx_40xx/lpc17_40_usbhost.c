@@ -2360,7 +2360,7 @@ static int lpc17_40_epalloc(struct usbhost_driver_s *drvr,
        */
 
       nxsem_init(&ed->wdhsem, 0, 0);
-      nxsem_setprotocol(&ed->wdhsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&ed->wdhsem, SEM_PRIO_NONE);
 
       /* Link the common tail TD to the ED's TD list */
 
@@ -3804,7 +3804,7 @@ struct usbhost_connection_s *lpc17_40_usbhost_initialize(int controller)
    * have priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->pscsem, SEM_PRIO_NONE);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   priv->ininterval  = MAX_PERINTERVAL;
@@ -3902,7 +3902,7 @@ struct usbhost_connection_s *lpc17_40_usbhost_initialize(int controller)
    */
 
   nxsem_init(&EDCTRL->wdhsem, 0, 0);
-  nxsem_setprotocol(&EDCTRL->wdhsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&EDCTRL->wdhsem, SEM_PRIO_NONE);
 
   /* Initialize user-configurable EDs */
 

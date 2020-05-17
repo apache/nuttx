@@ -382,7 +382,7 @@ ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf,
    */
 
   nxsem_init(&state.ir_sem, 0, 0); /* Doesn't really fail */
-  nxsem_setprotocol(&state.ir_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&state.ir_sem, SEM_PRIO_NONE);
 
   /* Set up the callback in the connection */
 

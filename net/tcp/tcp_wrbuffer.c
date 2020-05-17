@@ -119,7 +119,7 @@ void tcp_wrbuffer_initialize(void)
     }
 
   nxsem_init(&g_wrbuffer.sem, 0, CONFIG_NET_TCP_NWRBCHAINS);
-  nxsem_setprotocol(&g_wrbuffer.sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_wrbuffer.sem, SEM_PRIO_NONE);
 }
 
 /****************************************************************************
@@ -282,7 +282,7 @@ int tcp_wrbuffer_test(void)
   int val = 0;
   int ret;
 
-  ret = nxsem_getvalue(&g_wrbuffer.sem, &val);
+  ret = nxsem_get_value(&g_wrbuffer.sem, &val);
   if (ret >= 0)
     {
       ret = val > 0 ? OK : -ENOSPC;

@@ -3528,7 +3528,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Create a watchdog timer */
 

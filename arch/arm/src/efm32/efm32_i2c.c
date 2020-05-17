@@ -702,7 +702,7 @@ static inline void efm32_i2c_sem_init(FAR struct efm32_i2c_priv_s *priv)
    */
 
   nxsem_init(&priv->sem_isr, 0, 0);
-  nxsem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
 #endif
 }
 

@@ -198,7 +198,7 @@ FAR struct bcmf_dev_s *bcmf_allocate_device(void)
       goto exit_free_priv;
     }
 
-  if ((ret = nxsem_setprotocol(&priv->control_timeout, SEM_PRIO_NONE)) != OK)
+  if ((ret = nxsem_set_protocol(&priv->control_timeout, SEM_PRIO_NONE)) != OK)
     {
       goto exit_free_priv;
     }
@@ -210,7 +210,7 @@ FAR struct bcmf_dev_s *bcmf_allocate_device(void)
       goto exit_free_priv;
     }
 
-  if ((ret = nxsem_setprotocol(&priv->auth_signal, SEM_PRIO_NONE)) != OK)
+  if ((ret = nxsem_set_protocol(&priv->auth_signal, SEM_PRIO_NONE)) != OK)
     {
       goto exit_free_priv;
     }

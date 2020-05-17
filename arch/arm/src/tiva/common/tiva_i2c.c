@@ -849,7 +849,7 @@ static inline void tiva_i2c_sem_init(struct tiva_i2c_priv_s *priv)
    */
 
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 }
 

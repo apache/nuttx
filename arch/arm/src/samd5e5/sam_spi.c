@@ -1520,7 +1520,7 @@ static void spi_dma_setup(struct sam_spidev_s *priv)
   /* Initialize the semaphore used to notify when DMA is complete */
 
   nxsem_init(&priv->dmasem, 0, 0);
-  nxsem_setprotocol(&priv->dmasem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->dmasem, SEM_PRIO_NONE);
 }
 #endif
 

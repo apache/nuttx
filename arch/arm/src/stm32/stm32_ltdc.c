@@ -1632,7 +1632,7 @@ static void stm32_ltdc_irqconfig(void)
    */
 
   nxsem_init(g_interrupt.sem, 0, 0);
-  nxsem_setprotocol(g_interrupt.sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(g_interrupt.sem, SEM_PRIO_NONE);
 
   /* Attach LTDC interrupt vector */
 

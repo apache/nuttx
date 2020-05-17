@@ -735,7 +735,7 @@ static inline void stm32_1wire_sem_init(FAR struct stm32_1wire_priv_s *priv)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
 }
 
 /****************************************************************************

@@ -637,7 +637,7 @@ int sim_tsc_initialize(int minor)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
   priv->minor = minor;
 

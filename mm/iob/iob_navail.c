@@ -65,7 +65,7 @@ int iob_navail(bool throttled)
 #if CONFIG_IOB_NBUFFERS > 0
   /* Get the value of the IOB counting semaphores */
 
-  ret = nxsem_getvalue(&g_iob_sem, &navail);
+  ret = nxsem_get_value(&g_iob_sem, &navail);
   if (ret >= 0)
     {
       ret = navail;
@@ -108,7 +108,7 @@ int iob_qentry_navail(void)
 #if CONFIG_IOB_NCHAINS > 0
   /* Get the value of the IOB chain qentry counting semaphores */
 
-  ret = nxsem_getvalue(&g_qentry_sem, &navail);
+  ret = nxsem_get_value(&g_qentry_sem, &navail);
   if (ret >= 0)
     {
       ret = navail;

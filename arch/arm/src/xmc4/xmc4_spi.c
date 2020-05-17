@@ -2090,7 +2090,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
        */
 
       nxsem_init(&spics->dmawait, 0, 0);
-      nxsem_setprotocol(&spics->dmawait, SEM_PRIO_NONE);
+      nxsem_set_protocol(&spics->dmawait, SEM_PRIO_NONE);
 
       /* Create a watchdog time to catch DMA timeouts */
 

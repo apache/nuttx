@@ -1213,7 +1213,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 
   /* Allocate a watchdog timer */

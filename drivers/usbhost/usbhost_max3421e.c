@@ -4788,8 +4788,8 @@ static inline int max3421e_sw_initialize(FAR struct max3421e_usbhost_s *priv,
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
-  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->pscsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Initialize the driver state data */
 

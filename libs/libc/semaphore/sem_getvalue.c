@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  nxsem_getvalue
+ * Name:  nxsem_get_value
  *
  * Description:
  *   This function updates the location referenced by 'sval' argument to
@@ -59,7 +59,7 @@
  *   but may not reflect the actual value of the semaphore when it is
  *   returned to the calling task.
  *
- *   If 'sem' is locked, the value return by nxsem_getvalue() will either be
+ *   If 'sem' is locked, the value return by nxsem_get_value() will either be
  *   zero or a negative number whose absolute value represents the number
  *   of tasks waiting for the semaphore.
  *
@@ -74,7 +74,7 @@
  *
  ****************************************************************************/
 
-int nxsem_getvalue(FAR sem_t *sem, FAR int *sval)
+int nxsem_get_value(FAR sem_t *sem, FAR int *sval)
 {
   if (sem != NULL && sval != NULL)
     {
@@ -113,7 +113,7 @@ int sem_getvalue(FAR sem_t *sem, FAR int *sval)
 {
   int ret;
 
-  ret = nxsem_getvalue(sem, sval);
+  ret = nxsem_get_value(sem, sval);
   if (ret < 0)
     {
       set_errno(-ret);

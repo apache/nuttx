@@ -994,7 +994,7 @@ FAR struct spi_dev_s *nrf52_spibus_initialize(int port)
    */
 
   nxsem_init(&priv->sem_isr, 0, 0);
-  nxsem_setprotocol(&priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
 
   /* Attach SPI interrupt */
 

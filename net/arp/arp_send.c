@@ -297,7 +297,7 @@ int arp_send(in_addr_t ipaddr)
    */
 
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
-  nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_retries   = 0;              /* No retries yet */
   state.snd_ipaddr    = ipaddr;         /* IP address to query */

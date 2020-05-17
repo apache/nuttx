@@ -627,7 +627,7 @@ struct i2c_master_s *lpc17_40_i2cbus_initialize(int port)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->wait, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
 
   /* Allocate a watchdog timer */
 

@@ -127,7 +127,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 #ifdef CONFIG_PRIORITY_INHERITANCE
       /* Initialize the semaphore protocol */
 
-      status = nxsem_setprotocol((FAR sem_t *)&mutex->sem, proto);
+      status = nxsem_set_protocol((FAR sem_t *)&mutex->sem, proto);
       if (status < 0)
         {
           ret = -status;

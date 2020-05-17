@@ -3117,7 +3117,7 @@ FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
    * have priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Create a watchdog timer */
 

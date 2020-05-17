@@ -600,7 +600,7 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&upper->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&upper->waitsem, SEM_PRIO_NONE);
 #endif
 
   upper->dev = dev;

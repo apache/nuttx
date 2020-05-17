@@ -172,7 +172,7 @@ void icmpv6_rwait_setup(FAR struct net_driver_s *dev,
    */
 
   nxsem_init(&notify->rn_sem, 0, 0);
-  nxsem_setprotocol(&notify->rn_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&notify->rn_sem, SEM_PRIO_NONE);
 
   /* Add the wait structure to the list with interrupts disabled */
 

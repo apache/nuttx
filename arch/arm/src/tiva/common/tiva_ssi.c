@@ -1623,7 +1623,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
    */
 
   nxsem_init(&priv->xfrsem, 0, 0);
-  nxsem_setprotocol(&priv->xfrsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->xfrsem, SEM_PRIO_NONE);
 #endif
   nxsem_init(&priv->exclsem, 0, 1);
 

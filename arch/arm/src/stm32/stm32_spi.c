@@ -2062,8 +2062,8 @@ static void spi_bus_initialize(FAR struct stm32_spidev_s *priv)
       nxsem_init(&priv->rxsem, 0, 0);
       nxsem_init(&priv->txsem, 0, 0);
 
-      nxsem_setprotocol(&priv->rxsem, SEM_PRIO_NONE);
-      nxsem_setprotocol(&priv->txsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&priv->rxsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&priv->txsem, SEM_PRIO_NONE);
 
       /* Get DMA channels.  NOTE: stm32_dmachannel() will always assign the DMA
        * channel.  If the channel is not available, then stm32_dmachannel() will

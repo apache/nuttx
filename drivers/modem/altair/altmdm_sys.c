@@ -321,12 +321,12 @@ int altmdm_sys_getcsemvalue(FAR struct altmdm_sys_csem_s *handle,
       return ERROR;
     }
 
-  ret = nxsem_getvalue(&handle->sem, value);
+  ret = nxsem_get_value(&handle->sem, value);
 
 #ifdef CONFIG_MODEM_ALTMDM_DEBUG
   if (ret < 0)
     {
-      m_err("nxsem_getvalue() failed:%d\n", ret);
+      m_err("nxsem_get_value() failed:%d\n", ret);
     }
 #endif
 
