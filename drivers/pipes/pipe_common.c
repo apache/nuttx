@@ -205,7 +205,9 @@ int pipecommon_open(FAR struct file *filep)
         }
     }
 
-  /* If opened for writing, increment the count of writers on the pipe instance */
+  /* If opened for writing, increment the count of writers on the pipe
+   * instance.
+   */
 
   if ((filep->f_oflags & O_WROK) != 0)
     {
@@ -225,7 +227,9 @@ int pipecommon_open(FAR struct file *filep)
         }
     }
 
-  /* If opened for reading, increment the count of reader on on the pipe instance */
+  /* If opened for reading, increment the count of reader on on the pipe
+   * instance.
+   */
 
   if ((filep->f_oflags & O_RDOK) != 0)
     {
@@ -455,7 +459,9 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
         }
     }
 
-  /* Then return whatever is available in the pipe (which is at least one byte) */
+  /* Then return whatever is available in the pipe (which is at least one
+   * byte).
+   */
 
   nread = 0;
   while ((size_t)nread < len && dev->d_wrndx != dev->d_rdndx)
@@ -469,7 +475,9 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
       nread++;
     }
 
-  /* Notify all waiting writers that bytes have been removed from the buffer */
+  /* Notify all waiting writers that bytes have been removed from the
+   * buffer.
+   */
 
   while (nxsem_get_value(&dev->d_wrsem, &sval) == 0 && sval < 0)
     {
@@ -575,14 +583,18 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
           nwritten++;
           if ((size_t)nwritten >= len)
             {
-              /* Yes.. Notify all of the waiting readers that more data is available */
+              /* Yes.. Notify all of the waiting readers that more data is
+               * available.
+               */
 
               while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
                   nxsem_post(&dev->d_rdsem);
                 }
 
-              /* Notify all poll/select waiters that they can read from the FIFO */
+              /* Notify all poll/select waiters that they can read from the
+               * FIFO.
+               */
 
               pipecommon_pollnotify(dev, POLLIN);
 
@@ -594,25 +606,33 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
         }
       else
         {
-          /* There is not enough room for the next byte.  Was anything written in this pass? */
+          /* There is not enough room for the next byte.  Was anything
+           * written in this pass?
+           */
 
           if (last < nwritten)
             {
-              /* Yes.. Notify all of the waiting readers that more data is available */
+              /* Yes.. Notify all of the waiting readers that more data is
+               * available.
+               */
 
               while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
                   nxsem_post(&dev->d_rdsem);
                 }
 
-              /* Notify all poll/select waiters that they can read from the FIFO */
+              /* Notify all poll/select waiters that they can read from the
+               * FIFO.
+               */
 
               pipecommon_pollnotify(dev, POLLIN);
             }
 
           last = nwritten;
 
-          /* If O_NONBLOCK was set, then return partial bytes written or EGAIN */
+          /* If O_NONBLOCK was set, then return partial bytes written or
+           * EGAIN.
+           */
 
           if (filep->f_oflags & O_NONBLOCK)
             {

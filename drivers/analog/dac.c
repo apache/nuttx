@@ -133,7 +133,9 @@ static int dac_open(FAR struct file *filep)
         }
       else
         {
-          /* Check if this is the first time that the driver has been opened. */
+          /* Check if this is the first time that the driver has been
+           * opened.
+           */
 
           if (tmp == 1)
             {
@@ -330,7 +332,9 @@ static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer,
           nexttail = 0;
         }
 
-      /* If the XMIT fifo becomes full, then wait for space to become available */
+      /* If the XMIT fifo becomes full, then wait for space to become
+       * available.
+       */
 
       while (nexttail == fifo->af_head)
         {

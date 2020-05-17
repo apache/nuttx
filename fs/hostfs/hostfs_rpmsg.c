@@ -280,8 +280,9 @@ static void hostfs_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
     }
 }
 
-static int hostfs_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
-                               size_t len, uint32_t src, FAR void *priv)
+static int hostfs_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
+                               FAR void *data, size_t len, uint32_t src,
+                               FAR void *priv)
 {
   FAR struct hostfs_rpmsg_header_s *header = data;
   uint32_t command = header->command;
@@ -441,7 +442,8 @@ ssize_t host_write(int fd, FAR const void *buf, size_t count)
       memcpy(msg->buf, buf + written, space);
 
       ret = hostfs_rpmsg_send_recv(HOSTFS_RPMSG_WRITE, false,
-                (struct hostfs_rpmsg_header_s *)msg, sizeof(*msg) + space, NULL);
+                                   (FAR struct hostfs_rpmsg_header_s *)msg,
+                                   sizeof(*msg) + space, NULL);
       if (ret <= 0)
         {
           break;

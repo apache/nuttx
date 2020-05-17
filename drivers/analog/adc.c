@@ -138,7 +138,9 @@ static int adc_open(FAR struct file *filep)
         }
       else
         {
-          /* Check if this is the first time that the driver has been opened. */
+          /* Check if this is the first time that the driver has been
+           * opened.
+           */
 
           if (tmp == 1)
             {
@@ -323,7 +325,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
 
           if (msglen == 1)
             {
-              /* Only one channel, return MS 8-bits of the sample*/
+              /* Only one channel, return MS 8-bits of the sample. */
 
               buffer[nread] = msg->am_data >> 24;
             }

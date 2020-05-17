@@ -99,7 +99,8 @@ static void lis3dh_write_register(FAR struct lis3dh_dev_s *dev,
 static void lis3dh_reset(FAR struct lis3dh_dev_s *dev);
 static int lis3dh_ident(FAR struct lis3dh_dev_s *dev);
 static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev);
-static int lis3dh_interrupt_handler(int irq, FAR void *context, FAR void *arg);
+static int lis3dh_interrupt_handler(int irq, FAR void *context,
+                                    FAR void *arg);
 static void lis3dh_worker(FAR void *arg);
 static int lis3dh_irq_enable(FAR struct lis3dh_dev_s *dev, bool enable);
 static int lis3dh_fifo_enable(FAR struct lis3dh_dev_s *dev);
@@ -152,7 +153,9 @@ static void lis3dh_read_register(FAR struct lis3dh_dev_s *dev,
 {
   uint8_t buffer[2];
 
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time.
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -193,7 +196,9 @@ static void lis3dh_write_register(FAR struct lis3dh_dev_s *dev,
 {
   uint8_t buffer[2];
 
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time.
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -501,7 +506,8 @@ static int lis3dh_read_fifo(FAR struct lis3dh_dev_s *dev)
  *
  ****************************************************************************/
 
-static int lis3dh_interrupt_handler(int irq, FAR void *context, FAR void *arg)
+static int lis3dh_interrupt_handler(int irq, FAR void *context,
+                                    FAR void *arg)
 {
   /* The interrupt handler is called when the FIFO watermark is reached */
 

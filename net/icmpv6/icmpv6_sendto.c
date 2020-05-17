@@ -1,35 +1,20 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_sendto.c
  *
- *   Copyright (C) 2017, 2019-2020 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -85,11 +70,14 @@
 struct icmpv6_sendto_s
 {
   FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
-  sem_t snd_sem;               /* Use to manage the wait for send complete */
-  struct in6_addr snd_toaddr;  /* The peer to send the request to */
-  FAR const uint8_t *snd_buf;  /* ICMPv6 header + data payload */
-  uint16_t snd_buflen;         /* Size of the ICMPv6 header + data payload */
-  int16_t snd_result;          /* 0: success; <0:negated errno on fail */
+  sem_t snd_sem;                       /* Use to manage the wait for send
+                                        * complete */
+  struct in6_addr snd_toaddr;          /* The peer to send the request to */
+  FAR const uint8_t *snd_buf;          /* ICMPv6 header + data payload */
+  uint16_t snd_buflen;                 /* Size of the ICMPv6 header + data
+                                        * payload */
+  int16_t snd_result;                  /* 0: success; <0:negated errno on
+                                        * fail */
 };
 
 /****************************************************************************
@@ -267,8 +255,8 @@ end_wait:
  *   Implements the sendto() operation for the case of the IPPROTO_ICMP6
  *   socket.  The 'buf' parameter points to a block of memory that includes
  *   an ICMPv6 request header, followed by any payload that accompanies the
- *   request.  The 'len' parameter includes both the size of the ICMPv6 header
- *   and the following payload.
+ *   request.  The 'len' parameter includes both the size of the ICMPv6
+ *   header and the following payload.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
@@ -285,8 +273,9 @@ end_wait:
  *
  ****************************************************************************/
 
-ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
-                    int flags, FAR const struct sockaddr *to, socklen_t tolen)
+ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf,
+                      size_t len, int flags, FAR const struct sockaddr *to,
+                      socklen_t tolen)
 {
   FAR const struct sockaddr_in6 *inaddr;
   FAR struct net_driver_s *dev;
@@ -399,16 +388,17 @@ ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
         {
           if (ret == -ETIMEDOUT)
             {
-              /* Check if this device is on the same network as the destination
-               * device.
+              /* Check if this device is on the same network as the
+               * destination device.
                */
 
               if (!net_ipv6addr_maskcmp(state.snd_toaddr.s6_addr16,
                                         dev->d_ipv6addr, dev->d_ipv6netmask))
                 {
-                  /* Destination address was not on the local network served by
-                   * this device.  If a timeout occurs, then the most likely
-                   * reason is that the destination address is not reachable.
+                  /* Destination address was not on the local network served
+                   * by this device.  If a timeout occurs, then the most
+                   * likely reason is that the destination address is not
+                   * reachable.
                    */
 
                   ret = -ENETUNREACH;
