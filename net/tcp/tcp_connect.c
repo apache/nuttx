@@ -107,7 +107,7 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
    */
 
   nxsem_init(&pstate->tc_sem, 0, 0); /* Doesn't really fail */
-  nxsem_setprotocol(&pstate->tc_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&pstate->tc_sem, SEM_PRIO_NONE);
 
   pstate->tc_conn   = conn;
   pstate->tc_psock  = psock;

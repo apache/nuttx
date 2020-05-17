@@ -425,7 +425,7 @@ ssize_t icmpv6_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    */
 
   nxsem_init(&state.recv_sem, 0, 0);
-  nxsem_setprotocol(&state.recv_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&state.recv_sem, SEM_PRIO_NONE);
 
   state.recv_sock   = psock;    /* The IPPROTO_ICMP6 socket instance */
   state.recv_result = -ENOMEM;  /* Assume allocation failure */

@@ -388,7 +388,7 @@ void imageproc_initialize(void)
   nxsem_init(&g_rotexc, 0, 1);
   nxsem_init(&g_rotwait, 0, 0);
   nxsem_init(&g_geexc, 0, 1);
-  nxsem_setprotocol(&g_rotwait, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_rotwait, SEM_PRIO_NONE);
 
   cxd56_ge2dinitialize(GEDEVNAME);
 

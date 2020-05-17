@@ -200,7 +200,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
    */
 
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
-  nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
 
   /* Remember the routing device name */
 

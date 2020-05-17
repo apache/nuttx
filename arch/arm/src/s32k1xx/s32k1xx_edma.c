@@ -743,7 +743,7 @@ void weak_function arm_dma_initialize(void)
    * hence, should not have priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&g_edma.dsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_edma.dsem, SEM_PRIO_NONE);
 
   /* Initialize the list of free TCDs from the pool of pre-allocated TCDs. */
 

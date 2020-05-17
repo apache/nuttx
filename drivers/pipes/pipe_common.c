@@ -144,8 +144,8 @@ FAR struct pipe_dev_s *pipecommon_allocdev(size_t bufsize)
        * should not have priority inheritance enabled.
        */
 
-      nxsem_setprotocol(&dev->d_rdsem, SEM_PRIO_NONE);
-      nxsem_setprotocol(&dev->d_wrsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&dev->d_rdsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&dev->d_wrsem, SEM_PRIO_NONE);
 
       dev->d_bufsize = bufsize;
     }
@@ -218,7 +218,7 @@ int pipecommon_open(FAR struct file *filep)
 
       if (dev->d_nwriters == 1)
         {
-          while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
+          while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval < 0)
             {
               nxsem_post(&dev->d_rdsem);
             }
@@ -318,7 +318,7 @@ int pipecommon_close(FAR struct file *filep)
 
           if (--dev->d_nwriters <= 0)
             {
-              while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
+              while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
                   nxsem_post(&dev->d_rdsem);
                 }
@@ -471,7 +471,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Notify all waiting writers that bytes have been removed from the buffer */
 
-  while (nxsem_getvalue(&dev->d_wrsem, &sval) == 0 && sval < 0)
+  while (nxsem_get_value(&dev->d_wrsem, &sval) == 0 && sval < 0)
     {
       nxsem_post(&dev->d_wrsem);
     }
@@ -577,7 +577,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
             {
               /* Yes.. Notify all of the waiting readers that more data is available */
 
-              while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
+              while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
                   nxsem_post(&dev->d_rdsem);
                 }
@@ -600,7 +600,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
             {
               /* Yes.. Notify all of the waiting readers that more data is available */
 
-              while (nxsem_getvalue(&dev->d_rdsem, &sval) == 0 && sval < 0)
+              while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
                   nxsem_post(&dev->d_rdsem);
                 }

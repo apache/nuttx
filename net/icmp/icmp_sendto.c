@@ -365,7 +365,7 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
    */
 
   nxsem_init(&state.snd_sem, 0, 0);
-  nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_result = -ENOMEM;          /* Assume allocation failure */
   state.snd_toaddr = inaddr->sin_addr.s_addr; /* Address of the peer to send the request */

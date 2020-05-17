@@ -619,7 +619,7 @@ static int cxd56_i2c_transfer(FAR struct i2c_master_s *dev,
    * be performed normally.
    */
 
-  ret = nxsem_getvalue(&priv->wait, &semval);
+  ret = nxsem_get_value(&priv->wait, &semval);
   DEBUGASSERT(ret == OK && semval == 0);
 
   /* Disable clock gating (clock enable) */

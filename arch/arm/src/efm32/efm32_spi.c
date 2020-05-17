@@ -1638,8 +1638,8 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->rxdmasem, SEM_PRIO_NONE);
-  nxsem_setprotocol(&priv->txdmasem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->rxdmasem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->txdmasem, SEM_PRIO_NONE);
 #endif
 
   /* Enable SPI */

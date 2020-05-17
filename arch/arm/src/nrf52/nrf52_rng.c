@@ -144,10 +144,10 @@ static int nrf52_rng_initialize(void)
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
 
   nxsem_init(&g_rngdev.rd_sem, 0, 0);
-  nxsem_setprotocol(&g_rngdev.rd_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_rngdev.rd_sem, SEM_PRIO_NONE);
 
   nxsem_init(&g_rngdev.excl_sem, 0, 1);
-  nxsem_setprotocol(&g_rngdev.excl_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_rngdev.excl_sem, SEM_PRIO_NONE);
 
   _info("Ready to stop\n");
   nrf52_rng_stop();

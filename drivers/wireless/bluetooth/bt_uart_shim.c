@@ -462,7 +462,7 @@ FAR void *bt_uart_shim_getdevice(FAR char *path)
 
   /* Put materials into poll structure */
 
-  nxsem_setprotocol(&s->dready, SEM_PRIO_NONE);
+  nxsem_set_protocol(&s->dready, SEM_PRIO_NONE);
 
   s->p.fd = s->h;
   s->p.events = POLLIN;

@@ -1664,7 +1664,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
    */
 
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Register the device as an input device */
 

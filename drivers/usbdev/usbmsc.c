@@ -1334,8 +1334,8 @@ int usbmsc_configure(unsigned int nluns, void **handle)
    * should not have priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->thsynch, SEM_PRIO_NONE);
-  nxsem_setprotocol(&priv->thwaitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->thsynch, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->thwaitsem, SEM_PRIO_NONE);
 
   sq_init(&priv->wrreqlist);
   priv->nluns = nluns;

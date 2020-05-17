@@ -2667,7 +2667,7 @@ struct qspi_dev_s *stm32h7_qspi_initialize(int intf)
        */
 
       nxsem_init(&priv->dmawait, 0, 0);
-      nxsem_setprotocol(&priv->dmawait, SEM_PRIO_NONE);
+      nxsem_set_protocol(&priv->dmawait, SEM_PRIO_NONE);
 
       /* Create a watchdog time to catch DMA timeouts */
 
@@ -2695,7 +2695,7 @@ struct qspi_dev_s *stm32h7_qspi_initialize(int intf)
        */
 
       nxsem_init(&priv->op_sem, 0, 0);
-      nxsem_setprotocol(&priv->op_sem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&priv->op_sem, SEM_PRIO_NONE);
 #endif
 
       /* Perform hardware initialization.  Puts the QSPI into an active

@@ -795,7 +795,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
                do
                  {
-                   DEBUGVERIFY(nxsem_getvalue(&devpair->pp_slavesem, &sval));
+                   DEBUGVERIFY(nxsem_get_value(&devpair->pp_slavesem, &sval));
                    if (sval < 0)
                      {
                        nxsem_post(&devpair->pp_slavesem);
@@ -1102,7 +1102,7 @@ int pty_register(int minor)
    * have priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&devpair->pp_slavesem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&devpair->pp_slavesem, SEM_PRIO_NONE);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   devpair->pp_minor             = minor;

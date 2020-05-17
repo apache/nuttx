@@ -1169,7 +1169,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
    * have priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
 #ifdef CONFIG_FT5X06_POLLMODE
   /* Allocate a timer for polling the FT5x06 */

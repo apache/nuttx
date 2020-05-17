@@ -2976,7 +2976,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
    */
 
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
 
   /* Perform one-time, global NFC/PMECC initialization */
@@ -2995,7 +2995,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
        */
 
       nxsem_init(&g_nand.waitsem, 0, 0);
-      nxsem_setprotocol(&g_nand.waitsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&g_nand.waitsem, SEM_PRIO_NONE);
 #endif
 
       /* Enable the NAND FLASH Controller (The NFC is always used) */

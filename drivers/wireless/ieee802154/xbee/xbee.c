@@ -1235,7 +1235,7 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
   nxsem_init(&priv->atquery_sem, 0, 1);
   nxsem_init(&priv->tx_sem, 0, 1);
   nxsem_init(&priv->txdone_sem, 0, 0);
-  nxsem_setprotocol(&priv->txdone_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->txdone_sem, SEM_PRIO_NONE);
 
   ieee802154_primitivepool_initialize();
 
@@ -1527,7 +1527,7 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
    */
 
   nxsem_init(&priv->atresp_sem, 0, 0);
-  nxsem_setprotocol(&priv->atresp_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->atresp_sem, SEM_PRIO_NONE);
 
   do
     {

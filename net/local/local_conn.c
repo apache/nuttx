@@ -98,7 +98,7 @@ FAR struct local_conn_s *local_alloc(void)
        */
 
       nxsem_init(&conn->lc_waitsem, 0, 0);
-      nxsem_setprotocol(&conn->lc_waitsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&conn->lc_waitsem, SEM_PRIO_NONE);
 #endif
     }
 

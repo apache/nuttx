@@ -66,9 +66,9 @@
 #  define _SEM_TRYWAIT(s)       nxsem_trywait(s)
 #  define _SEM_TIMEDWAIT(s,t)   nxsem_timedwait(s,t)
 #  define _SEM_POST(s)          nxsem_post(s)
-#  define _SEM_GETVALUE(s)      nxsem_getvalue(s)
-#  define _SEM_GETPROTOCOL(s,p) nxsem_getprotocol(s,p)
-#  define _SEM_SETPROTOCOL(s,p) nxsem_setprotocol(s,p)
+#  define _SEM_GETVALUE(s)      nxsem_get_value(s)
+#  define _SEM_GETPROTOCOL(s,p) nxsem_get_protocol(s,p)
+#  define _SEM_SETPROTOCOL(s,p) nxsem_set_protocol(s,p)
 #  define _SEM_ERRNO(r)         (-(r))
 #  define _SEM_ERRVAL(r)        (r)
 #else
@@ -342,7 +342,7 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay);
 int nxsem_post(FAR sem_t *sem);
 
 /****************************************************************************
- * Name:  nxsem_getvalue
+ * Name:  nxsem_get_value
  *
  * Description:
  *   This function updates the location referenced by 'sval' argument to
@@ -352,7 +352,7 @@ int nxsem_post(FAR sem_t *sem);
  *   but may not reflect the actual value of the semaphore when it is
  *   returned to the calling task.
  *
- *   If 'sem' is locked, the value return by nxsem_getvalue() will either be
+ *   If 'sem' is locked, the value return by nxsem_get_value() will either be
  *   zero or a negative number whose absolute value represents the number
  *   of tasks waiting for the semaphore.
  *
@@ -367,7 +367,7 @@ int nxsem_post(FAR sem_t *sem);
  *
  ****************************************************************************/
 
-int nxsem_getvalue(FAR sem_t *sem, FAR int *sval);
+int nxsem_get_value(FAR sem_t *sem, FAR int *sval);
 
 /****************************************************************************
  * Name: nxsem_reset
@@ -392,7 +392,7 @@ int nxsem_getvalue(FAR sem_t *sem, FAR int *sval);
 int nxsem_reset(FAR sem_t *sem, int16_t count);
 
 /****************************************************************************
- * Name: nxsem_getprotocol
+ * Name: nxsem_get_protocol
  *
  * Description:
  *    Return the value of the semaphore protocol attribute.
@@ -410,7 +410,7 @@ int nxsem_reset(FAR sem_t *sem, int16_t count);
  *
  ****************************************************************************/
 
-#define nxsem_getprotocol(s,p) sem_getprotocol(s,p)
+#define nxsem_get_protocol(s,p) sem_getprotocol(s,p)
 
 /****************************************************************************
  * Name: sem_getprotocol
@@ -434,7 +434,7 @@ int nxsem_reset(FAR sem_t *sem, int16_t count);
 int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
 
 /****************************************************************************
- * Name: nxsem_setprotocol
+ * Name: nxsem_set_protocol
  *
  * Description:
  *    Set semaphore protocol attribute.
@@ -454,7 +454,7 @@ int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
  *    becomes *permanently* a holder of the semaphore and may have its
  *    priority boosted when any other task tries to acquire the semaphore.
  *
- *    The fix is to call nxsem_setprotocol(SEM_PRIO_NONE) immediately after
+ *    The fix is to call nxsem_set_protocol(SEM_PRIO_NONE) immediately after
  *    the sem_init() call so that there will be no priority inheritance
  *    operations on this semaphore.
  *
@@ -470,7 +470,7 @@ int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
  *
  ****************************************************************************/
 
-int nxsem_setprotocol(FAR sem_t *sem, int protocol);
+int nxsem_set_protocol(FAR sem_t *sem, int protocol);
 
 /****************************************************************************
  * Name: sem_setprotocol

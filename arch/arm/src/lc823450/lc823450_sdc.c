@@ -699,7 +699,7 @@ int lc823450_sdc_locked(void)
 
   for (i = 0; i < 2; i++)
     {
-      nxsem_getvalue(&_sdc_sem[i], &val);
+      nxsem_get_value(&_sdc_sem[i], &val);
       if (1 != val)
         {
           ret = 1;

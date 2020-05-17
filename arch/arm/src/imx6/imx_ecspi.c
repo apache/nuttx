@@ -1291,7 +1291,7 @@ FAR struct spi_dev_s *imx_spibus_initialize(int port)
    */
 
   nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
   nxsem_init(&priv->exclsem, 0, 1);
 

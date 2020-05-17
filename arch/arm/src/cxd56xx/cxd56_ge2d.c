@@ -248,7 +248,7 @@ int cxd56_ge2dinitialize(FAR const char *devname)
 
   nxsem_init(&g_lock, 0, 1);
   nxsem_init(&g_wait, 0, 0);
-  nxsem_setprotocol(&g_wait, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_wait, SEM_PRIO_NONE);
 
   ret = register_driver(devname, &g_ge2dfops, 0666, NULL);
   if (ret != 0)

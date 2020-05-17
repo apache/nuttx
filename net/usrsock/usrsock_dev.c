@@ -1265,7 +1265,7 @@ void usrsockdev_register(void)
   nxsem_init(&g_usrsockdev.devsem, 0, 1);
   nxsem_init(&g_usrsockdev.req.sem, 0, 1);
   nxsem_init(&g_usrsockdev.req.acksem, 0, 0);
-  nxsem_setprotocol(&g_usrsockdev.req.acksem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_usrsockdev.req.acksem, SEM_PRIO_NONE);
 
   register_driver("/dev/usrsock", &g_usrsockdevops, 0666,
                   &g_usrsockdev);

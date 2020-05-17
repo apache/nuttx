@@ -660,7 +660,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
    */
 
   nxsem_init(&state.snd_sem, 0, 0);    /* Doesn't really fail */
-  nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
 
   state.snd_sock      = psock;             /* Socket descriptor to use */
   state.snd_buflen    = len;               /* Number of bytes to send */

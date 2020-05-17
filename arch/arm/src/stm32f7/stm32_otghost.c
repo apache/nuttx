@@ -5296,7 +5296,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->pscsem, SEM_PRIO_NONE);
 
   /* Initialize the driver state data */
 
@@ -5321,7 +5321,7 @@ static inline void stm32_sw_initialize(FAR struct stm32_usbhost_s *priv)
        */
 
       nxsem_init(&chan->waitsem,  0, 0);
-      nxsem_setprotocol(&chan->waitsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&chan->waitsem, SEM_PRIO_NONE);
     }
 }
 

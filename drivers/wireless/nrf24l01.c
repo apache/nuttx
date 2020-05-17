@@ -1058,7 +1058,7 @@ static ssize_t nrf24l01_read(FAR struct file *filep, FAR char *buffer,
 
       /* Test if data is ready */
 
-      ret = nxsem_getvalue(&dev->sem_rx, &packet_count);
+      ret = nxsem_get_value(&dev->sem_rx, &packet_count);
       if (ret)
         {
           goto errout; /* getvalue failed */
@@ -1498,7 +1498,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
 
   nxsem_init(&(dev->devsem), 0, 1);
   nxsem_init(&dev->sem_tx, 0, 0);
-  nxsem_setprotocol(&dev->sem_tx, SEM_PRIO_NONE);
+  nxsem_set_protocol(&dev->sem_tx, SEM_PRIO_NONE);
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
   if ((rx_fifo = kmm_malloc(CONFIG_WL_NRF24L01_RXFIFO_LEN)) == NULL)
@@ -1511,7 +1511,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
 
   nxsem_init(&(dev->sem_fifo), 0, 1);
   nxsem_init(&(dev->sem_rx), 0, 0);
-  nxsem_setprotocol(&dev->sem_rx, SEM_PRIO_NONE);
+  nxsem_set_protocol(&dev->sem_rx, SEM_PRIO_NONE);
 #endif
 
   /* Configure IRQ pin  (falling edge) */

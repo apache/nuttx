@@ -72,7 +72,7 @@ static bool pthread_notifywaiters(FAR struct join_s *pjoin)
 
   /* Are any tasks waiting for our exit value? */
 
-  status = nxsem_getvalue(&pjoin->exit_sem, &ntasks_waiting);
+  status = nxsem_get_value(&pjoin->exit_sem, &ntasks_waiting);
   if (status == OK && ntasks_waiting < 0)
     {
       /* Set the data semaphore so that this thread will be
@@ -90,7 +90,7 @@ static bool pthread_notifywaiters(FAR struct join_s *pjoin)
           status = pthread_sem_give(&pjoin->exit_sem);
           if (status == OK)
             {
-              status = nxsem_getvalue(&pjoin->exit_sem, &ntasks_waiting);
+              status = nxsem_get_value(&pjoin->exit_sem, &ntasks_waiting);
             }
         }
       while (ntasks_waiting < 0 && status == OK);

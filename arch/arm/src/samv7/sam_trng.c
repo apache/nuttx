@@ -363,7 +363,7 @@ static int sam_rng_initialize(void)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&g_trngdev.waitsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_trngdev.waitsem, SEM_PRIO_NONE);
 
   /* Enable clocking to the TRNG */
 

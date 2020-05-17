@@ -1003,7 +1003,7 @@ int lis3dh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   /* Initialize read notification semaphore */
 
   nxsem_init(&priv->readsem, 0, 0);
-  nxsem_setprotocol(&priv->readsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->readsem, SEM_PRIO_NONE);
 
   /* Setup SPI frequency and mode */
 

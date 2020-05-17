@@ -1379,7 +1379,7 @@ int xbee_netdev_register(XBEEHANDLE xbee)
 
   priv->xd_eventpending = false;
   nxsem_init(&priv->xd_eventsem, 0, 0);
-  nxsem_setprotocol(&priv->xd_eventsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->xd_eventsem, SEM_PRIO_NONE);
 
   sq_init(&priv->primitive_queue);
 

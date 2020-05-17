@@ -1102,8 +1102,8 @@ static int tun_dev_init(FAR struct tun_device_s *priv,
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->read_wait_sem, SEM_PRIO_NONE);
-  nxsem_setprotocol(&priv->write_wait_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->read_wait_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->write_wait_sem, SEM_PRIO_NONE);
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 

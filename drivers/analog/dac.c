@@ -489,7 +489,7 @@ int dac_txdone(FAR struct dac_dev_s *dev)
         {
           /* Inform any waiting threads that new xmit space is available */
 
-          ret = nxsem_getvalue(&dev->ad_xmit.af_sem, &sval);
+          ret = nxsem_get_value(&dev->ad_xmit.af_sem, &sval);
           if (ret == OK && sval <= 0)
             {
               ret = nxsem_post(&dev->ad_xmit.af_sem);
@@ -515,7 +515,7 @@ int dac_register(FAR const char *path, FAR struct dac_dev_s *dev)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&dev->ad_xmit.af_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&dev->ad_xmit.af_sem, SEM_PRIO_NONE);
 
   dev->ad_ops->ao_reset(dev);
 

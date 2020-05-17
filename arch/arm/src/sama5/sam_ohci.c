@@ -2718,7 +2718,7 @@ static int sam_epalloc(struct usbhost_driver_s *drvr,
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&eplist->wdhsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&eplist->wdhsem, SEM_PRIO_NONE);
 
   /* We must have exclusive access to the ED pool, the bulk list, the
    * periodic list, and the interrupt table.
@@ -4020,7 +4020,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&g_ohci.pscsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_ohci.pscsem, SEM_PRIO_NONE);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   g_ohci.ininterval  = MAX_PERINTERVAL;

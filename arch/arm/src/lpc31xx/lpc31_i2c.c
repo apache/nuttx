@@ -558,7 +558,7 @@ struct i2c_master_s *lpc31_i2cbus_initialize(int port)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&priv->wait, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
 
   /* Enable I2C system clocks */
 

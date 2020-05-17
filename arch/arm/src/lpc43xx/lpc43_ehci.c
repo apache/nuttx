@@ -3881,7 +3881,7 @@ static int lpc43_epalloc(FAR struct usbhost_driver_s *drvr,
    */
 
   nxsem_init(&epinfo->iocsem, 0, 0);
-  nxsem_setprotocol(&epinfo->iocsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&epinfo->iocsem, SEM_PRIO_NONE);
 
   /* Success.. return an opaque reference to the endpoint information
    * structure instance
@@ -4896,7 +4896,7 @@ FAR struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&g_ehci.pscsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_ehci.pscsem, SEM_PRIO_NONE);
 
   /* Initialize EP0 */
 
@@ -4940,7 +4940,7 @@ FAR struct usbhost_connection_s *lpc43_ehci_initialize(int controller)
        */
 
       nxsem_init(&rhport->ep0.iocsem, 0, 0);
-      nxsem_setprotocol(&rhport->ep0.iocsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&rhport->ep0.iocsem, SEM_PRIO_NONE);
 
       /* Initialize the public port representation */
 

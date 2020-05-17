@@ -1466,7 +1466,7 @@ static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv)
 
           flags = enter_critical_section();
           txfqs1 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
-          nxsem_getvalue(&priv->txfsem, &sval);
+          nxsem_get_value(&priv->txfsem, &sval);
           txfqs2 = mcan_getreg(priv, SAM_MCAN_TXFQS_OFFSET);
 
           /* If the semaphore count and the TXFQS samples are in
@@ -1611,7 +1611,7 @@ static void mcan_buffer_release(FAR struct sam_mcan_s *priv)
    * many times.
    */
 
-  nxsem_getvalue(&priv->txfsem, &sval);
+  nxsem_get_value(&priv->txfsem, &sval);
   if (sval < priv->config->ntxfifoq)
     {
       nxsem_post(&priv->txfsem);
@@ -3111,7 +3111,7 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
    * the TX FIFO/queue.  Make sure that they are consistent.
    */
 
-  nxsem_getvalue(&priv->txfsem, &sval);
+  nxsem_get_value(&priv->txfsem, &sval);
   DEBUGASSERT(((notfull && sval > 0) || (!notfull && sval <= 0)) &&
               (sval <= priv->config->ntxfifoq));
 #endif
@@ -3182,7 +3182,7 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
    * elements, then there is no transfer in progress.
    */
 
-  nxsem_getvalue(&priv->txfsem, &sval);
+  nxsem_get_value(&priv->txfsem, &sval);
   DEBUGASSERT(sval > 0 && sval <= priv->config->ntxfifoq);
 
   empty = (sval ==  priv->config->ntxfifoq);

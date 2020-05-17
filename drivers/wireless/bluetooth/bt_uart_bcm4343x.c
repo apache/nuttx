@@ -308,7 +308,7 @@ static int load_bcm4343x_firmware(FAR const struct btuart_lowerhalf_s *lower)
   lower->rxenable(lower, true);
 
   nxsem_init(&rxsem, 0, 0);
-  nxsem_setprotocol(&rxsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&rxsem, SEM_PRIO_NONE);
 
   /* It is possible this could fail if modem is already at high speed, so we
    * can safely ignore error return value.

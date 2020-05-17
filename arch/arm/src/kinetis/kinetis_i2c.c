@@ -332,7 +332,7 @@ static inline void kinetis_i2c_sem_init(FAR struct kinetis_i2cdev_s *priv)
    */
 
   nxsem_init(&priv->wait, 0, 0);
-  nxsem_setprotocol(&priv->wait, SEM_PRIO_NONE);
+  nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
 }
 
 /****************************************************************************

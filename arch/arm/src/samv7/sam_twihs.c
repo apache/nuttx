@@ -1456,7 +1456,7 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
        * have priority inheritance enabled.
        */
 
-      nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+      nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
       /* Perform repeatable TWIHS hardware initialization */
 

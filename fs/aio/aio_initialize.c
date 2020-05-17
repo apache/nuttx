@@ -95,7 +95,7 @@ void aio_initialize(void)
   /* Initialize counting semaphores */
 
   nxsem_init(&g_aioc_freesem, 0, CONFIG_FS_NAIOC);
-  nxsem_setprotocol(&g_aioc_freesem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_aioc_freesem, SEM_PRIO_NONE);
   nxsem_init(&g_aio_exclsem, 0, 1);
 
   g_aio_holder = INVALID_PROCESS_ID;

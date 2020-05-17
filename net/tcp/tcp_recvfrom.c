@@ -557,7 +557,7 @@ static void tcp_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
    */
 
   nxsem_init(&pstate->ir_sem, 0, 0); /* Doesn't really fail */
-  nxsem_setprotocol(&pstate->ir_sem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&pstate->ir_sem, SEM_PRIO_NONE);
 
   pstate->ir_buflen    = len;
   pstate->ir_buffer    = buf;

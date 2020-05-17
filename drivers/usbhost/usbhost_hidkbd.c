@@ -1996,7 +1996,7 @@ static FAR struct usbhost_class_s *
            * not have priority inheritance enabled.
            */
 
-          nxsem_setprotocol(&priv->waitsem, SEM_PRIO_NONE);
+          nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
           /* Return the instance of the USB keyboard class driver */
 
@@ -2582,7 +2582,7 @@ int usbhost_kbdinit(void)
    * have priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&g_syncsem, SEM_PRIO_NONE);
+  nxsem_set_protocol(&g_syncsem, SEM_PRIO_NONE);
 
   /* Advertise our availability to support (certain) devices */
 
