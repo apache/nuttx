@@ -50,7 +50,7 @@ CXXSRCS = libxx_cxa_atexit.cxx libxx_eabi_atexit.cxx
 ifeq ($(CONFIG_UCLIBCXX),y)
 include uClibc++.defs
 else ifeq ($(CONFIG_LIBCXX),y)
-include libcxx/Make.defs
+include libcxx.defs
 else
 include cxx.defs
 endif

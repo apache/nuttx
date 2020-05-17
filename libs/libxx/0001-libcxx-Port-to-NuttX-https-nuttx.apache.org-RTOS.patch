@@ -1,0 +1,103 @@
+From f2c553278288eef4c98ac4bbebc07a03af033718 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Mon, 15 Jun 2020 16:00:51 +0800
+Subject: [PATCH] [libcxx] Port to NuttX(https://nuttx.apache.org/) RTOS
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+Change-Id: I6ae68add2287aacbe66ae9d6a500a1fd1e131cd9
+---
+ include/__config                |  1 +
+ include/__locale                |  2 ++
+ include/support/nuttx/xlocale.h | 27 +++++++++++++++++++++++++++
+ src/include/config_elast.h      |  2 +-
+ src/locale.cpp                  |  2 +-
+ 5 files changed, 32 insertions(+), 2 deletions(-)
+ create mode 100644 include/support/nuttx/xlocale.h
+
+diff --git a/include/__config libcxx/include/__config
+index de09601e5..404c34b09 100644
+--- a/include/__config
++++ libcxx/include/__config
+@@ -1130,6 +1130,7 @@ extern "C" void __sanitizer_annotate_contiguous_container(
+ #  if defined(__FreeBSD__) || \
+       defined(__wasi__) || \
+       defined(__NetBSD__) || \
++      defined(__NuttX__) || \
+       defined(__linux__) || \
+       defined(__GNU__) || \
+       defined(__APPLE__) || \
+diff --git a/include/__locale libcxx/include/__locale
+index 6d10fa4d3..fb391861f 100644
+--- a/include/__locale
++++ libcxx/include/__locale
+@@ -21,6 +21,8 @@
+ #if defined(_LIBCPP_MSVCRT_LIKE)
+ # include <cstring>
+ # include <support/win32/locale_win32.h>
++#elif defined(__NuttX__)
++# include <support/nuttx/xlocale.h>
+ #elif defined(_AIX)
+ # include <support/ibm/xlocale.h>
+ #elif defined(__ANDROID__)
+diff --git a/include/support/nuttx/xlocale.h libcxx/include/support/nuttx/xlocale.h
+new file mode 100644
+index 000000000..f10c0f982
+--- /dev/null
++++ libcxx/include/support/nuttx/xlocale.h
+@@ -0,0 +1,27 @@
++// -*- C++ -*-
++//===-------------------- support/nuttx/xlocale.h -------------------------===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++
++#ifndef _LIBCPP_SUPPORT_NUTTX_XLOCALE_H
++#define _LIBCPP_SUPPORT_NUTTX_XLOCALE_H
++
++#if defined(__NuttX__)
++#include <support/xlocale/__posix_l_fallback.h>
++#include <support/xlocale/__strtonum_fallback.h>
++
++#define _LIBCPP_PROVIDES_DEFAULT_RUNE_TABLE
++
++#undef __linux__
++#undef __unix__
++#undef __APPLE__
++#undef __GLIBC__
++#undef _NEWLIB_VERSION
++
++#endif // __NuttX__
++
++#endif
+diff --git a/src/include/config_elast.h libcxx/src/include/config_elast.h
+index 501cbc4ff..1c8650af5 100644
+--- a/src/include/config_elast.h
++++ libcxx/src/include/config_elast.h
+@@ -19,7 +19,7 @@
+ 
+ #if defined(ELAST)
+ #define _LIBCPP_ELAST ELAST
+-#elif defined(_NEWLIB_VERSION)
++#elif  defined(__NuttX__) || defined(_NEWLIB_VERSION)
+ #define _LIBCPP_ELAST __ELASTERROR
+ #elif defined(__Fuchsia__)
+ // No _LIBCPP_ELAST needed on Fuchsia
+diff --git a/src/locale.cpp libcxx/src/locale.cpp
+index b9180880e..25699f29e 100644
+--- a/src/locale.cpp
++++ libcxx/src/locale.cpp
+@@ -30,7 +30,7 @@
+ #include "__sso_allocator"
+ #if defined(_LIBCPP_MSVCRT) || defined(__MINGW32__)
+ #include "support/win32/locale_win32.h"
+-#elif !defined(__BIONIC__)
++#elif !defined(__BIONIC__) && !defined(__NuttX__)
+ #include <langinfo.h>
+ #endif
+ #include <stdlib.h>
+-- 
+2.17.1
+
