@@ -140,8 +140,8 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
  * Name: usrsock_free()
  *
  * Description:
- *   Free a usrsock connection structure that is no longer in use. This should
- *   be done by the implementation of close().
+ *   Free a usrsock connection structure that is no longer in use. This
+ *   should be done by the implementation of close().
  *
  ****************************************************************************/
 
@@ -283,10 +283,11 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
  * Name: usrsock_setup_data_request_callback()
  ****************************************************************************/
 
-int usrsock_setup_data_request_callback(FAR struct usrsock_conn_s *conn,
-                                        FAR struct usrsock_data_reqstate_s *pstate,
-                                        FAR devif_callback_event_t event,
-                                        uint16_t flags)
+int usrsock_setup_data_request_callback(
+      FAR struct usrsock_conn_s *conn,
+      FAR struct usrsock_data_reqstate_s *pstate,
+      FAR devif_callback_event_t event,
+      uint16_t flags)
 {
   pstate->valuelen = 0;
   pstate->valuelen_nontrunc = 0;

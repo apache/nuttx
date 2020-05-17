@@ -131,32 +131,30 @@ struct rpmsg_rtc_lowerhalf_s
  ****************************************************************************/
 
 static void rpmsg_rtc_device_created(FAR struct rpmsg_device *rdev,
-                                     FAR void *priv);
+              FAR void *priv);
 static void rpmsg_rtc_device_destroy(FAR struct rpmsg_device *rdev,
-                                     FAR void *priv);
+              FAR void *priv);
 static void rpmsg_rtc_alarm_fire_handler(FAR struct rpmsg_endpoint *ept,
-                                         FAR void *data, size_t len,
-                                         uint32_t src, FAR void *priv);
+              FAR void *data, size_t len, uint32_t src, FAR void *priv);
 static int rpmsg_rtc_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
-                            size_t len, uint32_t src, FAR void *priv);
+              size_t len, uint32_t src, FAR void *priv);
 
 static int rpmsg_rtc_send_recv(FAR struct rpmsg_rtc_lowerhalf_s *lower,
-                               uint32_t command,
-                               FAR struct rpmsg_rtc_header_s *msg, int len);
+              uint32_t command, FAR struct rpmsg_rtc_header_s *msg, int len);
 static int rpmsg_rtc_rdtime(FAR struct rtc_lowerhalf_s *lower,
-                            FAR struct rtc_time *rtctime);
+              FAR struct rtc_time *rtctime);
 static int rpmsg_rtc_settime(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct rtc_time *rtctime);
+              FAR const struct rtc_time *rtctime);
 static bool rpmsg_rtc_havesettime(FAR struct rtc_lowerhalf_s *lower);
 #ifdef CONFIG_RTC_ALARM
 static int rpmsg_rtc_setalarm(FAR struct rtc_lowerhalf_s *lower_,
-                              FAR const struct lower_setalarm_s *alarminfo);
+              FAR const struct lower_setalarm_s *alarminfo);
 static int rpmsg_rtc_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                                 FAR const struct lower_setrelative_s *relinfo);
+              FAR const struct lower_setrelative_s *relinfo);
 static int rpmsg_rtc_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
-                                 int alarmid);
+              int alarmid);
 static int rpmsg_rtc_rdalarm(FAR struct rtc_lowerhalf_s *lower_,
-                             FAR struct lower_rdalarm_s *alarminfo);
+              FAR struct lower_rdalarm_s *alarminfo);
 #endif
 
 /****************************************************************************
@@ -337,8 +335,9 @@ static int rpmsg_rtc_setalarm(FAR struct rtc_lowerhalf_s *lower_,
   return ret;
 }
 
-static int rpmsg_rtc_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                                 FAR const struct lower_setrelative_s *relinfo)
+static int
+  rpmsg_rtc_setrelative(FAR struct rtc_lowerhalf_s *lower,
+                        FAR const struct lower_setrelative_s *relinfo)
 {
   struct lower_setalarm_s alarminfo =
   {

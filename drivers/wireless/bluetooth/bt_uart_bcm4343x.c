@@ -302,7 +302,9 @@ static int load_bcm4343x_firmware(FAR const struct btuart_lowerhalf_s *lower)
       0x00
     };
 
-  /* Let's temporarily connect to the hci uart rx callback so we can get data */
+  /* Let's temporarily connect to the hci uart rx callback so we can get
+   * data.
+   */
 
   lower->rxattach(lower, hciuart_cb, &rxsem);
   lower->rxenable(lower, true);

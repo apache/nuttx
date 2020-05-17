@@ -795,7 +795,8 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
                do
                  {
-                   DEBUGVERIFY(nxsem_get_value(&devpair->pp_slavesem, &sval));
+                   DEBUGVERIFY(nxsem_get_value(&devpair->pp_slavesem,
+                                               &sval));
                    if (sval < 0)
                      {
                        nxsem_post(&devpair->pp_slavesem);

@@ -108,7 +108,8 @@ static int  bcmf_chipinitialize(FAR struct bcmf_sdio_dev_s *sbus);
 
 static int  bcmf_oob_irq(FAR void *arg);
 
-static int  bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus, bool sleep);
+static int  bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus,
+                                bool sleep);
 
 static void bcmf_sdio_waitdog_timeout(int argc, wdparm_t arg1, ...);
 static int  bcmf_sdio_thread(int argc, char **argv);
@@ -605,8 +606,8 @@ int bcmf_transfer_bytes(FAR struct bcmf_sdio_dev_s *sbus, bool write,
       nblocks = 0;
     }
 
-  return sdio_io_rw_extended(sbus->sdio_dev, write,
-                             function, address, true, buf, blocklen, nblocks);
+  return sdio_io_rw_extended(sbus->sdio_dev, write, function, address, true,
+                             buf, blocklen, nblocks);
 }
 
 /****************************************************************************
@@ -876,15 +877,17 @@ int bcmf_sdio_thread(int argc, char **argv)
 
           sbus->irq_pending = false;
 
-          bcmf_read_sbregw(sbus,
-                          CORE_BUS_REG(sbus->chip->core_base[SDIOD_CORE_ID],
-                          intstatus), &sbus->intstatus);
+          bcmf_read_sbregw(
+            sbus,
+            CORE_BUS_REG(sbus->chip->core_base[SDIOD_CORE_ID], intstatus),
+            &sbus->intstatus);
 
           /* Clear interrupts */
 
-          bcmf_write_sbregw(sbus,
-                            CORE_BUS_REG(sbus->chip->core_base[SDIOD_CORE_ID],
-                            intstatus), sbus->intstatus);
+          bcmf_write_sbregw(
+            sbus,
+            CORE_BUS_REG(sbus->chip->core_base[SDIOD_CORE_ID], intstatus),
+            sbus->intstatus);
         }
 
       /* On frame indication, read available frames */

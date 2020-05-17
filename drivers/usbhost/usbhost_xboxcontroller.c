@@ -766,7 +766,9 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
                   memcpy(priv->tbuffer, guide_button_report_ack,
                          sizeof(guide_button_report_ack));
 
-                  /* Ensure the sequence number is the same as the input packet. */
+                  /* Ensure the sequence number is the same as the input
+                   * packet.
+                   */
 
                   priv->tbuffer[2] = seq_num;
 
@@ -789,7 +791,9 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
 
             case USBHOST_BUTTON_DATA:
 
-              /* Ignore the controller data if no task has opened the driver. */
+              /* Ignore the controller data if no task has opened the
+               * driver.
+               */
 
               if (priv->open)
                 {
@@ -879,7 +883,9 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
 
                   priv->valid = true;
 
-                  /* Notify any waiters that new controller data is available */
+                  /* Notify any waiters that new controller data is
+                   * available.
+                   */
 
                   usbhost_pollnotify(priv);
 
@@ -1185,7 +1191,9 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
             uinfo("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
-            /* Did we already find what we needed from a preceding interface? */
+            /* Did we already find what we needed from a preceding
+             * interface?
+             */
 
             if ((found & USBHOST_ALLFOUND) == USBHOST_ALLFOUND)
               {
@@ -1415,7 +1423,9 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
                                  (FAR char * const *)NULL);
   if (priv->pollpid < 0)
     {
-      /* Failed to started the poll thread... probably due to memory resources */
+      /* Failed to started the poll thread... probably due to memory
+       * resources.
+       */
 
       usbhost_givesem(&g_exclsem);
       ret = priv->pollpid;
@@ -1649,11 +1659,15 @@ static FAR struct usbhost_class_s *
           priv->usbclass.connect      = usbhost_connect;
           priv->usbclass.disconnected = usbhost_disconnected;
 
-          /* The initial reference count is 1... One reference is held by the driver */
+          /* The initial reference count is 1... One reference is held by the
+           * driver.
+           */
 
           priv->crefs = 1;
 
-          /* Initialize semaphores (this works okay in the interrupt context) */
+          /* Initialize semaphores (this works okay in the interrupt
+           * context).
+           */
 
           nxsem_init(&priv->exclsem, 0, 1);
           nxsem_init(&priv->waitsem, 0, 0);
@@ -1782,7 +1796,9 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
   priv->disconnected = true;
   uinfo("Disconnected\n");
 
-  /* Are there a thread(s) waiting for controller data that will never come? */
+  /* Are there a thread(s) waiting for controller data that will never
+   * come?
+   */
 
   for (i = 0; i < priv->nwaiters; i++)
     {

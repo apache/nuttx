@@ -242,7 +242,7 @@ hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower, uint32_t baud)
   ret = file_ioctl(&state->f, TCGETS, (long unsigned int)&tio);
   if (ret)
     {
-      wlerr("hciuart_setbaud: ERROR during TCGETS\n");
+      wlerr("ERROR during TCGETS\n");
       return ret;
     }
 
@@ -259,7 +259,7 @@ hciuart_setbaud(FAR const struct btuart_lowerhalf_s *lower, uint32_t baud)
 
   if (ret)
     {
-      wlerr("hciuart_setbaud: ERROR during TCSETS, does UART support CTS/RTS?\n");
+      wlerr("ERROR during TCSETS, does UART support CTS/RTS?\n");
       return ret;
     }
 
@@ -286,10 +286,11 @@ hciuart_read(FAR const struct btuart_lowerhalf_s *lower,
   FAR struct hciuart_state_s *state = &config->state;
   size_t ntotal;
 
-  wlinfo("config %p buffer %p buflen %lu\n", config, buffer, (size_t) buflen);
+  wlinfo("config %p buffer %p buflen %lu\n",
+         config, buffer, (size_t) buflen);
 
-  /* NOTE: This assumes that the caller has exclusive access to the Rx buffer,
-   * i.e., one lower half instance can server only one upper half!
+  /* NOTE: This assumes that the caller has exclusive access to the Rx
+   * buffer, i.e., one lower half instance can server only one upper half!
    */
 
   ntotal = file_read(&state->f, buffer, buflen);
@@ -318,7 +319,8 @@ hciuart_write(FAR const struct btuart_lowerhalf_s *lower,
     = (FAR const struct hciuart_config_s *)lower;
   FAR const struct hciuart_state_s *state = &config->state;
 
-  wlinfo("config %p buffer %p buflen %lu\n", config, buffer, (size_t) buflen);
+  wlinfo("config %p buffer %p buflen %lu\n",
+         config, buffer, (size_t) buflen);
 
   buflen = file_write((struct file *)&state->f, buffer, buflen);
 
@@ -367,7 +369,9 @@ static int hcicollecttask(int argc, FAR char **argv)
           continue;
         }
 
-      /* These flags can change dynamically as new events occur, so snapshot */
+      /* These flags can change dynamically as new events occur, so
+       * snapshot.
+       */
 
       irqstate_t flags = enter_critical_section();
       uint32_t tevents = s->p.revents;
@@ -434,7 +438,8 @@ FAR void *bt_uart_shim_getdevice(FAR char *path)
 
   /* Get the memory for this shim instance */
 
-  g_n = (struct hciuart_config_s *)kmm_zalloc(sizeof(struct hciuart_config_s));
+  g_n = (FAR struct hciuart_config_s *)
+    kmm_zalloc(sizeof(struct hciuart_config_s));
 
   if (!g_n)
     {

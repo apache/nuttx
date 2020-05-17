@@ -111,7 +111,9 @@
 
 #define TUN_WDDELAY  (1 * CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of the Ethernet
+ * header.
+ */
 
 #ifdef CONFIG_NET_ETHERNET
 #  define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)

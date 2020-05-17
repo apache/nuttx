@@ -458,7 +458,9 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           memcpy(&upper->info, info, sizeof(struct pwm_info_s));
 
-          /* If PWM is already running, then re-start it with the new characteristics */
+          /* If PWM is already running, then re-start it with the new
+           * characteristics.
+           */
 
           if (upper->started)
             {
@@ -532,7 +534,9 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* Any unrecognized IOCTL commands might be platform-specific ioctl commands */
+      /* Any unrecognized IOCTL commands might be platform-specific ioctl
+       * commands.
+       */
 
       default:
         {
@@ -590,7 +594,9 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
       return -ENOMEM;
     }
 
-  /* Initialize the PWM device structure (it was already zeroed by kmm_zalloc()) */
+  /* Initialize the PWM device structure (it was already zeroed by
+   * kmm_zalloc()).
+   */
 
   nxsem_init(&upper->exclsem, 0, 1);
 #ifdef CONFIG_PWM_PULSECOUNT
