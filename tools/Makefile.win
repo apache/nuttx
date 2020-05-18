@@ -167,8 +167,8 @@ NEED_MATH_H = y
 endif
 
 ifeq ($(NEED_MATH_H),y)
-include\math.h: include\nuttx\math.h
-	$(Q) cp -pf include\nuttx\math.h include\math.h
+include\math.h: include\nuttx\math.h .clean_context
+	$(Q) cp -f include\nuttx\math.h include\math.h
 else
 include\math.h:
 endif
@@ -180,8 +180,8 @@ endif
 # the settings in this float.h are actually correct for your platform!
 
 ifeq ($(CONFIG_ARCH_FLOAT_H),y)
-include\float.h: include\nuttx\float.h
-	$(Q) cp -pf include\nuttx\float.h include\float.h
+include\float.h: include\nuttx\float.h .clean_context
+	$(Q) cp -f include\nuttx\float.h include\float.h
 else
 include\float.h:
 endif
@@ -192,8 +192,8 @@ endif
 # have to copy stdarg.h from include\nuttx\. to include\.
 
 ifeq ($(CONFIG_ARCH_STDARG_H),y)
-include\stdarg.h: include\nuttx\stdarg.h
-	$(Q) cp -pf include\nuttx\stdarg.h include\stdarg.h
+include\stdarg.h: include\nuttx\stdarg.h .clean_context
+	$(Q) cp -f include\nuttx\stdarg.h include\stdarg.h
 else
 include\stdarg.h:
 endif
@@ -204,8 +204,8 @@ endif
 # have to copy setjmp.h from include\nuttx\. to include\.
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
-include\setjmp.h: include\nuttx\setjmp.h
-	$(Q) cp -pf include\nuttx\setjmp.h include\setjmp.h
+include\setjmp.h: include\nuttx\setjmp.h .clean_context
+	$(Q) cp -f include\nuttx\setjmp.h include\setjmp.h
 else
 include\setjmp.h:
 endif
@@ -224,7 +224,7 @@ $(TOPDIR)\.version:
 	$(Q) echo CONFIG_VERSION_PATCH=0 >> .version
 	$(Q) echo CONFIG_VERSION_BUILD="0" >> .version
 
-include\nuttx\version.h: $(TOPDIR)\.version tools\mkversion$(HOSTEXEEXT)
+include\nuttx\version.h: $(TOPDIR)\.version tools\mkversion$(HOSTEXEEXT) .clean_context
 	$(Q) tools\mkversion$(HOSTEXEEXT) $(TOPDIR) > include\nuttx\version.h
 
 # Targets used to build include\nuttx\config.h.  Creation of config.h is
@@ -234,7 +234,7 @@ include\nuttx\version.h: $(TOPDIR)\.version tools\mkversion$(HOSTEXEEXT)
 tools\mkconfig$(HOSTEXEEXT):
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" mkconfig$(HOSTEXEEXT)
 
-include\nuttx\config.h: $(TOPDIR)\.config tools\mkconfig$(HOSTEXEEXT)
+include\nuttx\config.h: $(TOPDIR)\.config tools\mkconfig$(HOSTEXEEXT) .clean_context
 	$(Q) tools\mkconfig$(HOSTEXEEXT) $(TOPDIR) > include\nuttx\config.h
 
 # Targets used to create dependencies
@@ -250,45 +250,51 @@ tools\mkdeps$(HOSTEXEEXT):
 
 # Link the arch\<arch-name>\include directory to include\arch
 
-include\arch: .config
+include\arch: .clean_context
 	@echo LN: include\arch to $(ARCH_DIR)\include
 	$(Q) $(DIRLINK) $(TOPDIR)\$(ARCH_DIR)\include include\arch
+	$(Q) touch $@
 
 # Link the boards\<arch>\<chip>\<board>\include directory to include\arch\board
 
 include\arch\board: include\arch
 	@echo LN: include\arch\board to $(BOARD_DIR)\include
 	$(Q) $(DIRLINK) $(BOARD_DIR)\include include\arch\board
+	$(Q) touch $@
 
 ifneq ($(BOARD_COMMON_DIR),)
 # Link the boards\<arch>\<chip>\common dir to arch\<arch-name>\src\board
 # Link the boards\<arch>\<chip>\<board>\src dir to arch\<arch-name>\src\board\board
 
-$(ARCH_SRC)\board: .config
+$(ARCH_SRC)\board: .clean_context
 	@echo "LN: $(ARCH_SRC)\board to $(BOARD_COMMON_DIR)"
 	$(Q) $(DIRLINK) $(BOARD_COMMON_DIR) $(ARCH_SRC)\board
 	@echo "LN: $(ARCH_SRC)\board\board to $(BOARD_DIR)\src"
 	$(Q) $(DIRLINK) $(BOARD_DIR)\src $(ARCH_SRC)\board\board
+	$(Q) touch $@
 else
 # Link the boards\<arch>\<chip>\<board>\src dir to arch\<arch-name>\src\board
 
-$(ARCH_SRC)\board: .config
+$(ARCH_SRC)\board: .clean_context
 	@echo LN: $(ARCH_SRC)\board to $(BOARD_DIR)\src
 	$(Q) $(DIRLINK) $(BOARD_DIR)\src $(ARCH_SRC)\board
+	$(Q) touch $@
 endif
 
 # Link the boards\<arch>\<chip>\drivers dir to drivers\platform
 
-drivers\platform: .config
+drivers\platform: .clean_context
 	@echo LN: $(TOPDIR)\drivers\platform to $(BOARD_DRIVERS_DIR)
 	$(Q) $(DIRLINK) $(BOARD_DRIVERS_DIR) $(TOPDIR)\drivers\platform
+	$(Q) touch $@
 
 # Link arch\<arch-name>\src\<chip-name> to arch\<arch-name>\src\chip
 
-$(ARCH_SRC)\chip: .config
+$(ARCH_SRC)\chip: .clean_context
 ifneq ($(CONFIG_ARCH_CHIP),)
 	@echo LN: $(ARCH_SRC)\chip to $(ARCH_SRC)\$(CONFIG_ARCH_CHIP)
 	$(Q) $(DIRLINK) $(TOPDIR)\$(ARCH_SRC)\$(CONFIG_ARCH_CHIP) $(ARCH_SRC)\chip
+	$(Q) touch $@
 endif
 
 # Link arch\<arch-name>\include\<chip-name> to arch\<arch-name>\include\chip
@@ -297,6 +303,7 @@ include\arch\chip: include\arch
 ifneq ($(CONFIG_ARCH_CHIP),)
 	@echo LN: include\arch\chip to $(ARCH_INC)\$(CONFIG_ARCH_CHIP)
 	$(Q) $(DIRLINK) $(TOPDIR)\$(ARCH_INC)\$(CONFIG_ARCH_CHIP) include\arch\chip
+	$(Q) touch $@
 endif
 
 dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip drivers\platform
@@ -328,6 +335,10 @@ clean_context:
 	$(call DELFILE, include\math.h)
 	$(call DELFILE, include\stdarg.h)
 	$(call DELFILE, include\setjmp.h)
+
+.clean_context: .config
+	+$(Q) $(MAKE) clean_context
+	$(Q) touch $@
 
 # Archive targets.  The target build sequence will first create a series of
 # libraries, one per configured source file directory.  The final NuttX
@@ -415,32 +426,22 @@ pass2dep: context tools\mkdeps$(HOSTEXEEXT)
 # location: https://bitbucket.org/nuttx/tools/downloads/.  See
 # misc\tools\README.txt for additional information.
 
-do_config: dirlinks apps_preconfig
+config: apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf Kconfig
 
-config: do_config clean_context
-
-do_oldconfig: dirlinks apps_preconfig
+oldconfig: apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --oldconfig Kconfig
 
-oldconfig: do_oldconfig clean_context
-
-do_olddefconfig: dirlinks apps_preconfig
+olddefconfig: apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --olddefconfig Kconfig
 
-olddefconfig: do_olddefconfig clean_context
-
-do_menuconfig: dirlinks configenv apps_preconfig
+menuconfig: configenv apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-mconf Kconfig
 
-menuconfig: do_menuconfig clean_context
-
-do_nconfig: dirlinks apps_preconfig
+nconfig: apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-nconf Kconfig
 
-nconfig: do_nconfig clean_context
-
-savedefconfig: dirlinks apps_preconfig
+savedefconfig: apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --savedefconfig defconfig.tmp Kconfig
 	$(Q) sed -i -e "/CONFIG_APPS_DIR=/d" defconfig.tmp
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
@@ -519,6 +520,7 @@ endif
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
 	$(call DELFILE, .config-e)
+	$(call DELFILE, .clean_context)
 	$(call DIRUNLINK, include\arch\board)
 	$(call DIRUNLINK, include\arch\chip)
 	$(call DIRUNLINK, include\arch)
@@ -541,7 +543,7 @@ endif
 # apps_distclean: Perform the distclean operation only in the user application
 #                 directory.
 
-apps_preconfig:
+apps_preconfig: dirlinks
 ifneq ($(APPDIR),)
 	$(Q) $(MAKE) -C "$(APPDIR)" TOPDIR="$(TOPDIR)" preconfig
 endif
