@@ -184,7 +184,8 @@ ssize_t up_check_stack_remain(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(void)
 {
-  uintptr_t start = (uintptr_t)g_intstackbase - (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+  uintptr_t start = (uintptr_t)g_intstackbase -
+    (CONFIG_ARCH_INTERRUPTSTACK & ~3);
   return do_stackcheck(start, (CONFIG_ARCH_INTERRUPTSTACK & ~3));
 }
 
