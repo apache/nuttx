@@ -417,6 +417,7 @@ done
 
 # Copy the essential build script file(s)
 
+cp -f "${TOPDIR}/tools/Config.mk" "${EXPORTDIR}/tools/"
 cp -f "${TOPDIR}/tools/copydir.bat" "${EXPORTDIR}/tools/"
 cp -f "${TOPDIR}/tools/copydir.sh" "${EXPORTDIR}/tools/"
 cp -f "${TOPDIR}/tools/define.bat" "${EXPORTDIR}/tools/"
