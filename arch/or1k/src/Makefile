@@ -33,8 +33,8 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
--include chip$(DELIM)Make.defs
+include $(TOPDIR)/Make.defs
+include chip$(DELIM)Make.defs
 
 ifeq ($(CONFIG_ARCH_MOR1KX),y)          # OpenRISC mor1kx
 ARCH_SUBDIR = mor1kx

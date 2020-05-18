@@ -33,10 +33,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
-
-# REVISIT: Backslash causes problems in $(COBJS) target
-DELIM := $(strip /)
+include $(TOPDIR)/Make.defs
 
 # Sources and paths
 

@@ -33,7 +33,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 ASRCS =
 CSRCS = pic32mz_boot.c pic32mz_bringup.c pic32mz_userleds.c pic32mz_spi.c

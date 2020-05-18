@@ -18,7 +18,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 CSRCS  = litex_bringup.c litex_boot.c
 

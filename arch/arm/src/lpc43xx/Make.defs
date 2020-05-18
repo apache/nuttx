@@ -196,4 +196,4 @@ CHIP_CSRCS += lpc43_usb0dev.c
 endif
 endif
 
--include chip/spifi/src/Make.defs
+include chip/spifi/src/Make.defs

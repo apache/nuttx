@@ -34,8 +34,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
-DELIM ?= $(strip /)
+include $(TOPDIR)/Make.defs
 
 # Basic BINFMT source files
 

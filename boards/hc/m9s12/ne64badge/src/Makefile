@@ -33,7 +33,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 ASRCS =
 CSRCS = m9s12_boot.c m9s12_leds.c m9s12_buttons.c m9s12_spi.c

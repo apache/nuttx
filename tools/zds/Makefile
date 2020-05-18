@@ -19,7 +19,7 @@
 ############################################################################
 
 TOPDIR ?= $(CURDIR)/..
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 # Define HOSTCC on the make command line if it differs from these defaults
 # Define HOSTCFLAGS with -g on the make command line to build debug versions

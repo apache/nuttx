@@ -20,7 +20,7 @@ Config.mk
   This file (along with <nuttx>/.config) must be included at the top of
   each configuration-specific Make.defs file like:
 
-    -include $(TOPDIR)/.config
+    include $(TOPDIR)/.config
     include $(TOPDIR)/tools/Config.mk
 
   Subsequent logic within the configuration-specific Make.defs file may then

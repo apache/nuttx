@@ -33,8 +33,8 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
--include chip/Make.defs
+include $(TOPDIR)/Make.defs
+include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_MIPS),y)
 ARCH_SUBDIR = mips32

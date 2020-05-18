@@ -33,8 +33,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
-DELIM ?= $(strip /)
+include $(TOPDIR)/Make.defs
 
 # Add files to the build
 

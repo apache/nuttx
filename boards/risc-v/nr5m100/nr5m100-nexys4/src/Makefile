@@ -33,7 +33,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 CSRCS = nr5_appinit.c nr5_boot.c nr5_autoleds.c
 

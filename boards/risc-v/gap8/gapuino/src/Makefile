@@ -1,5 +1,5 @@
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 CSRCS = gapuino_appinit.c gapuino_sysinit.c
 

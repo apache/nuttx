@@ -18,7 +18,7 @@
 #
 ###########################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 # Sources and paths
 
@@ -113,8 +113,6 @@ CSRCS += modlib_sys_symtab.c
 
 endif
 
-# REVISIT: Backslash causes problems in $(COBJS) target
-DELIM := $(strip /)
 BINDIR ?= bin
 
 AOBJS = $(patsubst %.S, $(BINDIR)$(DELIM)%$(OBJEXT), $(ASRCS))

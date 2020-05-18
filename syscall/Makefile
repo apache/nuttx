@@ -33,8 +33,7 @@
 #
 ###########################################################################
 
--include $(TOPDIR)/Make.defs
-DELIM ?= $(strip /)
+include $(TOPDIR)/Make.defs
 
 include proxies$(DELIM)Make.defs
 include stubs$(DELIM)Make.defs
