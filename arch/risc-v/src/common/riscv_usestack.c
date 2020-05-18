@@ -159,5 +159,16 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
 
+#if defined(CONFIG_STACK_COLORATION)
+  /* If stack debug is enabled, then fill the stack with a
+   * recognizable value that we can use later to test for high
+   * water marks.
+   */
+
+  up_stack_color((FAR void *)((uintptr_t)tcb->stack_alloc_ptr +
+                 sizeof(struct tls_info_s)),
+                 tcb->adj_stack_size - sizeof(struct tls_info_s));
+#endif
+
   return OK;
 }
