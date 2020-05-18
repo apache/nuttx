@@ -158,7 +158,7 @@ blacklist=`grep "^-" $testfile || true`
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
 function makefunc {
-  if ! ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" $@ 1>/dev/null; then
+  if ! ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" ${JOPTION} $@ 1>/dev/null; then
     fail=1
   fi
 }
@@ -172,7 +172,7 @@ function distclean {
       git -C $nuttx clean -xfdq
       git -C $APPSDIR clean -xfdq
     else
-      makefunc ${JOPTION} distclean
+      makefunc distclean
 
       # Remove .version manually because this file is shipped with
       # the release package and then distclean has to keep it
@@ -199,7 +199,7 @@ function distclean {
 
 function configure {
   echo "  Configuring..."
-  if ! ./tools/configure.sh ${HOPTION} $config; then
+  if ! ./tools/configure.sh ${HOPTION} $config ${JOPTION}; then
     fail=1
   fi
 
@@ -231,7 +231,7 @@ function configure {
 
 function build {
   echo "  Building NuttX..."
-  makefunc ${JOPTION}
+  makefunc
 
   # Ensure defconfig in the canonical form
 
