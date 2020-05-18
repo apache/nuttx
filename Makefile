@@ -41,9 +41,18 @@
 #   make -f tools/Makefile.win
 #
 
--include .config
+ifeq ($(wildcard .config),)
+.DEFAULT:
+	@echo "Nuttx has not been configured:"
+	@echo "  tools/configure.sh <target>"
+
+clean distclean:
+	@:
+else
+include .config
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 include tools/Makefile.win
 else
 include tools/Makefile.unix
+endif
 endif

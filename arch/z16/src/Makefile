@@ -18,8 +18,8 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
--include chip/Make.defs
+include $(TOPDIR)/Make.defs
+include chip/Make.defs
 
 COMPILER = ${shell basename "$(CC)"}
 ARCHSRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src

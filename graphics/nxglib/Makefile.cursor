@@ -33,7 +33,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 ifeq ($(NXGLIB_BITSPERPIXEL),8)
 NXGLIB_SUFFIX := _8bpp

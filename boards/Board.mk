@@ -35,7 +35,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 ifneq ($(RCSRCS)$(RCRAWS),)
 ETCDIR := etctmp

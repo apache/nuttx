@@ -33,7 +33,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 ASRCS =
 CSRCS = ez80_boot.c ez80_leds.c

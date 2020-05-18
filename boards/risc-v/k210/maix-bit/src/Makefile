@@ -33,7 +33,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 CSRCS  = k210_bringup.c k210_boot.c
 

@@ -33,7 +33,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 ASRCS =
 CSRCS = k40_boot.c k40_lcd.c k40_spi.c

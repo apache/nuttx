@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 ASRCS =
 CSRCS = stm32_boot.c stm32_leds.c

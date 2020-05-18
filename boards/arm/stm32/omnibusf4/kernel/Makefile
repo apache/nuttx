@@ -35,7 +35,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 # This is the directory for the board-specific header files
 

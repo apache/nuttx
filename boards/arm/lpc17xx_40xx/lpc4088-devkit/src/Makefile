@@ -33,7 +33,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 ASRCS =
 CSRCS = lpc17_40_boardinitialize.c lpc17_40_bringup.c lpc17_40_ssp.c

@@ -36,10 +36,7 @@
 export SHELL=cmd
 
 TOPDIR := ${shell echo %CD%}
--include $(TOPDIR)\.config
-include $(TOPDIR)\tools\Config.mk
--include $(TOPDIR)\Make.defs
-
+include $(TOPDIR)\Make.defs
 -include $(TOPDIR)\.version
 
 # In case .version file does not exist
@@ -155,7 +152,7 @@ NUTTXNAME = nuttx
 BIN       = $(NUTTXNAME)$(EXEEXT)
 
 all: $(BIN)
-.PHONY: dirlinks context clean_context check_context configenv config oldconfig menuconfig nconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
+.PHONY: dirlinks context clean_context configenv config oldconfig menuconfig nconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
 .PHONY: pass1 pass1dep
 .PHONY: pass2 pass2dep
 
@@ -326,7 +323,7 @@ dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(
 # the config.h and version.h header files in the include\nuttx directory and
 # the establishment of symbolic links to configured directories.
 
-context: check_context include\nuttx\config.h include\nuttx\version.h include\math.h include\float.h include\stdarg.h include\setjmp.h dirlinks
+context: include\nuttx\config.h include\nuttx\version.h include\math.h include\float.h include\stdarg.h include\setjmp.h dirlinks
 	$(Q) mkdir -p staging
 	$(Q) for %%G in ($(CONTEXTDIRS)) do ( $(MAKE) -C %%G TOPDIR="$(TOPDIR)" context )
 
@@ -343,17 +340,6 @@ clean_context:
 	$(call DELFILE, include\math.h)
 	$(call DELFILE, include\stdarg.h)
 	$(call DELFILE, include\setjmp.h)
-
-# check_context
-#
-# This target checks if NuttX has been configured.  NuttX is configured using
-# the script tools\configure.bat.  That script will install certain files in
-# the top-level NuttX build directory.  This target verifies that those
-# configuration files have been installed and that NuttX is ready to be built.
-
-check_context:
-	$(Q) if not exist $(TOPDIR)\.config echo "$(TOPDIR)\.config does not exist"
-	$(Q) if not exist $(TOPDIR)\Make.defs echo "$(TOPDIR)\Make.defs does not exist"
 
 # Archive targets.  The target build sequence will first create a series of
 # libraries, one per configured source file directory.  The final NuttX

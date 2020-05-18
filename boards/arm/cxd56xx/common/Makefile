@@ -32,7 +32,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 include board$(DELIM)Make.defs
 include src$(DELIM)Make.defs

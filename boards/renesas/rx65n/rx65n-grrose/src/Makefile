@@ -18,7 +18,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 CFLAGS += -I=$(ARCH_SRCDIR)/chip -I=$(ARCH_SRCDIR)/common -I=$(TOPDIR)/sched

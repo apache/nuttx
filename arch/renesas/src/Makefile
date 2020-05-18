@@ -33,8 +33,8 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
--include chip/Make.defs
+include $(TOPDIR)/Make.defs
+include chip/Make.defs
 
 CPPFLAGS += $(EXTRAFLAGS)
 CFLAGS += $(EXTRAFLAGS)

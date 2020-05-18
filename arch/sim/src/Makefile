@@ -34,7 +34,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 CPPFLAGS += -I$(ARCH_SRCDIR)/chip -I$(TOPDIR)/sched $(EXTRAFLAGS)

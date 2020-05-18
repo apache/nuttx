@@ -33,8 +33,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/.config
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
 # Zoneinfo database
 
