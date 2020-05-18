@@ -36,25 +36,25 @@ endif
 ifeq ($(filter y, \
       $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL) \
     ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABIL
+  CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABI
 endif
 
 ifeq ($(filter y, \
       $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW) \
     ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABIW
+  CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABI
 endif
 
 ifeq ($(filter y, \
       $(CONFIG_ARMV7M_TOOLCHAIN_CLANGL) \
     ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= CLANGL
+  CONFIG_ARMV7M_TOOLCHAIN ?= CLANG
 endif
 
 ifeq ($(filter y, \
       $(CONFIG_ARMV7M_TOOLCHAIN_CLANGW) \
     ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= CLANGW
+  CONFIG_ARMV7M_TOOLCHAIN ?= CLANG
 endif
 
 #
@@ -124,45 +124,20 @@ endif
   MAXOPTIMIZATION ?= -Os
 endif
 
-# Generic GNU EABI toolchain on macOS, Linux or any typical Posix system
+# Generic GNU EABI toolchain
 
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABIL)
+ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
 
-# Generic GNU EABI toolchain under Windows
+# Clang toolchain
 
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABIW)
-  CROSSDEV ?= arm-none-eabi-
-  ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION ?= -Os
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
-endif
-
-# Clang toolchain on macOS, Linux or any typical Posix system
-
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANGL)
+ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
-
-# Clang toolchain under Windows
-
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANGW)
-  CROSSDEV ?= arm-none-eabi-
-  ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION ?= -Os
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
-endif
-

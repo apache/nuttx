@@ -194,9 +194,6 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW_XC32)
   CROSSDEV ?= xc32-
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIP_XC32_LICENSED),y)
   MAXOPTIMIZATION ?= -O2
 endif
@@ -209,9 +206,6 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW)
   CROSSDEV ?= pic32-
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
   MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
@@ -235,9 +229,6 @@ endif
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW_LITE)
   CROSSDEV ?= pic32-
   # CROSSDEV ?= xc32-
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
   # MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=$(MIPS_MPROCESSOR) $(MIPS_MICROMIPS) -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
@@ -261,9 +252,6 @@ endif
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),PINGUINOW)
   #CROSSDEV ?= mips-
   CROSSDEV ?= p32-
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
   MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=$(MIPS_MARCH) $(MIPS_MICROMIPS) -EL
   ARCHPICFLAGS = -fpic -membedded-pic

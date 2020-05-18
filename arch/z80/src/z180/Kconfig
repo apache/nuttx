@@ -314,6 +314,7 @@ config Z180_TOOLCHAIN_SDCCL
 config Z180_TOOLCHAIN_SDCCW
 	bool "SDCC for Windows"
 	depends on TOOLCHAIN_WINDOWS
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 
 endchoice
 

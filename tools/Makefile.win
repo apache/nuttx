@@ -145,7 +145,7 @@ LINKLIBS = $(patsubst staging\\%,%,$(NUTTXLIBS))
 # Export tool definitions
 
 MKEXPORT = tools\mkexport.bat
-MKEXPORT_ARGS = -w$(WINTOOL) -t "$(TOPDIR)"
+MKEXPORT_ARGS = -w$(CONFIG_CYGWIN_WINTOOL) -t "$(TOPDIR)"
 
 ifneq ($(CONFIG_BUILD_FLAT),y)
 MKEXPORT_ARGS += -u
@@ -554,7 +554,7 @@ savedefconfig: dirlinks apps_preconfig
 # that the archiver is 'ar'
 
 export: pass2deps
-	$(Q) $(MKEXPORT) $(MKEXPORT_ARGS) -w$(WINTOOL) -t "$(TOPDIR)" -l "$(EXPORTLIBS)"
+	$(Q) $(MKEXPORT) $(MKEXPORT_ARGS) -l "$(EXPORTLIBS)"
 
 # General housekeeping targets:  dependencies, cleaning, etc.
 #

@@ -26,6 +26,7 @@ config ARCH_CHIP_Z180
 
 config ARCH_CHIP_EZ80
 	bool "eZ80 Family (ez80 Acclaim)"
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 	select MM_SMALL if EZ80_Z80MODE
 	select ARCH_HAVE_PHY
 	---help---
@@ -33,6 +34,7 @@ config ARCH_CHIP_EZ80
 
 config ARCH_CHIP_Z8
 	bool "z8 Family"
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 	select MM_SMALL
 	select ENDIAN_BIG
 	---help---

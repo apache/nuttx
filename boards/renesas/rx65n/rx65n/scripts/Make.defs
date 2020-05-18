@@ -44,8 +44,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
-ifeq ($(CONFIG_HOST_WINDOWS),y)
-WINTOOL=y
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
 DIRLINK = $(TOPDIR)/tools/copydir.sh
 DIRUNLINK = $(TOPDIR)/tools/unlink.sh
 MKDEP = $(TOPDIR)/tools/mkwindeps.sh
@@ -93,7 +92,7 @@ NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel
 LDNXFLATFLAGS = -e main -s 2048
 
 LDMODULEFLAGS = -r -e module_initialize
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libs/libc/modlib/gnu-elf.ld}"
 else
   LDMODULEFLAGS += -T $(TOPDIR)/libs/libc/modlib/gnu-elf.ld

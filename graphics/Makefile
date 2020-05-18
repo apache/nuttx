@@ -38,7 +38,7 @@
 
 DEPPATH = --dep-path .
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
 INCDIROPT = -w
 endif
 

@@ -39,7 +39,7 @@ include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 # TODO add stm32 bootloader support
 LDSCRIPT = flash.ld
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
   DIRLINK = $(TOPDIR)/tools/copydir.sh
   DIRUNLINK = $(TOPDIR)/tools/unlink.sh

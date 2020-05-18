@@ -15,6 +15,7 @@ choice
 config AVR_WINAVR_TOOLCHAIN
 	bool "WinAVR"
 	depends on TOOLCHAIN_WINDOWS
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 	---help---
 		For Cygwin development environment on Windows machines, you
 		can use WinAVR: http://sourceforge.net/projects/winavr/files/
@@ -27,6 +28,7 @@ config AVR_WINAVR_TOOLCHAIN
 config AVR_ATMEL_AVR_TOOLCHAIN
 	bool "Atmel AVR Toolchain"
 	depends on TOOLCHAIN_WINDOWS
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 	---help---
 		Atmel provides GNU Toolchain for AVR development. It can
 		be obtained by installing Atmel Studio 6 and later or

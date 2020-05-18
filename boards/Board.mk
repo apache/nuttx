@@ -83,38 +83,24 @@ else
   WARCHSRCDIR = ${shell cygpath -w $(ARCHSRCDIR)}
   USRINCLUDES = -usrinc:'.;$(WSCHEDSRCDIR);$(WARCHSRCDIR)\chip;$(WARCHSRCDIR)\common'
 endif
+  INCLUDES = $(ARCHSTDINCLUDES) $(USRINCLUDES)
+  CFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 else
-ifeq ($(WINTOOL),y)
-  CFLAGS += -I "${shell cygpath -w $(SCHEDSRCDIR)}"
-  CFLAGS += -I "${shell cygpath -w $(ARCHSRCDIR)$(DELIM)chip}"
+  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(SCHEDSRCDIR)"}
+  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(ARCHSRCDIR)$(DELIM)chip"}
 ifneq ($(CONFIG_ARCH_SIM),y)
-  CFLAGS += -I "${shell cygpath -w $(ARCHSRCDIR)$(DELIM)common}"
+  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(ARCHSRCDIR)$(DELIM)common"}
 ifneq ($(ARCH_FAMILY),)
-  CFLAGS += -I "${shell cygpath -w $(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)}"
+  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)"}
 endif
 endif
-else
-  CFLAGS += -I$(SCHEDSRCDIR)
-  CFLAGS += -I$(ARCHSRCDIR)$(DELIM)chip
-ifneq ($(CONFIG_ARCH_SIM),y)
-  CFLAGS += -I$(ARCHSRCDIR)$(DELIM)common
-ifneq ($(ARCH_FAMILY),)
-  CFLAGS += -I$(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)
-endif
-endif
-endif
-endif
-
-ifneq ($(ZDSVERSION),)
-INCLUDES = $(ARCHSTDINCLUDES) $(USRINCLUDES)
-CFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 endif
 
 all: libboard$(LIBEXT)
 
 ifneq ($(ZDSVERSION),)
 $(ASRCS) $(HEAD_ASRC): %$(ASMEXT): %.S
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
 	$(Q) $(CPP) $(CPPFLAGS) `cygpath -w $<` -o $@.tmp
 else
 	$(Q) $(CPP) $(CPPFLAGS) $< -o $@.tmp

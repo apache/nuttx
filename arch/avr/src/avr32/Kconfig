@@ -14,6 +14,7 @@ choice
 config AVR32_AVRTOOLSW
 	bool "AVR tools for Windows"
 	depends on TOOLCHAIN_WINDOWS
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 
 config AVR32_AVRTOOLSL
 	bool "AVR tools for Linux"

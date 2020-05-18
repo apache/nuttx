@@ -19,8 +19,9 @@ config RV32IM_TOOLCHAIN_GNU_RVGL
 
 config RV32IM_TOOLCHAIN_GNU_RVGW
 	bool "Generic GNU RVG toolchain under Windows"
-	select ARCH_TOOLCHAIN_GNU
 	depends on TOOLCHAIN_WINDOWS
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+	select ARCH_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
 		configured for riscv32-unknown-elf.

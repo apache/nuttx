@@ -18,19 +18,6 @@
 #
 ############################################################################
 
-# Setup for the selected toolchain
-
-#
-# The ZiLOG ZDS-II Windows toolchain is the only toolchain available for
-# the ez80.
-#
-
-CONFIG_Z16F_TOOLCHAIN ?= ZDSII
-
-ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-  WINTOOL = y
-endif
-
 # These are the default directories where the ZDS-II toolchain is installed.
 # NOTE that short 8.3 path names are used in order to avoid spaces.  On my
 # machine I have:
@@ -63,7 +50,6 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ZDSSTDLIBDIR = $(INSTALLDIR)\lib\std
   ZDSZILOGLIBDIR = $(INSTALLDIR)\lib\zilog
 else
-  WINTOOL = y
   ZDSINSTALLDIR = $(INSTALLROOT)/ZDSII_ZNEO_$(ZDSVERSION)
   INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
   ZDSBINDIR = $(INSTALLDIR)/bin

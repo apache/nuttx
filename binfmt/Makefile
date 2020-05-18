@@ -37,7 +37,7 @@
 -include $(TOPDIR)/Make.defs
 DELIM ?= $(strip /)
 
-ifeq ($(WINTOOL),y)
+ifeq ($(WINTCONFIG_CYGWIN_WINTOOLOOL),y)
 INCDIROPT = -w
 endif
 

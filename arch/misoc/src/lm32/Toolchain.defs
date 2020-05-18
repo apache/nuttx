@@ -49,13 +49,13 @@ endif
 ifeq ($(filter y, \
       $(CONFIG_LM32_TOOLCHAIN_GNUL) \
     ),y)
-  CONFIG_LM32_TOOLCHAIN ?= GNUL
+  CONFIG_LM32_TOOLCHAIN ?= GNU
 endif
 
 ifeq ($(filter y, \
       $(CONFIG_LM32_TOOLCHAIN_GNUW) \
     ),y)
-  CONFIG_LM32_TOOLCHAIN ?= GNUW
+  CONFIG_LM32_TOOLCHAIN ?= GNU
 endif
 
 #
@@ -84,21 +84,10 @@ ifeq ($(CONFIG_LM32_TOOLCHAIN),BUILDROOT)
   MAXOPTIMIZATION ?= -Os
 endif
 
-# Generic GNU toolchain on macOS, Linux or any typical Posix system
+# Generic GNU toolchain
 
 ifeq ($(CONFIG_LM32_TOOLCHAIN),GNUL)
   CROSSDEV ?= lm32-elf-
   ARCROSSDEV ?= lm32-elf-
   MAXOPTIMIZATION ?= -Os
-endif
-
-# Generic GNU toolchain under Windows (native)
-
-ifeq ($(CONFIG_LM32_TOOLCHAIN),GNUW)
-  CROSSDEV ?= lm32-elf--
-  ARCROSSDEV ?= lm32-elf--
-  MAXOPTIMIZATION ?= -Os
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
 endif

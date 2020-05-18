@@ -33,19 +33,6 @@
 #
 ############################################################################
 
-# Setup for the selected toolchain
-
-#
-# The ZiLOG ZDS-II Windows toolchain is the only toolchain available for
-# the z8.
-#
-
-CONFIG_Z8_TOOLCHAIN ?= ZDSII
-
-ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-  WINTOOL = y
-endif
-
 # These are the directories where the ZDS-II toolchain is installed.  NOTE
 # that short 8.3 path names are used in order to avoid spaces.  On my machine
 # I have:
@@ -76,7 +63,6 @@ endif
   ZDSSTDLIBDIR = $(INSTALLDIR)\lib\std
   ZDSZILOGLIBDIR = $(INSTALLDIR)\lib\zilog
 else
-  WINTOOL = y
   ZDSINSTALLDIR = C:/PROGRA~2/ZiLOG/ZDSII_Z8Encore!_$(ZDSVERSION)
   INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
   ZDSBINDIR = $(INSTALLDIR)/bin

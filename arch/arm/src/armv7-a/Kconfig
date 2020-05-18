@@ -145,8 +145,9 @@ config ARMV7A_TOOLCHAIN_GNU_EABIL
 
 config ARMV7A_TOOLCHAIN_GNU_EABIW
 	bool "Generic GNU EABI toolchain under Windows"
-	select ARCH_TOOLCHAIN_GNU
 	depends on TOOLCHAIN_WINDOWS
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+	select ARCH_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 		configured for arm-none-eabi-.

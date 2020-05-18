@@ -53,7 +53,7 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   INCLUDES += -I "$(TOPDIR)\sched"
 else
   ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   NUTTX = "${shell cygpath -w $(TOPDIR)/nuttx$(EXEEXT)}"
   INCLUDES += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
   INCLUDES += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
@@ -104,7 +104,7 @@ endif
 else
   BOARDMAKE = $(if $(wildcard ./board/Makefile),y,)
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)/staging"}"
 ifeq ($(BOARDMAKE),y)
   LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)/arch/$(CONFIG_ARCH)/src/board"}"

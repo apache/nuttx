@@ -25,6 +25,7 @@ config MINERVA_TOOLCHAIN_GNUL
 config MINERVA_TOOLCHAIN_GNUW
 	bool "Generic GNU toolchain under Windows"
 	depends on TOOLCHAIN_WINDOWS
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 	select ARCH_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)

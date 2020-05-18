@@ -43,7 +43,7 @@ LDSCRIPT = sdram.ld
 
 # Setup for Windows vs Linux/Cygwin/macOS environments
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
   DIRLINK = $(TOPDIR)/tools/copydir.sh
   DIRUNLINK = $(TOPDIR)/tools/unlink.sh

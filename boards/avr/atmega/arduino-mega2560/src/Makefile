@@ -56,7 +56,7 @@ ifeq ($(CONFIG_ARCH_AVR),y)
 ARCH_SUBDIR	= avr
 endif
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   CFLAGS	+= -I "${shell cygpath -w $(TOPDIR)/sched}"
   CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
   CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"

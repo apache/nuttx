@@ -42,6 +42,7 @@ endchoice
 
 config ARCH_CHIP_Z16F
 	bool
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 
 config ARCH_CHIP
 	string

@@ -173,9 +173,10 @@ fi
 cp -a "${TOPDIR}/.config" "${EXPORTDIR}/.config" ||
   { echo "MK: Failed to copy ${TOPDIR}/.config to ${EXPORTDIR}/.config"; exit 1; }
 
-# Copy the Make.defs files, but disable windows path conversions
+# Copy the Make.defs files
 
-grep -v "WINTOOL[ \t]*=[ \t]y" "${TOPDIR}/Make.defs"  > "${EXPORTDIR}/Make.defs"
+cp -a "${TOPDIR}/Make.defs" "${EXPORTDIR}/Make.defs" ||
+  { echo "MK: Failed to copy ${TOPDIR}/Make.defs to ${EXPORTDIR}/Make.defs"; exit 1; }
 
 # Extract information from the Make.defs file.  A Makefile can do this best
 
@@ -233,7 +234,6 @@ echo "ARCHPICFLAGS     = ${ARCHPICFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "ARCHWARNINGS     = ${ARCHWARNINGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "ARCHWARNINGSXX   = ${ARCHWARNINGSXX}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "ARCHOPTIMIZATION = ${ARCHOPTIMIZATION}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "WINTOOL          = ${WINTOOL}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "CROSSDEV         = ${CROSSDEV}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "CC               = ${CC}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "CXX              = ${CXX}" >>"${EXPORTDIR}/scripts/Make.defs"

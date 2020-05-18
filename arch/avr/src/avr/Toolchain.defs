@@ -69,7 +69,7 @@ endif
 ifeq ($(filter y, \
       $(CONFIG_AVR_ATMEL_AVR_TOOLCHAIN) \
     ),y)
-  CONFIG_AVR_TOOLCHAIN ?= ATMEL
+  CONFIG_AVR_TOOLCHAIN ?= WINAVR
 endif
 
 # Chip-specific CPU flags
@@ -120,21 +120,8 @@ ifeq ($(CONFIG_AVR_TOOLCHAIN),LINUXGCC)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
-# WinAVR or Atmel toolchain under Windows/Cygwin
-
-_WINAVR = 0
 ifeq ($(CONFIG_AVR_TOOLCHAIN),WINAVR)
-_WINAVR = 1
-endif
-ifeq ($(CONFIG_AVR_TOOLCHAIN),ATMEL)
-_WINAVR = 1
-endif
-
-ifeq ($(_WINAVR),1)
   CROSSDEV ?= avr-
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
   MAXOPTIMIZATION ?= -O2
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
