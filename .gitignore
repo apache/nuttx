@@ -23,6 +23,7 @@
 *.wsp
 *~
 .depend
+/.clean_context
 /.config
 /.config.old
 /.config-e
