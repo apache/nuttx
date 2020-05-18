@@ -1399,7 +1399,7 @@ int main(int argc, char **argv, char **envp)
                    *   IGMPv2      as an IGMP version number
                    *   [0-9]p[0-9] as a decimal point
                    *   d[0-9]      as a divisor
-                   *   MHz         for frequencies
+                   *   Hz          for frequencies (including KHz, MHz, etc.)
                    */
 
                    if (!have_lower && islower(line[n]))
@@ -1461,9 +1461,8 @@ int main(int argc, char **argv, char **envp)
                              break;
 
                          case 'z':
-                           if (!have_upper || n < 2 ||
-                               line[n - 1] != 'H' ||
-                               line[n - 2] != 'M')
+                           if (!have_upper || n < 1 ||
+                               line[n - 1] != 'H')
                              {
                                have_lower = true;
                              }
