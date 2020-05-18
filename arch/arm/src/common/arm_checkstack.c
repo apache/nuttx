@@ -191,7 +191,9 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
 
 size_t up_check_tcbstack(FAR struct tcb_s *tcb)
 {
-  return do_stackcheck((uintptr_t)tcb->stack_alloc_ptr, tcb->adj_stack_size,
+  return do_stackcheck((uintptr_t)tcb->stack_alloc_ptr +
+                       sizeof(struct tls_info_s),
+                       tcb->adj_stack_size,
                        false);
 }
 
