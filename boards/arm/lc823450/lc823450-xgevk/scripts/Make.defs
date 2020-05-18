@@ -47,7 +47,7 @@ else
 endif
 endif
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
   DIRLINK = $(TOPDIR)/tools/copydir.sh
   DIRUNLINK = $(TOPDIR)/tools/unlink.sh
@@ -110,7 +110,7 @@ CELFFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
 
 LDELFFLAGS = -r -e main
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   LDELFFLAGS += -T "${shell cygpath -w $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld}"
 else
   LDELFFLAGS += -T $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld
@@ -145,7 +145,7 @@ ARCH_LIBPATHS += -L"$(TOPDIR)/arch/arm/src/lc823450"
 endif
 
 ifeq ($(CONFIG_LC823450_SDIF),y)
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   ARCH_SYMBOLS = "${shell cygpath -w $(TOPDIR)/arch/arm/src/lc823450/lc823450_symbols.ld}"
 else
   ARCH_SYMBOLS = $(TOPDIR)/arch/arm/src/lc823450/lc823450_symbols.ld

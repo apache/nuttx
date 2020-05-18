@@ -45,11 +45,11 @@
 #
 
 ifeq ($(filter y, $(CONFIG_RV32IM_TOOLCHAIN_GNU_RVGL)),y)
-  CONFIG_RISCV_TOOLCHAIN ?= GNU_RVGL
+  CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
 endif
 
 ifeq ($(filter y, $(CONFIG_RV32IM_TOOLCHAIN_GNU_RVGW)),y)
-  CONFIG_RISCV_TOOLCHAIN ?= GNU_RVGW
+  CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
 endif
 
 ifeq ($(filter y, $(CONFIG_RI5CY_GAP8_TOOLCHAIN)),y)
@@ -74,29 +74,11 @@ ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
 endif
 
-# Generic GNU RVG toolchain on macOS, Linux or any typical Posix system
+# Generic GNU RVG toolchain
 
-ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVGL)
+ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
   CROSSDEV ?= riscv64-unknown-elf-
   ARCROSSDEV ?= riscv64-unknown-elf-
-  ifeq ($(CONFIG_ARCH_FPU),y)
-      ARCHCPUFLAGS = -march=rv32imf -mabi=ilp32f
-  else
-      ARCHCPUFLAGS = -march=rv32im -mabi=ilp32
-  endif
-  ifeq ($(CONFIG_RV32IM_HW_MULDIV),y)
-    ARCHCPUFLAGS += -mdiv
-  else
-    ARCHCPUFLAGS += -mno-div
-  endif
-endif
-
-ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVGW)
-  CROSSDEV ?= riscv32-unknown-elf-
-  ARCROSSDEV ?= riscv32-unknown-elf-
-  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
-    WINTOOL = y
-  endif
   ifeq ($(CONFIG_ARCH_FPU),y)
       ARCHCPUFLAGS = -march=rv32imf -mabi=ilp32f
   else

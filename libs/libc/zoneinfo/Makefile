@@ -36,7 +36,7 @@
 -include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
 INCDIROPT = -w
 endif
 

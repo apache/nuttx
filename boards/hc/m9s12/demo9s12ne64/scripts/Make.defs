@@ -41,7 +41,6 @@ include ${TOPDIR}/tools/Config.mk
 
 CROSSDEV = m9s12x-nuttx-elf-
 MAXOPTIMIZATION = -Os
-WINTOOL = n
 
 ifeq ($(CONFIG_HCS12_NONBANKED),y)
   ARCHCPUFLAGS = -m9s12x -mshort -mnolong-calls
@@ -55,7 +54,7 @@ ifneq ($(CONFIG_HCS12_MSOFTREGS),0)
   ARCHCPUFLAGS += -msoft-reg-count=$(CONFIG_HCS12_MSOFTREGS)
 endif
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
   DIRLINK = $(TOPDIR)/tools/copydir.sh
   DIRUNLINK = $(TOPDIR)/tools/unlink.sh

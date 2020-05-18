@@ -85,7 +85,7 @@ CMODULEFLAGS = $(CFLAGS)
 CMODULEFLAGS += -fno-pic
 
 LDMODULEFLAGS = -r -e module_initialize
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libs/libc/modlib/gnu-elf.ld}"
 else
   LDMODULEFLAGS += -T $(TOPDIR)/libs/libc/modlib/gnu-elf.ld
@@ -113,7 +113,7 @@ CELFFLAGS += -fno-pic
 CXXELFFLAGS += -fno-pic
 
 LDELFFLAGS = -r -e main
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   LDELFFLAGS += -T "${shell cygpath -w $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld}"
 else
   LDELFFLAGS += -T $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld

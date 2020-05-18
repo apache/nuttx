@@ -43,7 +43,7 @@ else ifeq ($(CONFIG_ARCH_CHIP_MK20DX128VLH5),y)
   LDSCRIPT = mk20dx128vlh5.ld
 endif
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
   DIRLINK = $(TOPDIR)/tools/copydir.sh
   DIRUNLINK = $(TOPDIR)/tools/unlink.sh

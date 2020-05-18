@@ -52,7 +52,7 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)\include -isystem $(TOPDIR)\include\cxx
   ARCHSCRIPT = -T$(TOPDIR)\boards\$(CONFIG_ARCH)\$(CONFIG_ARCH_CHIP)\$(CONFIG_ARCH_BOARD)\scripts\$(LDSCRIPT)
 else
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
   DIRLINK = $(TOPDIR)/tools/copydir.sh
   DIRUNLINK = $(TOPDIR)/tools/unlink.sh

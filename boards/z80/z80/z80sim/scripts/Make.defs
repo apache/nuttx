@@ -152,7 +152,7 @@ else
 
   # This is the tool to use for dependencies
 
-  ifeq ($(WINTOOL),y)
+  ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
     MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
   else
     MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
@@ -161,7 +161,7 @@ else
   # SDCC for Linux, macOS, or Cygwin understands symbolic links.  Windows SDCC
   # running under Cygwin does not
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   DIRLINK = $(TOPDIR)$(DELIM)tools$(DELIM)copydir.sh
 else
   DIRLINK = $(TOPDIR)$(DELIM)tools$(DELIM)link.sh

@@ -41,7 +41,7 @@ ifdef ARCHSCRIPT
 # ARCHSCRIPT may contain a leading -T; it must not be followed by a space
 # for this to work.
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
 LDPATH = $(shell cygpath -u $(patsubst -T%,%,$(ARCHSCRIPT)))
 else
 LDPATH = $(patsubst -T%,%,$(ARCHSCRIPT))
@@ -74,7 +74,6 @@ endif
 	@echo "ARCHWARNINGS=\"$(ARCHWARNINGS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHWARNINGSXX=\"$(ARCHWARNINGSXX)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHOPTIMIZATION=\"$(ARCHOPTIMIZATION)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "WINTOOL=\"$(WINTOOL)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "CROSSDEV=\"$(CROSSDEV)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "CC=\"$(CC)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "CXX=\"$(CXX)\"" >> $(EXPORTDIR)/makeinfo.sh

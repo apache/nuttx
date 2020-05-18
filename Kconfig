@@ -60,6 +60,14 @@ config TOOLCHAIN_WINDOWS
 		Selected internally if the selected Windows environment is compatible
 		with the use of Windows native toolchains.
 
+config CYGWIN_WINTOOL
+	bool
+	default n
+	depends on WINDOWS_CYGWIN
+	---help---
+		Selected internally if Cygwin environment with the use of Windows
+		native toolchains.
+
 choice
 	prompt "Windows Build Environment"
 	default WINDOWS_CYGWIN

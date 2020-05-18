@@ -50,18 +50,22 @@ config ARCH_SH1
 config ARCH_RX65N
 	bool
 	default n
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 
 config ARCH_RX65N_RSK1MB
 	bool
 	default n
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 
 config ARCH_RX65N_RSK2MB
 	bool
 	default n
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 
 config ARCH_RX65N_GRROSE
 	bool
 	default n
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 
 config ARCH_M16C
 	bool

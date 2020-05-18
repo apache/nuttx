@@ -128,6 +128,7 @@ choice
 config ARMV7M_TOOLCHAIN_IARW
 	bool "IAR for Windows"
 	depends on TOOLCHAIN_WINDOWS
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 	select ARCH_TOOLCHAIN_IAR
 
 config ARMV7M_TOOLCHAIN_IARL
@@ -151,6 +152,7 @@ config ARMV7M_TOOLCHAIN_GNU_EABIL
 config ARMV7M_TOOLCHAIN_GNU_EABIW
 	bool "Generic GNU EABI toolchain under Windows"
 	depends on TOOLCHAIN_WINDOWS
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 	select ARCH_TOOLCHAIN_GNU
 
 config ARMV7M_TOOLCHAIN_CLANGL
@@ -161,6 +163,7 @@ config ARMV7M_TOOLCHAIN_CLANGL
 config ARMV7M_TOOLCHAIN_CLANGW
 	bool "Generic Clang toolchain under Windows"
 	depends on TOOLCHAIN_WINDOWS
+	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
 	select ARCH_TOOLCHAIN_GNU
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)

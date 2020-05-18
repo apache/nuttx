@@ -39,7 +39,7 @@ include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 
 LDSCRIPT = flash.ld
 
-ifeq ($(WINTOOL),y)
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
   DIRLINK = $(TOPDIR)/tools/copydir.sh
   DIRUNLINK = $(TOPDIR)/tools/unlink.sh
@@ -130,7 +130,7 @@ HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
 
-ifneq ($(WINTOOL),y)
+ifneq ($(CONFIG_CYGWIN_WINTOOL),y)
 define DOWNLOAD
   $(Q) st-flash write nuttx.bin 0x8000000
 endef

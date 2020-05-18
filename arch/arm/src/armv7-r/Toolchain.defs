@@ -34,13 +34,13 @@ endif
 ifeq ($(filter y, \
       $(CONFIG_ARMV7R_TOOLCHAIN_GNU_EABIL) \
     ),y)
-  CONFIG_ARMV7R_TOOLCHAIN ?= GNU_EABIL
+  CONFIG_ARMV7R_TOOLCHAIN ?= GNU_EABI
 endif
 
 ifeq ($(filter y, \
       $(CONFIG_ARMV7R_TOOLCHAIN_GNU_EABIW) \
     ),y)
-  CONFIG_ARMV7R_TOOLCHAIN ?= GNU_EABIW
+  CONFIG_ARMV7R_TOOLCHAIN ?= GNU_EABI
 endif
 
 #
@@ -80,21 +80,10 @@ endif
   MAXOPTIMIZATION ?= -Os
 endif
 
-# Generic GNU EABI toolchain on macOS, Linux or any typical Posix system
+# Generic GNU EABI toolchain
 
-ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),GNU_EABIL)
+ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= $(TARGET_ARCH)-none-eabi-
   ARCROSSDEV ?= $(TARGET_ARCH)-none-eabi-
   MAXOPTIMIZATION ?= -Os
-endif
-
-# Generic GNU EABI toolchain under Windows
-
-ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),GNU_EABIW)
-  CROSSDEV ?= $(TARGET_ARCH)-none-eabi-
-  ARCROSSDEV ?= $(TARGET_ARCH)-none-eabi-
-  MAXOPTIMIZATION ?= -Os
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
 endif

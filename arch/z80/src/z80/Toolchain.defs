@@ -47,27 +47,3 @@
 #  CONFIG_Z80_TOOLCHAIN_SDCCL=y : SDCC for Linux, macOS or Cygwin
 #  CONFIG_Z80_TOOLCHAIN_SDCCW=y : SDCC for Win32
 #
-
-ifeq ($(filter y, \
-      $(CONFIG_Z80_TOOLCHAIN_SDCCL) \
-    ),y)
-  CONFIG_Z80_TOOLCHAIN ?= SDCCPOSIX
-endif
-ifeq ($(filter y, \
-      $(CONFIG_Z80_TOOLCHAIN_SDCCW) \
-    ),y)
-  CONFIG_Z80_TOOLCHAIN ?= SDCCWIN32
-endif
-
-# SDCC toolchain under Linux, macOS or Cygwin
-
-ifeq ($(CONFIG_Z80_TOOLCHAIN),POSIX)
-endif
-
-# SDCC  toolchain under Windows/Cygwin
-
-ifeq ($(CONFIG_AVR_TOOLCHAIN),SDCCWIN32)
-  ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-    WINTOOL = y
-  endif
-endif
