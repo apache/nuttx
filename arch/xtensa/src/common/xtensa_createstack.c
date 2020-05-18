@@ -221,20 +221,14 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       size_t size_of_stack;
 
 #ifdef CONFIG_STACK_COLORATION
-      uint32_t *ptr;
-      int i;
-
-      /* Yes.. If stack debug is enabled, then fill the stack with a
+      /* If stack debug is enabled, then fill the stack with a
        * recognizable value that we can use later to test for high
        * water marks.
        */
 
-      for (i = 0, ptr = (uint32_t *)tcb->stack_alloc_ptr;
-           i < stack_size;
-           i += sizeof(uint32_t))
-        {
-          *ptr++ = STACK_COLOR;
-        }
+      up_stack_color((FAR void *)tcb->stack_alloc_ptr +
+                     sizeof(struct tls_info_s),
+                     stack_size - sizeof(struct tls_info_s));
 #endif
 
       /* XTENSA uses a push-down stack:  the stack grows toward lower
@@ -295,3 +289,29 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   return ERROR;
 }
+
+/****************************************************************************
+ * Name: up_stack_color
+ *
+ * Description:
+ *   Write a well know value into the stack
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STACK_COLORATION
+void up_stack_color(FAR void *stackbase, size_t nbytes)
+{
+  /* Take extra care that we do not write outsize the stack boundaries */
+
+  uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 3) & ~3);
+  uintptr_t stkend = (((uintptr_t)stackbase + nbytes) & ~3);
+  size_t    nwords = (stkend - (uintptr_t)stackbase) >> 2;
+
+  /* Set the entire stack to the coloration value */
+
+  while (nwords-- > 0)
+    {
+      *stkptr++ = STACK_COLOR;
+    }
+}
+#endif

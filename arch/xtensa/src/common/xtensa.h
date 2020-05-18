@@ -342,5 +342,11 @@ void up_usbuninitialize(void);
 # define up_usbuninitialize()
 #endif
 
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_STACK_COLORATION
+void up_stack_color(FAR void *stackbase, size_t nbytes);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_H */
