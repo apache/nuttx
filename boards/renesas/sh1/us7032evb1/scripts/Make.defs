@@ -47,8 +47,8 @@ endif
 ARCHCPUFLAGS = -m1 -fno-builtin
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
-ARCHSCRIPT = -T$(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/sdram.ld
+ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)sdram.ld
 
 CROSSDEV = sh-nuttx-elf-
 CC = $(CROSSDEV)gcc
@@ -70,5 +70,4 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 HOSTCC = gcc
-HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

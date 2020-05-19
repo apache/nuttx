@@ -36,10 +36,15 @@
 
 include $(TOPDIR)/Make.defs
 
-ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CPPFLAGS += -I$(ARCH_SRCDIR)/chip -I$(TOPDIR)/sched $(EXTRAFLAGS)
-CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(TOPDIR)/sched $(EXTRAFLAGS)
-CXXFLAGS += -I$(ARCH_SRCDIR)/chip -I$(TOPDIR)/sched $(EXTRAFLAGS)
+ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+
+INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
+INCLUDES += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
+
+CPPFLAGS += $(INCLUDES) $(EXTRAFLAGS)
+CFLAGS += $(INCLUDES) $(EXTRAFLAGS)
+CXXFLAGS += $(INCLUDES) $(EXTRAFLAGS)
+AFLAGS += $(INCLUDES) $(EXTRAFLAGS)
 
 # Determine which objects are required in the link.The
 # up_head object normally draws in all that is needed, but
@@ -72,6 +77,7 @@ CSRCS += up_allocateheap.c
 VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
+HOSTCFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)}
 HOSTSRCS = up_hosttime.c
 
 ifeq ($(CONFIG_LIBC_MODLIB),y)

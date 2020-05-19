@@ -38,6 +38,11 @@ include $(TOPDIR)/tools/Config.mk
 
 HOSTOS = ${shell uname -o 2>/dev/null || uname -s 2>/dev/null || echo "Other"}
 
+ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+
+ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
+
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
 endif
@@ -47,16 +52,10 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  # Windows-native toolchains
-  ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
-  ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
-  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/qemu.ld}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)qemu.ld}"
   MAXOPTIMIZATION = -O2
 else
-  # Linux/Cygwin-native toolchain
-  ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
-  ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-  ARCHSCRIPT = -T$(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/qemu.ld
+  ARCHSCRIPT = -T$(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)qemu.ld
 endif
 
 ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-builtin -fno-stack-protector
@@ -97,5 +96,4 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 HOSTCC = gcc
-HOSTINCLUDESv = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

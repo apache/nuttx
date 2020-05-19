@@ -35,7 +35,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CFLAGS += -I$(TOPDIR)/sched
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 CSRCS = m16c_leds.c m16c_buttons.c m16c_lcd.c m16c_lcdconsole.c
@@ -45,7 +45,8 @@ SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
 ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common}
 
 all: libboard$(LIBEXT)
 

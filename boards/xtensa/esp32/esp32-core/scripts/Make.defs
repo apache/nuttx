@@ -38,28 +38,27 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/boards/xtensa/esp32/esp32-core/scripts/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx6/Toolchain.defs
 
-LDSCRIPT1 = $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/esp32_out.ld
-LDSCRIPT3 = $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/esp32_rom.ld
-LDSCRIPT4 = $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/esp32_peripherals.ld
+ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+
+ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
+
+LDSCRIPT1 = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)esp32_out.ld
+LDSCRIPT3 = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)esp32_rom.ld
+LDSCRIPT4 = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)esp32_peripherals.ld
 
 ifeq ($(CONFIG_ESP32CORE_RUN_IRAM),y)
-  LDSCRIPT2 = $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/esp32_iram.ld
+  LDSCRIPT2 = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)esp32_iram.ld
 else
-  LDSCRIPT2 = $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/esp32_flash.ld
+  LDSCRIPT2 = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)esp32_flash.ld
 endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  # Windows-native toolchains
-  ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
-  ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT1)}"
   ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT2)}"
   ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT3)}"
   ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT4)}"
 else
-  # Linux/Cygwin-native toolchain
-  ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
-  ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
   ARCHSCRIPT = -T$(LDSCRIPT1) -T$(LDSCRIPT2) -T$(LDSCRIPT3) -T$(LDSCRIPT4)
 endif
 
@@ -116,9 +115,9 @@ CXXELFFLAGS = $(CXXFLAGS) -mtext-section-literals
 
 LDELFFLAGS = -r -e main
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld}"
+  LDELFFLAGS += -T "${shell cygpath -w $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
 else
-  LDELFFLAGS += -T $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld
+  LDELFFLAGS += -T $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)gnu-elf.ld
 endif
 
 LDFLAGS += -nostartfiles -nodefaultlibs
@@ -128,5 +127,4 @@ endif
 
 
 HOSTCC = gcc
-HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

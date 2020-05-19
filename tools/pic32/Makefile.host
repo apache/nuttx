@@ -24,7 +24,7 @@ default: mkpichex
 
 # Add CFLAGS=-g on the make command line to build debug versions
 
-CFLAGS = -O2 -Wall -I.
+CFLAGS = -O2 -Wall
 
 # mkpichex - Convert virtual addresses in nuttx.hex to physical addresses
 

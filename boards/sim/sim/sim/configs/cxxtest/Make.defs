@@ -40,8 +40,10 @@ endif
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
-ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
-ARCHINCLUDESXX = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx -isystem $(TOPDIR)/include/uClibc++
+ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+ARCHINCLUDESXX += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+ARCHINCLUDESXX += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
+ARCHINCLUDESXX += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)uClibc++}
 
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
@@ -111,9 +113,9 @@ CXXELFFLAGS += -fno-pic
 
 LDELFFLAGS = -r -e main
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld}"
+  LDELFFLAGS += -T "${shell cygpath -w $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
 else
-  LDELFFLAGS += -T $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld
+  LDELFFLAGS += -T $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)gnu-elf.ld
 endif
 
 LDLINKFLAGS = $(ARCHSCRIPT) # Link flags used with $(LD)
@@ -138,6 +140,5 @@ ifeq ($(CONFIG_SIM_M32),y)
 endif
 
 HOSTCC = cc
-HOSTINCLUDES = -I.
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
