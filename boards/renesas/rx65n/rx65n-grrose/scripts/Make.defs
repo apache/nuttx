@@ -45,8 +45,6 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-DIRLINK = $(TOPDIR)/tools/copydir.sh
-DIRUNLINK = $(TOPDIR)/tools/unlink.sh
 MKDEP = $(TOPDIR)/tools/mkwindeps.sh
 ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -I. -isystem "${shell cygpath -w $(TOPDIR)/arch/$(CONFIG_ARCH)/include}"
 ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"

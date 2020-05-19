@@ -280,23 +280,13 @@ tools\mkdeps$(HOSTEXEEXT):
 
 include\arch: .config
 	@echo LN: include\arch to $(ARCH_DIR)\include
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d include\arch $(TOPDIR)\$(ARCH_DIR)\include
-else
-	$(Q) xcopy $(TOPDIR)\$(ARCH_DIR)\include include\arch /c /q /s /e /y /i
-	$(Q) echo FAKELNK > include\arch\.fakelnk
-endif
+	$(Q) $(DIRLINK) $(TOPDIR)\$(ARCH_DIR)\include include\arch
 
 # Link the boards\<arch>\<chip>\<board>\include directory to include\arch\board
 
 include\arch\board: include\arch
 	@echo LN: include\arch\board to $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\include
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d include\arch\board $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\include
-else
-	$(Q) xcopy $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\include include\arch\board /c /q /s /e /y /i
-	$(Q) echo FAKELNK > include\arch\board\.fakelnk
-endif
+	$(Q) $(DIRLINK) $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\include include\arch\board
 
 ifeq ($(COMMON_DIR),y)
 # Link the boards\<arch>\<chip>\common dir to arch\<arch-name>\src\board
@@ -304,54 +294,29 @@ ifeq ($(COMMON_DIR),y)
 
 $(ARCH_SRC)\board: .config
 	@echo "LN: $(ARCH_SRC)\board to $(BOARD_DIR)\common"
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board $(BOARD_DIR)\common
-else
-	$(Q) xcopy $(BOARD_DIR)\common $(ARCH_SRC)\board /c /q /s /e /y /i
-	$(Q) echo FAKELNK > $(ARCH_SRC)\board\.fakelnk
-endif
+	$(Q) $(DIRLINK) $(BOARD_DIR)\common $(ARCH_SRC)\board
 	@echo "LN: $(ARCH_SRC)\board\board to $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src"
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board\board $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src
-else
-	$(Q) xcopy $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src $(ARCH_SRC)\board\board /c /q /s /e /y /i
-	$(Q) echo FAKELNK > $(ARCH_SRC)\board\board\.fakelnk
-endif
+	$(Q) $(DIRLINK) $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src $(ARCH_SRC)\board\board
 else
 # Link the boards\<arch>\<chip>\<board>\src dir to arch\<arch-name>\src\board
 
 $(ARCH_SRC)\board: .config
 	@echo LN: $(ARCH_SRC)\board to $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src
-else
-	$(Q) xcopy $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src $(ARCH_SRC)\board /c /q /s /e /y /i
-	$(Q) echo FAKELNK > $(ARCH_SRC)\board\.fakelnk
-endif
+	$(Q) $(DIRLINK) $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src $(ARCH_SRC)\board
 endif
 
 # Link the boards\<arch>\<chip>\drivers dir to drivers\platform
 
 drivers\platform: .config
 	@echo LN: $(TOPDIR)\drivers\platform to $(BOARD_DIR)\drivers
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d $(TOPDIR)\drivers\platform $(BOARD_DIR)\drivers
-else
-	$(Q) xcopy $(BOARD_DIR)\drivers $(TOPDIR)\drivers\platform /c /q /s /e /y /i
-	$(Q) echo FAKELNK > $(TOPDIR)\drivers\platform .fakelnk
-endif
+	$(Q) $(DIRLINK) $(BOARD_DIR)\drivers $(TOPDIR)\drivers\platform
 
 # Link arch\<arch-name>\src\<chip-name> to arch\<arch-name>\src\chip
 
 $(ARCH_SRC)\chip: .config
 ifneq ($(CONFIG_ARCH_CHIP),)
 	@echo LN: $(ARCH_SRC)\chip to $(ARCH_SRC)\$(CONFIG_ARCH_CHIP)
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d $(ARCH_SRC)\chip $(TOPDIR)\$(ARCH_SRC)\$(CONFIG_ARCH_CHIP)
-else
-	$(Q) xcopy $(TOPDIR)\$(ARCH_SRC)\$(CONFIG_ARCH_CHIP) $(ARCH_SRC)\chip /c /q /s /e /y /i
-	$(Q) echo FAKELNK > $(ARCH_SRC)\chip\.fakelnk
-endif
+	$(Q) $(DIRLINK) $(TOPDIR)\$(ARCH_SRC)\$(CONFIG_ARCH_CHIP) $(ARCH_SRC)\chip
 endif
 
 # Link arch\<arch-name>\include\<chip-name> to arch\<arch-name>\include\chip
@@ -359,12 +324,7 @@ endif
 include\arch\chip: include\arch
 ifneq ($(CONFIG_ARCH_CHIP),)
 	@echo LN: include\arch\chip to $(ARCH_INC)\$(CONFIG_ARCH_CHIP)
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d include\arch\chip $(TOPDIR)\$(ARCH_INC)\$(CONFIG_ARCH_CHIP)
-else
-	$(Q) xcopy $(TOPDIR)\$(ARCH_INC)\$(CONFIG_ARCH_CHIP) include\arch\chip /c /q /s /e /y /i
-	$(Q) echo FAKELNK > include\arch\chip\.fakelnk
-endif
+	$(Q) $(DIRLINK) $(TOPDIR)\$(ARCH_INC)\$(CONFIG_ARCH_CHIP) include\arch\chip
 endif
 
 dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip drivers\platform
@@ -600,13 +560,13 @@ endif
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
 	$(call DELFILE, .config-e)
-	$(call DELDIR, include\arch\board)
-	$(call DELDIR, include\arch\chip)
-	$(call DELDIR, include\arch)
-	$(call DELDIR, $(ARCH_SRC)\board\board)
-	$(call DELDIR, $(ARCH_SRC)\board)
-	$(call DELDIR, $(ARCH_SRC)\chip)
-	$(call DELDIR, $(TOPDIR)\drivers\platform)
+	$(call DIRUNLINK, include\arch\board)
+	$(call DIRUNLINK, include\arch\chip)
+	$(call DIRUNLINK, include\arch)
+	$(call DIRUNLINK, $(ARCH_SRC)\board\board)
+	$(call DIRUNLINK, $(ARCH_SRC)\board)
+	$(call DIRUNLINK, $(ARCH_SRC)\chip)
+	$(call DIRUNLINK, $(TOPDIR)\drivers\platform)
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps\ directory is included with NuttX,

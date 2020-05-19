@@ -39,8 +39,6 @@ include ${TOPDIR}/arch/avr/src/avr/Toolchain.defs
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
-  DIRLINK = $(TOPDIR)/tools/copydir.sh
-  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
   MKDEP = $(TOPDIR)/tools/mkwindeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = $(ARCHINCLUDES) "${shell cygpath -w $(TOPDIR)/include/cxx}"

@@ -85,6 +85,26 @@ else
   DELIM ?= $(strip /)
 endif
 
+# DIRLINK - Create a directory link in the portable way
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+ifeq ($(CONFIG_WINDOWS_MKLINK),y)
+  DIRLINK   ?= $(TOPDIR)$(DELIM)tools$(DELIM)link.bat
+else
+  DIRLINK   ?= $(TOPDIR)$(DELIM)tools$(DELIM)copydir.bat
+endif
+  DIRUNLINK ?= $(TOPDIR)$(DELIM)tools$(DELIM)unlink.bat
+else
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  DIRLINK   ?= $(TOPDIR)$(DELIM)tools$(DELIM)copydir.sh
+else ifeq ($(CONFIG_WINDOWS_MSYS),y)
+  DIRLINK   ?= $(TOPDIR)$(DELIM)tools$(DELIM)copydir.sh
+else
+  DIRLINK   ?= $(TOPDIR)$(DELIM)tools$(DELIM)link.sh
+endif
+  DIRUNLINK ?= $(TOPDIR)$(DELIM)tools$(DELIM)unlink.sh
+endif
+
 # INCDIR - Convert a list of directory paths to a list of compiler include
 #   directories
 # Example: CFFLAGS += ${shell $(INCDIR) [options] "compiler" "dir1" "dir2" "dir2" ...}

@@ -41,8 +41,6 @@ LDSCRIPT = f410rb.ld
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
-  DIRLINK = $(TOPDIR)/tools/copydir.sh
-  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
   MKDEP = $(TOPDIR)/tools/mkwindeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"

@@ -74,13 +74,6 @@ else
 export Q := @
 endif
 
-# Default tools
-
-ifeq ($(DIRLINK),)
-DIRLINK = $(TOPDIR)/tools/link.sh
-DIRUNLINK = $(TOPDIR)/tools/unlink.sh
-endif
-
 # Process architecture and board-specific directories
 
 ARCH_DIR = arch/$(CONFIG_ARCH)
