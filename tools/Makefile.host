@@ -22,19 +22,6 @@ TOPDIR ?= $(CURDIR)/..
 -include $(TOPDIR)/Make.defs
 include ${TOPDIR}/tools/Config.mk
 
-# Control build verbosity
-#
-#  V=1,2: Enable echo of commands
-#  V=2:   Enable bug/verbose options in tools and scripts
-
-ifeq ($(V),1)
-export Q :=
-else ifeq ($(V),2)
-export Q :=
-else
-export Q := @
-endif
-
 # Check the endian-ness of the target
 
 # Define HOSTCC on the make command line if it differs from these defaults
