@@ -134,7 +134,7 @@
 
 /* Module symbol table */
 
-#if !defined(CONFIG_EXAMPLES_MODULE) || defined(CONFIG_BUILD_FLAT)
+#if !defined(CONFIG_EXAMPLES_MODULE) || !defined(CONFIG_BUILD_FLAT)
 #  undef HAVE_MODSYMS
 #endif
 
