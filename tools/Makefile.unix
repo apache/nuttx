@@ -373,7 +373,7 @@ clean_context:
 # configuration files have been installed and that NuttX is ready to be built.
 
 check_context:
-	$(Q) if [ ! -e ${TOPDIR}/.config -o ! -e ${TOPDIR}/Make.defs ]; then \
+	$(Q) if [ ! -e $(TOPDIR)/.config -o ! -e $(TOPDIR)/Make.defs ]; then \
 		echo "" ; \
 		echo "Nuttx has not been configured:" ; \
 		echo "  tools/configure.sh <target>" ; \

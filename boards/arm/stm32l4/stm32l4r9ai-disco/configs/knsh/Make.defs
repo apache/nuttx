@@ -33,9 +33,9 @@
 #
 ############################################################################
 
-include ${TOPDIR}/.config
-include ${TOPDIR}/tools/Config.mk
-include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
 LDSCRIPT1 = memory.ld
 LDSCRIPT2 = kernel-space.ld
@@ -100,7 +100,7 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
 
-#LDFLAGS += -Map=${TOPDIR}/nuttx.map
+#LDFLAGS += -Map=$(TOPDIR)/nuttx.map
 #CFLAGS += -Wa,-adhln
 #CXXFLAGS += -Wa,-adhln
 

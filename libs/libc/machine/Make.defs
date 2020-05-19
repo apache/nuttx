@@ -34,17 +34,17 @@
 ############################################################################
 
 ifeq ($(CONFIG_ARCH_ARM),y)
-include ${TOPDIR}/libs/libc/machine/arm/Make.defs
+include $(TOPDIR)/libs/libc/machine/arm/Make.defs
 endif
 ifeq ($(CONFIG_ARCH_RISCV),y)
-include ${TOPDIR}/libs/libc/machine/risc-v/Make.defs
+include $(TOPDIR)/libs/libc/machine/risc-v/Make.defs
 endif
 ifeq ($(CONFIG_ARCH_SIM),y)
-include ${TOPDIR}/libs/libc/machine/sim/Make.defs
+include $(TOPDIR)/libs/libc/machine/sim/Make.defs
 endif
 ifeq ($(CONFIG_ARCH_X86),y)
-include ${TOPDIR}/libs/libc/machine/x86/Make.defs
+include $(TOPDIR)/libs/libc/machine/x86/Make.defs
 endif
 ifeq ($(CONFIG_ARCH_XTENSA),y)
-include ${TOPDIR}/libs/libc/machine/xtensa/Make.defs
+include $(TOPDIR)/libs/libc/machine/xtensa/Make.defs
 endif

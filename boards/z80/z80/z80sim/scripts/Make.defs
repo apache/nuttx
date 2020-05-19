@@ -33,8 +33,8 @@
 #
 ############################################################################
 
-include ${TOPDIR}/.config
-include ${TOPDIR}/tools/Config.mk
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
 
 # These are the directories where the SDCC toolchain is installed.  NOTE
 # that short 8.3 path names are used in order to avoid spaces.  On my machine
