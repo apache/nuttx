@@ -33,9 +33,9 @@
 #
 ############################################################################
 
-include ${TOPDIR}/.config
-include ${TOPDIR}/tools/Config.mk
-include ${TOPDIR}/arch/or1k/src/mor1kx/Toolchain.defs
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/or1k/src/mor1kx/Toolchain.defs
 
 LDSCRIPT = flash.ld
 

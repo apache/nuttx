@@ -33,10 +33,10 @@
 #
 ############################################################################
 
-include ${TOPDIR}/.config
-include ${TOPDIR}/tools/Config.mk
-include ${TOPDIR}/boards/xtensa/esp32/esp32-core/scripts/Config.mk
-include ${TOPDIR}/arch/xtensa/src/lx6/Toolchain.defs
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/boards/xtensa/esp32/esp32-core/scripts/Config.mk
+include $(TOPDIR)/arch/xtensa/src/lx6/Toolchain.defs
 
 LDSCRIPT1 = $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/esp32_out.ld
 LDSCRIPT3 = $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/esp32_rom.ld

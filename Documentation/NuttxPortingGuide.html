@@ -1538,7 +1538,7 @@ tools/
 
 <h2>2.20 <a name="topmakefile">nuttx/Makefile</a></h2>
 <p>
-  The top-level <code>Makefile</code> in the <code>${TOPDIR}</code> directory contains all of the top-level control
+  The top-level <code>Makefile</code> in the <code>$(TOPDIR)</code> directory contains all of the top-level control
   logic to build NuttX.
   Use of this <code>Makefile</code> to build NuttX is described <a href="#buildingnuttx">below</a>.
 </p>
@@ -1555,12 +1555,12 @@ tools/
 <p>
   <b>Manual Configuration</b>.
   Configuring NuttX requires only copying the
-  <a href="#boardconfigsubdirs">board-specific configuration files</a> into the top level directory which appears in the make files as the make variable, <code>${TOPDIR}</code>.
+  <a href="#boardconfigsubdirs">board-specific configuration files</a> into the top level directory which appears in the make files as the make variable, <code>$(TOPDIR)</code>.
   This could be done manually as follows:
 </p>
 <ul>
-  <li>Copy <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/configs/[</code><i>&lt;config-dir&gt;</i><code>/]Make.defs</code> to <code>${TOPDIR}/Make.defs</code> (see NOTE below),</li>
-  <li>Copy <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/configs/[</code><i>&lt;config-dir&gt;</i><code>/]defconfig</code> to <code>${TOPDIR}/.config</code></li>
+  <li>Copy <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/configs/[</code><i>&lt;config-dir&gt;</i><code>/]Make.defs</code> to <code>$(TOPDIR)/Make.defs</code> (see NOTE below),</li>
+  <li>Copy <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/configs/[</code><i>&lt;config-dir&gt;</i><code>/]defconfig</code> to <code>$(TOPDIR)/.config</code></li>
 </ul>
 
 <p>
@@ -1679,7 +1679,7 @@ tools/version.h -v 6.1 .version
 
 <p>
   <b>Additional Configuration Steps</b>.
-  The remainder of configuration steps will be performed by <a href="#topmakefile"><code>${TOPDIR}/Makefile</code></a>
+  The remainder of configuration steps will be performed by <a href="#topmakefile"><code>$(TOPDIR)/Makefile</code></a>
   the first time the system is built as described below.
 </p>
 
@@ -1689,11 +1689,11 @@ tools/version.h -v 6.1 .version
    Once NuttX has been configured as described <a href="#configuringnuttx">above</a>, it may be built as follows:
 </p>
 <ul><pre>
-cd ${TOPDIR}
+cd $(TOPDIR)
 make
 </pre></ul>
 <p>
-  The <code>${TOPDIR}</code> directory holds:
+  The <code>$(TOPDIR)</code> directory holds:
 </p>
 <ul>
   <li>The top level <a href="#topmakefile"><code>Makefile</code></a> that controls the NuttX build.
@@ -1715,13 +1715,13 @@ The specific environmental definitions are unique for each board but should incl
   These additional steps include:
 </p>
 <ul>
-  <li>Auto-generating the file <code>include/nuttx/config.h</code> using the <code>${TOPDIR}/.config</code> file.</li>
-  <li>Auto-generating the file  <code>${TOPDIR}/.version</code> with version 0.0 if one does not exist.</li>
-  <li>Auto-generating the file <code>include/nuttx/version.h</code> using the <code>${TOPDIR}/.version</code> file.</li>
-  <li>Creating a link to <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch</code>.</li>
-  <li>Creating a link to <code>${TOPDIR}/boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/include</code> at <code>${TOPDIR}/include/arch/board</code>.</li>
-  <li>Creating a link to <code>${TOPDIR}/boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/src</code> at <code>${TOPDIR}/arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</code></li>
-  <li>Creating a link to <code>${APPDIR}/include</code> at <code>${TOPDIR}/include/apps</code></li>
+  <li>Auto-generating the file <code>include/nuttx/config.h</code> using the <code>$(TOPDIR)/.config</code> file.</li>
+  <li>Auto-generating the file  <code>$(TOPDIR)/.version</code> with version 0.0 if one does not exist.</li>
+  <li>Auto-generating the file <code>include/nuttx/version.h</code> using the <code>$(TOPDIR)/.version</code> file.</li>
+  <li>Creating a link to <code>$(TOPDIR)/arch/</code><i>&lt;arch-name&gt;</i><code>/include</code> at <code>$(TOPDIR)/include/arch</code>.</li>
+  <li>Creating a link to <code>$(TOPDIR)/boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/include</code> at <code>$(TOPDIR)/include/arch/board</code>.</li>
+  <li>Creating a link to <code>$(TOPDIR)/boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/src</code> at <code>$(TOPDIR)/arch/</code><i>&lt;arch-name&gt;</i><code>/src/board</code></li>
+  <li>Creating a link to <code>${APPDIR}/include</code> at <code>$(TOPDIR)/include/apps</code></li>
   <li>Creating make dependencies.
 </ul>
 

@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
-include ${TOPDIR}/arch/z16/src/z16f/Toolchain.defs
+include $(TOPDIR)/arch/z16/src/z16f/Toolchain.defs
 include $(TOPDIR)/tools/zds/Config.mk
 
 # CFLAGS

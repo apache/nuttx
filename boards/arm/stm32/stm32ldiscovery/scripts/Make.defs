@@ -33,9 +33,9 @@
 #
 ############################################################################
 
-include ${TOPDIR}/.config
-include ${TOPDIR}/tools/Config.mk
-include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_STM32L152RB),y)
   LDSCRIPT = stm32l152rb.ld

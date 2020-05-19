@@ -34,15 +34,15 @@
 #
 ############################################################################
 
-include ${TOPDIR}/.config
-include ${TOPDIR}/tools/Config.mk
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
 
 ifeq ($(CONFIG_ARCH_CHIP_LM32),y)
- include ${TOPDIR}/arch/misoc/src/lm32/Toolchain.defs
+ include $(TOPDIR)/arch/misoc/src/lm32/Toolchain.defs
  LDSCRIPT=lm32.ld
 endif
 ifeq ($(CONFIG_ARCH_CHIP_MINERVA),y)
- include ${TOPDIR}/arch/misoc/src/minerva/Toolchain.defs
+ include $(TOPDIR)/arch/misoc/src/minerva/Toolchain.defs
  LDSCRIPT=minerva.ld
 endif
 

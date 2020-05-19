@@ -35,7 +35,7 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
-include ${TOPDIR}/arch/z80/src/z8/Toolchain.defs
+include $(TOPDIR)/arch/z80/src/z8/Toolchain.defs
 include $(TOPDIR)/tools/zds/Config.mk
 
 # CFLAGS
