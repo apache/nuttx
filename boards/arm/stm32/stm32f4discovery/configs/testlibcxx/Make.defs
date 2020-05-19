@@ -59,7 +59,6 @@ EXTRA_LIBS = -lsupc++
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
-  MKDEP = $(TOPDIR)/tools/mkwindeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" \
     -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}" \
@@ -68,7 +67,6 @@ ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
                    $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)}"
 else
   # Linux/Cygwin-native toolchain
-  MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include \
     -isystem $(TOPDIR)/include/cxx -isystem $(TOPDIR)/include/libcxx

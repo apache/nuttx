@@ -96,7 +96,3 @@ HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
 HOSTEXEEXT = .exe
-
-# Windows-native host tools
-
-MKDEP = $(TOPDIR)\tools\mkdeps.exe --winnative
