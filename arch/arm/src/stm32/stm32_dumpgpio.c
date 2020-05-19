@@ -59,6 +59,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Port letters for prettier debug output */
 
 static const char g_portchar[STM32_NGPIO_PORTS] =
