@@ -218,7 +218,7 @@
 #    endif
 #  endif
 
-  /* CR1 settings */
+/* CR1 settings */
 
 #  if STM32_CONSOLE_BITS == 9
 #    define USART_CR1_M_VALUE USART_CR1_M
@@ -249,7 +249,7 @@
 
 #  define USART_CR1_SETBITS (USART_CR1_M_VALUE|USART_CR1_PARITY_VALUE)
 
-  /* CR2 settings */
+/* CR2 settings */
 
 #  if STM32_CONSOLE_2STOP != 0
 #    define USART_CR2_STOP2_VALUE USART_CR2_STOP2
@@ -272,7 +272,7 @@
 #  endif
 #  define USART_CR2_SETBITS USART_CR2_STOP2_VALUE
 
-  /* CR3 settings */
+/* CR3 settings */
 
 #  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
    defined(CONFIG_STM32_STM32F37XX)
@@ -289,33 +289,33 @@
 #  endif
 #  define USART_CR3_SETBITS 0
 
-  /* Only the STM32 F3 supports oversampling by 8 */
+/* Only the STM32 F3 supports oversampling by 8 */
 
 #  undef USE_OVER8
 
-  /* Calculate USART BAUD rate divider */
+/* Calculate USART BAUD rate divider */
 
 #  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
    defined(CONFIG_STM32_STM32F37XX)
 
-    /* Baud rate for standard USART (SPI mode included):
-     *
-     * In case of oversampling by 16, the equation is:
-     *   baud    = fCK / UARTDIV
-     *   UARTDIV = fCK / baud
-     *
-     * In case of oversampling by 8, the equation is:
-     *
-     *   baud    = 2 * fCK / UARTDIV
-     *   UARTDIV = 2 * fCK / baud
-     */
+/* Baud rate for standard USART (SPI mode included):
+ *
+ * In case of oversampling by 16, the equation is:
+ *   baud    = fCK / UARTDIV
+ *   UARTDIV = fCK / baud
+ *
+ * In case of oversampling by 8, the equation is:
+ *
+ *   baud    = 2 * fCK / UARTDIV
+ *   UARTDIV = 2 * fCK / baud
+ */
 
 #    define STM32_USARTDIV8 \
       (((STM32_APBCLOCK << 1) + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
 #    define STM32_USARTDIV16 \
       ((STM32_APBCLOCK + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
 
-     /* Use oversamply by 8 only if the divisor is small.  But what is small? */
+/* Use oversamply by 8 only if the divisor is small.  But what is small? */
 
 #    if STM32_USARTDIV8 > 100
 #      define STM32_BRR_VALUE STM32_USARTDIV16
@@ -327,47 +327,47 @@
 
 #  else /* CONFIG_STM32_STM32F30XX */
 
-    /* The baud rate for the receiver and transmitter (Rx and Tx) are both set
-     * to the same value as programmed in the Mantissa and Fraction values of
-     * USARTDIV.
-     *
-     *   baud     = fCK / (16 * usartdiv)
-     *   usartdiv = fCK / (16 * baud)
-     *
-     * Where fCK is the input clock to the peripheral (PCLK1 for USART2, 3, 4,
-     * 5 or PCLK2 for USART1).  Example, fCK=72MHz baud=115200,
-     * usartdiv=39.0625=39 1/16th;
-     *
-     * First calculate:
-     *
-     *   usartdiv32 = 32 * usartdiv = fCK / (baud/2)
-     *
-     * (NOTE: all standard baud values are even so dividing by two does not
-     * lose precision).  Eg. (same fCK and baud), usartdiv32 = 1250
-     */
+/* The baud rate for the receiver and transmitter (Rx and Tx) are both set
+ * to the same value as programmed in the Mantissa and Fraction values of
+ * USARTDIV.
+ *
+ *   baud     = fCK / (16 * usartdiv)
+ *   usartdiv = fCK / (16 * baud)
+ *
+ * Where fCK is the input clock to the peripheral (PCLK1 for USART2, 3, 4,
+ * 5 or PCLK2 for USART1).  Example, fCK=72MHz baud=115200,
+ * usartdiv=39.0625=39 1/16th;
+ *
+ * First calculate:
+ *
+ *   usartdiv32 = 32 * usartdiv = fCK / (baud/2)
+ *
+ * (NOTE: all standard baud values are even so dividing by two does not
+ * lose precision).  Eg. (same fCK and baud), usartdiv32 = 1250
+ */
 
 #    define STM32_USARTDIV32 (STM32_APBCLOCK / (STM32_CONSOLE_BAUD >> 1))
 
-    /* The mantissa is then usartdiv32 / 32:
-     *
-     *   mantissa = usartdiv32 / 32/
-     *
-     * Eg. usartdiv32=1250, mantissa = 39
-     */
+/* The mantissa is then usartdiv32 / 32:
+ *
+ *   mantissa = usartdiv32 / 32/
+ *
+ * Eg. usartdiv32=1250, mantissa = 39
+ */
 
 #    define STM32_MANTISSA (STM32_USARTDIV32 >> 5)
 
-    /* And the fraction:
-     *
-     *  fraction = (usartdiv32 - mantissa*32 + 1) / 2
-     *
-     * Eg., (1,250 - 39*32 + 1)/2 = 1 (or 0.0625)
-     */
+/* And the fraction:
+ *
+ *  fraction = (usartdiv32 - mantissa*32 + 1) / 2
+ *
+ * Eg., (1,250 - 39*32 + 1)/2 = 1 (or 0.0625)
+ */
 
 #    define STM32_FRACTION \
       ((STM32_USARTDIV32 - (STM32_MANTISSA << 5) + 1) >> 1)
 
-    /* And, finally, the BRR value is: */
+/* And, finally, the BRR value is: */
 
 #    define STM32_BRR_VALUE \
       ((STM32_MANTISSA << USART_BRR_MANT_SHIFT) | \
@@ -413,9 +413,11 @@ void arm_lowputc(char ch)
 #ifdef HAVE_CONSOLE
   /* Wait until the TX data register is empty */
 
-  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) & USART_SR_TC) == 0);
+  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) &
+         USART_SR_TC) == 0);
 #ifdef STM32_CONSOLE_RS485_DIR
-  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, STM32_CONSOLE_RS485_DIR_POLARITY);
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
+                  STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
   /* Then send the character */
@@ -423,8 +425,10 @@ void arm_lowputc(char ch)
   putreg32((uint32_t)ch, STM32_CONSOLE_BASE + STM32_USART_TDR_OFFSET);
 
 #ifdef STM32_CONSOLE_RS485_DIR
-  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) & USART_SR_TC) == 0);
-  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, !STM32_CONSOLE_RS485_DIR_POLARITY);
+  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_SR_OFFSET) &
+         USART_SR_TC) == 0);
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
+                  !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
 #endif /* HAVE_CONSOLE */
@@ -497,8 +501,8 @@ void stm32_lowsetup(void)
   /* Assume default pin mapping:
    *
    * Alternate  USART3_REMAP[1:0]  USART3_REMAP[1:0]      USART3_REMAP[1:0]
-   * Function   = “00” (no remap)  = “01” (partial remap) = “11” (full remap)
-   * ---------_ ------------------ ---------------------- --------------------
+   * Function   = 00 (no remap)    = 01 (partial remap)   = 11 (full remap)
+   * ---------_ ------------------ ---------------------- -----------------
    * USART3_TX  PB10               PC10                   PD8
    * USART3_RX  PB11               PC11                   PD9
    * USART3_CK  PB12               PC12                   PD10
@@ -529,7 +533,8 @@ void stm32_lowsetup(void)
 
 #ifdef STM32_CONSOLE_RS485_DIR
   stm32_configgpio(STM32_CONSOLE_RS485_DIR);
-  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, !STM32_CONSOLE_RS485_DIR_POLARITY);
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
+                  !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
   /* Enable and configure the selected console device */
@@ -601,7 +606,8 @@ void stm32_lowsetup(void)
 
 #ifdef STM32_CONSOLE_RS485_DIR
   stm32_configgpio(STM32_CONSOLE_RS485_DIR);
-  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, !STM32_CONSOLE_RS485_DIR_POLARITY);
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
+                  !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
   /* Enable and configure the selected console device */
