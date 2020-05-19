@@ -77,8 +77,17 @@ MODULESTRIP ?= $(STRIP)
 # Some defaults just to prohibit some bad behavior if for some reason they
 # are not defined
 
+ASMEXT ?= .S
 OBJEXT ?= .o
 LIBEXT ?= .a
+
+ifeq ($(HOSTOS),Cygwin)
+  EXEEXT ?= .exe
+endif
+
+ifeq ($(CONFIG_HOST_WINDOWS),y)
+  HOSTEXEEXT ?= .exe
+endif
 
 # This define is passed as EXTRAFLAGS for kernel-mode builds.  It is also passed
 # during PASS1 (but not PASS2) context and depend targets.

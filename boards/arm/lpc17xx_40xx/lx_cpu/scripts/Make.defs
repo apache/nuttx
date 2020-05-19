@@ -127,11 +127,6 @@ endif
 
 # File extensions
 
-ASMEXT = .S
-OBJEXT = .o
-LIBEXT = .a
-EXEEXT =
-
 # Linker flags
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
@@ -146,4 +141,3 @@ endif
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS =

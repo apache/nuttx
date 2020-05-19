@@ -119,17 +119,6 @@ else
   LDELFFLAGS += -T $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld
 endif
 
-
-ASMEXT = .S
-OBJEXT = .o
-LIBEXT = .a
-
-ifeq ($(HOSTOS),Cygwin)
-  EXEEXT = .exe
-else
-  EXEEXT =
-endif
-
 LDLINKFLAGS = $(ARCHSCRIPT) # Link flags used with $(LD)
 CCLINKFLAGS = $(ARCHSCRIPT) # Link flags used with $(CC)
 LDFLAGS = $(ARCHSCRIPT) # For backward compatibility, same as CCLINKFLAGS

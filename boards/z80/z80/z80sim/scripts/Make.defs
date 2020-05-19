@@ -119,20 +119,13 @@ define CLEAN
 endef
 endif
 
-# Windows native host tool definitions
+# Host tool definitions
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   HOSTCC = mingw32-gcc.exe
-  HOSTINCLUDES = -I.
-  HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-  HOSTLDFLAGS =
-  HOSTEXEEXT = .exe
 else
-
-# Linux/Cygwin host tool definitions
-
   HOSTCC = gcc
-  HOSTINCLUDES = -I.
-  HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-  HOSTLDFLAGS =
 endif
+
+HOSTINCLUDES = -I.
+HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

@@ -108,11 +108,6 @@ else
   LDELFFLAGS += -T $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld
 endif
 
-ASMEXT = .S
-OBJEXT = .o
-LIBEXT = .a
-EXEEXT =
-
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
@@ -123,9 +118,3 @@ endif
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS =
-ifeq ($(CONFIG_HOST_WINDOWS),y)
-  HOSTEXEEXT = .exe
-else
-  HOSTEXEEXT =
-endif

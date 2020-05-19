@@ -101,13 +101,6 @@ NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
-ASMEXT = .S
-OBJEXT = .o
-LIBEXT = .a
-EXEEXT =
-
-
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS =

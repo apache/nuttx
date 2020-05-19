@@ -81,7 +81,6 @@ AFLAGS = -x -a -l -o -s -g
 SDCCLIB = z180.lib
 
 ASMEXT = .asm
-# OBJEXT = .o
 OBJEXT = .rel
 LIBEXT = .lib
 EXEEXT = .hex
@@ -120,22 +119,15 @@ define CLEAN
 endef
 endif
 
-# Windows native host tool definitions
+# Host tool definitions
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 # You may need to customize the binary name:
 # HOSTCC = mingw32-gcc.exe
   HOSTCC = x86_64-w64-mingw32-gcc.exe
-  HOSTINCLUDES = -I.
-  HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-  HOSTLDFLAGS =
-  HOSTEXEEXT = .exe
 else
-
-# Linux/Cygwin host tool definitions
-
   HOSTCC = gcc
-  HOSTINCLUDES = -I.
-  HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-  HOSTLDFLAGS =
 endif
+
+HOSTINCLUDES = -I.
+HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
