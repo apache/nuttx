@@ -54,6 +54,13 @@ CONFIG_ARCH       := $(patsubst "%",%,$(strip $(CONFIG_ARCH)))
 CONFIG_ARCH_CHIP  := $(patsubst "%",%,$(strip $(CONFIG_ARCH_CHIP)))
 CONFIG_ARCH_BOARD := $(patsubst "%",%,$(strip $(CONFIG_ARCH_BOARD)))
 
+# Some defaults.
+# $(TOPDIR)/Make.defs can override these appropriately.
+
+MODULECC ?= $(CC)
+MODULELD ?= $(LD)
+MODULESTRIP ?= $(STRIP)
+
 # Some defaults just to prohibit some bad behavior if for some reason they
 # are not defined
 
@@ -63,7 +70,7 @@ LIBEXT ?= .a
 # This define is passed as EXTRAFLAGS for kernel-mode builds.  It is also passed
 # during PASS1 (but not PASS2) context and depend targets.
 
-KDEFINE = ${shell $(DEFINE) "$(CC)" __KERNEL__}
+KDEFINE ?= ${shell $(DEFINE) "$(CC)" __KERNEL__}
 
 # DELIM - Path segment delimiter character
 #
@@ -73,9 +80,9 @@ KDEFINE = ${shell $(DEFINE) "$(CC)" __KERNEL__}
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  DELIM = $(strip \)
+  DELIM ?= $(strip \)
 else
-  DELIM = $(strip /)
+  DELIM ?= $(strip /)
 endif
 
 # INCDIR - Convert a list of directory paths to a list of compiler include
@@ -98,14 +105,14 @@ endif
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  DEFINE = "$(TOPDIR)\tools\define.bat"
-  INCDIR = "$(TOPDIR)\tools\incdir.bat"
+  DEFINE ?= "$(TOPDIR)\tools\define.bat"
+  INCDIR ?= "$(TOPDIR)\tools\incdir.bat"
 else ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  DEFINE = "$(TOPDIR)/tools/define.sh"
-  INCDIR = "$(TOPDIR)/tools/incdir.sh" -w
+  DEFINE ?= "$(TOPDIR)/tools/define.sh" -w
+  INCDIR ?= "$(TOPDIR)/tools/incdir.sh" -w
 else
-  DEFINE = "$(TOPDIR)/tools/define.sh"
-  INCDIR = "$(TOPDIR)/tools/incdir.sh"
+  DEFINE ?= "$(TOPDIR)/tools/define.sh"
+  INCDIR ?= "$(TOPDIR)/tools/incdir.sh"
 endif
 
 # PREPROCESS - Default macro to run the C pre-processor
@@ -371,10 +378,3 @@ define TESTANDREPLACEFILE
 	fi
 endef
 endif
-
-# Some defaults.
-# $(TOPDIR)/Make.defs can override these appropriately.
-
-MODULECC = $(CC)
-MODULELD = $(LD)
-MODULESTRIP = $(STRIP)
