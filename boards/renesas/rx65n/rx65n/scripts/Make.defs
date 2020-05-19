@@ -45,7 +45,6 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-MKDEP = $(TOPDIR)/tools/mkwindeps.sh
 ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -I. -isystem "${shell cygpath -w $(TOPDIR)/arch/$(CONFIG_ARCH)/include}"
 ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
 ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/linker_script.ld}"
@@ -56,7 +55,6 @@ ARCHCPUFLAGS = -mcpu=rx64m
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 else
-MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
 ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
 ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/linker_script.ld
@@ -106,8 +104,6 @@ ASMEXT = .asm
 OBJEXT = .o
 LIBEXT = .a
 EXEEXT =
-
-#MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 
 HOSTCC = gcc
 HOSTINCLUDES = -I.

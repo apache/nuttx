@@ -50,7 +50,6 @@ endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
-  MKDEP = $(TOPDIR)/tools/mkwindeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT1)}"
@@ -59,7 +58,6 @@ ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT4)}"
 else
   # Linux/Cygwin-native toolchain
-  MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
   ARCHSCRIPT = -T$(LDSCRIPT1) -T$(LDSCRIPT2) -T$(LDSCRIPT3) -T$(LDSCRIPT4)

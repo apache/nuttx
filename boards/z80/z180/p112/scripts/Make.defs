@@ -130,11 +130,6 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
   HOSTLDFLAGS =
   HOSTEXEEXT = .exe
-
-  # Windows-native host tools
-
-  MKDEP = $(TOPDIR)\tools\mkdeps.exe --winnative # --dep-debug
-
 else
 
 # Linux/Cygwin host tool definitions
@@ -143,9 +138,4 @@ else
   HOSTINCLUDES = -I.
   HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
   HOSTLDFLAGS =
-
-  # This is the tool to use for dependencies (i.e., none)
-
-  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
-
 endif

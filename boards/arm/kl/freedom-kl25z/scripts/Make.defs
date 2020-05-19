@@ -102,7 +102,6 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
 
-
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
@@ -111,12 +110,4 @@ ifeq ($(CONFIG_HOST_WINDOWS),y)
   HOSTEXEEXT = .exe
 else
   HOSTEXEEXT =
-endif
-
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  # Windows-native host tools
-  MKDEP = $(TOPDIR)/tools/mkwindeps.sh
-else
-  # Linux/Cygwin-native host tools
-  MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 endif

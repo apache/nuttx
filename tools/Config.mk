@@ -105,6 +105,16 @@ endif
   DIRUNLINK ?= $(TOPDIR)$(DELIM)tools$(DELIM)unlink.sh
 endif
 
+# MKDEP - Create the depend rule in the portable way
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  MKDEP ?= $(TOPDIR)$(DELIM)tools$(DELIM)mkdeps$(HOSTEXEEXT) --winnative
+else ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  MKDEP ?= $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
+else
+  MKDEP ?= $(TOPDIR)$(DELIM)tools$(DELIM)mkdeps$(HOSTEXEEXT)
+endif
+
 # INCDIR - Convert a list of directory paths to a list of compiler include
 #   directories
 # Example: CFFLAGS += ${shell $(INCDIR) [options] "compiler" "dir1" "dir2" "dir2" ...}
