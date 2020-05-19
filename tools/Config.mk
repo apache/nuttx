@@ -47,6 +47,19 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 export SHELL=cmd
 endif
 
+# Control build verbosity
+#
+#  V=1,2: Enable echo of commands
+#  V=2:   Enable bug/verbose options in tools and scripts
+
+ifeq ($(V),1)
+export Q :=
+else ifeq ($(V),2)
+export Q :=
+else
+export Q := @
+endif
+
 # These are configuration variables that are quoted by configuration tool
 # but which must be unquoted when used in the build system.
 
