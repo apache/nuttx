@@ -187,7 +187,7 @@
 #define STM32_IRQ_JPEG         (STM32_IRQ_FIRST + 121)  /* 121: JPEG  global interrupt */
 #define STM32_IRQ_MDMA         (STM32_IRQ_FIRST + 122)  /* 122: MDMA */
 #define STM32_IRQ_RESERVED123  (STM32_IRQ_FIRST + 123)  /* 123: Reserved */
-#define STM32_IRQ_SDMMC        (STM32_IRQ_FIRST + 124)  /* 124: SDMMC global interrupt */
+#define STM32_IRQ_SDMMC2       (STM32_IRQ_FIRST + 124)  /* 124: SDMMC2 global interrupt */
 #define STM32_IRQ_HSEM0        (STM32_IRQ_FIRST + 125)  /* 125: HSEM global interrupt 1 */
 #define STM32_IRQ_RESERVED126  (STM32_IRQ_FIRST + 126)  /* 126: Reserved */
 #define STM32_IRQ_ADC3         (STM32_IRQ_FIRST + 127)  /* 127: ADC3 global interrupt */
