@@ -41,12 +41,8 @@
 
 #include "chip.h"
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/* This file is only a thin shell that includes the correct DMA implementation
- * for the selected STM32 IP core:
+/* This file is only a thin shell that includes the correct DMA
+ * implementation for the selected STM32 IP core:
  *   - STM32 DMA IP version 1 - F0, F1, F3, L0, L1, L4
  *   - STM32 DMA IP version 2 - F2, F4, F7, H7
  *
@@ -60,3 +56,7 @@
 #elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #  include "stm32_dma_v2.c"
 #endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/

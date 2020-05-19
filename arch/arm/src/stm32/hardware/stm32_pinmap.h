@@ -74,8 +74,9 @@
 #    include "hardware/stm32f103c_pinmap.h"
 
 /* STM32 F103 High Density Family */
-/* STM32F103RC, STM32F103RD, and STM32F103RE are all provided in 64 pin packages and differ
- * only in the available FLASH and SRAM.
+
+/* STM32F103RC, STM32F103RD, and STM32F103RE are all provided in 64 pin
+ * packages and differ only in the available FLASH and SRAM.
  */
 
 #  elif defined(CONFIG_ARCH_CHIP_STM32F103RB) || \
@@ -85,15 +86,15 @@
         defined(CONFIG_ARCH_CHIP_STM32F103RG)
 #    include "hardware/stm32f103r_pinmap.h"
 
-/* STM32F103VC, STM32F103VD, and STM32F103VE are all provided in 100 pin packages and differ
- * only in the available FLASH and SRAM.
+/* STM32F103VC, STM32F103VD, and STM32F103VE are all provided in 100 pin
+ * packages and differ only in the available FLASH and SRAM.
  */
 
 #  elif defined(CONFIG_ARCH_CHIP_STM32F103VC) || defined(CONFIG_ARCH_CHIP_STM32F103VE)
 #    include "hardware/stm32f103v_pinmap.h"
 
-/* STM32F103ZC, STM32F103ZD, and STM32F103ZE are all provided in 144 pin packages and differ
- * only in the available FLASH and SRAM.
+/* STM32F103ZC, STM32F103ZD, and STM32F103ZE are all provided in 144 pin
+ * packages and differ only in the available FLASH and SRAM.
  */
 #  elif defined(CONFIG_ARCH_CHIP_STM32F103ZE)
 #    include "hardware/stm32f103z_pinmap.h"

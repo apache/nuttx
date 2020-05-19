@@ -77,6 +77,10 @@
 
 #define STM32_IRQ_FIRST         (16) /* Vector number of the first external interrupt */
 
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
 #if defined(CONFIG_STM32_STM32L15XX)
 #  include <arch/stm32/stm32l15xxx_irq.h>
 #elif defined(CONFIG_STM32_STM32F10XX)
@@ -113,7 +117,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 #undef EXTERN
