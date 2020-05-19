@@ -114,11 +114,6 @@ endif
 
 # File extensions
 
-ASMEXT = .S
-OBJEXT = .o
-LIBEXT = .a
-EXEEXT =
-
 # Linker flags
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
@@ -133,7 +128,6 @@ LDFLAGS += --gc-sections
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS =
 
 ifeq ($(CONFIG_LC823450_SDIF_PATCH),y)
 ARCH_LIBS += -lSdDr_patch_es2

@@ -49,7 +49,6 @@ HOSTCFLAGS += -DHAVE_STRTOK_C=1
 
 ifeq ($(HOSTOS),Cygwin)
 HOSTCFLAGS += -DHOST_CYGWIN=1
-HOSTEXEEXT ?= .exe
 endif
 endif
 

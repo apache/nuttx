@@ -89,11 +89,6 @@ NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
-ASMEXT = .S
-OBJEXT = .o
-LIBEXT = .a
-EXEEXT =
-
 ifneq ($(CROSSDEV),or1k-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
@@ -105,9 +100,3 @@ endif
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS =
-ifeq ($(CONFIG_HOST_WINDOWS),y)
-  HOSTEXEEXT = .exe
-else
-  HOSTEXEEXT =
-endif

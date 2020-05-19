@@ -101,11 +101,6 @@ NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotof
 
 LDNXFLATFLAGS = -e main -s 2048
 
-ASMEXT = .S
-OBJEXT = .o
-LIBEXT = .a
-EXEEXT =
-
 ifneq ($(CROSSDEV),arm-nuttx-eabi-)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
@@ -117,4 +112,3 @@ endif
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS =

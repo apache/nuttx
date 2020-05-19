@@ -108,11 +108,6 @@ NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) \
    -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
-ASMEXT = .S
-OBJEXT = .o
-LIBEXT = .a
-EXEEXT =
-
 ifneq ($(CONFIG_ARM_TOOLCHAIN_BUILDROOT),y)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
@@ -123,4 +118,3 @@ endif
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS =

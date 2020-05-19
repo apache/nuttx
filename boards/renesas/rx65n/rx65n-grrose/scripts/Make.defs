@@ -101,11 +101,6 @@ endif
 CMODULEFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 
 ASMEXT = .asm
-OBJEXT = .o
-LIBEXT = .a
-EXEEXT =
-
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS =
