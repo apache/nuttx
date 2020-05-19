@@ -2428,15 +2428,7 @@ int main(int argc, char **argv, char **envp)
 
           if (m > g_maxline && !rhcomment)
             {
-              if (g_file_type == C_SOURCE)
-                {
-                  ERROR("Long line found", lineno, m);
-                }
-              else if (g_file_type == C_HEADER)
-
-                {
-                  WARN("Long line found", lineno, m);
-                }
+              ERROR("Long line found", lineno, m);
             }
         }
 
