@@ -55,19 +55,11 @@ ifeq ($(CONFIG_ARCH_AVR),y)
 ARCH_SUBDIR	= avr
 endif
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(TOPDIR)/sched}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)/atmega2560}"
-else
-  CFLAGS	+= -I "$(TOPDIR)/sched"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/chip"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/common"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)/atmega2560"
-endif
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)$(ARCH_SUBDIR)}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)atmega2560}
 
 all: libboard$(LIBEXT)
 

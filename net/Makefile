@@ -66,6 +66,8 @@ include usrsock/Make.defs
 include utils/Make.defs
 endif
 
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)net}
+
 ASRCS = $(SOCK_ASRCS) $(NETDEV_ASRCS) $(NET_ASRCS)
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 

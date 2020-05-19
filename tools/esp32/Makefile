@@ -35,7 +35,7 @@ default: all
 
 # Add CFLAGS=-g on the make command line to build debug versions
 
-CFLAGS = -O2 -Wall -I.
+CFLAGS = -O2 -Wall
 
 ${IDF_PATH}:
 	mkdir -p ${ESP_PATH}

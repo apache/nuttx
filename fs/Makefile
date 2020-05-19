@@ -36,8 +36,6 @@
 
 include $(TOPDIR)/Make.defs
 
-AOBJS = $(ASRCS:.S=$(OBJEXT))
-
 CSRCS = fs_initialize.c
 
 include inode/Make.defs
@@ -76,6 +74,9 @@ include littlefs/Make.defs
 
 endif
 
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)fs}
+
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)

@@ -36,34 +36,15 @@
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-endif
+ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
 
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
-endif
+ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -I. -isystem "${shell cygpath -w $(TOPDIR)/arch/$(CONFIG_ARCH)/include}"
-ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
-ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/linker_script.ld}"
-ARCHPICFLAGS = -fpic
-ARCHCFLAGS = -std=c99 -fno-builtin --sysroot=/cygwin64
-#ARCHCPUFLAGS = -fdata-sections -g2 -mlittle-endian-data
-ARCHCPUFLAGS = -mcpu=rx64m
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHWARNINGSXX = -Wall -Wshadow -Wundef
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)linker_script.ld}"
 else
-ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
-ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/linker_script.ld
-ARCHPICFLAGS = -fpic
-ARCHCFLAGS = -std=c99 -fno-builtin
-#ARCHCPUFLAGS = -fdata-sections -g2 -mlittle-endian-data
-ARCHCPUFLAGS = -mcpu=rx64m
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHWARNINGSXX = -Wall -Wshadow -Wundef
+  ARCHSCRIPT = -T$(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)linker_script.ld
 endif
 
 CROSSDEV = rx-elf-
@@ -78,11 +59,24 @@ NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION = -g
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+endif
+
+ARCHPICFLAGS = -fpic
+ARCHCFLAGS = -std=c99 -fno-builtin
+ARCHCPUFLAGS = -mcpu=rx64m
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHWARNINGSXX = -Wall -Wshadow -Wundef
+
 CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) $(ARCHWARNINGSXX)
 AFLAGS = $(CFLAGS) -D__ASSEMBLY__
-#AFLAGS = -Wa --mcpu=rxv2 -I$(TOPDIR)/include -I$(TOPDIR)/arch/renesas/src/common -I$(TOPDIR)/arch/renesas/src/rx65n -D__ASSEMBLY__
 NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
@@ -102,5 +96,4 @@ CMODULEFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 
 ASMEXT = .asm
 HOSTCC = gcc
-HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

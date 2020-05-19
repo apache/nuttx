@@ -34,7 +34,7 @@ ifeq ($(HOSTOS),MinGW)
 # In the Windows native environment, the MinGW GCC compiler is used
 
 HOSTCC ?= mingw32-gcc.exe
-HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I. -DCONFIG_WINDOWS_NATIVE=y
+HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -DCONFIG_WINDOWS_NATIVE=y
 
 else
 
@@ -44,7 +44,7 @@ else
 # the MinGW environment.
 
 HOSTCC ?= cc
-HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I.
+HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow
 HOSTCFLAGS += -DHAVE_STRTOK_C=1
 
 ifeq ($(HOSTOS),Cygwin)

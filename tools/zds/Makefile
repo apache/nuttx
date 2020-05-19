@@ -31,7 +31,7 @@ ifeq ($(HOSTOS),MinGW)
 # In the Windows native environment, the MinGW GCC compiler is used
 
 HOSTCC ?= mingw32-gcc.exe
-HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I.
+HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow
 HOSTCFLAGS += -DHOST_NATIVE=1
 
 else
@@ -43,7 +43,7 @@ else
 # the MinGW environment.
 
 HOSTCC ?= cc
-HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I.
+HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow
 HOSTCFLAGS += -DHAVE_STRTOK_C=1 -DHOST_CYGWIN=1
 
 endif
@@ -56,7 +56,7 @@ default: all
 
 # Add CFLAGS=-g on the make command line to build debug versions
 
-CFLAGS = -O2 -Wall -Wstrict-prototypes -Wshadow -I.
+CFLAGS = -O2 -Wall -Wstrict-prototypes -Wshadow
 CFLAGS += -DHAVE_STRTOK_C=1
 
 # zdsar - Wrapper for the ZDS-II librarian

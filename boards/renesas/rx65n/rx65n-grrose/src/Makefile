@@ -20,9 +20,12 @@
 
 include $(TOPDIR)/Make.defs
 
-ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS += -I=$(ARCH_SRCDIR)/chip -I=$(ARCH_SRCDIR)/common -I=$(TOPDIR)/sched
-CFLAGS += -I=$(ARCH_SRCDIR)/chip
+ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
 
 AOBJS = $(ASRCS:.asm=$(OBJEXT))
 CSRCS = rx65n_appinit.c rx65n_bringup.c rx65n_sbram.c rx65n_gpio.c
@@ -30,9 +33,6 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
-
-CFLAGS += -I=$(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS += -I=$(TOPDIR)/arch/$(CONFIG_ARCH)/include
 
 all: libboard$(LIBEXT)
 

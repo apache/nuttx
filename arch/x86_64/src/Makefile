@@ -25,33 +25,22 @@ ifeq ($(CONFIG_ARCH_INTEL64),y)
 ARCH_SUBDIR = intel64
 endif
 
-CPPFLAGS += $(EXTRAFLAGS)
-CFLAGS += $(EXTRAFLAGS)
-CXXFLAGS += $(EXTRAFLAGS)
+ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  ARCH_SRCDIR = $(TOPDIR)\arch\$(CONFIG_ARCH)\src
-  NUTTX = $(TOPDIR)\nuttx$(EXEEXT)
-  CFLAGS += -I$(ARCH_SRCDIR)\chip
-  CFLAGS += -I$(ARCH_SRCDIR)\common
-  CFLAGS += -I$(ARCH_SRCDIR)\$(ARCH_SUBDIR)
-  CFLAGS += -I$(TOPDIR)\sched
-else
-  ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
+INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common}
+INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)$(ARCH_SUBDIR)}
+INCLUDES += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
+
+CPPFLAGS += $(INCLUDES) $(EXTRAFLAGS)
+CFLAGS += $(INCLUDES) $(EXTRAFLAGS)
+CXXFLAGS += $(INCLUDES) $(EXTRAFLAGS)
+AFLAGS += $(INCLUDES) $(EXTRAFLAGS)
+
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  NUTTX = "${shell cygpath -w $(TOPDIR)/nuttx$(EXEEXT)}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
-  CFLAGS += -I "${shell cygpath -w $(TOPDIR)/sched}"
+  NUTTX = "${shell cygpath -w $(TOPDIR)$(DELIM)nuttx$(EXEEXT)}"
 else
-  NUTTX = $(TOPDIR)/nuttx$(EXEEXT)
-  LOADER = $(TOPDIR)/loader$(EXEEXT)
-  CFLAGS += -I$(ARCH_SRCDIR)/chip
-  CFLAGS += -I$(ARCH_SRCDIR)/common
-  CFLAGS += -I$(ARCH_SRCDIR)/$(ARCH_SUBDIR)
-  CFLAGS += -I$(TOPDIR)/sched
-endif
+  NUTTX = "$(TOPDIR)$(DELIM)nuttx$(EXEEXT)"
 endif
 
 ASRCS = $(CHIP_ASRCS) $(CMN_ASRCS)
@@ -74,28 +63,20 @@ LDENDGROUP ?= --end-group
 LDFLAGS += -z max-page-size=0x1000 $(ARCHSCRIPT)
 LOADER_LDFLAGS += $(LOADER_ARCHSCRIPT)
 
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  BOARDMAKE = $(if $(wildcard .\board\Makefile),y,)
-  LIBPATHS += -L"$(TOPDIR)\staging"
-ifeq ($(BOARDMAKE),y)
-  LIBPATHS += -L"$(TOPDIR)\arch\$(CONFIG_ARCH)\src\board"
-endif
-
-else
-  BOARDMAKE = $(if $(wildcard ./board/Makefile),y,)
+BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)/staging"}"
+  LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)$(DELIM)staging"}"
 ifeq ($(BOARDMAKE),y)
-  LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)/arch/$(CONFIG_ARCH)/src/board"}"
+  LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board"}"
 endif
 
 else
-  LIBPATHS += -L"$(TOPDIR)/staging"
+  LIBPATHS += -L"$(TOPDIR)$(DELIM)staging"
 ifeq ($(BOARDMAKE),y)
-  LIBPATHS += -L"$(TOPDIR)/arch/$(CONFIG_ARCH)/src/board"
+  LIBPATHS += -L"$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board"
 endif
-endif
+
 endif
 
 LDLIBS = $(patsubst %.a,%,$(patsubst lib%,-l%,$(LINKLIBS)))

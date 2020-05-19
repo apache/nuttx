@@ -46,6 +46,8 @@ include iob/Make.defs
 
 BINDIR ?= bin
 
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)mm}
+
 AOBJS = $(patsubst %.S, $(BINDIR)$(DELIM)%$(OBJEXT), $(ASRCS))
 COBJS = $(patsubst %.c, $(BINDIR)$(DELIM)%$(OBJEXT), $(CSRCS))
 

@@ -75,25 +75,13 @@ ifneq ($(CONFIG_ARCH_FAMILY),)
   ARCH_FAMILY = $(patsubst "%",%,$(CONFIG_ARCH_FAMILY))
 endif
 
-ifneq ($(ZDSVERSION),)
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  USRINCLUDES = -usrinc:".;$(SCHEDSRCDIR);$(ARCHSRCDIR)$(DELIM)chip;$(ARCHSRCDIR)$(DELIM)common"
-else
-  WSCHEDSRCDIR = ${shell cygpath -w $(SCHEDSRCDIR)}
-  WARCHSRCDIR = ${shell cygpath -w $(ARCHSRCDIR)}
-  USRINCLUDES = -usrinc:'.;$(WSCHEDSRCDIR);$(WARCHSRCDIR)\chip;$(WARCHSRCDIR)\common'
-endif
-  INCLUDES = $(ARCHSTDINCLUDES) $(USRINCLUDES)
-  CFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
-else
-  CFLAGS += ${shell $(INCDIR) "$(CC)" "$(SCHEDSRCDIR)"}
-  CFLAGS += ${shell $(INCDIR) "$(CC)" "$(ARCHSRCDIR)$(DELIM)chip"}
+CFLAGS += ${shell $(INCDIR) "$(CC)" "$(SCHEDSRCDIR)"}
+CFLAGS += ${shell $(INCDIR) "$(CC)" "$(ARCHSRCDIR)$(DELIM)chip"}
 ifneq ($(CONFIG_ARCH_SIM),y)
   CFLAGS += ${shell $(INCDIR) "$(CC)" "$(ARCHSRCDIR)$(DELIM)common"}
+endif
 ifneq ($(ARCH_FAMILY),)
   CFLAGS += ${shell $(INCDIR) "$(CC)" "$(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)"}
-endif
-endif
 endif
 
 all: libboard$(LIBEXT)

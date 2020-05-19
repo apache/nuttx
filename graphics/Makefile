@@ -42,6 +42,8 @@ include nxmu/Make.defs
 include nxterm/Make.defs
 include vnc/Make.defs
 
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)graphics}
+
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
 

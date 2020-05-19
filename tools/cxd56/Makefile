@@ -39,7 +39,7 @@ default: mkspk
 
 # Add CFLAGS=-g on the make command line to build debug versions
 
-CFLAGS = -O2 -Wall -I.
+CFLAGS = -O2 -Wall
 
 # mkspk - Convert nuttx.hex image to nuttx.spk image
 

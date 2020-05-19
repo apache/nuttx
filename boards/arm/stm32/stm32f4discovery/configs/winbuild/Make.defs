@@ -39,9 +39,12 @@ include $(TOPDIR)\arch\arm\src\armv7-m\Toolchain.defs
 
 LDSCRIPT = ld.script
 
-ARCHINCLUDES = -I. -isystem $(TOPDIR)\include
-ARCHXXINCLUDES = -I. -isystem $(TOPDIR)\include -isystem $(TOPDIR)\include\cxx
-ARCHSCRIPT = -T$(TOPDIR)\boards\$(CONFIG_ARCH)\$(CONFIG_ARCH_CHIP)\$(CONFIG_ARCH_BOARD)\scripts\$(LDSCRIPT)
+ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+
+ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
+
+ARCHSCRIPT = -T$(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 CC = $(CROSSDEV)gcc.exe
 CXX = $(CROSSDEV)g++.exe
@@ -86,5 +89,4 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 HOSTCC = mingw32-gcc.exe
-HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

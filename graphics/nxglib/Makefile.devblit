@@ -35,6 +35,8 @@
 
 include $(TOPDIR)/Make.defs
 
+CPPFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)graphics$(DELIM)nxglib}
+
 ifeq ($(NXGLIB_BITSPERPIXEL),1)
 NXGLIB_SUFFIX	:= _1bpp
 SETP_CSRC	:= nxglib_setpixel_1bpp.c

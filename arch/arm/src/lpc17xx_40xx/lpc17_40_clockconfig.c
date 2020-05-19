@@ -41,24 +41,24 @@
 #include <nuttx/config.h>
 
 /* This file is only a thin shell that includes the correct clock
- * configuration logic for the selected LPC17xx/LPC40xx family.  The correct file
- * cannot be selected by the make system because it needs the intelligence
- * that only exists in chip.h that can associate an LPC17xx/LPC40xx part number with
- * an LPC17xx/LPC40xx family.
+ * configuration logic for the selected LPC17xx/LPC40xx family.  The correct
+ * file cannot be selected by the make system because it needs the
+ * intelligence that only exists in chip.h that can associate an
+ * LPC17xx/LPC40xx part number with an LPC17xx/LPC40xx family.
  *
- * The LPC176x and LPC178x_40xx system control block is *nearly* identical but
- * we have found that the LPC178x_40xx is more sensitive to the ordering of
- * certain operations.  So, although the hardware seems very similar, the
- * safer thing to do is to separate the LPC176x and LPC178x_40xx into separate
- * files.
+ * The LPC176x and LPC178x_40xx system control block is *nearly* identical
+ * but we have found that the LPC178x_40xx is more sensitive to the ordering
+ * of certain operations.  So, although the hardware seems very similar, the
+ * safer thing to do is to separate the LPC176x and LPC178x_40xx into
+ * separate files.
  */
 
 #include <arch/lpc17xx_40xx/chip.h>
 
 #if defined(LPC176x)
-#  include "chip/lpc176x_clockconfig.c"
+#  include "lpc176x_clockconfig.c"
 #elif defined(LPC178x_40xx)
-#  include "chip/lpc178x_40xx_clockconfig.c"
+#  include "lpc178x_40xx_clockconfig.c"
 #else
 #  error "Unrecognized LPC17xx/LPC40xx family"
 #endif
