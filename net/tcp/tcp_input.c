@@ -591,7 +591,7 @@ found:
 
                 nwarn("WARNING: Listen canceled while waiting for ACK on "
                       "port %d\n",
-                      tcp->destport);
+                      ntohs(tcp->destport));
 
                 /* Free the connection structure */
 
