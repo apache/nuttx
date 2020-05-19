@@ -132,15 +132,6 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 
   MKDEP = $(TOPDIR)\tools\mkdeps$(HOSTEXEEXT) --winnative
 
-  # Use NTFS links or directory copies
-
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-  DIRLINK = $(TOPDIR)$(DELIM)tools$(DELIM)link.bat
-else
-  DIRLINK = $(TOPDIR)$(DELIM)tools$(DELIM)copydir.bat
-endif
-DIRUNLINK = $(TOPDIR)$(DELIM)tools$(DELIM)unlink.bat
-
 else
 
 # Linux/Cygwin host tool definitions
@@ -157,15 +148,5 @@ else
   else
     MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
   endif
-
-  # SDCC for Linux, macOS, or Cygwin understands symbolic links.  Windows SDCC
-  # running under Cygwin does not
-
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  DIRLINK = $(TOPDIR)$(DELIM)tools$(DELIM)copydir.sh
-else
-  DIRLINK = $(TOPDIR)$(DELIM)tools$(DELIM)link.sh
-endif
-DIRUNLINK = $(TOPDIR)$(DELIM)tools$(DELIM)unlink.sh
 
 endif

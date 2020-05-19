@@ -254,8 +254,6 @@ echo "HOSTINCLUDES     = ${HOSTINCLUDES}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "HOSTCFLAGS       = ${HOSTCFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "HOSTLDFLAGS      = ${HOSTLDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "DIRLINK          = ${DIRLINK}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "DIRUNLINK        = ${DIRUNLINK}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "MKDEP            = ${MKDEP}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "LDSCRIPT         = ${LDSCRIPT}" >>"${EXPORTDIR}/scripts/Make.defs"
 

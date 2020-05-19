@@ -23,11 +23,6 @@ include ${TOPDIR}/tools/Config.mk
 
 HOSTOS = ${shell uname -o 2>/dev/null || uname -s 2>/dev/null || echo "Other"}
 
-ifeq ($(CONFIG_WINDOWS_MSYS),y)
-  DIRLINK = $(TOPDIR)/tools/copydir.sh
-  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
-endif
-
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
 endif

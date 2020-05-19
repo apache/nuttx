@@ -122,8 +122,6 @@ endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native host tools
-  DIRLINK = $(TOPDIR)/tools/copydir.sh
-  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
   MKDEP = $(TOPDIR)/tools/mkwindeps.sh
 else
   # Linux/Cygwin-native host tools

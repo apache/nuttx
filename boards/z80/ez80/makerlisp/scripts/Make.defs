@@ -117,8 +117,4 @@ else
 
   MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh
 
-  # ZDS-II cannot follow Cygwin soft links, so we will have to use directory copies
-
-  DIRLINK = $(TOPDIR)$(DELIM)tools$(DELIM)copydir.sh
-  DIRUNLINK = $(TOPDIR)$(DELIM)tools$(DELIM)unlink.sh
 endif

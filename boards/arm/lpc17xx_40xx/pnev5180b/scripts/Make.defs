@@ -45,8 +45,6 @@ include ${TOPDIR}$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)armv7-m$(DELIM)Toolch
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
-  DIRLINK = $(TOPDIR)$(DELIM)tools$(DELIM)copydir.sh
-  DIRUNLINK = $(TOPDIR)$(DELIM)tools$(DELIM)unlink.sh
   MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include}" -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include$(DELIM)cxx}"
