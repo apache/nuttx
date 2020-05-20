@@ -33,6 +33,6 @@
 #
 ############################################################################
 
-include platform$(DELIM)audio$(DELIM)Make.defs
-include platform$(DELIM)sensors$(DELIM)Make.defs
-include platform$(DELIM)camera$(DELIM)Make.defs
+include platform/audio/Make.defs
+include platform/sensors/Make.defs
+include platform/camera/Make.defs

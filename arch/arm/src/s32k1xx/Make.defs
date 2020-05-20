@@ -97,9 +97,9 @@ endif
 # Source files specific to the ARM CPU family and to the S32K1xx chip family
 
 ifeq ($(CONFIG_ARCH_CHIP_S32K11X),y)
-include s32k1xx$(DELIM)s32k11x$(DELIM)Make.defs
+include s32k1xx/s32k11x/Make.defs
 else
-include s32k1xx$(DELIM)s32k14x$(DELIM)Make.defs
+include s32k1xx/s32k14x/Make.defs
 endif
 
 # Make sure that the S32K1 common directory in included in the VPATH

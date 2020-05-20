@@ -63,8 +63,8 @@ VPATH =
 SUBDIRS =
 DEPPATH = --dep-path .
 
-include libnxflat$(DELIM)Make.defs
-include libelf$(DELIM)Make.defs
+include libnxflat/Make.defs
+include libelf/Make.defs
 
 BINFMT_AOBJS = $(BINFMT_ASRCS:.S=$(OBJEXT))
 BINFMT_COBJS = $(BINFMT_CSRCS:.c=$(OBJEXT))
