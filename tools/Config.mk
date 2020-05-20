@@ -107,6 +107,21 @@ else
   DELIM ?= $(strip /)
 endif
 
+# Process board-specific directories
+
+ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
+ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
+  BOARD_DIR ?= $(TOPDIR)$(DELIM)$(CONFIG_ARCH_BOARD_CUSTOM_DIR)$(DELIM)$(CONFIG_ARCH_BOARD)
+else
+  BOARD_DIR ?= $(CONFIG_ARCH_BOARD_CUSTOM_DIR)$(DELIM)$(CONFIG_ARCH_BOARD)
+endif
+else
+  BOARD_DIR ?= $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)
+endif
+
+BOARD_COMMON_DIR ?= $(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)common)
+BOARD_DRIVERS_DIR ?= $(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)drivers)
+
 # DIRLINK - Create a directory link in the portable way
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)

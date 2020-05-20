@@ -78,7 +78,7 @@ ARFLAGS = -quiet -warn
 
 # Linker definitions
 
-LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)ez80f910200zco.linkcmd
+LINKCMDTEMPLATE = $(BOARD_DIR)$(DELIM)scripts$(DELIM)ez80f910200zco.linkcmd
 
 # Host tool definitions
 
