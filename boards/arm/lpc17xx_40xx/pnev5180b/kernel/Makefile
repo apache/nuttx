@@ -40,10 +40,6 @@
 
 include $(TOPDIR)/Make.defs
 
-# This is the directory for the board-specific header files
-
-BOARD_INCLUDE = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)include
-
 # The entry point name (if none is provided in the .config file)
 
 CONFIG_USER_ENTRYPOINT ?= user_start
