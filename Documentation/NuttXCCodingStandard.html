@@ -87,7 +87,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: February 2, 2020</p>
+      <p>Last Updated: May 19, 2020</p>
     </td>
   </tr>
 </table>
@@ -568,7 +568,7 @@
 <p>
   <b>Comments to the Right of Statements</b>.
   Comments to the right of statements in C source files are discouraged.
-  If such comments are used, they should be (1) very short so that they do not exceed the line width (typically 78 characters), (2) fit on one line, and (3) be aligned so that the comment begins in the same comment on each line.
+  If such comments are used, they should be (1) very short so that they do not exceed the line width (typically 78 characters), (2) aligned so that the comment begins in the same column on each line.
 </p>
 <center><table width="60%" border=1>
 <tr><td bgcolor="white">
@@ -659,6 +659,13 @@ struct animals_s
   <b>Long Comments on the Right</b>.
   Comments on the right of statements or data definitions must be short and fit on the same line without exceeding the maximum line length.
   If a longer comment is needed, then it should appear above the statement of definition rather than to the right of the definition.
+</p>
+<p>
+  <b>Breaking Long Comments to the Right of Statements</b>
+  Breaking long comments to the right of statements is acceptable as well, but not encouraged.
+  In this case the comment must be begin on the first line of the multi-line, right-hand comment with the opening comment delimiter (/*).
+  The following lines of the multi-line, right hand comment must be with an asterisk (*) aligned in the same column as the asterisk in the preceding line.
+  The closing comment delimiter must lie on the <i>same</i> line with the asterisk.
 </p>
 <center><table width="60%" border=1>
 <tr><td bgcolor="white">
