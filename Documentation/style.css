@@ -18,7 +18,7 @@ a:hover
 
 code
 {
-    font-family: "Bitstream Vera Sans Mono";
+    font-family: "courier";
     color: #2b4893;
     background: #f4f4f4;
     padding-left: 0.25em;
@@ -27,7 +27,7 @@ code
 
 pre
 {
-    font-family: "Bitstream Vera Sans Mono";
+    font-family: "courier";
     background: #f4f4f4;
     padding: 1em;
 }
