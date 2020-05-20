@@ -106,29 +106,29 @@
 
 /* Control register 1 */
 
-#define I2C_CR1_PE                (1 << 0)  /* Bit 0:  Peripheral Enable */
-#define I2C_CR1_TXIE              (1 << 1)  /* Bit 1:  TX Interrupt enable */
-#define I2C_CR1_RXIE              (1 << 2)  /* Bit 2:  RX Interrupt enable */
-#define I2C_CR1_ADDRIE            (1 << 3)  /* Bit 3:  Address match interrupt enable (slave) */
-#define I2C_CR1_NACKIE            (1 << 4)  /* Bit 4:  Not acknowledge received interrupt enable */
-#define I2C_CR1_STOPIE            (1 << 5)  /* Bit 5:  STOP detection interrupt enable */
-#define I2C_CR1_TCIE              (1 << 6)  /* Bit 6:  Transfer Complete interrupt enable */
-#define I2C_CR1_ERRIE             (1 << 7)  /* Bit 7:  Error interrupts enable */
-#define I2C_CR1_DNF_SHIFT         (8)       /* Bits 8-11: Digital noise filter */
+#define I2C_CR1_PE                (1 << 0)                   /* Bit 0:  Peripheral Enable */
+#define I2C_CR1_TXIE              (1 << 1)                   /* Bit 1:  TX Interrupt enable */
+#define I2C_CR1_RXIE              (1 << 2)                   /* Bit 2:  RX Interrupt enable */
+#define I2C_CR1_ADDRIE            (1 << 3)                   /* Bit 3:  Address match interrupt enable (slave) */
+#define I2C_CR1_NACKIE            (1 << 4)                   /* Bit 4:  Not acknowledge received interrupt enable */
+#define I2C_CR1_STOPIE            (1 << 5)                   /* Bit 5:  STOP detection interrupt enable */
+#define I2C_CR1_TCIE              (1 << 6)                   /* Bit 6:  Transfer Complete interrupt enable */
+#define I2C_CR1_ERRIE             (1 << 7)                   /* Bit 7:  Error interrupts enable */
+#define I2C_CR1_DNF_SHIFT         (8)                        /* Bits 8-11: Digital noise filter */
 #define I2C_CR1_DNF_MASK          (15 << I2C_CR1_DNF_SHIFT)
 #  define I2C_CR1_DNF_DISABLE     (0 << I2C_CR1_DNF_SHIFT)
 #  define I2C_CR1_DNF(n)          ((n) << I2C_CR1_DNF_SHIFT) /* Up to n * Ti2cclk, n=1..15 */
-#define I2C_CR1_ANFOFF            (1 << 12) /* Bit 12: Analog noise filter OFF */
-#define I2C_CR1_TXDMAEN           (1 << 14) /* Bit 14: DMA transmission requests enable */
-#define I2C_CR1_RXDMAEN           (1 << 15) /* Bit 15: DMA reception requests enable */
-#define I2C_CR1_SBC               (1 << 16) /* Bit 16: Slave byte control */
-#define I2C_CR1_NOSTRETCH         (1 << 17) /* Bit 17: Clock stretching disable */
-#define I2C_CR1_WUPEN             (1 << 18) /* Bit 18: Wakeup from STOP enable */
-#define I2C_CR1_GCEN              (1 << 19) /* Bit 19: General call enable */
-#define I2C_CR1_SMBHEN            (1 << 20) /* Bit 20: SMBus Host address enable */
-#define I2C_CR1_SMBDEN            (1 << 21) /* Bit 21: SMBus Device Default address enable */
-#define I2C_CR1_ALERTEN           (1 << 22) /* Bit 22: SMBus alert enable */
-#define I2C_CR1_PECEN             (1 << 23) /* Bit 23: PEC enable */
+#define I2C_CR1_ANFOFF            (1 << 12)                  /* Bit 12: Analog noise filter OFF */
+#define I2C_CR1_TXDMAEN           (1 << 14)                  /* Bit 14: DMA transmission requests enable */
+#define I2C_CR1_RXDMAEN           (1 << 15)                  /* Bit 15: DMA reception requests enable */
+#define I2C_CR1_SBC               (1 << 16)                  /* Bit 16: Slave byte control */
+#define I2C_CR1_NOSTRETCH         (1 << 17)                  /* Bit 17: Clock stretching disable */
+#define I2C_CR1_WUPEN             (1 << 18)                  /* Bit 18: Wakeup from STOP enable */
+#define I2C_CR1_GCEN              (1 << 19)                  /* Bit 19: General call enable */
+#define I2C_CR1_SMBHEN            (1 << 20)                  /* Bit 20: SMBus Host address enable */
+#define I2C_CR1_SMBDEN            (1 << 21)                  /* Bit 21: SMBus Device Default address enable */
+#define I2C_CR1_ALERTEN           (1 << 22)                  /* Bit 22: SMBus alert enable */
+#define I2C_CR1_PECEN             (1 << 23)                  /* Bit 23: PEC enable */
 
 /* Control register 2 */
 
@@ -160,9 +160,9 @@
 
 /* Own address register 2 */
 
-#define I2C_OAR2_OA2_SHIFT        (1)       /* Bits 1-7: 7-bit interface address */
+#define I2C_OAR2_OA2_SHIFT        (1)                          /* Bits 1-7: 7-bit interface address */
 #define I2C_OAR2_OA2_MASK         (0x7f << I2C_OAR2_OA2_SHIFT)
-#define I2C_OAR2_OA2MSK_SHIFT     (8)       /* Bits 8-10: Own Address 2 masks */
+#define I2C_OAR2_OA2MSK_SHIFT     (8)                          /* Bits 8-10: Own Address 2 masks */
 #define I2C_OAR2_OA2MSK_MASK      (7 << I2C_OAR2_OA2MSK_SHIFT)
 #  define I2C_OAR2_OA2MSK_NONE    (0 << I2C_OAR2_OA2MSK_SHIFT) /* No mask */
 #  define I2C_OAR2_OA2MSK_2_7     (1 << I2C_OAR2_OA2MSK_SHIFT) /* Only OA2[7:2] are compared */
@@ -172,7 +172,7 @@
 #  define I2C_OAR2_OA2MSK_6_7     (5 << I2C_OAR2_OA2MSK_SHIFT) /* Only OA2[7:6] are compared */
 #  define I2C_OAR2_OA2MSK_7       (6 << I2C_OAR2_OA2MSK_SHIFT) /* Only OA2[7] is compared */
 #  define I2C_OAR2_OA2MSK_ALL     (7 << I2C_OAR2_OA2MSK_SHIFT) /* All 7-bit addresses acknowledged */
-#define I2C_OAR2_OA2EN            (1 << 15)  /* Bit 15: Own Address 2 enable */
+#define I2C_OAR2_OA2EN            (1 << 15)                    /* Bit 15: Own Address 2 enable */
 
 /* Timing register */
 
@@ -209,6 +209,7 @@
 #define I2C_TIMEOUTR_TEXTEN       (1 << 31) /* Bits 31: Extended clock timeout enable */
 
 /* Interrupt and Status register and interrupt clear register */
+
 /* Common interrupt bits */
 
 #define I2C_INT_ADDR              (1 << 3)  /* Bit 3:  Address matched (slave) */
