@@ -69,8 +69,6 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 DEPSRCS  = $(SSRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
-BOARDDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board
-
 VPATH = chip:common
 
 # Targets

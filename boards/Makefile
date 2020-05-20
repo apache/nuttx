@@ -57,8 +57,8 @@ DUMMY_KCONFIG = $(TOPDIR)$(DELIM)boards$(DELIM)dummy$(DELIM)Kconfig
 
 # The board configuration should be installed in the arch/ directory
 
-BOARD_DIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board
-BOARD_INSTALLED = $(if $(wildcard $(BOARD_DIR)$(DELIM)Makefile),y,)
+BOARDDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board
+BOARD_INSTALLED = $(if $(wildcard $(BOARDDIR)$(DELIM)Makefile),y,)
 
 # Basic
 
@@ -118,7 +118,7 @@ dirlinks: $(DUMMY_KCONFIG)
 
 context: $(DUMMY_KCONFIG)
 ifeq ($(BOARD_INSTALLED),y)
-	$(Q) $(MAKE) -C $(BOARD_DIR) TOPDIR="$(TOPDIR)" context
+	$(Q) $(MAKE) -C $(BOARDDIR) TOPDIR="$(TOPDIR)" context
 endif
 
 clean_context:

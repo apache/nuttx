@@ -52,10 +52,10 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)qemu.ld}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)qemu.ld}"
   MAXOPTIMIZATION = -O2
 else
-  ARCHSCRIPT = -T$(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)qemu.ld
+  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)qemu.ld
 endif
 
 ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-builtin -fno-stack-protector

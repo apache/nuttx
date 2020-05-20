@@ -80,7 +80,7 @@ else ifeq ($(CONFIG_Z20X_COPYTORAM),y)
   LDSCRIPT = z20x_copytoram.linkcmd
 endif
 
-LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+LINKCMDTEMPLATE = $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 # Host tool definitions
 

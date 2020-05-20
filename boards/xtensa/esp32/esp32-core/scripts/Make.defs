@@ -43,14 +43,14 @@ ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
 ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
 ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
 
-LDSCRIPT1 = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)esp32_out.ld
-LDSCRIPT3 = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)esp32_rom.ld
-LDSCRIPT4 = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)esp32_peripherals.ld
+LDSCRIPT1 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
+LDSCRIPT3 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
+LDSCRIPT4 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_peripherals.ld
 
 ifeq ($(CONFIG_ESP32CORE_RUN_IRAM),y)
-  LDSCRIPT2 = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)esp32_iram.ld
+  LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_iram.ld
 else
-  LDSCRIPT2 = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)esp32_flash.ld
+  LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_flash.ld
 endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
@@ -115,9 +115,9 @@ CXXELFFLAGS = $(CXXFLAGS) -mtext-section-literals
 
 LDELFFLAGS = -r -e main
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
+  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
 else
-  LDELFFLAGS += -T $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)gnu-elf.ld
+  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
 endif
 
 LDFLAGS += -nostartfiles -nodefaultlibs
