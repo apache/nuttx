@@ -188,7 +188,7 @@ struct gs2200m_dev_s
   struct work_s        irq_work;
   sem_t                dev_sem;
   dq_queue_t           pkt_q[16];
-  uint8_t              pkt_q_cnt[16];
+  uint16_t             pkt_q_cnt[16];
   uint16_t             valid_cid_bits;
   uint16_t             aip_cid_bits;
   uint8_t              tx_buff[MAX_PKT_LEN];
