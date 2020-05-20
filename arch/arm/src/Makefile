@@ -35,7 +35,7 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
-include chip$(DELIM)Make.defs
+include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_ARMV7A),y)          # ARMv7-A
 ARCH_SUBDIR = armv7-a

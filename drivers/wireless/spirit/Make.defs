@@ -37,8 +37,8 @@ ifeq ($(CONFIG_WL_SPIRIT),y)
 
 # Include Spirit library support
 
-include wireless$(DELIM)spirit$(DELIM)lib$(DELIM)Make.defs
-include wireless$(DELIM)spirit$(DELIM)include$(DELIM)Make.defs
-include wireless$(DELIM)spirit$(DELIM)drivers$(DELIM)Make.defs
+include wireless/spirit/lib/Make.defs
+include wireless/spirit/include/Make.defs
+include wireless/spirit/drivers/Make.defs
 
 endif

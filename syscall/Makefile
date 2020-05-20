@@ -35,8 +35,8 @@
 
 include $(TOPDIR)/Make.defs
 
-include proxies$(DELIM)Make.defs
-include stubs$(DELIM)Make.defs
+include proxies/Make.defs
+include stubs/Make.defs
 
 MKSYSCALL = "$(TOPDIR)$(DELIM)tools$(DELIM)mksyscall$(HOSTEXEEXT)"
 CSVFILE = "$(TOPDIR)$(DELIM)syscall$(DELIM)syscall.csv"

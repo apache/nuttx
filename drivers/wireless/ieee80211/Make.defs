@@ -40,6 +40,6 @@ ifeq ($(CONFIG_DRIVERS_IEEE80211),y)
 
 # Include IEEE 802.11 drivers into the build
 
-include wireless$(DELIM)ieee80211$(DELIM)bcm43xxx$(DELIM)Make.defs
+include wireless/ieee80211/bcm43xxx/Make.defs
 
 endif # CONFIG_DRIVERS_IEEE80211
