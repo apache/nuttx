@@ -33,10 +33,6 @@
 #
 ############################################################################
 
-POWER_DEPPATH =
-POWER_VPATH =
-POWER_CFLAGS =
-
 # Include power management sources
 
 ifeq ($(CONFIG_PM),y)

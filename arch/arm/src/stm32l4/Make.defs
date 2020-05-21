@@ -37,12 +37,7 @@
 # The start-up, "head", file.  Only common vectors are support so there
 # isn't one.
 
-HEAD_ASRC =
-
 # Common ARM and Cortex-M4 files (copied from stm32/Make.defs)
-
-CMN_UASRCS =
-CMN_UCSRCS =
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
@@ -100,7 +95,6 @@ endif
 
 # Required STM32L4 files
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = stm32l4_allocateheap.c stm32l4_exti_gpio.c stm32l4_gpio.c
 CHIP_CSRCS += stm32l4_irq.c stm32l4_lowputc.c stm32l4_rcc.c
 CHIP_CSRCS += stm32l4_serial.c stm32l4_start.c stm32l4_waste.c stm32l4_uid.c

@@ -33,11 +33,6 @@
 #
 ############################################################################
 
-HEAD_ASRC =
-
-CMN_UASRCS =
-CMN_UCSRCS =
-
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
 
@@ -97,8 +92,6 @@ endif
 ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)
 CMN_CSRCS += arm_itm_syslog.c
 endif
-
-CHIP_ASRCS  =
 
 CHIP_CSRCS  = stm32_allocateheap.c stm32_start.c stm32_rcc.c stm32_lse.c
 CHIP_CSRCS += stm32_lsi.c stm32_gpio.c stm32_exti_gpio.c stm32_flash.c

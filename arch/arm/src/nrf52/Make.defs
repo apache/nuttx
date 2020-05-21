@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-HEAD_ASRC  =
-
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S vfork.S
 
@@ -79,7 +77,6 @@ CMN_ASRCS += arm_fpu.S
 CMN_CSRCS += arm_copyarmstate.c
 endif
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = nrf52_start.c nrf52_clockconfig.c nrf52_irq.c nrf52_utils.c
 CHIP_CSRCS += nrf52_allocateheap.c nrf52_lowputc.c nrf52_gpio.c nrf52_nvmc.c
 

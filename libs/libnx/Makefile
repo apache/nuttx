@@ -35,14 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-# Sources and paths
-
-ASRCS =
-CSRCS =
-
-DEPPATH := --dep-path .
-VPATH := .
-
 include nxglib/Make.defs
 include nx/Make.defs
 include nxmu/Make.defs

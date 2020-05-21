@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-HEAD_ASRC  =
-
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
 
@@ -83,7 +81,6 @@ CMN_ASRCS += arm_fpu.S
 CMN_CSRCS += arm_copyarmstate.c
 endif
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = lpc54_start.c lpc54_clockconfig.c lpc54_irq.c lpc54_clrpend.c
 CHIP_CSRCS += lpc54_allocateheap.c lpc54_lowputc.c lpc54_gpio.c lpc54_reset.c
 

@@ -35,14 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-# Add files to the build
-
-DEPPATH = --dep-path .
-
-ASRCS =
-CSRCS =
-VPATH = .
-
 # Add IEEE 802.15.4 files to the build
 
 include bluetooth/Make.defs

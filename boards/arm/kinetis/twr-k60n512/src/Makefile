@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = k60_boot.c k60_spi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)

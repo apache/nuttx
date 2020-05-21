@@ -36,7 +36,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = lpc43_boot.c lpc43_ssp.c
 
 ifeq ($(CONFIG_SENSORS_MAX31855),y)

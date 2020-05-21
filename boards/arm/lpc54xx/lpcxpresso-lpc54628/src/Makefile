@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = lpc54_boot.c lpc54_bringup.c lpc54_userleds.c lpc54_lcd.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)

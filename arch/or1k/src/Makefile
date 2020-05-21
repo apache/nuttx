@@ -107,10 +107,6 @@ LDFLAGS += $(ARCHSCRIPT)
 LDSTARTGROUP ?= --start-group
 LDENDGROUP ?= --end-group
 
-EXTRA_LIBS ?=
-EXTRA_LIBPATHS ?=
-LINKLIBS ?=
-
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   BOARDMAKE = $(if $(wildcard .\board\Makefile),y,)
   LIBPATHS += -L"$(TOPDIR)\staging"

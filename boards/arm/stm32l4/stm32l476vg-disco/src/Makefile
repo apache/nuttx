@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = stm32_boot.c stm32_spi.c
 
 ifeq ($(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG),y)

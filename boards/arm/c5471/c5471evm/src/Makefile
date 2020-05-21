@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = c5471_leds.c
 
 include $(TOPDIR)/boards/Board.mk

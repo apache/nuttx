@@ -45,8 +45,6 @@ ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
     CUSTOM_KPATH = $(CUSTOM_DIR)$(DELIM)Kconfig
   endif
   CUSTOM_KCONFIG = $(if $(wildcard $(CUSTOM_KPATH)),y,)
-else
-  CUSTOM_KCONFIG =
 endif
 
 ifeq ($(CUSTOM_KCONFIG),y)
@@ -64,9 +62,7 @@ BOARD_INSTALLED = $(if $(wildcard $(BOARD_DIR)$(DELIM)Makefile),y,)
 
 # Basic
 
-CONFIG_ASRCS =
 CONFIG_CSRCS = dummy.c
-CONFIG_CXXSRCS =
 
 # boardctl support
 
@@ -105,10 +101,10 @@ $(BIN): $(OBJS)
 
 .depend: Makefile $(SRCS)
 ifneq ($(SRCS),)
-	$(Q) $(MKDEP) --dep-path . "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MKDEP) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif
 ifneq ($(CXXSRCS),)
-	$(Q) $(MKDEP) --dep-path . "$(CXX)" -- $(CXXFLAGS) -- $(CXXSRCS) >>Make.dep
+	$(Q) $(MKDEP) "$(CXX)" -- $(CXXFLAGS) -- $(CXXSRCS) >>Make.dep
 endif
 	$(Q) touch $@
 

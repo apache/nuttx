@@ -90,7 +90,6 @@ else
 endif
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef #-fno-strict-aliasing
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
-ARCHDEFINES =
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
 

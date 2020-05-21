@@ -37,7 +37,6 @@ include $(TOPDIR)/Make.defs
 
 CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 CSRCS = m16c_leds.c m16c_buttons.c m16c_lcd.c m16c_lcdconsole.c
 COBJS = $(CSRCS:.c=$(OBJEXT))

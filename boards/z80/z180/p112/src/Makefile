@@ -34,8 +34,4 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
-
-ASRCS =
-CSRCS =
-
 include $(TOPDIR)/boards/Board.mk

@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = lc823450_boot.c lc823450_mux.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

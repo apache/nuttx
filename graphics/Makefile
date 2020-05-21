@@ -36,12 +36,6 @@
 
 include $(TOPDIR)/Make.defs
 
-DEPPATH = --dep-path .
-
-ASRCS =
-CSRCS =
-VPATH =
-
 include nxglib/Make.defs
 include nxbe/Make.defs
 include nxmu/Make.defs

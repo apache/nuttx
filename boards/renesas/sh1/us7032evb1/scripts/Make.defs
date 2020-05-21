@@ -47,7 +47,6 @@ endif
 ARCHCPUFLAGS = -m1 -fno-builtin
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHDEFINES =
 ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
 ARCHSCRIPT = -T$(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/sdram.ld
 

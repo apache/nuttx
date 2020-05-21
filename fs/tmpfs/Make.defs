@@ -36,7 +36,6 @@
 ifeq ($(CONFIG_FS_TMPFS),y)
 # Files required for TMPFS file system support
 
-ASRCS +=
 CSRCS += fs_tmpfs.c
 
 # Include TMPFS build support

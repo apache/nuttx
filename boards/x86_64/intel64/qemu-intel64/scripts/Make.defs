@@ -48,15 +48,12 @@ endif
 ARCHCPUFLAGS = -fPIC -fno-builtin -fno-stack-protector -mno-red-zone -mrdrnd
 ARCHPICFLAGS = -fPIC
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHDEFINES =
 
 # We have to use a cross-development toolchain under Cygwin because the native
 # Cygwin toolchains don't generate ELF binaries.
 
 ifeq ($(HOSTOS),Cygwin)
 CROSSDEV = i486-nuttx-elf-
-else
-CROSSDEV =
 endif
 
 CC = $(CROSSDEV)gcc

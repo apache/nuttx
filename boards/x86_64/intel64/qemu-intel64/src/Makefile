@@ -20,7 +20,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = qemu_boot.c qemu_bringup.c qemu_freq.c qemu_net.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

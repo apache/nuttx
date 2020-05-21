@@ -35,11 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-# Sources
-
-ASRCS =
-CSRCS =
-
 CXXSRCS  = libxx_cxapurevirtual.cxx libxx_eabi_atexit.cxx libxx_cxa_atexit.cxx
 CXXSRCS += libxx_cxa_guard.cxx
 ifeq ($(CONFIG_CXX_EXCEPTION),y)
@@ -54,11 +49,6 @@ CXXSRCS += libxx_delete.cxx libxx_delete_sized.cxx libxx_deletea.cxx
 CXXSRCS += libxx_deletea_sized.cxx libxx_new.cxx libxx_newa.cxx
 CXXSRCS += libxx_stdthrow.cxx
 endif
-
-# Paths
-
-DEPPATH = --dep-path .
-VPATH = .
 
 # Include the uClibc++ Make.defs file if selected.  If it is included,
 # the uClibc++/Make.defs file will add its files to the source file list,

@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = kl_boardinitialize.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

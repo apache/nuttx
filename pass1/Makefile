@@ -35,8 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-DEPPATH = --dep-path .
-
 ASRCS = $(wildcard *.S)
 CSRCS = $(wildcard *.c)
 
@@ -45,8 +43,6 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
-
-VPATH = .
 
 BIN = libpass1$(LIBEXT)
 

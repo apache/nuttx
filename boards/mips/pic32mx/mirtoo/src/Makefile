@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = pic32_boot.c pic32_leds.c
 
 ifeq ($(CONFIG_PIC32MX_SPI2),y)

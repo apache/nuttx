@@ -107,10 +107,6 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += arm_checkstack.c
 endif
 
-# A1x-specific assembly language files
-
-CHIP_ASRCS  =
-
 # A1x-specific C source files
 
 CHIP_CSRCS  = a1x_boot.c a1x_irq.c a1x_pio.c a1x_lowputc.c a1x_serial.c

@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = z8_boot.c z8_leds.c
 
 include $(TOPDIR)/boards/Board.mk

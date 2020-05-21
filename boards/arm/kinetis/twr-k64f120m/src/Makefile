@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 #CSRCS = k64_boot.c k64_spi.c
 CSRCS = k64_boot.c
 

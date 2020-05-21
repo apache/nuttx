@@ -36,7 +36,6 @@
 ifeq ($(CONFIG_FS_ROMFS),y)
 # Files required for ROMFS file system support
 
-ASRCS +=
 CSRCS += fs_romfs.c fs_romfsutil.c
 
 # Include ROMFS build support

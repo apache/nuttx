@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = xmc4_boot.c xmc4_bringup.c
 
 ifeq ($(CONFIG_BUTTONS),y)

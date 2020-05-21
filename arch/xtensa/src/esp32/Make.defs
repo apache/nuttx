@@ -95,7 +95,6 @@ endif
 
 # Required ESP32 files (arch/xtensa/src/lx6)
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = esp32_allocateheap.c esp32_clockconfig.c esp32_cpuint.c
 CHIP_CSRCS += esp32_gpio.c esp32_intdecode.c esp32_irq.c esp32_region.c
 CHIP_CSRCS += esp32_timerisr.c

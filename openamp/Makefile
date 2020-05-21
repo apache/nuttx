@@ -35,12 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
-CSRCS =
-
-VPATH := $(SRCDIR)
-DEPPATH = --dep-path .
-
 VERSION ?= 2020.04.0
 
 include libmetal.defs

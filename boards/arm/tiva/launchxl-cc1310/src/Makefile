@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = cc1310_boot.c cc1310_pinconfig.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

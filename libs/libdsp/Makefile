@@ -35,11 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
-CSRCS =
-DEPPATH := --dep-path .
-VPATH := .
-
 ifeq ($(CONFIG_LIBDSP),y)
 CSRCS += lib_pid.c
 CSRCS += lib_svm.c

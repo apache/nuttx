@@ -56,7 +56,6 @@ endif
 
 # Required AT32UC3 files
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = at32uc3_clkinit.c at32uc3_gpio.c at32uc3_irq.c
 CHIP_CSRCS += at32uc3_lowconsole.c at32uc3_lowinit.c at32uc3_serial.c
 

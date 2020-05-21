@@ -103,10 +103,6 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += arm_checkstack.c
 endif
 
-# AM335x-specific assembly language files
-
-CHIP_ASRCS  =
-
 # AM335x-specific C source files
 
 CHIP_CSRCS  = am335x_boot.c am335x_clockconfig.c am335x_pinmux.c am335x_irq.c

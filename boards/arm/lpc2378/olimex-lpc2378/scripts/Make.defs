@@ -100,7 +100,6 @@ ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
-ARCHDEFINES =
 
 CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
          $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe

@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = at90usb_boot.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)

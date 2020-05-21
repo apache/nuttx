@@ -20,7 +20,6 @@
 
 HEAD_SSRC = z16f_head.S
 
-CMN_SSRCS  =
 CMN_CSRCS  = z16_allocateheap.c z16_initialize.c z16_schedulesigaction.c
 CMN_CSRCS += z16_assert.c z16_initialstate.c z16_sigdeliver.c z16_blocktask.c
 CMN_CSRCS += z16_interruptcontext.c z16_stackdump.c z16_copystate.c

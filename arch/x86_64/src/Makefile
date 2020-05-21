@@ -73,10 +73,6 @@ LDENDGROUP ?= --end-group
 
 LDFLAGS += -z max-page-size=0x1000 $(ARCHSCRIPT)
 LOADER_LDFLAGS += $(LOADER_ARCHSCRIPT)
-EXTRA_LIBS ?=
-LINKLIBS ?=
-
-OBJCOPYARGS =
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   BOARDMAKE = $(if $(wildcard .\board\Makefile),y,)

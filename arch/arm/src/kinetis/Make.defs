@@ -33,11 +33,6 @@
 #
 ############################################################################
 
-HEAD_ASRC =
-
-CMN_UASRCS =
-CMN_UCSRCS =
-
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
 
@@ -105,8 +100,6 @@ CMN_CSRCS += arm_itm_syslog.c
 endif
 
 # Required Kinetis files
-
-CHIP_ASRCS  =
 
 CHIP_CSRCS  = kinetis_allocateheap.c kinetis_clockconfig.c kinetis_clrpend.c
 CHIP_CSRCS += kinetis_irq.c kinetis_lowputc.c kinetis_pin.c kinetis_pingpio.c

@@ -36,12 +36,7 @@
 # The start-up, "head", file.  Only common vectors are support so there
 # isn't one.
 
-HEAD_ASRC =
-
 # Common ARM and Cortex-M7 files
-
-CMN_UASRCS =
-CMN_UCSRCS =
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S vfork.S
@@ -108,7 +103,6 @@ endif
 
 # Required STM32H7 files
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c stm32_irq.c
 CHIP_CSRCS += stm32_start.c stm32_rcc.c stm32_lowputc.c stm32_serial.c
 CHIP_CSRCS += stm32_uid.c

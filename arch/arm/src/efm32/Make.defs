@@ -33,11 +33,6 @@
 #
 ############################################################################
 
-HEAD_ASRC =
-
-CMN_UASRCS =
-CMN_UCSRCS =
-
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
 
@@ -85,8 +80,6 @@ endif
 ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)
 CMN_CSRCS += arm_itm_syslog.c
 endif
-
-CHIP_ASRCS  =
 
 CHIP_CSRCS  = efm32_start.c efm32_clockconfig.c efm32_irq.c efm32_timerisr.c
 CHIP_CSRCS += efm32_gpio.c efm32_lowputc.c efm32_timer.c efm32_i2c.c

@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = moxart_boot.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

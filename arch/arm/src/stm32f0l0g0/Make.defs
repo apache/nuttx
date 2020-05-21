@@ -34,8 +34,6 @@
 #
 ############################################################################
 
-HEAD_ASRC =
-
 CMN_ASRCS  = arm_exception.S arm_saveusercontext.S arm_fullcontextrestore.S
 CMN_ASRCS += arm_switchcontext.S vfork.S
 
@@ -62,7 +60,6 @@ ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CMN_CSRCS += arm_dumpnvic.c
 endif
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = stm32_start.c stm32_gpio.c stm32_exti_gpio.c stm32_irq.c
 CHIP_CSRCS += stm32_lse.c stm32_lowputc.c stm32_serial.c stm32_rcc.c
 
