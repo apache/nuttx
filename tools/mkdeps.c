@@ -287,6 +287,10 @@ static void parse_args(int argc, char **argv)
   char *args = NULL;
   int argidx;
 
+  /* Always look in the current directory */
+
+  g_altpath = strdup(".");
+
   /* Accumulate CFLAGS up to "--" */
 
   for (argidx = 1; argidx < argc; argidx++)
@@ -361,13 +365,6 @@ static void parse_args(int argc, char **argv)
   /* The final thing accumulated is the list of files */
 
   g_files = args;
-
-  /* If no paths were specified, then look in the current directory only */
-
-  if (!g_altpath)
-    {
-      g_altpath = strdup(".");
-    }
 
   if (g_debug)
     {
