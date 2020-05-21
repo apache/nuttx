@@ -38,6 +38,8 @@ Contents
   - DNS Name Resolution Integration for IPv4
   - LINK MONITOR Integration
   - RTC
+  - File Systems
+  - Standby RAM
   - Debugging
 
 Board Features
@@ -63,9 +65,7 @@ Status/Open Issues
 ==================
 Ethernet
 ---------
-1.Observed instability in Link Management, due to difference in hardware design.(No Separate Interrupt line for PHY)
-2.Currently tested only ping and udpblaster application.
-3. Executed long run ping and udpblaster stress test for 12 hrs. Code is able to execute for 12hrs without any breakage.
+
 
 Serial Console
 ==============

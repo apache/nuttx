@@ -38,6 +38,8 @@ Contents
   - DNS Name Resolution Integration for IPv4
   - LINK MONITOR Integration
   - RTC
+  - Standby RAM
+  - File Systems
   - Debugging
 
 Board Features

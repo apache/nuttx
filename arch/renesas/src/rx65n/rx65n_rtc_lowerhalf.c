@@ -57,7 +57,7 @@
 struct rx65n_cbinfo_s
 {
   volatile rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
-  volatile FAR void *priv;       /* Private argument to accompany callback */
+  volatile FAR void *priv;           /* Private argument to accompany callback */
   uint8_t id;                        /* Identifies the alarm */
 };
 #endif
@@ -235,6 +235,7 @@ static int rx65n_rdtime(FAR struct rtc_lowerhalf_s *lower,
    * compatible with struct tm.
    */
 
+  int ret;
   return up_rtc_getdatetime((FAR struct tm *)rtctime);
 
 #elif defined(CONFIG_RTC_HIRES)
@@ -258,6 +259,7 @@ static int rx65n_rdtime(FAR struct rtc_lowerhalf_s *lower,
     {
       goto errout_with_errno;
     }
+#endif
 
   return OK;
 
@@ -435,6 +437,7 @@ static int rx65n_setrelative(FAR struct rtc_lowerhalf_s *lower,
 #if defined(CONFIG_RTC_DATETIME)
       /* Get the broken out time and convert to seconds */
 
+      struct timespec ts;
       ret = up_rtc_getdatetime(&time);
       if (ret < 0)
         {
@@ -576,8 +579,9 @@ static int rx65n_rdalarm(FAR struct rtc_lowerhalf_s *lower,
  * Name: rx65n_periodic_callback
  *
  * Description:
- *   This is the function that is called from the RTC driver when the periodic
- *   wakeup goes off.  It just invokes the upper half drivers callback.
+ *   This is the function that is called from the RTC driver when the
+ *   periodic wakeup goes off.  It just invokes the upper half drivers
+ *   callback.
  *
  * Input Parameters:
  *   None
@@ -733,4 +737,4 @@ FAR struct rtc_lowerhalf_s *rx65n_rtc_lowerhalf(void)
 }
 
 #endif /* CONFIG_RTC_DRIVER */
-#endif
+
