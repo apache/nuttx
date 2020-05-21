@@ -2379,6 +2379,10 @@ errout:
 
   _remove_all_pkt(dev, _cid_to_uint8(msg->cid));
 
+  /* Do packet flow control */
+
+  _control_pkt_q(dev);
+
   wlinfo("++ end: cid=%c type=%d \n", msg->cid, type);
 
   return ret;
