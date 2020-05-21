@@ -157,6 +157,22 @@
 #define RPTUN_IS_MASTER(d) ((d)->ops->is_master(d))
 
 /****************************************************************************
+ * Name: RPTUN_CONFIG
+ *
+ * Description:
+ *   CONFIG remote cpu
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   data - Device-specific private data
+ *
+ * Returned Value:
+ *   OK unless an error occurs.  Then a negated errno value is returned
+ *
+ ****************************************************************************/
+#define RPTUN_CONFIG(d, p) ((d)->ops->config(d, p))
+
+/****************************************************************************
  * Name: RPTUN_START
  *
  * Description:
@@ -276,6 +292,7 @@ struct rptun_ops_s
   CODE bool (*is_autostart)(FAR struct rptun_dev_s *dev);
   CODE bool (*is_master)(FAR struct rptun_dev_s *dev);
 
+  CODE int (*config)(struct rptun_dev_s *dev, void *data);
   CODE int (*start)(FAR struct rptun_dev_s *dev);
   CODE int (*stop)(FAR struct rptun_dev_s *dev);
   CODE int (*notify)(FAR struct rptun_dev_s *dev, uint32_t vqid);
