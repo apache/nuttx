@@ -112,6 +112,7 @@ static int rptun_mmap(FAR struct remoteproc *rproc,
                       FAR metal_phys_addr_t *pa, FAR metal_phys_addr_t *da,
                       FAR void **va, size_t size, unsigned int attribute,
                       FAR struct metal_io_region **io_);
+static int rptun_config(struct remoteproc *rproc, void *data);
 static int rptun_start(FAR struct remoteproc *rproc);
 static int rptun_stop(FAR struct remoteproc *rproc);
 static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id);
@@ -147,6 +148,7 @@ static struct remoteproc_ops g_rptun_ops =
   .init   = rptun_init,
   .remove = rptun_remove,
   .mmap   = rptun_mmap,
+  .config = rptun_config,
   .start  = rptun_start,
   .stop   = rptun_stop,
   .notify = rptun_notify,
@@ -264,6 +266,18 @@ static int rptun_mmap(FAR struct remoteproc *rproc,
   if (io_)
     {
       *io_ = io;
+    }
+
+  return 0;
+}
+
+static int rptun_config(struct remoteproc *rproc, void *data)
+{
+  struct rptun_priv_s *priv = rproc->priv;
+
+  if (RPTUN_IS_MASTER(priv->dev))
+    {
+      return RPTUN_CONFIG(priv->dev, data);
     }
 
   return 0;
