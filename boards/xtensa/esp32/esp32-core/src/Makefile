@@ -39,7 +39,6 @@ SCRIPTDIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_C
 
 CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
 
-ASRCS =
 CSRCS = esp32_boot.c esp32_bringup.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
@@ -50,7 +49,6 @@ SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
 
 BOARD_CONTEXT = y
-EXTRA_CLEAN =
 EXTRA_DISTCLEAN = $(call DELFILE, $(SCRIPTOUT))
 
 .PHONY = context

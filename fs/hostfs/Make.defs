@@ -33,11 +33,6 @@
 #
 ############################################################################
 
-# Files required for HostFS file system support
-
-ASRCS +=
-CSRCS +=
-
 # Include HOSTFS build support
 
 DEPPATH += --dep-path hostfs

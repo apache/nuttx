@@ -36,13 +36,9 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = fs_initialize.c
-
-DEPPATH = --dep-path .
-VPATH = .
 
 include inode/Make.defs
 include vfs/Make.defs

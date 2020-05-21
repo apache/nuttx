@@ -71,7 +71,6 @@ endif
 
 # Required PIC32MZ files
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = pic32mz_lowinit.c pic32mz_exception.c pic32mz_decodeirq.c
 CHIP_CSRCS += pic32mz_irq.c pic32mz_timerisr.c pic32mz_gpio.c
 CHIP_CSRCS += pic32mz_lowconsole.c pic32mz_serial.c

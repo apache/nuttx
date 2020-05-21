@@ -111,10 +111,6 @@ LDFLAGS += $(ARCHSCRIPT)
 LDSTARTGROUP ?= --start-group
 LDENDGROUP ?= --end-group
 
-EXTRA_LIBS ?=
-EXTRA_LIBPATHS ?=
-LINKLIBS ?=
-
 AFLAGS += -I$(TOPDIR)/include
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)

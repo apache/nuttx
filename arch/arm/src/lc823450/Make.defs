@@ -35,11 +35,6 @@
 #
 ############################################################################
 
-HEAD_ASRC =
-
-CMN_UASRCS =
-CMN_UCSRCS =
-
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += vfork.S
 
@@ -85,8 +80,6 @@ endif
 ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += arm_checkstack.c
 endif
-
-CHIP_ASRCS  =
 
 CHIP_CSRCS  = lc823450_allocateheap2.c lc823450_start.c lc823450_irq.c lc823450_timer.c
 CHIP_CSRCS += lc823450_lowputc.c lc823450_serial.c lc823450_clockconfig.c

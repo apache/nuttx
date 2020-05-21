@@ -49,8 +49,6 @@ CXXFLAGS += -I$(ARCH_SRCDIR)/chip -I$(TOPDIR)/sched $(EXTRAFLAGS)
 LINKOBJS = up_head$(OBJEXT)
 REQUIREDOBJS = $(LINKOBJS)
 
-ASRCS =
-
 ifeq ($(CONFIG_HOST_X86_64),y)
 ifeq ($(CONFIG_SIM_M32),y)
   ASRCS += up_setjmp32.S
@@ -223,22 +221,15 @@ OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 # Override in Make.defs if linker is not 'ld'
 
 ifeq ($(HOSTOS),Darwin)
-  LDSTARTGROUP ?=
-  LDENDGROUP ?=
   LDUNEXPORTSYMBOLS ?= -unexported_symbols_list $(HOSTOS)-names.dat
 else
   LDSTARTGROUP ?= --start-group
   LDENDGROUP ?= --end-group
-  LDUNEXPORTSYMBOLS ?=
 endif
-
-EXTRA_LIBS ?=
-EXTRA_LIBPATHS ?=
 
 # Determine which NuttX libraries will need to be linked in
 # Most are provided by LINKLIBS on the MAKE command line
 
-LINKLIBS ?=
 RELLIBS = $(patsubst %.a,%,$(patsubst lib%,-l%,$(LINKLIBS)))
 RELPATHS += -L"$(TOPDIR)/staging"
 

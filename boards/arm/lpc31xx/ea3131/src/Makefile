@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = lpc31_boot.c lpc31_clkinit.c
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)

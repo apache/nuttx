@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = tm4c_boot.c tm4c_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)

@@ -82,10 +82,7 @@ OBJS = $(AOBJS) $(COBJS)
 
 LDSTARTGROUP ?= --start-group
 LDENDGROUP ?= --end-group
-
 LDFLAGS += $(ARCHSCRIPT)
-EXTRA_LIBS ?=
-LINKLIBS ?=
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   BOARDMAKE = $(if $(wildcard .\board\Makefile),y,)

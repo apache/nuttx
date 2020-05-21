@@ -34,13 +34,6 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
-
-ASRCS =
-CSRCS =
-
-DEPPATH = --dep-path .
-VPATH = .
-
 include videomode/Make.defs
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))

@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = tms570_initialize.c tms570_bringup.c tms570_spi.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

@@ -74,9 +74,3 @@ CHIP_CSRCS = atmega_lowconsole.c atmega_lowinit.c atmega_serial.c
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += atmega_timerisr.c
 endif
-
-# Configuration-dependent ATMEGA files
-
-ifeq ($(CONFIG_AVR_GPIOIRQ),y)
-CHIP_CSRCS +=
-endif

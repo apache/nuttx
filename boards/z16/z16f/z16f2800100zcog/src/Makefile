@@ -20,7 +20,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = z16f_boot.c z16f_leds.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

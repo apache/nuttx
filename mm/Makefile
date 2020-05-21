@@ -37,12 +37,6 @@ include $(TOPDIR)/Make.defs
 
 # Sources and paths
 
-ASRCS  =
-CSRCS  =
-
-DEPPATH = --dep-path .
-VPATH = .
-
 include mm_heap/Make.defs
 include umm_heap/Make.defs
 include kmm_heap/Make.defs

@@ -35,10 +35,7 @@
 
 include $(TOPDIR)/Make.defs
 
-DEPPATH = --dep-path .
-ASRCS =
 CSRCS = audio.c
-VPATH = .
 
 ifeq ($(CONFIG_AUDIO_COMP),y)
   CSRCS += audio_comp.c

@@ -62,7 +62,6 @@ endif
 ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-builtin -fno-stack-protector
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHDEFINES =
 
 # Check if building a 32-bit target with a 64-bit toolchain
 
@@ -76,8 +75,6 @@ endif
 
 ifeq ($(HOSTOS),Cygwin)
 CROSSDEV = i486-nuttx-elf-
-else
-CROSSDEV =
 endif
 
 CC = $(CROSSDEV)gcc

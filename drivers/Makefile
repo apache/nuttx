@@ -35,11 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-DEPPATH = --dep-path .
-ASRCS =
-CSRCS =
-VPATH = .
-
 # Include support for various drivers.  Each Make.defs file will add its
 # files to the source file list, add its DEPPATH info, and will add
 # the appropriate paths to the VPATH variable

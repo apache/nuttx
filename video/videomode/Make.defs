@@ -37,7 +37,6 @@ ifeq ($(CONFIG_VIDEO_EDID),y)
 
 # Files required for EDID support
 
-ASRCS +=
 CSRCS += edid_parse.c edid_dump.c
 CSRCS += videomode_lookup.c videomode_sort.c videomode_dump.c
 CSRCS += vesagtf.c

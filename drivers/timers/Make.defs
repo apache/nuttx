@@ -36,9 +36,6 @@
 
 # Include timer drivers
 
-TMRDEPPATH =
-TMRVPATH =
-
 ifeq ($(CONFIG_WATCHDOG),y)
   CSRCS += watchdog.c
   TMRDEPPATH = --dep-path timers

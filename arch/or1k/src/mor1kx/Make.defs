@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-HEAD_ASRC =
-
 CMN_ASRCS  = up_vectortab.S \
              up_saveusercontext.S \
              up_fullcontextrestore.S
@@ -77,9 +75,6 @@ endif
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
 #CMN_CSRCS += up_dumpnvic.c
 endif
-
-CHIP_ASRCS  =
-CHIP_CSRCS  =
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 #CHIP_CSRCS += sam_timerisr.c

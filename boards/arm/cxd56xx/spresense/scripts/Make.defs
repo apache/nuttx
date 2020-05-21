@@ -82,7 +82,6 @@ ARCHCFLAGS = -fno-builtin -mabi=aapcs -ffunction-sections -fdata-sections
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fno-rtti -std=c++98
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
-ARCHDEFINES =
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
 CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe

@@ -34,8 +34,6 @@
 #
 ############################################################################
 
-HEAD_ASRC  =
-
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S  vfork.S
 
@@ -95,7 +93,6 @@ else
   CMN_CSRCS += arm_allocateheap.c
 endif
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = tiva_allocateheap.c tiva_irq.c tiva_lowputc.c tiva_serial.c
 CHIP_CSRCS += tiva_ssi.c
 

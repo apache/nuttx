@@ -40,7 +40,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = lpc2378_leds.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

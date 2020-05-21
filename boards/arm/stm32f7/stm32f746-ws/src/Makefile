@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = stm32_boot.c stm32_spi.c stm32_dma_alloc.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

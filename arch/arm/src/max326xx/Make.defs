@@ -35,8 +35,6 @@
 
 # Common ARMv7-M Source Files
 
-HEAD_ASRC  =
-
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
 
@@ -83,7 +81,6 @@ endif
 
 # Common MAX326XX Source Files
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = max326_start.c max326_irq.c max326_clrpend.c
 
 ifeq ($(CONFIG_MAX326XX_ICC),y)

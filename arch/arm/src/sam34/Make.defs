@@ -36,12 +36,7 @@
 
 # The start-up, "head", file
 
-HEAD_ASRC =
-
 # Common ARM and Cortex-M3 files
-
-CMN_UASRCS =
-CMN_UCSRCS =
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
@@ -101,7 +96,6 @@ endif
 
 # Required SAM3/4 files
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = sam_allocateheap.c sam_irq.c sam_lowputc.c sam_serial.c
 CHIP_CSRCS += sam_start.c
 

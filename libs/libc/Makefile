@@ -20,14 +20,6 @@
 
 include $(TOPDIR)/Make.defs
 
-# Sources and paths
-
-ASRCS =
-CSRCS =
-
-DEPPATH := --dep-path .
-VPATH := .
-
 include aio/Make.defs
 include audio/Make.defs
 include builtin/Make.defs

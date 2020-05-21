@@ -40,10 +40,8 @@ endif
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
-ARCHDEFINES =
 ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
 ARCHINCLUDESXX = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx -isystem $(TOPDIR)/include/uClibc++
-ARCHSCRIPT =
 
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
@@ -55,7 +53,6 @@ ifeq ($(CONFIG_SIM_M32),y)
   ARCHCPUFLAGSXX += -m32
 endif
 
-CROSSDEV =
 CC = $(CROSSDEV)cc
 CXX = $(CROSSDEV)c++
 CPP = $(CROSSDEV)cc -E

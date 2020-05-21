@@ -20,12 +20,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
-CSRCS =
-
-VPATH =
-DEPPATH = --dep-path .
-
 include clock/Make.defs
 include environ/Make.defs
 include group/Make.defs

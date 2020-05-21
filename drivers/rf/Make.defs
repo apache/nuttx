@@ -36,9 +36,6 @@
 
 # Include rf drivers
 
-RFDEPPATH =
-RFVPATH =
-
 ifeq ($(CONFIG_DRIVERS_RF),y)
 
 ifeq ($(CONFIG_SPI),y)

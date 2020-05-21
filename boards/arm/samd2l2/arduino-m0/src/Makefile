@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = sam_boot.c sam_bringup.c
 
 ifeq ($(CONFIG_SAMD2L2_SERCOM0),y)

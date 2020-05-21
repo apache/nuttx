@@ -35,9 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-CRYPTO_ASRCS =
-CRYPTO_CSRCS =
-
 ifeq ($(CONFIG_CRYPTO),y)
 
 # Basic
@@ -95,7 +92,7 @@ $(BIN): $(OBJS)
 
 .depend: Makefile $(SRCS)
 ifeq ($(CONFIG_CRYPTO),y)
-	$(Q) $(MKDEP) --dep-path . "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MKDEP) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif
 	$(Q) touch $@
 

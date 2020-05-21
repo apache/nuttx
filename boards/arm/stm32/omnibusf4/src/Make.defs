@@ -38,7 +38,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c stm32_userleds.c
 
 ifeq ($(CONFIG_SENSORS_MPU60X0),y)

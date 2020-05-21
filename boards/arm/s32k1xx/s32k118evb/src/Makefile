@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS  =
 CSRCS  = s32k1xx_boot.c s32k1xx_bringup.c s32k1xx_clockconfig.c
 CSRCS += s32k1xx_periphclocks.c
 

@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = lpc17_40_boot.c lpc17_40_leds.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

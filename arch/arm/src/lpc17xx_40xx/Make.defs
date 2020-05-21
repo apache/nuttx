@@ -33,14 +33,7 @@
 #
 ############################################################################
 
-# The start-up, "head", file
-
-HEAD_ASRC =
-
 # Common ARM and Cortex-M3 files
-
-CMN_UASRCS =
-CMN_UCSRCS =
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
@@ -102,8 +95,6 @@ CMN_CSRCS += arm_copyarmstate.c
 endif
 
 # Required LPC17xx files
-
-CHIP_ASRCS  =
 
 CHIP_CSRCS  = lpc17_40_allocateheap.c lpc17_40_clockconfig.c lpc17_40_clrpend.c
 CHIP_CSRCS += lpc17_40_gpio.c lpc17_40_i2c.c lpc17_40_irq.c lpc17_40_lowputc.c

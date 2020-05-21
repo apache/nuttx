@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = imxrt_flexspi_nor_flash.c imxrt_boot.c imxrt_flexspi_nor_boot.c
 ifeq ($(CONFIG_IMXRT_SDRAMC),y)
 CSRCS += imxrt_sdram.c

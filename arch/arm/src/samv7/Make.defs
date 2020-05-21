@@ -36,12 +36,7 @@
 # The start-up, "head", file.  Only common vectors are support so there
 # isn't one.
 
-HEAD_ASRC =
-
 # Common ARM and Cortex-M7 files
-
-CMN_UASRCS =
-CMN_UCSRCS =
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
@@ -104,7 +99,6 @@ endif
 
 # Required SAMV7 files
 
-CHIP_ASRCS  =
 CHIP_CSRCS  = sam_start.c sam_clockconfig.c sam_irq.c sam_allocateheap.c
 CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_gpio.c sam_pck.c sam_uid.c
 

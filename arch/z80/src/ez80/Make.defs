@@ -18,10 +18,6 @@
 #
 ############################################################################
 
-HEAD_ASRC =
-HEAD_SSRC =
-
-CMN_SSRCS  =
 CMN_CSRCS  = z80_initialize.c z80_allocateheap.c z80_createstack.c
 CMN_CSRCS += z80_releasestack.c z80_interruptcontext.c z80_blocktask.c
 CMN_CSRCS += z80_unblocktask.c z80_exit.c z80_releasepending.c
@@ -60,7 +56,6 @@ ifeq ($(CONFIG_ARCH_STACKDUMP),y)
 CHIP_ASRCS += ez80_getsp.asm
 endif
 
-CHIP_SSRCS  =
 CHIP_CSRCS  = ez80_clock.c ez80_initialstate.c ez80_irq.c ez80_copystate.c
 CHIP_CSRCS += ez80_schedulesigaction.c ez80_sigdeliver.c
 CHIP_CSRCS += ez80_timerisr.c ez80_serial.c

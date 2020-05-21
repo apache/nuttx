@@ -39,21 +39,7 @@ ifeq ($(CONFIG_NET),y)
 
 # Basic networking support
 
-NET_ASRCS   =
-NET_CSRCS   = net_initialize.c
-
-# Socket support
-
-SOCK_ASRCS  =
-SOCK_CSRCS  =
-
-# Support for operations on network devices
-
-NETDEV_ASRCS =
-NETDEV_CSRCS =
-
-VPATH =
-DEPPATH = --dep-path .
+NET_CSRCS = net_initialize.c
 
 include socket/Make.defs
 include inet/Make.defs

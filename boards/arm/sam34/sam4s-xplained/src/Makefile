@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = sam_boot.c
 
 ifeq ($(CONFIG_SAM34_EXTSRAM0),y)

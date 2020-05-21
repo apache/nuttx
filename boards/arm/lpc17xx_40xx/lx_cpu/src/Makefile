@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = lpc17_40_boardinitialize.c lpc17_40_bringup.c lpc17_40_ssp.c
 
 ifeq ($(CONFIG_LPC17_40_EMC),y)

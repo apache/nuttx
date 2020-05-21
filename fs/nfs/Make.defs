@@ -34,14 +34,8 @@
 ############################################################################
 
 ifeq ($(CONFIG_NFS),y)
-# Files required for NFS file system support
-
-ASRCS +=
-CSRCS +=
-
 # Files required for NFS RPC
 
-ASRCS +=
 CSRCS += rpc_clnt.c nfs_util.c nfs_vfsops.c
 
 # Include NFS build support

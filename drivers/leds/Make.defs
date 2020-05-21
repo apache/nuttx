@@ -34,11 +34,6 @@
 #
 ############################################################################
 
-# Include LED drivers
-
-LEDDEPATH =
-LEDVPATH =
-
 # Include user LED driver
 
 ifeq ($(CONFIG_USERLED),y)

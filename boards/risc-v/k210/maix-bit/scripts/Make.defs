@@ -80,8 +80,6 @@ ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
-ARCHDEFINES =
-ARCHPICFLAGS =
 
 CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)

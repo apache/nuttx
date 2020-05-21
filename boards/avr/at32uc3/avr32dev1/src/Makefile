@@ -35,7 +35,6 @@
 
 include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = avr32_boot.c
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += avr32_leds.c
