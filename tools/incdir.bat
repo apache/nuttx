@@ -98,11 +98,6 @@ if "%1" == "" (
   goto :End
 )
 
-if not exist %1 (
-  echo ERROR: Path %1 does not exist
-  goto :Usage
-)
-
 if "%fmt%"=="zds" goto :GenerateZdsPath
 if "%response%"=="" goto :FirstStdPath
 if "%pathtype%"=="system" goto :NextStdSystemPath
