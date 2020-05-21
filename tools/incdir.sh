@@ -191,14 +191,6 @@ fi
 unset response
 for dir in $dirlist; do
 
-  # Verify that the include directory exists
-
-  if [ ! -d $dir ]; then
-    echo "Include path '$dir' does not exist"
-    echo $showusage
-    exit 1
-  fi
-
   # Check if the path needs to be extended for Windows-based tools under Cygwin
   # windows=yes:  We are building for a windows platform
   # wintool=y:    The platform is Cygwin and we are using a windows native tool
