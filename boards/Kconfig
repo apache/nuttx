@@ -1693,6 +1693,16 @@ config ARCH_BOARD_STM32F746_WS
 	---help---
 		Waveshare STM32F746 development board featuring the STM32F746IG MCU.
 
+config ARCH_BOARD_B_G474E_DPOW1
+	bool "ST Micro B-G474E-DPOW1 Discovery Kit"
+	depends on ARCH_CHIP_STM32G474R
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		ST Micro B-G474E-DPOW1 Discovery Kit, based on the STM32G474RET6
+		MCU, a Cortex-M4 with FPU, 170 MHz, 128 KB SRAM, 512 KB code.
+		See boards/arm/stm32/b-g474e-dpow1/README.txt.
+
 config ARCH_BOARD_B_L072Z_LRWAN1
 	bool "B-L072Z-LRWAN1"
 	depends on ARCH_CHIP_STM32L072CZ
@@ -2247,6 +2257,7 @@ config ARCH_BOARD
 	default "stm32f769i-disco"         if ARCH_BOARD_STM32F769I_DISCO
 	default "stm32h747i-disco"         if ARCH_BOARD_STM32H747I_DISCO
 	default "stm32f746-ws"             if ARCH_BOARD_STM32F746_WS
+	default "b-g474e-dpow1"            if ARCH_BOARD_B_G474E_DPOW1
 	default "b-l072z-lrwan1"           if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"           if ARCH_BOARD_B_L475E_IOT01A
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
@@ -2552,6 +2563,9 @@ source "boards/arm/samv7/same70-xplained/Kconfig"
 endif
 if ARCH_BOARD_SAMV71_XULT
 source "boards/arm/samv7/samv71-xult/Kconfig"
+endif
+if ARCH_BOARD_B_G474E_DPOW1
+source "boards/arm/stm32/b-g474e-dpow1/Kconfig"
 endif
 if ARCH_BOARD_B_L072Z_LRWAN1
 source "boards/arm/stm32f0l0g0/b-l072z-lrwan1/Kconfig"
