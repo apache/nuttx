@@ -55,6 +55,7 @@
 #include "stm32_gpio.h"
 #include "stm32_rcc.h"
 #include "stm32_ethernet.h"
+#include "stm32_uid.h"
 
 #include <arch/board/board.h>
 
@@ -4356,6 +4357,8 @@ static inline int stm32_ethinitialize(int intf)
 #endif
 {
   struct stm32_ethmac_s *priv;
+  uint8_t uid[12];
+  uint64_t crc;
 
   ninfo("intf: %d\n", intf);
 
@@ -4385,6 +4388,20 @@ static inline int stm32_ethinitialize(int intf)
 
   priv->txpoll       = wd_create();     /* Create periodic poll timer */
   priv->txtimeout    = wd_create();     /* Create TX timeout timer */
+
+  stm32_get_uniqueid(uid);
+  crc = crc64(uid, 12);
+
+  /* Specify as localy administrated address */
+
+  priv->dev.d_mac.ether.ether_addr_octet[0]  = (crc >> 0) | 0x02;
+  priv->dev.d_mac.ether.ether_addr_octet[0] &= ~0x1;
+
+  priv->dev.d_mac.ether.ether_addr_octet[1]  = crc >> 8;
+  priv->dev.d_mac.ether.ether_addr_octet[2]  = crc >> 16;
+  priv->dev.d_mac.ether.ether_addr_octet[3]  = crc >> 24;
+  priv->dev.d_mac.ether.ether_addr_octet[4]  = crc >> 32;
+  priv->dev.d_mac.ether.ether_addr_octet[5]  = crc >> 40;
 
   /* Configure GPIO pins to support Ethernet */
 
