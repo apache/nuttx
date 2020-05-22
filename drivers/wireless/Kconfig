@@ -37,6 +37,10 @@ config WL_GS2200M
 
 if WL_GS2200M
 
+config WL_GS2200M_ENABLE_WEP
+	bool "WEP support in AP mode"
+	default false
+
 config WL_GS2200M_SPI_FREQUENCY
 	int "SPI frequency for GS2200M"
 	default 4000000
