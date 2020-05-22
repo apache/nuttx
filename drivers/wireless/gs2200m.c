@@ -106,6 +106,9 @@
 #define PORT_START   50000
 #define PORT_END     59999
 
+#define SEC_MODE_WEP     2
+#define SEC_MODE_WPA2PSK 8
+
 /****************************************************************************
  * Private Data Types
  ****************************************************************************/
@@ -1686,9 +1689,11 @@ static enum pkt_type_e gs2200m_set_auth(FAR struct gs2200m_dev_s *dev,
   return gs2200m_send_cmd(dev, cmd, NULL);
 }
 
+#ifdef CONFIG_WL_GS2200M_ENABLE_WEP
+
 /****************************************************************************
  * Name: gs2200m_set_wepkey
- * NOTE: See xxxx
+ * NOTE: See 5.3.3.2
  ****************************************************************************/
 
 static enum pkt_type_e gs2200m_set_wepkey(FAR struct gs2200m_dev_s *dev,
@@ -1699,6 +1704,24 @@ static enum pkt_type_e gs2200m_set_wepkey(FAR struct gs2200m_dev_s *dev,
   snprintf(cmd, sizeof(cmd), "AT+WWEP1=%s\r\n", key);
   return gs2200m_send_cmd(dev, cmd, NULL);
 }
+
+#else
+
+/****************************************************************************
+ * Name: gs2200m_set_wpa2pf
+ * NOTE: See 5.3.3.4
+ ****************************************************************************/
+
+static enum pkt_type_e gs2200m_set_wpa2pf(FAR struct gs2200m_dev_s *dev,
+                                          FAR char *key)
+{
+  char cmd[64];
+
+  snprintf(cmd, sizeof(cmd), "AT+WWPA=%s\r\n", key);
+  return gs2200m_send_cmd(dev, cmd, NULL);
+}
+
+#endif /* CONFIG_WL_GS2200M_ENABLE_WEP */
 
 /****************************************************************************
  * Name: gs2200m_get_wstatus
@@ -2539,9 +2562,10 @@ static int gs2200m_ioctl_assoc_ap(FAR struct gs2200m_dev_s *dev,
   t = gs2200m_set_auth(dev, 2);
   ASSERT(TYPE_OK == t);
 
-  /* Set security mode */
+#ifdef CONFIG_WL_GS2200M_ENABLE_WEP
+  /* Set security mode (WEP) */
 
-  t = gs2200m_set_security(dev, 2);
+  t = gs2200m_set_security(dev, SEC_MODE_WEP);
   ASSERT(TYPE_OK == t);
 
   /* Set WEP key */
@@ -2551,6 +2575,20 @@ static int gs2200m_ioctl_assoc_ap(FAR struct gs2200m_dev_s *dev,
       wlerr("*** error: invalid wepkey: %s \n", msg->key);
       return -1;
     }
+#else
+  /* Set security mode (WPA2-PSK) */
+
+  t = gs2200m_set_security(dev, SEC_MODE_WPA2PSK);
+  ASSERT(TYPE_OK == t);
+
+  /* Set WPA-PSK and WPA2-PSK Passphrase */
+
+  if (TYPE_OK != gs2200m_set_wpa2pf(dev, msg->key))
+    {
+      wlerr("*** error: invalid passphrase: %s \n", msg->key);
+      return -1;
+    }
+#endif
 
   /* Start DHCP server */
 
