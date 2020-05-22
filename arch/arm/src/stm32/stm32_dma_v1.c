@@ -56,23 +56,34 @@
 #include "stm32_dma.h"
 #include "stm32.h"
 
-/* This file supports the STM32 DMA IP core version 1 - F0, F1, F3, L0, L1,
- * L4.
+/* This file supports the STM32 DMA IP core version 1 - F0, F1, F3, G4, L0,
+ * L1, L4.
  *
  * F0, L0 and L4 have the additional CSELR register which is used to remap
  * the DMA requests for each channel.
+ *
+ * G4 has additional channels in DMA1 and DMA2.
  */
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DMA1_NCHANNELS   7
-#if STM32_NDMA > 1
-#  define DMA2_NCHANNELS 5
-#  define DMA_NCHANNELS  (DMA1_NCHANNELS+DMA2_NCHANNELS)
+#if defined(CONFIG_STM32_HAVE_DMA1_CHAN8)
+#  define DMA1_NCHANNELS     8
 #else
-#  define DMA_NCHANNELS  DMA1_NCHANNELS
+#  define DMA1_NCHANNELS     7
+#endif
+
+#if STM32_NDMA > 1
+#  if defined(CONFIG_STM32_HAVE_DMA2_CHAN678)
+#    define DMA2_NCHANNELS   8
+#  else
+#    define DMA2_NCHANNELS   5
+#  endif
+#  define DMA_NCHANNELS      (DMA1_NCHANNELS + DMA2_NCHANNELS)
+#else
+#  define DMA_NCHANNELS      DMA1_NCHANNELS
 #endif
 
 /* Convert the DMA channel base address to the DMA register block address */
@@ -106,80 +117,132 @@ struct stm32_dma_s
 
 static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 {
+#if DMA1_NCHANNELS > 0
   {
     .chan     = 0,
     .irq      = STM32_IRQ_DMA1CH1,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(0),
   },
+#endif /* DMA1_NCHANNELS > 0 */
+#if DMA1_NCHANNELS > 1
   {
     .chan     = 1,
     .irq      = STM32_IRQ_DMA1CH2,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(1),
   },
+#endif /* DMA1_NCHANNELS > 1 */
+#if DMA1_NCHANNELS > 2
   {
     .chan     = 2,
     .irq      = STM32_IRQ_DMA1CH3,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(2),
   },
+#endif /* DMA1_NCHANNELS > 2 */
+#if DMA1_NCHANNELS > 3
   {
     .chan     = 3,
     .irq      = STM32_IRQ_DMA1CH4,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(3),
   },
+#endif /* DMA1_NCHANNELS > 3 */
+#if DMA1_NCHANNELS > 4
   {
     .chan     = 4,
     .irq      = STM32_IRQ_DMA1CH5,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(4),
   },
+#endif /* DMA1_NCHANNELS > 4 */
+#if DMA1_NCHANNELS > 5
   {
     .chan     = 5,
     .irq      = STM32_IRQ_DMA1CH6,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(5),
   },
+#endif /* DMA1_NCHANNELS > 5 */
+#if DMA1_NCHANNELS > 6
   {
     .chan     = 6,
     .irq      = STM32_IRQ_DMA1CH7,
     .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(6),
   },
+#endif /* DMA1_NCHANNELS > 6 */
+#if DMA1_NCHANNELS > 7
+  {
+    .chan     = 7,
+    .irq      = STM32_IRQ_DMA1CH8,
+    .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(7),
+  },
+#endif /* DMA1_NCHANNELS > 7 */
 #if STM32_NDMA > 1
+#if DMA2_NCHANNELS > 0
   {
     .chan     = 0,
     .irq      = STM32_IRQ_DMA2CH1,
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(0),
   },
+#endif /* DMA2_NCHANNELS > 0 */
+#if DMA2_NCHANNELS > 1
   {
     .chan     = 1,
     .irq      = STM32_IRQ_DMA2CH2,
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(1),
   },
+#endif /* DMA2_NCHANNELS > 1 */
+#if DMA2_NCHANNELS > 2
   {
     .chan     = 2,
     .irq      = STM32_IRQ_DMA2CH3,
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(2),
   },
+#endif /* DMA2_NCHANNELS > 2 */
+#if DMA2_NCHANNELS > 3
   {
     .chan     = 3,
 #if defined(CONFIG_STM32_CONNECTIVITYLINE) || \
-    defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32G47XX) || defined(CONFIG_STM32_STM32L15XX)
     .irq      = STM32_IRQ_DMA2CH4,
 #else
     .irq      = STM32_IRQ_DMA2CH45,
 #endif
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(3),
   },
+#endif /* DMA2_NCHANNELS > 3 */
+#if DMA2_NCHANNELS > 4
   {
     .chan     = 4,
 #if defined(CONFIG_STM32_CONNECTIVITYLINE) || \
-    defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX) || \
+    defined(CONFIG_STM32_STM32G47XX) || defined(CONFIG_STM32_STM32L15XX)
     .irq      = STM32_IRQ_DMA2CH5,
 #else
     .irq      = STM32_IRQ_DMA2CH45,
 #endif
     .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(4),
   },
-#endif
+#endif /* DMA2_NCHANNELS > 4 */
+#if DMA2_NCHANNELS > 5
+  {
+    .chan     = 5,
+    .irq      = STM32_IRQ_DMA2CH5,
+    .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(5),
+  },
+#endif /* DMA2_NCHANNELS > 5 */
+#if DMA2_NCHANNELS > 6
+  {
+    .chan     = 6,
+    .irq      = STM32_IRQ_DMA2CH6,
+    .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(6),
+  },
+#endif /* DMA2_NCHANNELS > 6 */
+#if DMA2_NCHANNELS > 7
+  {
+    .chan     = 7,
+    .irq      = STM32_IRQ_DMA2CH7,
+    .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(7),
+  },
+#endif /* DMA2_NCHANNELS > 7 */
+#endif /* STM32_NDMA > 1 */
 };
 
 /****************************************************************************
@@ -269,6 +332,41 @@ static void stm32_dmachandisable(struct stm32_dma_s *dmach)
 }
 
 /****************************************************************************
+ * Name: irq_to_channel_index
+ *
+ * Description:
+ *   Given an IRQ number, find the channel index in the g_dma array.
+ *
+ * Parameters:
+ *   irq: IRQ number as passed to stm32_dmainterrupt.
+ *
+ * Returned Value:
+ *   On success (IRQ matches a DMA channel), returns index in the g_dma
+ *   array from 0 to DMA_NCHANNELS - 1.  On failure (IRQ does not match
+ *   a DMA channel), returns -1.
+ *
+ ****************************************************************************/
+
+static int irq_to_channel_index(int irq)
+{
+  int chndx;
+
+  /* Find the DMA channel that matches this IRQ */
+
+  for (chndx = 0; chndx < DMA_NCHANNELS; chndx++)
+    {
+      if (irq == g_dma[chndx].irq)
+        {
+          return chndx;
+        }
+    }
+
+  /* Failed to find the DMA channel for this IRQ */
+
+  return -1;
+}
+
+/****************************************************************************
  * Name: stm32_dmainterrupt
  *
  * Description:
@@ -284,23 +382,8 @@ static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
 
   /* Get the channel structure from the interrupt number */
 
-  if (irq >= STM32_IRQ_DMA1CH1 && irq <= STM32_IRQ_DMA1CH7)
-    {
-      chndx = irq - STM32_IRQ_DMA1CH1;
-    }
-  else
-#if STM32_NDMA > 1
-#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32L15XX)
-  if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH5)
-#else
-  if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH45)
-#endif
-    {
-      chndx = irq - STM32_IRQ_DMA2CH1 + DMA1_NCHANNELS;
-    }
-  else
-#endif
+  chndx = irq_to_channel_index(irq);
+  if (chndx < 0)
     {
       DEBUGPANIC();
     }

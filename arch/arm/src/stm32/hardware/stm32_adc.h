@@ -50,7 +50,7 @@
  *     b) extended version for F2, F4, F7, L1:
  *   2. STM32 ADC IPv2:
  *     a) basic version for F0 and L0
- *     b) extended version for F3 (without F37x), H7, L4, L4+
+ *     b) extended version for F3 (without F37x), G4, H7, L4, L4+
  *
  *   We also distinguish the modified STM32 ADC IPv1 core for the L1 family,
  *   which differs too much to keep it in the same file as ADC IPv1.

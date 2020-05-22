@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* This is implementation for STM32 DMA IP version 1 - F0, F1, F3, L0, L1, L4 */
+/* This is implementation for STM32 DMA IP version 1 - F0, F1, F3, G4, L0, L1, L4 */
 
 #define HAVE_IP_DMA_V1 1
 #undef  HAVE_IP_DMA_V2
@@ -54,8 +54,13 @@
 #define DMA1                       (0)
 #define DMA2                       (1)
 
-/* These definitions apply to both the STM32 F1 and F3 families
- * 12 Channels Total: 7 DMA1 Channels(1-7) and 5 DMA2 channels (1-5)
+/* These definitions apply to multiple STM32 families.
+ *
+ * The STM32 F1 and F3 families have 12 channels total:
+ * 7 DMA1 channels(1-7) and 5 DMA2 channels (1-5).
+ *
+ * The STM32 G4 family has 16 channels total:
+ * 8 DMA1 channels(1-8) and 8 DMA2 channels (1-8).
  */
 
 #define DMA_CHAN1                  (0)
@@ -65,6 +70,7 @@
 #define DMA_CHAN5                  (4)
 #define DMA_CHAN6                  (5)
 #define DMA_CHAN7                  (6)
+#define DMA_CHAN8                  (7)
 
 /* Register Offsets *****************************************************************/
 
@@ -79,6 +85,7 @@
 #define STM32_DMACHAN5_OFFSET      0x0050
 #define STM32_DMACHAN6_OFFSET      0x0064
 #define STM32_DMACHAN7_OFFSET      0x0078
+#define STM32_DMACHAN8_OFFSET      0x008c
 
 #define STM32_DMACHAN_CCR_OFFSET   0x0008 /* DMA channel configuration register */
 #define STM32_DMACHAN_CNDTR_OFFSET 0x000c /* DMA channel number of data register */
@@ -97,6 +104,7 @@
 #define STM32_DMA_CCR5_OFFSET     0x0058 /* DMA channel 5 configuration register */
 #define STM32_DMA_CCR6_OFFSET     0x006c /* DMA channel 6 configuration register */
 #define STM32_DMA_CCR7_OFFSET     0x0080 /* DMA channel 7 configuration register */
+#define STM32_DMA_CCR8_OFFSET     0x0094 /* DMA channel 8 configuration register */
 
 #define STM32_DMA_CNDTR1_OFFSET   0x000c /* DMA channel 1 number of data register */
 #define STM32_DMA_CNDTR2_OFFSET   0x0020 /* DMA channel 2 number of data register */
@@ -105,6 +113,7 @@
 #define STM32_DMA_CNDTR5_OFFSET   0x005c /* DMA channel 5 number of data register */
 #define STM32_DMA_CNDTR6_OFFSET   0x0070 /* DMA channel 6 number of data register */
 #define STM32_DMA_CNDTR7_OFFSET   0x0084 /* DMA channel 7 number of data register */
+#define STM32_DMA_CNDTR8_OFFSET   0x0098 /* DMA channel 8 number of data register */
 
 #define STM32_DMA_CPAR1_OFFSET    0x0010 /* DMA channel 1 peripheral address register */
 #define STM32_DMA_CPAR2_OFFSET    0x0024 /* DMA channel 2 peripheral address register */
@@ -113,6 +122,7 @@
 #define STM32_DMA_CPAR5_OFFSET    0x0060 /* DMA channel 5 peripheral address register */
 #define STM32_DMA_CPAR6_OFFSET    0x0074 /* DMA channel 6 peripheral address register */
 #define STM32_DMA_CPAR7_OFFSET    0x0088 /* DMA channel 7 peripheral address register */
+#define STM32_DMA_CPAR8_OFFSET    0x009c /* DMA channel 8 peripheral address register */
 
 #define STM32_DMA_CMAR1_OFFSET    0x0014 /* DMA channel 1 memory address register */
 #define STM32_DMA_CMAR2_OFFSET    0x0028 /* DMA channel 2 memory address register */
@@ -121,6 +131,7 @@
 #define STM32_DMA_CMAR5_OFFSET    0x0064 /* DMA channel 5 memory address register */
 #define STM32_DMA_CMAR6_OFFSET    0x0078 /* DMA channel 6 memory address register */
 #define STM32_DMA_CMAR7_OFFSET    0x008c /* DMA channel 7 memory address register */
+#define STM32_DMA_CMAR8_OFFSET    0x00a0 /* DMA channel 8 memory address register */
 
 #ifdef DMA_HAVE_CSELR
 #  define STM32_DMA_CSELR_OFFSET  0x00a8 /* DMA channel selection register */
@@ -139,6 +150,9 @@
 #define STM32_DMA1_CCR5           (STM32_DMA1_BASE+STM32_DMA_CCR5_OFFSET)
 #define STM32_DMA1_CCR6           (STM32_DMA1_BASE+STM32_DMA_CCR6_OFFSET)
 #define STM32_DMA1_CCR7           (STM32_DMA1_BASE+STM32_DMA_CCR7_OFFSET)
+#if defined(CONFIG_STM32_HAVE_DMA1_CHAN8)
+#  define STM32_DMA1_CCR8         (STM32_DMA1_BASE+STM32_DMA_CCR8_OFFSET)
+#endif
 
 #define STM32_DMA1_CNDTR(n)       (STM32_DMA1_BASE+STM32_DMA_CNDTR_OFFSET(n))
 #define STM32_DMA1_CNDTR1         (STM32_DMA1_BASE+STM32_DMA_CNDTR1_OFFSET)
@@ -148,6 +162,9 @@
 #define STM32_DMA1_CNDTR5         (STM32_DMA1_BASE+STM32_DMA_CNDTR5_OFFSET)
 #define STM32_DMA1_CNDTR6         (STM32_DMA1_BASE+STM32_DMA_CNDTR6_OFFSET)
 #define STM32_DMA1_CNDTR7         (STM32_DMA1_BASE+STM32_DMA_CNDTR7_OFFSET)
+#if defined(CONFIG_STM32_HAVE_DMA1_CHAN8)
+#  define STM32_DMA1_CNDTR8       (STM32_DMA1_BASE+STM32_DMA_CNDTR8_OFFSET)
+#endif
 
 #define STM32_DMA1_CPAR(n)        (STM32_DMA1_BASE+STM32_DMA_CPAR_OFFSET(n))
 #define STM32_DMA1_CPAR1          (STM32_DMA1_BASE+STM32_DMA_CPAR1_OFFSET)
@@ -157,6 +174,9 @@
 #define STM32_DMA1_CPAR5          (STM32_DMA1_BASE+STM32_DMA_CPAR5_OFFSET)
 #define STM32_DMA1_CPAR6          (STM32_DMA1_BASE+STM32_DMA_CPAR6_OFFSET)
 #define STM32_DMA1_CPAR7          (STM32_DMA1_BASE+STM32_DMA_CPAR7_OFFSET)
+#if defined(CONFIG_STM32_HAVE_DMA1_CHAN8)
+#  define STM32_DMA1_CPAR8        (STM32_DMA1_BASE+STM32_DMA_CPAR8_OFFSET)
+#endif
 
 #define STM32_DMA1_CMAR(n)        (STM32_DMA1_BASE+STM32_DMA_CMAR_OFFSET(n))
 #define STM32_DMA1_CMAR1          (STM32_DMA1_BASE+STM32_DMA_CMAR1_OFFSET)
@@ -166,6 +186,9 @@
 #define STM32_DMA1_CMAR5          (STM32_DMA1_BASE+STM32_DMA_CMAR5_OFFSET)
 #define STM32_DMA1_CMAR6          (STM32_DMA1_BASE+STM32_DMA_CMAR6_OFFSET)
 #define STM32_DMA1_CMAR7          (STM32_DMA1_BASE+STM32_DMA_CMAR7_OFFSET)
+#if defined(CONFIG_STM32_HAVE_DMA1_CHAN8)
+#  define STM32_DMA1_CMAR8        (STM32_DMA1_BASE+STM32_DMA_CMAR8_OFFSET)
+#endif
 
 #define STM32_DMA2_ISRC           (STM32_DMA2_BASE+STM32_DMA_ISR_OFFSET)
 #define STM32_DMA2_IFCR           (STM32_DMA2_BASE+STM32_DMA_IFCR_OFFSET)
@@ -176,6 +199,11 @@
 #define STM32_DMA2_CCR3           (STM32_DMA2_BASE+STM32_DMA_CCR3_OFFSET)
 #define STM32_DMA2_CCR4           (STM32_DMA2_BASE+STM32_DMA_CCR4_OFFSET)
 #define STM32_DMA2_CCR5           (STM32_DMA2_BASE+STM32_DMA_CCR5_OFFSET)
+#if defined(CONFIG_STM32_HAVE_DMA2_CHAN678)
+#  define STM32_DMA2_CCR6         (STM32_DMA2_BASE+STM32_DMA_CCR6_OFFSET)
+#  define STM32_DMA2_CCR7         (STM32_DMA2_BASE+STM32_DMA_CCR7_OFFSET)
+#  define STM32_DMA2_CCR8         (STM32_DMA2_BASE+STM32_DMA_CCR8_OFFSET)
+#endif
 
 #define STM32_DMA2_CNDTR(n)       (STM32_DMA2_BASE+STM32_DMA_CNDTR_OFFSET(n))
 #define STM32_DMA2_CNDTR1         (STM32_DMA2_BASE+STM32_DMA_CNDTR1_OFFSET)
@@ -183,6 +211,11 @@
 #define STM32_DMA2_CNDTR3         (STM32_DMA2_BASE+STM32_DMA_CNDTR3_OFFSET)
 #define STM32_DMA2_CNDTR4         (STM32_DMA2_BASE+STM32_DMA_CNDTR4_OFFSET)
 #define STM32_DMA2_CNDTR5         (STM32_DMA2_BASE+STM32_DMA_CNDTR5_OFFSET)
+#if defined(CONFIG_STM32_HAVE_DMA2_CHAN678)
+#  define STM32_DMA2_CNDTR6       (STM32_DMA2_BASE+STM32_DMA_CNDTR6_OFFSET)
+#  define STM32_DMA2_CNDTR7       (STM32_DMA2_BASE+STM32_DMA_CNDTR7_OFFSET)
+#  define STM32_DMA2_CNDTR8       (STM32_DMA2_BASE+STM32_DMA_CNDTR8_OFFSET)
+#endif
 
 #define STM32_DMA2_CPAR(n)        (STM32_DMA2_BASE+STM32_DMA_CPAR_OFFSET(n))
 #define STM32_DMA2_CPAR1          (STM32_DMA2_BASE+STM32_DMA_CPAR1_OFFSET)
@@ -190,6 +223,11 @@
 #define STM32_DMA2_CPAR3          (STM32_DMA2_BASE+STM32_DMA_CPAR3_OFFSET)
 #define STM32_DMA2_CPAR4          (STM32_DMA2_BASE+STM32_DMA_CPAR4_OFFSET)
 #define STM32_DMA2_CPAR5          (STM32_DMA2_BASE+STM32_DMA_CPAR5_OFFSET)
+#if defined(CONFIG_STM32_HAVE_DMA2_CHAN678)
+#  define STM32_DMA2_CPAR6        (STM32_DMA2_BASE+STM32_DMA_CPAR6_OFFSET)
+#  define STM32_DMA2_CPAR7        (STM32_DMA2_BASE+STM32_DMA_CPAR7_OFFSET)
+#  define STM32_DMA2_CPAR8        (STM32_DMA2_BASE+STM32_DMA_CPAR8_OFFSET)
+#endif
 
 #define STM32_DMA2_CMAR(n)        (STM32_DMA2_BASE+STM32_DMA_CMAR_OFFSET(n))
 #define STM32_DMA2_CMAR1          (STM32_DMA2_BASE+STM32_DMA_CMAR1_OFFSET)
@@ -197,6 +235,11 @@
 #define STM32_DMA2_CMAR3          (STM32_DMA2_BASE+STM32_DMA_CMAR3_OFFSET)
 #define STM32_DMA2_CMAR4          (STM32_DMA2_BASE+STM32_DMA_CMAR4_OFFSET)
 #define STM32_DMA2_CMAR5          (STM32_DMA2_BASE+STM32_DMA_CMAR5_OFFSET)
+#if defined(CONFIG_STM32_HAVE_DMA2_CHAN678)
+#  define STM32_DMA2_CMAR6        (STM32_DMA2_BASE+STM32_DMA_CMAR6_OFFSET)
+#  define STM32_DMA2_CMAR7        (STM32_DMA2_BASE+STM32_DMA_CMAR7_OFFSET)
+#  define STM32_DMA2_CMAR8        (STM32_DMA2_BASE+STM32_DMA_CMAR8_OFFSET)
+#endif
 
 /* Register Bitfield Definitions ****************************************************/
 
@@ -225,6 +268,8 @@
 #define DMA_ISR_CHAN6_MASK        (DMA_CHAN_MASK <<  DMA_ISR_CHAN6_SHIFT)
 #define DMA_ISR_CHAN7_SHIFT       (24)      /* Bits 27-24:  DMA Channel 7 interrupt status */
 #define DMA_ISR_CHAN7_MASK        (DMA_CHAN_MASK <<  DMA_ISR_CHAN7_SHIFT)
+#define DMA_ISR_CHAN8_SHIFT       (28)      /* Bits 31-28:  DMA Channel 8 interrupt status */
+#define DMA_ISR_CHAN8_MASK        (DMA_CHAN_MASK <<  DMA_ISR_CHAN8_SHIFT)
 
 #define DMA_ISR_GIF(n)            (DMA_CHAN_GIF_BIT << DMA_ISR_CHAN_SHIFT(n))
 #define DMA_ISR_TCIF(n)           (DMA_CHAN_TCIF_BIT << DMA_ISR_CHAN_SHIFT(n))
@@ -249,7 +294,14 @@
 #define DMA_IFCR_CHAN6_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN6_SHIFT)
 #define DMA_IFCR_CHAN7_SHIFT      (24)      /* Bits 27-24:  DMA Channel 7 interrupt flag clear */
 #define DMA_IFCR_CHAN7_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN7_SHIFT)
-#define DMA_IFCR_ALLCHANNELS      (0x0fffffff)
+#define DMA_IFCR_CHAN8_SHIFT      (28)      /* Bits 31-28:  DMA Channel 8 interrupt flag clear */
+#define DMA_IFCR_CHAN8_MASK       (DMA_CHAN_MASK <<  DMA_IFCR_CHAN8_SHIFT)
+
+#if defined(CONFIG_STM32_HAVE_DMA1_CHAN8) || defined(CONFIG_STM32_HAVE_DMA2_CHAN678)
+#  define DMA_IFCR_ALLCHANNELS    (0xffffffff)
+#else
+#  define DMA_IFCR_ALLCHANNELS    (0x0fffffff)
+#endif
 
 #define DMA_IFCR_CGIF(n)          (DMA_CHAN_GIF_BIT << DMA_IFCR_CHAN_SHIFT(n))
 #define DMA_IFCR_CTCIF(n)         (DMA_CHAN_TCIF_BIT << DMA_IFCR_CHAN_SHIFT(n))
@@ -308,12 +360,30 @@
 #define STM32_DMA1_CHAN5          (4)
 #define STM32_DMA1_CHAN6          (5)
 #define STM32_DMA1_CHAN7          (6)
-
-#define STM32_DMA2_CHAN1          (7)
-#define STM32_DMA2_CHAN2          (8)
-#define STM32_DMA2_CHAN3          (9)
-#define STM32_DMA2_CHAN4          (10)
-#define STM32_DMA2_CHAN5          (11)
+#if defined(CONFIG_STM32_HAVE_DMA1_CHAN8)
+#  define STM32_DMA1_CHAN8        (7)
+#  define STM32_DMA2_CHAN1        (8)
+#  define STM32_DMA2_CHAN2        (9)
+#  define STM32_DMA2_CHAN3        (10)
+#  define STM32_DMA2_CHAN4        (11)
+#  define STM32_DMA2_CHAN5        (12)
+#  if defined(CONFIG_STM32_HAVE_DMA2_CHAN678)
+#    define STM32_DMA2_CHAN6      (13)
+#    define STM32_DMA2_CHAN7      (14)
+#    define STM32_DMA2_CHAN8      (15)
+#  endif
+#else
+#  define STM32_DMA2_CHAN1        (7)
+#  define STM32_DMA2_CHAN2        (8)
+#  define STM32_DMA2_CHAN3        (9)
+#  define STM32_DMA2_CHAN4        (10)
+#  define STM32_DMA2_CHAN5        (11)
+#  if defined(CONFIG_STM32_HAVE_DMA2_CHAN678)
+#    define STM32_DMA2_CHAN6      (12)
+#    define STM32_DMA2_CHAN7      (13)
+#    define STM32_DMA2_CHAN8      (14)
+#  endif
+#endif
 
 #ifdef DMA_HAVE_CSELR
 #  define DMACHAN_SETTING(chan, sel)     ((((sel) & 0xff) << 8) | ((chan) & 0xff))
@@ -699,6 +769,12 @@
 #  define DMACHAN_TIM5_CH1        STM32_DMA2_CHAN5
 #  define DMACHAN_TIM18_UP_2      STM32_DMA2_CHAN5
 #  define DMACHAN_DAC2_CH1_2      STM32_DMA2_CHAN5
+
+#elif defined(CONFIG_STM32_STM32G47XX)
+
+  /* This family uses a DMAMUX. The code to support this needs to be ported
+   * to this family from STM32L4R.
+   */
 
 #else
 #  error "Unknown DMA channel assignments"

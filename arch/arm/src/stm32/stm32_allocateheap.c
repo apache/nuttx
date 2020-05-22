@@ -493,6 +493,94 @@
 #    endif
 #  endif
 
+/* STM32G47xxx family P/Ns have 96KiB of internal RAM in 2 banks, plus 32 KiB
+ * of CCM SRAM (Routine Booster), and the possibility of external RAM via
+ * FSMC:
+ *
+ * All internal RAM is contiguous from address 0x2000:0000 thru 0x2001:FFFF,
+ * but consists of these separate regions:
+ *
+ * SRAM:
+ *
+ * 1) 80 KiB SRAM1 mapped at 0x2000:0000 thru 0x2001:3FFF.
+ * 2) 16 KiB SRAM2 mapped at 0x2001:4000 thru 0x2001:7FFF.
+ *
+ * CCM SRAM:
+ *
+ * 3) 32 KiB CCM SRAM mapped at 0x1000:0000 thru 0x1000:7FFF
+ *    but also aliased at at 0x2001:8000 thru 0x2001:FFFF to be contiguous
+ *    with the SRAM1 and SRAM2.
+ *
+ * Because SRAM1 and SRAM2 are contiguous, they are treated as one region
+ * by this logic.
+ *
+ * REVISIT: I believe that unlike other parts mentioned in this file, the
+ * CCM SRAM *is* accessible to DMA. See Reference Manual (RM0440 Rev 2)
+ * section 2.1.3, DMA-Bus: "This bus connects the AHB master interface of
+ * the DMA to the BusMatrix. The targets of this bus are the SRAM1, SRAM2
+ * and CCM SRAM..." Then, should we exclude CCM SRAM from the heap?
+ *
+ * In addition, external FSMC SRAM may be available.
+ */
+
+#elif defined(CONFIG_STM32_STM32G47XX)
+
+/* Set the end of system SRAM */
+
+#  define SRAM1_END                    0x20020000
+
+/* Set the range of CCM SRAM as well (although we may not use it) */
+
+#  define SRAM2_START                  0x10000000
+#  define SRAM2_END                    0x10008000
+
+/* There are 4 possible SRAM configurations:
+ *
+ * Configuration 1. System SRAM (only)
+ *                  CONFIG_MM_REGIONS == 1
+ *                  CONFIG_STM32_EXTERNAL_RAM NOT defined
+ *                  CONFIG_STM32_CCMEXCLUDE defined
+ * Configuration 2. System SRAM and CCM SRAM
+ *                  CONFIG_MM_REGIONS == 2
+ *                  CONFIG_STM32_EXTERNAL_RAM NOT defined
+ *                  CONFIG_STM32_CCMEXCLUDE NOT defined
+ * Configuration 3. System SRAM and FSMC SRAM
+ *                  CONFIG_MM_REGIONS == 2
+ *                  CONFIG_STM32_EXTERNAL_RAM defined
+ *                  CONFIG_STM32_CCMEXCLUDE defined
+ * Configuration 4. System SRAM, CCM SRAM, and FSMC SRAM
+ *                  CONFIG_MM_REGIONS == 3
+ *                  CONFIG_STM32_EXTERNAL_RAM defined
+ *                  CONFIG_STM32_CCMEXCLUDE NOT defined
+ *
+ * Let's make sure that all definitions are consistent before doing
+ * anything else
+ */
+
+#  if defined(CONFIG_STM32_EXTERNAL_RAM)
+#    if (CONFIG_MM_REGIONS == 2)
+/* OK: This is Configuration 3: SRAM and FSMC */
+
+#    elif (CONFIG_MM_REGIONS == 3)
+/* OK: This is Configuration 3: SRAM, CCM, and FSMC */
+
+#    else
+#      error "Expected CONFIG_MM_REGIONS to be either 2 (SRAM + FSMC) or 3 (SRAM + CCM + FSMC)!"
+
+#    endif
+#  else
+#    if (CONFIG_MM_REGIONS == 1)
+/* OK: Configuration 1: SRAM only. */
+
+#    elif (CONFIG_MM_REGIONS == 2)
+/* OK: Configuration 2: SRAM and CCM SRAM. */
+
+#    else
+#      error "Expected CONFIG_MM_REGIONS to be either 1 (SRAM) or 2 (SRAM + CCM)!"
+
+#    endif
+#  endif
+
 #else
 #  error "Unsupported STM32 chip"
 #endif

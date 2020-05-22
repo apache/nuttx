@@ -43,7 +43,7 @@
 
 /* This file is only a thin shell that includes the correct DMA
  * implementation for the selected STM32 IP core:
- *   - STM32 DMA IP version 1 - F0, F1, F3, L0, L1, L4
+ *   - STM32 DMA IP version 1 - F0, F1, F3, G4, L0, L1, L4
  *   - STM32 DMA IP version 2 - F2, F4, F7, H7
  *
  * The STM32 DMA IPv2 differs from the STM32 DMA IPv1 primarily in that it

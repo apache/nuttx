@@ -292,7 +292,7 @@ config ARCH_CHIP_SIMPLELINK
 		TI SimpleLink CCxxx architectures (ARM Cortex-M3 or M4)
 
 config ARCH_CHIP_STM32
-	bool "STMicro STM32 F1/F2/F3/F4/L1"
+	bool "STMicro STM32 F1/F2/F3/F4/G4/L1"
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_I2CRESET

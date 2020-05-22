@@ -410,13 +410,14 @@ int stm32_configgpio(uint32_t cfgset)
 #endif
 
 /****************************************************************************
- * Name: stm32_configgpio (for the STM32L15xxx, STM32F20xxx and STM32F40xxx
- * family)
+ * Name: stm32_configgpio (for the STM32L15xxx, STM32F20xxx, STM32F40xxx,
+ *       and STM32G47XX families).
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
     defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX)
+    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
+    defined(CONFIG_STM32_STM32G47XX)
 int stm32_configgpio(uint32_t cfgset)
 {
   uintptr_t base;
@@ -547,11 +548,11 @@ int stm32_configgpio(uint32_t cfgset)
         {
 #if defined(CONFIG_STM32_STM32L15XX)
           default:
-          case GPIO_SPEED_400KHz:    /* 400 kHz Very low speed output */
+          case GPIO_SPEED_400KHz:  /* 400 kHz Very low speed output */
             setting = GPIO_OSPEED_400KHz;
             break;
 
-          case GPIO_SPEED_2MHz:   /* 2 MHz Low speed output */
+          case GPIO_SPEED_2MHz:    /* 2 MHz Low speed output */
             setting = GPIO_OSPEED_2MHz;
             break;
 
@@ -561,6 +562,23 @@ int stm32_configgpio(uint32_t cfgset)
 
           case GPIO_SPEED_40MHz:   /* 40 MHz High speed output */
             setting = GPIO_OSPEED_40MHz;
+            break;
+#elif defined(CONFIG_STM32_STM32G47XX)
+          default:
+          case GPIO_SPEED_5MHz:    /* 5 MHz Low speed output */
+            setting = GPIO_OSPEED_5MHz;
+            break;
+
+          case GPIO_SPEED_25MHz:   /* 25 MHz Medium speed output */
+            setting = GPIO_OSPEED_25MHz;
+            break;
+
+          case GPIO_SPEED_50MHz:   /* 50 MHz Fast speed output  */
+            setting = GPIO_OSPEED_50MHz;
+            break;
+
+          case GPIO_SPEED_120MHz:  /* 120 MHz High speed output */
+            setting = GPIO_OSPEED_120MHz;
             break;
 #else
           default:
@@ -655,10 +673,10 @@ int stm32_configgpio(uint32_t cfgset)
  * Description:
  *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set
  *   it into default HiZ state (and possibly mark it's unused) and unlock it
- *   whether it was previously selected as alternative function
- *   (GPIO_ALT|GPIO_CNF_AFPP|...).
+ *   whether it was previously selected as an alternative function
+ *   (GPIO_ALT | GPIO_CNF_AFPP | ...).
  *
- *   This is a safety function and prevents hardware from schocks, as
+ *   This is a safety function and prevents hardware from shocks, as
  *   unexpected write to the Timer Channel Output GPIO to fixed '1' or '0'
  *   while it should operate in PWM mode could produce excessive on-board
  *   currents and trigger over-current/alarm function.
@@ -679,7 +697,8 @@ int stm32_unconfiggpio(uint32_t cfgset)
   cfgset |= GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT;
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX)
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
+      defined(CONFIG_STM32_STM32G47XX)
   cfgset |= GPIO_INPUT | GPIO_FLOAT;
 #else
 # error "Unsupported STM32 chip"
@@ -705,7 +724,8 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
   uint32_t offset;
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX)
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
+      defined(CONFIG_STM32_STM32G47XX)
   uint32_t bit;
 #endif
   unsigned int port;
@@ -739,7 +759,8 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX)
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
+      defined(CONFIG_STM32_STM32G47XX)
 
       if (value)
         {
