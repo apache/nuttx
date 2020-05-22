@@ -36,8 +36,8 @@
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_I2C_V2_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_I2C_V2_H
 
-/* This file provide definitions for the STM32 I2C IP core 2 (G0, L0, F0, F3, F7,
- * H7, and L4).
+/* This file provide definitions for the STM32 I2C IP core 2 (F0, F3, F7, G0,
+ * G4, H7, L0 and L4).
  */
 
 /************************************************************************************

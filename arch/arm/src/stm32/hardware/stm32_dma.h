@@ -45,7 +45,7 @@
 #include "chip.h"
 
 /* Include the correct DMA register definitions for selected STM32 DMA IP core:
- *   - STM32 DMA IP version 1 - F0, F1, F3, L0, L1, L4
+ *   - STM32 DMA IP version 1 - F0, F1, F3, G4, L0, L1, L4
  *   - STM32 DMA IP version 2 - F2, F4, F7, H7
  */
 

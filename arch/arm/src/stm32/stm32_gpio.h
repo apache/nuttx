@@ -64,6 +64,8 @@
 #  include "hardware/stm32f30xxx_gpio.h"
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "hardware/stm32f40xxx_gpio.h"
+#elif defined(CONFIG_STM32_STM32G47XX)
+#  include "hardware/stm32g47xxx_gpio.h"
 #else
 #  error "Unrecognized STM32 chip"
 #endif
@@ -204,8 +206,8 @@
 
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX)
-
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
+      defined(CONFIG_STM32_STM32G47XX)
 /* Each port bit of the general-purpose I/O (GPIO) ports can be
  * individually configured by software in several modes:
  *
@@ -295,16 +297,21 @@
 #define GPIO_SPEED_SHIFT              (10)                       /* Bits 10-11: GPIO frequency selection */
 #define GPIO_SPEED_MASK               (3 << GPIO_SPEED_SHIFT)
 #if defined(CONFIG_STM32_STM32L15XX)
-#  define GPIO_SPEED_400KHz           (0 << GPIO_SPEED_SHIFT)     /* 400 kHz Very low speed output */
-#  define GPIO_SPEED_2MHz             (1 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
-#  define GPIO_SPEED_10MHz            (2 << GPIO_SPEED_SHIFT)     /* 10 MHz Medium speed output */
-#  define GPIO_SPEED_40MHz            (3 << GPIO_SPEED_SHIFT)     /* 40 MHz High speed output */
+#  define GPIO_SPEED_400KHz           (0 << GPIO_SPEED_SHIFT)    /* 400 kHz Very low speed output */
+#  define GPIO_SPEED_2MHz             (1 << GPIO_SPEED_SHIFT)    /* 2 MHz Low speed output */
+#  define GPIO_SPEED_10MHz            (2 << GPIO_SPEED_SHIFT)    /* 10 MHz Medium speed output */
+#  define GPIO_SPEED_40MHz            (3 << GPIO_SPEED_SHIFT)    /* 40 MHz High speed output */
+#elif defined(CONFIG_STM32_STM32G47XX)                           /* With C=50pF, 2.7<VDD<3.6, DS12288 Rev2 Table 59 */
+#  define GPIO_SPEED_5MHz             (0 << GPIO_SPEED_SHIFT)    /* 5 MHz Low speed output */
+#  define GPIO_SPEED_25MHz            (1 << GPIO_SPEED_SHIFT)    /* 25 MHz Medium speed output */
+#  define GPIO_SPEED_50MHz            (2 << GPIO_SPEED_SHIFT)    /* 50 MHz Fast speed output */
+#  define GPIO_SPEED_120MHz           (3 << GPIO_SPEED_SHIFT)    /* 120 MHz High speed output */
 #else
-#  define GPIO_SPEED_2MHz             (0 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
-#  define GPIO_SPEED_25MHz            (1 << GPIO_SPEED_SHIFT)     /* 25 MHz Medium speed output */
-#  define GPIO_SPEED_50MHz            (2 << GPIO_SPEED_SHIFT)     /* 50 MHz Fast speed output  */
+#  define GPIO_SPEED_2MHz             (0 << GPIO_SPEED_SHIFT)    /* 2 MHz Low speed output */
+#  define GPIO_SPEED_25MHz            (1 << GPIO_SPEED_SHIFT)    /* 25 MHz Medium speed output */
+#  define GPIO_SPEED_50MHz            (2 << GPIO_SPEED_SHIFT)    /* 50 MHz Fast speed output  */
 #ifndef CONFIG_STM32_STM32F30XX
-#  define GPIO_SPEED_100MHz           (3 << GPIO_SPEED_SHIFT)     /* 100 MHz High speed output */
+#  define GPIO_SPEED_100MHz           (3 << GPIO_SPEED_SHIFT)    /* 100 MHz High speed output */
 #endif
 #endif
 

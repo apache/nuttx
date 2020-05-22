@@ -95,6 +95,8 @@
 #  include <arch/stm32/stm32f37xxx_irq.h>
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  include <arch/stm32/stm32f40xxx_irq.h>
+#elif defined(CONFIG_STM32_STM32G47XX)
+#  include <arch/stm32/stm32g47xxx_irq.h>
 #else
 #  error "Unsupported STM32 chip"
 #endif

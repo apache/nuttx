@@ -89,6 +89,8 @@
 #  include "stm32f37xxx_rcc.c"
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "stm32f40xxx_rcc.c"
+#elif defined(CONFIG_STM32_STM32G47XX)
+#  include "stm32g47xxx_rcc.c"
 #else
 #  error "Unsupported STM32 chip"
 #endif
