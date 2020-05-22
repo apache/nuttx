@@ -430,3 +430,16 @@ define TESTANDREPLACEFILE
 	fi
 endef
 endif
+
+# Invoke make
+
+define MAKE_template
+	+$(Q) $(MAKE) -C $(1) $(2) TOPDIR="$(TOPDIR)" APPDIR="$(APPDIR)"
+
+endef
+
+define SDIR_template
+$(1)_$(2):
+	+$(Q) $(MAKE) -C $(1) $(2) TOPDIR="$(TOPDIR)" APPDIR="$(APPDIR)"
+
+endef
