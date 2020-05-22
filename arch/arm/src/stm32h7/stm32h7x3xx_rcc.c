@@ -269,7 +269,6 @@ static inline void rcc_enableahb2(void)
   regval |= RCC_AHB2ENR_SDMMC2EN;
 #endif
 
-
   putreg32(regval, STM32_RCC_AHB2ENR);   /* Enable peripherals */
 }
 
