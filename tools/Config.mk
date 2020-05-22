@@ -121,6 +121,9 @@ endif
 
 BOARD_COMMON_DIR ?= $(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)common)
 BOARD_DRIVERS_DIR ?= $(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)drivers)
+ifeq ($(BOARD_DRIVERS_DIR),)
+  BOARD_DRIVERS_DIR = $(TOPDIR)$(DELIM)drivers$(DELIM)dummy
+endif
 
 # DIRLINK - Create a directory link in the portable way
 
