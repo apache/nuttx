@@ -55,7 +55,8 @@
  *   name       - Name of the new task
  *   ttype      - Type of the new task
  *   priority   - Priority of the new task
- *   stack_size - size (in bytes) of the stack needed
+ *   stack      - Pointer to the stack space.
+ *   stack_size - Size (in bytes) of the stack needed
  *   entry      - Entry point of a new task
  *   arg        - A pointer to an array of input parameters.  The array
  *                should be terminated with a NULL argv[] value. If no
@@ -69,8 +70,8 @@
  ****************************************************************************/
 
 static int nxthread_create(FAR const char *name, uint8_t ttype,
-                           int priority, int stack_size, main_t entry,
-                           FAR char * const argv[])
+                           int priority, FAR void *stack, int stack_size,
+                           main_t entry, FAR char * const argv[])
 {
   FAR struct task_tcb_s *tcb;
   pid_t pid;
@@ -111,9 +112,19 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
         }
     }
 
-  /* Allocate the stack for the TCB */
+  if (stack)
+    {
+      /* Use pre-allocated stack */
 
-  ret = up_create_stack((FAR struct tcb_s *)tcb, stack_size, ttype);
+      ret = up_use_stack((FAR struct tcb_s *)tcb, stack, stack_size);
+    }
+  else
+    {
+      /* Allocate the stack for the TCB */
+
+      ret = up_create_stack((FAR struct tcb_s *)tcb, stack_size, ttype);
+    }
+
   if (ret < OK)
     {
       goto errout_with_tcb;
@@ -192,7 +203,7 @@ errout_with_tcb:
  * Input Parameters:
  *   name       - Name of the new task
  *   priority   - Priority of the new task
- *   stack_size - size (in bytes) of the stack needed
+ *   stack_size - Size (in bytes) of the stack needed
  *   entry      - Entry point of a new task
  *   arg        - A pointer to an array of input parameters.  The array
  *                should be terminated with a NULL argv[] value. If no
@@ -208,8 +219,8 @@ errout_with_tcb:
 int nxtask_create(FAR const char *name, int priority,
                   int stack_size, main_t entry, FAR char * const argv[])
 {
-  return nxthread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size,
-                         entry, argv);
+  return nxthread_create(name, TCB_FLAG_TTYPE_TASK, priority, NULL,
+                         stack_size, entry, argv);
 }
 
 /****************************************************************************
@@ -270,7 +281,7 @@ int task_create(FAR const char *name, int priority,
  * Input Parameters:
  *   name       - Name of the new task
  *   priority   - Priority of the new task
- *   stack_size - size (in bytes) of the stack needed
+ *   stack_size - Size (in bytes) of the stack needed
  *   entry      - Entry point of a new task
  *   arg        - A pointer to an array of input parameters.  The array
  *                should be terminated with a NULL argv[] value. If no
@@ -286,6 +297,36 @@ int task_create(FAR const char *name, int priority,
 int kthread_create(FAR const char *name, int priority,
                    int stack_size, main_t entry, FAR char * const argv[])
 {
-  return nxthread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size,
-                         entry, argv);
+  return nxthread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, NULL,
+                         stack_size, entry, argv);
+}
+
+/****************************************************************************
+ * Name: kthread_create2
+ *
+ * Description:
+ *   An extended version of kthread_create(), use a reserved stack area for
+ *   kernel thread.
+ *
+ * Input Parameters:
+ *   name       - Name of the new task
+ *   priority   - Priority of the new task
+ *   stack      - Pointer to the stack space.
+ *   stack_size - Size (in bytes) of the stack needed
+ *   entry      - Entry point of a new task
+ *   arg        - A pointer to an array of input parameters.  The array
+ *                should be terminated with a NULL argv[] value. If no
+ *                parameters are required, argv may be NULL.
+ *
+ * Returned Value:
+ *   Returns the positive, non-zero process ID of the new task or a negated
+ *   errno value to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+int kthread_create2(FAR const char *name, int priority, FAR void *stack,
+                    int stack_size, main_t entry, FAR char *const argv[])
+{
+  return nxthread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack,
+                         stack_size, entry, argv);
 }
