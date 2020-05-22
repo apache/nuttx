@@ -73,7 +73,7 @@ COMMON_DIR = $(if $(wildcard $(BOARD_DIR)$(DELIM)common$(DELIM)Makefile),y,)
 ifeq ($(CONFIG_APPS_DIR),)
 CONFIG_APPS_DIR = ..\apps
 endif
-APPDIR := ${shell if exist "$(CONFIG_APPS_DIR)\Makefile" echo $(CONFIG_APPS_DIR)}
+APPDIR := $(realpath ${shell if exist "$(CONFIG_APPS_DIR)\Makefile" echo $(CONFIG_APPS_DIR)})
 
 # CONTEXTDIRS include directories that have special, one-time pre-build
 #   requirements.  Normally this includes things like auto-generation of
@@ -497,8 +497,9 @@ export: ${NUTTXLIBS}
 
 depend: pass1dep pass2dep
 
-subdir_clean:
-	$(Q) for %%G in ($(CLEANDIRS)) do ( if exist %%G\Makefile $(MAKE) -C %%G TOPDIR="$(TOPDIR)" clean )
+$(foreach SDIR, $(CLEANDIRS), $(eval $(call SDIR_template,$(SDIR),clean)))
+
+subdir_clean: $(foreach SDIR, $(CLEANDIRS), $(SDIR)_clean)
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" clean
 ifeq ($(CONFIG_BUILD_2PASS),y)
 	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" clean
@@ -516,8 +517,9 @@ clean: subdir_clean
 	$(call DELFILE, uImage)
 	$(call CLEAN)
 
-subdir_distclean:
-	$(Q) for %%G in ($(CLEANDIRS)) do ( if exist %%G\Makefile $(MAKE) -C %%G TOPDIR="$(TOPDIR)" distclean )
+$(foreach SDIR, $(CLEANDIRS), $(eval $(call SDIR_template,$(SDIR),distclean)))
+
+subdir_distclean: $(foreach SDIR, $(CLEANDIRS), $(SDIR)_distclean)
 
 distclean: clean subdir_distclean clean_context
 ifeq ($(CONFIG_BUILD_2PASS),y)
