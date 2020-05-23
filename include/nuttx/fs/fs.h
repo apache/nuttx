@@ -1031,7 +1031,8 @@ int close_blockdriver(FAR struct inode *inode);
 
 #if CONFIG_NFILE_STREAMS > 0
 struct tcb_s; /* Forward reference */
-FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb);
+int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
+              FAR struct file_struct **filep);
 #endif
 
 /****************************************************************************

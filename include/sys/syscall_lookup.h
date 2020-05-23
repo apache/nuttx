@@ -255,7 +255,7 @@ SYSCALL_LOOKUP(telldir,                    1)
 #endif
 
 #if CONFIG_NFILE_STREAMS > 0
-  SYSCALL_LOOKUP(fs_fdopen,                3)
+  SYSCALL_LOOKUP(fs_fdopen,                4)
   SYSCALL_LOOKUP(nxsched_get_streams,      0)
 #endif
 
