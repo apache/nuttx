@@ -59,7 +59,7 @@ ifeq ($(CONFIG_ARM_SEMIHOSTING_HOSTFS),y)
 endif
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-  CMN_CSRCS += arm_idle.c
+  CMN_CSRCS += tiva_idle.c
 endif
 
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
