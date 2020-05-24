@@ -917,6 +917,15 @@ static void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_D3CCIPR);
 #endif
 
+      /* Configure FDCAN source clock */
+
+#if defined(STM32_RCC_D2CCIP1R_FDCANSEL)
+      regval = getreg32(STM32_RCC_D2CCIP1R);
+      regval &= ~RCC_D2CCIP1R_FDCANSEL_MASK;
+      regval |= STM32_RCC_D2CCIP1R_FDCANSEL;
+      putreg32(regval, STM32_RCC_D2CCIP1R);
+#endif
+
 #if defined(CONFIG_STM32H7_IWDG) || defined(CONFIG_STM32H7_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
 
