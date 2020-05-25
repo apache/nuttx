@@ -434,7 +434,7 @@ pid_t nxtask_start_vfork(FAR struct task_tcb_s *child)
 
   /* Activate the task */
 
-  ret = task_activate((FAR struct tcb_s *)child);
+  ret = nxtask_activate((FAR struct tcb_s *)child);
   if (ret < OK)
     {
       nxtask_abort_vfork(child, -ret);

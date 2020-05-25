@@ -607,7 +607,8 @@ static inline int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
  *   This functions initializes a Task Control Block (TCB) in preparation
  *   for starting a new task.
  *
- *   nxtask_setup_scheduler() is called from task_init() and nxtask_start().
+ *   nxtask_setup_scheduler() is called from nxtask_init() and
+ *   nxtask_start().
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
@@ -676,7 +677,7 @@ int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
  *   This functions sets up parameters in the Task Control Block (TCB) in
  *   preparation for starting a new thread.
  *
- *   nxtask_setup_arguments() is called only from task_init() and
+ *   nxtask_setup_arguments() is called only from nxtask_init() and
  *   nxtask_start() to create a new task.  In the "normal" case, the argv[]
  *   array is a structure in the TCB, the arguments are cloned via strdup.
  *

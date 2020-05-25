@@ -201,7 +201,7 @@ int task_restart(pid_t pid)
 
   /* Activate the task. */
 
-  ret = task_activate((FAR struct tcb_s *)tcb);
+  ret = nxtask_activate((FAR struct tcb_s *)tcb);
   if (ret != OK)
     {
       nxtask_terminate(pid, true);

@@ -176,9 +176,9 @@ errout:
  *      to perform these operations?
  *   A: Good idea, except that existing nxtask_starthook() implementation
  *      cannot be used here unless we get rid of task_create and, instead,
- *      use task_init() and task_activate().  start_taskhook() could then
- *      be called between task_init() and task_activate().  task_restart()
- *      would still be an issue.
+ *      use nxtask_init() and nxtask_activate().  start_taskhook() could then
+ *      be called between nxtask_init() and nxtask_activate().
+ *      task_restart() would still be an issue.
  *
  * Input Parameters:
  *   Standard task start-up parameters

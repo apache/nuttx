@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_init
+ * Name: nxtask_init
  *
  * Description:
  *   This function initializes a Task Control Block (TCB) in preparation for
@@ -51,7 +51,7 @@
  *   Unlike task_create():
  *     1. Allocate the TCB.  The pre-allocated TCB is passed in argv.
  *     2. Allocate the stack.  The pre-allocated stack is passed in argv.
- *     3. Activate the task. This must be done by calling task_activate().
+ *     3. Activate the task. This must be done by calling nxtask_activate().
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
@@ -73,7 +73,7 @@
  *
  ****************************************************************************/
 
-int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
+int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
               FAR uint32_t *stack, uint32_t stack_size,
               main_t entry, FAR char * const argv[])
 {

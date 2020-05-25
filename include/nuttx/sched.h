@@ -908,6 +908,62 @@ FAR struct socketlist *nxsched_get_sockets(void);
 #endif
 
 /********************************************************************************
+ * Name: nxtask_init
+ *
+ * Description:
+ *   This function initializes a Task Control Block (TCB) in preparation for
+ *   starting a new thread.  It performs a subset of the functionality of
+ *   task_create()
+ *
+ *   Unlike task_create():
+ *     1. Allocate the TCB.  The pre-allocated TCB is passed in argv.
+ *     2. Allocate the stack.  The pre-allocated stack is passed in argv.
+ *     3. Activate the task. This must be done by calling nxtask_activate().
+ *
+ * Input Parameters:
+ *   tcb        - Address of the new task's TCB
+ *   name       - Name of the new task (not used)
+ *   priority   - Priority of the new task
+ *   stack      - Start of the pre-allocated stack
+ *   stack_size - Size (in bytes) of the stack allocated
+ *   entry      - Application start point of the new task
+ *   argv       - A pointer to an array of input parameters.  The array
+ *                should be terminated with a NULL argv[] value. If no
+ *                parameters are required, argv may be NULL.
+ *
+ * Returned Value:
+ *   OK on success; negative error value on failure appropriately.  (See
+ *   nxtask_setup_scheduler() for possible failure conditions).  On failure,
+ *   the caller is responsible for freeing the stack memory and for calling
+ *   nxsched_release_tcb() to free the TCB (which could be in most any
+ *   state).
+ *
+ ********************************************************************************/
+
+int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
+                FAR uint32_t *stack, uint32_t stack_size, main_t entry,
+                FAR char * const argv[]);
+
+/********************************************************************************
+ * Name: nxtask_activate
+ *
+ * Description:
+ *   This function activates tasks initialized by nxtask_setup_scheduler().
+ *   Without activation, a task is ineligible for execution by the
+ *   scheduler.
+ *
+ * Input Parameters:
+ *   tcb - The TCB for the task for the task (same as the nxtask_init
+ *         argument).
+ *
+ * Returned Value:
+ *   Always returns OK
+ *
+ ********************************************************************************/
+
+int nxtask_activate(FAR struct tcb_s *tcb);
+
+/********************************************************************************
  * Name: nxtask_starthook
  *
  * Description:

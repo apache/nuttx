@@ -62,7 +62,7 @@
  *
  * Description:
  *   Setup up stack-related information in the TCB using pre-allocated stack
- *   memory.  This function is called only from task_init() when a task or
+ *   memory.  This function is called only from nxtask_init() when a task or
  *   kernel thread is started (never for pthreads).
  *
  *   The following TCB fields must be initialized:
