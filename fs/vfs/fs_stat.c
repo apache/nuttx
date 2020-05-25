@@ -389,7 +389,8 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
           if ((inode->u.i_bops != NULL) && (inode->u.i_bops->geometry))
             {
               struct geometry geo;
-              if (inode->u.i_bops->geometry(inode, &geo) >= 0 && geo.geo_available)
+              if (inode->u.i_bops->geometry(inode, &geo) >= 0 &&
+                  geo.geo_available)
                 {
                   buf->st_size = geo.geo_nsectors * geo.geo_sectorsize;
                 }
