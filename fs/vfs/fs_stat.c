@@ -384,6 +384,17 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
           /* What is if also has child inodes? */
 
           buf->st_mode |= S_IFBLK;
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+          if ((inode->u.i_bops != NULL) && (inode->u.i_bops->geometry))
+            {
+              struct geometry geo;
+              if (inode->u.i_bops->geometry(inode, &geo) >= 0 && geo.geo_available)
+                {
+                  buf->st_size = geo.geo_nsectors * geo.geo_sectorsize;
+                }
+            }
+#endif
         }
       else /* if (INODE_IS_DRIVER(inode)) */
         {
