@@ -1,35 +1,20 @@
 /****************************************************************************
  * fs/nfs/nfs_util.c
  *
- *   Copyright (C) 2012-2013, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -121,8 +106,8 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
  * Name: nfs_request
  *
  * Description:
- *   Perform the NFS request. On successful receipt, it verifies the NFS level
- *   of the returned values.
+ *   Perform the NFS request. On successful receipt, it verifies the NFS
+ *   level of the returned values.
  *
  * Returned Value:
  *   Zero on success; a negative errno value on failure.
@@ -158,7 +143,7 @@ int nfs_request(FAR struct nfsmount *nmp, int procnum,
     {
       error = -EOPNOTSUPP;
       ferr("ERROR: NFS authtype %d from server\n",
-           fxdr_unsigned(int, replyh.rpc_verfi.authtype));
+           fxdr_unsigned(int, replyh.rh.rpc_verfi.authtype));
       return error;
     }
 
@@ -242,7 +227,8 @@ int nfs_lookup(FAR struct nfsmount *nmp, FAR const char *filename,
    * may differ in size whereas struct rpc_reply_lookup uses a fixed size.
    */
 
-  ptr = (FAR uint32_t *)&((FAR struct rpc_reply_lookup *)nmp->nm_iobuffer)->lookup;
+  ptr = (FAR uint32_t *)
+    &((FAR struct rpc_reply_lookup *)nmp->nm_iobuffer)->lookup;
 
   /* Get the length of the file handle */
 
@@ -337,8 +323,8 @@ int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
       return OK;
     }
 
-  /* This is not the root directory. Loop until the directory entry corresponding
-   * to the path is found.
+  /* This is not the root directory. Loop until the directory entry
+   * corresponding to the path is found.
    */
 
   for (; ; )
@@ -357,7 +343,8 @@ int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
 
       /* Look-up this path segment */
 
-      error = nfs_lookup(nmp, buffer, fhandle, obj_attributes, dir_attributes);
+      error = nfs_lookup(nmp, buffer, fhandle, obj_attributes,
+                         dir_attributes);
       if (error != OK)
         {
           ferr("ERROR: nfs_lookup of \"%s\" failed at \"%s\": %d\n",
@@ -373,7 +360,8 @@ int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
       if (!terminator)
         {
           /* Return success meaning that the description the matching
-           * directory entry is in fhandle, obj_attributes, and dir_attributes.
+           * directory entry is in fhandle, obj_attributes, and
+           * dir_attributes.
            */
 
           return OK;
@@ -389,7 +377,8 @@ int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
         {
           /* Ooops.. we found something else */
 
-          ferr("ERROR: Intermediate segment \"%s\" of \'%s\" is not a directory\n",
+          ferr("ERROR: Intermediate segment \"%s\" of \'%s\" is not a "
+               "directory\n",
                buffer, relpath);
           return -ENOTDIR;
         }
@@ -478,7 +467,8 @@ int nfs_finddir(FAR struct nfsmount *nmp, FAR const char *relpath,
         {
           /* Ooops.. we found something else */
 
-          ferr("ERROR: Intermediate segment \"%s\" of \'%s\" is not a directory\n",
+          ferr("ERROR: Intermediate segment \"%s\" of \'%s\" is not a "
+               "directory\n",
                filename, relpath);
           return -ENOTDIR;
         }
@@ -500,7 +490,9 @@ void nfs_attrupdate(FAR struct nfsnode *np, FAR struct nfs_fattr *attributes)
 {
   struct timespec ts;
 
-  /* Save a few of the files attribute values in file structure (host order) */
+  /* Save a few of the files attribute values in file structure (host
+   * order).
+   */
 
   np->n_type   = fxdr_unsigned(uint8_t, attributes->fa_type);
   np->n_mode   = fxdr_unsigned(uint16_t, attributes->fa_mode);
