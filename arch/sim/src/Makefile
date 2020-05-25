@@ -38,6 +38,7 @@ include $(TOPDIR)/Make.defs
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 
+INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)}
 INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
 INCLUDES += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
 
