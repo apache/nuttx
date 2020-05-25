@@ -273,7 +273,7 @@ o Task/Scheduler (sched/)
                  message queue used in the OS.  I am keeping this issue
                  open because (1) there are some known remaining calls that
                  that will modify the errno (such as dup(), dup2(),
-                 task_activate(), kthread_create(), exec(), mq_open(),
+                 nxtask_activate(), kthread_create(), exec(), mq_open(),
                  mq_close(), and others) and (2) there may still be calls that
                  create cancellation points.  Need to check things like open(),
                  close(), read(), write(), and possibly others.

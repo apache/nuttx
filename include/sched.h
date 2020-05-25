@@ -218,11 +218,6 @@ extern "C"
 
 /* Task Control Interfaces (non-standard) */
 
-int    task_init(FAR struct tcb_s *tcb, const char *name, int priority,
-                 FAR uint32_t *stack, uint32_t stack_size, main_t entry,
-                 FAR char * const argv[]);
-int    task_activate(FAR struct tcb_s *tcb);
-
 #ifndef CONFIG_BUILD_KERNEL
 int    task_create(FAR const char *name, int priority, int stack_size,
                    main_t entry, FAR char * const argv[]);

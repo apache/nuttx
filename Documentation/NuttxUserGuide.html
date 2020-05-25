@@ -14,7 +14,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: October 16, 2019</p>
+      <p>Last Updated: May 25, 2020</p>
     </td>
   </tr>
 </table>
@@ -200,10 +200,8 @@ paragraphs.
 </p>
 <ul>
   <li><a href="#taskcreate">2.1.1 task_create</a></li>
-  <li><a href="#taskinit">2.1.2 task_init</a></li>
-  <li><a href="#taskactivate">2.1.3 task_activate</a></li>
-  <li><a href="#taskdelete">2.1.4 task_delete</a></li>
-  <li><a href="#taskrestart">2.1.5 task_restart</a></li>
+  <li><a href="#taskdelete">2.1.2 task_delete</a></li>
+  <li><a href="#taskrestart">2.1.3 task_restart</a></li>
 </ul>
 <p>
   Non-standard extensions to VxWorks-like interfaces to support POSIX <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Points</a>.
@@ -345,127 +343,7 @@ VxWorks provides the following similar interface:
 <li>A variable number of parameters can be passed to a task (VxWorks supports ten).
 </ul>
 
-<H3><a name="taskinit">2.1.2 task_init</a></H3>
-
-<p>
-<b>Function Prototype:</b>
-<pre>
-   #include &lt;sched.h&gt;
-   int task_init(struct tcb_s *tcb, char *name, int priority, uint32_t *stack, uint32_t stack_size,
-                 maint_t entry, char * const argv[]);
-</pre>
-
-<p>
-<b>Description:</b>
-<p>
-  This function initializes a Task Control Block (TCB)
-  in preparation for starting a new thread.  It performs a subset
-  of the functionality of <code>task_create()</code> (see above).
-</P>
-<p>
-  Unlike task_create(), task_init() does not activate the task.
-  This must be done by calling task_activate().
-</P>
-<p>
-<b>Input Parameters:</b>
-  <ul>
-    <li><code>tcb</code>. Address of the new task's TCB
-    <li><code>name</code>. Name of the new task (not used)
-    <li><code>priority</code>. Priority of the new task
-    <li><code>stack</code>. Start of the pre-allocated stack
-    <li><code>stack_size</code>. size (in bytes) of the pre-allocated stack
-    <li><code>entry</code>. Entry point of a new task
-    <li><code>argv</code>. A pointer to an array of input parameters.
-       The array should be terminated with a NULL argv[] value.
-       If no parameters are required, argv may be NULL.
-  </ul>
-</p>
-<p>
-<b>Returned Value:</b>
-</p>
-<ul>
-  <li><p>OK, or ERROR if the task cannot be initialized.</P>
-  <p>This function can only failure is it is unable to assign
-    a new, unique task ID to the TCB (<a href="#ErrnoAccess"><code>errno</code></a> is not set).</P>
-</ul>
-<p>
-<b>Assumptions/Limitations:</b>
-<ul>
-<li>task_init() is provided to support internal OS functionality.  It is
-<b>not recommended</b> for normal usage.  task_create() is the preferred
-mechanism to initialize and start a new task.
-</ul>
-<p>
-<b>POSIX Compatibility:</b> This is a NON-POSIX interface.
-VxWorks provides the following similar interface:
-<pre>
-   STATUS taskInit(WIND_TCB *pTcb, char *name, int priority, int options, uint32_t *pStackBase, int stackSize,
-                   FUNCPTR entryPt, int arg1, int arg2, int arg3, int arg4, int arg5,
-                   int arg6, int arg7, int arg8, int arg9, int arg10);
-</pre>
-
-<p>
-  The NuttX task_init() differs from VxWorks' taskInit() in the
-  following ways:
-</p>
-<ul>
-<li>Interface name
-<li>Various differences in types or arguments
-<li>There is no options argument.
-<li>A variable number of parameters can be passed to a task (VxWorks supports ten).
-</ul>
-
-<H3><a name="taskactivate">2.1.3 task_activate</a></H3>
-
-<p>
-<b>Function Prototype:</b>
-<pre>
-    #include &lt;sched.h&gt;
-    int task_activate(struct tcb_s *tcb);
-</pre>
-
-<p>
-<b>Description:</b> This function activates tasks created by task_init().
-Without activation, a task is ineligible for execution by the
-scheduler.
-<p>
-<b>Input Parameters:</b>
-<ul>
-<li><code>tcb</code>. The TCB for the task for the task (same as the
-task_init argument).
-</ul>
-
-<p>
-<b>Returned Value:</b>
-<ul>
-<li>OK, or ERROR if the task cannot be activated (<a href="#ErrnoAccess"><code>errno</code></a> is not set).
-</ul>
-
-<p>
-<b>Assumptions/Limitations:</b>
-<ul>
-<li>task_activate() is provided to support internal OS functionality.  It is
-<b>not recommended</b> for normal usage.  task_create() is the preferred
-mechanism to initialize and start a new task.
-</ul>
-<p>
-<b>POSIX Compatibility:</b> This is a NON-POSIX interface.
-VxWorks provides the following similar interface:
-<pre>
-    STATUS taskActivate(int tid);
-</pre>
-
-<p>
-  The NuttX task_activate() differs from VxWorks' taskActivate() in the
-  following ways:
-</p>
-<ul>
-<li>Function name
-<li>With VxWork's taskActivate, the pid argument is supposed to be
-the pointer to the WIND_TCB cast to an integer.
-</ul>
-
-<H3><a name="taskdelete">2.1.4 task_delete</a></H3>
+<H3><a name="taskdelete">2.1.2 task_delete</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -534,7 +412,7 @@ STATUS taskDelete(int tid);
   <li>Deletion of self is supported, but only because <code>task_delete()</code> will re-direct processing to <code>exit()</code>.
 </ul>
 
-<H3><a name="taskrestart">2.1.5 task_restart</a></H3>
+<H3><a name="taskrestart">2.1.3 task_restart</a></H3>
 <p>
 <b>Function Prototype:</b>
 <ul><pre>
@@ -10691,15 +10569,13 @@ notify a task when a message is available on a queue.
   <li><a href="#standardio">stdio.h</a></li>
   <li><a href="#drvselectops">sys/select.h</a></li>
   <li><a href="#drvrioctlops">sys/ioctl.h</a></li>
-  <li><a href="#taskactivate">task_activate</a></li>
   <li><a href="#Task_Control">Task Control Interfaces</a>
   <li><a href="#taskcreate">task_create</a></li>
   <li><a href="#taskdelete">task_delete</a></li>
-  <li><a href="#taskinit">task_init</a></li>
   <li><a href="#taskrestart">task_restart</a></li>
   <li><a href="#Task_Schedule">Task Scheduling Interfaces</a>
   <li><a href="#tasksetcancelstate">task_setcancelstate</a></li>
-  <li><a href="#tasksetcanceltype>task_setcanceltype</a></li>
+  <li><a href="#tasksetcanceltype">task_setcanceltype</a></li>
   <li><a href="#task_spawn">task_spawn</a></li>
   <li><a href="#task_spawnattr_getstacksize">task_spawnattr_getstacksize</a></li>
   <li><a href="#task_spawnattr_setstacksize">task_spawnattr_setstacksize</a></li>
