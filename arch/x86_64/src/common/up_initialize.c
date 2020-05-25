@@ -43,6 +43,7 @@
 
 #include <arch/board/board.h>
 
+#include "sched/sched.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
@@ -100,6 +101,12 @@ static void up_calibratedelay(void)
 
 void up_initialize(void)
 {
+  struct tcb_s *rtcb = this_task();
+
+  rtcb->adj_stack_size = CONFIG_IDLETHREAD_STACKSIZE;
+  rtcb->stack_alloc_ptr =
+    (void *)(g_idle_topstack - CONFIG_IDLETHREAD_STACKSIZE);
+
   /* Initialize global variables */
 
   g_current_regs = NULL;
@@ -119,8 +126,8 @@ void up_initialize(void)
 #endif
 
 #ifdef CONFIG_ARCH_DMA
-  /* Initialize the DMA subsystem if the weak function up_dma_initialize has been
-   * brought into the build
+  /* Initialize the DMA subsystem if the weak function up_dma_initialize
+   * has been brought into the build
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
