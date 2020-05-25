@@ -46,6 +46,8 @@
 #include <errno.h>
 
 #include "inode/inode.h"
+#include <nuttx/mtd/mtd.h>
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -303,6 +305,14 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
           buf->st_mode  = S_IFMTD;
           buf->st_mode |= S_IROTH | S_IRGRP | S_IRUSR;
           buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
+
+          struct mtd_geometry_s mtdgeo;
+          if (inode->u.i_mtd
+                  && MTD_IOCTL(inode->u.i_mtd, MTDIOC_GEOMETRY,
+                          (unsigned long)((uintptr_t)&mtdgeo)) >= 0)
+            {
+              buf->st_size = mtdgeo.neraseblocks * mtdgeo.erasesize;
+            }
         }
       else
 #endif
