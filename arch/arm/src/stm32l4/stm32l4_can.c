@@ -1073,6 +1073,50 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
         }
         break;
 
+      case CANIOC_SET_NART:
+        {
+          uint32_t regval;
+          ret = stm32can_enterinitmode(priv);
+          if (ret != 0)
+            {
+              return ret;
+            }
+          regval = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+          if (arg == 1)
+            {
+              regval |= CAN_MCR_NART;
+            }
+          else
+            {
+              regval &= ~CAN_MCR_NART;
+            }
+          stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+          return stm32can_exitinitmode(priv);
+        }
+        break;
+
+      case CANIOC_SET_ABOM:
+        {
+          uint32_t regval;
+          ret = stm32can_enterinitmode(priv);
+          if (ret != 0)
+            {
+              return ret;
+            }
+          regval = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+          if (arg == 1)
+            {
+              regval |= CAN_MCR_ABOM;
+            }
+          else
+            {
+              regval &= ~CAN_MCR_ABOM;
+            }
+          stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+          return stm32can_exitinitmode(priv);
+        }
+        break;
+
       /* Unsupported/unrecognized command */
 
       default:
@@ -1182,8 +1226,11 @@ static int stm32l4can_send(FAR struct can_dev_s *dev,
       regval |= msg->cm_hdr.ch_id << CAN_TIR_STID_SHIFT;
     }
 #else
-  regval &= ~CAN_TIR_STID_MASK;
-  regval |= (uint32_t)msg->cm_hdr.ch_id << CAN_TIR_STID_SHIFT;
+   regval |= ( ( (uint32_t) msg->cm_hdr.ch_id << CAN_TIR_STID_SHIFT) & CAN_TIR_STID_MASK );
+
+#ifdef CONFIG_CAN_USE_RTR
+  regval |= (msg->cm_hdr.ch_rtr ? CAN_TIR_RTR : 0);
+#endif
 #endif
   stm32l4can_putreg(priv, STM32L4_CAN_TIR_OFFSET(txmb), regval);
 
