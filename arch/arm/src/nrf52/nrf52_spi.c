@@ -54,6 +54,11 @@
 
 #include "hardware/nrf52_spi.h"
 
+#ifdef CONFIG_NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
+#  include "hardware/nrf52_gpiote.h"
+#  include "hardware/nrf52_ppi.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -65,6 +70,13 @@
 #endif
 #if defined(CONFIG_NRF52_I2C1_MASTER) && defined(CONFIG_NRF52_SPI1_MASTER)
 #  error Unsupported configuration I2C1 + SPI1
+#endif
+
+/* Reserve PPI channel and GPIOTE channel for 1 byte transfer workaround */
+
+#ifdef CONFIG_NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
+#  define SPI_1B_WORKAROUND_PPI_CHAN    (18)
+#  define SPI_1B_WORKAROUND_GPIOTE_CHAN (7)
 #endif
 
 /****************************************************************************
@@ -771,6 +783,71 @@ static uint32_t nrf52_spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
   return ret;
 }
 
+#ifdef CONFIG_NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
+
+/****************************************************************************
+ * Name: n4f52_spi_1b_workaround
+ *
+ * Description:
+ *   Workaround to fix SPI Master 1 byte transfer for NRF52832.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   enable - Enable/disable workaround
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void nrf52_spi_1b_workaround(FAR struct spi_dev_s *dev, bool enable)
+{
+  FAR struct nrf52_spidev_s *priv = (FAR struct nrf52_spidev_s *)dev;
+  uint32_t pin  = 0;
+  uint32_t port = 0;
+
+  pin = (priv->sck_pin & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  port = (priv->sck_pin & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+
+  if (enable == true)
+    {
+      /* Create an event when SCK toggles */
+
+      putreg32((GPIOTE_CONFIG_MODE_EV |
+                pin << GPIOTE_CONFIG_PSEL_SHIFT |
+                port << GPIOTE_CONFIG_PORT_SHIFT |
+                GPIOTE_CONFIG_POL_TG),
+               NRF52_GPIOTE_CONFIG(SPI_1B_WORKAROUND_GPIOTE_CHAN));
+
+      /* Stop the SPIM instance when SCK toggles */
+
+      putreg32(NRF52_GPIOTE_EVENTS_IN(SPI_1B_WORKAROUND_GPIOTE_CHAN),
+               NRF52_PPI_CHEEP(SPI_1B_WORKAROUND_PPI_CHAN));
+
+      putreg32((priv->base + NRF52_SPIM_TASK_STOP_OFFSET),
+               NRF52_PPI_CHTEP(SPI_1B_WORKAROUND_PPI_CHAN));
+
+      /* Enable PPI channel */
+
+      modifyreg32(NRF52_PPI_CHEN, 0,
+                  PPI_CHEN_CH(SPI_1B_WORKAROUND_PPI_CHAN));
+    }
+  else
+    {
+      /* Disable event */
+
+      putreg32(0, NRF52_GPIOTE_CONFIG(SPI_1B_WORKAROUND_GPIOTE_CHAN));
+      putreg32(0, NRF52_PPI_CHEEP(SPI_1B_WORKAROUND_PPI_CHAN));
+      putreg32(0, NRF52_PPI_CHTEP(SPI_1B_WORKAROUND_PPI_CHAN));
+
+      /* Disable PPI channel */
+
+      modifyreg32(NRF52_PPI_CHEN,
+                  PPI_CHEN_CH(SPI_1B_WORKAROUND_PPI_CHAN), 0);
+    }
+}
+#endif
+
 /****************************************************************************
  * Name: nrf52_spi_exchange
  *
@@ -796,6 +873,13 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
 {
   FAR struct nrf52_spidev_s *priv = (FAR struct nrf52_spidev_s *)dev;
   uint32_t regval = 0;
+
+#ifdef CONFIG_NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
+  if (nwords <= 1)
+    {
+      nrf52_spi_1b_workaround(dev, true);
+    }
+#endif
 
   if (rxbuffer != NULL)
     {
@@ -859,6 +943,13 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
   nrf52_spi_putreg(priv, NRF52_SPIM_RXDMAXCNT_OFFSET, 0);
   nrf52_spi_putreg(priv, NRF52_SPIM_TXDPTR_OFFSET, 0);
   nrf52_spi_putreg(priv, NRF52_SPIM_TXDMAXCNT_OFFSET, 0);
+
+#ifdef CONFIG_NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
+  if (nwords <= 1)
+    {
+      nrf52_spi_1b_workaround(dev, false);
+    }
+#endif
 }
 
 #ifndef CONFIG_SPI_EXCHANGE
