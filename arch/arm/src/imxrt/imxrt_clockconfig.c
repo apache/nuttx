@@ -212,8 +212,10 @@ static void imxrt_lcd_clockconfig(void)
   /* Select PLL5 as LCD Clock and set Pre divider. */
 
   modifyreg32(IMXRT_CCM_CSCDR2,
-      CCM_CSCDR2_LCDIF_PRE_CLK_SEL_MASK | CCM_CSCDR2_LCDIF_PRED_MASK,
-      CCM_CSCDR2_LCDIF_PRE_CLK_SEL_PLL5 | CCM_CSCDR2_LCDIF_PRED(pre_divider));
+              CCM_CSCDR2_LCDIF_PRE_CLK_SEL_MASK |
+              CCM_CSCDR2_LCDIF_PRED_MASK,
+              CCM_CSCDR2_LCDIF_PRE_CLK_SEL_PLL5 |
+              CCM_CSCDR2_LCDIF_PRED(pre_divider));
 
   /* Set Post divider. */
 
@@ -399,10 +401,10 @@ void imxrt_clockconfig(void)
    * clocking and SDRAM.  We are pretty much committed to using things the
    * way that the bootloader has left them.
    *
-   * Note that although this is safe at boot while nothing is using the clocks
-   * additional caution is required if at some later date we want to
-   * manipulate the PODFs while the system is running (for power minimisation)
-   * because changing those is not glitch free.
+   * Note that although this is safe at boot while nothing is using
+   * the clocks additional caution is required if at some later date
+   * we want to manipulate the PODFs while the system is running
+   * (for power minimisation) because changing those is not glitch free.
    */
 
 #ifndef CONFIG_IMXRT_BOOT_SDRAM
@@ -564,8 +566,9 @@ void imxrt_clockconfig(void)
   /* Set FlEXIO1 source & divider */
 
   reg = getreg32(IMXRT_CCM_CDCDR);
-  reg &= ~(CCM_CDCDR_FLEXIO1_CLK_SEL_MASK | CCM_CDCDR_FLEXIO1_CLK_PODF_MASK | \
-            CCM_CDCDR_FLEXIO1_CLK_PRED_MASK);
+  reg &= ~(CCM_CDCDR_FLEXIO1_CLK_SEL_MASK |
+           CCM_CDCDR_FLEXIO1_CLK_PODF_MASK |
+           CCM_CDCDR_FLEXIO1_CLK_PRED_MASK);
   reg |= CCM_CDCDR_FLEXIO1_CLK_SEL(CONFIG_FLEXIO1_CLK);
   reg |= CCM_CDCDR_FLEXIO1_CLK_PODF
             (CCM_PODF_FROM_DIVISOR(CONFIG_FLEXIO1_PODF_DIVIDER));
@@ -609,7 +612,9 @@ void imxrt_clockconfig(void)
 
   reg  = getreg32(IMXRT_CCM_CSCDR2);
   reg &= ~CCM_CSCDR2_LPI2C_CLK_PODF_MASK;
-  reg |= CCM_CSCDR2_LPI2C_CLK_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_LSI2C_PODF_DIVIDER));
+  reg |= CCM_CSCDR2_LPI2C_CLK_PODF(
+           CCM_PODF_FROM_DIVISOR(IMXRT_LSI2C_PODF_DIVIDER)
+         );
   putreg32(reg, IMXRT_CCM_CSCDR2);
 
 #endif
@@ -626,7 +631,9 @@ void imxrt_clockconfig(void)
 
   reg  = getreg32(IMXRT_CCM_CBCMR);
   reg &= ~CCM_CBCMR_LPSPI_PODF_MASK;
-  reg |= CCM_CBCMR_LPSPI_PODF(CCM_PODF_FROM_DIVISOR(IMXRT_LSPI_PODF_DIVIDER));
+  reg |= CCM_CBCMR_LPSPI_PODF(
+           CCM_PODF_FROM_DIVISOR(IMXRT_LSPI_PODF_DIVIDER)
+         );
   putreg32(reg, IMXRT_CCM_CBCMR);
 #endif
 
@@ -646,7 +653,9 @@ void imxrt_clockconfig(void)
 #endif
 
 #ifdef CONFIG_IMXRT_USDHC
-  /* Optionally set USDHC1 & 2 to generate clocks from IMXRT_USDHC1_CLK_SELECT */
+  /* Optionally set USDHC1 & 2 to generate clocks
+   * from IMXRT_USDHC1_CLK_SELECT
+   */
 
   reg  = getreg32(IMXRT_CCM_CSCMR1);
   reg &= ~(CCM_CSCMR1_USDHC1_CLK_SEL | CCM_CSCMR1_USDHC2_CLK_SEL);
