@@ -332,7 +332,7 @@ dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(
 context: include/nuttx/config.h include/nuttx/version.h include/math.h include/float.h include/stdarg.h include/setjmp.h dirlinks
 	$(Q) mkdir -p staging
 	$(Q) for dir in $(CONTEXTDIRS) ; do \
-		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" context; \
+		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" context || exit; \
 	done
 
 # clean_context
@@ -437,12 +437,12 @@ download: $(BIN)
 
 pass1dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 	$(Q) for dir in $(USERDEPDIRS) ; do \
-		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" depend ; \
+		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" depend || exit; \
 	done
 
 pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 	$(Q) for dir in $(KERNDEPDIRS) ; do \
-		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" depend; \
+		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" depend || exit; \
 	done
 
 # Configuration targets
