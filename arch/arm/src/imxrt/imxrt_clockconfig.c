@@ -678,5 +678,11 @@ void imxrt_clockconfig(void)
   reg  = getreg32(IMXRT_CCM_CGPR);
   reg |= CCM_CGPR_INT_MEM_CLK_LPM;
   putreg32(reg, IMXRT_CCM_CGPR);
+
+  /* Remain in run mode */
+
+  modifyreg32(IMXRT_CCM_CLPCR,
+              CCM_CLPCR_LPM_MASK,
+              CCM_CLPCR_LPM_RUN);
 #endif
 }
