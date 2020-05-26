@@ -39,7 +39,7 @@ progname=$0
 fail=0
 APPSDIR=$WD/../apps
 MAKE_FLAGS=-k
-EXTRA_FLAGS=
+EXTRA_FLAGS="EXTRAFLAGS="
 MAKE=make
 unset testfile
 unset HOPTION
@@ -89,7 +89,7 @@ while [ ! -z "$1" ]; do
     ;;
   -e )
     shift
-    EXTRA_FLAGS="EXTRAFLAGS=$1"
+    EXTRA_FLAGS+="$1"
     ;;
   -x )
     MAKE_FLAGS='--silent --no-print-directory'
