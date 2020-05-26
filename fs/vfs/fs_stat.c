@@ -302,11 +302,12 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
 #if defined(CONFIG_MTD)
       if (INODE_IS_MTD(inode))
         {
+          struct mtd_geometry_s mtdgeo;
+
           buf->st_mode  = S_IFMTD;
           buf->st_mode |= S_IROTH | S_IRGRP | S_IRUSR;
           buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
 
-          struct mtd_geometry_s mtdgeo;
           if (inode->u.i_mtd
                   && MTD_IOCTL(inode->u.i_mtd, MTDIOC_GEOMETRY,
                           (unsigned long)((uintptr_t)&mtdgeo)) >= 0)
