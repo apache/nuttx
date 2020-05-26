@@ -78,6 +78,9 @@ struct pci_dev_type_s *pci_device_types[] =
 #ifdef CONFIG_VIRT_QEMU_PCI_TEST
   &pci_type_qemu_pci_test,
 #endif /* CONFIG_VIRT_QEMU_PCI_TEST */
+#ifdef CONFIG_VIRT_QEMU_EDU
+  &pci_type_qemu_edu,
+#endif /* CONFIG_VIRT_QEMU_EDU */
   NULL,
 };
 
@@ -713,6 +716,8 @@ void pci_dev_dump(FAR struct pci_dev_s *dev)
   uint8_t progif = dev_ops->pci_cfg_read(dev, PCI_CONFIG_PROG_IF, 1);
   uint8_t subclass = dev_ops->pci_cfg_read(dev, PCI_CONFIG_SUBCLASS, 1);
   uint8_t class = dev_ops->pci_cfg_read(dev, PCI_CONFIG_CLASS, 1);
+  uint8_t int_pin;
+  uint8_t int_line;
 
   pciinfo("[%02x:%02x.%x] %04x:%04x\n",
           bdf >> 8, (bdf & 0xff) >> 3, bdf & 0x7, vid, pid);
@@ -737,7 +742,9 @@ void pci_dev_dump(FAR struct pci_dev_s *dev)
   if ((header & PCI_HEADER_TYPE_MASK) != PCI_HEADER_NORMAL)
       return;
 
-  /* Dump the BARs */
+  int_pin = dev_ops->pci_cfg_read(dev, PCI_HEADER_NORM_INT_PIN, 1);
+  int_line = dev_ops->pci_cfg_read(dev, PCI_HEADER_NORM_INT_LINE, 1);
+  pciinfo("\tINT Pin %02x Line %02x\n", int_pin, int_line);
 
   for (bar_id = 0; bar_id < PCI_BAR_CNT; bar_id++)
     {

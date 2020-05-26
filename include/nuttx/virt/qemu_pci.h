@@ -45,6 +45,10 @@ extern "C"
 extern struct pci_dev_type_s pci_type_qemu_pci_test;
 #endif /* CONFIG_VIRT_QEMU_PCI_TEST */
 
+#ifdef CONFIG_VIRT_QEMU_EDU
+extern struct pci_dev_type_s pci_type_qemu_edu;
+#endif /* CONFIG_VIRT_QEMU_EDU */
+
 #undef EXTERN
 #ifdef __cplusplus
 }

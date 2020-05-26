@@ -26,6 +26,12 @@ CSRCS += qemu_pci_test.c
 
 endif
 
+ifeq ($(CONFIG_VIRT_QEMU_EDU),y)
+
+CSRCS += qemu_edu.c
+
+endif
+
 # Include virt device driver build support
 #
 ifeq ($(CONFIG_VIRT),y)
