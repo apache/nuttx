@@ -149,7 +149,8 @@ static void     spi_bind(struct spi_sctrlr_s *sctrlr,
                   struct spi_sdev_s *sdev, enum spi_smode_e mode,
                   int nbits);
 static void     spi_unbind(struct spi_sctrlr_s *sctrlr);
-static int      spi_enqueue(struct spi_sctrlr_s *sctrlr, uint16_t data);
+static int      spi_enqueue(struct spi_sctrlr_s *sctrlr,
+                  FAR const void *data, size_t nwords);
 static bool     spi_qfull(struct spi_sctrlr_s *sctrlr);
 static void     spi_qflush(struct spi_sctrlr_s *sctrlr);
 
@@ -485,7 +486,8 @@ static int spi_interrupt(int irq, void *context, FAR void *arg)
 
           /* Report the receipt of data to the SPI device driver */
 
-          SPI_SDEV_RECEIVE(priv->sdev, data);
+          SPI_SDEV_RECEIVE(priv->sdev, (const uint16_t *)&data,
+                           sizeof(data));
         }
 
       /* When a transfer starts, the data shifted out is the data present
@@ -615,7 +617,7 @@ static uint16_t spi_dequeue(struct sam_spidev_s *priv)
 
       ret = priv->outval;
 
-      /* Disable further TXDR/OVRE interrupts until spi_enqueue() is called. */
+      /* Disable further TXDR/OVRE interrupts until spi_enqueue() is called */
 
       regval = (SPI_INT_TDRE | SPI_INT_UNDES);
       spi_putreg(priv, regval, SAM_SPI_IDR_OFFSET);
@@ -728,7 +730,9 @@ static void spi_setbits(struct sam_spidev_s *priv, int nbits)
 
       spiinfo("csr0=%08x\n", regval);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so the subsequence re-configurations will be
+       * faster
+       */
 
       priv->nbits = nbits;
     }
@@ -763,6 +767,7 @@ static void spi_bind(struct spi_sctrlr_s *sctrlr,
   struct sam_spidev_s *priv = (struct sam_spidev_s *)sctrlr;
   uint32_t regval;
   int ret;
+  FAR const void *data;
 
   spiinfo("sdev=%p mode=%d nbits=%d\n", sdv, mode, nbits);
 
@@ -812,7 +817,8 @@ static void spi_bind(struct spi_sctrlr_s *sctrlr,
    * be shifted out the SPI clock is detected.
    */
 
-  priv->outval = SPI_SDEV_GETDATA(sdev);
+  SPI_SDEV_GETDATA(sdev, &data);
+  priv->outval = *(const uint16_t *)data;
   spi_putreg(priv, priv->outval, SAM_SPI_TDR_OFFSET);
 
   /* Setup to begin normal SPI operation */
@@ -924,7 +930,8 @@ static void spi_unbind(struct spi_sctrlr_s *sctrlr)
  *
  ****************************************************************************/
 
-static int spi_enqueue(struct spi_sctrlr_s *sctrlr, uint16_t data)
+static int spi_enqueue(struct spi_sctrlr_s *sctrlr, FAR const void *data,
+                       size_t nwords)
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)sctrlr;
   irqstate_t flags;
@@ -932,7 +939,7 @@ static int spi_enqueue(struct spi_sctrlr_s *sctrlr, uint16_t data)
   int next;
   int ret;
 
-  spiinfo("data=%04x\n", data);
+  spiinfo("data=%04x\n", *(const uint16_t *)data);
   DEBUGASSERT(priv != NULL && priv->sdev != NULL);
 
   /* Get exclusive access to the SPI device */
@@ -966,7 +973,7 @@ static int spi_enqueue(struct spi_sctrlr_s *sctrlr, uint16_t data)
        * be overwritten.
        */
 
-      priv->outq[priv->head] = data;
+      priv->outq[priv->head] = *(const uint16_t *)data;
       priv->head = next;
       ret = OK;
 
