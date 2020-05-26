@@ -119,8 +119,7 @@ static void pci_probe_device(FAR struct pci_bus_s *root_bus,
 
   class_rev = root_bus->ops->pci_cfg_read(&tmp_dev, PCI_CONFIG_REV_ID, 4);
 
-  pciinfo("[%02x:%02x.%x] Found %04x:%04x, class/revision %08x\n",
-          bus_idx, slot_idx, func, vid, id, class_rev);
+  pci_dev_dump(&tmp_dev);
 
   for (int i = 0; types[i] != NULL; i++)
     {
@@ -133,6 +132,7 @@ static void pci_probe_device(FAR struct pci_bus_s *root_bus,
               if (types[i]->class_rev == PCI_ID_ANY ||
                   types[i]->class_rev == class_rev)
                 {
+                  pciinfo("Found: %s\n", types[i]->name);
                   if (types[i]->probe)
                     {
                       pciinfo("[%02x:%02x.%x] Probing\n",
@@ -251,8 +251,9 @@ static void pci_scan_device(FAR struct pci_bus_s *root_bus,
     {
       /* This is a multi-function device that we need to iterate over */
 
-      for (dev_func = 1; dev_func < 8; dev_func++)
+      for (dev_func = 0; dev_func < 8; dev_func++)
         {
+          tmp_dev.bdf = PCI_BDF(bus_idx, slot_idx, dev_func);
           vid = root_bus->ops->pci_cfg_read(&tmp_dev, PCI_CONFIG_VENDOR, 2);
           if (vid != 0xffff)
             {
@@ -263,8 +264,6 @@ static void pci_scan_device(FAR struct pci_bus_s *root_bus,
                   pci_scan_bus(root_bus, sec_bus, types);
                   continue;
                 }
-
-              /* Actually enumerate device */
 
               pci_probe_device(root_bus, bus_idx, slot_idx, dev_func, types);
             }
@@ -507,4 +506,280 @@ int pci_disable_bus_master(FAR struct pci_dev_s *dev)
 {
   pci_clear_cmd_bit(dev, PCI_CMD_BUS_MSTR);
   return OK;
+}
+
+/****************************************************************************
+ * Name: pci_bar_valid
+ *
+ * Description:
+ *  Determine in if the address in the BAR is valid
+ *
+ * Input Parameters:
+ *   dev   - device
+ *   bar_id - bar number
+ *
+ * Return value:
+ *   -EINVAL: error
+ *   OK: OK
+ *
+ ****************************************************************************/
+
+int pci_bar_valid(FAR struct pci_dev_s *dev, uint8_t bar_id)
+{
+  uint32_t bar = dev->bus->ops->pci_cfg_read(dev,
+      PCI_HEADER_NORM_BAR0 + (bar_id * 4), 4);
+
+  if (bar == PCI_BAR_INVALID)
+    {
+      return -EINVAL;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: pci_bar_is_64
+ *
+ * Description:
+ *  Determine in if the bar address is 64 bit.  If it is the address includes
+ *  the address in the next bar location.
+ *
+ * Input Parameters:
+ *   dev   - device
+ *   bar_id - bar number
+ *
+ * Return value:
+ *   true: 64bit address
+ *
+ ****************************************************************************/
+
+bool pci_bar_is_64(FAR struct pci_dev_s *dev, uint8_t bar_id)
+{
+  uint32_t bar = dev->bus->ops->pci_cfg_read(dev,
+      PCI_HEADER_NORM_BAR0 + (bar_id * 4), 4);
+
+  /* Check that it is memory and not io port */
+
+  if ((bar & PCI_BAR_LAYOUT_MASK) != PCI_BAR_LAYOUT_MEM)
+      return false;
+
+  if (((bar & PCI_BAR_TYPE_MASK) >> PCI_BAR_TYPE_OFFSET) == PCI_BAR_TYPE_64)
+    {
+      return true;
+    }
+
+  return false;
+}
+
+/****************************************************************************
+ * Name: pci_bar_size
+ *
+ * Description:
+ *  Determine the size of the address space required by the BAR
+ *
+ * Input Parameters:
+ *   dev   - device
+ *   bar_id - bar number
+ *
+ * Return value:
+ *   Size of address space
+ *
+ ****************************************************************************/
+
+uint64_t pci_bar_size(FAR struct pci_dev_s *dev, uint8_t bar_id)
+{
+  uint32_t bar;
+  uint32_t size;
+  uint64_t full_size;
+  uint8_t bar_offset = PCI_HEADER_NORM_BAR0 + (bar_id * 4);
+  const struct pci_bus_ops_s *dev_ops = dev->bus->ops;
+
+  bar = dev_ops->pci_cfg_read(dev, bar_offset, 4);
+
+  /* Write all 1 to the BAR.  We are looking for which bits will change */
+
+  dev_ops->pci_cfg_write(dev, bar_offset, 0xffffffff, 4);
+  full_size = dev_ops->pci_cfg_read(dev, bar_offset, 4);
+
+  /* Resore BAR to original values */
+
+  dev_ops->pci_cfg_write(dev, bar_offset, bar, 4);
+
+  if (full_size == 0)
+    {
+      /* This is not a valid bar */
+
+      return 0;
+    }
+
+  if ((bar & PCI_BAR_LAYOUT_MASK) == PCI_BAR_LAYOUT_MEM)
+    {
+      full_size &= PCI_BAR_MEM_BASE_MASK;
+    }
+  else
+    {
+      full_size &= PCI_BAR_IO_BASE_MASK;
+    }
+
+  /* If it is 64 bit address check the next bar as well */
+
+  if (pci_bar_is_64(dev, bar_id))
+    {
+      bar_offset += 4;
+      bar = dev_ops->pci_cfg_read(dev, bar_offset, 4);
+      dev_ops->pci_cfg_write(dev, bar_offset, 0xffffffff, 4);
+      size = dev_ops->pci_cfg_read(dev, bar_offset, 4);
+      dev_ops->pci_cfg_write(dev, bar_offset, bar, 4);
+      full_size |= ((uint64_t)size << 32);
+    }
+  else
+    {
+      full_size |= (uint64_t)(0xffffffff) << 32;
+    }
+
+  return ~full_size + 1;
+}
+
+/****************************************************************************
+ * Name: pci_bar_addr
+ *
+ * Description:
+ *  Determine the size of the address space required by the BAR
+ *
+ * Input Parameters:
+ *   dev   - device
+ *   bar_id - bar number
+ *
+ * Return value:
+ *   full bar address
+ *
+ ****************************************************************************/
+
+uint64_t pci_bar_addr(FAR struct pci_dev_s *dev, uint8_t bar_id)
+{
+  uint64_t addr;
+  uint8_t bar_offset = PCI_HEADER_NORM_BAR0 + (bar_id * 4);
+  const struct pci_bus_ops_s *dev_ops = dev->bus->ops;
+
+  addr = dev_ops->pci_cfg_read(dev, bar_offset, 4);
+
+  if ((addr & PCI_BAR_LAYOUT_MASK) == PCI_BAR_LAYOUT_MEM)
+    {
+      addr &= PCI_BAR_MEM_BASE_MASK;
+    }
+  else
+    {
+      addr &= PCI_BAR_IO_BASE_MASK;
+    }
+
+  /* If it is 64 bit address check the next bar as well */
+
+  if (pci_bar_is_64(dev, bar_id))
+    {
+      bar_offset += 4;
+      addr |= (uint64_t)(dev_ops->pci_cfg_read(dev, bar_offset, 4)) << 32;
+    }
+
+  return addr;
+}
+
+/****************************************************************************
+ * Name: pci_dev_dump
+ *
+ * Description:
+ *  Dump the configuration information for the device
+ *
+ * Input Parameters:
+ *   dev   - device
+ *
+ ****************************************************************************/
+
+void pci_dev_dump(FAR struct pci_dev_s *dev)
+{
+  uint8_t bar_id;
+  uint8_t bar_mem_type;
+  uint32_t bar;
+  uint64_t bar_size;
+  uint64_t bar_addr;
+
+  uint8_t cap_id;
+  uint8_t cap_offset;
+
+  const struct pci_bus_ops_s *dev_ops = dev->bus->ops;
+  uint32_t bdf = dev->bdf;
+  uint16_t vid = dev_ops->pci_cfg_read(dev, PCI_CONFIG_VENDOR, 2);
+  uint16_t pid = dev_ops->pci_cfg_read(dev, PCI_CONFIG_DEVICE, 2);
+  uint8_t header = dev_ops->pci_cfg_read(dev, PCI_CONFIG_HEADER_TYPE, 1);
+  uint8_t progif = dev_ops->pci_cfg_read(dev, PCI_CONFIG_PROG_IF, 1);
+  uint8_t subclass = dev_ops->pci_cfg_read(dev, PCI_CONFIG_SUBCLASS, 1);
+  uint8_t class = dev_ops->pci_cfg_read(dev, PCI_CONFIG_CLASS, 1);
+
+  pciinfo("[%02x:%02x.%x] %04x:%04x\n",
+          bdf >> 8, (bdf & 0xff) >> 3, bdf & 0x7, vid, pid);
+  pciinfo("\ttype %02x Prog IF %02x Class %02x Subclass %02x\n",
+          header, progif, class, subclass);
+
+  cap_offset = dev_ops->pci_cfg_read(dev, PCI_HEADER_NORM_CAP, 1);
+  while (cap_offset)
+    {
+      cap_id = dev_ops->pci_cfg_read(dev, cap_offset, 1);
+      if (cap_id > PCI_CAP_ID_END)
+        {
+          pcierr("Invalid PCI Capability Found, Skipping. %d\n", cap_id);
+          DEBUGPANIC();
+          break;
+        }
+
+      pciinfo("\tCAP %02x\n", cap_id);
+      cap_offset = dev_ops->pci_cfg_read(dev, cap_offset + 1, 1);
+    }
+
+  if ((header & PCI_HEADER_TYPE_MASK) != PCI_HEADER_NORMAL)
+      return;
+
+  /* Dump the BARs */
+
+  for (bar_id = 0; bar_id < PCI_BAR_CNT; bar_id++)
+    {
+      if (pci_bar_valid(dev, bar_id) != OK)
+        continue;
+
+      bar = dev_ops->pci_cfg_read(dev,
+        PCI_HEADER_NORM_BAR0 + (bar_id * 4), 4);
+
+      bar_size = pci_bar_size(dev, bar_id);
+      bar_addr = pci_bar_addr(dev, bar_id);
+      if ((bar & PCI_BAR_LAYOUT_MASK) == PCI_BAR_LAYOUT_MEM)
+        {
+          switch ((bar & PCI_BAR_TYPE_MASK) >> PCI_BAR_TYPE_OFFSET)
+            {
+              case PCI_BAR_TYPE_64:
+                bar_mem_type = 64;
+                break;
+              case PCI_BAR_TYPE_32:
+                bar_mem_type = 32;
+                break;
+              case PCI_BAR_TYPE_16:
+                bar_mem_type = 16;
+                break;
+              default:
+                bar_mem_type = 0;
+            }
+
+          pciinfo("\tBAR [%d] MEM %db range %p-%p (%p)\n",
+                  bar_id, bar_mem_type,
+                  bar_addr, bar_addr + bar_size - 1, bar_size);
+        }
+      else
+        {
+          pciinfo("\tBAR [%d] PIO range %p-%p (%p)\n",
+                  bar_id,
+                  bar_addr, bar_addr + bar_size - 1, bar_size);
+        }
+
+      /* Skip next bar if this one was 64bit */
+
+      if (bar_mem_type == 64)
+          bar_id++;
+    }
 }

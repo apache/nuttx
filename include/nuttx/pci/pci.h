@@ -62,6 +62,22 @@
 
 /* PCI config registers type 0 (Normal devices) */
 
+#define PCI_HEADER_NORM_BAR0      0x10
+#define PCI_HEADER_NORM_BAR1      0x14
+#define PCI_HEADER_NORM_BAR2      0x18
+#define PCI_HEADER_NORM_BAR3      0x1C
+#define PCI_HEADER_NORM_BAR4      0x20
+#define PCI_HEADER_NORM_BAR5      0x24
+#define PCI_HEADER_NORM_CB_CIS    0x28
+#define PCI_HEADER_NORM_SUB_VID   0x2C
+#define PCI_HEADER_NORM_SUB_ID    0x2E
+#define PCI_HEADER_NORM_EXP_ROM   0x30
+#define PCI_HEADER_NORM_CAP       0x34
+#define PCI_HEADER_NORM_INT_LINE  0x3C
+#define PCI_HEADER_NORM_INT_PIN   0x3D
+#define PCI_HEADER_NORM_MIN_GRANT 0x3E
+#define PCI_HEADER_NORM_MAX_LAT   0x3E
+
 /* PCI config registers type 1 (PCI-PCI bridge) */
 
 #define PCI_CONFIG_SEC_BUS 0x19
@@ -131,6 +147,56 @@
 #define PCI_CMD_FST_B2B     0x0200
 #define PCI_CMD_INT         0x0400
 
+/* PCI BAR Bitmasks */
+
+#define PCI_BAR_LAYOUT_MASK     0x00000001
+#define PCI_BAR_TYPE_MASK       0x00000006
+#define PCI_BAR_MEM_PF_MASK     0x00000008
+#define PCI_BAR_MEM_BASE_MASK   0xfffffff0
+#define PCI_BAR_IO_BASE_MASK    0xfffffffc
+
+/* PCI BAR OFFSETS */
+
+#define PCI_BAR_LAYOUT_OFFSET   0
+#define PCI_BAR_TYPE_OFFSET     1
+#define PCI_BAR_MEM_PF_OFFSET   3
+#define PCI_BAR_MEM_BASE_OFFSET 4
+#define PCI_BAR_IO_BASE_OFFSET  2
+
+/* PCI BAR */
+
+#define PCI_BAR_CNT         6
+#define PCI_BAR_INVALID     0
+#define PCI_BAR_LAYOUT_MEM  0
+#define PCI_BAR_LAYOUT_IO   1
+#define PCI_BAR_TYPE_32     0x00
+#define PCI_BAR_TYPE_16     0x01  /* This mode is not used */
+#define PCI_BAR_TYPE_64     0x02
+
+/* PCI CAP */
+
+#define PCI_CAP_ID_PM       0x01  /* Power Management */
+#define PCI_CAP_ID_AGP      0x02  /* Accelerated Graphics */
+#define PCI_CAP_ID_VPD      0x03  /* Vital Product Data */
+#define PCI_CAP_ID_SLOT     0x04  /* Slot ID */
+#define PCI_CAP_ID_MSI      0x05  /* MSI */
+#define PCI_CAP_ID_CHP      0x06  /* CompactPCI Hot-Swap */
+#define PCI_CAP_ID_PCIX     0x07  /* PCI-X */
+#define PCI_CAP_ID_HT       0x08  /* HyperTransport */
+#define PCI_CAP_ID_VNDR     0x09  /* Vendor */
+#define PCI_CAP_ID_DBG      0x0A  /* Debug */
+#define PCI_CAP_ID_CCRC     0x0B  /* CompactPCI Central Resource Control */
+#define PCI_CAP_ID_HOT      0x0C  /* Hot-Plug Controller */
+#define PCI_CAP_ID_BRG_VID  0x0D  /* Bridge Vendor/Device ID */
+#define PCI_CAP_ID_AGP_BRG  0x0E  /* AGP PCI-PCI Bridge */
+#define PCI_CAP_ID_SEC_DEV  0x0F  /* Secure Device */
+#define PCI_CAP_ID_PCIE     0x10  /* PCIe */
+#define PCI_CAP_ID_MSIX     0x11  /* MSI-X */
+#define PCI_CAP_ID_SATA     0x12  /* SATA */
+#define PCI_CAP_ID_ADVF     0x13  /* Advanced Features */
+
+#define PCI_CAP_ID_END PCI_CAP_ID_ADVF
+
 /* Resource types used by PCI devices */
 
 #define PCI_SYS_RES_IOPORT 0x00
@@ -155,6 +221,13 @@ struct pci_bus_ops_s
 
     CODE uint32_t (*pci_cfg_read)(FAR struct pci_dev_s *dev, int reg,
                                   int width);
+
+    CODE int (*pci_map_bar)(uint64_t addr, uint64_t len);
+
+    CODE uint32_t (*pci_io_read)(FAR const volatile void *addr, int width);
+
+    CODE void (*pci_io_write)(FAR const volatile void *addr, uint32_t val,
+                              int width);
 };
 
 /* PCI bus private data. */
@@ -293,6 +366,89 @@ int pci_enable_bus_master(FAR struct pci_dev_s *dev);
  ****************************************************************************/
 
 int pci_disable_bus_master(FAR struct pci_dev_s *dev);
+
+/****************************************************************************
+ * Name: pci_bar_valid
+ *
+ * Description:
+ *  Determine in if the address in the BAR is valid
+ *
+ * Input Parameters:
+ *   dev   - device
+ *   bar_id - bar number
+ *
+ * Return value:
+ *   -EINVAL: error
+ *   OK: OK
+ *
+ ****************************************************************************/
+
+int pci_bar_valid(FAR struct pci_dev_s *dev, uint8_t bar_id);
+
+/****************************************************************************
+ * Name: pci_bar_is_64
+ *
+ * Description:
+ *  Determine in if the bar address is 64 bit.  If it is the address includes
+ *  the address in the next bar location.
+ *
+ * Input Parameters:
+ *   dev   - device
+ *   bar_id - bar number
+ *
+ * Return value:
+ *   true: 64bit address
+ *
+ ****************************************************************************/
+
+bool pci_bar_is_64(FAR struct pci_dev_s *dev, uint8_t bar_id);
+
+/****************************************************************************
+ * Name: pci_bar_size
+ *
+ * Description:
+ *  Determine the size of the address space required by the BAR
+ *
+ * Input Parameters:
+ *   dev   - device
+ *   bar_id - bar number
+ *
+ * Return value:
+ *   Size of address space
+ *
+ ****************************************************************************/
+
+uint64_t pci_bar_size(FAR struct pci_dev_s *dev, uint8_t bar_id);
+
+/****************************************************************************
+ * Name: pci_bar_addr
+ *
+ * Description:
+ *  Determine the size of the address space required by the BAR
+ *
+ * Input Parameters:
+ *   dev   - device
+ *   bar_id - bar number
+ *
+ * Return value:
+ *   full bar address
+ *
+ ****************************************************************************/
+
+uint64_t pci_bar_addr(FAR struct pci_dev_s *dev, uint8_t bar_id);
+
+/****************************************************************************
+ * Name: pci_dev_dump
+ *
+ * Description:
+ *  Dump the configuration information for the device
+ *
+ * Input Parameters:
+ *   dev   - device
+ *
+ ****************************************************************************/
+
+void pci_dev_dump(FAR struct pci_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

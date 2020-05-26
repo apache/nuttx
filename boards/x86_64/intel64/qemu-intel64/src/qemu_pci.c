@@ -50,6 +50,13 @@ static void qemu_pci_cfg_write(FAR struct pci_dev_s *dev, int reg,
 static uint32_t qemu_pci_cfg_read(FAR struct pci_dev_s *dev, int reg,
                                   int width);
 
+static int qemu_pci_map_bar(uint64_t addr, uint64_t len);
+
+static uint32_t qemu_pci_io_read(FAR const volatile void *addr, int width);
+
+static void qemu_pci_io_write(FAR const volatile void *addr, uint32_t val,
+                              int width);
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -58,6 +65,9 @@ struct pci_bus_ops_s qemu_pci_bus_ops =
 {
     .pci_cfg_write     =   qemu_pci_cfg_write,
     .pci_cfg_read      =   qemu_pci_cfg_read,
+    .pci_map_bar       =   qemu_pci_map_bar,
+    .pci_io_read       =   qemu_pci_io_read,
+    .pci_io_write      =   qemu_pci_io_write,
 };
 
 struct pci_bus_s qemu_pci_bus =
@@ -148,6 +158,53 @@ static uint32_t qemu_pci_cfg_read(FAR struct pci_dev_s *dev, int reg,
     }
 
   return 0;
+}
+
+static uint32_t qemu_pci_io_read(FAR const volatile void *addr, int width)
+{
+  uint16_t portaddr = (uint16_t)(intptr_t)addr;
+  switch (width)
+  {
+    case 1:
+      return (uint32_t)inb(portaddr);
+    case 2:
+      return (uint32_t)inw(portaddr);
+    case 4:
+      return (uint32_t)inl(portaddr);
+    default:
+      pcierr("Invalid read width %d\n", width);
+      DEBUGPANIC();
+  }
+
+  return 0;
+}
+
+static void qemu_pci_io_write(FAR const volatile void *addr, uint32_t val,
+                              int width)
+{
+  uint16_t portaddr = (uint16_t)(intptr_t)addr;
+  switch (width)
+  {
+    case 1:
+      outb((uint8_t)val, portaddr);
+      return;
+    case 2:
+      outw((uint8_t)val, portaddr);
+      return;
+    case 4:
+      outl((uint8_t)val, portaddr);
+      return;
+    default:
+      pcierr("Invalid write width %d\n", width);
+      DEBUGPANIC();
+  }
+}
+
+static int qemu_pci_map_bar(uint64_t addr, uint64_t len)
+{
+  up_map_region((void *)(uintptr_t)addr, len,
+      X86_PAGE_WR | X86_PAGE_PRESENT | X86_PAGE_NOCACHE | X86_PAGE_GLOBAL);
+  return OK;
 }
 
 /****************************************************************************
