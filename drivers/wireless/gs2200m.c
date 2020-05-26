@@ -325,7 +325,7 @@ static uint16_t _to_uint16(char *str)
   uint16_t ret = 0;
   int n;
 
-  n = sscanf(str, "%04d", &ret);
+  n = sscanf(str, "%04hu", &ret);
   ASSERT(1 == n);
   return ret;
 }
