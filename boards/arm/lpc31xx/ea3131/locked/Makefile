@@ -105,6 +105,7 @@ depend: .depend
 
 clean:
 	$(call DELFILE, locked.r)
+	$(call DELFILE, $(TOPDIR)$(DELIM)$(PASS1_SRCDIR)$(DELIM)locked.r)
 	$(call DELFILE, locked.map)
 	$(call CLEAN)
 
