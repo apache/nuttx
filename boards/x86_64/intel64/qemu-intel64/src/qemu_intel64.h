@@ -48,6 +48,8 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+void qemu_pci_init(void);
+
 int qemu_bringup(void);
 
 #endif /* __ASSEMBLY__ */
