@@ -945,6 +945,27 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
                 FAR char * const argv[]);
 
 /********************************************************************************
+ * Name: nxtask_uninit
+ *
+ * Description:
+ *   Undo all operations on a TCB performed by task_init() and release the
+ *   TCB by calling kmm_free().  This is intended primarily to support
+ *   error recovery operations after a successful call to task_init() such
+ *   was when a subsequent call to task_activate fails.
+ *
+ *   Caution:  Freeing of the TCB itself might be an unexpected side-effect.
+ *
+ * Input Parameters:
+ *   tcb - Address of the TCB initialized by task_init()
+ *
+ * Returned Value:
+ *   OK on success; negative error value on failure appropriately.
+ *
+ ********************************************************************************/
+
+void nxtask_uninit(FAR struct tcb_s *tcb);
+
+/********************************************************************************
  * Name: nxtask_activate
  *
  * Description:

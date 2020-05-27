@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <sched.h>
+#include <queue.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -74,8 +75,8 @@
  ****************************************************************************/
 
 int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
-              FAR uint32_t *stack, uint32_t stack_size,
-              main_t entry, FAR char * const argv[])
+                FAR uint32_t *stack, uint32_t stack_size,
+                main_t entry, FAR char * const argv[])
 {
   FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
   int ret;
@@ -135,4 +136,39 @@ errout_with_group:
 
 errout:
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxtask_uninit
+ *
+ * Description:
+ *   Undo all operations on a TCB performed by task_init() and release the
+ *   TCB by calling kmm_free().  This is intended primarily to support
+ *   error recovery operations after a successful call to task_init() such
+ *   was when a subsequent call to task_activate fails.
+ *
+ *   Caution:  Freeing of the TCB itself might be an unexpected side-effect.
+ *
+ * Input Parameters:
+ *   tcb - Address of the TCB initialized by task_init()
+ *
+ * Returned Value:
+ *   OK on success; negative error value on failure appropriately.
+ *
+ ****************************************************************************/
+
+void nxtask_uninit(FAR struct tcb_s *tcb)
+{
+  /* The TCB was added to the inactive task list by
+   * nxtask_setup_scheduler().
+   */
+
+  dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
+
+  /* Release all resources associated with the TCB... Including the TCB
+   * itself.
+   */
+
+  nxsched_release_tcb((FAR struct tcb_s *)tcb,
+                      tcb->flags & TCB_FLAG_TTYPE_MASK);
 }
