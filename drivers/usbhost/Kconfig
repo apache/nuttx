@@ -600,4 +600,96 @@ config USBHOST_TRACE_VERBOSE
 
 endif
 
+config USBHOST_FT232R
+	bool "FTDI FT232R support"
+	default n
+	depends on !USBHOST_BULK_DISABLE && !USBHOST_INT_DISABLE
+	select SERIAL_REMOVABLE
+	---help---
+		Select this option to build in host support for FTDI FT232R
+		serial devices.
+
+if USBHOST_FT232R
+
+config USBHOST_FT232R_RXDELAY
+	int "RX poll delay (MSec)"
+	default 200
+	---help---
+		When the CDC/ACM device is inactive, the host must poll it at this
+		rate in order to discover if it has serial data to send to us.
+
+config USBHOST_FT232R_TXDELAY
+	int "TX poll delay (MSec)"
+	default 200
+	---help---
+		When the appellation is inactive, the host must poll it at this
+		rate in order to discover if it has serial data to send to the
+		device.
+
+config USBHOST_FT232R_NPREALLOC
+	int "Preallocated state"
+	default 0
+	---help---
+		If this setting is zero, the FT232R driver will allocate
+		memory as needed for FT232R device state.  If this value is non-
+		zero, then it provides a number of preallocated FT232R state
+		structures.  This increases the static size of the code image, but
+		eliminates all, direct, run-time allocations by the driver.
+
+config USBHOST_FT232R_BAUD
+	int "Initialize FT232R BAUD"
+	default 115200
+
+config USBHOST_FT232R_PARITY
+	int "Initialize FT232R parity"
+	default 0
+	range 0 2
+	---help---
+		Initialize FT232R parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config USBHOST_FT232R_BITS
+	int "Initialize FT232R transfer size"
+	default 8
+	range 7 8
+	---help---
+		Initialize FT232R number of bits.  Default: 8
+
+config USBHOST_FT232R_2STOP
+	bool "FT232R use two stop bits"
+	default n
+	---help---
+		False = 1 stop bit, True = Two stop bits.  Default: 1 stop bit
+
+config USBHOST_FT232R_HWFLOWCTRL
+	bool "Use FT232R RTS/CTS"
+	default n
+	---help---
+		Enables the FT232R to use its flow control signals
+
+config USBHOST_FT232R_RXBUFSIZE
+	int "Serial RX buffer size"
+	default 128
+	---help---
+		This is the size of the serial buffer that will be used to hold
+		received data.
+
+config USBHOST_FT232R_TXBUFSIZE
+	int "Serial TX buffer size"
+	default 128
+	---help---
+		This is the size of the serial buffer that will be used to hold
+		data waiting for transmission.
+
+config USBHOST_FT232R_LATENCY
+	int "Latency Timer"
+	default 16
+	range 0 255
+	---help---
+		A timeout for UART to USB packet reception. The FT232R will
+		release its buffer for sending to the USB host once this timeout
+		occurs or the buffer is full. Measured in ms.
+
+endif # USBHOST_FT232R
+
+
 endif # USBHOST
