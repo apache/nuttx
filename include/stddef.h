@@ -99,4 +99,24 @@
  * Reference: Opengroup.org
  */
 
+/* Type whose alignment is supported in every context and is at least
+ * as great as that of any standard type not using alignment specifiers.
+ */
+
+typedef struct
+{
+#if defined(CONFIG_HAVE_LONG_LONG)
+  long long max_align_i;
+#else
+  long max_align_i;
+#endif
+#if defined(CONFIG_HAVE_LONG_DOUBLE)
+  long double max_align_f;
+#elif defined(CONFIG_HAVE_DOUBLE)
+  double max_align_f;
+#elif defined(CONFIG_HAVE_FLOAT)
+  float max_align_f;
+#endif
+} max_align_t;
+
 #endif /* __INCLUDE_STDDEF_H */
