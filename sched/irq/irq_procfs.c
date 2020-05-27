@@ -203,7 +203,9 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
 
   if (copy.count == 0)
     {
-      return 0;
+      /* Comment this out to show all registered ISR not just triggered */
+
+      /* return 0; */
     }
 
   /* Calculate the interrupt rate from the interrupt count and the elapsed
