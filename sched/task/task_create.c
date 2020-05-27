@@ -136,7 +136,7 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
   ret = group_initialize(tcb);
   if (ret < 0)
     {
-      goto errout_with_tcb;
+      goto errout_with_active;
     }
 
   /* Get the assigned pid before we start the task */
@@ -148,15 +148,17 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
   ret = nxtask_activate((FAR struct tcb_s *)tcb);
   if (ret < OK)
     {
-      /* The TCB was added to the active task list by
-       * nxtask_setup_scheduler()
-       */
-
-      dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
-      goto errout_with_tcb;
+      goto errout_with_active;
     }
 
   return pid;
+
+errout_with_active:
+  /* The TCB was added to the inactive task list by
+   * nxtask_setup_scheduler().
+   */
+
+  dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
 
 errout_with_tcb:
   nxsched_release_tcb((FAR struct tcb_s *)tcb, ttype);
