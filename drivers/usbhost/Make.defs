@@ -74,6 +74,10 @@ ifeq ($(CONFIG_USBHOST_MAX3421E),y)
 CSRCS += usbhost_max3421e.c
 endif
 
+ifeq ($(CONFIG_USBHOST_FT232R),y)
+CSRCS += usbhost_ft232r.c
+endif
+
 # HCD debug/trace logic
 
 ifeq ($(CONFIG_USBHOST_TRACE),y)
