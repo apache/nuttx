@@ -127,9 +127,12 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
           nxsched_releasepid(tcb->pid);
         }
 
-      /* Delete the thread's stack if one has been allocated */
+      /* Delete the thread's stack if one has been allocated and it is
+       * not some custom stack managed by the caller.
+       */
 
-      if (tcb->stack_alloc_ptr)
+      if (tcb->stack_alloc_ptr &&
+          (tcb->flags & TCB_FLAG_CUSTOM_STACK) == 0)
         {
 #ifdef CONFIG_BUILD_KERNEL
           /* If the exiting thread is not a kernel thread, then it has an
