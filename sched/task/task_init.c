@@ -54,6 +54,14 @@
  *     2. Allocate the stack.  The pre-allocated stack is passed in argv.
  *     3. Activate the task. This must be done by calling nxtask_activate().
  *
+ *   Certain fields of the pre-allocated TCB may be set to change the
+ *   nature of the created task.  For example:
+ *
+ *     - Task type may be set in the TCB flags to create  kernel thread
+ *     - If a custom stack is used, i.e., one allocated, managed, and freed
+ *       by the caller, then TCB_FLAG_CUSTOM_STACK should be set in the
+ *       TCB flags.
+ *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
  *   name       - Name of the new task (not used)
@@ -148,6 +156,8 @@ errout:
  *   was when a subsequent call to task_activate fails.
  *
  *   Caution:  Freeing of the TCB itself might be an unexpected side-effect.
+ *   The stack will also be freed UNLESS TCB_FLAG_CUSTOM_STACK was set in
+ *   in the tcb->flags field when nxtask_init() was called.
  *
  * Input Parameters:
  *   tcb - Address of the TCB initialized by task_init()
