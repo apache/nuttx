@@ -828,16 +828,10 @@ static int ft232r_setdivisor(uint32_t *divisor, uint32_t baud)
     }
   else
     {
-      int divfrac[9] = {0,
-                        500,
-                        250,
-                        125,
-                        375,
-                        625,
-                        750,
-                        875,
-                        1000
-                       };
+      int divfrac[9] =
+        {
+          0, 500, 250, 125, 375, 625, 750, 875, 1000
+        };
 
       double frac = (double)USBHOST_FT232R_MAX_BAUD / (double)baud;
 
