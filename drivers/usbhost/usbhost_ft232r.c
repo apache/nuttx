@@ -156,7 +156,7 @@
 #define USBHOST_BULKIN_FOUND   0x02      /* Bulk IN interface found */
 #define USBHOST_BULKOUT_FOUND  0x04      /* Bulk OUT interface found */
 
-#define USBHOST_ALLFOUND     0x07     /* All configuration things */
+#define USBHOST_ALLFOUND       0x07      /* All configuration things */
 
 #define USBHOST_MAX_CREFS      INT16_MAX /* Max cref count before signed overflow */
 
@@ -177,14 +177,14 @@
 #define USBHOST_FT232R_CTRLREQ_SETDATA      0x4
 #define USBHOST_FT232R_CTRLREQ_GETMODEMSTAT 0x5
 #define USBHOST_FT232R_CTRLREQ_SETLATTIMER  0x9
-#define USBHOST_FT232R_CTRLREQ_GETLATTIMER  0xA
+#define USBHOST_FT232R_CTRLREQ_GETLATTIMER  0xa
 
 #define USBHOST_FT232R_MODEMCTRL_VAL_DTR 0x1
 #define USBHOST_FT232R_MODEMCTRL_VAL_RTS 0x2
 #define USBHOST_FT232R_MODEMCTRL_VAL_DTR_EN 0x100
 #define USBHOST_FT232R_MODEMCTRL_VAL_RTS_EN 0x200
 
-#define USBHOST_FT232R_SETDATA_NBIT_MASK    0xFF
+#define USBHOST_FT232R_SETDATA_NBIT_MASK    0xff
 #define USBHOST_FT232R_SETDATA_PARITY_MASK  0x7
 #define USBHOST_FT232R_SETDATA_PARITY_SHIFT 8
 #define USBHOST_FT232R_SETDATA_2STOP        0x1000
@@ -658,7 +658,7 @@ static inline void usbhost_mkdevname(FAR struct usbhost_ft232r_s *priv,
  ****************************************************************************/
 
 static int ft232r_ctrlxfer(FAR struct usbhost_ft232r_s *priv, uint8_t req,
-                          uint16_t value, uint16_t index)
+                           uint16_t value, uint16_t index)
 {
   FAR struct usbhost_hubport_s *hport;
   FAR struct usb_ctrlreq_s *ctrlreq;
@@ -671,7 +671,7 @@ static int ft232r_ctrlxfer(FAR struct usbhost_ft232r_s *priv, uint8_t req,
 
   ctrlreq          = (FAR struct usb_ctrlreq_s *)priv->ctrlreq;
   ctrlreq->type    = USB_DIR_OUT | USB_REQ_TYPE_VENDOR |
-                    USB_REQ_RECIPIENT_DEVICE;
+                     USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req     = req;
 
   usbhost_putle16(ctrlreq->value, value);
@@ -708,7 +708,7 @@ static int ft232r_ctrlxfer(FAR struct usbhost_ft232r_s *priv, uint8_t req,
 static int ft232r_reset(FAR struct usbhost_ft232r_s *priv, bool purgerxtx)
 {
   int ret = ft232r_ctrlxfer(priv, USBHOST_FT232R_CTRLREQ_RESET,
-                              purgerxtx, 0);
+                            purgerxtx, 0);
   if (ret < 0)
     {
       uerr("ERROR: ft232r_ctrlxfer failed: %d\n", ret);
@@ -739,7 +739,7 @@ static int ft232r_modemctrl(FAR struct usbhost_ft232r_s *priv)
                     USBHOST_FT232R_MODEMCTRL_VAL_DTR_EN;
 
   int ret = ft232r_ctrlxfer(priv, USBHOST_FT232R_CTRLREQ_MODEMCTRL,
-                              value, 0);
+                            value, 0);
   if (ret < 0)
     {
       uerr("ERROR: ft232r_ctrlxfer failed: %d\n", ret);
@@ -834,15 +834,17 @@ static int ft232r_setdivisor(uint32_t *divisor, uint32_t baud)
         };
 
       double frac = (double)USBHOST_FT232R_MAX_BAUD / (double)baud;
+      int rem;
 
       *divisor = (uint32_t)frac;
-      int rem = (frac - *divisor) * 1000.0;
+      rem      = (frac - *divisor) * 1000.0;
 
       if (rem > 0)
         {
           int i;
           int j = 0;
           int closest = rem;
+          double err;
 
           for (i = 1; i < 9; i++)
             {
@@ -868,9 +870,10 @@ static int ft232r_setdivisor(uint32_t *divisor, uint32_t baud)
            * requested baud rate.
            */
 
-          double err = (frac -
-                      (double)(*divisor + (double)divfrac[j] / 1000.0))
-                      / frac;
+          err = (frac -
+                (double)(*divisor + (double)divfrac[j] / 1000.0)) /
+                frac;
+
           if (err < -0.03 || err > 0.03)
             {
               ret = -ENOTSUP;
@@ -943,9 +946,12 @@ static int ft232r_setbaud(FAR struct usbhost_ft232r_s *priv)
 
 static int ft232r_setdata(FAR struct usbhost_ft232r_s *priv)
 {
+  uint16_t linecoding;
+  int ret;
+
   /* Build up line coding */
 
-  uint16_t linecoding = (priv->nbits & USBHOST_FT232R_SETDATA_NBIT_MASK) |
+  linecoding = (priv->nbits & USBHOST_FT232R_SETDATA_NBIT_MASK) |
       ((priv->parity & USBHOST_FT232R_SETDATA_PARITY_MASK)
       << USBHOST_FT232R_SETDATA_PARITY_SHIFT);
   if (priv->stop2)
@@ -953,8 +959,8 @@ static int ft232r_setdata(FAR struct usbhost_ft232r_s *priv)
       linecoding |= CONFIG_USBHOST_FT232R_2STOP;
     }
 
-  int ret = ft232r_ctrlxfer(priv, USBHOST_FT232R_CTRLREQ_SETDATA,
-                            linecoding, 0);
+  ret = ft232r_ctrlxfer(priv, USBHOST_FT232R_CTRLREQ_SETDATA,
+                        linecoding, 0);
   if (ret < 0)
     {
       uerr("ERROR: ft232r_ctrlxfer failed: %d\n", ret);
@@ -1266,9 +1272,11 @@ static void usbhost_rxdata_work(FAR void *arg)
             }
         }
 
-      /* Transfer one byte from the RX packet buffer into UART RX buffer */
+      /* Transfer one byte from the RX packet buffer into UART RX buffer.
+       * +2 to account for the two status byes
+       */
 
-      rxbuf->buffer[rxbuf->head] = priv->inbuf[rxndx + 2]; /* +2 to account for the two status byes */
+      rxbuf->buffer[rxbuf->head] = priv->inbuf[rxndx + 2];
       nxfrd++;
 
       /* Save the updated indices */
@@ -1454,7 +1462,9 @@ static int usbhost_cfgdesc(FAR struct usbhost_ft232r_s *priv,
   int ret;
 
   DEBUGASSERT(priv != NULL && priv->usbclass.hport &&
-              configdesc != NULL && desclen >= sizeof(struct usb_cfgdesc_s));
+              configdesc != NULL &&
+              desclen >= sizeof(struct usb_cfgdesc_s));
+
   hport = priv->usbclass.hport;
 
   /* Keep the compiler from complaining about uninitialized variables */
@@ -1728,7 +1738,9 @@ static inline uint16_t usbhost_getbe16(FAR const uint8_t *val)
 
 static void usbhost_putle16(FAR uint8_t *dest, uint16_t val)
 {
-  dest[0] = val & 0xff; /* Little endian means LS byte first in byte stream */
+  /* Little endian means LS byte first in byte stream */
+
+  dest[0] = val & 0xff;
   dest[1] = val >> 8;
 }
 
