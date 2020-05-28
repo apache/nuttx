@@ -57,7 +57,7 @@
  *   Certain fields of the pre-allocated TCB may be set to change the
  *   nature of the created task.  For example:
  *
- *     - Task type may be set in the TCB flags to create  kernel thread
+ *     - Task type may be set in the TCB flags to create kernel thread
  *     - If a custom stack is used, i.e., one allocated, managed, and freed
  *       by the caller, then TCB_FLAG_CUSTOM_STACK should be set in the
  *       TCB flags.
