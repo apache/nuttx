@@ -1,35 +1,20 @@
 /****************************************************************************
  * fs/vfs/fs_stat.c
  *
- *   Copyright (C) 2007-2009, 2012, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -276,9 +261,13 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
 
   RESET_BUF(buf);
 
+  /* Handle "special" nodes */
+
   if (INODE_IS_SPECIAL(inode))
     {
 #if defined(CONFIG_FS_NAMED_SEMAPHORES)
+      /* Check for a named semaphore */
+
       if (INODE_IS_NAMEDSEM(inode))
         {
           buf->st_mode = S_IFSEM;
@@ -286,6 +275,8 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
       else
 #endif
 #if !defined(CONFIG_DISABLE_MQUEUE)
+      /* Check for a message queue */
+
       if (INODE_IS_MQUEUE(inode))
         {
           buf->st_mode = S_IFMQ;
@@ -293,6 +284,8 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
       else
 #endif
 #if defined(CONFIG_FS_SHM)
+      /* Check for shared memory */
+
       if (INODE_IS_SHM(inode))
         {
           buf->st_mode = S_IFSHM;
@@ -300,6 +293,8 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
       else
 #endif
 #if defined(CONFIG_MTD)
+      /* Check for an MTD driver */
+
       if (INODE_IS_MTD(inode))
         {
           struct mtd_geometry_s mtdgeo;
@@ -308,9 +303,9 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
           buf->st_mode |= S_IROTH | S_IRGRP | S_IRUSR;
           buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
 
-          if (inode->u.i_mtd
-                  && MTD_IOCTL(inode->u.i_mtd, MTDIOC_GEOMETRY,
-                          (unsigned long)((uintptr_t)&mtdgeo)) >= 0)
+          if (inode->u.i_mtd != NULL &&
+              MTD_IOCTL(inode->u.i_mtd, MTDIOC_GEOMETRY,
+                        (unsigned long)((uintptr_t)&mtdgeo)) >= 0)
             {
               buf->st_size = mtdgeo.neraseblocks * mtdgeo.erasesize;
             }
@@ -368,6 +363,9 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
         {
         }
     }
+
+  /* Handle "normal inodes */
+
   else if (inode->u.i_ops != NULL)
     {
       /* Determine read/write privileges based on the existence of read
@@ -386,10 +384,15 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
 
       /* Determine the type of the inode */
 
+      /* Check for a mountpoint */
+
       if (INODE_IS_MOUNTPT(inode))
         {
           buf->st_mode |= S_IFDIR;
         }
+
+      /* Check for a block driver */
+
       else if (INODE_IS_BLOCK(inode))
         {
           /* What is if also has child inodes? */
@@ -397,7 +400,8 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
           buf->st_mode |= S_IFBLK;
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-          if ((inode->u.i_bops != NULL) && (inode->u.i_bops->geometry))
+          if ((inode->u.i_bops != NULL) &&
+              (inode->u.i_bops->geometry != NULL))
             {
               struct geometry geo;
               if (inode->u.i_bops->geometry(inode, &geo) >= 0 &&
@@ -408,6 +412,9 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
             }
 #endif
         }
+
+      /* Otherwise, the node must refer to a character driver */
+
       else /* if (INODE_IS_DRIVER(inode)) */
         {
           /* What is it if it also has child inodes? */
