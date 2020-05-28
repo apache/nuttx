@@ -29,6 +29,7 @@ endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -O2 -fno-strict-aliasing
+  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
 endif
 
 ARCHCPUFLAGS = -fno-builtin
@@ -128,6 +129,10 @@ ifeq ($(CONFIG_SIM_M32),y)
   LDMODULEFLAGS += -melf_i386
   LDELFFLAGS += -melf_i386
   HOSTLDFLAGS += -m32
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  CCLINKFLAGS += -Wl,--gc-sections
 endif
 
 HOSTCC = cc
