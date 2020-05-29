@@ -179,10 +179,10 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   INCDIR ?= "$(TOPDIR)\tools\incdir.bat"
 else ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   DEFINE ?= "$(TOPDIR)/tools/define.sh" -w
-  INCDIR ?= "$(TOPDIR)/tools/incdir.sh" -w
+  INCDIR ?= "$(TOPDIR)/tools/incdir$(HOSTEXEEXT)" -w
 else
   DEFINE ?= "$(TOPDIR)/tools/define.sh"
-  INCDIR ?= "$(TOPDIR)/tools/incdir.sh"
+  INCDIR ?= "$(TOPDIR)/tools/incdir$(HOSTEXEEXT)"
 endif
 
 # PREPROCESS - Default macro to run the C pre-processor
