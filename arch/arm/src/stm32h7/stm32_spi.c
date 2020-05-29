@@ -234,9 +234,7 @@ struct stm32_spidev_s
   struct spi_dev_s spidev;       /* Externally visible part of the SPI interface */
   uint32_t         spibase;      /* SPIn base address */
   uint32_t         spiclock;     /* Clocking for the SPI module */
-#ifdef CONFIG_STM32H7_SPI_INTERRUPTS
   uint8_t          spiirq;       /* SPI IRQ number */
-#endif
 #ifdef CONFIG_STM32H7_SPI_DMA
   volatile uint8_t rxresult;     /* Result of the RX DMA */
   volatile uint8_t txresult;     /* Result of the RX DMA */
@@ -291,10 +289,7 @@ static inline void spi_dumpregs(FAR struct stm32_spidev_s *priv);
 static int         spi_dmarxwait(FAR struct stm32_spidev_s *priv);
 static int         spi_dmatxwait(FAR struct stm32_spidev_s *priv);
 static inline void spi_dmarxwakeup(FAR struct stm32_spidev_s *priv);
-static inline void spi_dmatxwakeup(FAR struct stm32_spidev_s *priv);
 static void        spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr,
-                                     void *arg);
-static void        spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr,
                                      void *arg);
 static void        spi_dmarxsetup(FAR struct stm32_spidev_s *priv,
                                   FAR void *rxbuffer,
@@ -396,9 +391,7 @@ static struct stm32_spidev_s g_spi1dev =
               },
   .spibase  = STM32_SPI1_BASE,
   .spiclock = SPI123_KERNEL_CLOCK_FREQ,
-#ifdef CONFIG_STM32H7_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI1,
-#endif
 #ifdef CONFIG_STM32H7_SPI1_DMA
   .rxch     = DMAMAP_SPI1_RX,
   .txch     = DMAMAP_SPI1_TX,
@@ -464,9 +457,7 @@ static struct stm32_spidev_s g_spi2dev =
               },
   .spibase  = STM32_SPI2_BASE,
   .spiclock = SPI123_KERNEL_CLOCK_FREQ,
-#ifdef CONFIG_STM32H7_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI2,
-#endif
 #ifdef CONFIG_STM32H7_SPI2_DMA
   .rxch     = DMAMAP_SPI2_RX,
   .txch     = DMAMAP_SPI2_TX,
@@ -532,9 +523,7 @@ static struct stm32_spidev_s g_spi3dev =
               },
   .spibase  = STM32_SPI3_BASE,
   .spiclock = SPI123_KERNEL_CLOCK_FREQ,
-#ifdef CONFIG_STM32H7_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI3,
-#endif
 #ifdef CONFIG_STM32H7_SPI3_DMA
   .rxch     = DMAMAP_SPI3_RX,
   .txch     = DMAMAP_SPI3_TX,
@@ -600,9 +589,7 @@ static struct stm32_spidev_s g_spi4dev =
               },
   .spibase  = STM32_SPI4_BASE,
   .spiclock = SPI45_KERNEL_CLOCK_FREQ,
-#ifdef CONFIG_STM32H7_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI4,
-#endif
 #ifdef CONFIG_STM32H7_SPI4_DMA
   .rxch     = DMAMAP_SPI4_RX,
   .txch     = DMAMAP_SPI4_TX,
@@ -668,9 +655,7 @@ static struct stm32_spidev_s g_spi5dev =
               },
   .spibase  = STM32_SPI5_BASE,
   .spiclock = SPI45_KERNEL_CLOCK_FREQ,
-#ifdef CONFIG_STM32H7_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI5,
-#endif
 #ifdef CONFIG_STM32H7_SPI5_DMA
   .rxch     = DMAMAP_SPI5_RX,
   .txch     = DMAMAP_SPI5_TX,
@@ -736,9 +721,7 @@ static struct stm32_spidev_s g_spi6dev =
               },
   .spibase  = STM32_SPI6_BASE,
   .spiclock = SPI6_KERNEL_CLOCK_FREQ,
-#ifdef CONFIG_STM32H7_SPI_INTERRUPTS
   .spiirq   = STM32_IRQ_SPI6,
-#endif
 #ifdef CONFIG_STM32H7_SPI6_DMA
   .rxch     = DMAMAP_SPI6_RX,
   .txch     = DMAMAP_SPI6_TX,
@@ -844,6 +827,22 @@ static inline void spi_putreg(FAR struct stm32_spidev_s *priv,
                               uint32_t offset, uint32_t value)
 {
   putreg32(value, priv->spibase + offset);
+}
+
+/****************************************************************************
+ * Name: spi_modifyreg
+ *
+ * Description:
+ *   Modify an SPI register
+ *
+ ****************************************************************************/
+
+static void spi_modifyreg(FAR struct stm32_spidev_s *priv, uint32_t offset,
+                          uint32_t clrbits, uint32_t setbits)
+{
+  /* Only 32-bit registers */
+
+  modifyreg32(priv->spibase + offset, clrbits, setbits);
 }
 
 /****************************************************************************
@@ -997,6 +996,39 @@ static void spi_dumpregs(FAR struct stm32_spidev_s *priv)
 #endif
 
 /****************************************************************************
+ * Name: spi_interrupt
+ *
+ * Description:
+ *   In DMA transfer mode, handle the transmission complete interrupt
+ *
+ ****************************************************************************/
+
+static int spi_interrupt(int irq, void *context, void *arg)
+{
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)arg;
+  uint32_t sr = spi_getreg(priv, STM32_SPI_SR_OFFSET);
+
+  if (sr & SPI_SR_TXC)
+    {
+      /* Disable interrupt. This needs to be done
+       * before disabling SPI to avoid spurious TXC interrupt
+       * (ERRATA: Q2.14.4 TXP interrupt occurring while SPI/I2Sdisabled")
+       * There is no need to clear the interrupt since it is disabled and
+       * SPI will be disabled after transmit as well.
+       */
+
+      spi_modifyreg(priv, STM32_SPI_IER_OFFSET, SPI_IER_EOTIE, 0);
+
+      /* Set result and release wait semaphore */
+
+      priv->txresult = 0x80;
+      nxsem_post(&priv->txsem);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: spi_dmarxwait
  *
  * Description:
@@ -1056,6 +1088,15 @@ static int spi_dmatxwait(FAR struct stm32_spidev_s *priv)
       return OK;
     }
 
+  /* Enable TXC interrupt. This needs to be done after starting TX-dma AND
+   * when spi is enabled to avoid spurious TXC interrupt (ERRATA:
+   * "2.14.4 TXP interrupt occurring while SPI/I2Sdisabled")
+   * It is fine to enable this interrupt even if the transfer already did
+   * complete; in this case the irq will just fire right away
+   */
+
+  spi_modifyreg(priv, STM32_SPI_IER_OFFSET, 0, SPI_IER_EOTIE);
+
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the
    * DMA must not really have completed???
    */
@@ -1092,21 +1133,6 @@ static inline void spi_dmarxwakeup(FAR struct stm32_spidev_s *priv)
 #endif
 
 /****************************************************************************
- * Name: spi_dmatxwakeup
- *
- * Description:
- *   Signal that DMA is complete
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32H7_SPI_DMA
-static inline void spi_dmatxwakeup(FAR struct stm32_spidev_s *priv)
-{
-  nxsem_post(&priv->txsem);
-}
-#endif
-
-/****************************************************************************
  * Name: spi_dmarxcallback
  *
  * Description:
@@ -1123,26 +1149,6 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
   priv->rxresult = isr | 0x080;  /* OR'ed with 0x80 to assure non-zero */
   spi_dmarxwakeup(priv);
-}
-#endif
-
-/****************************************************************************
- * Name: spi_dmatxcallback
- *
- * Description:
- *   Called when the RX DMA completes
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32H7_SPI_DMA
-static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
-{
-  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)arg;
-
-  /* Wake-up the SPI driver */
-
-  priv->txresult = isr | 0x080;  /* OR'ed with 0x80 to assure non-zero */
-  spi_dmatxwakeup(priv);
 }
 #endif
 
@@ -1287,6 +1293,7 @@ static void spi_dmarxstart(FAR struct stm32_spidev_s *priv)
     }
 
   priv->rxresult = 0;
+  spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_RXDMAEN);
   stm32_dmastart(priv->rxdma, spi_dmarxcallback, priv, false);
 }
 #endif
@@ -1310,17 +1317,10 @@ static void spi_dmatxstart(FAR struct stm32_spidev_s *priv)
     }
 
   priv->txresult = 0;
-  stm32_dmastart(priv->txdma, spi_dmatxcallback, priv, false);
+  stm32_dmastart(priv->txdma, NULL, priv, false);
+  spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_TXDMAEN);
 }
 #endif
-
-static void spi_modifyreg(FAR struct stm32_spidev_s *priv, uint32_t offset,
-                          uint32_t clrbits, uint32_t setbits)
-{
-  /* Only 32-bit registers */
-
-  modifyreg32(priv->spibase + offset, clrbits, setbits);
-}
 
 /****************************************************************************
  * Name: spi_lock
@@ -2051,8 +2051,6 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
        */
 
       spi_enable(priv, false);
-      spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, SPI_CFG1_TXDMAEN,
-                          SPI_CFG1_RXDMAEN);
 
       spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
               txbuffer, rxbuffer, nwords);
@@ -2069,9 +2067,6 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
         {
           stm32_dmasetup(priv->txdma, &txdmacfg);
         }
-
-      spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_TXDMAEN |
-                          SPI_CFG1_RXDMAEN);
 
 #ifdef CONFIG_SPI_TRIGGER
       /* Is deferred triggering in effect? */
@@ -2113,6 +2108,11 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
        * 3. Disable DMA Tx and Rx buffers by clearing the TXDMAEN and RXDMAEN
        *    bits in the SPI_CFG1 register, if DMA Tx and/or DMA Rx are used.
        */
+
+      /* TX transmission must be completed before shutting down the SPI */
+
+      DEBUGASSERT(priv->config != SIMPLEX_RX ?
+                  (spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXC) : 1);
 
       spi_enable(priv, false);
       spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, SPI_CFG1_TXDMAEN |
@@ -2360,7 +2360,7 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
 
   clrbits = SPI_CFG2_CPHA | SPI_CFG2_CPOL | SPI_CFG2_LSBFRST |
             SPI_CFG2_COMM_MASK;
-  setbits = SPI_CFG2_MASTER | SPI_CFG2_SSM;
+  setbits = SPI_CFG2_AFCNTR | SPI_CFG2_MASTER | SPI_CFG2_SSM;
 
   switch (priv->config)
     {
@@ -2433,6 +2433,20 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
       spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_TXDMAEN);
     }
 #endif
+
+  /* Attach the IRQ to the driver */
+
+  if (irq_attach(priv->spiirq, spi_interrupt, priv))
+    {
+      /* We could not attach the ISR to the interrupt */
+
+      spierr("ERROR: Can't initialize spi irq\n");
+      return;
+    }
+
+  /* Enable SPI interrupts */
+
+  up_enable_irq(priv->spiirq);
 
   /* Enable SPI */
 
