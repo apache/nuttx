@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <libgen.h>
 #include <errno.h>
 
 #ifdef HOST_CYGWIN
@@ -112,14 +113,14 @@ static void show_help(const char *progname, int exitcode)
   exit(exitcode);
 }
 
-static enum os_e get_os(const char *ccpath)
+static enum os_e get_os(char *ccname)
 {
   struct utsname buf;
   int ret;
 
   /* Check for MinGW which implies a Windows native environment */
 
-  if (strstr(ccpath, "mingw") != NULL)
+  if (strstr(ccname, "mingw") != NULL)
     {
       return OS_WINDOWS;
     }
@@ -162,41 +163,48 @@ static enum os_e get_os(const char *ccpath)
     }
   else
     {
+      fprintf(stderr, "ERROR:  Unknown operating system: %s\n",
+              buf.sysname);
       return OS_UNKNOWN;
     }
 }
 
-static enum compiler_e get_compiler(const char *ccpath, enum os_e os)
+static enum compiler_e get_compiler(char *ccname, enum os_e os)
 {
   /* Let's assume that all GCC compiler paths contain the string gcc or
-   * g++ and no non-GCC compiler paths include these substrings
+   * g++ and no non-GCC compiler paths include these substrings.
+   *
+   * If the compiler is called cc, let's assume that is GCC too.
    */
 
-  if (strstr(ccpath, "gcc") != NULL ||
-      strstr(ccpath, "g++") != NULL)
+  if (strstr(ccname, "gcc")     != NULL ||
+      strstr(ccname, "g++")     != NULL ||
+      strcmp(ccname, "cc")      == 0    ||
+      strncmp(ccname, "cc.", 3) == 0)
     {
       return COMPILER_GCC;
     }
-  else if (strstr(ccpath, "clang") != NULL)
+  else if (strstr(ccname, "clang") != NULL)
     {
       return COMPILER_CLANG;
     }
-  else if (strstr(ccpath, "sdcc") != NULL)
+  else if (strstr(ccname, "sdcc") != NULL)
     {
       return COMPILER_SDCC;
     }
-  else if (strstr(ccpath, "mingw") != NULL)
+  else if (strstr(ccname, "mingw") != NULL)
     {
       return COMPILER_MINGW;
     }
-  else if (strstr(ccpath, "ez8cc") != NULL ||
-           strstr(ccpath, "zneocc") != NULL ||
-           strstr(ccpath, "ez80cc") != NULL)
+  else if (strstr(ccname, "ez8cc") != NULL ||
+           strstr(ccname, "zneocc") != NULL ||
+           strstr(ccname, "ez80cc") != NULL)
     {
       return COMPILER_ZDSII;
     }
   else
     {
+      fprintf(stderr, "ERROR:  Unknown compiler: %s\n", ccname);
       return COMPILER_UNKNOWN;
     }
 }
@@ -242,17 +250,17 @@ int main(int argc, char **argv, char **envp)
 {
 #ifdef HOST_CYGWIN
   char *convpath = NULL;
+  bool wintool = false;
 #endif
   enum pathtype_e pathtype = USER_PATH;
   enum os_e os;
   enum compiler_e compiler;
   const char *progname = argv[0];
-  const char *ccpath;
   const char *cmdarg;
+  char *ccname;
   char * const *dirlist;
   size_t respsize = 0;
   char *response = NULL;
-  bool wintool = false;
   int ndirs;
   int ret;
   int ch;
@@ -265,7 +273,9 @@ int main(int argc, char **argv, char **envp)
       switch (ch)
         {
           case 'w':
+#ifdef HOST_CYGWIN
           wintool = true;
+#endif
           break;
 
           case 's':
@@ -283,7 +293,7 @@ int main(int argc, char **argv, char **envp)
       show_advice(progname, EXIT_FAILURE);
     }
 
-  ccpath = argv[optind];
+  ccname = basename(argv[optind]);
   optind++;
 
   if (optind >= argc)
@@ -315,14 +325,14 @@ int main(int argc, char **argv, char **envp)
    * files.
    */
 
-  os = get_os(ccpath);
+  os = get_os(ccname);
   if (os == OS_UNKNOWN)
     {
-      fprintf(stderr, "ERROR:  Operating system not recognized.\n");
+      fprintf(stderr, "ERROR:  Operating system not recognized\n");
       show_advice(progname, EXIT_FAILURE);
     }
 
-  compiler = get_compiler(ccpath, os);
+  compiler = get_compiler(ccname, os);
   if (compiler == COMPILER_UNKNOWN)
     {
       fprintf(stderr, "ERROR:  Compiler not recognized.\n");
@@ -334,7 +344,9 @@ int main(int argc, char **argv, char **envp)
   if (compiler == COMPILER_ZDSII)
     {
       cmdarg = (pathtype == SYSTEM_PATH) ? "-stdinc:" : "-usrinc:";
+#ifdef HOST_CYGWIN
       wintool = true;
+#endif
     }
   else
     {
