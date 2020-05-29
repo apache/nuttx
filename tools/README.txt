@@ -605,8 +605,8 @@ ide_exporter.py
     Obsoleted/stm32f429i_disco/ltcd/template and at
     Obsoleted/stm3220g-eval/template.
 
-incdir.sh and incdir.bat
-------------------------
+incdir.sh, incdir.bat, and incdir.c
+-----------------------------------
 
   Different compilers have different conventions for specifying lists
   of include file paths on the compiler command line.  This incdir.sh
@@ -616,6 +616,8 @@ incdir.sh and incdir.bat
   The incdir.bat script is a counterpart for use in the native Windows
   build.  However, there is currently only one compiler supported in
   that context:  MinGW-GCC.
+
+  incdir.c is a higher performance version of incdir.sh, converted to C.
 
 indent.sh
 ---------
