@@ -285,6 +285,8 @@ clean:
 	$(call DELFILE, nxstyle.exe)
 	$(call DELFILE, rmcr)
 	$(call DELFILE, rmcr.exe)
+	$(call DELFILE, incdir)
+	$(call DELFILE, incdir.exe)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) rm -rf *.dSYM
 endif
