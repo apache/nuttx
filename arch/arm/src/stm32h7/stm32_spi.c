@@ -515,7 +515,7 @@ static const struct spi_ops_s g_sp3iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi3register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
 
@@ -583,7 +583,7 @@ static const struct spi_ops_s g_sp4iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi4register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
 
@@ -651,7 +651,7 @@ static const struct spi_ops_s g_sp5iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi5register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
 
@@ -719,7 +719,7 @@ static const struct spi_ops_s g_sp6iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi6register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
 
@@ -1924,6 +1924,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   static uint8_t rxdummy[ARMV7M_DCACHE_LINESIZE]
     __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
   static const uint16_t txdummy = 0xffff;
+  FAR void * orig_rxbuffer = rxbuffer;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1955,39 +1956,60 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       return;
     }
 
-  /* Setup the DMA configs */
+  /* If this bus uses the driver's DMA aligned buffers (priv->txbuf != NULL)
+   * we will incur 2 copies. However the copy cost is much less the non
+   * DMA transfer time. Having the buffer in the driver ensures DMA can be
+   * used. This is needed because the stm32_dmacapable API does not support
+   * passing the buffer extent. So the only extent calculated is buffer
+   * plus the transfer size. The sizes can be less than a cache line size,
+   * and not aligned and are typically greater then 4 bytes, which is
+   * about the break even point for the DMA IO overhead.
+   */
+
+  /* Does bus support in driver DMA buffering? */
+
+  if (priv->txbuf)
+    {
+      if (nbytes > priv->buflen)
+        {
+          /* Buffer is too big for internal DMA buffer so fall back. */
+
+          spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
+          return;
+        }
+
+      /* First copy: If provided, copy caller's buffer to the internal DMA
+       * txbuf
+       */
+
+      if (txbuffer)
+        {
+          memcpy(priv->txbuf, txbuffer, nbytes);
+
+          /* Adjust pointers to internal DMA buffers */
+
+          txbuffer  = priv->txbuf;
+        }
+
+      /* orig_rxbuffer holds the callers return buffer */
+
+      rxbuffer  = rxbuffer ? priv->rxbuf : rxbuffer;
+    }
+
+  /* Setup the DMA configs using the internal or external set of buffers */
 
   spi_dmatxsetup(priv, txbuffer, &txdummy, nwords, &txdmacfg);
   spi_dmarxsetup(priv, rxbuffer, (uint16_t *)rxdummy, nwords, &rxdmacfg);
 
 #ifdef CONFIG_STM32H7_DMACAPABLE
 
-  /* Setup DMAs */
-
-  /* If this bus uses a in driver buffers we will incur 2 copies,
-   * The copy cost is << less the non DMA transfer time and having
-   * the buffer in the driver ensures DMA can be used. This is bacause
-   * the API does not support passing the buffer extent so the only
-   * extent is buffer + the transfer size. These can sizes be less than
-   * the cache line size, and not aligned and tyicaly greater then 4
-   * bytes, which is about the break even point for the DMA IO overhead.
+  /* Test for DMA capability of only callers buffers, internal buffers are
+   * guaranteed capable.
    */
 
-  if (txbuffer && priv->txbuf)
-    {
-      if (nbytes > priv->buflen)
-        {
-          nbytes = priv->buflen;
-        }
-
-      memcpy(priv->txbuf, txbuffer, nbytes);
-      txbuffer  = priv->txbuf;
-      rxbuffer  = rxbuffer ? priv->rxbuf : rxbuffer;
-    }
-
-  if ((priv->config != SIMPLEX_RX &&
+  if ((priv->config != SIMPLEX_RX && priv->txbuf == 0 &&
        !stm32_dmacapable(priv->txdma, &txdmacfg)) ||
-      (priv->config != SIMPLEX_TX &&
+      (priv->config != SIMPLEX_TX && priv->rxbuf == 0 &&
        !stm32_dmacapable(priv->rxdma, &rxdmacfg)))
     {
       /* Unsupported memory region fall back to non-DMA method. */
@@ -2009,29 +2031,6 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
        * 4. Enable the SPI by setting the SPE bit.
        */
 
-      spi_enable(priv, false);
-      spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, SPI_CFG1_TXDMAEN,
-                          SPI_CFG1_RXDMAEN);
-
-      spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
-              txbuffer, rxbuffer, nwords);
-      DEBUGASSERT(priv->spibase != 0);
-
-      /* Setup the DMA */
-
-      if (priv->config != SIMPLEX_RX)
-        {
-          stm32_dmasetup(priv->txdma, &txdmacfg);
-        }
-
-      if (priv->config != SIMPLEX_TX)
-        {
-          stm32_dmasetup(priv->rxdma, &rxdmacfg);
-        }
-
-      spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_TXDMAEN |
-                          SPI_CFG1_RXDMAEN);
-
       /* Flush cache to physical memory */
 
       if (txbuffer)
@@ -2044,6 +2043,35 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
           up_invalidate_dcache((uintptr_t)rxbuffer,
                                (uintptr_t)rxbuffer + nbytes);
         }
+
+      /* N.B. the H7 tri-states the clock output on SPI disable and
+       * unfortunately the Chip Select (CS) is active.  So we keep
+       * the device disabled for the minimum time, that meets the
+       * setup sequence criteria.
+       */
+
+      spi_enable(priv, false);
+      spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, SPI_CFG1_TXDMAEN,
+                          SPI_CFG1_RXDMAEN);
+
+      spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
+              txbuffer, rxbuffer, nwords);
+      DEBUGASSERT(priv->spibase != 0);
+
+      /* Setup the DMA */
+
+      if (priv->config != SIMPLEX_TX)
+        {
+          stm32_dmasetup(priv->rxdma, &rxdmacfg);
+        }
+
+      if (priv->config != SIMPLEX_RX)
+        {
+          stm32_dmasetup(priv->txdma, &txdmacfg);
+        }
+
+      spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, 0, SPI_CFG1_TXDMAEN |
+                          SPI_CFG1_RXDMAEN);
 
 #ifdef CONFIG_SPI_TRIGGER
       /* Is deferred triggering in effect? */
@@ -2078,7 +2106,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       spi_dmatxwait(priv);
 
       /* To close communication it is mandatory to follow these steps in
-       * order:
+       * this order:
        * 1. Disable DMA request for Tx and Rx in the DMA registers, if the
        *    DMA issued.
        * 2. Disable the SPI by following the SPI disable procedure.
@@ -2091,10 +2119,17 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                           SPI_CFG1_RXDMAEN, 0);
       spi_enable(priv, true);
 
+      /* Second copy: Copy the DMA internal buffer to caller's buffer */
+
+      if (orig_rxbuffer && priv->rxbuf)
+        {
+          memcpy(orig_rxbuffer, priv->rxbuf, nbytes);
+        }
+    }
+
 #ifdef CONFIG_SPI_TRIGGER
       priv->trigarmed = false;
 #endif
-    }
 }
 #endif /* CONFIG_STM32H7_SPI_DMA */
 
