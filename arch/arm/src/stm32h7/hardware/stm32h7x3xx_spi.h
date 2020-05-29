@@ -397,6 +397,22 @@
 #define SPI_SR_CTSIZE_SHIFT      (16)      /* Bits 16-31: number of data frames remaining in current TSIZE session */
 #define SPI_SR_CTSIZE_MASK       (1 << SPI_SR_CTSIZE_SHIFT)
 
+/* SPI/I2S interrupt/status flags interrupt enable register */
+
+#define SPI_IER_RXPIE            (1 << 0)  /* Bit 0: RXP Interrupt enable */
+#define SPI_IER_TXPIE            (1 << 1)  /* Bit 1: TXP interrupt enable */
+#define SPI_IER_DXPIE            (1 << 2)  /* Bit 2: DXP interrupt enable */
+#define SPI_IER_EOTIE            (1 << 3)  /* Bit 3: EOT, SUSP and TXC interrupt enable */
+#define SPI_IER_TXTFIE           (1 << 4)  /* Bit 4: TXTFIE interrupt enable */
+#define SPI_IER_UDRIE            (1 << 5)  /* Bit 5: UDR interrupt enable */
+#define SPI_IER_OVRIE            (1 << 6)  /* Bit 6: OVR interrupt enable */
+#define SPI_IER_CRCEIE           (1 << 7)  /* Bit 7: CRC error interrupt enable */
+#define SPI_IER_TIFREIE          (1 << 8)  /* Bit 8: TIFRE interrupt enable */
+#define SPI_IER_MODFIE           (1 << 9)  /* Bit 9: mode fault interrupt enable */
+#define SPI_IER_TSERFIE          (1 << 10) /* Bit 10: additional number of transactions
+                                            * reload interrupt enable
+                                            */
+
 /* SPI/I2S interrupt/status flags clear register */
 
                                            /* Bits 0-2: Reserved */
