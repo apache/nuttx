@@ -76,7 +76,7 @@ struct qemu_edu_priv_s
 
 static void qemu_edu_write_reg32(uintptr_t addr, uint32_t val);
 
-static void qemu_edu_read_reg32(uintptr_t addr, uint32_t val);
+static uint32_t qemu_edu_read_reg32(uintptr_t addr);
 
 static void qemu_edu_write_reg64(uintptr_t addr, uint64_t val);
 
