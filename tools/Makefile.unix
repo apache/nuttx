@@ -523,7 +523,6 @@ depend: pass1dep pass2dep
 $(foreach SDIR, $(CLEANDIRS), $(eval $(call SDIR_template,$(SDIR),clean)))
 
 subdir_clean: $(foreach SDIR, $(CLEANDIRS), $(SDIR)_clean)
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" clean
 ifeq ($(CONFIG_BUILD_2PASS),y)
 	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" clean
 endif
@@ -563,6 +562,7 @@ endif
 	$(Q) $(DIRUNLINK) $(ARCH_SRC)/board
 	$(Q) $(DIRUNLINK) $(ARCH_SRC)/chip
 	$(Q) $(DIRUNLINK) $(TOPDIR)/drivers/platform
+	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" clean
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps/ directory is included with NuttX,
