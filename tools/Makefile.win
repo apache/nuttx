@@ -330,13 +330,6 @@ clean_context:
 # execution will then be built from those libraries.  The following targets
 # build those libraries.
 
-include tools/LibTargets.mk
-
-# Build the incdir tools need for all builds
-
-tools\incdir$(HOSTEXEEXT):
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" incdir$(HOSTEXEEXT)
-
 # pass1 and pass2
 #
 # If the 2 pass build option is selected, then this pass1 target is
@@ -347,9 +340,9 @@ tools\incdir$(HOSTEXEEXT):
 # is an archive.  Exactly what is performed during pass1 or what it generates
 # is unknown to this makefile unless CONFIG_PASS1_OBJECT is defined.
 
-pass1: tools\incdir$(HOSTEXEEXT) $(USERLIBS)
+pass1: $(USERLIBS)
 
-pass2: tools\incdir$(HOSTEXEEXT) $(NUTTXLIBS)
+pass2: $(NUTTXLIBS)
 
 # $(BIN)
 #
