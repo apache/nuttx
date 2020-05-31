@@ -3381,7 +3381,7 @@ config STM32_I2SPLL
 
 config STM32_CCMEXCLUDE
 	bool "Exclude CCM SRAM from the heap"
-	default y if  ARCH_DMA || ELF
+	default y if  ARCH_DMA || LIBC_ARCH_ELF
 	depends on STM32_HAVE_CCM
 	---help---
 		Exclude CCM SRAM from the HEAP because (1) it cannot be used for DMA
