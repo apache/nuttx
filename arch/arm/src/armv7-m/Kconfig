@@ -183,7 +183,7 @@ config ARMV7M_TARGET2_PREL
 	bool "R_ARM_TARGET2 is PC relative"
 	default n if !CXX_EXCEPTION
 	default y if CXX_EXCEPTION
-	depends on ELF
+	depends on LIBC_ARCH_ELF
 	---help---
 		Perform a PC relative relocation for relocation type R_ARM_TARGET2
 
