@@ -1394,6 +1394,8 @@ static int fat_sync(FAR struct file *filep)
 
   if ((ff->ff_bflags & FFBUFF_MODIFIED) != 0)
     {
+      uint8_t dircopy[DIR_SIZE];
+
       /* Flush any unwritten data in the file buffer */
 
       ret = fat_ffcacheflush(fs, ff);
@@ -1419,6 +1421,10 @@ static int fat_sync(FAR struct file *filep)
       direntry = &fs->fs_buffer[(ff->ff_dirindex & DIRSEC_NDXMASK(fs)) *
                                  DIR_SIZE];
 
+      /* Copy directory entry */
+
+      memcpy(dircopy, direntry, DIR_SIZE);
+
       /* Set the archive bit, set the write time, and update
        * anything that may have* changed in the directory
        * entry: the file size, and the start cluster
@@ -1438,11 +1444,17 @@ static int fat_sync(FAR struct file *filep)
 
       ff->ff_bflags &= ~FFBUFF_MODIFIED;
 
+      /* Compare old and new directory entry */
+
+      if (memcmp(direntry, dircopy, DIR_SIZE) != 0)
+        {
+          fs->fs_dirty = true;
+        }
+
       /* Flush these change to disk and update FSINFO (if
        * appropriate.
        */
 
-      fs->fs_dirty = true;
       ret          = fat_updatefsinfo(fs);
     }
 
