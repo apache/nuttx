@@ -1,42 +1,20 @@
 /****************************************************************************
  * fs/fat/fs_fat32util.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013, 2015, 2017-2018 Gregory Nutt. All
- *     rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
- *   Microsoft FAT documentation
- *   Some good ideas were leveraged from the FAT implementation:
- *     'Copyright (C) 2007, ChaN, all right reserved.'
- *     which has an unrestricted license.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -205,7 +183,9 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
       return -EINVAL;
     }
 
-  /* Get the number of FATs. This is probably two but could have other values */
+  /* Get the number of FATs. This is probably two but could have other
+   * values.
+   */
 
   fs->fs_fatnumfats = FBR_GETNUMFATS(fs->fs_buffer);
   ntotalfatsects = fs->fs_fatnumfats * fs->fs_nfatsects;
@@ -521,7 +501,9 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
       goto errout;
     }
 
-  /* Make sure that that the media is write-able (if write access is needed) */
+  /* Make sure that that the media is write-able (if write access is
+   * needed).
+   */
 
   if (writeable && !geo.geo_writeenabled)
     {
@@ -886,7 +868,9 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
 
               cluster |= (unsigned int)fs->fs_buffer[fatindex] << 8;
 
-              /* Now, pick out the correct 12 bit cluster start sector value */
+              /* Now, pick out the correct 12 bit cluster start sector
+               * value.
+               */
 
               if ((clusterno & 1) != 0)
                 {
@@ -959,7 +943,9 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
 int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
                    off_t nextcluster)
 {
-  /* Verify that the cluster number is within range.  Zero erases the cluster. */
+  /* Verify that the cluster number is within range.  Zero erases the
+   * cluster.
+   */
 
   if (clusterno == 0 || (clusterno >= 2 && clusterno < fs->fs_nclusters))
     {
@@ -1403,7 +1389,9 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
 
               if (cluster < 2 || cluster >= fs->fs_nclusters)
                 {
-                  /* No, we have probably reached the end of the cluster list */
+                  /* No, we have probably reached the end of the cluster
+                   * list.
+                   */
 
                   return -ENOSPC;
                 }
@@ -2040,7 +2028,9 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
 {
   uint32_t nfreeclusters;
 
-  /* If number of the first free cluster is valid, then just return that value. */
+  /* If number of the first free cluster is valid, then just return that
+   * value.
+   */
 
   if (fs->fs_fsifreecount <= fs->fs_nclusters - 2)
     {
@@ -2059,7 +2049,9 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
 
       for (sector = 2; sector < fs->fs_nclusters; sector++)
         {
-          /* If the cluster is unassigned, then increment the count of free clusters */
+          /* If the cluster is unassigned, then increment the count of free
+           * clusters.
+           */
 
           if ((uint16_t)fat_getcluster(fs, sector) == 0)
             {
@@ -2081,7 +2073,9 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
 
       for (cluster = fs->fs_nclusters; cluster > 0; cluster--)
         {
-          /* If we are starting a new sector, then read the new sector in fs_buffer */
+          /* If we are starting a new sector, then read the new sector in
+           * fs_buffer.
+           */
 
           if (offset >= fs->fs_hwsectorsize)
             {
