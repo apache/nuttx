@@ -58,6 +58,7 @@ config ARCH_RV32IM
 config ARCH_RV64GC
 	bool
 	default n
+	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 
 config ARCH_FAMILY
 	string
