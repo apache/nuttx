@@ -1,42 +1,20 @@
 /****************************************************************************
  * fs/fat/fs_fat32.c
  *
- *   Copyright (C) 2007-2009, 2011-2015, 2017-2018 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
- *   Microsoft FAT documentation
- *   Some good ideas were leveraged from the FAT implementation:
- *     'Copyright (C) 2007, ChaN, all right reserved.'
- *     which has an unrestricted license.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -341,7 +319,9 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
       goto errout_with_struct;
     }
 
-  /* Initialize the file private data (only need to initialize non-zero elements) */
+  /* Initialize the file private data (only need to initialize non-zero
+   * elements).
+   */
 
   ff->ff_oflags           = oflags;
 
@@ -375,7 +355,9 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
 
   fat_semgive(fs);
 
-  /* In write/append mode, we need to set the file pointer to the end of the file */
+  /* In write/append mode, we need to set the file pointer to the end of
+   * the file.
+   */
 
   if ((oflags & (O_APPEND | O_WRONLY)) == (O_APPEND | O_WRONLY))
     {
@@ -1654,7 +1636,9 @@ static int fat_opendir(FAR struct inode *mountpt, FAR const char *relpath,
     }
   else
     {
-      /* This is not the root directory.  Verify that it is some kind of directory */
+      /* This is not the root directory.  Verify that it is some kind of
+       * directory.
+       */
 
       direntry = &fs->fs_buffer[dirinfo.fd_seq.ds_offset];
 
@@ -2335,7 +2319,9 @@ static int fat_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = MSDOS_SUPER_MAGIC;
 
-  /* We will claim that the optimal transfer size is the size of a cluster in bytes */
+  /* We will claim that the optimal transfer size is the size of a cluster
+   * in bytes.
+   */
 
   buf->f_bsize   = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
 
@@ -2344,8 +2330,10 @@ static int fat_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   ret = fat_nfreeclusters(fs, &buf->f_bfree); /* Free blocks in the file system */
   if (ret >= 0)
     {
-      buf->f_blocks  = fs->fs_nclusters;      /* Total data blocks in the file system */
-      buf->f_bavail  = buf->f_bfree;          /* Free blocks avail to non-superuser */
+      buf->f_blocks  = fs->fs_nclusters;      /* Total data blocks in the
+                                               * file system */
+      buf->f_bavail  = buf->f_bfree;          /* Free blocks avail to non-
+                                               * superuser */
 #ifdef CONFIG_FAT_LFN
       buf->f_namelen = LDIR_MAXFNAME;         /* Maximum length of filenames */
 #else
@@ -2537,7 +2525,9 @@ static int fat_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   fs->fs_currentsector = dirsector;
   memset(direntry, 0, fs->fs_hwsectorsize);
 
-  /* Now clear all sectors in the new directory cluster (except for the first) */
+  /* Now clear all sectors in the new directory cluster (except for the
+   * first).
+   */
 
   for (i = 1; i < fs->fs_fatsecperclus; i++)
     {
