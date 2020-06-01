@@ -56,6 +56,10 @@ ifeq ($(HOSTOS),Cygwin)
 CROSSDEV = i486-nuttx-elf-
 endif
 
+ifeq ($(CONFIG_HOST_MACOS),y)
+CROSSDEV = 86_64-elf-
+endif
+
 CC = $(CROSSDEV)gcc
 CPP = $(CROSSDEV)gcc -E
 LD = $(CROSSDEV)ld
