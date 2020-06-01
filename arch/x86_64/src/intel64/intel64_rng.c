@@ -39,8 +39,6 @@
 
 #include "up_internal.h"
 
-#include <immintrin.h>
-
 #if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
 
 /****************************************************************************
@@ -110,7 +108,7 @@ static ssize_t x86_rngread(struct file *filep, char *buffer, size_t buflen)
   size_t reqlen = buflen;
   for (; buflen > 8; buflen -= 8)
     {
-      while (_rdrand64_step((unsigned long long *)buffer) == 0)
+      while (__builtin_ia32_rdrand64_step((unsigned long long *)buffer) == 0)
         {
           sched_yield();
         }
@@ -120,7 +118,7 @@ static ssize_t x86_rngread(struct file *filep, char *buffer, size_t buflen)
 
   for (; buflen > 4; buflen -= 4)
     {
-      while (_rdrand32_step((unsigned int *)buffer) == 0)
+      while (__builtin_ia32_rdrand32_step((unsigned int *)buffer) == 0)
         {
           sched_yield();
         }
@@ -130,7 +128,7 @@ static ssize_t x86_rngread(struct file *filep, char *buffer, size_t buflen)
 
   for (; buflen > 2; buflen -= 2)
     {
-      while (_rdrand16_step((unsigned short *)buffer) == 0)
+      while (__builtin_ia32_rdrand16_step((unsigned short *)buffer) == 0)
         {
           sched_yield();
         }
@@ -142,7 +140,7 @@ static ssize_t x86_rngread(struct file *filep, char *buffer, size_t buflen)
     {
       unsigned short temp = 0;
 
-      while (_rdrand16_step(&temp) == 0)
+      while (__builtin_ia32_rdrand16_step(&temp) == 0)
         {
           sched_yield();
         }
