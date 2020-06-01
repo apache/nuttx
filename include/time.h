@@ -96,6 +96,10 @@
 
 #define TIMER_ABSTIME      1
 
+/* Time base values for timespec_get.  */
+
+#define TIME_UTC           1
+
 #ifndef CONFIG_LIBC_LOCALTIME
 /* Local time is the same as gmtime in this implementation */
 
@@ -196,6 +200,17 @@ clock_t clock(void);
 int clock_settime(clockid_t clockid, FAR const struct timespec *tp);
 int clock_gettime(clockid_t clockid, FAR struct timespec *tp);
 int clock_getres(clockid_t clockid, FAR struct timespec *res);
+
+#ifdef __cplusplus
+inline int timespec_get(FAR struct timespec *t, int b)
+{
+  return b == TIME_UTC ? (clock_gettime(CLOCK_REALTIME, t), b) : 0;
+}
+
+#else
+#define timespec_get(t, b) \
+  ((b) == TIME_UTC ? (clock_gettime(CLOCK_REALTIME, (t)), (b)) : 0)
+#endif
 
 time_t mktime(FAR struct tm *tp);
 FAR struct tm *gmtime(FAR const time_t *timep);
