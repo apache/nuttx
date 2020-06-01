@@ -109,6 +109,8 @@
 #define SEC_MODE_WEP     2
 #define SEC_MODE_WPA2PSK 8
 
+#define BULK_THRESHOLD (1024 * 8)
+
 /****************************************************************************
  * Private Data Types
  ****************************************************************************/
@@ -190,10 +192,12 @@ struct gs2200m_dev_s
   FAR struct spi_dev_s *spi;
   struct work_s        irq_work;
   sem_t                dev_sem;
+  bool                 int_enabled;
   dq_queue_t           pkt_q[16];
   uint16_t             pkt_q_cnt[16];
   uint16_t             valid_cid_bits;
   uint16_t             aip_cid_bits;
+  uint32_t             total_bulk;
   uint8_t              tx_buff[MAX_PKT_LEN];
   struct net_driver_s  net_dev;
   uint8_t              op_mode;
@@ -463,7 +467,8 @@ static void _push_data_to_pkt(struct pkt_dat_s *pkt, uint8_t data)
  * Name: _release_pkt_dat
  ****************************************************************************/
 
-static void _release_pkt_dat(struct pkt_dat_s *pkt_dat)
+static void _release_pkt_dat(FAR struct gs2200m_dev_s *dev,
+                             FAR struct pkt_dat_s *pkt_dat)
 {
   int i;
 
@@ -475,6 +480,15 @@ static void _release_pkt_dat(struct pkt_dat_s *pkt_dat)
   if (pkt_dat->len)
     {
       kmm_free(pkt_dat->data);
+
+      if (pkt_dat->type == TYPE_BULK_DATA_TCP ||
+          pkt_dat->type == TYPE_BULK_DATA_UDP)
+        {
+          /* Update total bulk data size */
+
+          ASSERT(dev->total_bulk >= pkt_dat->len);
+          dev->total_bulk -= pkt_dat->len;
+        }
     }
 
   pkt_dat->n   = 0;
@@ -525,51 +539,29 @@ static void _check_pkt_q_empty(FAR struct gs2200m_dev_s *dev, char cid)
  * Name: _control_pkt_q
  ****************************************************************************/
 
-static void _control_pkt_q(FAR struct gs2200m_dev_s *dev)
+static bool _control_pkt_q(FAR struct gs2200m_dev_s *dev)
 {
-  uint8_t c;
-  uint16_t mask;
-  bool over = false;
-
-  static bool enabled = true;
+  bool over = BULK_THRESHOLD < dev->total_bulk ? true : false;
 
   /* TODO: should enable again if disabled for long time
    * Or, should use flow control commands for gs2200m
    */
 
-  /* For all cid(c) */
-
-  for (c = 0; c < 16; c++)
-    {
-      mask = 1 << c;
-
-      if (!(dev->valid_cid_bits & mask))
-        {
-          continue;
-        }
-
-      /* Check the pkt_q_cnt */
-
-      if (4 <= dev->pkt_q_cnt[c])
-        {
-          over = true;
-          break;
-        }
-    }
-
-  if (enabled && over)
+  if (dev->int_enabled && over)
     {
       wlinfo("--- pkt_q[%d] exceeds, disable irq \n", c);
-      enabled = false;
+      dev->int_enabled = false;
       dev->lower->disable();
     }
 
-  if (!enabled && !over)
+  if (!dev->int_enabled && !over)
     {
       wlinfo("--- enable irq again \n");
       dev->lower->enable();
-      enabled = true;
+      dev->int_enabled = true;
     }
+
+  return over;
 }
 
 /****************************************************************************
@@ -592,7 +584,7 @@ static void _remove_and_free_pkt(FAR struct gs2200m_dev_s *dev, uint8_t c)
 
   /* Release the packet */
 
-  _release_pkt_dat(pkt_dat);
+  _release_pkt_dat(dev, pkt_dat);
   kmm_free(pkt_dat);
 }
 
@@ -1437,6 +1429,14 @@ static enum pkt_type_e gs2200m_recv_pkt(FAR struct gs2200m_dev_s *dev,
       pkt_dat->type = t;
     }
 
+  if (pkt_dat->type == TYPE_BULK_DATA_TCP ||
+      pkt_dat->type == TYPE_BULK_DATA_UDP)
+    {
+      /* Update total bulk data size */
+
+      dev->total_bulk += pkt_dat->len;
+    }
+
 errout:
   kmm_free(p);
   return t;
@@ -1534,7 +1534,7 @@ static enum pkt_type_e gs2200m_get_mac(FAR struct gs2200m_dev_s *dev)
     }
 
 errout:
-  _release_pkt_dat(&pkt_dat);
+  _release_pkt_dat(dev, &pkt_dat);
   return r;
 }
 
@@ -1640,7 +1640,7 @@ static enum pkt_type_e gs2200m_join_network(FAR struct gs2200m_dev_s *dev,
   inet_aton(addr[2], (struct in_addr *)&dev->net_dev.d_draddr);
 
 errout:
-  _release_pkt_dat(&pkt_dat);
+  _release_pkt_dat(dev, &pkt_dat);
   return r;
 }
 
@@ -1750,7 +1750,7 @@ enum pkt_type_e gs2200m_get_wstatus(FAR struct gs2200m_dev_s *dev)
     }
 
 errout:
-  _release_pkt_dat(&pkt_dat);
+  _release_pkt_dat(dev, &pkt_dat);
   return r;
 }
 
@@ -1804,7 +1804,7 @@ static enum pkt_type_e gs2200m_create_clnt(FAR struct gs2200m_dev_s *dev,
     }
 
 errout:
-  _release_pkt_dat(&pkt_dat);
+  _release_pkt_dat(dev, &pkt_dat);
   return r;
 }
 
@@ -1859,7 +1859,7 @@ static enum pkt_type_e gs2200m_start_server(FAR struct gs2200m_dev_s *dev,
     }
 
 errout:
-  _release_pkt_dat(&pkt_dat);
+  _release_pkt_dat(dev, &pkt_dat);
   return r;
 }
 
@@ -1955,7 +1955,7 @@ static enum pkt_type_e gs2200m_close_conn(FAR struct gs2200m_dev_s *dev,
   memset(&pkt_dat, 0, sizeof(pkt_dat));
   r = gs2200m_send_cmd(dev, cmd, &pkt_dat);
 
-  _release_pkt_dat(&pkt_dat);
+  _release_pkt_dat(dev, &pkt_dat);
   return r;
 }
 
@@ -2123,7 +2123,7 @@ static enum pkt_type_e gs2200m_get_cstatus(FAR struct gs2200m_dev_s *dev,
   r = TYPE_UNMATCH;
 
 errout:
-  _release_pkt_dat(&pkt_dat);
+  _release_pkt_dat(dev, &pkt_dat);
   return r;
 }
 
@@ -2919,6 +2919,7 @@ static void gs2200m_irq_worker(FAR void *arg)
   enum pkt_type_e t = TYPE_ERROR;
   struct pkt_dat_s *pkt_dat;
   bool ignored = false;
+  bool over;
   uint8_t c;
   char s_cid;
   char c_cid;
@@ -3031,11 +3032,15 @@ repeat:
       _enable_cid(&dev->aip_cid_bits, c_cid, true);
     }
 
+  /* Do packet flow control */
+
+  over = _control_pkt_q(dev);
+
 errout:
 
   if (ignored)
     {
-      _release_pkt_dat(pkt_dat);
+      _release_pkt_dat(dev, pkt_dat);
       kmm_free(pkt_dat);
       ignored = false;
     }
@@ -3045,7 +3050,7 @@ errout:
   wlinfo("== end: cid=%c (dready=%d, ec=%d) type=%d \n",
          pkt_dat->cid, n, ec, t);
 
-  if (1 == n)
+  if (1 == n && !over)
     {
       goto repeat;
     }
@@ -3185,6 +3190,7 @@ static int gs2200m_initialize(FAR struct gs2200m_dev_s *dev,
   /* Attach interrupt handler */
 
   lower->attach(gs2200m_irq, dev);
+  dev->int_enabled = true;
 
   /* Start gs2200m by sending commands */
 
