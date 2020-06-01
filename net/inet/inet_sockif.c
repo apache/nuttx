@@ -208,7 +208,8 @@ static int inet_udp_alloc(FAR struct socket *psock)
  *   families.
  *
  * Input Parameters:
- *   psock    A pointer to a user allocated socket structure to be initialized.
+ *   psock    A pointer to a user allocated socket structure to be
+ *            initialized.
  *   protocol (see sys/socket.h)
  *
  * Returned Value:
@@ -428,7 +429,8 @@ static int inet_bind(FAR struct socket *psock,
 
           ret = udp_bind(psock->s_conn, addr);
 #else
-          nwarn("WARNING: UDP stack is not available in this configuration\n");
+          nwarn("WARNING: UDP stack is not available in this "
+                "configuration\n");
           ret = -ENOSYS;
 #endif
         }
@@ -669,7 +671,8 @@ int inet_listen(FAR struct socket *psock, int backlog)
 static int inet_connect(FAR struct socket *psock,
                         FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  FAR const struct sockaddr_in *inaddr = (FAR const struct sockaddr_in *)addr;
+  FAR const struct sockaddr_in *inaddr =
+    (FAR const struct sockaddr_in *)addr;
 
   /* Verify that a valid address has been provided */
 
@@ -795,7 +798,8 @@ static int inet_connect(FAR struct socket *psock,
  * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr', Return: returned size of
+ *            'addr'
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
@@ -1160,8 +1164,8 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
  ****************************************************************************/
 
 static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
-                           size_t len, int flags, FAR const struct sockaddr *to,
-                           socklen_t tolen)
+                           size_t len, int flags,
+                           FAR const struct sockaddr *to, socklen_t tolen)
 {
   socklen_t minlen;
   ssize_t nsent;
@@ -1300,7 +1304,8 @@ static ssize_t inet_sendfile(FAR struct socket *psock,
  ****************************************************************************/
 
 static ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf,
-                             size_t len, int flags, FAR struct sockaddr *from,
+                             size_t len, int flags,
+                             FAR struct sockaddr *from,
                              FAR socklen_t *fromlen)
 {
   ssize_t ret;
