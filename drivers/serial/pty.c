@@ -673,6 +673,10 @@ static ssize_t pty_write(FAR struct file *filep,
                * How would we ripple the O_NONBLOCK characteristic to the
                * contained sink pipe?  file_vfcntl()?  Or FIONSPACE?  See the
                * TODO comment at the top of this file.
+               *
+               * NOTE: The newline is not included in total number of bytes
+               * written.  Otherwise, we would return more than the
+               * requested number of bytes.
                */
 
               nwritten = file_write(&dev->pd_sink, &cr, 1);
@@ -681,10 +685,6 @@ static ssize_t pty_write(FAR struct file *filep,
                   ntotal = nwritten;
                   break;
                 }
-
-              /* Update the count of bytes transferred */
-
-              ntotal++;
             }
 
           /* Transfer the (possibly translated) character..  This will block
