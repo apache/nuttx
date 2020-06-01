@@ -158,7 +158,15 @@ int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
 /* _Exit() is a stdlib.h equivalent to the unistd.h _exit() function */
 
 void      _exit(int status); /* See unistd.h */
-#define   _Exit(s) _exit(s)
+
+#ifdef __cplusplus
+inline void _Exit(int s)
+{
+  _exit(s);
+}
+#else
+#define _Exit(s) _exit(s)
+#endif
 
 /* System() command is not implemented in the NuttX libc because it is so
  * entangled with shell logic.  There is an experimental version at
@@ -187,13 +195,44 @@ double    strtod(FAR const char *str, FAR char **endptr);
 long double strtold(FAR const char *str, FAR char **endptr);
 #endif
 
-#define atoi(nptr)  ((int)strtol((nptr), NULL, 10))
-#define atol(nptr)  strtol((nptr), NULL, 10)
+#ifdef __cplusplus
+inline int atoi(FAR const char *nptr)
+{
+  return (int)strtol(nptr, NULL, 10);
+}
+#else
+#define atoi(nptr) ((int)strtol((nptr), NULL, 10))
+#endif
+
+#ifdef __cplusplus
+inline int atol(FAR const char *nptr)
+{
+  return strtol(nptr, NULL, 10);
+}
+#else
+#define atol(nptr) strtol((nptr), NULL, 10)
+#endif
+
 #ifdef CONFIG_HAVE_LONG_LONG
+#ifdef __cplusplus
+inline long long atoll(FAR const char *nptr)
+{
+  return strtoll(nptr, NULL, 10);
+}
+#else
 #define atoll(nptr) strtoll((nptr), NULL, 10)
 #endif
+#endif
+
 #ifdef CONFIG_HAVE_DOUBLE
-#define atof(nptr)  strtod((nptr), NULL)
+#ifdef __cplusplus
+inline double atof(FAR const char *nptr)
+{
+  return strtod(nptr, NULL);
+}
+#else
+#define atof(nptr) strtod((nptr), NULL)
+#endif
 #endif
 
 /* Binary to string conversions */
