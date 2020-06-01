@@ -29,6 +29,7 @@
 #include <nuttx/compiler.h>
 
 #include <sys/types.h>
+#include <errno.h>
 #include <stdint.h>
 #include <limits.h>
 
@@ -254,6 +255,21 @@ FAR void *realloc(FAR void *, size_t);
 FAR void *memalign(size_t, size_t);
 FAR void *zalloc(size_t);
 FAR void *calloc(size_t, size_t);
+
+#ifdef __cplusplus
+inline FAR void *aligned_alloc(size_t a, size_t s)
+{
+  return memalign(a, s);
+}
+
+inline int posix_memalign(FAR void **m, size_t a, size_t s)
+{
+  return (*m = memalign(a, s)) ? OK : ENOMEM;
+}
+#else
+#define aligned_alloc(a, s) memalign((a), (s))
+#define posix_memalign(m, a, s) ((*(m) = memalign((a), (s))) ? OK : ENOMEM)
+#endif
 
 struct mallinfo mallinfo(void);
 
