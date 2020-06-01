@@ -830,7 +830,7 @@ static int inet_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
     {
       /* If an address is provided, then the length must also be provided. */
 
-      DEBUGASSERT(addrlen > 0);
+      DEBUGASSERT(*addrlen > 0);
 
       /* A valid length depends on the address domain */
 
