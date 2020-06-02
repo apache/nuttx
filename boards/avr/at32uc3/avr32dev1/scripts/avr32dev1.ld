@@ -33,8 +33,6 @@
  *
  ****************************************************************************/
 
-OUTPUT_FORMAT("elf32-avr32", "elf32-avr32", "elf32-avr32")
-OUTPUT_ARCH(avr32:uc)
 ENTRY(_stext)
 
 /* The following assumes that the bootloader resides at 0x8000:0000 and so
