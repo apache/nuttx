@@ -160,8 +160,8 @@ int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
 
 void      _exit(int status); /* See unistd.h */
 
-#ifdef __cplusplus
-inline void _Exit(int s)
+#ifdef CONFIG_HAVE_INLINE
+static inline void _Exit(int s)
 {
   _exit(s);
 }
@@ -196,8 +196,8 @@ double    strtod(FAR const char *str, FAR char **endptr);
 long double strtold(FAR const char *str, FAR char **endptr);
 #endif
 
-#ifdef __cplusplus
-inline int atoi(FAR const char *nptr)
+#ifdef CONFIG_HAVE_INLINE
+static inline int atoi(FAR const char *nptr)
 {
   return (int)strtol(nptr, NULL, 10);
 }
@@ -205,8 +205,8 @@ inline int atoi(FAR const char *nptr)
 #define atoi(nptr) ((int)strtol((nptr), NULL, 10))
 #endif
 
-#ifdef __cplusplus
-inline int atol(FAR const char *nptr)
+#ifdef CONFIG_HAVE_INLINE
+static inline int atol(FAR const char *nptr)
 {
   return strtol(nptr, NULL, 10);
 }
@@ -215,8 +215,8 @@ inline int atol(FAR const char *nptr)
 #endif
 
 #ifdef CONFIG_HAVE_LONG_LONG
-#ifdef __cplusplus
-inline long long atoll(FAR const char *nptr)
+#ifdef CONFIG_HAVE_INLINE
+static inline long long atoll(FAR const char *nptr)
 {
   return strtoll(nptr, NULL, 10);
 }
@@ -226,8 +226,8 @@ inline long long atoll(FAR const char *nptr)
 #endif
 
 #ifdef CONFIG_HAVE_DOUBLE
-#ifdef __cplusplus
-inline double atof(FAR const char *nptr)
+#ifdef CONFIG_HAVE_INLINE
+static inline double atof(FAR const char *nptr)
 {
   return strtod(nptr, NULL);
 }
@@ -259,13 +259,13 @@ FAR void *memalign(size_t, size_t);
 FAR void *zalloc(size_t);
 FAR void *calloc(size_t, size_t);
 
-#ifdef __cplusplus
-inline FAR void *aligned_alloc(size_t a, size_t s)
+#ifdef CONFIG_HAVE_INLINE
+static inline FAR void *aligned_alloc(size_t a, size_t s)
 {
   return memalign(a, s);
 }
 
-inline int posix_memalign(FAR void **m, size_t a, size_t s)
+static inline int posix_memalign(FAR void **m, size_t a, size_t s)
 {
   return (*m = memalign(a, s)) ? OK : ENOMEM;
 }
