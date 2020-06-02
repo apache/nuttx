@@ -399,8 +399,8 @@ int main(int argc, char **argv, char **envp)
 
       if (compiler == COMPILER_ZDSII)
         {
-          /* FORM:  -stdinc: 'dir1;dir2;...;dirN'
-           *        -usrinc: 'dir1;dir2;...;dirN'
+          /* FORM:  -stdinc:'dir1;dir2;...;dirN'
+           *        -usrinc:'dir1;dir2;...;dirN'
            */
 
           /* Treat the first directory differently */
@@ -409,11 +409,11 @@ int main(int argc, char **argv, char **envp)
             {
               if (i == ndirs - 1)
                 {
-                  ret = my_asprintf(&segment, "%s '%s'", cmdarg, incpath);
+                  ret = my_asprintf(&segment, "%s'%s'", cmdarg, incpath);
                 }
               else
                 {
-                  ret = my_asprintf(&segment, "%s '%s", cmdarg, incpath);
+                  ret = my_asprintf(&segment, "%s'%s", cmdarg, incpath);
                 }
             }
           else

@@ -71,7 +71,7 @@ else
 
   # Escaped versions
 
-  ETOPDIR := ${shell echo "$(WTOPDIR)" | sed -e "s/ /%20/g"}
+  ETOPDIR := ${shell echo $(WTOPDIR) | sed -e "s/ /%20/g"}
   EZDSSTDINCDIR := ${shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g"}
   EZDSZILOGINCDIR := ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
 endif
