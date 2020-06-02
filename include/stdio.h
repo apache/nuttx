@@ -210,6 +210,7 @@ int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap);
 
 /* Operations on paths */
 
+FAR FILE *tmpfile(void);
 FAR char *tmpnam(FAR char *s);
 FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
 int       remove(FAR const char *path);
