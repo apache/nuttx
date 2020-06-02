@@ -410,6 +410,18 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 }
             }
 
+          if (c == 'j')
+            {
+              /* Same as long long if available. Otherwise, long. */
+
+#ifdef CONFIG_LIBC_LONG_LONG
+              flags |= FL_REPD_TYPE;
+#endif
+              flags |= FL_LONG;
+              flags &= ~FL_SHORT;
+              continue;
+            }
+
           if (c == 'l')
             {
               if ((flags & FL_LONG) != 0)
