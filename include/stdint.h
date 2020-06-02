@@ -299,5 +299,5 @@ typedef _int32_t            intmax_t;
 typedef _uint32_t           uintmax_t;
 #endif
 
-#endif /* CONFIG_ARCH_STDBOOL_H */
+#endif /* CONFIG_ARCH_STDINT_H */
 #endif /* __INCLUDE_STDINT_H */
