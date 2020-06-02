@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <stdio.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Public Functions
@@ -49,7 +50,5 @@
 
 int vprintf(FAR const IPTR char *fmt, va_list ap)
 {
-  /* vfprintf into stdout */
-
-  return vfprintf(stdout, fmt, ap);
+  return vdprintf(STDOUT_FILENO, fmt, ap);
 }
