@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-int mbtowc(FAR wchar_t * pwc, FAR const char *s, size_t n)
+int mbtowc(FAR wchar_t *pwc, FAR const char *s, size_t n)
 {
   if (s == NULL)
     {
@@ -64,7 +64,7 @@ int mbtowc(FAR wchar_t * pwc, FAR const char *s, size_t n)
 
   if (pwc)
     {
-      *pwc = (wchar_t) * s;
+      *pwc = (wchar_t)*s;
     }
 
   return (*s != '\0');

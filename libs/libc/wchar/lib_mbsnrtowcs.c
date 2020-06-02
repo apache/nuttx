@@ -84,7 +84,25 @@
 size_t mbsnrtowcs(FAR wchar_t *dst, FAR const char **src, size_t nms,
                   size_t len, FAR mbstate_t *ps)
 {
-  return len;
+  size_t i;
+
+  if (dst == NULL)
+    {
+      return strnlen(*src, nms);
+    }
+
+  for (i = 0; i < nms && i < len; i++)
+    {
+      dst[i] = (wchar_t)(*src)[i];
+      if (dst[i] == L'\0')
+        {
+          *src = NULL;
+          return i;
+        }
+    }
+
+  *src += i;
+  return i;
 }
 
 #endif /* CONFIG_LIBC_WCHAR */
