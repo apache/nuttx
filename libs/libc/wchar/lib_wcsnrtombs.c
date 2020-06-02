@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_asprintf.c
+ * libs/libc/wchar/lib_wcsnrtombs.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -85,9 +85,52 @@
  ****************************************************************************/
 
 size_t wcsnrtombs(FAR char *dst, FAR const wchar_t **src, size_t nwc,
-                  size_t len, mbstate_t *ps)
+                  size_t len, FAR mbstate_t *ps)
 {
-  return len;
+  size_t i;
+
+  if (dst == NULL)
+    {
+      for (i = 0; i < nwc; i++)
+        {
+          wchar_t wc = (*src)[i];
+
+          if (wc < 0 || wc > 0xff)
+            {
+              set_errno(EILSEQ);
+              return -1;
+            }
+
+          if (wc == L'\0')
+            {
+              return i;
+            }
+        }
+
+      return i;
+    }
+
+  for (i = 0; i < nwc && i < len; i++)
+    {
+      wchar_t wc = (*src)[i];
+
+      if (wc < 0 || wc > 0xff)
+        {
+          *src += i;
+          set_errno(EILSEQ);
+          return -1;
+        }
+
+      dst[i] = wc;
+      if (wc == L'\0')
+        {
+          *src = NULL;
+          return i;
+        }
+    }
+
+  *src += i;
+  return i;
 }
 
 #endif /* CONFIG_LIBC_WCHAR */

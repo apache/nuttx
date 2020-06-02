@@ -168,7 +168,7 @@ size_t            mbrtowc(FAR wchar_t *, FAR const char *, size_t,
                       FAR mbstate_t *);
 size_t            mbsnrtowcs(FAR wchar_t *, FAR const char **, size_t,
                       size_t, FAR mbstate_t *);
-size_t            mbsrtowcs(wchar_t *, FAR const char **, size_t,
+size_t            mbsrtowcs(FAR wchar_t *, FAR const char **, size_t,
                       FAR mbstate_t *);
 wint_t            putwc(wchar_t, FILE *);
 wint_t            putwchar(wchar_t);
