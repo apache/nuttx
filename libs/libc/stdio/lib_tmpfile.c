@@ -39,7 +39,7 @@ FAR FILE *tmpfile(void)
   fd = mkstemp(path);
   if (fd >= 0)
     {
-      unlink(fd);
+      unlink(path);
       fp = fdopen(fd, "w+");
       if (fp == NULL)
         {
