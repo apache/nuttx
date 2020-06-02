@@ -28,7 +28,8 @@ CSRCS += lib_strtod.c lib_strtof.c lib_strtold.c lib_checkbase.c
 CSRCS += lib_mktemp.c lib_mkstemp.c
 
 ifeq ($(CONFIG_LIBC_WCHAR),y)
-CSRCS += lib_mbtowc.c lib_wctomb.c
+CSRCS += lib_mblen.c lib_mbtowc.c lib_wctomb.c
+CSRCS += lib_mbstowcs.c lib_wcstombs.c
 endif
 
 ifeq ($(CONFIG_PSEUDOTERM_SUSV1),y)
