@@ -137,11 +137,11 @@ struct arg
   } value;
 };
 
- /****************************************************************************
-  * Private Constant Data
-  ****************************************************************************/
+/****************************************************************************
+ * Private Constant Data
+ ****************************************************************************/
 
- static const char g_nullstring[] = "(null)";
+static const char g_nullstring[] = "(null)";
 
 /****************************************************************************
  * Public Functions
@@ -250,7 +250,6 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 {
                   if ((flags & FL_ARGNUMBER) == 0)
                     {
-
                       /* No other flag except FL_WIDTH or FL_ZFILL (leading
                        * zeros) and argument number must be at least 1
                        */
@@ -281,11 +280,12 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                         {
                           index = prec;
                         }
+
                       if (index > 0 && index <= numargs)
                         {
                           if (stream == NULL)
                             {
-                              arglist[index-1].type = TYPE_INT;
+                              arglist[index - 1].type = TYPE_INT;
                               if (index > total_len)
                                 {
                                   total_len = index;
@@ -295,11 +295,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                             {
                               if ((flags & FL_PREC) == 0)
                                 {
-                                  width = (int)arglist[index-1].value.u;
+                                  width = (int)arglist[index - 1].value.u;
                                 }
                               else
                                 {
-                                  prec = (int)arglist[index-1].value.u;
+                                  prec = (int)arglist[index - 1].value.u;
                                 }
                             }
                         }
@@ -382,7 +382,8 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 {
                   /* The only known cases that the default will be hit are
                    * (1) the eZ80 which has sizeof(size_t) = 3 which is the
-                   * same as the sizeof(int).  And (2) if CONFIG_LIBC_LONG_LONG
+                   * same as the sizeof(int).  And (2) if
+                   * CONFIG_LIBC_LONG_LONG
                    * is not enabled and sizeof(size_t) is equal to
                    * sizeof(unsigned long long).  This latter case is an
                    * error.
@@ -473,36 +474,37 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                   if ((c >= 'E' && c <= 'G')
                       || (c >= 'e' && c <= 'g'))
                     {
-                      arglist[argnumber-1].type = TYPE_DOUBLE;
+                      arglist[argnumber - 1].type = TYPE_DOUBLE;
                     }
                   else if (c == 'i' || c == 'd' || c == 'u' || c == 'p')
                     {
                       if ((flags & FL_LONG) == 0)
                         {
-                          arglist[argnumber-1].type = TYPE_INT;
+                          arglist[argnumber - 1].type = TYPE_INT;
                         }
                       else if ((flags & FL_REPD_TYPE) == 0)
                         {
-                          arglist[argnumber-1].type = TYPE_LONG;
+                          arglist[argnumber - 1].type = TYPE_LONG;
                         }
                       else
                         {
-                          arglist[argnumber-1].type = TYPE_LONG_LONG;
+                          arglist[argnumber - 1].type = TYPE_LONG_LONG;
                         }
                     }
                   else if (c == 'c')
                     {
-                      arglist[argnumber-1].type = TYPE_INT;
+                      arglist[argnumber - 1].type = TYPE_INT;
                     }
                   else if (c == 's')
                     {
-                      arglist[argnumber-1].type = TYPE_CHAR_POINTER;
+                      arglist[argnumber - 1].type = TYPE_CHAR_POINTER;
                     }
 
                   if (argnumber > total_len)
                     {
                       total_len = argnumber;
                     }
+
                   continue; /* We do only parsing */
                 }
             }
@@ -572,7 +574,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
             {
-              value = arglist[argnumber-1].value.d;
+              value = arglist[argnumber - 1].value.d;
             }
           else
             {
@@ -751,7 +753,6 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
               n = exp > 0 ? exp : 0;    /* Exponent of left digit */
               do
                 {
-
                   /* Insert decimal point at correct place */
 
                   if (n == -1)
@@ -855,12 +856,11 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
       switch (c)
         {
-
         case 'c':
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
             {
-              buf[0] = (int)arglist[argnumber-1].value.u;
+              buf[0] = (int)arglist[argnumber - 1].value.u;
             }
           else
             {
@@ -878,7 +878,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
           if ((flags & FL_ARGNUMBER) != 0)
             {
-              pnt = (FAR char *)arglist[argnumber-1].value.cp;
+              pnt = (FAR char *)arglist[argnumber - 1].value.cp;
             }
           else
             {
@@ -930,7 +930,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = (long long)arglist[argnumber-1].value.ull;
+                  x = (long long)arglist[argnumber - 1].value.ull;
                 }
               else
                 {
@@ -947,7 +947,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = (long)arglist[argnumber-1].value.ul;
+                  x = (long)arglist[argnumber - 1].value.ul;
                 }
               else
                 {
@@ -962,7 +962,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = (int)arglist[argnumber-1].value.u;
+                  x = (int)arglist[argnumber - 1].value.u;
                 }
               else
                 {
@@ -1013,7 +1013,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = arglist[argnumber-1].value.ull;
+                  x = arglist[argnumber - 1].value.ull;
                 }
               else
                 {
@@ -1030,7 +1030,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = arglist[argnumber-1].value.ul;
+                  x = arglist[argnumber - 1].value.ul;
                 }
               else
                 {
@@ -1045,7 +1045,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
               if ((flags & FL_ARGNUMBER) != 0)
                 {
-                  x = (unsigned int)arglist[argnumber-1].value.u;
+                  x = (unsigned int)arglist[argnumber - 1].value.u;
                 }
               else
                 {
