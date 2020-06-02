@@ -39,11 +39,7 @@
  ****************************************************************************/
 
 #include <stdio.h>
-#include <syslog.h>
-
-#include <nuttx/syslog/syslog.h>
-
-#include "libc.h"
+#include <unistd.h>
 
 /****************************************************************************
  * Public Functions
@@ -59,11 +55,7 @@ int printf(FAR const IPTR char *fmt, ...)
   int     ret;
 
   va_start(ap, fmt);
-#if CONFIG_NFILE_STREAMS > 0
-  ret = vfprintf(stdout, fmt, ap);
-#else
-  ret = nx_vsyslog(LOG_INFO, fmt, &ap);
-#endif
+  ret = vdprintf(STDOUT_FILENO, fmt, ap);
   va_end(ap);
 
   return ret;

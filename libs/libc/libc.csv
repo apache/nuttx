@@ -214,7 +214,7 @@
 "usleep","unistd.h","","int","useconds_t"
 "vasprintf","stdio.h","","int","FAR char **","FAR const IPTR char *","va_list"
 "vfprintf","stdio.h","CONFIG_NFILE_STREAMS > 0","int","FAR FILE *","FAR const IPTR char *","va_list"
-"vprintf","stdio.h","CONFIG_NFILE_STREAMS > 0","int","FAR const IPTR char *","va_list"
+"vprintf","stdio.h","","int","FAR const IPTR char *","va_list"
 "vscanf","stdio.h","CONFIG_NFILE_STREAMS > 0","int","FAR const IPTR char *","va_list"
 "vsnprintf","stdio.h","","int","FAR char *","size_t","FAR const IPTR char *","va_list"
 "vsprintf","stdio.h","","int","FAR char *","FAR const IPTR char *","va_list"
