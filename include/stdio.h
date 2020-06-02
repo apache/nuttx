@@ -192,10 +192,11 @@ int    vfprintf(FAR FILE *stream, FAR const IPTR char *fmt,
          va_list ap);
 int    vfscanf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap);
 int    vprintf(FAR const IPTR char *fmt, va_list ap);
+int    vscanf(FAR const IPTR char *fmt, va_list ap);
 int    vsnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt,
          va_list ap);
 int    vsprintf(FAR char *buf, FAR const IPTR char *fmt, va_list ap);
-int    vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap);
+int    vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap);
 
 /* Operations on file descriptors including:
  *
