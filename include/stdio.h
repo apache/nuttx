@@ -153,7 +153,7 @@ FAR char *fgets(FAR char *s, int n, FAR FILE *stream);
 FAR FILE *fopen(FAR const char *path, FAR const char *type);
 int    fprintf(FAR FILE *stream, FAR const IPTR char *format, ...);
 int    fputc(int c, FAR FILE *stream);
-int    fputs(FAR const char *s, FAR FILE *stream);
+int    fputs(FAR const IPTR char *s, FAR FILE *stream);
 size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream);
 FAR FILE *freopen(FAR const char *path, FAR const char *mode,
          FAR FILE *stream);
@@ -178,7 +178,7 @@ int    ungetc(int c, FAR FILE *stream);
 
 void   perror(FAR const char *s);
 int    printf(FAR const IPTR char *fmt, ...);
-int    puts(FAR const char *s);
+int    puts(FAR const IPTR char *s);
 int    rename(FAR const char *oldpath, FAR const char *newpath);
 int    sprintf(FAR char *buf, FAR const IPTR char *fmt, ...);
 int    asprintf(FAR char **ptr, FAR const IPTR char *fmt, ...);
