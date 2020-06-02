@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/ctype.h
  *
- *   Copyright (C) 2007-2009, 2011, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014, 2016 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +62,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int isspace(int c)
 {
   return c == ' ' || c == '\t' || c == '\n' || c == '\r' ||
@@ -82,7 +83,7 @@ static inline int isspace(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int isascii(int c)
 {
   return c >= 0 && c <= 0x7f;
@@ -99,7 +100,7 @@ static inline int isascii(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int isprint(int c)
 {
   return c >= 0x20 && c < 0x7f;
@@ -116,7 +117,7 @@ static inline int isprint(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int isgraph(int c)
 {
   return c > 0x20 && c < 0x7f;
@@ -133,7 +134,7 @@ static inline int isgraph(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int iscntrl(int c)
 {
   return !isprint(c);
@@ -150,7 +151,7 @@ static inline int iscntrl(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int islower(int c)
 {
   return c >= 'a' && c <= 'z';
@@ -167,7 +168,7 @@ static inline int islower(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int isupper(int c)
 {
   return c >= 'A' && c <= 'Z';
@@ -184,7 +185,7 @@ static inline int isupper(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int isalpha(int c)
 {
   return islower(c) || isupper(c);
@@ -201,7 +202,7 @@ static inline int isalpha(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int isblank(int c)
 {
   return c == ' ' || c == '\t';
@@ -218,7 +219,7 @@ static inline int isblank(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int isdigit(int c)
 {
   return c >= '0' && c <= '9';
@@ -235,7 +236,7 @@ static inline int isdigit(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int isalnum(int c)
 {
   return isalpha(c) || isdigit(c);
@@ -253,7 +254,7 @@ static inline int isalnum(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int ispunct(int c)
 {
   return isgraph(c) && !isalnum(c);
@@ -270,7 +271,7 @@ static inline int ispunct(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int isxdigit(int c)
 {
   return (c >= '0' && c <= '9') ||
@@ -292,7 +293,7 @@ static inline int isxdigit(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int toupper(int c)
 {
   return (c >= 'a' && c <= 'z') ? c - 'a' + 'A' : c;
@@ -310,7 +311,7 @@ static inline int toupper(int c)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 static inline int tolower(int c)
 {
   return (c >= 'A' && c <= 'Z') ? (c - 'A' + 'a') : c;
@@ -322,10 +323,6 @@ static inline int tolower(int c)
 
 /****************************************************************************
  * Public Type Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
  ****************************************************************************/
 
 #ifdef __cplusplus

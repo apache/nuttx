@@ -48,11 +48,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_HAVE_INLINE) && !defined(__cplusplus)
+#ifndef CONFIG_HAVE_INLINE
 /* Compatibility definitions
  *
- * Marked LEGACY in Open Group Base Specifications Issue 6/IEEE Std 1003.1-2004
- * Removed from Open Group Base Specifications Issue 7/IEEE Std 1003.1-2008
+ * Marked LEGACY in Open Group Base Specifications Issue 6/
+ * IEEE Std 1003.1-2004
+ * Removed from Open Group Base Specifications Issue 7/
+ * IEEE Std 1003.1-2008
  */
 
 #  define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
@@ -61,7 +63,7 @@
 #  define index(s,c)       strchr(s,c)
 #  define rindex(s,c)      strrchr(s,c)
 
-#endif /* !CONFIG_HAVE_INLINE && !__cplusplus */
+#endif /* !CONFIG_HAVE_INLINE */
 
 /****************************************************************************
  * Inline Functions
@@ -76,11 +78,13 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if defined(CONFIG_HAVE_INLINE) || defined(__cplusplus)
+#ifdef CONFIG_HAVE_INLINE
 /* Compatibility inline functions.
  *
- * Marked LEGACY in Open Group Base Specifications Issue 6/IEEE Std 1003.1-2004
- * Removed from Open Group Base Specifications Issue 7/IEEE Std 1003.1-2008
+ * Marked LEGACY in Open Group Base Specifications Issue 6/
+ * IEEE Std 1003.1-2004
+ * Removed from Open Group Base Specifications Issue 7/
+ * IEEE Std 1003.1-2008
  */
 
 static inline int bcmp(FAR const void *b1, FAR const void *b2, size_t len)
@@ -107,7 +111,7 @@ static inline FAR char *rindex(FAR const char *s, int c)
 {
   return strrchr(s, c);
 }
-#endif /* CONFIG_HAVE_INLINE || __cplusplus */
+#endif /* CONFIG_HAVE_INLINE */
 
 /****************************************************************************
  * Public Function Prototypes

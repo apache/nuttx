@@ -201,8 +201,8 @@ int clock_settime(clockid_t clockid, FAR const struct timespec *tp);
 int clock_gettime(clockid_t clockid, FAR struct timespec *tp);
 int clock_getres(clockid_t clockid, FAR struct timespec *res);
 
-#ifdef __cplusplus
-inline int timespec_get(FAR struct timespec *t, int b)
+#ifdef CONFIG_HAVE_INLINE
+static inline int timespec_get(FAR struct timespec *t, int b)
 {
   return b == TIME_UTC ? (clock_gettime(CLOCK_REALTIME, t), b) : 0;
 }
