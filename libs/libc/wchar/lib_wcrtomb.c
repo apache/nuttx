@@ -62,7 +62,7 @@ size_t wcrtomb(FAR char *s, wchar_t wc, FAR mbstate_t *ps)
 
   if (s == NULL)
     {
-      retval = wctomb(buf, L'\0');
+      retval = wctomb(buf, wc);
     }
   else
     {
