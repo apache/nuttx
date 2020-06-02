@@ -614,8 +614,13 @@ struct stm32_dev_s g_sdmmcdev2 =
     .attach           = stm32_attach,
     .sendcmd          = stm32_sendcmd,
     .blocksetup       = stm32_blocksetup,
+#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+    .recvsetup        = stm32_dmarecvsetup,
+    .sendsetup        = stm32_dmasendsetup,
+#else
     .recvsetup        = stm32_recvsetup,
     .sendsetup        = stm32_sendsetup,
+#endif
     .cancel           = stm32_cancel,
     .waitresponse     = stm32_waitresponse,
     .recv_r1          = stm32_recvshortcrc,
