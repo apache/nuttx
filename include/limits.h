@@ -49,7 +49,9 @@
 /********************************************************************************
  * Pre-processor Definitions
  ********************************************************************************/
+
 /* Default values for user configurable limits **********************************/
+
 /* Maximum number of bytes in a filename (not including terminating null). */
 
 #ifndef CONFIG_NAME_MAX
@@ -67,6 +69,13 @@
 #    define CONFIG_PATH_MAX 256
 #  endif
 #endif
+
+/* Maximum length of any multibyte character in any locale.
+ * We define this value here since the gcc header does not define
+ * the correct value.
+ */
+
+#define MB_LEN_MAX            1
 
 /* Configurable limits required by POSIX ****************************************
  *
@@ -303,6 +312,7 @@
 #define SEM_VALUE_MAX  _POSIX_SEM_VALUE_MAX
 
 /* Required for readv() and writev() */
+
 /* There really is no upper limit on the number of vectors */
 
 #define IOV_MAX        INT_MAX
