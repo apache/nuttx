@@ -49,7 +49,7 @@
  *      is configured.
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
- *   4. The handle returned by stm32_i2sdev_initialize() may then be used to
+ *   4. The handle returned by stm32_i2sbus_initialize() may then be used to
  *     bind the I2S driver to higher level logic
  *
  ****************************************************************************/
@@ -2604,7 +2604,7 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_i2sdev_initialize
+ * Name: stm32_i2sbus_initialize
  *
  * Description:
  *   Initialize the selected i2S port
@@ -2617,7 +2617,7 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
  *
  ****************************************************************************/
 
-FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port)
+FAR struct i2s_dev_s *stm32_i2sbus_initialize(int port)
 {
   FAR struct stm32_i2s_s *priv = NULL;
   irqstate_t flags;

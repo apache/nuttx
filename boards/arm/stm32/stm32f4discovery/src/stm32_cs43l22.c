@@ -297,7 +297,7 @@ int stm32_cs43l22_initialize(int minor)
         }
       /* Get an instance of the I2S interface for the CS43L22 data channel */
 
-      i2s = stm32_i2sdev_initialize(CS43L22_I2S_BUS);
+      i2s = stm32_i2sbus_initialize(CS43L22_I2S_BUS);
       if (!i2s)
         {
           auderr("ERROR: Failed to initialize I2S%d\n", CS43L22_I2S_BUS);
