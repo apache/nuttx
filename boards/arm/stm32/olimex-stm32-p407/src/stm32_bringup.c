@@ -213,6 +213,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef HAVE_CS4344
+  /* Configure CS4344 audio */
+
+  ret = stm32_cs4344_initialize(1);
+  if (ret != OK)
+    {
+      serr("Failed to initialize CS43L22 audio: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

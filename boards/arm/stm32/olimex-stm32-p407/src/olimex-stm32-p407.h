@@ -48,6 +48,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <stdint.h>
+#include <arch/stm32/chip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -187,6 +188,18 @@
 #  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTB|GPIO_PIN10)
 #endif
 
+/* The CS4344 depends on the CS4344 driver and I2S3 support */
+
+#if defined(CONFIG_AUDIO_CS4344) && defined(CONFIG_STM32_I2S3)
+#  define HAVE_CS4344
+#endif
+
+#ifdef HAVE_CS4344
+  /* The CS4344 transfers data on I2S3 */
+
+#  define CS4344_I2S_BUS      3
+#endif
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
@@ -288,6 +301,27 @@ int stm32_adc_setup(void);
 
 #ifdef CONFIG_CAN
 int stm32_can_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_cs4344_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the CS4344 device.  This function will register the driver
+ *   as /dev/audio/pcm[x] where x is determined by the minor device number.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_CS4344
+int stm32_cs4344_initialize(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
