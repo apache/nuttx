@@ -44,7 +44,6 @@
 #include <nuttx/audio/i2s.h>
 
 #include "chip.h"
-#include "hardware/stm32_i2s.h"
 
 #ifndef __ASSEMBLY__
 
