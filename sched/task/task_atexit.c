@@ -97,7 +97,7 @@ int atexit(void (*func)(void))
 
   return on_exit((onexitfunc_t)func, NULL);
 
-#elif defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
+#else
   FAR struct tcb_s *tcb = this_task();
   FAR struct task_group_s *group = tcb->group;
   int index;
@@ -117,11 +117,11 @@ int atexit(void (*func)(void))
        * higher to lower indices.
        */
 
-      for (index = 0; index < CONFIG_SCHED_ATEXIT_MAX; index++)
+      for (index = 0; index < CONFIG_SCHED_EXIT_MAX; index++)
         {
-          if (!group->tg_atexitfunc[index])
+          if (!group->tg_exit[index].func.at)
             {
-              group->tg_atexitfunc[index] = func;
+              group->tg_exit[index].func.at = func;
               ret = OK;
               break;
             }
@@ -130,24 +130,6 @@ int atexit(void (*func)(void))
       sched_unlock();
     }
 
-  return ret;
-#else
-  FAR struct tcb_s *tcb = this_task();
-  FAR struct task_group_s *group = tcb->group;
-  int ret = ERROR;
-
-  DEBUGASSERT(group);
-
-  /* The following must be atomic */
-
-  sched_lock();
-  if (func && !group->tg_atexitfunc)
-    {
-      group->tg_atexitfunc = func;
-      ret = OK;
-    }
-
-  sched_unlock();
   return ret;
 #endif
 }
