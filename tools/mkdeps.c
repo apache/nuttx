@@ -59,6 +59,7 @@
 
 #define MAX_BUFFER  (4096)
 #define MAX_EXPAND  (2048)
+#define MAX_SHQUOTE (2048)
 
 /* MAX_PATH might be defined in stdlib.h */
 
@@ -123,6 +124,7 @@ static char g_expand[MAX_EXPAND];
 static char g_dequoted[MAX_PATH];
 static char g_posixpath[MAX_PATH];
 #endif
+static char g_shquote[MAX_SHQUOTE];
 
 /****************************************************************************
  * Private Functions
@@ -201,7 +203,7 @@ static char *my_strtok_r(char *str, const char *delim, char **saveptr)
 #define strtok_r my_strtok_r
 #endif
 
-static void append(char **base, char *str)
+static void append(char **base, const char *str)
 {
   char *oldbase;
   char *newbase;
@@ -296,10 +298,75 @@ static void show_usage(const char *progname, const char *msg, int exitcode)
   exit(exitcode);
 }
 
+/****************************************************************************
+ * Name: do_shquote
+ *
+ * Description:
+ *    Escape the given string for use with the shell.
+ *
+ *    The idea was taken from:
+ *    https://netbsd.gw.com/cgi-bin/man-cgi?shquote++NetBSD-current
+ *    However, this implementation doesn't try to elide extraneous quotes.
+ ****************************************************************************/
+
+static const char *do_shquote(const char *argument)
+{
+  const char *src;
+  char *dest;
+  int len;
+
+  src  = argument;
+  dest = g_shquote;
+  len  = 0;
+
+  if (len < sizeof(g_shquote))
+    {
+      *dest++ = '\'';
+      len++;
+    }
+
+  while (*src && len < sizeof(g_shquote))
+    {
+      if (*src == '\'')
+        {
+          /* Expand single quote to '\'' */
+
+          if (len + 4 > sizeof(g_shquote))
+            {
+              break;
+            }
+
+          src++;
+          memcpy(dest, "\'\\\'\'", 4);
+          dest += 4;
+          len += 4;
+        }
+      else
+        {
+          *dest++ = *src++;
+          len++;
+        }
+    }
+
+  if (*src || len + 2 > sizeof(g_shquote))
+    {
+      fprintf(stderr,
+              "ERROR: Truncated during shquote string is too long"
+              "[%lu/%zu]\n", (unsigned long)strlen(argument),
+              sizeof(g_shquote));
+      exit(EXIT_FAILURE);
+    }
+
+  *dest++ = '\'';
+  *dest = '\0';
+  return g_shquote;
+}
+
 static void parse_args(int argc, char **argv)
 {
   char *args = NULL;
   int argidx;
+  int group = 0;
 
   /* Always look in the current directory */
 
@@ -314,6 +381,7 @@ static void parse_args(int argc, char **argv)
           g_cc = g_cflags;
           g_cflags = args;
           args = NULL;
+          group++;
         }
       else if (strcmp(argv[argidx], "--dep-debug") == 0)
         {
@@ -375,7 +443,27 @@ static void parse_args(int argc, char **argv)
         }
       else
         {
-          append(&args, argv[argidx]);
+          const char *arg = argv[argidx];
+
+          /* This condition means "perform shquote for
+           * g_cflags, but not g_cc or g_files".
+           *
+           * It isn't safe to escape g_cc becuase, for some reasons,
+           * Makefile passes it as a single argument like:
+           *
+           *    $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS)
+           *
+           * It isn't safe to escape g_files becuase
+           * do_dependency() uses them as bare filenames as well.
+           * (In addition to passing them to system().)
+           */
+
+          if (group == 1)
+            {
+               arg = do_shquote(arg);
+            }
+
+          append(&args, arg);
         }
     }
 
