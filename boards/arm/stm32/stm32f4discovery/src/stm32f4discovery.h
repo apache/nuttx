@@ -438,7 +438,7 @@ void weak_function stm32_spidev_initialize(void);
  *
  ****************************************************************************/
 
-FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port);
+void weak_function stm32_i2sdev_initialize(void);
 
 /****************************************************************************
  * Name: stm32_bh1750initialize
