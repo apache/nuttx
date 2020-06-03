@@ -53,6 +53,17 @@
 #ifdef CONFIG_SCHED_ATEXIT
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_ONEXIT
+static void exitfunc(int exitcode, FAR void *arg)
+{
+  (*(atexitfunc_t)arg)();
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -95,7 +106,7 @@ int atexit(void (*func)(void))
    * it expects).
    */
 
-  return on_exit((onexitfunc_t)func, NULL);
+  return on_exit(exitfunc, func);
 
 #else
   FAR struct tcb_s *tcb = this_task();
