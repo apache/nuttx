@@ -714,6 +714,17 @@ struct tcb_s
   FAR struct mqueue_inode_s *msgwaitq;   /* Waiting for this message queue      */
 #endif
 
+  /* Clean-up stack *************************************************************/
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+  /* tos   - The index to the next available entry at the top of the stack.
+   * stack - The pre-allocated clean-up stack memory.
+   */
+
+  uint8_t tos;
+  struct pthread_cleanup_s stack[CONFIG_PTHREAD_CLEANUP_STACKSIZE];
+#endif
+
   /* Pre-emption monitor support ************************************************/
 
 #ifdef CONFIG_SCHED_CRITMONITOR
@@ -790,17 +801,6 @@ struct pthread_tcb_s
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
   FAR struct pthread_mutex_s *mhead;     /* List of mutexes held by thread      */
-#endif
-
-  /* Clean-up stack *************************************************************/
-
-#ifdef CONFIG_PTHREAD_CLEANUP
-  /* tos   - The index to the next available entry at the top of the stack.
-   * stack - The pre-allocated clean-up stack memory.
-   */
-
-  uint8_t tos;
-  struct pthread_cleanup_s stack[CONFIG_PTHREAD_CLEANUP_STACKSIZE];
 #endif
 };
 #endif /* !CONFIG_DISABLE_PTHREAD */
