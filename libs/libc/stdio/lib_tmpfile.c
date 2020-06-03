@@ -32,7 +32,7 @@
 
 FAR FILE *tmpfile(void)
 {
-  char path[L_tmpnam] = "/tmp/XXXXXX.tmp";
+  char path[L_tmpnam] = P_tmpdir "/XXXXXX.tmp";
   FAR FILE *fp = NULL;
   int fd;
 
