@@ -352,8 +352,7 @@ static const char *do_shquote(const char *argument)
     {
       fprintf(stderr,
               "ERROR: Truncated during shquote string is too long"
-              "[%lu/%zu]\n", (unsigned long)strlen(argument),
-              sizeof(g_shquote));
+              "[%zu/%zu]\n", strlen(argument), sizeof(g_shquote));
       exit(EXIT_FAILURE);
     }
 
@@ -590,7 +589,7 @@ static const char *do_expand(const char *argument)
         {
           fprintf(stderr,
                   "ERROR: Truncated during expansion string is too long"
-                  "[%lu/%u]\n", (unsigned long)strlen(argument), MAX_EXPAND);
+                  "[%zu/%u]\n", strlen(argument), MAX_EXPAND);
           exit(EXIT_FAILURE);
         }
 
@@ -662,8 +661,7 @@ static const char *convert_path(const char *path)
                              NULL, 0);
       if (size > (MAX_PATH - 3))
         {
-          fprintf(stderr, "# ERROR: POSIX path too long: %lu\n",
-                  (unsigned long)size);
+          fprintf(stderr, "# ERROR: POSIX path too long: %zd\n", size);
           exit(EXIT_FAILURE);
         }
 
