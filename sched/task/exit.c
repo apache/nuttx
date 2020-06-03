@@ -83,7 +83,7 @@ void exit(int status)
    * exit through a different mechanism.
    */
 
-  group_kill_children((FAR struct task_tcb_s *)tcb);
+  group_kill_children(tcb);
 #endif
 
   /* Perform common task termination logic.  This will get called again later

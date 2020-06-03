@@ -273,7 +273,7 @@ static void nxsig_abnormal_termination(int signo)
    * task group if this_task is a pthread.
    */
 
-  group_kill_children((FAR struct task_tcb_s *)rtcb);
+  group_kill_children(rtcb);
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
