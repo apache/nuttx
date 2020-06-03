@@ -127,7 +127,7 @@ static int group_kill_children_handler(pid_t pid, FAR void *arg)
  *
  ****************************************************************************/
 
-int group_kill_children(FAR struct task_tcb_s *tcb)
+int group_kill_children(FAR struct tcb_s *tcb)
 {
   int ret;
 
@@ -136,8 +136,8 @@ int group_kill_children(FAR struct task_tcb_s *tcb)
    */
 
   sched_lock();
-  ret = group_foreachchild(tcb->cmn.group, group_kill_children_handler,
-                           (FAR void *)((uintptr_t)tcb->cmn.pid));
+  ret = group_foreachchild(tcb->group, group_kill_children_handler,
+                           (FAR void *)((uintptr_t)tcb->pid));
   sched_unlock();
   return ret;
 }

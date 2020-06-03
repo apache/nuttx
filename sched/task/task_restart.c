@@ -126,7 +126,7 @@ int task_restart(pid_t pid)
   /* Kill any children of this thread */
 
 #ifdef HAVE_GROUP_MEMBERS
-  group_kill_children(tcb);
+  group_kill_children((FAR struct tcb_s *)tcb);
 #endif
 
   /* Remove the TCB from whatever list it is in.  After this point, the TCB
