@@ -91,11 +91,10 @@
 
 int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 {
-#if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
   FAR struct tcb_s *tcb = this_task();
   FAR struct task_group_s *group = tcb->group;
-  int   index;
-  int   ret = ENOSPC;
+  int index;
+  int ret = ENOSPC;
 
   DEBUGASSERT(group);
 
@@ -111,12 +110,12 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
        * from higher to lower indices.
        */
 
-      for (index = 0; index < CONFIG_SCHED_ONEXIT_MAX; index++)
+      for (index = 0; index < CONFIG_SCHED_EXIT_MAX; index++)
         {
-          if (!group->tg_onexitfunc[index])
+          if (!group->tg_exit[index].func.on)
             {
-              group->tg_onexitfunc[index] = func;
-              group->tg_onexitarg[index]  = arg;
+              group->tg_exit[index].func.on = func;
+              group->tg_exit[index].arg     = arg;
               ret = OK;
               break;
             }
@@ -126,26 +125,6 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
     }
 
   return ret;
-#else
-  FAR struct tcb_s *tcb = this_task();
-  FAR struct task_group_s *group = tcb->group;
-  int   ret = ENOSPC;
-
-  DEBUGASSERT(group);
-
-  /* The following must be atomic */
-
-  sched_lock();
-  if (func && !group->tg_onexitfunc)
-    {
-      group->tg_onexitfunc = func;
-      group->tg_onexitarg  = arg;
-      ret = OK;
-    }
-
-  sched_unlock();
-  return ret;
-#endif
 }
 
 #endif /* CONFIG_SCHED_ONEXIT */

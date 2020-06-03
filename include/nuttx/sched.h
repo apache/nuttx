@@ -171,6 +171,18 @@
 #  define _SCHED_ERRVAL(r)           (-errno)
 #endif
 
+/* The number of callback can be saved */
+
+#if defined(CONFIG_SCHED_ONEXIT_MAX)
+#  define CONFIG_SCHED_EXIT_MAX CONFIG_SCHED_ONEXIT_MAX
+#elif defined(CONFIG_SCHED_ATEXIT_MAX)
+#  define CONFIG_SCHED_EXIT_MAX CONFIG_SCHED_ATEXIT_MAX
+#endif
+
+#if defined(CONFIG_SCHED_EXIT_MAX) && CONFIG_SCHED_EXIT_MAX < 1
+#  error "CONFIG_SCHED_EXIT_MAX < 1"
+#endif
+
 /********************************************************************************
  * Public Type Definitions
  ********************************************************************************/
@@ -400,6 +412,24 @@ struct stackinfo_s
                                          /* The initial stack pointer value     */
 };
 
+/* struct exitinfo_s ************************************************************/
+
+struct exitinfo_s
+{
+  union
+  {
+#ifdef CONFIG_SCHED_ATEXIT
+    atexitfunc_t at;
+#endif
+#ifdef CONFIG_SCHED_ONEXIT
+    onexitfunc_t on;
+#endif
+  } func;
+#ifdef CONFIG_SCHED_ONEXIT
+  FAR void *arg;
+#endif
+};
+
 /* struct task_group_s **********************************************************/
 
 /* All threads created by pthread_create belong in the same task group (along
@@ -463,26 +493,10 @@ struct task_group_s
   FAR pid_t *tg_members;            /* Members of the group                     */
 #endif
 
-#if defined(CONFIG_SCHED_ATEXIT) && !defined(CONFIG_SCHED_ONEXIT)
-  /* atexit support *************************************************************/
+  /* [at|on]exit support ********************************************************/
 
-# if defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
-  atexitfunc_t tg_atexitfunc[CONFIG_SCHED_ATEXIT_MAX];
-# else
-  atexitfunc_t tg_atexitfunc;       /* Called when exit is called.              */
-# endif
-#endif
-
-#ifdef CONFIG_SCHED_ONEXIT
-  /* on_exit support ************************************************************/
-
-# if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
-  onexitfunc_t tg_onexitfunc[CONFIG_SCHED_ONEXIT_MAX];
-  FAR void *tg_onexitarg[CONFIG_SCHED_ONEXIT_MAX];
-# else
-  onexitfunc_t tg_onexitfunc;       /* Called when exit is called.             */
-  FAR void *tg_onexitarg;           /* The argument passed to the function     */
-# endif
+#ifdef CONFIG_SCHED_EXIT_MAX
+  struct exitinfo_s tg_exit[CONFIG_SCHED_EXIT_MAX];
 #endif
 
 #ifdef CONFIG_BINFMT_LOADABLE
