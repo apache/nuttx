@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <string.h>
 #include <wchar.h>
 
 #ifdef CONFIG_LIBC_WCHAR
