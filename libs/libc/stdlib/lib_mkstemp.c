@@ -38,10 +38,6 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_TMPDIR
-#  define CONFIG_LIBC_TMPDIR "/tmp"
-#endif
-
 #define MAX_XS        6
 #define MIN_NUMERIC   0    /* 0-9:   Numeric */
 #define MAX_NUMERIC   9
