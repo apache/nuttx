@@ -39,7 +39,7 @@
 
 int pthread_cancel(pthread_t thread)
 {
-  FAR struct pthread_tcb_s *tcb;
+  FAR struct tcb_s *tcb;
 
   /* First, make sure that the handle references a valid thread */
 
@@ -52,7 +52,7 @@ int pthread_cancel(pthread_t thread)
       return ESRCH;
     }
 
-  tcb = (FAR struct pthread_tcb_s *)nxsched_get_tcb((pid_t)thread);
+  tcb = nxsched_get_tcb((pid_t)thread);
   if (tcb == NULL)
     {
       /* The pid does not correspond to any known thread.  The thread
@@ -64,7 +64,7 @@ int pthread_cancel(pthread_t thread)
 
   /* Only pthreads should use this interface */
 
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) ==
+  DEBUGASSERT((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
                TCB_FLAG_TTYPE_PTHREAD);
 
   /* Check to see if this thread has the non-cancelable bit set in its
@@ -73,7 +73,7 @@ int pthread_cancel(pthread_t thread)
    */
 
   sched_lock();
-  if ((tcb->cmn.flags & TCB_FLAG_NONCANCELABLE) != 0)
+  if ((tcb->flags & TCB_FLAG_NONCANCELABLE) != 0)
     {
       /* Then we cannot cancel the thread now.  Here is how this is
        * supposed to work:
@@ -88,7 +88,7 @@ int pthread_cancel(pthread_t thread)
        *  immediately, interrupting the thread with its processing."
        */
 
-      tcb->cmn.flags |= TCB_FLAG_CANCEL_PENDING;
+      tcb->flags |= TCB_FLAG_CANCEL_PENDING;
       sched_unlock();
       return OK;
     }
@@ -96,21 +96,21 @@ int pthread_cancel(pthread_t thread)
 #ifdef CONFIG_CANCELLATION_POINTS
   /* Check if this thread supports deferred cancellation */
 
-  if ((tcb->cmn.flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
+  if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
     {
       /* Then we cannot cancel the thread asynchronously.  Mark the
        * cancellation as pending.
        */
 
-      tcb->cmn.flags |= TCB_FLAG_CANCEL_PENDING;
+      tcb->flags |= TCB_FLAG_CANCEL_PENDING;
 
       /* If the thread is waiting at a cancellation point, then notify of the
        * cancellation thereby waking the task up with an ECANCELED error.
        */
 
-      if (tcb->cmn.cpcount > 0)
+      if (tcb->cpcount > 0)
         {
-          nxnotify_cancellation(&tcb->cmn);
+          nxnotify_cancellation(tcb);
         }
 
       sched_unlock();
@@ -126,7 +126,7 @@ int pthread_cancel(pthread_t thread)
    * same as pthread_exit(PTHREAD_CANCELED).
    */
 
-  if (tcb == (FAR struct pthread_tcb_s *)this_task())
+  if (tcb == this_task())
     {
       pthread_exit(PTHREAD_CANCELED);
     }
@@ -141,7 +141,7 @@ int pthread_cancel(pthread_t thread)
    * function will be unable to unlock its own mutexes.
    */
 
-  pthread_cleanup_popall((FAR struct tcb_s *)tcb);
+  pthread_cleanup_popall(tcb);
 #endif
 
   /* Complete pending join operations */

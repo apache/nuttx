@@ -93,6 +93,12 @@ void exit(int status)
   pthread_cleanup_popall(tcb);
 #endif
 
+#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
+  /* Recover any mutexes still held by the canceled thread */
+
+  pthread_mutex_inconsistent(tcb);
+#endif
+
   /* Perform common task termination logic.  This will get called again later
    * through logic kicked off by _exit().  However, we need to call it before
    * calling _exit() in order to handle atexit() and on_exit() callbacks and
