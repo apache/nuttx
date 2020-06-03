@@ -341,4 +341,22 @@
 #define BOARD_DHTXX_GPIO_OUTPUT  GPIO_DHTXX_PIN_OUTPUT
 #define BOARD_DHTXX_FRTIMER      1  /* Free-run timer 1 */
 
+/* SPI3 DMA -- As used for I2S DMA transfer with the audio configuration */
+
+#define GPIO_SPI3_MISO    GPIO_SPI3_MISO_1
+#define GPIO_SPI3_MOSI    GPIO_SPI3_MOSI_1
+#define GPIO_SPI3_SCK     GPIO_SPI3_SCK_1
+
+#define DMACHAN_SPI3_RX   DMAMAP_SPI3_RX_1
+#define DMACHAN_SPI3_TX   DMAMAP_SPI3_TX_1
+
+/* I2S3 - CS4344 configuration uses I2S3 */
+
+#define GPIO_I2S3_SD      GPIO_I2S3_SD_1
+#define GPIO_I2S3_CK      GPIO_I2S3_CK_1
+#define GPIO_I2S3_WS      GPIO_I2S3_WS_2
+
+#define DMACHAN_I2S3_RX   DMAMAP_SPI3_RX_2
+#define DMACHAN_I2S3_TX   DMAMAP_SPI3_TX_2
+
 #endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_P407_INCLUDE_BOARD_H */
