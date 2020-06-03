@@ -9313,7 +9313,7 @@ config STM32_I2S3_DATALEN
 
 #if STM32_I2S
 config STM32_I2S3_RX
-	bool "Enable I2C receiver"
+	bool "Enable I2S receiver"
 	default n
 	---help---
 		Enable I2S receipt logic
