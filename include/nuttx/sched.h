@@ -714,6 +714,12 @@ struct tcb_s
   FAR struct mqueue_inode_s *msgwaitq;   /* Waiting for this message queue      */
 #endif
 
+  /* Robust mutex support *******************************************************/
+
+#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
+  FAR struct pthread_mutex_s *mhead;     /* List of mutexes held by thread      */
+#endif
+
   /* Clean-up stack *************************************************************/
 
 #ifdef CONFIG_PTHREAD_CLEANUP
@@ -796,12 +802,6 @@ struct pthread_tcb_s
 
   pthread_addr_t arg;                    /* Startup argument                    */
   FAR void *joininfo;                    /* Detach-able info to support join    */
-
-  /* Robust mutex support *******************************************************/
-
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  FAR struct pthread_mutex_s *mhead;     /* List of mutexes held by thread      */
-#endif
 };
 #endif /* !CONFIG_DISABLE_PTHREAD */
 

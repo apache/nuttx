@@ -124,7 +124,7 @@ void pthread_exit(FAR void *exit_value)
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
   /* Recover any mutexes still held by the canceled thread */
 
-  pthread_mutex_inconsistent((FAR struct pthread_tcb_s *)tcb);
+  pthread_mutex_inconsistent(tcb);
 #endif
 
   /* Perform common task termination logic.  This will get called again later
