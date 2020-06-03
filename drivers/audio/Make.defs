@@ -58,6 +58,10 @@ endif
 endif
 endif
 
+ifeq ($(CONFIG_AUDIO_CS4344),y)
+CSRCS += cs4344.c
+endif
+
 ifeq ($(CONFIG_AUDIO_WM8904),y)
 CSRCS += wm8904.c
 ifeq ($(CONFIG_WM8904_REGDUMP),y)

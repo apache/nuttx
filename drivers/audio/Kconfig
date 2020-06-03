@@ -165,6 +165,39 @@ config CS43L22_CLKDEBUG
 
 endif # AUDIO_CS43L22
 
+config AUDIO_CS4344
+	bool "CS4344 audio chip"
+	default n
+	depends on AUDIO
+	---help---
+		Select to enable support for the CS4344 Audio codec by Cirrus Logic.
+		This chip is a lower level audio chip.. basically
+		an exotic D-to-A.  It includes no built-in support for audio CODECS.
+
+if AUDIO_CS4344
+
+config CS4344_INFLIGHT
+	int "CS4344 maximum in-flight audio buffers"
+	default 2
+
+config CS4344_MSG_PRIO
+	int "CS4344 message priority"
+	default 1
+
+config CS4344_BUFFER_SIZE
+	int "CS4344 preferred buffer size"
+	default 8192
+
+config CS4344_NUM_BUFFERS
+	int "CS4344 preferred number of buffers"
+	default 4
+
+config CS4344_WORKER_STACKSIZE
+	int "CS4344 worker thread stack size"
+	default 768
+
+endif # AUDIO_CS4344
+
 config AUDIO_WM8776
 	bool "WM8776 audio chip"
 	default n
