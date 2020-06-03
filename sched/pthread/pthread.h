@@ -99,7 +99,7 @@ int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
                             start_t start, pthread_startroutine_t entry);
 
 #ifdef CONFIG_PTHREAD_CLEANUP
-void pthread_cleanup_popall(FAR struct pthread_tcb_s *tcb);
+void pthread_cleanup_popall(FAR struct tcb_s *tcb);
 #endif
 
 int pthread_completejoin(pid_t pid, FAR void *exit_value);

@@ -141,7 +141,7 @@ int pthread_cancel(pthread_t thread)
    * function will be unable to unlock its own mutexes.
    */
 
-  pthread_cleanup_popall(tcb);
+  pthread_cleanup_popall((FAR struct tcb_s *)tcb);
 #endif
 
   /* Complete pending join operations */

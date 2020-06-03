@@ -57,8 +57,8 @@
  * Name: pthread_cleanup_pop_tcb
  *
  * Description:
- *   The pthread_cleanup_pop_tcb() function will remove the routine at the top
- *   of the calling thread's cancellation cleanup stack and optionally
+ *   The pthread_cleanup_pop_tcb() function will remove the routine at the
+ *   top of the calling thread's cancellation cleanup stack and optionally
  *   invoke it (if 'execute' is non-zero).
  *
  * Input Parameters:
@@ -72,7 +72,7 @@
  *
  ****************************************************************************/
 
-static void pthread_cleanup_pop_tcb(FAR struct pthread_tcb_s *tcb, int execute)
+static void pthread_cleanup_pop_tcb(FAR struct tcb_s *tcb, int execute)
 {
   if (tcb->tos > 0)
     {
@@ -124,7 +124,7 @@ static void pthread_cleanup_pop_tcb(FAR struct pthread_tcb_s *tcb, int execute)
  *
  *   - The thread exits (that is, calls pthread_exit()).
  *   - The thread acts upon a cancellation request.
- *   - The thread calls pthread_cleanup_pop() with a non-zero execute argument.
+ *   - The thread calls pthread_cleanup_pop() with non-zero execute argument.
  *
  * Input Parameters:
  *   routine - The cleanup routine to be pushed on the cleanup stack.
@@ -138,9 +138,7 @@ static void pthread_cleanup_pop_tcb(FAR struct pthread_tcb_s *tcb, int execute)
 
 void pthread_cleanup_pop(int execute)
 {
-  FAR struct pthread_tcb_s *tcb = (FAR struct pthread_tcb_s *)this_task();
-
-  /* We don't assert if called from a non-pthread; we just don't do anything */
+  FAR struct tcb_s *tcb = this_task();
 
   DEBUGASSERT(tcb != NULL);
 
@@ -150,19 +148,13 @@ void pthread_cleanup_pop(int execute)
    */
 
   sched_lock();
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
-    {
-      pthread_cleanup_pop_tcb(tcb, execute);
-    }
-
+  pthread_cleanup_pop_tcb(tcb, execute);
   sched_unlock();
 }
 
 void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
 {
-  FAR struct pthread_tcb_s *tcb = (FAR struct pthread_tcb_s *)this_task();
-
-  /* We don't assert if called from a non-pthread; we just don't do anything */
+  FAR struct tcb_s *tcb = this_task();
 
   DEBUGASSERT(tcb != NULL);
   DEBUGASSERT(tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
@@ -173,8 +165,7 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
    */
 
   sched_lock();
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD &&
-      tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE)
+  if (tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE)
     {
       unsigned int ndx = tcb->tos;
 
@@ -191,8 +182,8 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
  *
  * Description:
  *   The pthread_cleanup_popall() is an internal function that will pop and
- *   execute all clean-up functions.  This function is only called from within
- *   the pthread_exit() and pthread_cancellation() logic
+ *   execute all clean-up functions.  This function is only called from
+ *   within the pthread_exit() and pthread_cancellation() logic
  *
  * Input Parameters:
  *   tcb - The TCB of the pthread that is exiting or being canceled.
@@ -202,10 +193,9 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
  *
  ****************************************************************************/
 
-void pthread_cleanup_popall(FAR struct pthread_tcb_s *tcb)
+void pthread_cleanup_popall(FAR struct tcb_s *tcb)
 {
   DEBUGASSERT(tcb != NULL);
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD);
 
   /* Pop and execute each cleanup routine/
    *

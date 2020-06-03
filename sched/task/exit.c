@@ -34,6 +34,7 @@
 #include "task/task.h"
 #include "group/group.h"
 #include "sched/sched.h"
+#include "pthread/pthread.h"
 
 /****************************************************************************
  * Public Functions
@@ -84,6 +85,12 @@ void exit(int status)
    */
 
   group_kill_children(tcb);
+#endif
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+  /* Perform any stack pthread clean-up callbacks */
+
+  pthread_cleanup_popall(tcb);
 #endif
 
   /* Perform common task termination logic.  This will get called again later
