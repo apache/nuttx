@@ -104,6 +104,8 @@ MEMORY
     kseg1_datamem (rw!x) : ORIGIN = 0xa0000200, LENGTH = 512K - 640
 }
 
+OUTPUT_FORMAT("elf32-tradlittlemips")
+OUTPUT_ARCH(mips)
 ENTRY(__start)
 
 SECTIONS
