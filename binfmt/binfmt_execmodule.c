@@ -198,7 +198,7 @@ int exec_module(FAR const struct binary_s *binp)
     }
 #endif
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_SHM)
+#ifdef CONFIG_MM_SHM
   /* Initialize the shared memory virtual page allocator */
 
   ret = shm_group_initialize(tcb->cmn.group);
@@ -254,12 +254,7 @@ int exec_module(FAR const struct binary_s *binp)
 
   /* Then activate the task at the provided priority */
 
-  ret = nxtask_activate((FAR struct tcb_s *)tcb);
-  if (ret < 0)
-    {
-      berr("nxtask_activate() failed: %d\n", ret);
-      goto errout_with_tcbinit;
-    }
+  nxtask_activate((FAR struct tcb_s *)tcb);
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Restore the address environment of the caller */
@@ -274,11 +269,13 @@ int exec_module(FAR const struct binary_s *binp)
 
   return (int)pid;
 
+#if defined(CONFIG_ARCH_ADDRENV) || defined(CONFIG_MM_SHM)
 errout_with_tcbinit:
   tcb->cmn.stack_alloc_ptr = NULL;
   nxsched_release_tcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
   kumm_free(stack);
   return ret;
+#endif
 
 errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)

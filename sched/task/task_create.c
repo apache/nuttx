@@ -145,12 +145,7 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   /* Activate the task */
 
-  ret = nxtask_activate((FAR struct tcb_s *)tcb);
-  if (ret < OK)
-    {
-      goto errout_with_active;
-    }
-
+  nxtask_activate((FAR struct tcb_s *)tcb);
   return pid;
 
 errout_with_active:

@@ -989,11 +989,11 @@ void nxtask_uninit(FAR struct tcb_s *tcb);
  *         argument).
  *
  * Returned Value:
- *   Always returns OK
+ *   None
  *
  ********************************************************************************/
 
-int nxtask_activate(FAR struct tcb_s *tcb);
+void nxtask_activate(FAR struct tcb_s *tcb);
 
 /********************************************************************************
  * Name: nxtask_starthook

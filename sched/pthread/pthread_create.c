@@ -553,11 +553,8 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   sched_lock();
   if (ret == OK)
     {
-      ret = nxtask_activate((FAR struct tcb_s *)ptcb);
-    }
+      nxtask_activate((FAR struct tcb_s *)ptcb);
 
-  if (ret == OK)
-    {
       /* Wait for the task to actually get running and to register
        * its join structure.
        */

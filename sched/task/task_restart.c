@@ -73,7 +73,6 @@ int task_restart(pid_t pid)
 #ifdef CONFIG_SMP
   int cpu;
 #endif
-  int ret;
 
   /* Check if the task to restart is the calling task */
 
@@ -188,7 +187,7 @@ int task_restart(pid_t pid)
 
   if (cpu >= 0)
     {
-      ret = up_cpu_resume(cpu);
+      int ret = up_cpu_resume(cpu);
       if (ret < 0)
         {
           errcode = -ret;
@@ -201,14 +200,7 @@ int task_restart(pid_t pid)
 
   /* Activate the task. */
 
-  ret = nxtask_activate((FAR struct tcb_s *)tcb);
-  if (ret != OK)
-    {
-      nxtask_terminate(pid, true);
-      errcode = -ret;
-      goto errout_with_lock;
-    }
-
+  nxtask_activate((FAR struct tcb_s *)tcb);
   return OK;
 
 errout_with_lock:

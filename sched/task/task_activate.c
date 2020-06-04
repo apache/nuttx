@@ -49,11 +49,11 @@
  *         argument).
  *
  * Returned Value:
- *   Always returns OK
+ *   None
  *
  ****************************************************************************/
 
-int nxtask_activate(FAR struct tcb_s *tcb)
+void nxtask_activate(FAR struct tcb_s *tcb)
 {
   irqstate_t flags = enter_critical_section();
 
@@ -79,5 +79,4 @@ int nxtask_activate(FAR struct tcb_s *tcb)
 
   up_unblock_task(tcb);
   leave_critical_section(flags);
-  return OK;
 }
