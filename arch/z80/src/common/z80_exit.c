@@ -115,7 +115,7 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _exit
+ * Name: up_exit
  *
  * Description:
  *   This function causes the currently executing task to cease
@@ -125,7 +125,7 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
  *
  ****************************************************************************/
 
-void _exit(int status)
+void up_exit(int status)
 {
   FAR struct tcb_s *tcb = this_task();
 
