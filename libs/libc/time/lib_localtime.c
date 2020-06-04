@@ -598,14 +598,14 @@ static int tzload(FAR const char *name,
       goto oops;
     }
 
-  fid = open(name, O_RDONLY | O_BINARY);
+  fid = _NX_OPEN(name, O_RDONLY | O_BINARY);
   if (fid < 0)
     {
       goto oops;
     }
 
   nread = _NX_READ(fid, up->buf, sizeof up->buf);
-  if (close(fid) < 0 || nread <= 0)
+  if (_NX_CLOSE(fid) < 0 || nread <= 0)
     {
       goto oops;
     }
