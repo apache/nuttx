@@ -69,10 +69,6 @@ void _exit(int status)
 
   sinfo("TCB=%p exiting\n", tcb);
 
-  /* Update scheduler parameters */
-
-  nxsched_suspend_scheduler(tcb);
-
   /* Destroy the task at the head of the ready to run list. */
 
   nxtask_exit();
@@ -83,10 +79,6 @@ void _exit(int status)
 
   tcb = this_task();
   sinfo("New Active Task TCB=%p\n", tcb);
-
-  /* Reset scheduler parameters */
-
-  nxsched_resume_scheduler(tcb);
 
   /* The way that we handle signals in the simulation is kind of
    * a kludge.  This would be unsafe in a truly multi-threaded, interrupt

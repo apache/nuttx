@@ -84,6 +84,10 @@ int nxtask_exit(void)
   dtcb = this_task();
 #endif
 
+  /* Update scheduler parameters */
+
+  nxsched_suspend_scheduler(dtcb);
+
   /* Remove the TCB of the current task from the ready-to-run list.  A
    * context switch will definitely be necessary -- that must be done
    * by the architecture-specific logic.
@@ -102,13 +106,11 @@ int nxtask_exit(void)
   rtcb = this_task();
 #endif
 
-#ifdef CONFIG_SMP
   /* Because clearing the global IRQ control in nxsched_remove_readytorun()
    * was moved to nxsched_resume_scheduler(). So call the API here.
    */
 
   nxsched_resume_scheduler(rtcb);
-#endif
 
   /* We are now in a bad state -- the head of the ready to run task list
    * does not correspond to the thread that is running.  Disabling pre-
