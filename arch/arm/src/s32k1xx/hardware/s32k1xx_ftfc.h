@@ -140,4 +140,6 @@
 #define S32K1XX_FTFC_PROGRAM_PARTITION                   0x80 /* PGMPART */
 #define S32K1XX_FTFC_SET_FLEXRAM_FUNCTION                0x81 /* SETRAM */
 
+#define S32K1XX_FTFC_EEEPROM_BASE                        0x14000000
+
 #endif /* __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_FTFC_H */

@@ -361,6 +361,10 @@ void __start(void)
   s32k1xx_progmem_init();
 #endif
 
+#ifdef CONFIG_S32K1XX_EEEPROM
+  s32k1xx_eeeprom_init();
+#endif
+
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
    * Normally this just means initializing the user space .data and .bss

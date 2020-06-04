@@ -255,6 +255,13 @@ config S32K1XX_PROGMEM
         Use the FlexNVM 32/64 KB of d-flash memory as a
 		Memory-Technology-Device (MTD).
 
+config S32K1XX_EEEPROM
+	bool "Emulated EEPROM"
+	default n
+    ---help---
+       Enables Emulated EEPROM function which uses the FlexRAM and FlexNVM
+       memory to emulate non-volatile memory. The EEEPROM wil be registered 
+       as a ramdisk block device
 
 endmenu # S32K1XX Peripheral Selection
 
