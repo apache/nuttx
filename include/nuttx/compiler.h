@@ -103,9 +103,17 @@
 
 #  define farcall_function __attribute__ ((long_call))
 
+/* Code locate */
+
+#  define locate_code(n) __attribute__ ((section(n)))
+
 /* Data alignment */
 
 #  define aligned_data(n) __attribute__ ((aligned(n)))
+
+/* Data location */
+
+#  define locate_data(n) __attribute__ ((section(n)))
 
 /* The packed attribute informs GCC that the structure elements are packed,
  * ignoring other alignment rules.
@@ -336,7 +344,9 @@
  */
 
 #  define noreturn_function
+#  define locate_code(n)
 #  define aligned_data(n)
+#  define locate_data(n)
 #  define begin_packed_struct
 #  define end_packed_struct
 
@@ -475,6 +485,8 @@
 
 #  define noreturn_function
 #  define aligned_data(n)
+#  define locate_code(n)
+#  define locate_data(n)
 #  define begin_packed_struct
 #  define end_packed_struct
 #  define naked_function
@@ -575,7 +587,9 @@
 #  define weak_const_function
 #  define noreturn_function
 #  define farcall_function
+#  define locate_code(n)
 #  define aligned_data(n)
+#  define locate_data(n)
 #  define begin_packed_struct  __packed
 #  define end_packed_struct
 #  define reentrant_function
@@ -628,6 +642,8 @@
 #  define noreturn_function
 #  define farcall_function
 #  define aligned_data(n)
+#  define locate_code(n)
+#  define locate_data(n)
 #  define begin_packed_struct
 #  define end_packed_struct
 #  define reentrant_function
