@@ -78,12 +78,12 @@
 #define L_MOD   1
 #define LL_MOD  2
 
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
+/* Support special access to CODE-space strings for Harvard architectures */
 
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#ifdef CONFIG_ARCH_ROMGETC
+#  define fmt_char(fmt)   up_romgetc(fmt)
+#else
+#  define fmt_char(fmt)   (*(fmt))
 #endif
 
 /****************************************************************************
@@ -117,11 +117,11 @@ static FAR const char *findscanset(FAR const char *fmt,
 
   /* First `clear' the whole table */
 
-  c = *fmt++;                   /* First char hat => negated scanset */
+  c = fmt_char(fmt++);                   /* First char hat => negated scanset */
   if (c == '^')
     {
       v = 1;                    /* Default => accept */
-      c = *fmt++;               /* Get new first char */
+      c = fmt_char(fmt++);      /* Get new first char */
     }
   else
     {
@@ -143,7 +143,7 @@ static FAR const char *findscanset(FAR const char *fmt,
     {
       set[c / 8] |= (1 << (c % 8));     /* Take character c */
 
-    doswitch:n = *fmt++;       /* Examine the next */
+    doswitch:n = fmt_char(fmt++);       /* Examine the next */
       switch (n)
         {
         case 0:                /* Format ended too soon */
@@ -156,13 +156,13 @@ static FAR const char *findscanset(FAR const char *fmt,
            * scanset such as [a-zA-Z0-9] is implementation defined.  The V7
            * Unix scanf treats "a-z" as "the letters a through z", but treats
            * "a-a" as "the letter a, the character -, and the letter a". For
-           * compatibility, the `-' is not considered to define a range if the
-           * character following it is either a close bracket (required by
-           * ANSI) or is not numerically greater than the character* we just
-           * stored in the table (c).
+           * compatibility, the `-' is not considered to define a range if
+           * the character following it is either a close bracket (required
+           * by ANSI) or is not numerically greater than the character* we
+           * just stored in the table (c).
            */
 
-          n = *fmt;
+          n = fmt_char(fmt);
           if (n == ']' || n < c)
             {
               c = '-';
@@ -247,7 +247,9 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
   unsigned char set[32];        /* Bit field (256 / 8) */
 #endif
 
-  /* keep this for future reference linfo("buf=\"%s\" fmt=\"%s\"\n", buf, fmt); */
+  /* keep this for future reference:
+   * linfo("buf=\"%s\" fmt=\"%s\"\n", buf, fmt);
+   */
 
   /* Parse the format, extracting values from the input buffer as needed */
 
@@ -275,11 +277,11 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
   c = obj->get(obj);
 
-  while (*fmt)
+  while (fmt_char(fmt))
     {
       /* Skip over white spaces */
 
-      if (isspace(*fmt))
+      if (isspace(fmt_char(fmt)))
         {
           while (isspace(c))
             {
@@ -287,42 +289,42 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
             }
         }
 
-      while (isspace(*fmt))
+      while (isspace(fmt_char(fmt)))
         {
           fmt++;
         }
 
       /* Check for a conversion specifier */
 
-      if (*fmt == '%')
+      if (fmt_char(fmt) == '%')
         {
           linfo("Specifier found\n");
 
           /* Check for qualifiers on the conversion specifier */
 
           fmt++;
-          for (; *fmt; fmt++)
+          for (; fmt_char(fmt); fmt++)
             {
-              linfo("Processing %c\n", *fmt);
+              linfo("Processing %c\n", fmt_char(fmt));
 
 #ifdef CONFIG_LIBC_SCANSET
-              if (strchr("dibouxXcseEfFgGaAn[%", *fmt))
+              if (strchr("dibouxXcseEfFgGaAn[%", fmt_char(fmt)))
 #else
-              if (strchr("dibouxXcseEfFgGaAn%", *fmt))
+              if (strchr("dibouxXcseEfFgGaAn%", fmt_char(fmt)))
 #endif
                 {
-                  if (*fmt != '%')
+                  if (fmt_char(fmt) != '%')
                     {
                       conv = true;
                     }
                   break;
                 }
 
-              if (*fmt == '*')
+              if (fmt_char(fmt) == '*')
                 {
                   noassign = true;
                 }
-              else if (*fmt == 'l' || *fmt == 'L')
+              else if (fmt_char(fmt) == 'l' || fmt_char(fmt) == 'L')
                 {
                   modifier = L_MOD;
 
@@ -332,7 +334,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                       fmt++;
                     }
                 }
-              else if (*fmt == 'h' || *fmt == 'H')
+              else if (fmt_char(fmt) == 'h' || fmt_char(fmt) == 'H')
                 {
                   modifier = H_MOD;
 
@@ -342,9 +344,9 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                       fmt++;
                     }
                 }
-              else if (*fmt >= '1' && *fmt <= '9')
+              else if (fmt_char(fmt) >= '1' && fmt_char(fmt) <= '9')
                 {
-                  for (tc = fmt; isdigit(*fmt); fmt++)
+                  for (tc = fmt; isdigit(fmt_char(fmt)); fmt++)
                     ;
                   strncpy(tmp, tc, fmt - tc);
                   tmp[fmt - tc] = '\0';
@@ -355,7 +357,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
           /* Process %s: String conversion */
 
-          if (*fmt == 's')
+          if (fmt_char(fmt) == 's')
             {
               linfo("Performing string conversion\n");
 
@@ -415,7 +417,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 #ifdef CONFIG_LIBC_SCANSET
           /* Process %[: Scanset conversion */
 
-          if (*fmt == '[')
+          if (fmt_char(fmt) == '[')
             {
               linfo("Performing scanset conversion\n");
 
@@ -439,7 +441,6 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
               if (c > 0)
                 {
-
                   /* Use the actual field's width if 1) no fieldwidth
                    * specified or 2) the actual field's width is smaller
                    * than the fieldwidth specified.
@@ -477,7 +478,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
           /* Process %c: Character conversion */
 
-          else if (*fmt == 'c')
+          else if (fmt_char(fmt) == 'c')
             {
               linfo("Performing character conversion\n");
 
@@ -539,7 +540,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
           /* Process %d, %o, %b, %x, %u: Various integer conversions */
 
-          else if (strchr("dobxXui", *fmt))
+          else if (strchr("dobxXui", fmt_char(fmt)))
             {
               bool sign;
 
@@ -625,7 +626,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                   stopconv = false;
                   sign     = false;
 
-                  switch (*fmt)
+                  switch (fmt_char(fmt))
                     {
                     default:
                     case 'd':
@@ -817,6 +818,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                   linfo("tmp[]=\"%s\"\n", tmp);
 
                   /* Perform the integer conversion */
+
                   /* Preserve the errno value */
 
                   errsave = get_errno();
@@ -915,7 +917,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
            * conversions.
            */
 
-          else if (strchr("aAfFeEgG", *fmt) != NULL)
+          else if (strchr("aAfFeEgG", fmt_char(fmt)) != NULL)
             {
 #ifdef CONFIG_HAVE_DOUBLE
               FAR double_t *pd = NULL;
@@ -1048,6 +1050,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                   linfo("tmp[]=\"%s\"\n", tmp);
 
                   /* Perform the floating point conversion */
+
                   /* Preserve the errno value */
 
                   errsave = get_errno();
@@ -1078,9 +1081,8 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
                   if (!noassign)
                     {
-
-                      /* We have to check whether we need to return a float or
-                       * a double_t.
+                      /* We have to check whether we need to return a float
+                       * or a double_t.
                        */
 
 #  ifdef CONFIG_HAVE_DOUBLE
@@ -1102,15 +1104,15 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
                       assigncount++;
                     }
-                  count++;
 
+                  count++;
                 }
 #endif
             }
 
           /* Process %n: Character count */
 
-          else if (*fmt == 'n')
+          else if (fmt_char(fmt) == 'n')
             {
               linfo("Performing character count\n");
 
@@ -1158,10 +1160,10 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 #endif
                     }
                 }
-              count++;
 
+              count++;
             }
-          else if (*fmt == '%')
+          else if (fmt_char(fmt) == '%')
             {
               if (c != '%')
                 {
@@ -1195,7 +1197,7 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
 
           /* Skip over matching characters in the buffer and format */
 
-          if (*fmt != c)
+          if (fmt_char(fmt) != c)
             {
               break;
             }
