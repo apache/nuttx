@@ -430,8 +430,6 @@ static void cxd56_set_mic_gains(uint8_t gain,
 static void cxd56_set_mic_out_channel(FAR struct cxd56_dev_s *dev);
 static int cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol);
 static void cxd56_swap_buffer_rl(uint32_t addr, uint16_t size);
-static int  cxd56_take_sem(sem_t *sem);
-#define cxd56_give_sem(s) (nxsem_post(s))
 static void *cxd56_workerthread(pthread_addr_t pvarg);
 
 /****************************************************************************
@@ -1097,20 +1095,6 @@ static void write_reg_addr(const cxd56_aureg_t *reg, uint32_t val)
 #define write_reg(reg, val)   (write_reg_addr(&(reg), (val)))
 #define write_reg32(reg, val) (*((volatile uint32_t *)(reg).addr) = (val))
 
-/****************************************************************************
- * Name: cxd56_take_sem
- *
- * Description:
- *  Take a semaphore count, handling the nasty EINTR return if we are
- *  interrupted by a signal.
- *
- ****************************************************************************/
-
-static int cxd56_take_sem(sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
-}
-
 static void cxd56_int_clear(cxd56_dmahandle_t handle, uint8_t intbits)
 {
   if (handle == CXD56_AUDIO_DMA_MIC)
@@ -1383,13 +1367,14 @@ static void cxd56_dma_int_handler(void)
     {
       struct audio_msg_s msg;
       struct cxd56_dev_s *dev;
+      irqstate_t flags;
       int ret;
 
       dev = g_dev[hdl];
 
       /* Trigger new DMA job */
 
-      cxd56_take_sem(&dev->pendsem);
+      flags = spin_lock_irqsave();
 
       if (dq_count(&dev->runningq) > 0)
         {
@@ -1399,7 +1384,7 @@ static void cxd56_dma_int_handler(void)
           dev->dev.upper(dev->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
         }
 
-      cxd56_give_sem(&dev->pendsem);
+      spin_unlock_irqrestore(flags);
 
       if (err_code == CXD56_AUDIO_ECODE_DMA_TRANS)
         {
@@ -3067,13 +3052,14 @@ static void cxd56_swap_buffer_rl(uint32_t addr, uint16_t size)
 static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
 {
   FAR struct ap_buffer_s *apb;
+  irqstate_t flags;
   int retry;
   int timeout;
   uint32_t addr;
   uint32_t size;
   int ret = OK;
 
-  cxd56_take_sem(&dev->pendsem);
+  flags = spin_lock_irqsave();
   if (dq_count(&dev->pendingq) == 0)
     {
       /* Pending queue empty, nothing to do */
@@ -3242,7 +3228,7 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
     }
 
 exit:
-  cxd56_give_sem(&dev->pendsem);
+  spin_unlock_irqrestore(flags);
 
   return ret;
 }
@@ -3259,11 +3245,14 @@ static int cxd56_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
 {
   FAR struct cxd56_dev_s *priv = (FAR struct cxd56_dev_s *)lower;
   struct audio_msg_s msg;
+  irqstate_t flags;
 
-  cxd56_take_sem(&priv->pendsem);
+  flags = spin_lock_irqsave();
+
   apb->dq_entry.flink = NULL;
   dq_put(&priv->pendingq, &apb->dq_entry);
-  cxd56_give_sem(&priv->pendsem);
+
+  spin_unlock_irqrestore(flags);
 
   if (priv->mq != NULL)
     {
