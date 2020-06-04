@@ -450,7 +450,7 @@ void up_release_pending(void);
 void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
 
 /****************************************************************************
- * Name: _exit
+ * Name: up_exit
  *
  * Description:
  *   This function causes the currently executing task to cease
@@ -463,6 +463,8 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
  *   disable interrupts before performing scheduling operations.
  *
  ****************************************************************************/
+
+void up_exit() noreturn_function;
 
 /* Prototype is in unistd.h */
 
