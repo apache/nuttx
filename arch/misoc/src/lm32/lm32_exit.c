@@ -151,10 +151,6 @@ void _exit(int status)
   nxsched_foreach(_up_dumponexit, NULL);
 #endif
 
-  /* Update scheduler parameters */
-
-  nxsched_suspend_scheduler(tcb);
-
   /* Destroy the task at the head of the ready to run list. */
 
   nxtask_exit();
@@ -174,10 +170,6 @@ void _exit(int status)
 
   group_addrenv(tcb);
 #endif
-
-  /* Reset scheduler parameters */
-
-  nxsched_resume_scheduler(tcb);
 
   /* Then switch contexts */
 

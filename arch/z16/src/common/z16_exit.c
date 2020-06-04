@@ -140,10 +140,6 @@ void _exit(int status)
   nxsched_foreach(_z16_dumponexit, NULL);
 #endif
 
-  /* Update scheduler parameters */
-
-  nxsched_suspend_scheduler(tcb);
-
   /* Destroy the task at the head of the ready to run list. */
 
   nxtask_exit();
@@ -154,10 +150,6 @@ void _exit(int status)
 
   tcb = this_task();
   sinfo("New Active Task TCB=%p\n", tcb);
-
-  /* Reset scheduler parameters */
-
-  nxsched_resume_scheduler(tcb);
 
   /* Then switch contexts */
 

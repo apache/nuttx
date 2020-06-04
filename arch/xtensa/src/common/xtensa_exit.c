@@ -157,10 +157,6 @@ void _exit(int status)
   nxsched_foreach(_xtensa_dumponexit, NULL);
 #endif
 
-  /* Update scheduler parameters */
-
-  nxsched_suspend_scheduler(tcb);
-
 #if XCHAL_CP_NUM > 0
   /* Disable co-processor support for the task that is exit-ing. */
 
@@ -192,10 +188,6 @@ void _exit(int status)
 
   group_addrenv(tcb);
 #endif
-
-  /* Reset scheduler parameters */
-
-  nxsched_resume_scheduler(tcb);
 
   /* Then switch contexts */
 
