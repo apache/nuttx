@@ -189,6 +189,7 @@ struct nxbe_plane_s
 
   /* Framebuffer plane info describing destination video plane */
 
+  NX_DRIVERTYPE *driver;
   NX_PLANEINFOTYPE pinfo;
 };
 
@@ -216,14 +217,14 @@ struct nxbe_clipops_s
 #if defined(CONFIG_NX_SWCURSOR)
 struct nxbe_cursor_s
 {
-  bool visible;                    /* True: the cursor is visible */
-  struct nxgl_rect_s bounds;       /* Cursor image bounding box */
+  bool visible;                             /* True: the cursor is visible */
+  struct nxgl_rect_s bounds;                /* Cursor image bounding box */
   nxgl_mxpixel_t color1[CONFIG_NX_NPLANES]; /* Color1 is main color of the cursor */
   nxgl_mxpixel_t color2[CONFIG_NX_NPLANES]; /* Color2 is color of any border */
   nxgl_mxpixel_t color3[CONFIG_NX_NPLANES]; /* Color3 is the blended color */
-  size_t allocsize;                /* Size of the background allocation */
-  FAR const uint8_t *image;        /* Cursor image at 2-bits/pixel */
-  FAR nxgl_mxpixel_t *bkgd;        /* Cursor background in device pixels */
+  size_t allocsize;                         /* Size of the background allocation */
+  FAR const uint8_t *image;                 /* Cursor image at 2-bits/pixel */
+  FAR nxgl_mxpixel_t *bkgd;                 /* Cursor background in device pixels */
 };
 #elif defined(CONFIG_NX_HWCURSOR)
 struct nxbe_cursor_s
@@ -252,9 +253,9 @@ struct nxbe_state_s
   FAR struct nxbe_window_s *topwnd;  /* The window at the top of the display */
   struct nxbe_window_s bkgd;         /* The background window is always at the bottom */
 
-  /* At present, only a solid colored background is supported for refills.  The
-   * following provides the background color.  It would be nice to support
-   * background bitmap images as well.
+  /* At present, only a solid colored background is supported for refills.
+   * The following provides the background color.  It would be nice to
+   * support background bitmap images as well.
    */
 
   nxgl_mxpixel_t bgcolor[CONFIG_NX_NPLANES];
@@ -279,13 +280,14 @@ struct nxbe_state_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -298,6 +300,32 @@ extern "C" {
 
 #ifdef CONFIG_FB_CMAP
 int nxbe_colormap(FAR NX_DRIVERTYPE *dev);
+#endif
+
+/****************************************************************************
+ * Name: nxbe_notify_rectangle
+ *
+ * Description:
+ *   When CONFIG_NX_UPDATE=y, then the graphics system will callout to
+ *   inform some external module that the display has been updated.  This
+ *   would be useful in a couple for cases.
+ *
+ *   - When a serial LCD is used, but a framebuffer is used to access the
+ *     LCD.  In this case, the update callout can be used to refresh the
+ *     affected region of the display.
+ *
+ *   - When VNC is enabled.  This is case, this callout is necessary to
+ *     update the remote frame buffer to match the local framebuffer.
+ *
+ *   When this feature is enabled, some external logic must provide this
+ *   interface.  This is the function that will handle the notification.  It
+ *   receives the rectangular region that was updated on the provided plane.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NX_UPDATE
+void nxbe_notify_rectangle(FAR NX_DRIVERTYPE *dev,
+                           FAR const struct nxgl_rect_s *rect);
 #endif
 
 /****************************************************************************
@@ -523,8 +551,8 @@ void nxbe_setvisibility(FAR struct nxbe_window_s *wnd, bool hide);
  * Name: nxbe_setpixel
  *
  * Description:
- *  Set a single pixel in the window to the specified color.  This is simply
- *  a degenerate case of nxbe_fill(), but may be optimized in some architectures.
+ *  Set a single pixel in the window to the specified color. This is simply a
+ *  degenerate case of nxbe_fill, but may be optimized in some architectures.
  *
  * Input Parameters:
  *   wnd  - The window structure reference

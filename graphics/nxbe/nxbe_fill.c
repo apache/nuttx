@@ -83,7 +83,7 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
 #ifdef CONFIG_NX_UPDATE
   /* Notify external logic that the display has been updated */
 
-  nx_notify_rectangle(&plane->pinfo, rect);
+  nxbe_notify_rectangle(plane->driver, rect);
 #endif
 }
 
@@ -168,8 +168,8 @@ static inline void nxbe_fill_pwfb(FAR struct nxbe_window_s *wnd,
 
   DEBUGASSERT(wnd->be->plane[0].pwfb.fillrectangle != NULL);
 
-  /* The rectangle that we receive here is in absolute device coordinates.  We
-   * need to restore this to windows relative coordinates.
+  /* The rectangle that we receive here is in absolute device coordinates.
+   * We need to restore this to windows relative coordinates.
    */
 
   nxgl_rectoffset(&relrect, rect, -wnd->bounds.pt1.x, -wnd->bounds.pt1.y);
