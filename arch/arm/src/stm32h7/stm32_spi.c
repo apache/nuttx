@@ -57,6 +57,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/compiler.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/power/pm.h>
@@ -709,10 +710,11 @@ static const struct spi_ops_s g_sp6iops =
 };
 
 #if defined(SPI6_DMABUFSIZE_ADJUSTED)
-static uint8_t g_spi6_txbuf[SPI6_DMABUFSIZE_ADJUSTED] SPI6_DMABUFSIZE_ALGN;
-static uint8_t g_spi6_rxbuf[SPI6_DMABUFSIZE_ADJUSTED] SPI6_DMABUFSIZE_ALGN;
+static uint8_t g_spi6_txbuf[SPI6_DMABUFSIZE_ADJUSTED] SPI6_DMABUFSIZE_ALGN
+                                                      locate_data(".sram4");
+static uint8_t g_spi6_rxbuf[SPI6_DMABUFSIZE_ADJUSTED] SPI6_DMABUFSIZE_ALGN
+                                                      locate_data(".sram4");
 #endif
-
 static struct stm32_spidev_s g_spi6dev =
 {
   .spidev   =
