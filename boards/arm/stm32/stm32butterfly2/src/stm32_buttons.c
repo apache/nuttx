@@ -75,7 +75,7 @@ static const uint32_t buttons[NUM_BUTTONS] =
  *      Initializes gpio pins for joystick buttons
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -83,6 +83,8 @@ void board_button_initialize(void)
     {
       stm32_configgpio(buttons[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /*****************************************************************************

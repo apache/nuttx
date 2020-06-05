@@ -85,9 +85,10 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   stm32_configgpio(BUTTON_BOOT0n);
+  return 1;
 }
 
 /****************************************************************************

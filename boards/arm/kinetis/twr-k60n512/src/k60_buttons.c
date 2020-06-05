@@ -82,12 +82,13 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Configure the two buttons as inputs */
 
   kinetis_pinconfig(GPIO_SW1);
   kinetis_pinconfig(GPIO_SW2);
+  return 2;
 }
 
 /****************************************************************************

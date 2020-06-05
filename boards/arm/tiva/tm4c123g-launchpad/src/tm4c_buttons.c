@@ -78,7 +78,7 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Unlock GPIOF from NMI to use it w/ buttons see Register 19 of GPIOs
    * and see table 10-10 in datasheet for pins with special considerations.
@@ -105,6 +105,7 @@ void board_button_initialize(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
   tiva_gpioirqinitialize();
 #endif
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
