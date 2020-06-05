@@ -55,7 +55,7 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
@@ -63,6 +63,7 @@ void board_userled_initialize(void)
   sam_configpio(PIO_LED_GREEN);
 #endif
   sam_configpio(PIO_LED_BLUE);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

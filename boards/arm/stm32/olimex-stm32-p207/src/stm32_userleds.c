@@ -78,7 +78,7 @@ static uint32_t g_ledcfg[BOARD_NLEDS] =
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
    /* Configure LED1-4 GPIOs for output */
 
@@ -86,6 +86,7 @@ void board_userled_initialize(void)
    stm32_configgpio(GPIO_LED2);
    stm32_configgpio(GPIO_LED3);
    stm32_configgpio(GPIO_LED4);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

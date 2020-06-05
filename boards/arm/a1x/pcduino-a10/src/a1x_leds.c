@@ -217,9 +217,11 @@ void board_autoled_off(int led)
  *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Initialization already performed in a1x_led_initialize */
+
+  return BOARD_NLEDS;
 }
 
 void board_userled(int led, bool ledon)

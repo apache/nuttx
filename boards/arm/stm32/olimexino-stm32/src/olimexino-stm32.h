@@ -197,7 +197,7 @@ void stm32_usb_set_pwr_callback(xcpt_t pwr_changed_handler);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void stm32_led_initialize(void);
+uint32_t stm32_led_initialize(void);
 #endif
 
 /****************************************************************************

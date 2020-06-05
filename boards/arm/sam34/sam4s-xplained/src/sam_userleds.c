@@ -59,12 +59,13 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure D9-2 GPIOs for output */
 
   sam_configgpio(GPIO_D9);
   sam_configgpio(GPIO_D10);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

@@ -56,11 +56,12 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
   max326_gpio_config(GPIO_LED);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

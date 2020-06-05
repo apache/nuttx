@@ -46,9 +46,6 @@
 #include <nuttx/board.h>
 #include <nuttx/leds/userled.h>
 
-#undef __KERNEL__
-#include <arch/board/board.h>
-
 #if CONFIG_USERLED_LOWER
 
 /****************************************************************************
@@ -65,6 +62,8 @@ static void userled_ledset(FAR const struct userled_lowerhalf_s *lower,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static uint32_t g_lednum;
 
 /* This is the user LED lower half driver interface */
 
@@ -90,8 +89,8 @@ static const struct userled_lowerhalf_s g_userled_lower =
 static userled_set_t
 userled_supported(FAR const struct userled_lowerhalf_s *lower)
 {
-  ledinfo("BOARD_NLEDS: %02x\n", BOARD_NLEDS);
-  return (userled_set_t)((1 << BOARD_NLEDS) - 1);
+  ledinfo("BOARD_NLEDS: %02x\n", g_lednum);
+  return (userled_set_t)((1 << g_lednum) - 1);
 }
 
 /****************************************************************************
@@ -137,7 +136,7 @@ static void userled_ledset(FAR const struct userled_lowerhalf_s *lower,
 
 int userled_lower_initialize(FAR const char *devname)
 {
-  board_userled_initialize();
+  g_lednum = board_userled_initialize();
   return userled_register(devname, &g_userled_lower);
 }
 

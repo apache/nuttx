@@ -71,7 +71,7 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
@@ -79,6 +79,7 @@ void board_userled_initialize(void)
   tiva_configgpio(GPIO_LED_D2);
   tiva_configgpio(GPIO_LED_D3);
   tiva_configgpio(GPIO_LED_D4);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

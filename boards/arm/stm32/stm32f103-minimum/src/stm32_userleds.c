@@ -69,7 +69,7 @@ static const uint32_t g_ledcfg[BOARD_NLEDS] =
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   int i;
 
@@ -79,6 +79,8 @@ void board_userled_initialize(void)
     {
       stm32_configgpio(g_ledcfg[i]);
     }
+
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

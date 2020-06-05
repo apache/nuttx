@@ -56,7 +56,7 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
 #ifndef CONFIG_ARCH_LEDS
   /* Configure LED GPIOs for output */
@@ -65,6 +65,7 @@ void board_userled_initialize(void)
   stm32l4_configgpio(GPIO_LED_GREEN);
   stm32l4_configgpio(GPIO_LED_WHITE);
 #endif
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
