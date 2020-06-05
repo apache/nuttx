@@ -187,7 +187,13 @@ int host_open(const char *pathname, int flags, int mode)
     }
 #endif
 
-  return open(pathname, mapflags, mode);
+  int ret = open(pathname, mapflags, mode);
+  if (ret == -1)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -198,7 +204,13 @@ int host_close(int fd)
 {
   /* Just call the close routine */
 
-  return close(fd);
+  int ret = close(fd);
+  if (ret == -1)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -209,7 +221,13 @@ ssize_t host_read(int fd, void *buf, size_t count)
 {
   /* Just call the read routine */
 
-  return read(fd, buf, count);
+  ssize_t ret = read(fd, buf, count);
+  if (ret == -1)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -220,7 +238,13 @@ ssize_t host_write(int fd, const void *buf, size_t count)
 {
   /* Just call the write routine */
 
-  return write(fd, buf, count);
+  ssize_t ret = write(fd, buf, count);
+  if (ret == -1)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -231,7 +255,13 @@ off_t host_lseek(int fd, off_t offset, int whence)
 {
   /* Just call the lseek routine */
 
-  return lseek(fd, offset, whence);
+  off_t ret = lseek(fd, offset, whence);
+  if (ret == (off_t)-1)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -277,6 +307,10 @@ int host_fstat(int fd, struct nuttx_stat_s *buf)
   /* Call the host's stat routine */
 
   ret = fstat(fd, &hostbuf);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
 
   /* Map the return values */
 
@@ -290,7 +324,13 @@ int host_fstat(int fd, struct nuttx_stat_s *buf)
 
 int host_ftruncate(int fd, off_t length)
 {
-  return ftruncate(fd, length);
+  int ret = ftruncate(fd, length);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -382,7 +422,13 @@ void host_rewinddir(void *dirp)
 
 int host_closedir(void *dirp)
 {
-  return closedir(dirp);
+  int ret = closedir(dirp);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -397,6 +443,10 @@ int host_statfs(const char *path, struct nuttx_statfs_s *buf)
   /* Call the host's statfs routine */
 
   ret = statvfs(path, &hostbuf);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
 
   /* Map the struct statfs value */
 
@@ -418,7 +468,13 @@ int host_statfs(const char *path, struct nuttx_statfs_s *buf)
 
 int host_unlink(const char *pathname)
 {
-  return unlink(pathname);
+  int ret = unlink(pathname);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -429,7 +485,13 @@ int host_mkdir(const char *pathname, mode_t mode)
 {
   /* Just call the host's mkdir routine */
 
-  return mkdir(pathname, mode);
+  int ret = mkdir(pathname, mode);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -438,7 +500,13 @@ int host_mkdir(const char *pathname, mode_t mode)
 
 int host_rmdir(const char *pathname)
 {
-  return rmdir(pathname);
+  int ret = rmdir(pathname);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -447,7 +515,13 @@ int host_rmdir(const char *pathname)
 
 int host_rename(const char *oldpath, const char *newpath)
 {
-  return rename(oldpath, newpath);
+  int ret = rename(oldpath, newpath);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -462,6 +536,10 @@ int host_stat(const char *path, struct nuttx_stat_s *buf)
   /* Call the host's stat routine */
 
   ret = stat(path, &hostbuf);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
 
   /* Map the return values */
 
