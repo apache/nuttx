@@ -67,6 +67,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each zkit-arm-1769 button.
  * This array is indexed by NUM_BUTTONS in board.h
  */

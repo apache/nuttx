@@ -98,7 +98,8 @@ uint32_t board_buttons(void)
  *   board_button_irq() may be called to register an interrupt handler that
  *   will be called when a button is depressed or released.  The ID value is
  *   a button enumeration value that uniquely identifies a button resource.
- *   See the BUTTON_* definitions in board.h for the meaning of enumeration value.
+ *   See the BUTTON_* definitions in board.h for the meaning of enumeration
+ *   value.
  *
  ****************************************************************************/
 

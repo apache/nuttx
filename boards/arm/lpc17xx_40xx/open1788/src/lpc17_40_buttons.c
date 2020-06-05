@@ -58,8 +58,8 @@
  * Private Data
  ****************************************************************************/
 
-/* The Open1788 supports several buttons.  All will read "1" when open and "0"
- * when closed
+/* The Open1788 supports several buttons.  All will read "1" when open and
+ * "0" when closed
  *
  * USER1           -- Connected to P4[26]
  * USER2           -- Connected to P2[22]
@@ -73,8 +73,8 @@
  * JOY_D           -- Connected to P2[19]
  * JOY_CTR         -- Connected to P0[14]
  *
- * The switches are all connected to ground and should be pulled up and sensed
- * with a value of '0' when closed.
+ * The switches are all connected to ground and should be pulled up and
+ * sensed with a value of '0' when closed.
  */
 
 /* Pin configuration for each Open1788 button.  This array is indexed by
@@ -108,8 +108,8 @@ static const uint8_t g_buttonirq[NUM_BUTTONS] =
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
  *   interrupt handlers.
  *
  ****************************************************************************/
