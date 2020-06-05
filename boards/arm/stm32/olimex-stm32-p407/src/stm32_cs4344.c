@@ -95,10 +95,11 @@ int stm32_cs4344_initialize(int minor)
   audinfo("minor %d\n", minor);
   DEBUGASSERT(minor >= 0 && minor <= 25);
 
-  /* Have we already initialized?  Since we never uninitialize we must prevent
-   * multiple initializations.  This is necessary, for example, when the
-   * touchscreen example is used as a built-in application in NSH and can be
-   * called numerous time.  It will attempt to initialize each time.
+  /* Have we already initialized?  Since we never uninitialize we must
+   * prevent multiple initializations.  This is necessary, for example,
+   * when the touchscreen example is used as a built-in application in
+   * NSH and can be called numerous time.  It will attempt to initialize
+   * each time.
    */
 
   if (!initialized)
