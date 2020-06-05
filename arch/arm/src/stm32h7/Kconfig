@@ -843,6 +843,7 @@ config STM32H7_SPI1_DMA_BUFFER
 config STM32H7_SPI1_COMMTYPE
 	int "SPI1 Operation mode"
 	default 0
+	range 0 3
 	depends on STM32H7_SPI1
 	---help---
 		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
@@ -864,6 +865,7 @@ config STM32H7_SPI2_DMA_BUFFER
 config STM32H7_SPI2_COMMTYPE
 	int "SPI2 Operation mode"
 	default 0
+	range 0 3
 	depends on STM32H7_SPI2
 	---help---
 		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
@@ -885,6 +887,7 @@ config STM32H7_SPI3_DMA_BUFFER
 config STM32H7_SPI3_COMMTYPE
 	int "SPI3 Operation mode"
 	default 0
+	range 0 3
 	depends on STM32H7_SPI3
 	---help---
 		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
@@ -906,6 +909,7 @@ config STM32H7_SPI4_DMA_BUFFER
 config STM32H7_SPI4_COMMTYPE
 	int "SPI4 Operation mode"
 	default 0
+	range 0 3
 	depends on STM32H7_SPI4
 	---help---
 		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
@@ -927,6 +931,7 @@ config STM32H7_SPI5_DMA_BUFFER
 config STM32H7_SPI5_COMMTYPE
 	int "SPI5 Operation mode"
 	default 0
+	range 0 3
 	depends on STM32H7_SPI5
 	---help---
 		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
@@ -948,6 +953,7 @@ config STM32H7_SPI6_DMA_BUFFER
 config STM32H7_SPI6_COMMTYPE
 	int "SPI6 Operation mode"
 	default 0
+	range 0 3
 	depends on STM32H7_SPI6
 	---help---
 		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
