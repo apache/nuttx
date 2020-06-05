@@ -85,8 +85,8 @@ static int board_button_irqx(gpio_pinset_t pinset, int irq,
 {
   irqstate_t flags;
 
-  /* Disable interrupts until we are done.  This guarantees that the following
-   * operations are atomic.
+  /* Disable interrupts until we are done.  This guarantees that the
+   * following operations are atomic.
    */
 
   flags = enter_critical_section();

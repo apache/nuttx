@@ -116,17 +116,16 @@ uint32_t board_buttons(void)
 
   for (i = 0; i < NUM_BUTTONS; i++)
     {
-       /* A LOW value means that the key is pressed.
-        */
+      /* A LOW value means that the key is pressed. */
 
-       bool released = stm32_gpioread(g_buttons[i]);
+      bool released = stm32_gpioread(g_buttons[i]);
 
-       /* Accumulate the set of depressed (not released) keys */
+      /* Accumulate the set of depressed (not released) keys */
 
-       if (!released)
-         {
-            ret |= (1 << i);
-         }
+      if (!released)
+        {
+           ret |= (1 << i);
+        }
     }
 
   return ret;

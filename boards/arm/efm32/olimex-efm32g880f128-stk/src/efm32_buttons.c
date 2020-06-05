@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* The Olimex board has four buttons, BUT1-4.  Each is grounded and so should
  * have a weak pull-up so that it will be sensed as "1" when open and "0"
  * when closed.

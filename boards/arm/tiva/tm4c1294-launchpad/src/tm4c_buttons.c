@@ -58,6 +58,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each STM3210E-EVAL button.  This array is indexed by
  * the BUTTON_* and JOYSTICK_* definitions in board.h
  */

@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* This header file contains function prototypes for the interfaces between
  * (1) the nuttx core-code, (2) the microprocessor specific logic that
  * resides under the arch/ sub-directory, and (3) the board-specific logic
@@ -50,8 +51,8 @@
  *    nuttx/include/arch.h
  *
  *    NOTE: up_ is supposed to stand for microprocessor; the u is like the
- *    Greek letter micron: µ. So it would be µP which is a common shortening
- *    of the word microprocessor.
+ *    Greek letter micron: µ. So it would be µP which is a common
+ *    shortening of the word microprocessor.
  *
  * 2. Microprocessor-Specific Interfaces.
  *
@@ -610,12 +611,12 @@ void board_userled_all(uint8_t ledset);
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  *   NOTE: This interface may or may not be supported by board-specific
- *   logic.  If the board supports button interfaces, then CONFIG_ARCH_BUTTONS
+ *   logic. If the board supports button interfaces, then CONFIG_ARCH_BUTTONS
  *   will be defined.
  *   NOTE: The button number is returned.
  *
@@ -670,14 +671,14 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg);
  *
  * Description:
  *   If CONFIG_BOARD_CRASHDUMP is selected then up_asseert will call out to
- *   board_crashdump prior to calling exit in the case of an assertion failure.
- *   Or in the case of a hardfault looping indefinitely. board_crashdump then
- *   has a chance to save the state of the machine. The provided
- *   board_crashdump should save as much information as it can about the cause
- *   of the fault and then most likely reset the system.
+ *   board_crashdump prior to calling exit in the case of an assertion
+ *   failure. Or in the case of a hardfault looping indefinitely.
+ *   board_crashdump then has a chance to save the state of the machine.
+ *   The provided board_crashdump should save as much information as it can
+ *   about the cause of the fault and then most likely reset the system.
  *
  *   N.B. There are limited system resources that can be used by the provided
- *   board_crashdump function. The tems from the fact that most critical/fatal
+ *   board_crashdump. The tems from the fact that most critical/fatal
  *   crashes are because of a hard fault or during interrupt processing.
  *   In these cases, up_assert is running from the context of an interrupt
  *   handlerand it is impossible to use any device driver in this context.
