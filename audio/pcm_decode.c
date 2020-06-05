@@ -857,7 +857,6 @@ static int pcm_stop(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 #else
 static int pcm_stop(FAR struct audio_lowerhalf_s *dev)
 #endif
-#endif
 {
   FAR struct pcm_decode_s *priv = (FAR struct pcm_decode_s *)dev;
   FAR struct audio_lowerhalf_s *lower;
@@ -880,6 +879,7 @@ static int pcm_stop(FAR struct audio_lowerhalf_s *dev)
   return lower->ops->stop(lower);
 #endif
 }
+#endif /* CONFIG_AUDIO_EXCLUDE_STOP */
 
 /****************************************************************************
  * Name: pcm_pause
@@ -929,7 +929,6 @@ static int pcm_resume(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 #else
 static int pcm_resume(FAR struct audio_lowerhalf_s *dev)
 #endif
-#endif
 {
   FAR struct pcm_decode_s *priv = (FAR struct pcm_decode_s *)dev;
   FAR struct audio_lowerhalf_s *lower;
@@ -948,6 +947,7 @@ static int pcm_resume(FAR struct audio_lowerhalf_s *dev)
   return lower->ops->resume(lower);
 #endif
 }
+#endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
 
 /****************************************************************************
  * Name: pcm_allocbuffer
