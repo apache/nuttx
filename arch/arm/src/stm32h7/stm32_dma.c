@@ -1381,8 +1381,8 @@ static void stm32_sdma_start(DMA_HANDLE handle, dma_callback_t callback,
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
   uint32_t scr = 0;
 
-  DEBUGASSERT(dmachan->ctrl == DMA1 || dmachan->ctrl == DMA2);
   DEBUGASSERT(handle != NULL);
+  DEBUGASSERT(dmachan->ctrl == DMA1 || dmachan->ctrl == DMA2);
 
   /* Save the callback info.  This will be invoked when the DMA completes */
 
@@ -1714,12 +1714,23 @@ static void stm32_sdma_dump(DMA_HANDLE handle, const char *msg)
 
 static void stm32_bdma_disable(DMA_CHANNEL dmachan)
 {
-  DMA_CHANNEL dmachan    = (DMA_CHANNEL)handle;
-  uint8_t     controller = dmachan->ctrl;
+  uint32_t regval = 0;
 
-  DEBUGASSERT(controller == BDMA);
+  DEBUGASSERT(dmachan->ctrl == BDMA);
+  DEBUGASSERT(dmachan->chan < BDMA_NCHAN);
 
-#warning stm32_bdma_disable not implemented
+  /* Disable all interrupts at the DMA controller */
+
+  regval = dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET);
+  regval &= ~BDMA_CCR_ALLINTS;
+
+  /* Disable the DMA stream */
+
+  regval &= ~BDMA_CCR_EN;
+  dmachan_putreg(dmachan, STM32_BDMACH_CCR_OFFSET, regval);
+
+  dmabase_putreg(dmachan, STM32_BDMA_IFCR_OFFSET,
+                   (BDMA_CHAN_MASK << dmachan->shift));
 }
 
 /****************************************************************************
@@ -1732,7 +1743,66 @@ static void stm32_bdma_disable(DMA_CHANNEL dmachan)
 
 static int stm32_bdma_interrupt(int irq, void *context, FAR void *arg)
 {
-#warning stm32_bdma_interrupt not implemented
+  DMA_CHANNEL dmachan     = NULL;
+  uint32_t    status      = 0;
+  uint32_t    scrstatus   = 0;
+  uint8_t     stream      = irq - STM32_IRQ_BDMACH1;
+  uint8_t     controller  = BDMA;
+
+  /* Get the channel structure from the stream and controller numbers */
+
+  dmachan = stm32_dma_channel_get(stream, controller);
+
+  /* Get the interrupt status for this stream */
+
+  status = (dmabase_getreg(dmachan, STM32_BDMA_ISR_OFFSET) >> dmachan->shift)
+            & BDMA_CHAN_MASK;
+
+  dmabase_putreg(dmachan, STM32_BDMA_IFCR_OFFSET,
+                 (status << dmachan->shift));
+
+  /* Invoke the callback */
+
+  if (dmachan->callback)
+    {
+      /* Map to the SDMA status */
+
+      scrstatus  = (status & BDMA_CHAN_TEIF) ? DMA_STREAM_FEIF_BIT : 0;
+      scrstatus |= (status & BDMA_CHAN_TCIF) ? DMA_STREAM_TCIF_BIT : 0;
+      scrstatus |= (status & BDMA_CHAN_HTIF) ? DMA_STREAM_HTIF_BIT : 0;
+      dmachan->callback(dmachan, scrstatus, dmachan->arg);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_sdma_scr_2_bdma_ccr
+ *
+ * Description:
+ *   Maps the DMA SCR bits to the BDMA CCR bits
+ *
+ ****************************************************************************/
+
+static inline int32_t stm32_sdma_scr_2_bdma_ccr(int32_t scr)
+{
+  uint32_t ccr = 0;
+  ccr |= (scr & DMA_SCR_CT) ? BDMA_CCR_CT : 0;
+  ccr |= (scr & DMA_SCR_DBM) ? BDMA_CCR_DBM : 0;
+  ccr |= (scr & DMA_SCR_PL_MASK) >> (DMA_SCR_PL_SHIFT - BDMA_CCR_PRILO);
+  ccr |= (scr & DMA_SCR_MSIZE_MASK) >>
+               (DMA_SCR_MSIZE_SHIFT - BDMA_CCR_MSIZE_SHIFT);
+  ccr |= (scr & DMA_SCR_PSIZE_MASK) >>
+               (DMA_SCR_PSIZE_SHIFT - BDMA_CCR_PSIZE_SHIFT);
+  ccr |= (scr & DMA_SCR_MINC) ? BDMA_CCR_MINC : 0;
+  ccr |= (scr & DMA_SCR_PINC) ? BDMA_CCR_PINC : 0;
+  ccr |= (scr & DMA_SCR_CIRC) ? BDMA_CCR_CIRC : 0;
+  ccr |= (scr & DMA_SCR_DIR_M2P) ? BDMA_CCR_DIR : 0;
+  ccr |= (scr & DMA_SCR_DIR_M2M) ? BDMA_CCR_M2M : 0;
+  ccr |= (scr & DMA_SCR_TCIE) ? BDMA_CCR_TCIE : 0;
+  ccr |= (scr & DMA_SCR_HTIE) ? BDMA_CCR_HTIE : 0;
+  ccr |= (scr & DMA_SCR_TEIE) ? BDMA_CCR_TEIE : 0;
+  return ccr;
 }
 
 /****************************************************************************
@@ -1746,11 +1816,89 @@ static int stm32_bdma_interrupt(int irq, void *context, FAR void *arg)
 static void stm32_bdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
 {
   DMA_CHANNEL dmachan    = (DMA_CHANNEL)handle;
-  uint8_t     controller = dmachan->ctrl;
+  uint32_t    regval     = 0;
+  uint32_t    scr        = cfg->cfg1;
+  uint32_t    ccr        = 0;
 
-  DEBUGASSERT(controller == BDMA);
+  DEBUGASSERT(handle != NULL);
+  DEBUGASSERT(dmachan->ctrl == BDMA);
 
-#warning stm32_bdma_setup not implemented
+  dmainfo("paddr: %08x maddr: %08x ndata: %d scr: %08x\n",
+          cfg->paddr, cfg->maddr, cfg->ndata, cfg->cfg1);
+
+#ifdef CONFIG_STM32H7_DMACAPABLE
+  DEBUGASSERT(stm32_bdma_capable(cfg));
+#endif
+
+  /* "If the stream is enabled, disable it by resetting the EN bit in the
+   * DMA_SxCR register, then read this bit in order to confirm that there is
+   * no ongoing stream operation. Writing this bit to 0 is not immediately
+   * effective since it is actually written to 0 once all the current
+   * transfers have finished. When the EN bit is read as 0, this means that
+   * the stream is ready to be configured. It is therefore necessary to wait
+   * for the EN bit to be cleared before starting any stream configuration."
+   */
+
+  while ((dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET) &
+          BDMA_CCR_EN) != 0);
+
+  /* "... All the stream dedicated bits set in the status register BDMA_ISR
+   * from the previous data block DMA transfer should be cleared before the
+   * stream can be re-enabled."
+   *
+   * Clear pending stream interrupts by setting bits in the BDMA_IFCR
+   * register.
+   */
+
+  dmabase_putreg(dmachan, STM32_BDMA_IFCR_OFFSET,
+                 (BDMA_CHAN_MASK << dmachan->shift));
+
+  /* "Set the peripheral register address in the BDMA_SPARx register. The
+   * data will be moved from/to this address to/from the memory after the
+   *  peripheral event.
+   */
+
+  dmachan_putreg(dmachan, STM32_BDMACH_CPAR_OFFSET, cfg->paddr);
+
+  /* "Set the memory address in the BDMA_CM1ARx register. The data will be
+   *  written to or read from this memory after the peripheral event."
+   *
+   * Note that in double-buffered mode it is explicitly assumed that the
+   * second buffer immediately follows the first.
+   */
+
+  dmachan_putreg(dmachan, STM32_BDMACH_CM0AR_OFFSET, cfg->maddr);
+  if (scr & DMA_SCR_DBM)
+    {
+      dmachan_putreg(dmachan, STM32_BDMACH_CM1AR_OFFSET,
+                     cfg->maddr + cfg->ndata);
+    }
+
+  /* "Configure the total number of data items to be transferred in the
+   *  BDMA_CNDTRx register.  After each peripheral event, this value will be
+   *  decremented."
+   */
+
+  dmachan_putreg(dmachan, STM32_BDMACH_CNDTR_OFFSET, cfg->ndata);
+
+  /* "Configure the stream priority using the PL[1:0] bits, data transfer
+   *  direction, circular mode, peripheral & memory incremented mode,
+   *  peripheral & memory data size, and interrupt after
+   *  half and/or full transfer in the BDMACH_CCRx register."
+   *
+   * Note: The CT bit is always reset.
+   */
+
+  regval  = dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET);
+  regval &= ~(BDMA_CCR_DIR | BDMA_CCR_CIRC | BDMA_CCR_PINC |
+              BDMA_CCR_MINC | BDMA_CCR_PSIZE_MASK | BDMA_CCR_MSIZE_MASK |
+              BDMA_CCR_PL_MASK | BDMA_CCR_M2M | BDMA_CCR_DBM | BDMA_CCR_CT);
+  ccr = stm32_sdma_scr_2_bdma_ccr(scr);
+  ccr    &=  (BDMA_CCR_DIR | BDMA_CCR_CIRC | BDMA_CCR_PINC |
+              BDMA_CCR_MINC | BDMA_CCR_PSIZE_MASK | BDMA_CCR_MSIZE_MASK |
+              BDMA_CCR_PL_MASK | BDMA_CCR_M2M | BDMA_CCR_DBM);
+  regval |= ccr;
+  dmachan_putreg(dmachan, STM32_BDMACH_CCR_OFFSET, regval);
 }
 
 /****************************************************************************
@@ -1764,12 +1912,59 @@ static void stm32_bdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
 static void stm32_bdma_start(DMA_HANDLE handle, dma_callback_t callback,
                              void *arg, bool half)
 {
-  DMA_CHANNEL dmachan    = (DMA_CHANNEL)handle;
-  uint8_t     controller = dmachan->ctrl;
+  DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
+  uint32_t ccr = 0;
 
-  DEBUGASSERT(controller == BDMA);
+  DEBUGASSERT(handle != NULL);
+  DEBUGASSERT(dmachan->ctrl == BDMA);
 
-#warning stm32_bdma_start not implemented
+  /* Save the callback info.  This will be invoked when the DMA completes */
+
+  dmachan->callback = callback;
+  dmachan->arg      = arg;
+
+  /* Activate the stream by setting the ENABLE bit in the DMA_SCRx register.
+   * As soon as the stream is enabled, it can serve any DMA request from the
+   * peripheral connected on the stream.
+   */
+
+  ccr  = dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET);
+  ccr |= BDMA_CCR_EN;
+
+  /* In normal mode, interrupt at either half or full completion. In circular
+   * and double-buffered modes, always interrupt on buffer wrap, and
+   * optionally interrupt at the halfway point.
+   */
+
+  if ((ccr & (BDMA_CCR_DBM | BDMA_CCR_CIRC)) == 0)
+    {
+      /* Once half of the bytes are transferred, the half-transfer flag
+       * (HTIF) is set and an interrupt is generated if the
+       * Half-Transfer Interrupt Enable bit (HTIE) is set. At the end of the
+       * transfer, the Transfer Complete Flag (TCIF) is set and an interrupt
+       * is generated if the Transfer Complete Interrupt Enable bit (TCIE) is
+       * set.
+       */
+
+      ccr |= (half ? (BDMA_CCR_HTIE | BDMA_CCR_TEIE) :
+                     (BDMA_CCR_TCIE | BDMA_CCR_TEIE));
+    }
+  else
+    {
+      /* In non-stop modes, when the transfer completes it immediately resets
+       * and starts again.  The transfer-complete interrupt is thus always
+       * enabled, and the half-complete interrupt can be used in circular
+       * mode to determine when the buffer is half-full, or in
+       * double-buffered mode to determine when one of the two buffers is
+       * full
+       */
+
+      ccr |= (half ? BDMA_CCR_HTIE : 0) | BDMA_CCR_TCIE | BDMA_CCR_TEIE;
+    }
+
+  dmachan_putreg(dmachan, STM32_BDMACH_CCR_OFFSET, ccr);
+
+  stm32_dmadump(handle, "DMA after start");
 }
 
 /****************************************************************************
@@ -1779,10 +1974,10 @@ static void stm32_bdma_start(DMA_HANDLE handle, dma_callback_t callback,
 static size_t stm32_bdma_residual(DMA_HANDLE handle)
 {
   DMA_CHANNEL dmachan    = (DMA_CHANNEL)handle;
-  uint8_t     controller = dmachan->ctrl;
   uint32_t    residual   = 0
 
-  DEBUGASSERT(controller == BDMA);
+  DEBUGASSERT(handle != NULL);
+  DEBUGASSERT(dmachan->ctrl == BDMA);
 
   /* Fetch the count of bytes remaining to be transferred */
 
@@ -1804,10 +1999,8 @@ static bool stm32_bdma_capable(FAR stm32_dmacfg_t *cfg)
 
   dmainfo("0x%08x/%u 0x%08x\n", cfg->maddr, cfg->ndata, cfg->cfg1);
 
-#warning REVISIT
-
   /* Verify that the address conforms to the memory transfer size.
-   * Transfers to/from memory performed by the DMA controller are
+   * Transfers to/from memory performed by the BDMA controller are
    * required to be aligned to their size.
    *
    * See ST RM0090 rev4, section 9.3.11
