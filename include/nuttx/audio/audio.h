@@ -408,13 +408,11 @@ struct audio_info_s
  * so this info is queried from the lower-half driver.
  */
 
-#ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
 struct ap_buffer_info_s
 {
   apb_samp_t  nbuffers;     /* Preferred qty of buffers */
   apb_samp_t  buffer_size;  /* Preferred size of the buffers */
 };
-#endif
 
 /* This structure describes an Audio Pipeline Buffer */
 
