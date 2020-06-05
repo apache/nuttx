@@ -78,7 +78,7 @@
  * Name: board_button_initialize
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Configure all button GPIO lines */
 
@@ -88,6 +88,8 @@ void board_button_initialize(void)
   hcs12_configgpio(NE64BADGE_BUTTON2);
 
   btn_dumpgpio("board_button_initialize() Exit");
+
+  return 2;
 }
 
 /****************************************************************************

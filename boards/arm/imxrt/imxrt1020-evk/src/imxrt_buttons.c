@@ -80,11 +80,12 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Configure the buttons as input */
 
   imxrt_config_gpio(GPIO_SWWAKE);
+  return 1;
 }
 
 /****************************************************************************

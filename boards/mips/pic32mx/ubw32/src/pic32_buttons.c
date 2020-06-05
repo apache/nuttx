@@ -117,7 +117,7 @@ static const uint8_t g_buttoncn[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -127,6 +127,8 @@ void board_button_initialize(void)
     {
       pic32mx_configgpio(g_buttonset[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

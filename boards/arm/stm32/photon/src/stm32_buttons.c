@@ -55,11 +55,12 @@
  * Name: board_button_initialize
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Configure Photon button gpio as input */
 
   stm32_configgpio(GPIO_BUTTON1);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

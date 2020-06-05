@@ -137,7 +137,7 @@ static const uint8_t g_buttoncn[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -151,6 +151,7 @@ void board_button_initialize(void)
   /* Change AN2/AN3/AN4 to digital */
 
   putreg32(0xffff, PIC32MX_ADC_CFG);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

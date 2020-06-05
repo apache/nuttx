@@ -48,9 +48,6 @@
 
 #include <nuttx/irq.h>
 
-#undef __KERNEL__
-#include <arch/board/board.h>
-
 #if CONFIG_BUTTONS_LOWER
 
 /****************************************************************************
@@ -70,6 +67,8 @@ static int btn_interrupt(int irq, FAR void *context, FAR void *arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static uint32_t g_btnnum;
 
 /* This is the button button lower half driver interface */
 
@@ -99,8 +98,8 @@ static FAR void *g_btnarg;
 
 static btn_buttonset_t btn_supported(FAR const struct btn_lowerhalf_s *lower)
 {
-  iinfo("NUM_BUTTONS: %02x\n", NUM_BUTTONS);
-  return (btn_buttonset_t)((1 << NUM_BUTTONS) - 1);
+  iinfo("NUM_BUTTONS: %02x\n", g_btnnum);
+  return (btn_buttonset_t)((1 << g_btnnum) - 1);
 }
 
 /****************************************************************************
@@ -132,7 +131,7 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
   btn_buttonset_t mask;
   btn_buttonset_t either = press | release;
   irqstate_t flags;
-  int id;
+  uint32_t id;
 
   /* Start with all interrupts disabled */
 
@@ -155,7 +154,7 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
 
       /* Attach and enable each button interrupt */
 
-      for (id = 0; id < NUM_BUTTONS; id++)
+      for (id = 0; id < g_btnnum; id++)
         {
           mask = (1 << id);
           if ((either & mask) != 0)
@@ -179,12 +178,12 @@ static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
 static void btn_disable(void)
 {
   irqstate_t flags;
-  int id;
+  uint32_t id;
 
   /* Disable each button interrupt */
 
   flags = enter_critical_section();
-  for (id = 0; id < NUM_BUTTONS; id++)
+  for (id = 0; id < g_btnnum; id++)
     {
       board_button_irq(id, NULL, NULL);
     }
@@ -231,7 +230,7 @@ static int btn_interrupt(int irq, FAR void *context, FAR void *arg)
 
 int btn_lower_initialize(FAR const char *devname)
 {
-  board_button_initialize();
+  g_btnnum = board_button_initialize();
   return btn_register(devname, &g_btnlower);
 }
 

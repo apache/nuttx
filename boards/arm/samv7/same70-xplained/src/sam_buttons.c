@@ -129,11 +129,12 @@ static int board_button_irqx(gpio_pinset_t pinset, int irq,
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Configure button PIOs */
 
   sam_configgpio(GPIO_SW0);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

@@ -617,11 +617,12 @@ void board_userled_all(uint8_t ledset);
  *   NOTE: This interface may or may not be supported by board-specific
  *   logic.  If the board supports button interfaces, then CONFIG_ARCH_BUTTONS
  *   will be defined.
+ *   NOTE: The button number is returned.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-void board_button_initialize(void);
+uint32_t board_button_initialize(void);
 #endif
 
 /****************************************************************************

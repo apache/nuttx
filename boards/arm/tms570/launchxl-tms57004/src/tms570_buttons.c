@@ -141,11 +141,12 @@ static int board_button_irqx(gio_pinset_t pinset, int irq,
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Configure button GIOs */
 
   tms570_configgio(GIO_BUTTON);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

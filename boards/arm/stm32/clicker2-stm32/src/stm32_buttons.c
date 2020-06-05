@@ -68,12 +68,13 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Configure BUTTONS T2-T3 GPIOs for input */
 
   stm32_configgpio(GPIO_BTN_T2);
   stm32_configgpio(GPIO_BTN_T3);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

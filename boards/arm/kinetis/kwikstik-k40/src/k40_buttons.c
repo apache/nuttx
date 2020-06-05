@@ -65,9 +65,11 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* The KwikStik-K40 board has no standard GPIO contact buttons */
+
+  return 0;
 }
 
 /****************************************************************************

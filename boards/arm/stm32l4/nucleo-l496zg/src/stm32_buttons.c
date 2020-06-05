@@ -68,9 +68,10 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   stm32l4_configgpio(GPIO_BTN_USER);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

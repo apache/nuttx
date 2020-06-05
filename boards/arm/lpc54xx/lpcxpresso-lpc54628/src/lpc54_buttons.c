@@ -110,7 +110,7 @@ static int board_button_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int ret;
 
@@ -128,6 +128,8 @@ void board_button_initialize(void)
       irq_attach(g_button_irq, board_button_interrupt, NULL);
 #endif
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

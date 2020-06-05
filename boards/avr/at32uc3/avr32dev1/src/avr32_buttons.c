@@ -108,10 +108,11 @@ static int board_button_irqx(int irq, xcpt_t irqhandler, void *arg)
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   at32uc3_configgpio(PINMUX_GPIO_BUTTON1);
   at32uc3_configgpio(PINMUX_GPIO_BUTTON2);
+  return 2;
 }
 
 /****************************************************************************

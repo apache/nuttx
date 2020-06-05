@@ -69,9 +69,10 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   sam_configgpio(GPIO_BP2);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

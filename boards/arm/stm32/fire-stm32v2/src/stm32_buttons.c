@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are
    * configured for some pins but NOT used in this file
@@ -85,6 +85,7 @@ void board_button_initialize(void)
 
   stm32_configgpio(GPIO_BTN_KEY1);
   stm32_configgpio(GPIO_BTN_KEY2);
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

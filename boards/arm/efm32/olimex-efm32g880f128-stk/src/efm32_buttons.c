@@ -102,7 +102,7 @@ static const gpio_pinset_t g_button_boards[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -112,6 +112,8 @@ void board_button_initialize(void)
     {
       efm32_configgpio(g_button_boards[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

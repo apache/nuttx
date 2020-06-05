@@ -114,7 +114,7 @@ static const uint8_t g_buttonirq[NUM_BUTTONS] =
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -124,6 +124,8 @@ void board_button_initialize(void)
     {
       lpc17_40_configgpio(g_buttoncfg[i]);
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************

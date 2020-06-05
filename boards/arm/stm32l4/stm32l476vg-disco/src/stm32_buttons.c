@@ -230,7 +230,7 @@ static int button_pm_prepare(struct pm_callback_s *cb, int domain,
  *
  ****************************************************************************/
 
-void board_button_initialize(void)
+uint32_t board_button_initialize(void)
 {
   int i;
 
@@ -252,6 +252,8 @@ void board_button_initialize(void)
 #endif
 #endif
     }
+
+  return NUM_BUTTONS;
 }
 
 /****************************************************************************
