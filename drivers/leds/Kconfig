@@ -26,13 +26,6 @@ config USERLED_LOWER
 
 		1. The board implementation must provide the LED
 		   interfaces as defined in include/nuttx/board.h
-		2. The board.h header file must provide the definition
-		   BOARD_NLEDS, and
-		3. The board.h header file must not include any other
-		   header files that are not accessible in this context
-		   (such as those in arch/<arch>/src/<chip>) UNLESS those
-		   inclusions are conditioned on __KERNEL__.  button_lower.c
-		   will undefine __KERNEL__ before included board.h.
 
 		If your board does not meet these requirements, then the
 		userled_lower.c file can still be copied to your your

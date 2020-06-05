@@ -60,11 +60,12 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure D301 GPIO for output */
 
   sam_configgpio(GPIO_D301);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

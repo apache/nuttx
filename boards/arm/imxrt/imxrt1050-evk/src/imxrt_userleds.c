@@ -69,11 +69,12 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED GPIO for output */
 
   imxrt_config_gpio(GPIO_LED);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

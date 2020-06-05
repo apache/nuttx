@@ -77,9 +77,10 @@
  *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   sam_configgpio(GPIO_LED0);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

@@ -62,9 +62,10 @@
  *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   stm32_configgpio(GPIO_LD1);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

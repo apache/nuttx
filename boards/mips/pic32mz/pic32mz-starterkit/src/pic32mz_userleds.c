@@ -89,13 +89,14 @@ static const pinset_t g_ledpincfg[PIC32MZ_STARTERKIT_NLEDS] =
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure output pins */
 
   pic32mz_configgpio(GPIO_LED_1);
   pic32mz_configgpio(GPIO_LED_2);
   pic32mz_configgpio(GPIO_LED_3);
+  return 3;
 }
 
 /****************************************************************************

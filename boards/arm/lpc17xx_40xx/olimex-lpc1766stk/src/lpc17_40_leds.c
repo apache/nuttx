@@ -87,7 +87,7 @@ static bool g_uninitialized = true;
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void board_userled_initialize(void) /* Name when invoked externally */
+uint32_t board_userled_initialize(void) /* Name when invoked externally */
 #else
 void board_autoled_initialize(void) /* Name when invoked via lpc17_40_boot.c */
 #endif
@@ -100,6 +100,9 @@ void board_autoled_initialize(void) /* Name when invoked via lpc17_40_boot.c */
   lpc17_40_configgpio(LPC1766STK_LED2);
 
   led_dumpgpio("board_*led_initialize() Exit");
+#ifndef CONFIG_ARCH_LEDS
+  return BOARD_NLEDS;
+#endif
 }
 
 /****************************************************************************

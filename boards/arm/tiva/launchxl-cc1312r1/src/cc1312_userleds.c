@@ -56,10 +56,11 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   tiva_configgpio(&g_gpio_gled);
   tiva_configgpio(&g_gpio_rled);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

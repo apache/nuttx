@@ -175,12 +175,13 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LD4,5 GPIO for output */
 
   stm32l4_configgpio(GPIO_LED_RED);
   stm32l4_configgpio(GPIO_LED_GRN);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

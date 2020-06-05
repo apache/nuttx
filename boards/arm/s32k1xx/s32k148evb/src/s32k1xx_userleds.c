@@ -63,13 +63,14 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED GPIOs for output */
 
   s32k1xx_pinconfig(GPIO_LED_R);
   s32k1xx_pinconfig(GPIO_LED_G);
   s32k1xx_pinconfig(GPIO_LED_B);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

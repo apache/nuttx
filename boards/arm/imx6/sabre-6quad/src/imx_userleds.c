@@ -55,11 +55,12 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED PIOs for output */
 
   imx_config_gpio(GPIO_LED);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

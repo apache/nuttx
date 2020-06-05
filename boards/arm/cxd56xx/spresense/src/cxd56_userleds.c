@@ -66,12 +66,13 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   cxd56_gpio_config(GPIO_LED1, false);
   cxd56_gpio_config(GPIO_LED2, false);
   cxd56_gpio_config(GPIO_LED3, false);
   cxd56_gpio_config(GPIO_LED4, false);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

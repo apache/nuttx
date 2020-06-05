@@ -74,7 +74,7 @@
  * control of the application.  The following interfaces are then available
  * for application control of the LEDs:
  *
- *  void board_userled_initialize(void);
+ *  uint32_t board_userled_initialize(void);
  *  void board_userled(int led, bool ledon);
  *  void board_userled_all(uint8_t ledset);
  */
@@ -105,7 +105,7 @@ static void led_dumppins(FAR const char *msg)
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED pin as a GPIO outputs */
 
@@ -117,6 +117,7 @@ void board_userled_initialize(void)
   lpc43_gpio_config(GPIO_LED);
 
   led_dumppins("board_userled_initialize() Exit");
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

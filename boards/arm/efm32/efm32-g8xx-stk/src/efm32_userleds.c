@@ -175,7 +175,7 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LED0-4 GPIOs for output */
 
@@ -183,6 +183,7 @@ void board_userled_initialize(void)
   efm32_configgpio(GPIO_LED1);
   efm32_configgpio(GPIO_LED2);
   efm32_configgpio(GPIO_LED3);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

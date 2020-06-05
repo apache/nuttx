@@ -184,12 +184,14 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   for (unsigned wled = 0; wled < BOARD_NLEDS; wled++)
     {
       stm32_configgpio(g_ledcfg[wled]);
     }
+
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

@@ -548,10 +548,12 @@ void board_autoled_off(int led);
  *   used by the NuttX LED logic exclusively and may not be available for
  *   use by user logic if CONFIG_ARCH_LEDS=y.
  *
+ *   NOTE: The LED number is returned.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_LEDS
-void board_userled_initialize(void);
+uint32_t board_userled_initialize(void);
 #endif
 
 /****************************************************************************

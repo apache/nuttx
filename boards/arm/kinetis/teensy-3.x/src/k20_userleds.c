@@ -55,9 +55,10 @@
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   kinetis_pinconfig(GPIO_LED);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

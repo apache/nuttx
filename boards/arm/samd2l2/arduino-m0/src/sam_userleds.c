@@ -75,9 +75,10 @@
  *
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   sam_configport(PORT_STATUS_LED);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

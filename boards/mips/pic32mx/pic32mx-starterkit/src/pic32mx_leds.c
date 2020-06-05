@@ -189,13 +189,14 @@ static void pic32mx_setleds(FAR const struct led_setting_s *setting)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure output pins */
 
   pic32mx_configgpio(GPIO_LED_1);
   pic32mx_configgpio(GPIO_LED_2);
   pic32mx_configgpio(GPIO_LED_3);
+  return 3;
 }
 #endif
 

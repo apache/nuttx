@@ -168,11 +168,12 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
  * Name: board_userled_initialize
  ****************************************************************************/
 
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   /* Configure LD2 GPIO for output */
 
   stm32l4_configgpio(GPIO_LD2);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
