@@ -1832,6 +1832,7 @@ static int wm8904_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
 static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
                         unsigned long arg)
 {
+  int ret = OK;
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
   FAR struct ap_buffer_info_s *bufinfo;
 #endif
@@ -1869,11 +1870,12 @@ static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 #endif
 
       default:
+        ret = -ENOTTY;
         audinfo("Ignored\n");
         break;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
