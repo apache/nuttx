@@ -146,13 +146,13 @@ static const struct audio_ops_s g_audioops =
   cs4344_pause,         /* pause */
   cs4344_resume,        /* resume */
 #endif
-  NULL,                  /* allocbuffer */
-  NULL,                  /* freebuffer */
+  NULL,                 /* allocbuffer */
+  NULL,                 /* freebuffer */
   cs4344_enqueuebuffer, /* enqueue_buffer */
   cs4344_cancelbuffer,  /* cancel_buffer */
   cs4344_ioctl,         /* ioctl */
-  NULL,                  /* read */
-  NULL,                  /* write */
+  NULL,                 /* read */
+  NULL,                 /* write */
   cs4344_reserve,       /* reserve */
   cs4344_release        /* release */
 };
