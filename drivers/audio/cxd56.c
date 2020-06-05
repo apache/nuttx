@@ -3307,6 +3307,7 @@ static int cxd56_cancelbuffer(FAR struct audio_lowerhalf_s *lower,
 static int cxd56_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
                  unsigned long arg)
 {
+  int ret = OK;
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
   FAR struct ap_buffer_info_s *bufinfo;
 #endif
@@ -3329,11 +3330,12 @@ static int cxd56_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
 #endif
 
       default:
+        ret = -ENOTTY;
         audinfo("Unhandled ioctl: %d\n", cmd);
         break;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
