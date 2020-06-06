@@ -132,6 +132,17 @@ int task_delete(pid_t pid)
       goto errout;
     }
 
+  /* Check if the task to delete is the calling task */
+
+  if (pid == rtcb->pid)
+    {
+      /* If it is, then what we really wanted to do was exit. Note that we
+       * don't bother to unlock the TCB since it will be going away.
+       */
+
+      exit(EXIT_SUCCESS);
+    }
+
   /* Check to see if this task has the non-cancelable bit set in its
    * flags. Suppress context changes for a bit so that the flags are stable.
    * (the flags should not change in interrupt handling).
@@ -183,17 +194,7 @@ int task_delete(pid_t pid)
     }
 #endif
 
-  /* Check if the task to delete is the calling task */
-
   sched_unlock();
-  if (pid == rtcb->pid)
-    {
-      /* If it is, then what we really wanted to do was exit. Note that we
-       * don't bother to unlock the TCB since it will be going away.
-       */
-
-      exit(EXIT_SUCCESS);
-    }
 
   /* Otherwise, perform the asynchronous cancellation, letting
    * nxtask_terminate() do all of the heavy lifting.
