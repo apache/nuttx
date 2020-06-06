@@ -80,8 +80,8 @@
 #define K210_IO_SL             (1 << 19)
 #define K210_IO_ST             (1 << 23)
 
-#define K210_FLAG_GPIOHS  (K210_IO_DS(0xf) | K210_IO_OUTPUT_ENABLE | \
-                           K210_IO_INPUT_ENABLE | K210_IO_ST)
+#define K210_IOFLAG_GPIOHS (K210_IO_DS(0xf) | K210_IO_OUTPUT_ENABLE | \
+                            K210_IO_INPUT_ENABLE | K210_IO_ST)
 
 /****************************************************************************
  * Public Functions Prototypes
