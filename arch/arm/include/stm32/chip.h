@@ -1681,6 +1681,31 @@
 #  define STM32_NRNG                     1   /* No Random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
+#elif defined(CONFIG_ARCH_CHIP_STM32F411CE)  /* LQFP64 package, 512Kb FLASH, 128KiB SRAM */
+#  define STM32_NFSMC                    0   /* No FSMC */
+#  define STM32_NATIM                    1   /* One advanced timers TIM1 */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
+                                              * 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIMNDMA                3   /* 16-bit general timers TIM9-11 without DMA */
+#  define STM32_NBTIM                    0   /* No basic timers */
+#  define STM32_NDMA                     2   /* DMA1-2 with 8 streams each*/
+#  define STM32_NSPI                     5   /* SPI1-5 */
+#  define STM32_NI2S                     2   /* I2S1-2 (multiplexed with SPI2-3) */
+#  define STM32_NUSART                   6   /* Actually only 3: USART1, 2 and 6 */
+#  define STM32_NI2C                     3   /* I2C1-3 */
+#  define STM32_NCAN                     0   /* No CAN */
+#  define STM32_NSDIO                    1   /* One SDIO interface */
+#  define STM32_NLCD                     0   /* No LCD */
+#  define STM32_NUSBOTG                  1   /* USB OTG FS (only) */
+#  define STM32_NGPIO                    50  /* GPIOA-H */
+#  define STM32_NADC                     1   /* One 12-bit ADC1, 16 channels */
+#  define STM32_NDAC                     0   /* No DAC */
+#  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
+#  define STM32_NCRC                     1   /* No CRC */
+#  define STM32_NETHERNET                0   /* No Ethernet MAC */
+#  define STM32_NRNG                     0   /* No Random number generator (RNG) */
+#  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
+
 #elif defined(CONFIG_ARCH_CHIP_STM32F411RE)  /* LQFP64 package, 512Kb FLASH, 128KiB SRAM */
 #  define STM32_NFSMC                    0   /* No FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
