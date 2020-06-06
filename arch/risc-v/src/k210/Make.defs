@@ -59,8 +59,8 @@ endif
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = k210_allocateheap.c k210_clockconfig.c
 CHIP_CSRCS += k210_idle.c k210_irq.c k210_irq_dispatch.c
-CHIP_CSRCS += k210_lowputc.c k210_serial.c
-CHIP_CSRCS += k210_start.c k210_timerisr.c
+CHIP_CSRCS += k210_lowputc.c k210_serial.c k210_fpioa.c
+CHIP_CSRCS += k210_start.c k210_timerisr.c k210_gpiohs.c
 
 ifeq ($(CONFIG_SMP), y)
 CHIP_CSRCS += k210_cpuidlestack.c k210_cpuindex.c

@@ -1,9 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/hardware/k210_memorymap.h
- *
- * Derives from software originally provided by Canaan Inc
- *
- *   Copyright 2018 Canaan Inc
+ * arch/risc-v/src/k210/k210_fpioa.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,26 +18,28 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H
-#define __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H
-
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
-/* Register Base Address ****************************************************/
+#include <nuttx/config.h>
 
-#define K210_CLINT_BASE   0x02000000
-#define K210_PLIC_BASE    0x0c000000
+#include <assert.h>
+#include <debug.h>
 
-#ifdef CONFIG_K210_WITH_QEMU
-#define K210_UART0_BASE   0x10010000
-#else
-#define K210_UART0_BASE   0x38000000
-#endif
-#define K210_GPIOHS_BASE  0x38001000
-#define K210_FPIOA_BASE   0x502B0000
+#include "riscv_internal.h"
+#include "riscv_arch.h"
 
-#define K210_SYSCTL_BASE  0x50440000
+#include "k210_memorymap.h"
+#include "k210_fpioa.h"
 
-#endif /* __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+void k210_fpioa_config(uint32_t io, uint32_t ioflags)
+{
+  uint32_t *fpioa = (uint32_t *)K210_FPIOA_BASE;
+  DEBUGASSERT(io < K210_IO_NUMBER);
+  putreg32(ioflags, &fpioa[io]);
+}
