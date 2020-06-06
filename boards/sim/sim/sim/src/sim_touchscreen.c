@@ -112,7 +112,7 @@ static FAR void *sim_listener(FAR void *arg)
            */
 
           fwarn("WARNING: Lost server connection: %d\n", errno);
-          pthread_exit(NULL);
+          break;
         }
 
       /* If we received a message, we must be connected */
@@ -125,7 +125,7 @@ static FAR void *sim_listener(FAR void *arg)
         }
     }
 
-  return NULL; /* Not-reachable */
+  return NULL;
 }
 
 /****************************************************************************
