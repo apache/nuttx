@@ -41,6 +41,7 @@
 
 #include <debug.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 /****************************************************************************
@@ -68,4 +69,5 @@
 
 void k210_boardinitialize(void)
 {
+  board_autoled_initialize();
 }

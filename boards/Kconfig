@@ -549,6 +549,7 @@ config ARCH_BOARD_LX_CPU
 config ARCH_BOARD_MAIX_BIT
 	bool "Sipeed Maix Bit board"
 	depends on ARCH_CHIP_K210
+	select ARCH_HAVE_LEDS
 	---help---
 		This is the board configuration for the port of NuttX to the
 		Sipeed Maix Bit board. This board features the RISC-V K210
