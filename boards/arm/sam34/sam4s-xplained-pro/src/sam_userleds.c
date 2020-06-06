@@ -86,7 +86,8 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint32_t ledset)
 {
-  sam_gpiowrite(GPIO_D301, (ledset & BOARD_D301_BIT) ? LED_D301_ON : LED_D301_OFF);
+  sam_gpiowrite(GPIO_D301,
+    (ledset & BOARD_D301_BIT) ? LED_D301_ON : LED_D301_OFF);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

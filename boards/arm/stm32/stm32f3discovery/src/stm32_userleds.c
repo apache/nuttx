@@ -54,6 +54,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This array maps an LED number to GPIO pin configuration */
 
 static const uint32_t g_ledcfg[BOARD_NLEDS] =

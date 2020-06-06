@@ -38,8 +38,8 @@
  * one user controllable LED, a yellow LED labeled STATUS near the SAMD20 USB
  * connector.
  *
- * This LED is controlled by PA14 and the LED can be activated by driving PA14
- * to GND.
+ * This LED is controlled by PA14 and the LED can be activated by driving
+ * PA14 to GND.
  *
  * When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
  * control the LED.  Otherwise, the LED can be controlled from user

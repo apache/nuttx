@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32/stm32butterfly2/src/stm32_leds.c
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
@@ -32,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -44,7 +44,7 @@
 
 #include "stm32_gpio.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
 
@@ -57,7 +57,7 @@
 #define GPIO_LED4       (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz |\
                          GPIO_OUTPUT_SET | GPIO_PORTC | GPIO_PIN5)
 
-/*****************************************************************************
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -69,11 +69,11 @@ enum led_state
   LED_OFF = true
 };
 
-/*****************************************************************************
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: led_state
  *
  * Description:
@@ -103,11 +103,11 @@ static void led_state(enum led_state state, unsigned int leds)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_led_initialize
  *
  * Description:
@@ -124,14 +124,14 @@ void stm32_led_initialize(void)
 
 #ifdef CONFIG_ARCH_LEDS
 
-/*****************************************************************************
+/****************************************************************************
  * Name: board_autoled_on
  *
  * Description:
  *   Drives board leds when specific RTOS state led occurs.
  *
  * Input Parameters:
- *   led - This is actually an RTOS state not led number of anything like that
+ *   led - This is actually RTOS state not led number of anything like that
  ****************************************************************************/
 
 void board_autoled_on(int led)
@@ -167,14 +167,14 @@ void board_autoled_on(int led)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: board_autoled_off
  *
  * Description:
  *   Drives board leds when specific RTOS state led ends
  *
  * Input Parameters:
- *   led - This is actually an RTOS state not led number of anything like that
+ *   led - This is actually RTOS state not led number of anything like that
  ****************************************************************************/
 
 void board_autoled_off(int led)
@@ -204,14 +204,14 @@ void board_autoled_off(int led)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: board_userled_initialize
  *
  * Description:
  *   This function should initialize leds for user use, but on RTOS start we
  *   initialize every led for use by RTOS and at end, when RTOS is fully
- *   booted up, we give control of these specific leds for user. So that's why
- *   this function is empty.
+ *   booted up, we give control of these specific leds for user. So that's
+ *   why this function is empty.
  ****************************************************************************/
 
 uint32_t board_userled_initialize(void)
@@ -221,7 +221,7 @@ uint32_t board_userled_initialize(void)
   return BOARD_NLEDS;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: board_userled
  *
  * Description:
@@ -247,7 +247,7 @@ void board_userled(int led, bool ledon)
   led_state(ledon, ledbit);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: board_userled_all
  *
  * Description:
@@ -264,6 +264,6 @@ void board_userled_all(uint32_t ledset)
   led_state(LED_OFF, ~(ledset | BOARD_LED4_BIT));
 #else
   led_state(LED_ON, ledset);
-  led_state(led_OFF, ~ledset);
+  led_state(LED_OFF, ~ledset);
 #endif
 }

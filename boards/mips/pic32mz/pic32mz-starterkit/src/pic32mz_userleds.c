@@ -55,6 +55,7 @@
 #ifndef CONFIG_ARCH_LEDS
 
 /* LED Configuration ********************************************************/
+
 /* The PIC32MZ Ethernet Starter kit has 3 user LEDs labelled LED1-3 on the
  * board:
  *

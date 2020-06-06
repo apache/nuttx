@@ -74,7 +74,7 @@ void board_userled(int led, bool ledon)
     {
       stm32l4_gpiowrite(GPIO_LED1, ledon);
     }
-   else if (led == BOARD_LED2)
+  else if (led == BOARD_LED2)
     {
       stm32l4_gpiowrite(GPIO_LED2, ledon);
     }

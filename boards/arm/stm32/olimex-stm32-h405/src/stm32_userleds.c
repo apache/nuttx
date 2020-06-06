@@ -51,6 +51,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This array maps an LED number to GPIO pin configuration */
 
 static uint32_t g_ledcfg[BOARD_NLEDS] =
@@ -68,9 +69,9 @@ static uint32_t g_ledcfg[BOARD_NLEDS] =
 
 uint32_t board_userled_initialize(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+  /* Configure LED1-4 GPIOs for output */
 
-   stm32_configgpio(GPIO_LED_STATUS);
+  stm32_configgpio(GPIO_LED_STATUS);
   return BOARD_NLEDS;
 }
 

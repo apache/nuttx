@@ -32,13 +32,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* There are three LEDs on board the SAML21 Xplained Pro board:  The EDBG
  * controls two of the LEDs, a power LED and a status LED.  There is only
  * one user controllable LED, a yellow LED labeled STATUS near the SAML21 USB
  * connector.
  *
- * This LED is controlled by PB10 and the LED can be activated by driving PB10
- * to GND.
+ * This LED is controlled by PB10 and the LED can be activated by driving
+ * PB10 to GND.
  *
  * When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
  * control the LED.
@@ -110,7 +111,7 @@ void board_userled(int led, bool ledon)
  *   LEDs.
  *   If CONFIG_ARCH_LEDS is not defined, then the board_userled_all() is
  *   available to control the LED from user application logic.  NOTE:  since
- *   there is only a single LED on-board, this is function is not very useful.
+ *   there is only a single LED on-board, this is function isn't very useful.
  *
  ****************************************************************************/
 
