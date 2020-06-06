@@ -244,7 +244,7 @@ void board_userled(int led, bool ledon)
     }
 }
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   board_userled(BOARD_LED1, (ledset & BOARD_LED1) != 0);
   board_userled(BOARD_LED3, (ledset & BOARD_LED3) != 0);

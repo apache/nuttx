@@ -281,7 +281,7 @@ void board_userled(int led, bool ledon)
   stm32_gpiowrite(pinset, !ledon);
 }
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
 #ifdef CONFIG_ARCH_LEDS
   led_onbits(ledset & ~BOARD_LED4_BIT);

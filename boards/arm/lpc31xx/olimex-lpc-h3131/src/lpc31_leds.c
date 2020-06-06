@@ -210,7 +210,7 @@ void board_userled(int led, bool ledon)
     }
 }
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
 #ifndef CONFIG_ARCH_LEDS
   board_userled(BOARD_LED1, (ledset & BOARD_LED1_BIT) != 0);

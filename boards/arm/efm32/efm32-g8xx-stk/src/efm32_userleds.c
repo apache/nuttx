@@ -202,7 +202,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   efm32_gpiowrite(GPIO_LED0, (ledset & BOARD_LED0_BIT) != 0);
   efm32_gpiowrite(GPIO_LED1, (ledset & BOARD_LED1_BIT) != 0);

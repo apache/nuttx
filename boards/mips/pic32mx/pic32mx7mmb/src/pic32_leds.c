@@ -226,7 +226,7 @@ void board_userled(int led, bool ledon)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   /* Call board_userled() with ledon == true to illuminated the LED */
 

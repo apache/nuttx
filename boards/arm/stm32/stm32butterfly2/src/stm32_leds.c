@@ -257,7 +257,7 @@ void board_userled(int led, bool ledon)
  *   ledset - Led bits to be set on or off
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
 #ifdef CONFIG_ARCH_LEDS
   led_state(LED_ON, ledset & ~BOARD_LED4_BIT);

@@ -94,7 +94,7 @@
  *
  *  uint32_t board_userled_initialize(void);
  *  void board_userled(int led, bool ledon);
- *  void board_userled_all(uint8_t ledset);
+ *  void board_userled_all(uint32_t ledset);
  */
 
 /* Button definitions *******************************************************/

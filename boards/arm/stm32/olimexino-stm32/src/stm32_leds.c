@@ -122,7 +122,7 @@ void board_userled(int led, bool ledon)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   stm32_gpiowrite(GPIO_LED_GREEN, (ledset & BOARD_LED_YELLOW_BIT) == 0);
   stm32_gpiowrite(GPIO_LED_YELLOW, (ledset & BOARD_LED_YELLOW_BIT) == 0);

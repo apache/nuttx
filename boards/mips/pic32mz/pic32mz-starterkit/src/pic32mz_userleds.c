@@ -115,7 +115,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   board_userled(PIC32MZ_STARTERKIT_LED1,
                 (ledset & PIC32MZ_STARTERKIT_LED1_BIT) != 0);

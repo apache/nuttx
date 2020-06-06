@@ -128,7 +128,7 @@ void board_userled(int led, bool ledon)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   lpc17_40_gpiowrite(LPC1766STK_LED1, (ledset & BOARD_LED1_BIT) == 0);
   lpc17_40_gpiowrite(LPC1766STK_LED2, (ledset & BOARD_LED2_BIT) == 0);
