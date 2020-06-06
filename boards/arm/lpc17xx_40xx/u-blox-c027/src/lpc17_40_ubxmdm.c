@@ -267,7 +267,7 @@ static int lpc17_40_ioctl(FAR struct ubxmdm_lower* lower,
 {
   /* No platform-specific IOCTL at the moment. */
 
-  return -ENOSYS;
+  return -ENOTTY;
 }
 
 /****************************************************************************
