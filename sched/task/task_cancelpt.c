@@ -316,6 +316,8 @@ bool check_cancellation_point(void)
   return ret;
 }
 
+#endif /* CONFIG_CANCELLATION_POINTS */
+
 /****************************************************************************
  * Name: nxnotify_cancellation
  *
@@ -327,9 +329,12 @@ bool check_cancellation_point(void)
  *   leave_cancellation_point() would then follow, causing the thread to
  *   exit.
  *
+ * Returned Value:
+ *   Indicate whether the notification delivery to the target
+ *
  ****************************************************************************/
 
-void nxnotify_cancellation(FAR struct tcb_s *tcb)
+bool nxnotify_cancellation(FAR struct tcb_s *tcb)
 {
   irqstate_t flags;
 
@@ -339,51 +344,86 @@ void nxnotify_cancellation(FAR struct tcb_s *tcb)
 
   flags = enter_critical_section();
 
-  /* Make sure that the cancellation pending indication is set. */
-
-  tcb->flags |= TCB_FLAG_CANCEL_PENDING;
-
   /* We only notify the cancellation if (1) the thread has not disabled
    * cancellation, (2) the thread uses the deferred cancellation mode,
    * (3) the thread is waiting within a cancellation point.
    */
 
-  if (((tcb->flags & TCB_FLAG_NONCANCELABLE) == 0 &&
-       (tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0) ||
-      tcb->cpcount > 0)
+  /* Check to see if this task has the non-cancelable bit set. */
+
+  if ((tcb->flags & TCB_FLAG_NONCANCELABLE) != 0)
     {
-      /* If the thread is blocked waiting for a semaphore, then the thread
-       * must be unblocked to handle the cancellation.
+      /* Then we cannot cancel the thread now.  Here is how this is
+       * supposed to work:
+       *
+       * "When cancellability is disabled, all cancels are held pending
+       *  in the target thread until the thread changes the cancellability.
+       *  When cancellability is deferred, all cancels are held pending in
+       *  the target thread until the thread changes the cancellability,
+       *  calls a function which is a cancellation point or calls
+       *  pthread_testcancel(), thus creating a cancellation point.  When
+       *  cancellability is asynchronous, all cancels are acted upon
+       *  immediately, interrupting the thread with its processing."
        */
 
-      if (tcb->task_state == TSTATE_WAIT_SEM)
-        {
-          nxsem_wait_irq(tcb, ECANCELED);
-        }
-
-      /* If the thread is blocked waiting on a signal, then the
-       * thread must be unblocked to handle the cancellation.
-       */
-
-      else if (tcb->task_state == TSTATE_WAIT_SIG)
-        {
-          nxsig_wait_irq(tcb, ECANCELED);
-        }
-
-#ifndef CONFIG_DISABLE_MQUEUE
-      /* If the thread is blocked waiting on a message queue, then the
-       * thread must be unblocked to handle the cancellation.
-       */
-
-      else if (tcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
-               tcb->task_state == TSTATE_WAIT_MQNOTFULL)
-        {
-          nxmq_wait_irq(tcb, ECANCELED);
-        }
-#endif
+      tcb->flags |= TCB_FLAG_CANCEL_PENDING;
+      leave_critical_section(flags);
+      return true;
     }
 
-  leave_critical_section(flags);
-}
+#ifdef CONFIG_CANCELLATION_POINTS
+  /* Check if this task supports deferred cancellation */
 
-#endif /* CONFIG_CANCELLATION_POINTS */
+  if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
+    {
+      /* Then we cannot cancel the task asynchronously.
+       * Mark the cancellation as pending.
+       */
+
+      tcb->flags |= TCB_FLAG_CANCEL_PENDING;
+
+      /* If the task is waiting at a cancellation point, then notify of the
+       * cancellation thereby waking the task up with an ECANCELED error.
+       */
+
+      if (tcb->cpcount > 0)
+        {
+          /* If the thread is blocked waiting for a semaphore, then the
+           * thread must be unblocked to handle the cancellation.
+           */
+
+          if (tcb->task_state == TSTATE_WAIT_SEM)
+            {
+              nxsem_wait_irq(tcb, ECANCELED);
+            }
+
+          /* If the thread is blocked waiting on a signal, then the
+           * thread must be unblocked to handle the cancellation.
+           */
+
+          else if (tcb->task_state == TSTATE_WAIT_SIG)
+            {
+              nxsig_wait_irq(tcb, ECANCELED);
+            }
+
+#ifndef CONFIG_DISABLE_MQUEUE
+          /* If the thread is blocked waiting on a message queue, then
+           * the thread must be unblocked to handle the cancellation.
+           */
+
+          else if (tcb->task_state == TSTATE_WAIT_MQNOTEMPTY ||
+                  tcb->task_state == TSTATE_WAIT_MQNOTFULL)
+            {
+              nxmq_wait_irq(tcb, ECANCELED);
+            }
+#endif
+        }
+
+      leave_critical_section(flags);
+      return true;
+    }
+#endif
+
+  leave_critical_section(flags);
+  return false;
+}

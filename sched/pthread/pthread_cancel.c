@@ -67,60 +67,14 @@ int pthread_cancel(pthread_t thread)
   DEBUGASSERT((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
                TCB_FLAG_TTYPE_PTHREAD);
 
-  /* Check to see if this thread has the non-cancelable bit set in its
-   * flags. Suppress context changes for a bit so that the flags are stable.
-   * (the flags should not change in interrupt handling).
-   */
+  /* Notify the target if the non-cancelable or deferred cancellation set */
 
-  sched_lock();
-  if ((tcb->flags & TCB_FLAG_NONCANCELABLE) != 0)
+  if (nxnotify_cancellation(tcb))
     {
-      /* Then we cannot cancel the thread now.  Here is how this is
-       * supposed to work:
-       *
-       * "When cancellability is disabled, all cancels are held pending
-       *  in the target thread until the thread changes the cancellability.
-       *  When cancellability is deferred, all cancels are held pending in
-       *  the target thread until the thread changes the cancellability,
-       *  calls a function which is a cancellation point or calls
-       *  pthread_testcancel(), thus creating a cancellation point. When
-       *  cancellability is asynchronous, all cancels are acted upon
-       *  immediately, interrupting the thread with its processing."
-       */
-
-      tcb->flags |= TCB_FLAG_CANCEL_PENDING;
-      sched_unlock();
       return OK;
     }
-
-#ifdef CONFIG_CANCELLATION_POINTS
-  /* Check if this thread supports deferred cancellation */
-
-  if ((tcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
-    {
-      /* Then we cannot cancel the thread asynchronously.  Mark the
-       * cancellation as pending.
-       */
-
-      tcb->flags |= TCB_FLAG_CANCEL_PENDING;
-
-      /* If the thread is waiting at a cancellation point, then notify of the
-       * cancellation thereby waking the task up with an ECANCELED error.
-       */
-
-      if (tcb->cpcount > 0)
-        {
-          nxnotify_cancellation(tcb);
-        }
-
-      sched_unlock();
-      return OK;
-    }
-#endif
 
   /* Otherwise, perform the asyncrhonous cancellation */
-
-  sched_unlock();
 
   /* Check to see if the ID refers to ourselves.. this would be the
    * same as pthread_exit(PTHREAD_CANCELED).
