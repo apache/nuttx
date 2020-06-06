@@ -91,7 +91,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   board_userled(BOARD_GLED, (ledset & BOARD_GLED_BIT) != 0);
   board_userled(BOARD_RLED, (ledset & BOARD_RLED_BIT) != 0);

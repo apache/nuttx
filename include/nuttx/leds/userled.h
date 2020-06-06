@@ -96,7 +96,7 @@
  * from or writing to the LED driver.
  */
 
-typedef uint8_t userled_set_t;
+typedef uint32_t userled_set_t;
 
 /* A reference to this structure is provided with the ULEDIOC_SETLED IOCTL
  * command and describes the LED to be set and the new value of the LED.

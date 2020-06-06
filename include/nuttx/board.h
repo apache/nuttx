@@ -605,7 +605,7 @@ void board_userled(int led, bool ledon);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_LEDS
-void board_userled_all(uint8_t ledset);
+void board_userled_all(uint32_t ledset);
 #endif
 
 /****************************************************************************

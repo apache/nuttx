@@ -210,7 +210,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   for (unsigned wled = 0; wled < BOARD_NLEDS; wled++)
     {

@@ -99,7 +99,7 @@ void board_userled(int led, bool ledon)
  * Name: board_userled_all
  ****************************************************************************/
 
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   stm32_gpiowrite(GPIO_LED_STATUS, (ledset & BOARD_LED1_BIT) != 0);
 }

@@ -220,7 +220,7 @@ void board_userled(int led, bool ledon)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void board_userled_all(uint8_t ledset)
+void board_userled_all(uint32_t ledset)
 {
   board_userled(PIC32MX_UBW32_LED1, (ledset & PIC32MX_UBW32_LED1_BIT) != 0);
   board_userled(PIC32MX_UBW32_LED2, (ledset & PIC32MX_UBW32_LED2_BIT) != 0);
