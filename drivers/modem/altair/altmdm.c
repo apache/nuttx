@@ -368,6 +368,7 @@ static int altmdm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     default:
       m_err("Unrecognized cmd: 0x%08x\n", cmd);
+      ret = -ENOTTY;
       break;
     }
 

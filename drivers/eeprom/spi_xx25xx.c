@@ -812,7 +812,7 @@ static int ee25xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
       default:
-        ret = -EINVAL;
+        ret = -ENOTTY;
     }
 
   return ret;

@@ -1464,7 +1464,7 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return OK;
     }
 
-  return -EBADFD;
+  return -ENOTTY;
 }
 
 /****************************************************************************
