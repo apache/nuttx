@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_STM32F411_MINIMUM
+
+config STM32F411MINIMUM_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1024
+	depends on USBHOST
+
+config STM32F411MINIMUM_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
+endif
