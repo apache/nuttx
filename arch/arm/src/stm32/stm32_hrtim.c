@@ -1692,7 +1692,7 @@ static int stm32_hrtim_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       default:
         {
-          ret = -ENOSYS;
+          ret = -ENOTTY;
           break;
         }
     }

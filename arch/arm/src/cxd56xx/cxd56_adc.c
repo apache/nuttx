@@ -869,7 +869,7 @@ static int cxd56_adc_ioctl(FAR struct file *filep, int cmd,
           else
             {
               aerr("Unrecognized cmd: %d\n", cmd);
-              ret = -EINVAL;
+              ret = -ENOTTY;
             }
         }
         break;
