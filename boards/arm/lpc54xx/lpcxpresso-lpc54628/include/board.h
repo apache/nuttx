@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking ****************************************************************/
+/* Clocking *****************************************************************/
 
 #undef  BOARD_180MHz
 #define BOARD_220MHz                    1
@@ -248,7 +248,7 @@
 #define BOARD_CLKDIV_SDWIDEXFR  BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
 #define BOARD_CLKDIV_SDXFR      BOARD_SDMMC_CEIL(BOARD_SDMMC_FREQUENCY, 25000000)
 
-/* LED definitions *********************************************************/
+/* Clocking *****************************************************************/
 
 /* The LPCXpress-LPC54628 has three user LEDs: D9, D11, and D12.  These
  * LEDs are for application use. They are illuminated when the driving
@@ -280,6 +280,7 @@
  * include/board.h and src/lpc54_autoleds.c.  The LEDs are used to encode
  * OS-related events as follows:
  */
+
                                       /* D9     D11    D12 */
 #define LED_STARTED                0  /* OFF    OFF    OFF */
 #define LED_HEAPALLOCATE           1  /* ON     OFF    OFF */
@@ -327,8 +328,8 @@
 
 /* Flexcomm0/USART0
  *
- * USART0 connects to the serial bridge on LPC4322JET100 and is typically used
- * for the serial console.
+ * USART0 connects to the serial bridge on LPC4322JET100 and is typically
+ * used for the serial console.
  *
  *   BRIDGE_UART_RXD -> P0_29-ISP_FC0_RXD -> P0.29  GPIO_FC0_RXD_SDA_MOSI_2
  *   BRIDGE_UART_TXD <- P0_30-ISP_FC0_TXD <- P0.30  GPIO_FC0_TXD_SCL_MISO_2

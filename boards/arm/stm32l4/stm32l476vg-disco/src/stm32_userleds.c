@@ -102,8 +102,13 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
         {
           /* Restore normal LEDs operation */
 
-          //stm32l4_gpiowrite(GPIO_LED_RED, (ledset & BOARD_LED_RED_BIT) != 0);
-          //stm32l4_gpiowrite(GPIO_LED_GRN, (ledset & BOARD_LED_GRN_BIT) != 0);
+          /* stm32l4_gpiowrite(GPIO_LED_RED,
+           *   (ledset & BOARD_LED_RED_BIT) != 0);
+           */
+
+          /* stm32l4_gpiowrite(GPIO_LED_GRN,
+           *   (ledset & BOARD_LED_GRN_BIT) != 0);
+           */
         }
         break;
 

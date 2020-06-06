@@ -59,6 +59,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This array maps an LED number to GPIO pin configuration */
 
 static uint32_t g_ledcfg[BOARD_NLEDS] =
@@ -78,7 +79,6 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
 static int led_pm_prepare(struct pm_callback_s *cb, int domain,
                           enum pm_state_e pmstate);
 #endif
-
 
 /****************************************************************************
  * Private Data
@@ -114,35 +114,30 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
       case(PM_NORMAL):
         {
           /* Restore normal LEDs operation */
-
         }
         break;
 
       case(PM_IDLE):
         {
           /* Entering IDLE mode - Turn leds off */
-
         }
         break;
 
       case(PM_STANDBY):
         {
           /* Entering STANDBY mode - Logic for PM_STANDBY goes here */
-
         }
         break;
 
       case(PM_SLEEP):
         {
           /* Entering SLEEP mode - Logic for PM_SLEEP goes here */
-
         }
         break;
 
       default:
         {
           /* Should not get here */
-
         }
         break;
     }
@@ -183,12 +178,12 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
 
 uint32_t board_userled_initialize(void)
 {
-   /* Configure LED1-4 GPIOs for output */
+  /* Configure LED1-4 GPIOs for output */
 
-   stm32_configgpio(GPIO_LED1);
-   stm32_configgpio(GPIO_LED2);
-   stm32_configgpio(GPIO_LED3);
-   stm32_configgpio(GPIO_LED4);
+  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_LED2);
+  stm32_configgpio(GPIO_LED3);
+  stm32_configgpio(GPIO_LED4);
   return BOARD_NLEDS;
 }
 

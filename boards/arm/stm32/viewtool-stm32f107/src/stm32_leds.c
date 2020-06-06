@@ -164,22 +164,22 @@ void board_autoled_on(int led)
   switch (led)
     {
     case 0:
-      led_offbits(BOARD_LED2_BIT | BOARD_LED3_BIT |BOARD_LED4_BIT);
+      led_offbits(BOARD_LED2_BIT | BOARD_LED3_BIT | BOARD_LED4_BIT);
       led_onbits(BOARD_LED1_BIT);
       break;
 
     case 1:
-      led_offbits(BOARD_LED1_BIT | BOARD_LED3_BIT |BOARD_LED4_BIT);
+      led_offbits(BOARD_LED1_BIT | BOARD_LED3_BIT | BOARD_LED4_BIT);
       led_onbits(BOARD_LED2_BIT);
       break;
 
     case 2:
-      led_offbits(BOARD_LED3_BIT |BOARD_LED4_BIT);
+      led_offbits(BOARD_LED3_BIT | BOARD_LED4_BIT);
       led_onbits(BOARD_LED1_BIT | BOARD_LED2_BIT);
       break;
 
     case 3:
-      led_offbits(BOARD_LED1_BIT | BOARD_LED2_BIT |BOARD_LED4_BIT);
+      led_offbits(BOARD_LED1_BIT | BOARD_LED2_BIT | BOARD_LED4_BIT);
       led_onbits(BOARD_LED3_BIT);
       break;
 
@@ -235,12 +235,12 @@ void board_autoled_off(int led)
  * Description:
  *   These interfaces allow user control of the board LEDs.
  *
- *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board LEDs up
- *   until the completion of boot.  The it will continue to control LED2; LED1 is
- *   available for application use.
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board
+ *   LEDs up until the completion of boot.  The it will continue to control
+ *   LED2; LED1 is available for application use.
  *
- *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for application
- *   use.
+ *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for
+ *   application use.
  *
  ****************************************************************************/
 

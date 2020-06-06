@@ -55,7 +55,7 @@
 
 /* LED Configuration ********************************************************/
 
-/* The Mirtoo module has 2 user LEDs labelled LED0 and LED1 in the schematics:
+/* The Mirtoo module has 2 user LEDs labelled LED0 and LED1:
  *
  * ---  ----- --------------------------------------------------------------
  * PIN  Board Notes
@@ -214,8 +214,8 @@ void board_userled_all(uint32_t ledset)
 {
   /* Call board_userled() with ledon == true to illuminated the LED */
 
-  board_userled(PIC32MX_MIRTOO_LED0, (ledset & PIC32MX_MIRTOO_LED0_BIT) != 0);
-  board_userled(PIC32MX_MIRTOO_LED1, (ledset & PIC32MX_MIRTOO_LED1_BIT) != 0);
+  board_userled(PIC32MX_MIRTOO_LED0, !!(ledset & PIC32MX_MIRTOO_LED0_BIT));
+  board_userled(PIC32MX_MIRTOO_LED1, !!(ledset & PIC32MX_MIRTOO_LED1_BIT));
 }
 #endif
 

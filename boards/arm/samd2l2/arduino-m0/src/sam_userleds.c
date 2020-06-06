@@ -35,8 +35,8 @@
 
 /* There is a LED on board the Arduino M0.
  *
- * This LED is controlled by PA17 and the LED can be activated by driving PA17
- * to High.
+ * This LED is controlled by PA17 and the LED can be activated by driving
+ * PA17 to High.
  *
  * When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
  * control the LED.  Otherwise, the LED can be controlled from user
@@ -107,7 +107,7 @@ void board_userled(int led, bool ledon)
  *   LEDs.
  *   If CONFIG_ARCH_LEDS is not defined, then the board_userled_all() is
  *   available to control the LED from user application logic.  NOTE:  since
- *   there is only a single LED on-board, this is function is not very useful.
+ *   there is only a single LED on-board, this is function isn't very useful.
  *
  ****************************************************************************/
 
