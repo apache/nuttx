@@ -183,7 +183,8 @@ static void watchdog_automonitor_idle(FAR struct pm_callback_s *cb,
 #endif
 
 #ifdef CONFIG_WATCHDOG_AUTOMONITOR
-static void watchdog_automonitor_start(FAR struct watchdog_upperhalf_s *upper)
+static void watchdog_automonitor_start(FAR struct watchdog_upperhalf_s
+                                       *upper)
 {
   FAR struct watchdog_lowerhalf_s *lower = upper->lower;
 
@@ -549,7 +550,7 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
         else
           {
-            ret = -ENOSYS;
+            ret = -ENOTTY;
           }
       }
       break;

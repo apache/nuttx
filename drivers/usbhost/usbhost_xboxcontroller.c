@@ -2199,7 +2199,7 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     default:
 
-      ret = -EINVAL;
+      ret = -ENOTTY;
       goto errout;
     }
 
