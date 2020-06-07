@@ -23,11 +23,15 @@ include $(TOPDIR)/Make.defs
 CSRCS = stm32_boot.c stm32_bringup.c
 
 ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += stm32_appinit.c
+  CSRCS += stm32_appinit.c
+endif
+
+ifeq ($(CONFIG_ARCH_LEDS),y)
+  CSRCS += stm32_autoleds.c
 endif
 
 ifeq ($(CONFIG_STM32_OTGFS),y)
-CSRCS += stm32_usb.c
+  CSRCS += stm32_usb.c
 endif
 
 DEPPATH += --dep-path board

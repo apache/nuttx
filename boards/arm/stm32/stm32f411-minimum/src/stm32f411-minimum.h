@@ -39,12 +39,12 @@
 /* LED.  User LED1: the blue LED is a user LED connected to board LED C13
  * corresponding to MCU I/O PC13.
  *
- * - When the I/O is HIGH value, the LED is on.
- * - When the I/O is LOW, the LED is off.
+ * - When the I/O is LOW value, the LED is on.
+ * - When the I/O is HIGH, the LED is off.
  */
 
 #define GPIO_LED1 \
-  (GPIO_PORTC | GPIO_PIN13 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | \
+  (GPIO_PORTC | GPIO_PIN13 | GPIO_OUTPUT_SET | GPIO_OUTPUT | GPIO_PULLUP | \
    GPIO_SPEED_50MHz)
 
 /* Buttons
