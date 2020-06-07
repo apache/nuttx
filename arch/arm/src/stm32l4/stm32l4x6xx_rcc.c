@@ -723,25 +723,34 @@ static void stm32l4_stdclockconfig(void)
         }
     }
 
-  /* Enable MSI and choosing frequency */
+  /* Choose MSI frequency */
 
   regval  = getreg32(STM32L4_RCC_CR);
   regval &= ~RCC_CR_MSIRANGE_MASK;
-  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION | RCC_CR_MSIRGSEL);
+  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSIRGSEL);
   putreg32(regval, STM32L4_RCC_CR);
 
-  /* Wait until the MSI is ready (or until a timeout elapsed) */
+  if (!(regval & RCC_CR_MSION))
+  {
+    /* Enable MSI */
 
-  for (timeout = MSIRDY_TIMEOUT; timeout > 0; timeout--)
-    {
-      /* Check if the MSIRDY flag is the set in the CR */
+    regval  = getreg32(STM32L4_RCC_CR);
+    regval |= RCC_CR_MSION;
+    putreg32(regval, STM32L4_RCC_CR);
 
-      if ((getreg32(STM32L4_RCC_CR) & RCC_CR_MSIRDY) != 0)
-        {
-          /* If so, then break-out with timeout > 0 */
+    /* Wait until the MSI is ready (or until a timeout elapsed) */
 
-          break;
-        }
+    for (timeout = MSIRDY_TIMEOUT; timeout > 0; timeout--)
+      {
+        /* Check if the MSIRDY flag is the set in the CR */
+
+        if ((getreg32(STM32L4_RCC_CR) & RCC_CR_MSIRDY) != 0)
+          {
+            /* If so, then break-out with timeout > 0 */
+
+            break;
+          }
+      }
     }
 
 #elif defined(STM32L4_BOARD_USEHSE)
@@ -777,24 +786,25 @@ static void stm32l4_stdclockconfig(void)
 
   if (timeout > 0)
     {
-      /* Ensure Power control is enabled before modifying it. */
-
-      stm32l4_pwr_enableclk(true);
-
       if (STM32L4_SYSCLK_FREQUENCY > 24000000ul)
         {
           /* Select regulator voltage output Scale 1 mode to support system
            * frequencies up to 168 MHz.
            */
 
+          /* TODO: this seems to hang on STM32L476, at least for MSI@48MHz */
+#if 0
+          stm32l4_pwr_enableclk(true);
           stm32_pwr_setvos(1);
-        }
+#endif
+      }
       else
         {
           /* Select regulator voltage output Scale 2 mode for
            * frequencies below 24 MHz
            */
 
+          stm32l4_pwr_enableclk(true);
           stm32_pwr_setvos(2);
         }
 
@@ -828,6 +838,7 @@ static void stm32l4_stdclockconfig(void)
       putreg32(regval, STM32L4_RCC_CFGR);
 #endif
 
+#ifndef STM32L4_BOARD_NOPLL
       /* Set the PLL source and main divider */
 
       regval  = getreg32(STM32L4_RCC_PLLCFG);
@@ -864,7 +875,6 @@ static void stm32l4_stdclockconfig(void)
       regval |= RCC_PLLCFG_PLLSRC_HSE;
 #endif
 
-#ifndef STM32L4_BOARD_NOPLL
       /* Use the main PLL as SYSCLK, so enable it first */
 
       putreg32(regval, STM32L4_RCC_PLLCFG);
