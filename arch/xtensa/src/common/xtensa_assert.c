@@ -101,8 +101,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
  * Name: xtensa_assert
  ****************************************************************************/
 
-static void xtensa_assert(int errorcode) noreturn_function;
-static void xtensa_assert(int errorcode)
+static void xtensa_assert(void)
 {
   /* Dump the processor state */
 
@@ -151,7 +150,6 @@ static void xtensa_assert(int errorcode)
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 2
       board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
-      exit(errorcode);
     }
 }
 
@@ -163,7 +161,7 @@ static void xtensa_assert(int errorcode)
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const uint8_t *filename, int lineno)
+void up_assert(const char *filename, int lineno)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = running_task();
@@ -183,7 +181,7 @@ void up_assert(const uint8_t *filename, int lineno)
         filename, lineno);
 #endif
 
-  xtensa_assert(EXIT_FAILURE);
+  xtensa_assert();
 }
 
 /****************************************************************************
@@ -229,7 +227,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
 #endif
 
   CURRENT_REGS = regs;
-  xtensa_assert(EXIT_FAILURE); /* Should not return */
+  xtensa_assert(); /* Should not return */
   for (; ; );
 }
 
@@ -334,6 +332,6 @@ void xtensa_user_panic(int exccause, uint32_t *regs)
 #endif
 
   CURRENT_REGS = regs;
-  xtensa_assert(EXIT_FAILURE); /* Should not return */
+  xtensa_assert(); /* Should not return */
   for (; ; );
 }
