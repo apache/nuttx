@@ -297,6 +297,17 @@
  * The STM32F411-Minimum (aka BlackPill) has a LED on PC13 pin.
  */
 
+/* The board has only one controllable LED */
+
+#define LED_STARTED       0  /* No LEDs */
+#define LED_HEAPALLOCATE  1  /* LED1 on */
+#define LED_IRQSENABLED   2  /* LED1 on */
+#define LED_STACKCREATED  3  /* LED1 on */
+#define LED_INIRQ         4  /* LED1 on */
+#define LED_SIGNAL        5  /* LED1 on */
+#define LED_ASSERTION     6  /* LED1 on */
+#define LED_PANIC         7  /* LED1 blinking */
+
 /* LED index values for use with board_userled() */
 
 #define BOARD_LED1        0
