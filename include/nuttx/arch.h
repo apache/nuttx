@@ -476,7 +476,7 @@ void up_exit() noreturn_function;
  *
  ****************************************************************************/
 
-/* Prototype is in assert.h */
+void up_assert(FAR const char *filename, int linenum) noreturn_function;
 
 /****************************************************************************
  * Name: up_schedule_sigaction

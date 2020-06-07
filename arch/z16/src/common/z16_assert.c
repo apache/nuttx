@@ -128,11 +128,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
  * Name: up_assert
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_FILENAME
-void up_assert(const uint8_t *filename, int lineno)
-#else
-void up_assert(void)
-#endif
+void up_assert(const char *filename, int lineno)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = running_task();
@@ -144,20 +140,12 @@ void up_assert(void)
 
   syslog_flush();
 
-#ifdef CONFIG_HAVE_FILENAME
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
 #else
   _alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
-#endif
-#else
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
-  _alert("Assertion failed: task: %s\n", rtcb->name);
-#else
-  _alert("Assertion failed\n");
-#endif
 #endif
 
   z16_registerdump();
