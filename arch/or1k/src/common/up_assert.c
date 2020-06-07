@@ -340,8 +340,7 @@ static void up_dumpstate(void)
  * Name: _up_assert
  ****************************************************************************/
 
-static void _up_assert(int errorcode) noreturn_function;
-static void _up_assert(int errorcode)
+static void _up_assert(void)
 {
   /* Flush any buffered SYSLOG data */
 
@@ -370,7 +369,6 @@ static void _up_assert(int errorcode)
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 2
       board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
-      exit(errorcode);
     }
 }
 
@@ -382,7 +380,7 @@ static void _up_assert(int errorcode)
  * Name: up_assert
  ****************************************************************************/
 
-void up_assert(const uint8_t *filename, int lineno)
+void up_assert(const char *filename, int lineno)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = running_task();
@@ -412,5 +410,5 @@ void up_assert(const uint8_t *filename, int lineno)
   board_crashdump(or1k_getsp(), running_task(), filename, lineno);
 #endif
 
-  _up_assert(EXIT_FAILURE);
+  _up_assert();
 }

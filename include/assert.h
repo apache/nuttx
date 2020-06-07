@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/assert.h
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013, 2015-2016 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
@@ -60,9 +61,9 @@
 #undef DEBUGVERIFY  /* Like VERIFY, but only if CONFIG_DEBUG_ASSERTIONS is defined */
 
 #ifdef CONFIG_HAVE_FILENAME
-#  define PANIC()        up_assert((const uint8_t *)__FILE__, (int)__LINE__)
+#  define PANIC()        _assert(__FILE__, __LINE__)
 #else
-#  define PANIC()        up_assert()
+#  define PANIC()        _assert("unknown", 0)
 #endif
 
 #define ASSERT(f)        do { if (!(f)) PANIC(); } while (0)
@@ -117,11 +118,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_FILENAME
-void up_assert(FAR const uint8_t *filename, int linenum) noreturn_function;
-#else
-void up_assert(void) noreturn_function;
-#endif
+void _assert(FAR const char *filename, int linenum) noreturn_function;
 
 #undef EXTERN
 #ifdef __cplusplus

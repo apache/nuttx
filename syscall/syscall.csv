@@ -178,7 +178,7 @@
 "uname","sys/utsname.h","","int","FAR struct utsname *"
 "unlink","unistd.h","!defined(CONFIG_DISABLE_MOUNTPOINT)","int","FAR const char *"
 "unsetenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int","FAR const char *"
-"up_assert","assert.h","","void","FAR const uint8_t *","int"
+"up_assert","nuttx/arch.h","","void","FAR const char *","int"
 "vfork","unistd.h","defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_ARCH_HAVE_VFORK)","pid_t"
 "wait","sys/wait.h","defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_SCHED_HAVE_PARENT)","pid_t","FAR int *"
 "waitid","sys/wait.h","defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_SCHED_HAVE_PARENT)","int","idtype_t","id_t"," FAR siginfo_t *","int"

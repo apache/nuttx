@@ -21,6 +21,7 @@
 include $(TOPDIR)/Make.defs
 
 include aio/Make.defs
+include assert/Make.defs
 include audio/Make.defs
 include builtin/Make.defs
 include dirent/Make.defs

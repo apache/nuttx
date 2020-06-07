@@ -108,7 +108,7 @@ int main(int argc, char **argv, char **envp)
  *
  ****************************************************************************/
 
-void up_assert(const uint8_t *filename, int line)
+void up_assert(const char *filename, int line)
 {
   /* Show the location of the failed assertion */
 
