@@ -69,7 +69,7 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  ledinfo("board_autoled_on(%d)\n",led);
+  ledinfo("board_autoled_on(%d)\n", led);
 
   switch (led)
     {
@@ -83,6 +83,7 @@ void board_autoled_on(int led)
       break;
 
     case LED_PANIC:
+
       /* For panic state, the LED is blinking */
 
       set_led(true);
@@ -99,6 +100,7 @@ void board_autoled_off(int led)
   switch (led)
     {
     case LED_PANIC:
+
       /* For panic state, the LED is blinking */
 
       set_led(false);
