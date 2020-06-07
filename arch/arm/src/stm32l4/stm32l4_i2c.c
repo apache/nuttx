@@ -1288,11 +1288,11 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
 {
   int i2cclk_mhz;
   uint32_t pe;
-  uint8_t presc;
-  uint8_t scl_delay;
-  uint8_t sda_delay;
-  uint8_t scl_h_period;
-  uint8_t scl_l_period;
+  uint8_t presc = 0;
+  uint8_t scl_delay = 0;
+  uint8_t sda_delay = 0;
+  uint8_t scl_h_period = 0;
+  uint8_t scl_l_period = 0;
 
   if (frequency != priv->frequency)
     {
@@ -1306,6 +1306,8 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
 
 #if defined(STM32L4_I2C_USE_HSI16) || (STM32L4_PCLK1_FREQUENCY == 16000000)
       i2cclk_mhz = 16;
+#elif STM32L4_PCLK1_FREQUENCY == 48000000
+      i2cclk_mhz = 48;
 #elif STM32L4_PCLK1_FREQUENCY == 80000000
       i2cclk_mhz = 80;
 #elif STM32L4_PCLK1_FREQUENCY == 120000000
@@ -1457,6 +1459,33 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
               scl_l_period = 162;
             }
         }
+      else if (i2cclk_mhz == 48)
+      {
+        if (frequency == 100000)
+          {
+            presc        = 2;
+            scl_delay    = 10;
+            sda_delay    = 0;
+            scl_h_period = 62;
+            scl_l_period = 85;
+          }
+        else if (frequency == 400000)
+          {
+            presc        = 1;
+            scl_delay    = 8;
+            sda_delay    = 0;
+            scl_h_period = 12;
+            scl_l_period = 33;
+          }
+        else if (frequency == 1000000)
+          {
+            presc        = 0;
+            scl_delay    = 5;
+            sda_delay    = 0;
+            scl_h_period = 8;
+            scl_l_period = 22;
+          }
+      }
       else
         {
           DEBUGPANIC();
