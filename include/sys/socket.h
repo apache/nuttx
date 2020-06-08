@@ -131,7 +131,7 @@
 
 /* Protocol levels supported by get/setsockopt(): */
 
-#define SOL_SOCKET      0 /* Only socket-level options supported */
+#define SOL_SOCKET       1 /* Only socket-level options supported */
 
 /* Socket-level options */
 
@@ -214,15 +214,17 @@
 
 /* Protocol-level socket operations. */
 
-#define SOL_IP          1 /* See options in include/netinet/ip.h */
-#define SOL_IPV6        2 /* See options in include/netinet/ip6.h */
-#define SOL_TCP         3 /* See options in include/netinet/tcp.h */
-#define SOL_UDP         4 /* See options in include/netinit/udp.h */
-#define SOL_HCI         5 /* See options in include/netpacket/bluetooth.h */
-#define SOL_L2CAP       6 /* See options in include/netpacket/bluetooth.h */
-#define SOL_SCO         7 /* See options in include/netpacket/bluetooth.h */
-#define SOL_RFCOMM      8 /* See options in include/netpacket/bluetooth.h */
-#define SOL_CAN_RAW     9 /* See options in include/netpacket/can.h */
+#define SOL_IP          IPPROTO_IP   /* See options in include/netinet/ip.h */
+#define SOL_IPV6        IPPROTO_IPV6 /* See options in include/netinet/ip6.h */
+#define SOL_TCP         IPPROTO_TCP  /* See options in include/netinet/tcp.h */
+#define SOL_UDP         IPPROTO_UDP  /* See options in include/netinit/udp.h */
+
+/* Bluetooth-level operations. */
+
+#define SOL_HCI         0  /* See options in include/netpacket/bluetooth.h */
+#define SOL_L2CAP       6  /* See options in include/netpacket/bluetooth.h */
+#define SOL_SCO         17 /* See options in include/netpacket/bluetooth.h */
+#define SOL_RFCOMM      18 /* See options in include/netpacket/bluetooth.h */
 
 /* Protocol-level socket options may begin with this value */
 

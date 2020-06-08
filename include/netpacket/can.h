@@ -61,6 +61,10 @@
 #define CAN_J1939    7           /* SAE J1939 */
 #define CAN_NPROTO   8
 
+#define SOL_CAN_BASE 100
+
+#define SOL_CAN_RAW  (SOL_CAN_BASE + CAN_RAW)
+
 /* CAN_RAW socket options */
 
 #define CAN_RAW_FILTER         (__SO_PROTOCOL + 0)     
