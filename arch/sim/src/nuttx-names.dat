@@ -146,6 +146,7 @@ strncmp        NXstrncmp
 strncpy        NXstrncpy
 strnlen        NXstrnlen
 strrchr        NXstrrchr
+strstr         NXstrstr
 strtok_r       NXstrtok_r
 strtol         NXstrtol
 strtoul        NXstrtoul
