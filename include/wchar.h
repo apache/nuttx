@@ -176,8 +176,12 @@ int               swprintf(FAR wchar_t *, size_t, FAR const wchar_t *, ...);
 int               swscanf(FAR const wchar_t *, FAR const wchar_t *, ...);
 wint_t            ungetwc(wint_t, FILE *);
 int               vfwprintf(FILE *, FAR const wchar_t *, va_list);
+int               vfwscanf(FILE *, FAR const wchar_t *, va_list);
 int               vwprintf(FAR const wchar_t *, va_list);
-int               vswprintf(wchar_t *, size_t, FAR const wchar_t *,
+int               vwscanf(FAR const wchar_t *, va_list);
+int               vswprintf(FAR wchar_t *, size_t, FAR const wchar_t *,
+                      va_list);
+int               vswscanf(FAR const wchar_t *, FAR const wchar_t *,
                       va_list);
 size_t            wcrtomb(FAR char *, wchar_t, FAR mbstate_t *);
 FAR wchar_t      *wcscat(FAR wchar_t *, FAR const wchar_t *);
