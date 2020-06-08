@@ -146,6 +146,8 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
             {
               psock->s_flags &= ~_SF_CLOEXEC;
             }
+
+          ret = OK;
          }
          break;
 
