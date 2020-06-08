@@ -334,6 +334,25 @@ int stm32l4_configgpio(uint32_t cfgset)
       putreg32(regval, regaddr);
     }
 
+  /* On STM32L47x/STM32L48x parts, the ACSR register also needs to be set
+   * (RM0351 Rev 7, p521)
+   */
+
+#if defined(CONFIG_STM32L4_STM32L471XX) || \
+    defined(CONFIG_STM32L4_STM32L475XX) || \
+    defined(CONFIG_STM32L4_STM32L476XX) || \
+    defined(CONFIG_STM32L4_STM32L486XX)
+
+  if (pinmode == GPIO_MODER_ANALOG)
+    {
+      modifyreg32(base + STM32L4_GPIO_ASCR_OFFSET, 0, GPIO_ASCR(pin));
+    }
+  else
+    {
+      modifyreg32(base + STM32L4_GPIO_ASCR_OFFSET, GPIO_ASCR(pin), 0);
+    }
+#endif
+
   leave_critical_section(flags);
   return OK;
 }
