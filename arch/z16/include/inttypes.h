@@ -209,4 +209,12 @@
 #define SCNxMAX     "x"
 #define SCNxPTR     "x"
 
+#define INT8_C(x)   x
+#define INT16_C(x)  x
+#define INT32_C(x)  x
+
+#define UINT8_C(x)  x
+#define UINT16_C(x) x
+#define UINT32_C(x) x ## u
+
 #endif /* __ARCH_Z16_INCLUDE_INTTYPES_H */
