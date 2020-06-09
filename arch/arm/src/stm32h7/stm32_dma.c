@@ -1995,7 +1995,9 @@ static bool stm32_bdma_capable(FAR stm32_dmacfg_t *cfg)
 {
   uint32_t transfer_size;
   uint32_t mend;
-  uint32_t ccr = cfg->cfg1;
+  uint32_t count = cfg->ndata;
+  uint32_t maddr = cfg->maddr;
+  uint32_t ccr   = cfg->cfg1;
 
   dmainfo("0x%08x/%u 0x%08x\n", cfg->maddr, cfg->ndata, cfg->cfg1);
 
@@ -2063,7 +2065,7 @@ static bool stm32_bdma_capable(FAR stm32_dmacfg_t *cfg)
 
   /* Verify that transfer is froma a supported memory region */
 
-  if (cfg->paddr & STM32_PREGION_MASK != STM32_D3_BASE)
+  if ((cfg->paddr & STM32_PREGION_MASK) != STM32_D3_BASE)
     {
       /* BDMA support only D3 domain */
 
