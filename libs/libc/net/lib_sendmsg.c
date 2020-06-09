@@ -45,6 +45,8 @@
 #include <sys/socket.h>
 #include <errno.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -70,20 +72,43 @@
 
 ssize_t sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
 {
-  FAR void *buf           = msg->msg_iov->iov_base;
   FAR struct sockaddr *to = msg->msg_name;
-  socklen_t tolen         = msg->msg_namelen;
-  size_t len              = msg->msg_iov->iov_len;
+  socklen_t tolen = msg->msg_namelen;
+  FAR struct iovec *iov;
+  FAR struct iovec *end;
+  FAR void *buf;
+  size_t len;
+  int ret;
 
   if (msg->msg_iovlen == 1)
     {
-      return sendto(sockfd, buf, len, flags, to, tolen);
+      return sendto(sockfd, msg->msg_iov->iov_base,
+                    msg->msg_iov->iov_len, flags, to, tolen);
     }
-  else
+
+  end = &msg->msg_iov[msg->msg_iovlen];
+  for (len = 0, iov = msg->msg_iov; iov != end; iov++)
     {
-      set_errno(ENOTSUP);
-      return ERROR;
+      len += iov->iov_len;
     }
+
+  buf = lib_malloc(len);
+  if (buf == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  for (len = 0, iov = msg->msg_iov; iov != end; iov++)
+    {
+      memcpy(buf + len, iov->iov_base, iov->iov_len);
+      len += iov->iov_len;
+    }
+
+  ret = sendto(sockfd, buf, len, flags, to, tolen);
+
+  lib_free(buf);
+
+  return ret;
 }
 
 #endif /* CONFIG_NET && !CONFIG_NET_CMSG */
