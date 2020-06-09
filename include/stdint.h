@@ -47,6 +47,7 @@
 #else
 #  include <nuttx/compiler.h>
 #  include <arch/types.h>
+#  include <arch/inttypes.h>
 #  include <limits.h>
 
 /****************************************************************************
@@ -145,36 +146,18 @@
 
 #  define UINTMAX_MIN       UINT64_MIN
 #  define UINTMAX_MAX       UINT64_MAX
+
+#  define INTMAX_C(x)       INT64_C(x)
+#  define UINTMAX_C(x)      UINT64_C(x)
 #else
 #  define INTMAX_MIN        INT32_MIN
 #  define INTMAX_MAX        INT32_MAX
 
 #  define UINTMAX_MIN       UINT32_MIN
 #  define UINTMAX_MAX       UINT32_MAX
-#endif
 
-/* Macros for minimum-width integer constant expressions */
-
-#if 0 /* REVISIT: Depends on architecture specific implementation */
-#define INT8_C(x)           x
-#define INT16_C(x)          x
-#define INT32_C(x)          x ## l
-#define INT64_C(x)          x ## ll
-
-#define UINT8_C(x)          x
-#define UINT16_C(x)         x
-#define UINT32_C(x)         x ## ul
-#define UINT64_C(x)         x ## ull
-#endif
-
-/* Macros for greatest-width integer constant expressions */
-
-#ifdef CONFIG_HAVE_LONG_LONG
-#  define INTMAX_C(x)       x ## ll
-#  define UINTMAX_C(x)      x ## ull
-#else
-#  define INTMAX_C(x)       x ## l
-#  define UINTMAX_C(x)      x ## ul
+#  define INTMAX_C(x)       INT32_C(x)
+#  define UINTMAX_C(x)      UINT32_C(x)
 #endif
 
 /* Limits of Other Integer Types */
