@@ -219,7 +219,15 @@ int stm32_bringup(void)
   ret = stm32_cs4344_initialize(1);
   if (ret != OK)
     {
-      serr("Failed to initialize CS43L22 audio: %d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize CS4344 audio: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DJOYSTICK
+  ret = stm32_djoy_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to register djoystick driver: %d\n", ret);
     }
 #endif
 

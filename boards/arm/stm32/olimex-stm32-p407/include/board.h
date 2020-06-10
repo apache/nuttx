@@ -209,23 +209,31 @@
 
 /* The Olimex STM32-P407 supports seven buttons: */
 
-#define BUTTON_TAMPER     0
-#define BUTTON_WKUP       1
-#define BUTTON_RIGHT      2
-#define BUTTON_UP         3
-#define BUTTON_LEFT       4
-#define BUTTON_DOWN       5
-#define BUTTON_CENTER     6
+#define BUTTON_TAMPER         0
+#define BUTTON_WKUP           1
 
-#define NUM_BUTTONS       7
+#ifdef CONFIG_DJOYSTICK
+#  define NUM_BUTTONS         2
+#else
+#  define JOYSTICK_RIGHT      2
+#  define JOYSTICK_UP         3
+#  define JOYSTICK_LEFT       4
+#  define JOYSTICK_DOWN       5
+#  define JOYSTICK_CENTER     6
 
-#define BUTTON_TAMPER_BIT (1 << BUTTON_TAMPER)
-#define BUTTON_WKUP_BIT   (1 << BUTTON_WKUP)
-#define BUTTON_RIGHT_BIT  (1 << BUTTON_RIGHT)
-#define BUTTON_UP_BIT     (1 << BUTTON_UP)
-#define BUTTON_LEFT_BIT   (1 << BUTTON_LEFT)
-#define BUTTON_DOWN_BIT   (1 << BUTTON_DOWN)
-#define BUTTON_CENTER_BIT (1 << BUTTON_CENTER)
+#  define NUM_BUTTONS         7
+#endif
+
+#define BUTTON_TAMPER_BIT     (1 << BUTTON_TAMPER)
+#define BUTTON_WKUP_BIT       (1 << BUTTON_WKUP)
+
+#ifndef CONFIG_DJOYSTICK
+#  define JOYSTICK_RIGHT_BIT  (1 << JOYSTICK_RIGHT)
+#  define JOYSTICK_UP_BIT     (1 << JOYSTICK_UP)
+#  define JOYSTICK_LEFT_BIT   (1 << JOYSTICK_LEFT)
+#  define JOYSTICK_DOWN_BIT   (1 << JOYSTICK_DOWN)
+#  define JOYSTICK_CENTER_BIT (1 << JOYSTICK_CENTER)
+#endif
 
 /* Alternate function pin selections ****************************************/
 
