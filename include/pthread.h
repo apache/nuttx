@@ -344,9 +344,16 @@ typedef struct pthread_mutex_s pthread_mutex_t;
 #  define PTHREAD_MUTEX_INITIALIZER {NULL, SEM_INITIALIZER(1), -1, \
                                      __PTHREAD_MUTEX_DEFAULT_FLAGS, \
                                      PTHREAD_MUTEX_DEFAULT, 0}
+#  define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
+                                     {NULL, SEM_INITIALIZER(1), -1, \
+                                     __PTHREAD_MUTEX_DEFAULT_FLAGS, \
+                                     PTHREAD_MUTEX_RECURSIVE, 0}
 #elif defined(CONFIG_PTHREAD_MUTEX_TYPES)
 #  define PTHREAD_MUTEX_INITIALIZER {SEM_INITIALIZER(1), -1, \
                                      PTHREAD_MUTEX_DEFAULT, 0}
+#  define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
+                                     {SEM_INITIALIZER(1), -1, \
+                                     PTHREAD_MUTEX_RECURSIVE, 0}
 #elif !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
 #  define PTHREAD_MUTEX_INITIALIZER {NULL, SEM_INITIALIZER(1), -1,\
                                      __PTHREAD_MUTEX_DEFAULT_FLAGS}
