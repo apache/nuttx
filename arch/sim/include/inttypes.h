@@ -61,7 +61,6 @@
 #  define PRIdFAST32  "d"
 #  define PRIdFAST64  "lld"
 
-#  define PRIdMAX     "lld"
 #  define PRIdPTR     "lld"
 
 #  define PRIi8       "i"
@@ -79,7 +78,6 @@
 #  define PRIiFAST32  "i"
 #  define PRIiFAST64  "lli"
 
-#  define PRIiMAX     "lli"
 #  define PRIiPTR     "lli"
 
 #  define PRIo8       "o"
@@ -97,7 +95,6 @@
 #  define PRIoFAST32  "o"
 #  define PRIoFAST64  "llo"
 
-#  define PRIoMAX     "llo"
 #  define PRIoPTR     "llo"
 
 #  define PRIu8       "u"
@@ -133,7 +130,6 @@
 #  define PRIxFAST32  "x"
 #  define PRIxFAST64  "llx"
 
-#  define PRIxMAX     "llx"
 #  define PRIxPTR     "llx"
 
 #  define PRIX8       "X"
@@ -151,7 +147,6 @@
 #  define PRIXFAST32  "X"
 #  define PRIXFAST64  "llX"
 
-#  define PRIXMAX     "llX"
 #  define PRIXPTR     "llX"
 
 #  define SCNd8       "hhd"
@@ -223,7 +218,6 @@
 #  define SCNuFAST32  "u"
 #  define SCNuFAST64  "llu"
 
-#  define SCNuMAX     "llu"
 #  define SCNuPTR     "llu"
 
 #  define SCNx8       "hhx"
@@ -241,7 +235,6 @@
 #  define SCNxFAST32  "x"
 #  define SCNxFAST64  "llx"
 
-#  define SCNxMAX     "llx"
 #  define SCNxPTR     "llx"
 
 #  define INT8_C(x)   x
@@ -271,7 +264,6 @@
 #  define PRIdFAST32  "d"
 #  define PRIdFAST64  "lld"
 
-#  define PRIdMAX     "lld"
 #  define PRIdPTR     "d"
 
 #  define PRIi8       "i"
@@ -289,7 +281,6 @@
 #  define PRIiFAST32  "i"
 #  define PRIiFAST64  "lli"
 
-#  define PRIiMAX     "lli"
 #  define PRIiPTR     "i"
 
 #  define PRIo8       "o"
@@ -307,7 +298,6 @@
 #  define PRIoFAST32  "o"
 #  define PRIoFAST64  "llo"
 
-#  define PRIoMAX     "llo"
 #  define PRIoPTR     "o"
 
 #  define PRIu8       "u"
@@ -343,7 +333,6 @@
 #  define PRIxFAST32  "x"
 #  define PRIxFAST64  "llx"
 
-#  define PRIxMAX     "llx"
 #  define PRIxPTR     "x"
 
 #  define PRIX8       "X"
@@ -361,7 +350,6 @@
 #  define PRIXFAST32  "X"
 #  define PRIXFAST64  "llX"
 
-#  define PRIXMAX     "llX"
 #  define PRIXPTR     "X"
 
 #  define SCNd8       "hhd"
@@ -433,7 +421,6 @@
 #  define SCNuFAST32  "u"
 #  define SCNuFAST64  "llu"
 
-#  define SCNuMAX     "llu"
 #  define SCNuPTR     "u"
 
 #  define SCNx8       "hhx"
@@ -451,7 +438,6 @@
 #  define SCNxFAST32  "x"
 #  define SCNxFAST64  "llx"
 
-#  define SCNxMAX     "llx"
 #  define SCNxPTR     "x"
 
 #  define INT8_C(x)   x
