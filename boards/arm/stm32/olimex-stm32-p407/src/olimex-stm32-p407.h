@@ -159,17 +159,24 @@
 
 /* BUTTONS -- NOTE that all have EXTI interrupts configured */
 
-#define MIN_IRQBUTTON     BUTTON_TAMPER
-#define MAX_IRQBUTTON     BUTTON_CENTER
-#define NUM_IRQBUTTONS    7
+#ifdef CONFIG_DJOYSTICK
+#  define MIN_IRQBUTTON     BUTTON_TAMPER
+#  define MAX_IRQBUTTON     BUTTON_WKUP
+#  define NUM_IRQBUTTONS    2
+#else
+#  define MIN_IRQBUTTON     BUTTON_TAMPER
+#  define MAX_IRQBUTTON     JOYSTICK_CENTER
+#  define NUM_IRQBUTTONS    7
+#endif
 
 #define GPIO_BTN_TAMPER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 #define GPIO_BTN_WKUP     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
-#define GPIO_BTN_RIGHT    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN6)
-#define GPIO_BTN_UP       (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN7)
-#define GPIO_BTN_LEFT     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN11)
-#define GPIO_BTN_DOWN     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN8)
-#define GPIO_BTN_CENTER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN15)
+
+#define GPIO_JOY_RIGHT    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN6)
+#define GPIO_JOY_UP       (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN7)
+#define GPIO_JOY_LEFT     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN11)
+#define GPIO_JOY_DOWN     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN8)
+#define GPIO_JOY_CENTER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN15)
 
 /* USB OTG FS
  *
@@ -322,6 +329,18 @@ int stm32_can_setup(void);
 
 #ifdef CONFIG_AUDIO_CS4344
 int stm32_cs4344_initialize(int minor);
+#endif
+
+/****************************************************************************
+ * Name: stm32_djoy_initialize
+ *
+ * Description:
+ *   Initialize and register the discrete joystick driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DJOYSTICK
+int stm32_djoy_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

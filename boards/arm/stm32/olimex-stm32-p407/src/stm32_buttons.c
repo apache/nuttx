@@ -64,11 +64,19 @@ static const uint32_t g_buttons[NUM_BUTTONS] =
 {
   GPIO_BTN_TAMPER,
   GPIO_BTN_WKUP,
-  GPIO_BTN_RIGHT,
-  GPIO_BTN_UP,
-  GPIO_BTN_LEFT,
-  GPIO_BTN_DOWN,
-  GPIO_BTN_CENTER
+
+  /* The Joystick is treated like the other buttons unless CONFIG_DJOYSTICK
+   * is defined, then it is assumed that they should be used by the discrete
+   * joystick driver.
+   */
+
+#ifndef CONFIG_DJOYSTICK
+  GPIO_JOY_RIGHT,
+  GPIO_JOY_UP,
+  GPIO_JOY_LEFT,
+  GPIO_JOY_DOWN,
+  GPIO_JOY_CENTER
+#endif
 };
 
 /****************************************************************************
@@ -122,30 +130,32 @@ uint32_t board_buttons(void)
       ret |= BUTTON_WKUP_BIT;
     }
 
-  if (stm32_gpioread(g_buttons[BUTTON_RIGHT]))
+#ifndef CONFIG_DJOYSTICK
+  if (stm32_gpioread(g_buttons[JOYSTICK_RIGHT]))
     {
-      ret |= BUTTON_RIGHT_BIT;
+      ret |= JOYSTICK_RIGHT_BIT;
     }
 
-  if (stm32_gpioread(g_buttons[BUTTON_UP]))
+  if (stm32_gpioread(g_buttons[JOYSTICK_UP]))
     {
-      ret |= BUTTON_UP_BIT;
+      ret |= JOYSTICK_UP_BIT;
     }
 
-  if (stm32_gpioread(g_buttons[BUTTON_LEFT]))
+  if (stm32_gpioread(g_buttons[JOYSTICK_LEFT]))
     {
-      ret |= BUTTON_LEFT_BIT;
+      ret |= JOYSTICK_LEFT_BIT;
     }
 
-  if (stm32_gpioread(g_buttons[BUTTON_DOWN]))
+  if (stm32_gpioread(g_buttons[JOYSTICK_DOWN]))
     {
-      ret |= BUTTON_DOWN_BIT;
+      ret |= JOYSTICK_DOWN_BIT;
     }
 
-  if (stm32_gpioread(g_buttons[BUTTON_CENTER]))
+  if (stm32_gpioread(g_buttons[JOYSTICK_CENTER]))
     {
-      ret |= BUTTON_CENTER_BIT;
+      ret |= JOYSTICK_CENTER_BIT;
     }
+#endif
 
   return ret;
 }
