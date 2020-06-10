@@ -2979,7 +2979,8 @@ static int cxd56_resume(FAR struct audio_lowerhalf_s *lower)
   int ret;
   FAR struct cxd56_dev_s *dev = (FAR struct cxd56_dev_s *)lower;
 
-  if (dev->state == CXD56_DEV_STATE_PAUSED)
+  if (dev->state == CXD56_DEV_STATE_PAUSED ||
+      dev->state == CXD56_DEV_STATE_BUFFERING)
     {
       dev->state = CXD56_DEV_STATE_STARTED;
       cxd56_power_on_analog_output(dev);
@@ -3062,17 +3063,17 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
   flags = spin_lock_irqsave();
   if (dq_count(&dev->pendingq) == 0)
     {
-      /* Pending queue empty, nothing to do */
+      /* Underrun occurred, send user message to start buffering */
 
+      audwarn("Underrun \n");
       struct audio_msg_s msg;
-
-      msg.msg_id = AUDIO_MSG_STOP;
+      msg.msg_id = AUDIO_MSG_USER;
       msg.u.data = 0;
       ret = nxmq_send(dev->mq, (FAR const char *)&msg,
                       sizeof(msg), CONFIG_CXD56_MSG_PRIO);
       if (ret != OK)
         {
-          auderr("ERROR: nxmq_send start DMA failed (%d)\n", ret);
+          auderr("ERROR: nxmq_send for buffering failed (%d)\n", ret);
           goto exit;
         }
     }
@@ -3396,6 +3397,18 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
 
       switch (msg.msg_id)
         {
+          case AUDIO_MSG_USER:
+            ret = cxd56_stop_dma(priv);
+            if (ret != CXD56_AUDIO_ECODE_OK)
+              {
+                auderr("ERROR: Could not stop DMA transfer (%d)\n", ret);
+                priv->running = false;
+              }
+
+            priv->state = CXD56_DEV_STATE_BUFFERING;
+            audinfo("Workerthread paused for buffering.\n");
+            break;
+
           case AUDIO_MSG_STOP:
             ret = cxd56_stop_dma(priv);
             if (ret != CXD56_AUDIO_ECODE_OK)
@@ -3417,6 +3430,29 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
             break;
 
           case AUDIO_MSG_ENQUEUE:
+            if (priv->state == CXD56_DEV_STATE_BUFFERING)
+              {
+                audwarn("Buffering pendingq=%d \n",
+                        dq_count(&priv->pendingq));
+
+                FAR struct ap_buffer_s *apb;
+                apb = (struct ap_buffer_s *)(&priv->pendingq)->tail;
+
+                bool final = (apb != NULL) &&
+                  ((apb->flags & AUDIO_APB_FINAL) != 0);
+
+                /* If pendingq exceeds the threshold or pendingq
+                 * contains the final buffer, then start dma.
+                 */
+
+                if (CONFIG_CXD56_AUDIO_NUM_BUFFERS <=
+                    dq_count(&priv->pendingq) || final)
+                  {
+                    cxd56_resume((FAR struct audio_lowerhalf_s *)priv);
+                  }
+              }
+            break;
+
           default:
             break;
         }
