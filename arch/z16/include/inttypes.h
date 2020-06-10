@@ -56,7 +56,6 @@
 #define PRIdFAST16  "d"
 #define PRIdFAST32  "d"
 
-#define PRIdMAX     "d"
 #define PRIdPTR     "d"
 
 #define PRIi8       "i"
@@ -71,7 +70,6 @@
 #define PRIiFAST16  "i"
 #define PRIiFAST32  "i"
 
-#define PRIiMAX     "i"
 #define PRIiPTR     "i"
 
 #define PRIo8       "o"
@@ -86,7 +84,6 @@
 #define PRIoFAST16  "o"
 #define PRIoFAST32  "o"
 
-#define PRIoMAX     "o"
 #define PRIoPTR     "o"
 
 #define PRIu8       "u"
@@ -101,7 +98,6 @@
 #define PRIuFAST16  "u"
 #define PRIuFAST32  "u"
 
-#define PRIuMAX     "u"
 #define PRIuPTR     "u"
 
 #define PRIx8       "x"
@@ -116,7 +112,6 @@
 #define PRIxFAST16  "x"
 #define PRIxFAST32  "x"
 
-#define PRIxMAX     "x"
 #define PRIxPTR     "x"
 
 #define PRIX8       "X"
@@ -131,7 +126,6 @@
 #define PRIXFAST16  "X"
 #define PRIXFAST32  "X"
 
-#define PRIXMAX     "X"
 #define PRIXPTR     "X"
 
 #define SCNd8       "hhd"
@@ -146,7 +140,6 @@
 #define SCNdFAST16  "hd"
 #define SCNdFAST32  "d"
 
-#define SCNdMAX     "d"
 #define SCNdPTR     "d"
 
 #define SCNi8       "hhi"
@@ -161,7 +154,6 @@
 #define SCNiFAST16  "hi"
 #define SCNiFAST32  "i"
 
-#define SCNiMAX     "i"
 #define SCNiPTR     "i"
 
 #define SCNo8       "hho"
@@ -176,7 +168,6 @@
 #define SCNoFAST16  "ho"
 #define SCNoFAST32  "o"
 
-#define SCNoMAX     "o"
 #define SCNoPTR     "o"
 
 #define SCNu8       "hhu"
@@ -191,7 +182,6 @@
 #define SCNuFAST16  "hu"
 #define SCNuFAST32  "u"
 
-#define SCNuMAX     "u"
 #define SCNuPTR     "u"
 
 #define SCNx8       "hhx"
@@ -206,7 +196,6 @@
 #define SCNxFAST16  "hx"
 #define SCNxFAST32  "x"
 
-#define SCNxMAX     "x"
 #define SCNxPTR     "x"
 
 #define INT8_C(x)   x
