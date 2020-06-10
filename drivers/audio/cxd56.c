@@ -3224,6 +3224,24 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
           dq_get(&dev->pendingq);
           dq_put(&dev->runningq, &apb->dq_entry);
           dev->state = CXD56_DEV_STATE_STARTED;
+
+          if ((apb->flags & AUDIO_APB_FINAL) != 0)
+            {
+              /* If the apb is final, send stop message */
+
+              audinfo("Final apb \n");
+              struct audio_msg_s msg;
+              msg.msg_id = AUDIO_MSG_STOP;
+              msg.u.data = 0;
+              ret = nxmq_send(dev->mq, (FAR const char *)&msg,
+                              sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+
+              if (ret != OK)
+                {
+                  auderr("ERROR: nxmq_send for stop failed (%d)\n", ret);
+                  goto exit;
+                }
+            }
         }
     }
 
