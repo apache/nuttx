@@ -1686,6 +1686,20 @@ config STACK_COLORATION
 
 		Only supported by a few architectures.
 
+config STACK_CANARIES
+	bool "Compiler stack canaries"
+	depends on ARCH_HAVE_STACKCHECK
+	default n
+	---help---
+		This option enables compiler stack canaries.
+		If stack canaries are supported by the compiler, it will emit
+		extra code that inserts a canary value into the stack frame when
+		a function is entered and validates this value upon exit.
+		Stack corruption (such as that caused by buffer overflow) results
+		in a fatal error condition for the running entity.
+		Enabling this option can result in a significant increase
+		in footprint and an associated decrease in performance.
+
 config ARCH_HAVE_HEAPCHECK
 	bool
 	default n
