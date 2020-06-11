@@ -203,6 +203,9 @@ int cxd56_bringup(void)
 {
   struct pm_cpu_wakelock_s wlock;
   int ret;
+#ifdef CONFIG_VIDEO_ISX012
+  FAR const struct video_devops_s *devops;
+#endif
 
   ret = nsh_cpucom_initialize();
   if (ret < 0)
@@ -359,13 +362,21 @@ int cxd56_bringup(void)
       _err("ERROR: Failed to initialize ISX012 board. %d\n", errno);
     }
 
-  g_video_devops = isx012_initialize();
-  if (g_video_devops == NULL)
+  devops  = isx012_initialize();
+  if (devops == NULL)
     {
       _err("ERROR: Failed to populate ISX012 devops. %d\n", errno);
       ret = ERROR;
     }
 #endif /* CONFIG_VIDEO_ISX012 */
+
+#ifdef CONFIG_VIDEO_STREAM
+  ret = video_initialize("/dev/video", devops);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize video stream driver. \n");
+    }
+#endif
 
   /* In order to prevent Hi-Z from being input to the SD Card controller,
    * Initialize SDIO pins to GPIO low output with internal pull-down.

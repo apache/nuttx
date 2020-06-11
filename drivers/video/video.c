@@ -222,7 +222,7 @@ static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
  * Public Data
  ****************************************************************************/
 
-FAR const struct video_devops_s *g_video_devops;
+static const struct video_devops_s *g_video_devops;
 
 /****************************************************************************
  * Private Data
@@ -1495,7 +1495,8 @@ static int video_unregister(FAR video_mng_t *v_mgr)
  * Public Functions
  ****************************************************************************/
 
-int video_initialize(FAR const char *devpath)
+int video_initialize(FAR const char *devpath,
+                     FAR const struct video_devops_s *devops)
 {
   if (is_initialized)
     {

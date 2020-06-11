@@ -625,8 +625,6 @@ struct v4l2_ext_controls
  * Public Data
  ****************************************************************************/
 
-extern FAR const struct video_devops_s *g_video_devops;
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -639,7 +637,8 @@ extern FAR const struct video_devops_s *g_video_devops;
  *  negative value is returned.
  */
 
-int video_initialize(FAR const char *devpath);
+int video_initialize(FAR const char *devpath,
+                     FAR const struct video_devops_s *devops);
 
 /* Uninitialize video driver.
  *
