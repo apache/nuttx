@@ -616,18 +616,6 @@ config SCHED_WAITPID
 		compliant) and will enable the waitid() and wait() interfaces as
 		well.
 
-config SCHED_EXIT_KILL_CHILDREN
-	bool "Enable kill all children when exit"
-	default n
-	depends on SCHED_HAVE_PARENT && SCHED_CHILD_STATUS
-	---help---
-		When a task exits, all of its child threads will be killed.
-
-		Caution:  This selection should not be used unless you are certain
-		of what you are doing.  Uninformed of this option can often lead to
-		memory leaks since, for example, memory allocations held by threads
-		are not automatically freed!
-
 config SCHED_USER_IDENTITY
 	bool "Support per-task User Identity"
 	default n
