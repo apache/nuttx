@@ -78,7 +78,7 @@ void exit(int status)
 
   status &= 0xff;
 
-#ifdef CONFIG_SCHED_EXIT_KILL_CHILDREN
+#ifdef HAVE_GROUP_MEMBERS
   /* Kill all of the children of the group, preserving only this thread.
    * exit() is normally called from the main thread of the task.  pthreads
    * exit through a different mechanism.
