@@ -295,7 +295,7 @@ int ncp5623c_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Register the character driver */
 
-  int const ret = register_driver(devpath, &g_ncp5623c_fileops, 666, priv);
+  int const ret = register_driver(devpath, &g_ncp5623c_fileops, 0666, priv);
   if (ret != OK)
     {
       lcderr("ERROR: Failed to register driver: %d\n", ret);

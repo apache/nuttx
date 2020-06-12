@@ -363,7 +363,7 @@ int pca9635pw_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Register the character driver */
 
-  int const ret = register_driver(devpath, &g_pca9635pw_fileops, 666, priv);
+  int const ret = register_driver(devpath, &g_pca9635pw_fileops, 0666, priv);
   if (ret != OK)
     {
       lcderr("ERROR: Failed to register driver: %d\n", ret);
