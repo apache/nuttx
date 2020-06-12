@@ -65,7 +65,8 @@ struct comp_callback_s
    * comparator output state changes.
    *
    * Input Parameters:
-   *   dev - The COMP device structure that was previously registered by adc_register()
+   *   dev - The COMP device structure that was previously registered by
+   *         adc_register()
    *   val - The actual value of the comparator output.
    *
    * Returned Value:
@@ -79,7 +80,6 @@ struct comp_ops_s
 {
   /* Bind the upper-half driver callbacks to the lower-half implementation.  This
    * must be called early in order to receive COMP event notifications.
-
    */
 
   CODE int (*ao_bind)(FAR struct comp_dev_s *dev,
@@ -94,7 +94,7 @@ struct comp_ops_s
   CODE int (*ao_setup)(FAR struct comp_dev_s *dev);
 
   /* Disable the COMP.  This method is called when the COMP device is closed.
-   * This method reverses the operation the setup method.
+   * This method reverses the operation of the setup method.
    * Works only if COMP device is not locked.
    */
 
@@ -114,10 +114,10 @@ struct comp_dev_s
 #ifdef CONFIG_COMP
   /* Fields managed by common upper half COMP logic */
 
-  uint8_t ad_ocount;            /* The number of times the device has been opened */
+  uint8_t ad_ocount;           /* The number of times the device has been opened */
   uint8_t val;                 /* Comparator value after output transition event */
-  sem_t   ad_sem;               /* Used to serialize access  */
-  sem_t   ad_readsem;           /* Blocking read */
+  sem_t   ad_sem;              /* Used to serialize access  */
+  sem_t   ad_readsem;          /* Blocking read */
 
   /* pollfd's for output transition events */
 
@@ -131,7 +131,7 @@ struct comp_dev_s
 };
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 #if defined(__cplusplus)

@@ -98,13 +98,15 @@ static int opamp_open(FAR struct file *filep)
   uint8_t                tmp;
   int                    ret;
 
-  /* If the port is the middle of closing, wait until the close is finished */
+  /* If the port is the middle of closing, wait until the close is
+   * finished.
+   */
 
   ret = nxsem_wait(&dev->ad_closesem);
   if (ret >= 0)
     {
-      /* Increment the count of references to the device.  If this the first
-       * time that the driver has been opened for this device, then
+      /* Increment the count of references to the device.  If this is the
+       * first time that the driver has been opened for this device, then
        * initialize the device.
        */
 
@@ -117,7 +119,9 @@ static int opamp_open(FAR struct file *filep)
         }
       else
         {
-          /* Check if this is the first time that the driver has been opened. */
+          /* Check if this is the first time that the driver has been
+           * opened.
+           */
 
           if (tmp == 1)
             {
