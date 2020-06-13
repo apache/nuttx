@@ -58,6 +58,7 @@ mktime         NXmktime
 mmap           NXmmap
 mount          NXmount
 mq_close       NXmq_close
+munmap         NXmunmap
 nanosleep      NXnanosleep
 ntohs          NXhntohs
 open           NXopen
