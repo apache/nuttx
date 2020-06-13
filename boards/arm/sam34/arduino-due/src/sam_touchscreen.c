@@ -108,7 +108,7 @@
 
 /* Calibration value for timing loop */
 
-#define SPI_BITBAND_LOOPSPERMSEC CONFIG_BOARD_LOOPSPERMSEC
+#define SPI_BITBANG_LOOPSPERMSEC CONFIG_BOARD_LOOPSPERMSEC
 
 /* SPI_PERBIT_NSEC is the minimum time to transfer one bit.  This determines
  * the maximum frequency and is also used to calculate delays to achieve

@@ -55,8 +55,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* This file holds the static, device-independ portion of the generica SPI-
- * bit-bang driver.  The full driver consists of 5 files:
+/* This file holds the static, device-independent portion of the generic
+ * SPI-bit-bang driver.  The full driver consists of 5 files:
  *
  * 1. drivers/spi/spi_bitbang.c:  This file.  This file holds the basic
  *    SPI driver framework and not perform any direct bit-bang operations.
@@ -68,17 +68,17 @@
  * 3. boards/<arch>/<chip>/<board>/src/<file>:  The implementation of the
  *    low-level bit-bang logic resides in some file in the board source
  *    directory.  This board-specific logic includes the bit-bang skeleton
- *    logic provided in include/nuttx/spi/spi_bitband.c.
- * 4. include/nuttx/spi/spi_bitband.c.  Despite the .c extension, this
+ *    logic provided in include/nuttx/spi/spi_bitbang.c.
+ * 4. include/nuttx/spi/spi_bitbang.c.  Despite the .c extension, this is
  *    really an included file.  It is used in this way:  1) The board-
  *    specific logic in boards/<arch>/<chip>/<board>/src/<file> provides
- *    some definitions then 2) includes include/nuttx/spi/spi_bitband.c.
+ *    some definitions then 2) includes include/nuttx/spi/spi_bitbang.c.
  *    That file will then use those definitions to implement the low-level
- *    bit-bang logic.  the board-specific logic then calls
+ *    bit-bang logic.  The board-specific logic then calls
  *    spi_create_bitbang() in this file to instantiate the complete SPI
  *    driver.
  *
- *    See include/nuttx/spi/spi_bitband.c for more detailed usage
+ *    See include/nuttx/spi/spi_bitbang.c for more detailed usage
  *    information.
  */
 
