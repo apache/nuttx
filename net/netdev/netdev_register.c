@@ -315,9 +315,9 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             break;
 #endif
         case NET_LL_MBIM:
-          dev->d_llhdrlen = 0;
-          dev->d_pktsize = 1200;
-          devfmt = NETDEV_MBIM_FORMAT;
+          llhdrlen = 0;
+          pktsize  = 1200;
+          devfmt   = NETDEV_MBIM_FORMAT;
           break;
 
           default:
