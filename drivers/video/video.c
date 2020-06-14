@@ -1035,8 +1035,14 @@ static int video_queryctrl(FAR struct v4l2_queryctrl *ctrl)
 
   /* Replace to VIDIOC_QUERY_EXT_CTRL format */
 
-  ext_ctrl.ctrl_class = ctrl->ctrl_class;
-  ext_ctrl.id         = ctrl->id;
+  ext_ctrl.ctrl_class     = ctrl->ctrl_class;
+  ext_ctrl.id             = ctrl->id;
+  ext_ctrl.type           = ctrl->type;
+  ext_ctrl.minimum        = ctrl->minimum;
+  ext_ctrl.maximum        = ctrl->maximum;
+  ext_ctrl.step           = ctrl->step;
+  ext_ctrl.default_value  = ctrl->default_value;
+  ext_ctrl.flags          = ctrl->flags;
 
   ret = video_query_ext_ctrl(&ext_ctrl);
 
