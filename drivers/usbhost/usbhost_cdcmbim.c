@@ -50,6 +50,7 @@
 #include <nuttx/usb/usbhost.h>
 
 #define CDCMBIM_NETBUF_SIZE 8192
+#define CDCMBIM_WDDELAY     (1*CLK_TCK)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -2316,7 +2317,7 @@ static void cdcmbim_txpoll_work(void *arg)
   net_lock();
   priv->netdev.d_buf = priv->txpktbuf;
 
-  (void)devif_timer(&priv->netdev, cdcmbim_txpoll);
+  (void)devif_timer(&priv->netdev, CDCMBIM_WDDELAY, cdcmbim_txpoll);
 
   /* setup the watchdog poll timer again */
 
