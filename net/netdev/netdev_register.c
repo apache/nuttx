@@ -55,7 +55,7 @@
 #define NETDEV_PAN_FORMAT   "pan%d"
 #define NETDEV_WLAN_FORMAT  "wlan%d"
 #define NETDEV_WPAN_FORMAT  "wpan%d"
-#define NETDEV_MBIM_FORMAT  "wwan%d"
+#define NETDEV_WWAN_FORMAT  "wwan%d"
 
 #if defined(CONFIG_DRIVERS_IEEE80211) /* Usually also has CONFIG_NET_ETHERNET */
 #  define NETDEV_DEFAULT_FORMAT NETDEV_WLAN_FORMAT
@@ -317,7 +317,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
         case NET_LL_MBIM:
           llhdrlen = 0;
           pktsize  = 1200;
-          devfmt   = NETDEV_MBIM_FORMAT;
+          devfmt   = NETDEV_WWAN_FORMAT;
           break;
 
           default:
