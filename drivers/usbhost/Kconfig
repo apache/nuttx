@@ -262,6 +262,15 @@ config USBHOST_CDCACM_TXBUFSIZE
 
 endif # USBHOST_CDCACM
 
+config USBHOST_CDCMBIM
+	bool "CDC/MBIM support"
+	default n
+	depends on USBHOST_HAVE_ASYNCH && !USBHOST_BULK_DISABLE && !USBHOST_INT_DISABLE
+	select USBHOST_ASYNCH
+	---help---
+		Select this option to build in host support for CDC/MBIM network
+		devices.
+
 config USBHOST_HIDKBD
 	bool "HID Keyboard Class Support"
 	default n
