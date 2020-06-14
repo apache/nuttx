@@ -56,6 +56,7 @@
  ****************************************************************************/
 
 /* put in cdc.h */
+
 #define USB_CDC_SEND_ENCAPSULATED_COMMAND 0x00
 #define USB_CDC_GET_ENCAPSULATED_RESPONSE 0x01
 #define USB_CDC_GET_NTB_PARAMETERS        0x80
@@ -564,10 +565,10 @@ static ssize_t cdcwdm_write(FAR struct file *filep, FAR const char *buffer,
 static int cdcwdm_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup)
 {
-  FAR struct inode           *inode;
+  FAR struct inode             *inode;
   FAR struct usbhost_cdcmbim_s *priv;
-  int                         ret = OK;
-  int                         i;
+  int                           ret = OK;
+  int                           i;
 
   DEBUGASSERT(filep && filep->f_inode && fds);
   inode = filep->f_inode;
@@ -803,9 +804,11 @@ static void usbhost_bulkin_work(FAR void *arg)
 {
   struct usbhost_cdcmbim_s *priv;
   struct usbhost_hubport_s *hport;
+  struct usb_cdc_ncm_nth16_s *nth;
   uint16_t ndpoffset;
   uint16_t dgram_len;
   uint16_t dgram_off;
+  uint16_t block_len;
 
   priv = (struct usbhost_cdcmbim_s *)arg;
   DEBUGASSERT(priv);
@@ -828,8 +831,7 @@ static void usbhost_bulkin_work(FAR void *arg)
 
   /* Parse the NTB header */
 
-  struct usb_cdc_ncm_nth16_s *nth =
-    (struct usb_cdc_ncm_nth16_s *)priv->rxnetbuf;
+  nth = (struct usb_cdc_ncm_nth16_s *)priv->rxnetbuf;
 
   if (usbhost_getle32(nth->signature) != USB_CDC_NCM_NTH16_SIGNATURE)
     {
@@ -837,7 +839,7 @@ static void usbhost_bulkin_work(FAR void *arg)
       goto out;
     }
 
-  uint16_t block_len = usbhost_getle16(nth->block_length);
+  block_len = usbhost_getle16(nth->block_length);
 
   if (block_len > priv->bulkinbytes)
     {
@@ -856,14 +858,13 @@ static void usbhost_bulkin_work(FAR void *arg)
 
   do
     {
+      struct usb_cdc_ncm_dpe16_s *dpe;
       struct usb_cdc_ncm_ndp16_s *ndp
         = (struct usb_cdc_ncm_ndp16_s *)(priv->rxnetbuf + ndpoffset);
 
       ndpoffset = usbhost_getle16(ndp->next_ndp_index);
 
       /* Parse each DPE */
-
-      struct usb_cdc_ncm_dpe16_s *dpe;
 
       for (dpe = ndp->dpe16; usbhost_getle16(dpe->index); dpe++)
         {
@@ -904,7 +905,17 @@ out:
 
 static void usbhost_rxdata_work(FAR void *arg)
 {
+  /* Would be nice if CTRLIN would return how many bytes it read... */
+
+  struct mbim_header_s
+  {
+    uint8_t type[4];
+    uint8_t len[4];
+  };
+
   FAR struct usbhost_cdcmbim_s *priv;
+  struct mbim_header_s *hdr;
+  uint32_t len;
   int ret;
 
   priv = (FAR struct usbhost_cdcmbim_s *)arg;
@@ -931,16 +942,8 @@ static void usbhost_rxdata_work(FAR void *arg)
       goto errout;
     }
 
-  /* Would be nice if CTRLIN would return how many bytes it read... */
-
-  struct mbim_header_s
-  {
-    uint8_t type[4];
-    uint8_t len[4];
-  };
-
-  struct mbim_header_s *hdr = (struct mbim_header_s *)priv->comm_rxbuf;
-  uint32_t len = usbhost_getle32(hdr->len);
+  hdr = (struct mbim_header_s *)priv->comm_rxbuf;
+  len = usbhost_getle32(hdr->len);
 
   if (len > priv->maxctrlsize)
     {

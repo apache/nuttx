@@ -1,4 +1,4 @@
-/****************************************************************************
+/*****************************************************************************
  * include/nuttx/usb/cdc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_USB_CDC_H
 #define __INCLUDE_NUTTX_USB_CDC_H
@@ -930,7 +930,9 @@ struct cdc_linecoding_s
 struct cdc_linestatus_s
 {
   uint8_t size[2];   /* wLength, Size of this structure, in bytes */
-  uint8_t ringer[4]; /* dwRingerBitmap, Ringer Conf bitmap for this line */
+  uint8_t ringer[4]; /* dwRingerBitmap, Ringer Configuration bitmap for this
+                      * line
+                      */
   uint8_t line[4];   /* dwLineState, Defines current state of the line */
   uint32_t call[1];  /* dwCallStateN, Current state of call N on the line */
 };

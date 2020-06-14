@@ -156,7 +156,7 @@ enum net_lltype_e
   NET_LL_IEEE80211,    /* IEEE 802.11 */
   NET_LL_IEEE802154,   /* IEEE 802.15.4 MAC */
   NET_LL_PKTRADIO,     /* Non-standard packet radio */
-  NET_LL_MBIM
+  NET_LL_MBIM          /* CDC-MBIM USB host driver */
 };
 
 /* This defines a bitmap big enough for one bit for each socket option */

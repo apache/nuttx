@@ -150,6 +150,11 @@ config NET_LOOPBACK_PKTSIZE
 		CONFIG_NET_LOOPBACK_PKTSIZE is zero, meaning that this maximum
 		packet size will be used by loopback driver.
 
+menuconfig NET_MBIM
+        bool "MBIM modem support"
+	depends on USBHOST_CDCMBIM
+	default n
+
 menuconfig NET_SLIP
 	bool "SLIP support"
 	select ARCH_HAVE_NETDEV_STATISTICS

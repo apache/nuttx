@@ -314,11 +314,14 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             devfmt   = NETDEV_TUN_FORMAT;
             break;
 #endif
-        case NET_LL_MBIM:
-          llhdrlen = 0;
-          pktsize  = 1200;
-          devfmt   = NETDEV_WWAN_FORMAT;
-          break;
+
+#ifdef CONFIG_NET_MBIM
+          case NET_LL_MBIM:
+            llhdrlen = 0;
+            pktsize  = 1200;
+            devfmt   = NETDEV_WWAN_FORMAT;
+            break;
+#endif
 
           default:
             nerr("ERROR: Unrecognized link type: %d\n", lltype);
