@@ -73,7 +73,7 @@ int can_setsockopt(FAR struct socket *psock, int option,
                    FAR const void *value, socklen_t value_len)
 {
   FAR struct can_conn_s *conn;
-  int ret;
+  int ret = OK;
   int count = 0;
 
   DEBUGASSERT(psock != NULL && value != NULL && psock->s_conn != NULL);
