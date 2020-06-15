@@ -359,7 +359,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 int psock_getsockopt(FAR struct socket *psock, int level, int option,
                      FAR void *value, FAR socklen_t *value_len)
 {
-  int ret;
+  int ret = OK;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
