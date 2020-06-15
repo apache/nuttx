@@ -150,4 +150,14 @@
 #define PIN_LPI2C0_SCL   PIN_LPI2C0_SCL_2   /* PTA3 */
 #define PIN_LPI2C0_SDA	 PIN_LPI2C0_SDA_2   /* PTA2 */
 
+/* CAN selections ***********************************************************/
+#define PIN_CAN0_TX      PIN_CAN0_TX_4      /* PTE5 */
+#define PIN_CAN0_RX      PIN_CAN0_RX_4      /* PTE4 */
+#define PIN_CAN0_ENABLE  (GPIO_OUTPUT | PIN_PORTE | PIN11 )
+#define CAN0_ENABLE_OUT  0
+#define PIN_CAN1_TX      PIN_CAN1_TX_1      /* PTA13 */
+#define PIN_CAN1_RX      PIN_CAN1_RX_1      /* PTA12 */
+#define PIN_CAN1_ENABLE  (GPIO_OUTPUT | PIN_PORTE | PIN10 )
+#define CAN1_ENABLE_OUT  0
+
 #endif  /* __BOARDS_ARM_RDDRONE_UAVCAN146_INCLUDE_BOARD_H */
