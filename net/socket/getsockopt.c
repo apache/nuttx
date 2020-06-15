@@ -52,6 +52,7 @@
 #include "tcp/tcp.h"
 #include "usrsock/usrsock.h"
 #include "utils/utils.h"
+#include "can/can.h"
 
 /****************************************************************************
  * Private Functions
