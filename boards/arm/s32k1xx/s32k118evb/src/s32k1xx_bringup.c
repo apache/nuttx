@@ -105,5 +105,16 @@ int s32k1xx_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_S32K1XX_PROGMEM
+  FAR struct mtd_dev_s *mtd;
+  int minor = 0;
+
+  mtd = progmem_initialize();
+  if (!mtd)
+    {
+      syslog(LOG_ERR, "ERROR: progmem_initialize failed\n");
+    }
+#endif
+
   return ret;
 }
