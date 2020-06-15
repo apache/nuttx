@@ -175,4 +175,11 @@ ifeq ($(CONFIG_NET),y)
 ifeq ($(CONFIG_KINETIS_ENET),y)
 CHIP_CSRCS += kinetis_enet.c
 endif
+
+ifeq ($(CONFIG_NET_CAN),y)
+ifeq ($(CONFIG_KINETIS_FLEXCAN),y)
+CHIP_CSRCS += kinetis_flexcan.c
+endif
+endif
+
 endif

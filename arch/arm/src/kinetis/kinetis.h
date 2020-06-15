@@ -62,6 +62,7 @@
 /* Configuration ********************************************************************/
 
 /* Bit-encoded input to kinetis_pinconfig() *****************************************/
+
 /* General form (32-bits, only 22 bits are unused in the encoding):
  *
  * oooo mmmv iiii ifd- ---- -ppp ---b bbbb
@@ -80,6 +81,7 @@
 #define _PIN_OPTIONS_MASK      (15 << _PIN_OPTIONS_SHIFT)
 
 /* Port Modes */
+
                                                        /* Unshifted versions: */
 #define PIN_MODE_ANALOG        (0)                     /*   000 Pin Disabled (Analog) */
 #define PIN_MODE_ALT1          (1)                     /*   001 Alternative 1 */
@@ -354,7 +356,7 @@ extern "C"
 
 void kinetis_clockconfig(void);
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_earlyserialinit
  *
  * Description:
@@ -362,13 +364,13 @@ void kinetis_clockconfig(void);
  *   the serial console will be available during bootup.  This must be called
  *   before arm_serialinit.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
 void kinetis_earlyserialinit(void);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_uart_earlyserialinit
  *
  * Description:
@@ -376,13 +378,13 @@ void kinetis_earlyserialinit(void);
  *   serial console will be available during bootup.  This must be called
  *   before arm_serialinit.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
 void kinetis_uart_earlyserialinit(void);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_lpuart_earlyserialinit
  *
  * Description:
@@ -390,7 +392,7 @@ void kinetis_uart_earlyserialinit(void);
  *   serial console will be available during bootup.  This must be called
  *   before arm_serialinit.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
 void kinetis_lpuart_earlyserialinit(void);
@@ -408,7 +410,7 @@ void kinetis_lpuart_earlyserialinit(void);
 
 void kinetis_lowsetup(void);
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_uart_serialinit
  *
  * Description:
@@ -421,13 +423,13 @@ void kinetis_lowsetup(void);
  * Returned Value:
  *   The next TTY number available for assignment
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
 unsigned int kinetis_uart_serialinit(unsigned int first);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_lpuart_serialinit
  *
  * Description:
@@ -440,43 +442,43 @@ unsigned int kinetis_uart_serialinit(unsigned int first);
  * Returned Value:
  *   The next TTY number available for assignment
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_LPUART_DEVICE
 unsigned int kinetis_lpuart_serialinit(unsigned int first);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_uartreset
  *
  * Description:
  *   Reset a UART.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
 void kinetis_uartreset(uintptr_t uart_base);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_lpuartreset
  *
  * Description:
  *   Reset a UART.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_LPUART_DEVICE
 void kinetis_lpuartreset(uintptr_t uart_base);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_uartconfigure
  *
  * Description:
  *   Configure a UART as a RS-232 UART.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
 void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
@@ -485,13 +487,13 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
                            bool iflow, bool oflow);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_lpuartconfigure
  *
  * Description:
  *   Configure a UART as a RS-232 UART.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_LPUART_DEVICE
 void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
@@ -672,7 +674,7 @@ void kinetis_pindump(uint32_t pinset, const char *msg);
 
 void kinetis_clrpend(int irq);
 
-/****************************************************************************
+/************************************************************************************
  * Name: sdhc_initialize
  *
  * Description:
@@ -684,14 +686,14 @@ void kinetis_clrpend(int irq);
  * Returned Value:
  *   A reference to an SDIO interface structure.  NULL is returned on failures.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_SDHC
 struct sdio_dev_s;
 FAR struct sdio_dev_s *sdhc_initialize(int slotno);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sdhc_mediachange
  *
  * Description:
@@ -708,13 +710,13 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno);
  * Returned Value:
  *   None
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_SDHC
 void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sdio_wrprotect
  *
  * Description:
@@ -728,7 +730,7 @@ void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
  * Returned Value:
  *   None
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_SDHC
 void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
@@ -736,6 +738,47 @@ void sdhc_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 #undef EXTERN
 #if defined(__cplusplus)
 }
+#endif
+
+/************************************************************************************
+ * Name: kinetis_netinitialize
+ *
+ * Description:
+ *   Initialize the Ethernet controller and driver
+ *
+ * Input Parameters:
+ *   intf - In the case where there are multiple EMACs, this value
+ *          identifies which EMAC is to be initialized.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_KINETIS_ENET
+int kinetis_netinitialize(int intf);
+#endif
+
+/************************************************************************************
+ * Function: kinetis_caninitialize
+ *
+ * Description:
+ *   Initialize the CAN controller and driver
+ *
+ * Input Parameters:
+ *   intf - In the case where there are multiple CAN, this value
+ *          identifies which CAN is to be initialized.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ************************************************************************************/
+#ifdef CONFIG_KINETIS_CAN
+int kinetis_caninitialize(int intf)
 #endif
 
 #endif /* __ASSEMBLY__ */
