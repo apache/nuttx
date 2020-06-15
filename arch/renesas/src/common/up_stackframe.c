@@ -51,6 +51,7 @@
 /****************************************************************************
  * Pre-processor Macros
  ****************************************************************************/
+
 /* The SH stack must be aligned at word (4 byte) boundaries. If necessary
  * frame_size must be rounded up to the next boundary
  */
