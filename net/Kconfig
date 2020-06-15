@@ -151,7 +151,7 @@ config NET_LOOPBACK_PKTSIZE
 		packet size will be used by loopback driver.
 
 menuconfig NET_MBIM
-        bool "MBIM modem support"
+	bool "MBIM modem support"
 	depends on USBHOST_CDCMBIM
 	default n
 
