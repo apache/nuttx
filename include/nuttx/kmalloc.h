@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <malloc.h>
 #include <stdbool.h>
 #include <stdlib.h>
 

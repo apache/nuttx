@@ -30,7 +30,6 @@
 
 #include <sys/types.h>
 #include <errno.h>
-#include <malloc.h>
 #include <stdint.h>
 #include <limits.h>
 
