@@ -103,7 +103,6 @@ namespace std
   using ::memalign;
   using ::zalloc;
   using ::calloc;
-  using ::mallinfo;
 
 #ifdef CONFIG_PSEUDOTERM
   // Pseudo-Terminals
