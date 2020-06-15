@@ -57,6 +57,7 @@
 #include "udp/udp.h"
 #include "usrsock/usrsock.h"
 #include "utils/utils.h"
+#include "can/can.h"
 
 /****************************************************************************
  * Public Functions
