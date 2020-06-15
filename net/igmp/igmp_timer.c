@@ -151,7 +151,7 @@ static void igmp_timeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void igmp_timeout(int argc, uint32_t arg, ...)
+static void igmp_timeout(int argc, wdparm_t arg, ...)
 {
   FAR struct igmp_group_s *group;
   int ret;
@@ -197,7 +197,7 @@ void igmp_startticks(FAR struct igmp_group_s *group, unsigned int ticks)
 
   gtmrinfo("ticks: %d\n", ticks);
 
-  ret = wd_start(group->wdog, ticks, igmp_timeout, 1, (uint32_t)group);
+  ret = wd_start(group->wdog, ticks, igmp_timeout, 1, (wdparm_t)group);
 
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
