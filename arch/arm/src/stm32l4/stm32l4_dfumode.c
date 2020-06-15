@@ -49,6 +49,16 @@
 #include "hardware/stm32l4_syscfg.h"
 #include "stm32l4_dfumode.h"
 
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+typedef void (*boot_call_t)(void);
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
 static inline void rcc_reset(void)
 {
   uint32_t regval;
@@ -73,9 +83,9 @@ static inline void rcc_reset(void)
   /* Reset HSION, HSEON, CSSON and PLLON bits */
 
   regval  = getreg32(STM32L4_RCC_CR);
-  regval &= ~(RCC_CR_HSION | RCC_CR_HSIKERON | RCC_CR_HSEON | RCC_CR_HSIASFS |
-              RCC_CR_CSSON | RCC_CR_PLLON | RCC_CR_PLLON | RCC_CR_PLLSAI1ON |
-              RCC_CR_PLLSAI2ON);
+  regval &= ~(RCC_CR_HSION | RCC_CR_HSIKERON | RCC_CR_HSEON |
+              RCC_CR_HSIASFS | RCC_CR_CSSON | RCC_CR_PLLON | RCC_CR_PLLON |
+              RCC_CR_PLLSAI1ON | RCC_CR_PLLSAI2ON);
   putreg32(regval, STM32L4_RCC_CR);
 
   /* Reset PLLCFGR register to reset default */
@@ -132,13 +142,14 @@ static inline void apb_reset(void)
 void stm32l4_dfumode(void)
 {
   uint32_t regval;
-  void (*SysMemBootJump)(void);
+  boot_call_t boot = (boot_call_t)(*(uint32_t *)0x1fff0004);
 
 #ifdef CONFIG_DEBUG_WARN
   _warn("Entering DFU mode...\n");
 #endif
 
   /* disable all peripherals, interrupts and switch to HSI */
+
   rcc_reset();
   apb_reset();
 
@@ -159,10 +170,10 @@ void stm32l4_dfumode(void)
 
   /* jump into ROM */
 
-  SysMemBootJump = (void (*)(void))(*((uint32_t*)0x1fff0004));
-  SysMemBootJump();
+  boot();
 
-  while(1);
+  while (true);
+
   __builtin_unreachable();         /* Tell compiler we will not return */
 }
 #endif
