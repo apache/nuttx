@@ -37,7 +37,8 @@ ifeq ($(CONFIG_LIBC_LOCALE),y)
 
 # Add the locale files to the build
 
-CSRCS += lib_setlocale.c lib_localeconv.c
+CSRCS += lib_duplocale.c lib_freelocale.c lib_localeconv.c
+CSRCS += lib_newlocale.c lib_setlocale.c lib_uselocale.c
 
 # Add the locale directory to the build
 
