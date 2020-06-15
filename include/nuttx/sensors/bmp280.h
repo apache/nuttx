@@ -36,6 +36,10 @@
 #ifndef __INCLUDE_NUTTX_SENSORS_BMP280_H
 #define __INCLUDE_NUTTX_SENSORS_BMP280_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #if defined(CONFIG_I2C) && (defined(CONFIG_SENSORS_BMP280) || defined(CONFIG_SENSORS_BMP280_SCU))
