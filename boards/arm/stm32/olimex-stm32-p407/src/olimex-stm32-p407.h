@@ -207,6 +207,15 @@
 #  define CS4344_I2S_BUS      3
 #endif
 
+/* External ST7735 Pins */
+
+#define GPIO_ST7735_CS     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN6)
+#define GPIO_ST7735_AO     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN10)
+#define GPIO_ST7735_RST    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN12)
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
@@ -228,6 +237,17 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the olimex-stm32-p407
+ *   board.
+ *
+ ****************************************************************************/
+
+void weak_function stm32_spidev_initialize(void);
 
 /****************************************************************************
  * Name: stm32_stram_configure
