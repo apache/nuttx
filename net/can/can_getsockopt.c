@@ -78,7 +78,7 @@ int can_getsockopt(FAR struct socket *psock, int option,
                    FAR void *value, FAR socklen_t *value_len)
 {
   FAR struct can_conn_s *conn;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(psock != NULL && value != NULL && value_len != NULL &&
               psock->s_conn != NULL);
