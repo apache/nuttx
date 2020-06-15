@@ -117,6 +117,10 @@ static const struct sock_intf_s g_inet_sockif =
   inet_sendfile,    /* si_sendfile */
 #endif
   inet_recvfrom,    /* si_recvfrom */
+#ifdef CONFIG_NET_CMSG
+  NULL,             /* si_recvmsg */
+  NULL,             /* si_sendmsg */
+#endif
   inet_close        /* si_close */
 };
 

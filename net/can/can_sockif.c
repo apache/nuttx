@@ -1,35 +1,20 @@
 /****************************************************************************
- * net/netlink/netlink_sockif.c
+ * net/can/can_sockif.c
  *
- *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -54,68 +39,69 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/net/net.h>
 
-#include "netlink/netlink.h"
+#include "can/can.h"
+#include "netdev/netdev.h"
 
-#ifdef CONFIG_NET_NETLINK
+#ifdef CONFIG_NET_CAN
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  netlink_setup(FAR struct socket *psock, int protocol);
-static sockcaps_t netlink_sockcaps(FAR struct socket *psock);
-static void netlink_addref(FAR struct socket *psock);
-static int  netlink_bind(FAR struct socket *psock,
+static int  can_setup(FAR struct socket *psock, int protocol);
+static sockcaps_t can_sockcaps(FAR struct socket *psock);
+static void can_addref(FAR struct socket *psock);
+static int  can_bind(FAR struct socket *psock,
               FAR const struct sockaddr *addr, socklen_t addrlen);
-static int  netlink_getsockname(FAR struct socket *psock,
+static int  can_getsockname(FAR struct socket *psock,
               FAR struct sockaddr *addr, FAR socklen_t *addrlen);
-static int  netlink_getpeername(FAR struct socket *psock,
+static int  can_getpeername(FAR struct socket *psock,
               FAR struct sockaddr *addr, FAR socklen_t *addrlen);
-static int  netlink_listen(FAR struct socket *psock, int backlog);
-static int  netlink_connect(FAR struct socket *psock,
+static int  can_listen(FAR struct socket *psock, int backlog);
+static int  can_connect(FAR struct socket *psock,
               FAR const struct sockaddr *addr, socklen_t addrlen);
-static int  netlink_accept(FAR struct socket *psock,
-              FAR struct sockaddr *addr, FAR socklen_t *addrlen,
-              FAR struct socket *newsock);
-static int  netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+static int  can_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+              FAR socklen_t *addrlen, FAR struct socket *newsock);
+static int  can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
               bool setup);
-static ssize_t netlink_send(FAR struct socket *psock,
+static ssize_t can_send(FAR struct socket *psock,
               FAR const void *buf, size_t len, int flags);
-static ssize_t netlink_sendto(FAR struct socket *psock, FAR const void *buf,
+static ssize_t can_sendto(FAR struct socket *psock, FAR const void *buf,
               size_t len, int flags, FAR const struct sockaddr *to,
               socklen_t tolen);
-static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
-              size_t len, int flags, FAR struct sockaddr *from,
-              FAR socklen_t *fromlen);
-static int netlink_close(FAR struct socket *psock);
+#ifdef CONFIG_NET_CMSG
+static ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                    int flags);
+#endif
+static int can_close(FAR struct socket *psock);
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-const struct sock_intf_s g_netlink_sockif =
+const struct sock_intf_s g_can_sockif =
 {
-  netlink_setup,        /* si_setup */
-  netlink_sockcaps,     /* si_sockcaps */
-  netlink_addref,       /* si_addref */
-  netlink_bind,         /* si_bind */
-  netlink_getsockname,  /* si_getsockname */
-  netlink_getpeername,  /* si_getpeername */
-  netlink_listen,       /* si_listen */
-  netlink_connect,      /* si_connect */
-  netlink_accept,       /* si_accept */
-  netlink_poll,         /* si_poll */
-  netlink_send,         /* si_send */
-  netlink_sendto,       /* si_sendto */
+  can_setup,        /* si_setup */
+  can_sockcaps,     /* si_sockcaps */
+  can_addref,       /* si_addref */
+  can_bind,         /* si_bind */
+  can_getsockname,  /* si_getsockname */
+  can_getpeername,  /* si_getpeername */
+  can_listen,       /* si_listen */
+  can_connect,      /* si_connect */
+  can_accept,       /* si_accept */
+  can_poll_local,   /* si_poll */
+  can_send,         /* si_send */
+  can_sendto,       /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
-  NULL,                 /* si_sendfile */
+  NULL,             /* si_sendfile */
 #endif
-  netlink_recvfrom,     /* si_recvfrom */
+  can_recvfrom,     /* si_recvfrom */
 #ifdef CONFIG_NET_CMSG
-  NULL,                 /* si_recvmsg */
-  NULL,                 /* si_sendmsg */
+  can_recvmsg,      /* si_recvmsg */
+  can_sendmsg,      /* si_sendmsg */
 #endif
-  netlink_close         /* si_close */
+  can_close         /* si_close */
 };
 
 /****************************************************************************
@@ -123,7 +109,77 @@ const struct sock_intf_s g_netlink_sockif =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netlink_setup
+ * Name: can_poll_eventhandler
+ *
+ * Description:
+ *   This function is called to perform the actual CAN receive operation
+ *   via the device interface layer. from can_input()
+ *
+ * Input Parameters:
+ *   dev      The structure of the network driver that caused the event
+ *   conn     The connection structure associated with the socket
+ *   flags    Set of events describing why the callback was invoked
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+static uint16_t can_poll_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *conn,
+                                      FAR void *pvpriv, uint16_t flags)
+{
+  FAR struct can_poll_s *info = (FAR struct can_poll_s *)pvpriv;
+
+  DEBUGASSERT(!info || (info->psock && info->fds));
+
+  /* 'priv' might be null in some race conditions (?) */
+
+  if (info)
+    {
+      pollevent_t eventset = 0;
+
+      /* Check for data or connection availability events. */
+
+      if ((flags & CAN_NEWDATA) != 0)
+        {
+          eventset |= (POLLIN & info->fds->events);
+        }
+
+      /* Check for loss of connection events. */
+
+      if ((flags & NETDEV_DOWN) != 0)
+        {
+          eventset |= (POLLHUP | POLLERR);
+        }
+
+#if 0
+      /* A poll is a sign that we are free to send data. */
+
+      else if ((flags & CAN_POLL) != 0 &&
+                 psock_udp_cansend(info->psock) >= 0)
+        {
+          eventset |= (POLLOUT & info->fds->events);
+        }
+#endif
+
+      /* Awaken the caller of poll() is requested event occurred. */
+
+      if (eventset)
+        {
+          info->fds->revents |= eventset;
+          nxsem_post(info->fds->sem);
+        }
+    }
+
+  return flags;
+}
+
+/****************************************************************************
+ * Name: can_setup
  *
  * Description:
  *   Called for socket() to verify that the provided socket type and
@@ -141,7 +197,7 @@ const struct sock_intf_s g_netlink_sockif =
  *
  ****************************************************************************/
 
-static int netlink_setup(FAR struct socket *psock, int protocol)
+static int can_setup(FAR struct socket *psock, int protocol)
 {
   int domain = psock->s_domain;
   int type = psock->s_type;
@@ -152,30 +208,41 @@ static int netlink_setup(FAR struct socket *psock, int protocol)
 
   switch (protocol)
     {
-#ifdef CONFIG_NETLINK_ROUTE
-      case NETLINK_ROUTE:
+      case 0:            /* INET subsystem for netlib_ifup */
+      case CAN_RAW:      /* RAW sockets */
+      case CAN_BCM:      /* Broadcast Manager */
+      case CAN_TP16:     /* VAG Transport Protocol v1.6 */
+      case CAN_TP20:     /* VAG Transport Protocol v2.0 */
+      case CAN_MCNET:    /* Bosch MCNet */
+      case CAN_ISOTP:    /* ISO 15765-2 Transport Protocol */
+      case CAN_J1939:    /* SAE J1939 */
         break;
-#endif
 
       default:
         return -EPROTONOSUPPORT;
     }
 
-  /* Verify the socket type (domain should always be PF_NETLINK here) */
+  /* Verify the socket type (domain should always be PF_CAN here) */
 
-  if (domain == PF_NETLINK && (type == SOCK_RAW || type == SOCK_DGRAM))
+  if (domain == PF_CAN && (type == SOCK_RAW || type == SOCK_DGRAM))
     {
       /* Allocate the NetLink socket connection structure and save it in the
        * new socket instance.
        */
 
-      FAR struct netlink_conn_s *conn = netlink_alloc();
+      FAR struct can_conn_s *conn = can_alloc();
       if (conn == NULL)
         {
           /* Failed to reserve a connection structure */
 
           return -ENOMEM;
         }
+
+#ifdef CONFIG_NET_TIMESTAMP
+      /* Store psock in conn se we can read the SO_TIMESTAMP value */
+
+      conn->psock = psock;
+#endif
 
       /* Initialize the connection instance */
 
@@ -198,7 +265,7 @@ static int netlink_setup(FAR struct socket *psock, int protocol)
 }
 
 /****************************************************************************
- * Name: netlink_sockcaps
+ * Name: can_sockcaps
  *
  * Description:
  *   Return the bit encoded capabilities of this socket.
@@ -212,7 +279,7 @@ static int netlink_setup(FAR struct socket *psock, int protocol)
  *
  ****************************************************************************/
 
-static sockcaps_t netlink_sockcaps(FAR struct socket *psock)
+static sockcaps_t can_sockcaps(FAR struct socket *psock)
 {
   /* Permit vfcntl to set socket to non-blocking */
 
@@ -220,7 +287,7 @@ static sockcaps_t netlink_sockcaps(FAR struct socket *psock)
 }
 
 /****************************************************************************
- * Name: netlink_addref
+ * Name: can_addref
  *
  * Description:
  *   Increment the reference count on the underlying connection structure.
@@ -234,9 +301,9 @@ static sockcaps_t netlink_sockcaps(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static void netlink_addref(FAR struct socket *psock)
+static void can_addref(FAR struct socket *psock)
 {
-  FAR struct netlink_conn_s *conn;
+  FAR struct can_conn_s *conn;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
@@ -246,10 +313,10 @@ static void netlink_addref(FAR struct socket *psock)
 }
 
 /****************************************************************************
- * Name: netlink_bind
+ * Name: can_bind
  *
  * Description:
- *   netlink_bind() gives the socket 'conn' the local address 'addr'. 'addr'
+ *   can_bind() gives the socket 'conn' the local address 'addr'. 'addr'
  *   is 'addrlen' bytes long. Traditionally, this is called "assigning a name
  *   to a socket." When a socket is created with socket, it exists in a name
  *   space (address family) but has no name assigned.
@@ -275,28 +342,34 @@ static void netlink_addref(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-static int netlink_bind(FAR struct socket *psock,
-                        FAR const struct sockaddr *addr, socklen_t addrlen)
+static int can_bind(FAR struct socket *psock,
+                    FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  FAR struct sockaddr_nl *nladdr;
-  FAR struct netlink_conn_s *conn;
-
+  FAR struct sockaddr_can *canaddr;
+  FAR struct can_conn_s *conn;
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
-              addrlen >= sizeof(struct sockaddr_nl));
+              addrlen >= sizeof(struct sockaddr_can));
 
   /* Save the address information in the connection structure */
 
-  nladdr = (FAR struct sockaddr_nl *)addr;
-  conn   = (FAR struct netlink_conn_s *)psock->s_conn;
+  canaddr = (FAR struct sockaddr_can *)addr;
+  conn    = (FAR struct can_conn_s *)psock->s_conn;
 
-  conn->pid    = nladdr->nl_pid ? nladdr->nl_pid : getpid();
-  conn->groups = nladdr->nl_groups;
+  /* Bind CAN device to socket */
+
+#ifdef CONFIG_NETDEV_IFINDEX
+  conn->dev = netdev_findbyindex(canaddr->can_ifindex);
+#else
+  char netdev_name[5] = "can0";
+  netdev_name[3] += canaddr->can_ifindex;
+  conn->dev = netdev_findbyname((const char *)&netdev_name);
+#endif
 
   return OK;
 }
 
 /****************************************************************************
- * Name: netlink_getsockname
+ * Name: can_getsockname
  *
  * Description:
  *   The getsockname() function retrieves the locally-bound name of the
@@ -317,36 +390,18 @@ static int netlink_bind(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int netlink_getsockname(FAR struct socket *psock,
-                               FAR struct sockaddr *addr,
-                               FAR socklen_t *addrlen)
+static int can_getsockname(FAR struct socket *psock,
+                           FAR struct sockaddr *addr,
+                           FAR socklen_t *addrlen)
 {
-  FAR struct sockaddr_nl *nladdr;
-  FAR struct netlink_conn_s *conn;
-
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
-              addrlen != NULL && *addrlen >= sizeof(struct sockaddr_nl));
-
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
-
-  /* Return the address information in the address structure */
-
-  nladdr = (FAR struct sockaddr_nl *)addr;
-  memset(nladdr, 0, sizeof(struct sockaddr_nl));
-
-  nladdr->nl_family = AF_NETLINK;
-  nladdr->nl_pid    = conn->pid;
-  nladdr->nl_groups = conn->groups;
-
-  *addrlen = sizeof(struct sockaddr_nl);
-  return OK;
+  return -EAFNOSUPPORT;
 }
 
 /****************************************************************************
- * Name: netlink_getpeername
+ * Name: can_getpeername
  *
  * Description:
- *   The netlink_getpeername() function retrieves the remote-connected name
+ *   The can_getpeername() function retrieves the remote-connected name
  *   of the specified packet socket, stores this address in the sockaddr
  *   structure pointed to by the 'addr' argument, and stores the length of
  *   this address in the object pointed to by the 'addrlen' argument.
@@ -370,33 +425,15 @@ static int netlink_getsockname(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int netlink_getpeername(FAR struct socket *psock,
-                               FAR struct sockaddr *addr,
-                               FAR socklen_t *addrlen)
+static int can_getpeername(FAR struct socket *psock,
+                           FAR struct sockaddr *addr,
+                           FAR socklen_t *addrlen)
 {
-  FAR struct sockaddr_nl *nladdr;
-  FAR struct netlink_conn_s *conn;
-
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
-              addrlen != NULL && *addrlen >= sizeof(struct sockaddr_nl));
-
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
-
-  /* Return the address information in the address structure */
-
-  nladdr = (FAR struct sockaddr_nl *)addr;
-  memset(nladdr, 0, sizeof(struct sockaddr_nl));
-
-  nladdr->nl_family = AF_NETLINK;
-  nladdr->nl_pid    = conn->dst_pid;
-  nladdr->nl_groups = conn->dst_groups;
-
-  *addrlen = sizeof(struct sockaddr_nl);
-  return OK;
+  return -EOPNOTSUPP;
 }
 
 /****************************************************************************
- * Name: netlink_listen
+ * Name: can_listen
  *
  * Description:
  *   To accept connections, a socket is first created with psock_socket(), a
@@ -421,19 +458,20 @@ static int netlink_getpeername(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int netlink_listen(FAR struct socket *psock, int backlog)
+static int can_listen(FAR struct socket *psock, int backlog)
 {
   return -EOPNOTSUPP;
 }
 
 /****************************************************************************
- * Name: netlink_connect
+ * Name: can_connect
  *
  * Description:
- *   Perform a netlink connection
+ *   Perform a can connection
  *
  * Input Parameters:
- *   psock   A reference to the structure of the socket to be connected
+ *   psock   A reference to the socket structure of the socket
+ *           to be connected
  *   addr    The address of the remote server to connect to
  *   addrlen Length of address buffer
  *
@@ -444,32 +482,18 @@ static int netlink_listen(FAR struct socket *psock, int backlog)
  *
  ****************************************************************************/
 
-static int netlink_connect(FAR struct socket *psock,
-                           FAR const struct sockaddr *addr,
-                           socklen_t addrlen)
+static int can_connect(FAR struct socket *psock,
+                       FAR const struct sockaddr *addr,
+                       socklen_t addrlen)
 {
-  FAR struct sockaddr_nl *nladdr;
-  FAR struct netlink_conn_s *conn;
-
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
-              addrlen >= sizeof(struct sockaddr_nl));
-
-  /* Save the address information in the connection structure */
-
-  nladdr = (FAR struct sockaddr_nl *)addr;
-  conn   = (FAR struct netlink_conn_s *)psock->s_conn;
-
-  conn->dst_pid    = nladdr->nl_pid;
-  conn->dst_groups = nladdr->nl_groups;
-
-  return OK;
+  return -EOPNOTSUPP;
 }
 
 /****************************************************************************
- * Name: netlink_accept
+ * Name: can_accept
  *
  * Description:
- *   The netlink_accept function is used with connection-based socket
+ *   The can_accept function is used with connection-based socket
  *   types (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
  *   connection request on the queue of pending connections, creates a new
  *   connected socket with mostly the same properties as 'sockfd', and
@@ -488,7 +512,7 @@ static int netlink_connect(FAR struct socket *psock,
  *   actual length of the address returned.
  *
  *   If no pending connections are present on the queue, and the socket is
- *   not marked as non-blocking, accept blocks the caller until a
+ *   not marked as non-blocking, inet_accept blocks the caller until a
  *   connection is present. If the socket is marked non-blocking and no
  *   pending connections are present on the queue, inet_accept returns
  *   EAGAIN.
@@ -509,63 +533,14 @@ static int netlink_connect(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int netlink_accept(FAR struct socket *psock,
-                          FAR struct sockaddr *addr, FAR socklen_t *addrlen,
-                          FAR struct socket *newsock)
+static int can_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+                      FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
   return -EOPNOTSUPP;
 }
 
 /****************************************************************************
- * Name: netlink_response_available
- *
- * Description:
- *   Handle a Netlink response available notification.
- *
- * Input Parameters:
- *   Standard work handler parameters
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void netlink_response_available(FAR void *arg)
-{
-  FAR struct netlink_conn_s *conn = arg;
-
-  DEBUGASSERT(conn != NULL);
-
-  /* The following should always be true ... but maybe not in some race
-   * condition?
-   */
-
-  sched_lock();
-  net_lock();
-
-  if (conn->pollsem != NULL && conn->pollevent != NULL)
-    {
-      /* Wake up the poll() with POLLIN */
-
-       *conn->pollevent |= POLLIN;
-       nxsem_post(conn->pollsem);
-    }
-  else
-    {
-      nwarn("WARNING: Missing references in connection.\n");
-    }
-
-  /* Allow another poll() */
-
-  conn->pollsem   = NULL;
-  conn->pollevent = NULL;
-
-  net_unlock();
-  sched_unlock();
-}
-
-/****************************************************************************
- * Name: netlink_poll
+ * Name: can_poll_local
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors
@@ -587,97 +562,124 @@ static void netlink_response_available(FAR void *arg)
  *
  ****************************************************************************/
 
-static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
-                        bool setup)
+static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
+                          bool setup)
 {
-  FAR struct netlink_conn_s *conn;
+  FAR struct can_conn_s *conn;
+  FAR struct can_poll_s *info;
+  FAR struct devif_callback_s *cb;
   int ret = OK;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  conn = (FAR struct can_conn_s *)psock->s_conn;
+  info = conn->pollinfo;
+
+  /* FIXME add NETDEV_DOWN support */
 
   /* Check if we are setting up or tearing down the poll */
 
   if (setup)
     {
-      /* If POLLOUT is selected, return immediately (maybe) */
-
-      pollevent_t revents = POLLOUT;
-
-      /* If POLLIN is selected and a response is available, return
-       * immediately (maybe).
-       */
-
       net_lock();
-      if (netlink_check_response(conn))
+
+      info->dev = conn->dev;
+
+      cb = can_callback_alloc(info->dev, conn);
+      if (cb == NULL)
         {
-          revents |= POLLIN;
+          ret = -EBUSY;
+          goto errout_with_lock;
         }
 
-      /* But return ONLY if POLLIN and/or POLLIN are included in the
-       * requested event set.
+      /* Initialize the poll info container */
+
+      info->psock  = psock;
+      info->fds    = fds;
+      info->cb     = cb;
+
+      /* Initialize the callback structure.  Save the reference to the info
+       * structure as callback private data so that it will be available
+       * during callback processing.
        */
 
-      revents &= fds->events;
-      if (revents != 0)
+      cb->flags    = NETDEV_DOWN;
+      cb->priv     = (FAR void *)info;
+      cb->event    = can_poll_eventhandler;
+
+      if ((fds->events & POLLOUT) != 0)
         {
-          fds->revents = revents;
-          nxsem_post(fds->sem);
-          net_unlock();
-          return OK;
+          cb->flags |= CAN_POLL;
         }
-
-      /* Set up to be notified when a response is available if POLLIN is
-       * requested.
-       */
 
       if ((fds->events & POLLIN) != 0)
         {
-          /* Some limitations:  There can be only a single outstanding POLLIN
-           * on the Netlink connection.
-           */
-
-          if (conn->pollsem != NULL || conn->pollevent != NULL)
-            {
-              nerr("ERROR: Multiple polls() on socket not supported.\n");
-              net_unlock();
-              return -EBUSY;
-            }
-
-          /* Set up the notification */
-
-          conn->pollsem    = fds->sem;
-          conn->pollevent  = &fds->revents;
-
-          ret = netlink_notifier_setup(netlink_response_available,
-                                       conn, conn);
-          if (ret < 0)
-            {
-              nerr("ERROR: netlink_notifier_setup() failed: %d\n", ret);
-              conn->pollsem   = NULL;
-              conn->pollevent = NULL;
-            }
+          cb->flags |= CAN_NEWDATA;
         }
 
+      /* Save the reference in the poll info structure as fds private as well
+       * for use during poll teardown as well.
+       */
+
+      fds->priv = (FAR void *)info;
+
+      /* Check for read data availability now */
+
+      if (!IOB_QEMPTY(&conn->readahead))
+        {
+          /* Normal data may be read without blocking. */
+
+          fds->revents |= (POLLRDNORM & fds->events);
+        }
+
+    #if 0
+      if (psock_udp_cansend(psock) >= 0)
+        {
+          /* Normal data may be sent without blocking (at least one byte). */
+
+          fds->revents |= (POLLWRNORM & fds->events);
+        }
+    #endif
+
+      /* Check if any requested events are already in effect */
+
+      if (fds->revents != 0)
+        {
+          /* Yes.. then signal the poll logic */
+
+          nxsem_post(fds->sem);
+        }
+
+errout_with_lock:
       net_unlock();
     }
   else
     {
-      /* Cancel any response notifications */
+      info = (FAR struct can_poll_s *)fds->priv;
 
-      ret = netlink_notifier_teardown(conn);
-      conn->pollsem   = NULL;
-      conn->pollevent = NULL;
+      if (info != NULL)
+        {
+          /* Cancel any response notifications */
+
+          can_callback_free(info->dev, conn, info->cb);
+
+          /* Release the poll/select data slot */
+
+          info->fds->priv = NULL;
+
+          /* Then free the poll info container */
+
+          info->psock = NULL;
+        }
     }
 
   return ret;
 }
 
 /****************************************************************************
- * Name: netlink_send
+ * Name: can_send
  *
  * Description:
- *   The netlink_send() call may be used only when the socket is in
+ *   The can_send() call may be used only when the socket is in
  *   a connected state  (so that the intended recipient is known).
  *
  * Input Parameters:
@@ -693,34 +695,33 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
  *
  ****************************************************************************/
 
-static ssize_t netlink_send(FAR struct socket *psock, FAR const void *buf,
-                            size_t len, int flags)
+static ssize_t can_send(FAR struct socket *psock, FAR const void *buf,
+                        size_t len, int flags)
 {
-  FAR struct netlink_conn_s *conn;
-  struct sockaddr_nl nladdr;
+  ssize_t ret;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
+  /* Only SOCK_RAW is supported */
 
-  /* Get the underlying connection structure */
+  if (psock->s_type == SOCK_RAW)
+    {
+      /* Raw packet send */
 
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+      ret = psock_can_send(psock, buf, len);
+    }
+  else
+    {
+      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
+       * no peer address is set.
+       */
 
-  /* Format the address */
+      ret = -EDESTADDRREQ;
+    }
 
-  nladdr.nl_family = AF_NETLINK;
-  nladdr.nl_pad    = 0;
-  nladdr.nl_pid    = conn->dst_pid;
-  nladdr.nl_groups = conn->dst_groups;
-
-  /* Then let sendto() perform the actual send operation */
-
-  return netlink_sendto(psock, buf, len, flags,
-                        (FAR const struct sockaddr *)&nladdr,
-                        sizeof(struct sockaddr_nl));
+  return ret;
 }
 
 /****************************************************************************
- * Name: netlink_sendto
+ * Name: can_sendto
  *
  * Description:
  *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
@@ -729,7 +730,8 @@ static ssize_t netlink_send(FAR struct socket *psock, FAR const void *buf,
  *   returned when the socket was not actually connected.
  *
  * Input Parameters:
- *   psock    A reference to the structure of the socket to be connected
+ *   psock    A reference to the socket structure of the socket
+ *            to be connected
  *   buf      Data to send
  *   len      Length of data to send
  *   flags    Send flags (ignored)
@@ -743,119 +745,60 @@ static ssize_t netlink_send(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-static ssize_t netlink_sendto(FAR struct socket *psock, FAR const void *buf,
-                              size_t len, int flags,
-                              FAR const struct sockaddr *to, socklen_t tolen)
+static ssize_t can_sendto(FAR struct socket *psock, FAR const void *buf,
+                          size_t len, int flags,
+                          FAR const struct sockaddr *to, socklen_t tolen)
 {
-  FAR struct netlink_conn_s *conn;
-  FAR struct nlmsghdr *nlmsg;
-  int ret;
+  nerr("ERROR: sendto() not supported for raw packet sockets\n");
+  return -EAFNOSUPPORT;
+}
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL &&
-              to != NULL && tolen >= sizeof(struct sockaddr_nl));
+/****************************************************************************
+ * Name: can_sendmsg
+ *
+ * Description:
+ *   The can_sendmsg() send a CAN frame to psock
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   msg   - CAN frame and optional CMSG
+ *   flags - Send flags (ignored)
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error, a negated
+ *   errno value is returned (see send() for the list of appropriate error
+ *   values.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_NET_CMSG
+static ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                    int flags)
+{
+  ssize_t ret;
 
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  /* Only SOCK_RAW is supported */
 
-  /* Get a reference to the netlink message */
-
-  nlmsg = (FAR struct nlmsghdr *)buf;
-  DEBUGASSERT(nlmsg->nlmsg_len >= sizeof(struct nlmsghdr));
-
-  switch (conn->protocol)
+  if (psock->s_type == SOCK_RAW)
     {
-#ifdef CONFIG_NETLINK_ROUTE
-      case NETLINK_ROUTE:
-        ret = netlink_route_sendto(conn, nlmsg, len, flags,
-                                   (FAR struct sockaddr_nl *)to,
-                                   tolen);
-        break;
-#endif
+      /* Raw packet send */
 
-      default:
-       ret = -EOPNOTSUPP;
-       break;
+      ret = psock_can_sendmsg(psock, msg);
+    }
+  else
+    {
+      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
+       * no peer address is set.
+       */
+
+      ret = -EDESTADDRREQ;
     }
 
   return ret;
 }
+#endif
 
 /****************************************************************************
- * Name: netlink_recvfrom
- *
- * Description:
- *   recvfrom() receives messages from a socket, and may be used to receive
- *   data on a socket whether or not it is connection-oriented.
- *
- *   If from is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in. The argument 'fromlen'
- *   initialized to the size of the buffer associated with from, and modified
- *   on return to indicate the actual size of the address stored there.
- *
- * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   flags    Receive flags (ignored)
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
- *
- ****************************************************************************/
-
-static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
-                                size_t len, int flags,
-                                FAR struct sockaddr *from,
-                                FAR socklen_t *fromlen)
-{
-  FAR struct netlink_response_s *entry;
-
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
-  DEBUGASSERT(from == NULL ||
-              (fromlen != NULL && *fromlen >= sizeof(struct sockaddr_nl)));
-
-  /* Find the response to this message.  The return value */
-
-  entry = netlink_tryget_response(psock->s_conn);
-  if (entry == NULL)
-    {
-      /* No response is variable, but presumably, one is expected.  Check
-       * if the socket has been configured for non-blocking operation.
-       */
-
-      if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
-        {
-          return -EAGAIN;
-        }
-
-      /* Wait for the response.  This should always succeed. */
-
-      entry = netlink_get_response(psock->s_conn);
-      DEBUGASSERT(entry != NULL);
-      if (entry == NULL)
-        {
-          return -EPIPE;
-        }
-    }
-
-  if (len > entry->msg.nlmsg_len)
-    {
-      len = entry->msg.nlmsg_len;
-    }
-
-  /* Copy the payload to the user buffer */
-
-  memcpy(buf, &entry->msg, len);
-  kmm_free(entry);
-
-  if (from != NULL)
-    {
-      netlink_getpeername(psock, from, fromlen);
-    }
-
-  return len;
-}
-
-/****************************************************************************
- * Name: netlink_close
+ * Name: can_close
  *
  * Description:
  *   Performs the close operation on a NetLink socket instance
@@ -870,12 +813,12 @@ static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
  *
  ****************************************************************************/
 
-static int netlink_close(FAR struct socket *psock)
+static int can_close(FAR struct socket *psock)
 {
-  FAR struct netlink_conn_s *conn = psock->s_conn;
+  FAR struct can_conn_s *conn = psock->s_conn;
   int ret = OK;
 
-  /* Perform some pre-close operations for the NETLINK socket type. */
+  /* Perform some pre-close operations for the CAN socket type. */
 
   /* Is this the last reference to the connection structure (there
    * could be more if the socket was dup'ed).
@@ -883,16 +826,20 @@ static int netlink_close(FAR struct socket *psock)
 
   if (conn->crefs <= 1)
     {
+      /* Yes... inform user-space daemon of socket close. */
+
+#warning Missing logic
+
       /* Free the connection structure */
 
       conn->crefs = 0;
-      netlink_free(psock->s_conn);
+      can_free(psock->s_conn);
 
       if (ret < 0)
         {
           /* Return with error code, but free resources. */
 
-          nerr("ERROR: netlink_close failed: %d\n", ret);
+          nerr("ERROR: can_close failed: %d\n", ret);
           return ret;
         }
     }
@@ -906,4 +853,4 @@ static int netlink_close(FAR struct socket *psock)
   return ret;
 }
 
-#endif /* CONFIG_NET_NETLINK */
+#endif /* CONFIG_NET_CAN */

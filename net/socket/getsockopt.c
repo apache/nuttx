@@ -278,6 +278,19 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
         }
         break;
 
+#ifdef CONFIG_NET_TIMESTAMP
+      case SO_TIMESTAMP:
+        {
+          if (*value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          *(FAR int *)value = (int)psock->s_timestamp;
+        }
+        break;
+#endif
+
       /* The following are not yet implemented
        * (return values other than {0,1})
        */
@@ -370,6 +383,12 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
        ret = tcp_getsockopt(psock, option, value, value_len);
        break;
 #endif
+
+      case SOL_CAN_RAW:/* CAN protocol socket options (see include/netpacket/can.h) */
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+       ret = can_getsockopt(psock, option, value, value_len);
+#endif
+       break;
 
       /* These levels are defined in sys/socket.h, but are not yet
        * implemented.

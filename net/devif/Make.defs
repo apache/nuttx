@@ -66,6 +66,10 @@ ifeq ($(CONFIG_NET_PKT),y)
 NET_CSRCS += devif_pktsend.c
 endif
 
+ifeq ($(CONFIG_NET_CAN),y)
+NET_CSRCS += devif_cansend.c
+endif
+
 # Include network device interface build support
 
 DEPPATH += --dep-path devif

@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/net/lib_recvmsg.c
+ * net/devif/devif_cansend.c
  *
- *   Copyright (C) 2007, 2008, 2012, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,52 +39,75 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_NET) && !defined(CONFIG_NET_CMSG)
+#include <string.h>
+#include <assert.h>
+#include <debug.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
+#include <nuttx/net/netdev.h>
+
+#if defined(CONFIG_NET_CAN)
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: recvmsg
+ * Name: devif_can_send
  *
  * Description:
- *   The recvmsg() call is identical to recvfrom() with a NULL from
- *   parameter.
+ *   Called from socket logic in order to send a can packet in response to
+ *   an xmit or poll request from the network interface driver.
  *
- * Parameters:
- *   sockfd   Socket descriptor of socket
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   flags    Receive flags
- *
- * Returned Value:
- *  (see recvfrom)
+ *   This is almost identical to calling devif_send() except that the data to
+ *   be sent is copied into dev->d_buf (vs. dev->d_appdata), since there is
+ *   no header on the data.
  *
  * Assumptions:
+ *   Called with the network locked.
  *
  ****************************************************************************/
 
-ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
+void devif_can_send(FAR struct net_driver_s *dev, FAR const void *buf,
+                    unsigned int len)
 {
-  FAR void *buf             = msg->msg_iov->iov_base;
-  FAR struct sockaddr *from = msg->msg_name;
-  FAR socklen_t *fromlen    = (FAR socklen_t *)&msg->msg_namelen;
-  size_t len                = msg->msg_iov->iov_len;
+  DEBUGASSERT(dev && len > 0 && len < NETDEV_PKTSIZE(dev));
 
-  if (msg->msg_iovlen == 1)
-    {
-      return recvfrom(sockfd, buf, len, flags, from, fromlen);
-    }
-  else
-    {
-      set_errno(ENOTSUP);
-      return ERROR;
-    }
+  /* Copy the data into the device packet buffer */
+
+  memcpy(dev->d_buf, buf, len);
+
+  /* Set the number of bytes to send */
+
+  dev->d_len    = len;
+  dev->d_sndlen = len;
 }
 
-#endif /* CONFIG_NET && !CONFIG_NET_CMSG */
+#endif /* CONFIG_NET_CAN */

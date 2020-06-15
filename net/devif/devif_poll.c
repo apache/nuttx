@@ -50,6 +50,7 @@
 
 #include "devif/devif.h"
 #include "arp/arp.h"
+#include "can/can.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
@@ -222,6 +223,44 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
       /* Perform any necessary conversions on outgoing packets */
 
       devif_packet_conversion(dev, DEVIF_PKT);
+
+      /* Call back into the driver */
+
+      bstop = callback(dev);
+    }
+
+  return bstop;
+}
+#endif /* CONFIG_NET_PKT */
+
+/****************************************************************************
+ * Name: devif_poll_pkt_connections
+ *
+ * Description:
+ *   Poll all packet connections for available packets to send.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_CAN
+static int devif_poll_can_connections(FAR struct net_driver_s *dev,
+                                      devif_poll_callback_t callback)
+{
+  FAR struct can_conn_s *can_conn = NULL;
+  int bstop = 0;
+
+  /* Traverse all of the allocated packet connections and
+   * perform the poll action
+   */
+
+  while (!bstop && (can_conn = can_nextconn(can_conn)))
+    {
+      /* Perform the packet TX poll */
+
+      can_poll(dev, can_conn);
 
       /* Call back into the driver */
 
@@ -642,6 +681,15 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
       /* Check for pending packet socket transfer */
 
       bstop = devif_poll_pkt_connections(dev, callback);
+    }
+
+  if (!bstop)
+#endif
+#ifdef CONFIG_NET_CAN
+    {
+      /* Check for pending packet socket transfer */
+
+      bstop = devif_poll_can_connections(dev, callback);
     }
 
   if (!bstop)

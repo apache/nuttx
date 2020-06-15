@@ -62,6 +62,7 @@
 #define PF_NETLINK    16         /* Netlink IPC socket */
 #define PF_ROUTE      PF_NETLINK /* 4.4BSD Compatibility*/
 #define PF_PACKET     17         /* Low level packet interface */
+#define PF_CAN        29         /* Controller Area Network (SocketCAN) */
 #define PF_BLUETOOTH  31         /* Bluetooth sockets */
 #define PF_IEEE802154 36         /* Low level IEEE 802.15.4 radio frame interface */
 #define PF_PKTRADIO   64         /* Low level packet radio interface */
@@ -78,6 +79,7 @@
 #define AF_NETLINK     PF_NETLINK
 #define AF_ROUTE       PF_ROUTE
 #define AF_PACKET      PF_PACKET
+#define AF_CAN         PF_CAN
 #define AF_BLUETOOTH   PF_BLUETOOTH
 #define AF_IEEE802154  PF_IEEE802154
 #define AF_PKTRADIO    PF_PKTRADIO
@@ -199,6 +201,16 @@
 #define SO_TYPE         15 /* Reports the socket type (get only).
                             * return: int
                             */
+#define SO_TIMESTAMP    16 /* Generates a timestamp for each incoming packet
+                            * arg: integer value
+                            */
+
+/* The options are unsupported but included for compatibility
+ * and portability
+ */
+#define SO_SNDBUFFORCE  32
+#define SO_RCVBUFFORCE  33
+#define SO_RXQ_OVFL     40
 
 /* Protocol-level socket operations. */
 
@@ -210,6 +222,7 @@
 #define SOL_L2CAP       6 /* See options in include/netpacket/bluetooth.h */
 #define SOL_SCO         7 /* See options in include/netpacket/bluetooth.h */
 #define SOL_RFCOMM      8 /* See options in include/netpacket/bluetooth.h */
+#define SOL_CAN_RAW     9 /* See options in include/netpacket/can.h */
 
 /* Protocol-level socket options may begin with this value */
 

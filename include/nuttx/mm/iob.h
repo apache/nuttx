@@ -54,6 +54,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* I/O buffer allocation logic supports a throttle value for read-ahead
@@ -220,6 +221,9 @@ enum iob_user_e
 #ifdef CONFIG_WIRELESS_BLUETOOTH
   IOBUSER_WIRELESS_BLUETOOTH,
 #endif
+#ifdef CONFIG_NET_CAN
+  IOBUSER_NET_CAN_READAHEAD,
+#endif
   IOBUSER_GLOBAL,
   IOBUSER_NENTRIES /* MUST BE LAST ENTRY */
 };
@@ -248,7 +252,8 @@ void iob_initialize(void);
  * Name: iob_alloc
  *
  * Description:
- *   Allocate an I/O buffer by taking the buffer at the head of the free list.
+ *   Allocate an I/O buffer by taking the buffer at the head of the free
+ *   list.
  *
  ****************************************************************************/
 
@@ -586,7 +591,8 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
  * Name: iob_getuserstats
  *
  * Description:
- *   Return a reference to the IOB usage statistics for the IOB consumer/producer
+ *   Return a reference to the IOB usage statistics for the IOB
+ *   consumer/producer
  *
  * Input Parameters:
  *   userid - id representing the IOB producer/consumer

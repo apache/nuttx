@@ -16,6 +16,14 @@ config NETDEV_PHY_IOCTL
 	---help---
 		Enable support for ioctl() commands to access PHY registers
 
+config NETDEV_CAN_BITRATE_IOCTL
+	bool "Enable CAN bitrate ioctl()"
+	default n
+	select NETDEV_IOCTL
+	depends on NET_CAN
+	---help---
+		Enable support for ioctl() commands to change CAN bitrate
+		
 config NETDEV_WIRELESS_IOCTL
 	bool "Enable Wireless ioctl()"
 	default n

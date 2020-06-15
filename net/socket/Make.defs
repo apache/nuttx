@@ -74,3 +74,9 @@ endif
 
 DEPPATH += --dep-path socket
 VPATH += :socket
+
+# Support for control messages (CMSG)
+ifeq ($(CONFIG_NET_CMSG),y)
+SOCK_CSRCS += recvmsg.c
+SOCK_CSRCS += sendmsg.c
+endif
