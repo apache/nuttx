@@ -57,6 +57,10 @@
 #  include "s32k1xx_lpi2c.h"
 #endif
 
+#ifdef CONFIG_S32K1XX_EEEPROM
+#  include "s32k1xx_eeeprom.h"
+#endif
+
 #include "rddrone-uavcan146.h"
 
 /****************************************************************************
@@ -149,6 +153,11 @@ int s32k1xx_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: progmem_initialize failed\n");
     }
+#endif
+
+#ifdef CONFIG_S32K1XX_EEEPROM
+      /* Register EEEPROM block device */
+      s32k1xx_eeeprom_register(0, 4096);
 #endif
 
   return ret;
