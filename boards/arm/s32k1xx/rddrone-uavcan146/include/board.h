@@ -148,7 +148,7 @@
 /* I2C selections ***********************************************************/
 
 #define PIN_LPI2C0_SCL   PIN_LPI2C0_SCL_2   /* PTA3 */
-#define PIN_LPI2C0_SDA	 PIN_LPI2C0_SDA_2   /* PTA2 */
+#define PIN_LPI2C0_SDA   PIN_LPI2C0_SDA_2   /* PTA2 */
 
 /* CAN selections ***********************************************************/
 #define PIN_CAN0_TX      PIN_CAN0_TX_4      /* PTE5 */

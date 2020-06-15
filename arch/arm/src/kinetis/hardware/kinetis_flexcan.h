@@ -71,22 +71,22 @@
 #define KINETIS_CAN_MB_OFFSET       0x0080 /* CAN MB register */
 
 #define KINETIS_CAN_RXIMR_OFFSET(n) (0x0880+((n)<<2)) /* Rn Individual Mask Registers */
-#define KINETIS_CAN_RXIMR0_OFFSET   0x0880 /* R0 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR1_OFFSET   0x0884 /* R1 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR2_OFFSET   0x0888 /* R2 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR3_OFFSET   0x088c /* R3 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR4_OFFSET   0x0890 /* R4 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR5_OFFSET   0x0894 /* R5 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR6_OFFSET   0x0898 /* R6 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR7_OFFSET   0x089c /* R7 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR8_OFFSET   0x08a0 /* R8 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR9_OFFSET   0x08a4 /* R9 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR10_OFFSET  0x08a8 /* R10 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR11_OFFSET  0x08ac /* R11 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR12_OFFSET  0x08b0 /* R12 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR13_OFFSET  0x08b4 /* R13 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR14_OFFSET  0x08b8 /* R14 Individual Mask Registers */
-#define KINETIS_CAN_RXIMR15_OFFSET  0x08bc /* R15 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR0_OFFSET   0x0880            /* R0 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR1_OFFSET   0x0884            /* R1 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR2_OFFSET   0x0888            /* R2 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR3_OFFSET   0x088c            /* R3 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR4_OFFSET   0x0890            /* R4 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR5_OFFSET   0x0894            /* R5 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR6_OFFSET   0x0898            /* R6 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR7_OFFSET   0x089c            /* R7 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR8_OFFSET   0x08a0            /* R8 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR9_OFFSET   0x08a4            /* R9 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR10_OFFSET  0x08a8            /* R10 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR11_OFFSET  0x08ac            /* R11 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR12_OFFSET  0x08b0            /* R12 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR13_OFFSET  0x08b4            /* R13 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR14_OFFSET  0x08b8            /* R14 Individual Mask Registers */
+#define KINETIS_CAN_RXIMR15_OFFSET  0x08bc            /* R15 Individual Mask Registers */
 
 /* Register Addresses *******************************************************************************/
 
@@ -178,16 +178,16 @@
 #define CAN_CTRL1_CLKSRC           (1 << 13) /* Bit 13: CAN Engine Clock Source */
 #define CAN_CTRL1_ERRMSK           (1 << 14) /* Bit 14: Error Mask */
 #define CAN_CTRL1_BOFFMSK          (1 << 15) /* Bit 15: Bus Off Mask */
-#define CAN_CTRL1_PSEG2_SHIFT      (16)       /* Bits 16-18: Phase Segment 2 */
+#define CAN_CTRL1_PSEG2_SHIFT      (16)      /* Bits 16-18: Phase Segment 2 */
 #define CAN_CTRL1_PSEG2_MASK       (7 << CAN_CTRL1_PSEG2_SHIFT)
 #define CAN_CTRL1_PSEG2(x)         (((uint32_t)(((uint32_t)(x)) << 16)) & 0x70000)
-#define CAN_CTRL1_PSEG1_SHIFT      (19)       /* Bits 19-21: Phase Segment 1 */
+#define CAN_CTRL1_PSEG1_SHIFT      (19)      /* Bits 19-21: Phase Segment 1 */
 #define CAN_CTRL1_PSEG1_MASK       (7 << CAN_CTRL1_PSEG1_SHIFT)
 #define CAN_CTRL1_PSEG1(x)         (((uint32_t)(((uint32_t)(x)) << 19)) & 0x380000)
-#define CAN_CTRL1_RJW_SHIFT        (22)       /* Bits 22-23: Resync Jump Width */
+#define CAN_CTRL1_RJW_SHIFT        (22)      /* Bits 22-23: Resync Jump Width */
 #define CAN_CTRL1_RJW_MASK         (3 << CAN_CTRL1_RJW_SHIFT)
 #define CAN_CTRL1_RJW(x)           (((uint32_t)(((uint32_t)(x)) << 22)) & 0xC00000)
-#define CAN_CTRL1_PRESDIV_SHIFT    (24)       /* Bits 24-31: Prescaler Division Factor */
+#define CAN_CTRL1_PRESDIV_SHIFT    (24)      /* Bits 24-31: Prescaler Division Factor */
 #define CAN_CTRL1_PRESDIV_MASK     (0xff << CAN_CTRL1_PRESDIV_SHIFT)
 #define CAN_CTRL1_PRESDIV(x)       (((uint32_t)(((uint32_t)(x)) << 24)) & 0xFF000000)
 
@@ -225,9 +225,12 @@
 #define CAN_ESR1_RX                (1 << 3)  /* Bit 3:  FlexCAN in Reception */
 #define CAN_ESR1_FLTCONF_SHIFT     (4)       /* Bits 4-5: Fault Confinement State */
 #define CAN_ESR1_FLTCONF_MASK      (3 << CAN_ESR1_FLTCONF_SHIFT)
-#  define CAN_ESR1_FLTCONF_ACTV    (0 << CAN_ESR1_FLTCONF_SHIFT) /* Error Active */
-#  define CAN_ESR1_FLTCONF_PASV    (1 << CAN_ESR1_FLTCONF_SHIFT) /* Error Passive */
-#  define CAN_ESR1_FLTCONF_OFF     (2 << CAN_ESR1_FLTCONF_SHIFT) /* Bus Off */
+#  define CAN_ESR1_FLTCONF_ACTV    (0 << CAN_ESR1_FLTCONF_SHIFT)
+                                             /* Error Active */
+#  define CAN_ESR1_FLTCONF_PASV    (1 << CAN_ESR1_FLTCONF_SHIFT)
+                                             /* Error Passive */
+#  define CAN_ESR1_FLTCONF_OFF     (2 << CAN_ESR1_FLTCONF_SHIFT)
+                                             /* Bus Off */
 #define CAN_ESR1_TX                (1 << 6)  /* Bit 6:  FlexCAN in Transmission */
 #define CAN_ESR1_IDLE              (1 << 7)  /* Bit 7:  CAN bus is in IDLE state */
 #define CAN_ESR1_RXWRN             (1 << 8)  /* Bit 8:  Rx Error Warning */

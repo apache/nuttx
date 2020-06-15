@@ -390,7 +390,7 @@ static int local_getsockname(FAR struct socket *psock,
         }
       else /* conn->lctype = LOCAL_TYPE_PATHNAME */
         {
-          /* Get the full length of the socket name (including null terminator) */
+          /* Get the full length of the socket name (incl. null terminator) */
 
           int namelen = strlen(conn->lc_path) + 1;
 

@@ -1517,21 +1517,21 @@ static int kinetis_initialize(struct kinetis_driver_s *priv)
   regval  = getreg32(priv->base + KINETIS_CAN_CTRL1_OFFSET);
   regval |= CAN_CTRL1_PRESDIV(priv->arbi_timing.presdiv) | /* Prescaler divisor factor */
             CAN_CTRL1_PROPSEG(priv->arbi_timing.propseg) | /* Propagation segment */
-            CAN_CTRL1_PSEG1(priv->arbi_timing.pseg1) |   /* Phase buffer segment 1 */
-            CAN_CTRL1_PSEG2(priv->arbi_timing.pseg2) |   /* Phase buffer segment 2 */
-            CAN_CTRL1_RJW(1);      /* Resynchronization jump width */
+            CAN_CTRL1_PSEG1(priv->arbi_timing.pseg1) |     /* Phase buffer segment 1 */
+            CAN_CTRL1_PSEG2(priv->arbi_timing.pseg2) |     /* Phase buffer segment 2 */
+            CAN_CTRL1_RJW(1);                              /* Resynchronization jump width */
   putreg32(regval, priv->base + KINETIS_CAN_CTRL1_OFFSET);
 
 #else
   regval  = getreg32(priv->base + KINETIS_CAN_CBT_OFFSET);
-  regval |= CAN_CBT_BTF |         /* Enable extended bit timing
-                                   * configurations for CAN-FD for setting up
-                                   * separately nominal and data phase */
+            regval |= CAN_CBT_BTF |                       /* Enable extended bit timing
+                                                           * configurations for CAN-FD for setting up
+                                                           * separately nominal and data phase */
             CAN_CBT_EPRESDIV(priv->arbi_timing.presdiv) | /* Prescaler divisor factor */
             CAN_CBT_EPROPSEG(priv->arbi_timing.propseg) | /* Propagation segment */
-            CAN_CBT_EPSEG1(priv->arbi_timing.pseg1) |   /* Phase buffer segment 1 */
-            CAN_CBT_EPSEG2(priv->arbi_timing.pseg2) |   /* Phase buffer segment 2 */
-            CAN_CBT_ERJW(1);      /* Resynchronization jump width */
+            CAN_CBT_EPSEG1(priv->arbi_timing.pseg1) |     /* Phase buffer segment 1 */
+            CAN_CBT_EPSEG2(priv->arbi_timing.pseg2) |     /* Phase buffer segment 2 */
+            CAN_CBT_ERJW(1);                              /* Resynchronization jump width */
   putreg32(regval, priv->base + KINETIS_CAN_CBT_OFFSET);
 
   /* Enable CAN FD feature */
@@ -1542,11 +1542,11 @@ static int kinetis_initialize(struct kinetis_driver_s *priv)
 
   regval  = getreg32(priv->base + KINETIS_CAN_FDCBT_OFFSET);
   regval |= CAN_FDCBT_FPRESDIV(priv->data_timing.presdiv) |  /* Prescaler divisor factor of 1 */
-            CAN_FDCBT_FPROPSEG(priv->data_timing.propseg) | /* Propagation
-                                                             * segment (only register that doesn't add 1) */
-            CAN_FDCBT_FPSEG1(priv->data_timing.pseg1) |    /* Phase buffer segment 1 */
-            CAN_FDCBT_FPSEG2(priv->data_timing.pseg2) |    /* Phase buffer segment 2 */
-            CAN_FDCBT_FRJW(priv->data_timing.pseg2);       /* Resynchorinzation jump width same as PSEG2 */
+            CAN_FDCBT_FPROPSEG(priv->data_timing.propseg) |  /* Propagation
+                                                              * segment (only register that doesn't add 1) */
+            CAN_FDCBT_FPSEG1(priv->data_timing.pseg1) |      /* Phase buffer segment 1 */
+            CAN_FDCBT_FPSEG2(priv->data_timing.pseg2) |      /* Phase buffer segment 2 */
+            CAN_FDCBT_FRJW(priv->data_timing.pseg2);         /* Resynchorinzation jump width same as PSEG2 */
   putreg32(regval, priv->base + KINETIS_CAN_FDCBT_OFFSET);
 
   /* Additional CAN-FD configurations */
