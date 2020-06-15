@@ -100,6 +100,7 @@ CHIP_CSRCS += stm32l4_irq.c stm32l4_lowputc.c stm32l4_rcc.c
 CHIP_CSRCS += stm32l4_serial.c stm32l4_start.c stm32l4_waste.c stm32l4_uid.c
 CHIP_CSRCS += stm32l4_spi.c stm32l4_i2c.c stm32l4_lse.c stm32l4_lsi.c
 CHIP_CSRCS += stm32l4_pwr.c stm32l4_tim.c stm32l4_flash.c
+CHIP_CSRCS += stm32l4_dfumode.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32l4_idle.c
