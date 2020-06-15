@@ -312,6 +312,7 @@
 #define ESTRPIPE_STR        "Streams pipe error"
 
 #define __ELASTERROR        2000                        /* Users can add values starting here */
+#define ELAST               __ELASTERROR
 
 /****************************************************************************
  * Public Type Definitions
