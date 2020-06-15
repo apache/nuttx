@@ -30,6 +30,7 @@
 
 #include <sys/types.h>
 #include <errno.h>
+#include <malloc.h>
 #include <stdint.h>
 #include <limits.h>
 
@@ -70,18 +71,6 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
-
-struct mallinfo
-{
-  int arena;    /* This is the total size of memory allocated
-                 * for use by malloc in bytes. */
-  int ordblks;  /* This is the number of free (not in use) chunks */
-  int mxordblk; /* Size of the largest free (not in use) chunk */
-  int uordblks; /* This is the total size of memory occupied by
-                 * chunks handed out by malloc. */
-  int fordblks; /* This is the total size of memory occupied
-                 * by free (not in use) chunks. */
-};
 
 /* Structure type returned by the div() function. */
 
@@ -273,8 +262,6 @@ static inline int posix_memalign(FAR void **m, size_t a, size_t s)
 #define aligned_alloc(a, s) memalign((a), (s))
 #define posix_memalign(m, a, s) ((*(m) = memalign((a), (s))) ? OK : ENOMEM)
 #endif
-
-struct mallinfo mallinfo(void);
 
 /* Pseudo-Terminals */
 
