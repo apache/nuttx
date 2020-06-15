@@ -163,7 +163,8 @@ struct bmp280_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static uint8_t bmp280_getreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr);
+static uint8_t bmp280_getreg8(FAR struct bmp280_dev_s *priv,
+                              uint8_t regaddr);
 static void bmp280_putreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr,
                            uint8_t regval);
 static uint32_t bmp280_getpressure(FAR struct bmp280_dev_s *priv);
@@ -568,9 +569,9 @@ static uint32_t bmp280_gettemp(FAR struct bmp280_dev_s *priv)
   sninfo("temp = %d\n", temp);
 
   if (priv->compensated == ENABLE_COMPENSATED)
-  {
-    temp = bmp280_compensate_temp(priv, temp);
-  }
+    {
+      temp = bmp280_compensate_temp(priv, temp);
+    }
 
   return temp;
 }
@@ -669,7 +670,7 @@ static int bmp280_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       case SNIOC_GET_TEMP:
-        *(uint32_t*)arg = bmp280_gettemp(priv);
+        *(uint32_t *)arg = bmp280_gettemp(priv);
 
       default:
         snerr("Unrecognized cmd: %d\n", cmd);
