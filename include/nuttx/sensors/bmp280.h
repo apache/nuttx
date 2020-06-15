@@ -112,6 +112,13 @@ extern "C"
 
 #define SNIOC_SETSTB               _SNIOC(0x0003)
 
+/* Get temperature value
+ *
+ * Arg: Pointer to uint32_t (raw value)
+ */
+
+#define SNIOC_GET_TEMP             _SNIOC(0x0004)
+
 struct bmp280_press_adj_s
 {
   uint16_t  dig_p1; /* calibration P1 data */
