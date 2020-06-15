@@ -1,0 +1,97 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "SocketCAN Support"
+
+config NET_CAN
+	bool "SocketCAN support"
+	default n
+	select NET_READAHEAD
+	depends on NET
+	---help---
+		Enable support for SocketCAN sockets that will permit.
+
+		This logic is a WIP.  Currently only fragmentary support is
+		available, not enough to actually do anything of consequence.
+
+if NET_CAN
+
+config NET_CAN_HAVE_TX_DEADLINE
+	bool
+	default n
+	
+config NET_CAN_HAVE_CANFD
+	bool
+	default n
+
+config CAN_CONNS
+	int "Number of CAN connections"
+	default 4
+	---help---
+		Maximum number of CAN connections (all tasks).
+		
+config NET_CAN_CANFD
+	bool "Enable CAN FD support"
+	default y
+	depends on NET_CAN_HAVE_CANFD
+	---help---
+		Enable CAN FD support in SocketCAN stack
+		
+config NET_CAN_SOCK_OPTS
+	bool "sockopt support"
+	default n
+	select NET_SOCKOPTS
+	select NET_CANPROTO_OPTIONS
+	---help---
+		Enable support for the CAN socket options
+				
+config NET_CAN_RAW_TX_DEADLINE
+	bool "TX deadline sockopt"
+	default n
+	depends on NET_CAN_SOCK_OPTS && NET_CAN_HAVE_TX_DEADLINE
+	select NET_CMSG
+	---help---
+	    Note: Non-standard SocketCAN sockopt, but this options helps us in
+	    real-time use cases.
+	    
+		When the CAN_RAW_TX_DEADLINE sockopt is enabled. The user can send 
+		CAN frames using sendmsg() function and add a deadline timespec 
+		value in the CMSG data. When the deadline has been passed and the
+		CAN frame is still in the HW TX mailbox then the CAN driver will 
+		discard the CAN frame automatically.
+		
+config NET_CAN_RAW_DEFAULT_TX_DEADLINE
+	int "Default TX deadline when no deadline is given (us)"
+	default 0
+	depends on NET_CAN_RAW_TX_DEADLINE
+	---help---
+		Some applications may not use the NET_CAN_RAW_TX_DEADLINE flag.
+		By default their deadline becomes 0 which means it becomes infinite.
+		This would mean that packets from applications without the 
+		NET_CAN_RAW_TX_DEADLINE flag, can block the TX mailboxes forever.
+		This config can set the default deadline when no deadline has been 
+		given.
+		
+config NET_CAN_RAW_FILTER_MAX
+	int "CAN_RAW_FILTER max filter count"
+	default 32
+	depends on NET_CAN_SOCK_OPTS
+	---help---
+		Maximum number of CAN_RAW filters that can be set per CAN connection.
+		
+config NET_CAN_NOTIFIER
+	bool "Support CAN notifications"
+	default n
+	depends on SCHED_WORKQUEUE
+	select WQUEUE_NOTIFIER
+	---help---
+		Enable building of CAN notifier logic that will execute a worker
+		function on the low priority work queue when read-ahead data
+		is available or when a CAN connection is lost.  This is is a general
+		purpose notifier, but was developed specifically to support poll()
+		logic where the poll must wait for these events.
+
+endif # NET_CAN
+endmenu # CAN Socket Support

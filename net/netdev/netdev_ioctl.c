@@ -1088,6 +1088,54 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
             }
         }
         break;
+#endif  
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_CAN_BITRATE_IOCTL)
+      case SIOCGCANBITRATE:  /* Get bitrate from a CAN controller */
+      case SIOCSCANBITRATE:  /* Set bitrate of a CAN controller */
+        {
+          dev = netdev_ifr_dev(req);
+          if (dev && dev->d_ioctl)
+            {
+              struct can_ioctl_data_s *can_bitrate_data =
+                            &req->ifr_ifru.ifru_can_data;
+              ret = dev->d_ioctl(dev, cmd,
+                            (unsigned long)(uintptr_t)can_bitrate_data);
+            }
+        }
+        break;
+#endif
+
+#ifdef CONFIG_NETDEV_IFINDEX
+      case SIOCGIFNAME:  /* Get interface name */
+        {
+          struct net_driver_s *dev = netdev_findbyindex(req->ifr_ifindex);
+          if (dev != NULL)
+            {
+              strncpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
+              ret = OK;
+            }
+          else
+            {
+              ret = -ENODEV;
+            }
+        }
+        break;
+
+      case SIOCGIFINDEX:  /* Index to name mapping */
+        {
+          struct net_driver_s *dev = netdev_findbyname(req->ifr_name);
+          if (dev != NULL)
+            {
+              req->ifr_ifindex = dev->d_ifindex;
+              ret = OK;
+            }
+          else
+            {
+              ret = -ENODEV;
+            }
+        }
+        break;
 #endif
 
       default:

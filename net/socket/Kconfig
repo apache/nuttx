@@ -37,6 +37,12 @@ config NET_UDPPROTO_OPTIONS
 	---help---
 		Enable or disable support for UDP protocol level socket options.
 
+config NET_CANPROTO_OPTIONS
+	bool
+	default n
+	---help---
+		Enable or disable support for CAN protocol level socket option
+
 if NET_SOCKOPTS
 
 config NET_SOLINGER
@@ -49,5 +55,23 @@ config NET_SOLINGER
 		Enable or disable support for the SO_LINGER socket option.  Requires
 		write buffer support.
 
+config NET_TIMESTAMP
+	bool "SO_TIMESTAMP socket option"
+	default n
+	depends on NET_CAN
+	select NET_CMSG
+	---help---
+		Enable or disable support for the SO_TIMESTAMP socket option. Currently only tested & implemented in SocketCAN but should work on all sockets
+
 endif # NET_SOCKOPTS
+
+config NET_CMSG
+	bool "Control messages (CMSG) support"
+	default n
+	---help---
+		Enable or disable support for control messages in the recvmsg() and
+		sendmsg() function. Control messages (also defined in POSIX 1003.1g 
+		as ancillary data object information). Includes additional 
+		information on the packet received or to be transmitted.
+
 endmenu # Socket Support

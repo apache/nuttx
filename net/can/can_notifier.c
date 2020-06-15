@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/net/lib_recvmsg.c
+ * net/can/can_notifier.c
  *
- *   Copyright (C) 2007, 2008, 2012, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,52 +39,45 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_NET) && !defined(CONFIG_NET_CMSG)
-
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
+#include <assert.h>
+
+#include <nuttx/wqueue.h>
+
+#include "can/can.h"
+
+#ifdef CONFIG_NET_CAN_NOTIFIER
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: recvmsg
+ * Name: can_readahead_signal
  *
  * Description:
- *   The recvmsg() call is identical to recvfrom() with a NULL from
- *   parameter.
+ *   Read-ahead data has been buffered.  Signal all threads waiting for
+ *   read-ahead data to become available.
  *
- * Parameters:
- *   sockfd   Socket descriptor of socket
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   flags    Receive flags
+ *   When read-ahead data becomes available, *all* of the workers waiting
+ *   for read-ahead data will be executed.  If there are multiple workers
+ *   waiting for read-ahead data then only the first to execute will get the
+ *   data.  Others will need to call can_readahead_notifier_setup() once
+ *   again.
+ *
+ * Input Parameters:
+ *   conn  - The CAN connection where read-ahead data was just buffered.
  *
  * Returned Value:
- *  (see recvfrom)
- *
- * Assumptions:
+ *   None.
  *
  ****************************************************************************/
 
-ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
+void can_readahead_signal(FAR struct can_conn_s *conn)
 {
-  FAR void *buf             = msg->msg_iov->iov_base;
-  FAR struct sockaddr *from = msg->msg_name;
-  FAR socklen_t *fromlen    = (FAR socklen_t *)&msg->msg_namelen;
-  size_t len                = msg->msg_iov->iov_len;
+  /* This is just a simple wrapper around work_notifier_signal(). */
 
-  if (msg->msg_iovlen == 1)
-    {
-      return recvfrom(sockfd, buf, len, flags, from, fromlen);
-    }
-  else
-    {
-      set_errno(ENOTSUP);
-      return ERROR;
-    }
+  work_notifier_signal(WORK_CAN_READAHEAD, conn);
 }
 
-#endif /* CONFIG_NET && !CONFIG_NET_CMSG */
+#endif /* CONFIG_NET_CAN_NOTIFIER */
