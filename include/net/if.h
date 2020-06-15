@@ -174,14 +174,14 @@ struct lifreq
   } lifr_ifru;
 };
 
-#define lifr_addr             lifr_ifru.lifru_addr      /* IP address */
-#define lifr_dstaddr          lifr_ifru.lifru_dstaddr   /* P-to-P Address */
-#define lifr_broadaddr        lifr_ifru.lifru_broadaddr /* Broadcast address */
-#define lifr_netmask          lifr_ifru.lifru_netmask   /* Interface net mask */
-#define lifr_hwaddr           lifr_ifru.lifru_hwaddr    /* MAC address */
-#define lifr_mtu              lifr_ifru.lifru_mtu       /* MTU */
-#define lifr_count            lifr_ifru.lifru_count     /* Number of devices */
-#define lifr_flags            lifr_ifru.lifru_flags     /* interface flags */
+#define lifr_addr             lifr_ifru.lifru_addr             /* IP address */
+#define lifr_dstaddr          lifr_ifru.lifru_dstaddr          /* P-to-P Address */
+#define lifr_broadaddr        lifr_ifru.lifru_broadaddr        /* Broadcast address */
+#define lifr_netmask          lifr_ifru.lifru_netmask          /* Interface net mask */
+#define lifr_hwaddr           lifr_ifru.lifru_hwaddr           /* MAC address */
+#define lifr_mtu              lifr_ifru.lifru_mtu              /* MTU */
+#define lifr_count            lifr_ifru.lifru_count            /* Number of devices */
+#define lifr_flags            lifr_ifru.lifru_flags            /* interface flags */
 #define lifr_mii_notify_pid   lifr_ifru.llfru_mii_notify.pid   /* PID to be notified */
 #define lifr_mii_notify_event lifr_ifru.llfru_mii_notify.event /* Describes notification */
 #define lifr_mii_phy_id       lifr_ifru.lifru_mii_data.phy_id  /* PHY device address */
@@ -228,14 +228,14 @@ struct ifreq
   } ifr_ifru;
 };
 
-#define ifr_addr              ifr_ifru.ifru_addr        /* IP address */
-#define ifr_dstaddr           ifr_ifru.ifru_dstaddr     /* P-to-P Address */
-#define ifr_broadaddr         ifr_ifru.ifru_broadaddr   /* Broadcast address */
-#define ifr_netmask           ifr_ifru.ifru_netmask     /* Interface net mask */
-#define ifr_hwaddr            ifr_ifru.ifru_hwaddr      /* MAC address */
-#define ifr_mtu               ifr_ifru.ifru_mtu         /* MTU */
-#define ifr_count             ifr_ifru.ifru_count       /* Number of devices */
-#define ifr_flags             ifr_ifru.ifru_flags       /* interface flags */
+#define ifr_addr              ifr_ifru.ifru_addr             /* IP address */
+#define ifr_dstaddr           ifr_ifru.ifru_dstaddr          /* P-to-P Address */
+#define ifr_broadaddr         ifr_ifru.ifru_broadaddr        /* Broadcast address */
+#define ifr_netmask           ifr_ifru.ifru_netmask          /* Interface net mask */
+#define ifr_hwaddr            ifr_ifru.ifru_hwaddr           /* MAC address */
+#define ifr_mtu               ifr_ifru.ifru_mtu              /* MTU */
+#define ifr_count             ifr_ifru.ifru_count            /* Number of devices */
+#define ifr_flags             ifr_ifru.ifru_flags            /* interface flags */
 #define ifr_mii_notify_pid    ifr_ifru.ifru_mii_notify.pid   /* PID to be notified */
 #define ifr_mii_notify_event  ifr_ifru.ifru_mii_notify.event /* Describes notification */
 #define ifr_mii_phy_id        ifr_ifru.ifru_mii_data.phy_id  /* PHY device address */

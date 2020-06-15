@@ -782,7 +782,7 @@ static int ieee802154_close(FAR struct socket *psock)
             {
               /* Yes... free the connection structure */
 
-              conn->crefs = 0;          /* No more references on the connection */
+              conn->crefs = 0;                      /* No more references on the connection */
               ieee802154_conn_free(psock->s_conn);  /* Free network resources */
             }
           else

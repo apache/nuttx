@@ -1109,7 +1109,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 #ifdef CONFIG_NETDEV_IFINDEX
       case SIOCGIFNAME:  /* Get interface name */
         {
-          struct net_driver_s *dev = netdev_findbyindex(req->ifr_ifindex);
+          dev = netdev_findbyindex(req->ifr_ifindex);
           if (dev != NULL)
             {
               strncpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
@@ -1124,7 +1124,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
 
       case SIOCGIFINDEX:  /* Index to name mapping */
         {
-          struct net_driver_s *dev = netdev_findbyname(req->ifr_name);
+          dev = netdev_findbyname(req->ifr_name);
           if (dev != NULL)
             {
               req->ifr_ifindex = dev->d_ifindex;
