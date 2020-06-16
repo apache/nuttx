@@ -284,6 +284,14 @@ config ARCH_GLOBAL_IRQDISABLE
 		interrupts as well so that no context switches can occur on the CPU
 		that disabled "local" interrupts.
 
+config ARCH_HAVE_SYSCALL_HOOKS
+	bool
+	default n
+	---help---
+		Indicates that the architecture supports the system call hooks as
+		required if CONFIG_SCHED_INSTRUMENTATION_SYSCALL is enabled.  Refer
+		to sched/Kconfig for additional information.
+
 config ARCH_FPU
 	bool "FPU support"
 	default y
