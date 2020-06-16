@@ -972,6 +972,25 @@ config SCHED_INSTRUMENTATION_SPINLOCKS
 			void sched_note_spinunlock(FAR struct tcb_s *tcb, bool state);
 			void sched_note_spinabort(FAR struct tcb_s *tcb, bool state);
 
+config SCHED_INSTRUMENTATION_SYSCALL
+	bool "System call monitor hooks"
+	default n
+	---help---
+		Enables additional hooks for entry and exit from system call.
+		Board-specific logic must provide this additional logic.
+
+			void sched_note_syscall_enter(int nr, int argc, ...);
+			void sched_note_syscall_leave(int nr, uintptr_t result);
+
+config SCHED_INSTRUMENTATION_IRQHANDLER
+	bool "Interrupt handler monitor hooks"
+	default n
+	---help---
+		Enables additional hooks for interrupt handler. Board-specific logic
+		must provide this additional logic.
+
+			void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
+
 config SCHED_INSTRUMENTATION_BUFFER
 	bool "Buffer instrumentation data in memory"
 	default n

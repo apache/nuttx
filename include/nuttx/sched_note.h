@@ -45,6 +45,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 #include <nuttx/sched.h>
 
@@ -305,6 +306,20 @@ void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
 #  define sched_note_spinabort(t,s)
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+void sched_note_syscall_enter(int nr, int argc, ...);
+void sched_note_syscall_leave(int nr, uintptr_t result);
+#else
+#  define sched_note_syscall_enter(n,a...)
+#  define sched_note_syscall_leave(n,r)
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
+#else
+#  define sched_note_irqhandler(i,h,e)
+#endif
+
 /****************************************************************************
  * Name: sched_note_get
  *
@@ -387,6 +402,9 @@ int note_register(void);
 #  define sched_note_spinlocked(t,s)
 #  define sched_note_spinunlock(t,s)
 #  define sched_note_spinabort(t,s)
+#  define sched_note_syscall_enter(n,a...)
+#  define sched_note_syscall_leave(n,r)
+#  define sched_note_irqhandler(i,h,e)
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION */
 #endif /* __INCLUDE_NUTTX_SCHED_NOTE_H */
