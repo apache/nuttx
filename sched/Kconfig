@@ -975,7 +975,7 @@ config SCHED_INSTRUMENTATION_SPINLOCKS
 config SCHED_INSTRUMENTATION_SYSCALL
 	bool "System call monitor hooks"
 	default n
-	depends on LIB_SYSCALL && ARCH_HAVE_SYSCALL_HOOKS
+	depends on ARCH_HAVE_SYSCALL_HOOKS
 	---help---
 		Enables additional hooks for entry and exit from system call.
 		Board-specific logic must provide this additional logic.
