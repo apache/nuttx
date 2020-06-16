@@ -60,6 +60,12 @@ NUTTXLIBS += staging$(DELIM)libkmm$(LIBEXT) staging$(DELIM)libkarch$(LIBEXT)
 USERLIBS  += staging$(DELIM)libproxies$(LIBEXT) staging$(DELIM)libc$(LIBEXT)
 USERLIBS  += staging$(DELIM)libmm$(LIBEXT) staging$(DELIM)libarch$(LIBEXT)
 
+# Add library for system call instrumentation if needed
+
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION_SYSCALL),y)
+NUTTXLIBS += staging$(DELIM)libwraps$(LIBEXT)
+endif
+
 # Add libraries for two pass build support.  The special directory pass1
 # may be populated so that application generated logic can be included into
 # the kernel build

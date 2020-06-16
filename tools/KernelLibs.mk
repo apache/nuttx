@@ -59,6 +59,12 @@ NUTTXLIBS += staging$(DELIM)libkmm$(LIBEXT) staging$(DELIM)libkarch$(LIBEXT)
 USERLIBS  += staging$(DELIM)libproxies$(LIBEXT) staging$(DELIM)libc$(LIBEXT)
 USERLIBS  += staging$(DELIM)libmm$(LIBEXT) staging$(DELIM)libarch$(LIBEXT)
 
+# Add library for system call instrumentation if needed
+
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION_SYSCALL),y)
+NUTTXLIBS += staging$(DELIM)libwraps$(LIBEXT)
+endif
+
 # Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
 # be defined in Make.defs for this to work!
 
