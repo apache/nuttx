@@ -381,7 +381,8 @@ static inline int can_readahead_timestamp(struct can_conn_s *conn,
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
 static int can_recv_filter(struct can_conn_s *conn, canid_t id)
 {
-  for (int i = 0; i < conn->filter_count; i++)
+  uint32_t i;
+  for (i = 0; i < conn->filter_count; i++)
     {
       if (conn->filters[i].can_id & CAN_INV_FILTER)
         {

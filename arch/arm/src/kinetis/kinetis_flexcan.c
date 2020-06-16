@@ -719,7 +719,8 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
       uint32_t *frame_data_word = (uint32_t *)&frame->data[0];
 
-      for (int i = 0; i < (frame->len + 4 - 1) / 4; i++)
+      uint32_t i;
+      for (i = 0; i < (frame->len + 4 - 1) / 4; i++)
         {
           mb->data[i].w00 = __builtin_bswap32(frame_data_word[i]);
         }
@@ -863,7 +864,8 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv,
 
           uint32_t *frame_data_word = (uint32_t *)&frame->data[0];
 
-          for (int i = 0; i < (frame->len + 4 - 1) / 4; i++)
+          uint32_t i;
+          for (i = 0; i < (frame->len + 4 - 1) / 4; i++)
             {
               frame_data_word[i] = __builtin_bswap32(rf->data[i].w00);
             }
@@ -967,6 +969,7 @@ static void kinetis_txdone(FAR void *arg)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
   uint32_t flags;
+  uint32_t mbi;
 
   flags  = getreg32(priv->base + KINETIS_CAN_IFLAG1_OFFSET);
   flags &= IFLAG1_TX;
@@ -978,7 +981,7 @@ static void kinetis_txdone(FAR void *arg)
   /* Process TX completions */
 
   uint32_t mb_bit = 1 << RXMBCOUNT;
-  for (uint32_t mbi = 0; flags && mbi < TXMBCOUNT; mbi++)
+  for (mbi = 0; flags && mbi < TXMBCOUNT; mbi++)
     {
       if (flags & mb_bit)
         {
@@ -1004,7 +1007,6 @@ static void kinetis_txdone(FAR void *arg)
   net_lock();
   devif_poll(&priv->dev, kinetis_txpoll);
   net_unlock();
-  up_enable_irq(priv->config->mb_irq);
 }
 
 /****************************************************************************
@@ -1052,11 +1054,13 @@ static int kinetis_flexcan_interrupt(int irq, FAR void *context,
 
       if (flags)
         {
-          /* Disable further CAN interrupts. here can be no race
+          /* Disable further TX MB CAN interrupts. here can be no race
            * condition here.
            */
 
-          up_disable_irq(priv->config->mb_irq);
+          flags  = getreg32(priv->base + KINETIS_CAN_IMASK1_OFFSET);
+          flags &= ~(IFLAG1_TX);
+          putreg32(flags, priv->base + KINETIS_CAN_IMASK1_OFFSET);
           work_queue(CANWORK, &priv->irqwork, kinetis_txdone, priv, 0);
         }
     }
@@ -1084,6 +1088,7 @@ static int kinetis_flexcan_interrupt(int irq, FAR void *context,
 static void kinetis_txtimeout_work(FAR void *arg)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
+  uint32_t mbi;
 
   struct timespec ts;
   struct timeval *now = (struct timeval *)&ts;
@@ -1094,7 +1099,7 @@ static void kinetis_txtimeout_work(FAR void *arg)
    * transmit function transmitted a new frame
    */
 
-  for (int mbi = 0; mbi < TXMBCOUNT; mbi++)
+  for (mbi = 0; mbi < TXMBCOUNT; mbi++)
     {
       if (priv->txmb[mbi].deadline.tv_sec != 0
           && (now->tv_sec > priv->txmb[mbi].deadline.tv_sec
@@ -1183,8 +1188,10 @@ static void kinetis_setfreeze(uint32_t base, uint32_t freeze)
 static uint32_t kinetis_waitmcr_change(uint32_t base, uint32_t mask,
                                        uint32_t target_state)
 {
-  const unsigned timeout = 1000;
-  for (unsigned wait_ack = 0; wait_ack < timeout; wait_ack++)
+  const uint32_t timeout = 1000;
+  uint32_t wait_ack;
+
+  for (wait_ack = 0; wait_ack < timeout; wait_ack++)
     {
       const bool state = (getreg32(base + KINETIS_CAN_MCR_OFFSET) & mask)
           != 0;
@@ -1850,7 +1857,8 @@ int kinetis_caninitialize(int intf)
   priv->dev.d_private = (void *)priv;      /* Used to recover private state from dev */
 
 #ifdef TX_TIMEOUT_WQ
-  for (int i = 0; i < TXMBCOUNT; i++)
+  uint32_t i;
+  for (i = 0; i < TXMBCOUNT; i++)
     {
       priv->txtimeout[i] = wd_create();    /* Create TX timeout timer */
     }
