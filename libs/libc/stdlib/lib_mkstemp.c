@@ -198,29 +198,28 @@ int mkstemp(FAR char *path_template)
   uint8_t base62[MAX_XS];
   uint32_t retries;
   FAR char *xptr;
-  FAR char *ptr;
   int xlen;
   int fd;
   int i;
 
   /* Count the number of X's at the end of the template */
 
-  xptr = strchr(path_template, 'X');
-  if (!xptr)
+  xptr = &path_template[strlen(path_template)];
+  for (xlen = 0; xlen < MAX_XS && path_template < xptr && *(xptr - 1) == 'X';
+       xlen++, xptr--);
+
+  if (xlen == 0)
     {
       /* No Xs?  There should always really be 6 */
 
       return open(path_template, O_RDWR | O_CREAT | O_EXCL, 0666);
     }
 
-  /* There is at least one.. count all of them */
-
-  for (xlen = 0, ptr = xptr; xlen < MAX_XS && *ptr == 'X'; xlen++, ptr++);
-
   /* Ignore any X's after the sixth */
 
   if (xlen > MAX_XS)
     {
+      xptr += xlen - MAX_XS;
       xlen = MAX_XS;
     }
 
