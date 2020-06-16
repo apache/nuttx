@@ -99,7 +99,8 @@ enum note_type_e
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
   ,
-  NOTE_IRQHANDLER      = 20
+  NOTE_IRQ_ENTER       = 20,
+  NOTE_IRQ_LEAVE       = 21
 #endif
 };
 
@@ -239,7 +240,6 @@ struct note_syscall_enter_s
 {
   struct note_common_s nsc_cmn; /* Common note parameters */
   int nsc_nr;                   /* System call number */
-  bool nsc_enter;               /* true:  Entering system call */
 };
 
 struct note_syscall_leave_s
@@ -247,18 +247,16 @@ struct note_syscall_leave_s
   struct note_common_s nsc_cmn; /* Common note parameters */
   uintptr_t nsc_result;         /* Result of the system call */
   int nsc_nr;                   /* System call number */
-  bool nsc_enter;               /* false:  Leaving system call */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_SYSCALL */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-/* This is the specific form of the NOTE_IRQHANDLER note */
+/* This is the specific form of the NOTE_IRQ_ENTER/LEAVE notes */
 
 struct note_irqhandler_s
 {
   struct note_common_s nih_cmn; /* Common note parameters */
   int nih_irq;                  /* IRQ number */
-  bool nih_enter;               /* true:  Entering handler */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER */
 #endif /* CONFIG_SCHED_INSTRUMENTATION_BUFFER */

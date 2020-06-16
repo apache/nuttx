@@ -1026,7 +1026,7 @@ config SCHED_NOTE_BUFSIZE
 		bytes).
 
 config SCHED_NOTE_GET
-	bool "Callable interface to get instrumentatin data"
+	bool "Callable interface to get instrumentation data"
 	default n
 	depends on !SCHED_INSTRUMENTATION_CSECTION && (!SCHED_INSTRUMENTATION_SPINLOCK || !SMP)
 	---help---
