@@ -352,7 +352,7 @@ static int block_comment_width(char *line)
 
   /* Skip over any trailing whitespace at the end of the line */
 
-  for (e = strlen(line) - 1; isspace(line[e]); e--)
+  for (e = strlen(line) - 1; e >= 0 && isspace(line[e]); e--)
     {
     }
 
