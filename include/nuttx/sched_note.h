@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/nuttx/sched_note.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -106,6 +91,15 @@ enum note_type_e
   NOTE_SPINLOCK_LOCKED = 15,
   NOTE_SPINLOCK_UNLOCK = 16,
   NOTE_SPINLOCK_ABORT  = 17
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+  ,
+  NOTE_SYSCALL_ENTER   = 18,
+  NOTE_SYSCALL_LEAVE   = 19
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+  ,
+  NOTE_IRQHANDLER      = 20
 #endif
 };
 
@@ -226,7 +220,9 @@ struct note_csection_s
 #endif /* CONFIG_SCHED_INSTRUMENTATION_CSECTION */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-/* This is the specific form of the NOTE_SPINLOCK_LOCK/LOCKED/UNLOCK/ABORT note */
+/* This is the specific form of the NOTE_SPINLOCK_LOCK/LOCKED/UNLOCK/ABORT
+ * note.
+ */
 
 struct note_spinlock_s
 {
@@ -235,23 +231,53 @@ struct note_spinlock_s
   uint8_t nsp_value;            /* Value of spinlock */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+/* This is the specific form of the NOTE_SYSCALL_ENTER/LEAVE notes */
+
+struct note_syscall_enter_s
+{
+  struct note_common_s nsc_cmn; /* Common note parameters */
+  int nsc_nr;                   /* System call number */
+  bool nsc_enter;               /* true:  Entering system call */
+};
+
+struct note_syscall_leave_s
+{
+  struct note_common_s nsc_cmn; /* Common note parameters */
+  uintptr_t nsc_result;         /* Result of the system call */
+  int nsc_nr;                   /* System call number */
+  bool nsc_enter;               /* false:  Leaving system call */
+};
+#endif /* CONFIG_SCHED_INSTRUMENTATION_SYSCALL */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+/* This is the specific form of the NOTE_IRQHANDLER note */
+
+struct note_irqhandler_s
+{
+  struct note_common_s nih_cmn; /* Common note parameters */
+  int nih_irq;                  /* IRQ number */
+  bool nih_enter;               /* true:  Entering handler */
+};
+#endif /* CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER */
 #endif /* CONFIG_SCHED_INSTRUMENTATION_BUFFER */
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Name: sched_note_*
  *
  * Description:
- *   If instrumentation of the scheduler is enabled, then some outboard logic
- *   must provide the following interfaces.  These interfaces are not available
- *   to application code.
+ *   If instrumentation of the scheduler is enabled, then some outboard
+ *   logic must provide the following interfaces.  These interfaces are not
+ *   available to application code.
  *
  *   NOTE: if CONFIG_SCHED_INSTRUMENTATION_BUFFER, then these interfaces are
- *   *not* available to the platform-specific logic.  Rather, they provided by
- *   the note buffering logic.  See sched_note_get() below.
+ *   *not* available to the platform-specific logic.  Rather, they provided
+ *   by the note buffering logic.  See sched_note_get() below.
  *
  * Input Parameters:
  *   tcb - The TCB of the thread.
@@ -259,7 +285,7 @@ struct note_spinlock_s
  * Returned Value:
  *   None
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 void sched_note_start(FAR struct tcb_s *tcb);
 void sched_note_stop(FAR struct tcb_s *tcb);
@@ -295,10 +321,14 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void sched_note_spinlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
-void sched_note_spinlocked(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
-void sched_note_spinunlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
-void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock);
+void sched_note_spinlock(FAR struct tcb_s *tcb,
+                         FAR volatile void *spinlock);
+void sched_note_spinlocked(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock);
+void sched_note_spinunlock(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock);
+void sched_note_spinabort(FAR struct tcb_s *tcb,
+                          FAR volatile void *spinlock);
 #else
 #  define sched_note_spinlock(t,s)
 #  define sched_note_spinlocked(t,s)
