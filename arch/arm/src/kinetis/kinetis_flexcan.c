@@ -601,6 +601,16 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
   /* Attempt to write frame */
 
   uint32_t mbi = 0;
+  uint32_t mb_bit;
+  uint32_t regval;
+#ifdef CONFIG_NET_CAN_CANFD
+  uint32_t *frame_data_word;
+  uint32_t i;
+#endif
+#ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
+  int32_t timeout;
+#endif
+
   if ((getreg32(priv->base + KINETIS_CAN_ESR2_OFFSET) &
       (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
       (CAN_ESR2_IMB | CAN_ESR2_VPS))
@@ -610,7 +620,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
       mbi -= RXMBCOUNT;
     }
 
-  uint32_t mb_bit = 1 << (RXMBCOUNT + mbi);
+  mb_bit = 1 << (RXMBCOUNT + mbi);
 
   while (mbi < TXMBCOUNT)
     {
@@ -631,7 +641,6 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
     }
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
-  int32_t timeout = 0;
   struct timespec ts;
   clock_systimespec(&ts);
 
@@ -664,6 +673,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
         {
           priv->txmb[mbi].deadline.tv_sec = 0;
           priv->txmb[mbi].deadline.tv_usec = 0;
+          timeout = -1;
         }
     }
 #endif
@@ -717,9 +727,8 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
       cs.dlc = len_to_can_dlc[frame->len];
 
-      uint32_t *frame_data_word = (uint32_t *)&frame->data[0];
+      frame_data_word = (uint32_t *)&frame->data[0];
 
-      uint32_t i;
       for (i = 0; i < (frame->len + 4 - 1) / 4; i++)
         {
           mb->data[i].w00 = __builtin_bswap32(frame_data_word[i]);
@@ -729,7 +738,6 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   mb->cs = cs; /* Go. */
 
-  uint32_t regval;
   regval = getreg32(priv->base + KINETIS_CAN_IMASK1_OFFSET);
   regval |= mb_bit;
   putreg32(regval, priv->base + KINETIS_CAN_IMASK1_OFFSET);
@@ -833,6 +841,10 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv,
 {
   uint32_t mb_index;
   struct mb_s *rf;
+#ifdef CONFIG_NET_CAN_CANFD
+  uint32_t *frame_data_word;
+  uint32_t i;
+#endif
 
   while ((mb_index = arm_lsb(flags)) != 32)
     {
@@ -862,9 +874,8 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv,
 
           frame->len = can_dlc_to_len[rf->cs.dlc];
 
-          uint32_t *frame_data_word = (uint32_t *)&frame->data[0];
+          frame_data_word = (uint32_t *)&frame->data[0];
 
-          uint32_t i;
           for (i = 0; i < (frame->len + 4 - 1) / 4; i++)
             {
               frame_data_word[i] = __builtin_bswap32(rf->data[i].w00);
@@ -970,17 +981,16 @@ static void kinetis_txdone(FAR void *arg)
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
   uint32_t flags;
   uint32_t mbi;
+  uint32_t mb_bit;
 
   flags  = getreg32(priv->base + KINETIS_CAN_IFLAG1_OFFSET);
   flags &= IFLAG1_TX;
 
-  #warning Missing logic
-
-  /* FIXME First Process Error aborts */
+  /* TODO First Process Error aborts */
 
   /* Process TX completions */
 
-  uint32_t mb_bit = 1 << RXMBCOUNT;
+  mb_bit = 1 << RXMBCOUNT;
   for (mbi = 0; flags && mbi < TXMBCOUNT; mbi++)
     {
       if (flags & mb_bit)
@@ -1708,6 +1718,9 @@ int kinetis_caninitialize(int intf)
   struct kinetis_driver_s *priv;
   int ret;
   uint32_t regval;
+#ifdef TX_TIMEOUT_WQ
+  uint32_t i;
+#endif
 
   switch (intf)
     {
@@ -1857,7 +1870,6 @@ int kinetis_caninitialize(int intf)
   priv->dev.d_private = (void *)priv;      /* Used to recover private state from dev */
 
 #ifdef TX_TIMEOUT_WQ
-  uint32_t i;
   for (i = 0; i < TXMBCOUNT; i++)
     {
       priv->txtimeout[i] = wd_create();    /* Create TX timeout timer */
