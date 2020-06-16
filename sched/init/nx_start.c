@@ -528,9 +528,14 @@ void nx_start(void)
 
       g_running_tasks[cpu] = &g_idletcb[cpu].cmn;
 
-      /* Initialize the processor-specific portion of the TCB */
+      /* Initialize the 1st processor-specific portion of the TCB
+       * Note: other idle thread get initialized in nx_smpstart
+       */
 
-      up_initial_state(&g_idletcb[cpu].cmn);
+      if (cpu == 0)
+        {
+          up_initial_state(&g_idletcb[cpu].cmn);
+        }
     }
 
   /* Task lists are initialized */

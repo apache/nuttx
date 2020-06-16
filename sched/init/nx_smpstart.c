@@ -168,11 +168,7 @@ int nx_smp_start(void)
           return ret;
         }
 
-      /* Reinitialize the processor-specific portion of the TCB.  This is
-       * the second time this has been called for this CPU, but the stack
-       * was not yet initialized on the first call so we need to do it
-       * again.
-       */
+      /* Initialize the processor-specific portion of the TCB */
 
       up_initial_state(tcb);
     }
