@@ -731,26 +731,26 @@ static void stm32l4_stdclockconfig(void)
   putreg32(regval, STM32L4_RCC_CR);
 
   if (!(regval & RCC_CR_MSION))
-  {
-    /* Enable MSI */
+    {
+      /* Enable MSI */
 
-    regval  = getreg32(STM32L4_RCC_CR);
-    regval |= RCC_CR_MSION;
-    putreg32(regval, STM32L4_RCC_CR);
+      regval  = getreg32(STM32L4_RCC_CR);
+      regval |= RCC_CR_MSION;
+      putreg32(regval, STM32L4_RCC_CR);
 
-    /* Wait until the MSI is ready (or until a timeout elapsed) */
+      /* Wait until the MSI is ready (or until a timeout elapsed) */
 
-    for (timeout = MSIRDY_TIMEOUT; timeout > 0; timeout--)
-      {
-        /* Check if the MSIRDY flag is the set in the CR */
+      for (timeout = MSIRDY_TIMEOUT; timeout > 0; timeout--)
+        {
+          /* Check if the MSIRDY flag is the set in the CR */
 
-        if ((getreg32(STM32L4_RCC_CR) & RCC_CR_MSIRDY) != 0)
-          {
-            /* If so, then break-out with timeout > 0 */
+          if ((getreg32(STM32L4_RCC_CR) & RCC_CR_MSIRDY) != 0)
+            {
+              /* If so, then break-out with timeout > 0 */
 
-            break;
-          }
-      }
+              break;
+            }
+        }
     }
 
 #elif defined(STM32L4_BOARD_USEHSE)
@@ -797,7 +797,7 @@ static void stm32l4_stdclockconfig(void)
           stm32l4_pwr_enableclk(true);
           stm32_pwr_setvos(1);
 #endif
-      }
+        }
       else
         {
           /* Select regulator voltage output Scale 2 mode for

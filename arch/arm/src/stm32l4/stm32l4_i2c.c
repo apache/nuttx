@@ -1460,32 +1460,32 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
             }
         }
       else if (i2cclk_mhz == 48)
-      {
-        if (frequency == 100000)
-          {
-            presc        = 2;
-            scl_delay    = 10;
-            sda_delay    = 0;
-            scl_h_period = 62;
-            scl_l_period = 85;
-          }
-        else if (frequency == 400000)
-          {
-            presc        = 1;
-            scl_delay    = 8;
-            sda_delay    = 0;
-            scl_h_period = 12;
-            scl_l_period = 33;
-          }
-        else if (frequency == 1000000)
-          {
-            presc        = 0;
-            scl_delay    = 5;
-            sda_delay    = 0;
-            scl_h_period = 8;
-            scl_l_period = 22;
-          }
-      }
+        {
+          if (frequency == 100000)
+            {
+              presc        = 2;
+              scl_delay    = 10;
+              sda_delay    = 0;
+              scl_h_period = 62;
+              scl_l_period = 85;
+            }
+          else if (frequency == 400000)
+            {
+              presc        = 1;
+              scl_delay    = 8;
+              sda_delay    = 0;
+              scl_h_period = 12;
+              scl_l_period = 33;
+            }
+          else if (frequency == 1000000)
+            {
+              presc        = 0;
+              scl_delay    = 5;
+              sda_delay    = 0;
+              scl_h_period = 8;
+              scl_l_period = 22;
+            }
+        }
       else
         {
           DEBUGPANIC();
