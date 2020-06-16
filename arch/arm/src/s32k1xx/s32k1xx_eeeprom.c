@@ -61,16 +61,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 
-
 /******************************************************************************
- * Pre-processor Definitions
- ******************************************************************************/
-
-
-
-/****************************************************************************
  * Private Types
- ****************************************************************************/
+ ******************************************************************************/
 
 struct eeed_struct_s
 {
@@ -82,9 +75,9 @@ struct eeed_struct_s
   FAR uint8_t *eeed_buffer;       /* FlexRAM memory */
 };
 
-/****************************************************************************
+/******************************************************************************
  * Private Function Prototypes
- ****************************************************************************/
+ ******************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     eeed_open(FAR struct inode *inode);
@@ -128,11 +121,9 @@ static const struct block_operations g_bops =
 #endif
 };
 
-
 /******************************************************************************
  * Private Functions
  ******************************************************************************/
-
 
 static inline void wait_ftfc_ready()
 {
@@ -166,13 +157,12 @@ static uint32_t execute_ftfc_command()
   return retval;
 }
 
-
-/****************************************************************************
+/******************************************************************************
  * Name: eeed_open
  *
  * Description: Open the block device
  *
- ****************************************************************************/
+ ******************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int eeed_open(FAR struct inode *inode)
@@ -192,12 +182,12 @@ static int eeed_open(FAR struct inode *inode)
 }
 #endif
 
-/****************************************************************************
+/******************************************************************************
  * Name: eeed_close
  *
  * Description: close the block device
  *
- ****************************************************************************/
+ ******************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int eeed_close(FAR struct inode *inode)
@@ -217,12 +207,12 @@ static int eeed_close(FAR struct inode *inode)
 }
 #endif
 
-/****************************************************************************
+/******************************************************************************
  * Name: eeed_read
  *
  * Description:  Read the specified number of sectors
  *
- ****************************************************************************/
+ ******************************************************************************/
 
 static ssize_t eeed_read(FAR struct inode *inode, unsigned char *buffer,
                        size_t start_sector, unsigned int nsectors)
@@ -243,7 +233,7 @@ static ssize_t eeed_read(FAR struct inode *inode, unsigned char *buffer,
              &dev->eeed_buffer[start_sector * dev->eeed_sectsize]);
 
        wait_ftfc_ready();
-       
+
        memcpy(buffer,
              &dev->eeed_buffer[start_sector * dev->eeed_sectsize],
              nsectors * dev->eeed_sectsize);
@@ -253,12 +243,12 @@ static ssize_t eeed_read(FAR struct inode *inode, unsigned char *buffer,
   return -EINVAL;
 }
 
-/****************************************************************************
+/******************************************************************************
  * Name: eeed_write
  *
  * Description: Write the specified number of sectors
  *
- ****************************************************************************/
+ ******************************************************************************/
 
 static ssize_t eeed_write(FAR struct inode *inode, const unsigned char *buffer,
                         size_t start_sector, unsigned int nsectors)
@@ -278,28 +268,31 @@ static ssize_t eeed_write(FAR struct inode *inode, const unsigned char *buffer,
              nsectors * dev->eeed_sectsize,
              &dev->eeed_buffer[start_sector * dev->eeed_sectsize]);
 
-      FAR uint32_t *dest = (FAR uint32_t*)&dev->eeed_buffer
+      FAR uint32_t *dest = (FAR uint32_t *)&dev->eeed_buffer
                            [start_sector * dev->eeed_sectsize];
-      uint32_t *src = (uint32_t*)buffer;
-      
-      for(int i = 0; i < nsectors; i++){
-        wait_ftfc_ready();
-        *dest = *src;
-        dest++;
-        src++;
-      }
+
+      uint32_t *src = (uint32_t *)buffer;
+
+      for (int i = 0; i < nsectors; i++)
+        {
+          wait_ftfc_ready();
+          *dest = *src;
+          dest++;
+          src++;
+        }
+
       return nsectors;
     }
 
   return -EFBIG;
 }
 
-/****************************************************************************
+/******************************************************************************
  * Name: eeed_geometry
  *
  * Description: Return device geometry
  *
- ****************************************************************************/
+ ******************************************************************************/
 
 static int eeed_geometry(FAR struct inode *inode, struct geometry *geometry)
 {
@@ -328,13 +321,13 @@ static int eeed_geometry(FAR struct inode *inode, struct geometry *geometry)
   return -EINVAL;
 }
 
-/****************************************************************************
+/******************************************************************************
  * Name: eeed_ioctl
  *
  * Description:
  *   Return device geometry
  *
- ****************************************************************************/
+ ******************************************************************************/
 
 static int eeed_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 {
@@ -358,13 +351,13 @@ static int eeed_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   return -ENOTTY;
 }
 
-/****************************************************************************
+/******************************************************************************
  * Name: eeed_unlink
  *
  * Description:
  *   The block driver has been unlinked.
  *
- ****************************************************************************/
+ ******************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int eeed_unlink(FAR struct inode *inode)
@@ -374,7 +367,6 @@ static int eeed_unlink(FAR struct inode *inode)
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct eeed_struct_s *)inode->i_private;
 
-
   /* And free the block driver itself */
 
   kmm_free(dev);
@@ -383,12 +375,11 @@ static int eeed_unlink(FAR struct inode *inode)
 }
 #endif
 
-
-/****************************************************************************
+/******************************************************************************
  * Public Functions
- ****************************************************************************/
+ ******************************************************************************/
 
-/****************************************************************************
+/******************************************************************************
  * Name: s32k1xx_eeeprom_register
  *
  * Description:
@@ -401,7 +392,7 @@ static int eeed_unlink(FAR struct inode *inode)
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
- ****************************************************************************/
+ ******************************************************************************/
 
 int s32k1xx_eeeprom_register(int minor, uint32_t size)
 {
@@ -418,8 +409,8 @@ int s32k1xx_eeeprom_register(int minor, uint32_t size)
 
       dev->eeed_nsectors     = size / 4;     /* Number of sectors on device */
       dev->eeed_sectsize     = 4;            /* The size of one sector */
-      dev->eeed_buffer       = (FAR uint8_t *)S32K1XX_FTFC_EEEPROM_BASE;  
-                                             /* FlexRAM buffer location */
+      dev->eeed_buffer       = (FAR uint8_t *)S32K1XX_FTFC_EEEPROM_BASE;
+
       /* Create a eeeprom device name */
 
       snprintf(devname, 16, "/dev/eeeprom%d", minor);
@@ -437,24 +428,25 @@ int s32k1xx_eeeprom_register(int minor, uint32_t size)
   return ret;
 }
 
-/****************************************************************************
+/******************************************************************************
  * Name: s32k1xx_eeeprom_init
  *
  * Description:
  *   Init FTFC flash controller to run in Enhanced EEPROM mode
  *
  *
- ****************************************************************************/
+ ******************************************************************************/
 
 void s32k1xx_eeeprom_init()
 {
   uint32_t regval;
-  
+
   regval = getreg32(S32K1XX_SIM_FCFG1);
-  
-  /* If the FlexNVM memory has not been partitioned */ 
-  if(((regval & SIM_FCFG1_DEPART_MASK) >> SIM_FCFG1_DEPART_SHIFT) == 0xF)
-    {    
+
+  /* If the FlexNVM memory has not been partitioned */
+
+  if (((regval & SIM_FCFG1_DEPART_MASK) >> SIM_FCFG1_DEPART_SHIFT) == 0xf)
+    {
       /* Setup D-flash partitioning for use with EEEPROM */
 
       putreg8(S32K1XX_FTFC_PROGRAM_PARTITION, S32K1XX_FTFC_FCCOB0); /* Command */
@@ -463,8 +455,9 @@ void s32k1xx_eeeprom_init()
       putreg8(0x0, S32K1XX_FTFC_FCCOB2); /* uSFE */
       putreg8(0x0, S32K1XX_FTFC_FCCOB3); /* Load FlexRAM EEE */
       putreg8(0x2, S32K1XX_FTFC_FCCOB4); /* EEE Partition code (4KB) */
-      putreg8(0x8, S32K1XX_FTFC_FCCOB5); /* DE  Partition code (64KB FlexNVM as 
-                                                                EEEPROM backup */
+      putreg8(0x8, S32K1XX_FTFC_FCCOB5); /* DE  Partition code (64KB FlexNVM as
+                                          * EEEPROM backup
+                                          */
 
       execute_ftfc_command();
     }
@@ -476,11 +469,11 @@ void s32k1xx_eeeprom_init()
   putreg8(0x0, S32K1XX_FTFC_FCCOB1); /* FlexRAM used for EEEPROM */
 
   execute_ftfc_command();
-  
+
   /* Wait for Emulated EEPROM to be ready */
+
   while ((getreg8(S32K1XX_FTFC_FCNFG) & FTTC_FCNFG_EEERDY) == 0)
-  {
-    /* Busy */
-  }
-  
+    {
+      /* Busy */
+    }
 }
