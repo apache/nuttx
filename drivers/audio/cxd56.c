@@ -2899,31 +2899,27 @@ static int cxd56_stop(FAR struct audio_lowerhalf_s *lower, FAR void *session)
 static int cxd56_stop(FAR struct audio_lowerhalf_s *lower)
 #endif
 {
+  int ret;
+  FAR void *value;
+  struct audio_msg_s msg;
   FAR struct cxd56_dev_s *priv = (FAR struct cxd56_dev_s *)lower;
 
   audinfo("cxd56_stop\n");
 
-  if (priv->state != CXD56_DEV_STATE_STOPPED)
+  msg.msg_id = AUDIO_MSG_STOP;
+  msg.u.data = 0;
+  ret = nxmq_send(priv->mq, (FAR const char *)&msg,
+                  sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+  if (ret != OK)
     {
-      int ret;
-      FAR void *value;
-      struct audio_msg_s msg;
-
-      msg.msg_id = AUDIO_MSG_STOP;
-      msg.u.data = 0;
-      ret = nxmq_send(priv->mq, (FAR const char *)&msg,
-                      sizeof(msg), CONFIG_CXD56_MSG_PRIO);
-      if (ret != OK)
-        {
-          auderr("ERROR: nxmq_send stop message failed (%d)\n", ret);
-          return ret;
-        }
-
-      /* Join the worker thread */
-
-      pthread_join(priv->threadid, &value);
-      priv->threadid = 0;
+      auderr("ERROR: nxmq_send stop message failed (%d)\n", ret);
+      return ret;
     }
+
+  /* Join the worker thread */
+
+  pthread_join(priv->threadid, &value);
+  priv->threadid = 0;
 
   return OK;
 }
