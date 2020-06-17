@@ -25,9 +25,13 @@ include $(TOPDIR)/Make.defs
 
 GIT_DIR = $(if $(wildcard $(TOPDIR)$(DELIM).git),y,)
 
+ifeq ($(GIT_DIR),y)
+GIT_PRESENT = `git rev-parse --git-dir 2> /dev/null`
+endif
+
 # In case we cannot get version information from GIT
 
-ifneq ($(GIT_DIR),y)
+ifneq ($(GIT_PRESENT),true)
 -include $(TOPDIR)/.version
 
 # In case the version file does not exist
