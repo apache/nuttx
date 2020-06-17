@@ -97,26 +97,26 @@ static ssize_t note_read(FAR struct file *filep, FAR char *buffer,
   sched_lock();
   do
     {
-     /* Get the next note (removing it from the buffer) */
+      /* Get the next note (removing it from the buffer) */
 
-     notelen = sched_note_get((FAR uint8_t *)buffer, buflen);
-     if (notelen < 0)
-       {
-         /* We were unable to read the next note, probably because it will
-          * not fit into the user buffer.
-          */
+      notelen = sched_note_get((FAR uint8_t *)buffer, buflen);
+      if (notelen < 0)
+        {
+          /* We were unable to read the next note, probably because it will
+           * not fit into the user buffer.
+           */
 
-         if (retlen == 0)
-           {
-             /* If nothing was read then report the error.  Otherwise,
-              * just silently drop the note.
-              */
+          if (retlen == 0)
+            {
+              /* If nothing was read then report the error.  Otherwise,
+               * just silently drop the note.
+               */
 
-             retlen = notelen;
-           }
+              retlen = notelen;
+            }
 
-         break;
-       }
+          break;
+        }
 
       /* Update pointers from the note that was transferred */
 
