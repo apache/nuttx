@@ -165,6 +165,7 @@ int can_getsockopt(FAR struct socket *psock, int option,
           }
         break;
 
+#ifdef CONFIG_NET_CAN_CANFD
       case CAN_RAW_FD_FRAMES:
         if (*value_len < sizeof(conn->fd_frames))
           {
@@ -183,6 +184,7 @@ int can_getsockopt(FAR struct socket *psock, int option,
             ret                = OK;
           }
         break;
+#endif
 
       case CAN_RAW_JOIN_FILTERS:
         break;

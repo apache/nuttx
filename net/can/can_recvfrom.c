@@ -436,7 +436,14 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
           if (!conn->fd_frames)
 #endif
             {
+#if defined(CONFIG_NET_TIMESTAMP)
+              if ((conn->psock->s_timestamp && (dev->d_len >
+                  sizeof(struct can_frame) + sizeof(struct timeval)))
+                  || (!conn->psock->s_timestamp && (dev->d_len >
+                   sizeof(struct can_frame))))
+#else
               if (dev->d_len > sizeof(struct can_frame))
+#endif
                 {
                   /* DO WE NEED TO CLEAR FLAGS?? */
 
