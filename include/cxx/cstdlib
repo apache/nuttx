@@ -70,6 +70,9 @@ namespace std
 
   // String to binary conversions
 
+  using ::atof;
+  using ::atoi;
+  using ::atol;
   using ::strtol;
   using ::strtoul;
 #ifdef CONFIG_HAVE_LONG_LONG
