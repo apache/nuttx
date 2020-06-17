@@ -1,8 +1,4 @@
-/Cygwin-names.dat
-/Darwin-names.dat
-/Msys-names.dat
-/Linux-names.dat
+/nuttx-names.dat
 /hostfs.h
-/GNU
 /chip
 /board

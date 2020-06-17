@@ -228,7 +228,7 @@ OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 # Override in Make.defs if linker is not 'ld'
 
 ifeq ($(HOSTOS),Darwin)
-  LDUNEXPORTSYMBOLS ?= -unexported_symbols_list $(HOSTOS)-names.dat
+  LDUNEXPORTSYMBOLS ?= -unexported_symbols_list nuttx-names.dat
 else
   LDSTARTGROUP ?= --start-group
   LDENDGROUP ?= --end-group
@@ -277,30 +277,14 @@ board/libboard$(LIBEXT):
 # A partially linked object containing only NuttX code (no interface to host OS)
 # Change the names of most symbols that conflict with libc symbols.
 
-GNU:
-	$(Q) mkdir -p ./GNU
+nuttx-names.dat: nuttx-names.in
+	$(call PREPROCESS, $<, $@)
 
-GNU/Linux-names.dat: GNU nuttx-names.dat
-	$(Q) cp nuttx-names.dat $@
-
-Msys-names.dat: GNU nuttx-names.dat
-	$(Q) cp nuttx-names.dat $@
-
-Cygwin-names.dat: nuttx-names.dat
-ifeq ($())CONFIG_SIM_CYGWIN_DECORATED),y)
-	$(Q) cat $^ | sed -e "s/^/_/g" >$@
-else
-	$(Q) cp nuttx-names.dat $@
-endif
-
-Darwin-names.dat: nuttx-names.dat
-	$(Q) cat $^ | sed -e "s/^\([^[:space:]][^[:space:]]*\)[[:space:]].*/_\1/g" >$@
-
-nuttx.rel : libarch$(LIBEXT) board/libboard$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
+nuttx.rel : libarch$(LIBEXT) board/libboard$(LIBEXT) nuttx-names.dat $(LINKOBJS)
 	$(Q) echo "LD:  nuttx.rel"
 	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o $@ $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP) $(LDUNEXPORTSYMBOLS)
 ifneq ($(HOSTOS),Darwin)
-	$(Q) $(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat $@
+	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat $@
 endif
 
 # Generate the final NuttX binary by linking the host-specific objects with the NuttX
@@ -332,7 +316,7 @@ export_startup: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS)
 depend: .depend
 
 cleanrel:
-	$(Q) rm -f nuttx.rel $(HOSTOS)-names.dat
+	$(Q) rm -f nuttx.rel nuttx-names.dat
 
 clean: cleanrel
 	$(Q) if [ -e board/Makefile ]; then \
@@ -349,6 +333,5 @@ distclean: clean
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 	$(call DELFILE, hostfs.h)
-	$(Q) rm -rf GNU
 
 -include Make.dep
