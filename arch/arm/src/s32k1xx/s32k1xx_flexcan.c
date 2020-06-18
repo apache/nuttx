@@ -643,7 +643,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   struct timespec ts;
-  clock_systimespec(&ts);
+  clock_systime_timespec(&ts);
 
   if (priv->dev.d_sndlen > priv->dev.d_len)
     {
@@ -1103,7 +1103,7 @@ static void s32k1xx_txtimeout_work(FAR void *arg)
 
   struct timespec ts;
   struct timeval *now = (struct timeval *)&ts;
-  clock_systimespec(&ts);
+  clock_systime_timespec(&ts);
   now->tv_usec = ts.tv_nsec / 1000; /* timespec to timeval conversion */
 
   /* The watchdog timed out, yet we still check mailboxes in case the
