@@ -584,7 +584,7 @@ void sched_note_syscall_enter(int nr, int argc, ...)
   /* Format the note */
 
   note_common(tcb, &note.nsc_cmn, sizeof(struct note_syscall_enter_s),
-              NOTE_CSECTION_ENTER);
+              NOTE_SYSCALL_ENTER);
   note.nsc_nr = nr;
 
   /* Add the note to circular buffer */
@@ -600,7 +600,7 @@ void sched_note_syscall_leave(int nr, uintptr_t result)
   /* Format the note */
 
   note_common(tcb, &note.nsc_cmn, sizeof(struct note_syscall_leave_s),
-              NOTE_CSECTION_LEAVE);
+              NOTE_SYSCALL_LEAVE);
   note.nsc_result = result;
   note.nsc_nr     = nr;
 
