@@ -204,7 +204,8 @@ static inline void rcc_enableahb1(void)
 #ifdef CONFIG_STM32_ETHMAC
   /* Ethernet MAC clocking */
 
-  regval |= (RCC_AHB1ENR_ETHMACEN | RCC_AHB1ENR_ETHMACTXEN | RCC_AHB1ENR_ETHMACRXEN);
+  regval |= (RCC_AHB1ENR_ETHMACEN | RCC_AHB1ENR_ETHMACTXEN
+            | RCC_AHB1ENR_ETHMACRXEN);
 
 #ifdef CONFIG_STM32_ETH_PTP
   /* Precision Time Protocol (PTP) */
@@ -688,7 +689,8 @@ static void stm32_stdclockconfig(void)
 
       regval  = getreg32(STM32_PWR_CR);
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469) || \
+    defined(CONFIG_STM32_STM32F412)
       regval &= ~PWR_CR_VOS_MASK;
       regval |= PWR_CR_VOS_SCALE_1;
 #else
@@ -773,7 +775,9 @@ static void stm32_stdclockconfig(void)
         }
 #endif
 
-      /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
+      /* Enable FLASH prefetch, instruction cache, data cache,
+       * and 5 wait states.
+       */
 
       regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN
 #ifdef CONFIG_STM32_FLASH_PREFETCH
@@ -791,7 +795,8 @@ static void stm32_stdclockconfig(void)
 
       /* Wait until the PLL source is used as the system clock source */
 
-      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL)
+      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK)
+              != RCC_CFGR_SWS_PLL)
         {
         }
 
@@ -909,6 +914,18 @@ static void stm32_stdclockconfig(void)
       regval |= (STM32_RCC_PLLI2SCFGR_PLLI2SN
                 | STM32_RCC_PLLI2SCFGR_PLLI2SQ
                 | STM32_RCC_PLLI2SCFGR_PLLI2SR);
+
+#  elif defined(CONFIG_STM32_STM32F412)
+
+      regval &= ~(RCC_PLLI2SCFGR_PLLI2SM_MASK
+                 | RCC_PLLI2SCFGR_PLLI2SN_MASK
+                 | RCC_PLLI2SCFGR_PLLI2SQ_MASK
+                 | RCC_PLLI2SCFGR_PLLI2SR_MASK);
+      regval |= (STM32_RCC_PLLI2SCFGR_PLLI2SM
+                | STM32_RCC_PLLI2SCFGR_PLLI2SN
+                | STM32_RCC_PLLI2SCFGR_PLLI2SQ
+                | STM32_RCC_PLLI2SCFGR_PLLI2SR
+                | STM32_RCC_PLLI2SCFGR_PLLI2SSRC);
 #  endif
 
       putreg32(regval, STM32_RCC_PLLI2SCFGR);
@@ -916,6 +933,8 @@ static void stm32_stdclockconfig(void)
 #  if defined(STM32_RCC_DCKCFGR2)
 
       regval  = getreg32(STM32_RCC_DCKCFGR2);
+
+#    if defined(CONFIG_STM32_STM32F446)
 
       regval &= ~(RCC_DCKCFGR2_FMPI2C1SEL_MASK
                  | RCC_DCKCFGR2_CECSEL_MASK
@@ -927,6 +946,16 @@ static void stm32_stdclockconfig(void)
                 | STM32_RCC_DCKCFGR2_CK48MSEL
                 | STM32_RCC_DCKCFGR2_SDIOSEL
                 | STM32_RCC_DCKCFGR2_SPDIFRXSEL);
+
+#    elif defined(CONFIG_STM32_STM32F412)
+
+      regval &= ~(RCC_DCKCFGR2_FMPI2C1SEL_MASK
+                 | RCC_DCKCFGR2_CK48MSEL_MASK
+                 | RCC_DCKCFGR2_SDIOSEL_MASK);
+      regval |= (STM32_RCC_DCKCFGR2_FMPI2C1SEL
+                | STM32_RCC_DCKCFGR2_CK48MSEL
+                | STM32_RCC_DCKCFGR2_SDIOSEL);
+#    endif
 
       putreg32(regval, STM32_RCC_DCKCFGR2);
 #  endif
@@ -979,7 +1008,6 @@ static inline void rcc_itm_syslog(void)
 
   modifyreg32(STM32_DBGMCU_CR, DBGMCU_CR_TRACEMODE_MASK, DBGMCU_CR_ASYNCH |
               DBGMCU_CR_TRACEIOEN);
-
 }
 #else
 #  define rcc_itm_syslog()

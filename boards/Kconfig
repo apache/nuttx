@@ -1135,6 +1135,14 @@ config ARCH_BOARD_NUCLEO_F411RE
 		This is a minimal configuration that supports low-level test of the
 		Nucleo F411RE in the NuttX source tree.
 
+config ARCH_BOARD_NUCLEO_F412ZG
+	bool "STM32F412 Nucleo F412ZG"
+	depends on ARCH_CHIP_STM32F412ZG
+	select ARCH_HAVE_LEDS
+	---help---
+		This is a minimal configuration that supports low-level test of the
+		Nucleo F412ZG in the NuttX source tree.
+
 config ARCH_BOARD_NUCLEO_F446RE
 	bool "STM32F446 Nucleo F446RE"
 	depends on ARCH_CHIP_STM32F446R
@@ -2185,6 +2193,7 @@ config ARCH_BOARD
 	default "nucleo-f429zi"            if ARCH_BOARD_NUCLEO_F429ZI
 	default "nucleo-f446re"            if ARCH_BOARD_NUCLEO_F446RE
 	default "nucleo-f410rb"            if ARCH_BOARD_NUCLEO_F410RB
+	default "nucleo-f412zg"            if ARCH_BOARD_NUCLEO_F412ZG
 	default "nucleo-g070rb"            if ARCH_BOARD_NUCLEO_G070RB
 	default "nucleo-g071rb"            if ARCH_BOARD_NUCLEO_G071RB
 	default "nucleo-h743zi"            if ARCH_BOARD_NUCLEO_H743ZI
@@ -2685,6 +2694,9 @@ source "boards/arm/stm32/nucleo-f334r8/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F410RB
 source "boards/arm/stm32/nucleo-f410rb/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F412ZG
+source "boards/arm/stm32/nucleo-f412zg/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F44RE
 source "boards/arm/stm32/nucleo-f446re/Kconfig"
