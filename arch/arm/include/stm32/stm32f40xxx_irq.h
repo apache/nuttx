@@ -332,7 +332,7 @@
 #elif defined(CONFIG_STM32_STM32F429)
 #  define STM32_IRQ_NEXTINT      (91)
 #  define NR_IRQS                (STM32_IRQ_FIRST+91)
-#elif defined(CONFIG_STM32_STM32F446)
+#elif defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F412)
 #  define STM32_IRQ_NEXTINT      (97)
 #  define NR_IRQS                (STM32_IRQ_FIRST+97)
 #elif defined(CONFIG_STM32_STM32F469)
@@ -356,10 +356,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus
