@@ -142,7 +142,7 @@ static inline void apb_reset(void)
 void stm32l4_dfumode(void)
 {
   uint32_t regval;
-  boot_call_t boot = (boot_call_t)(*(uint32_t *)0x1fff0004);
+  boot_call_t boot;
 
 #ifdef CONFIG_DEBUG_WARN
   _warn("Entering DFU mode...\n");
@@ -170,6 +170,7 @@ void stm32l4_dfumode(void)
 
   /* jump into ROM */
 
+  boot = (boot_call_t)(*(uint32_t *)0x1fff0004);
   boot();
 
   while (true);
