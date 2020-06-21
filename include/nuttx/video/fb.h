@@ -52,8 +52,8 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-/* Color format definitions.  The pretty much define the color pixel processing
- * organization of the video controller.
+/* Color format definitions.  This pretty much defines the color pixel
+ * processing organization of the video controller.
  */
 
 /* Monochrome Formats *******************************************************/
@@ -66,7 +66,7 @@
 #define FB_FMT_GREY           FB_FMT_Y8 /* BPP=8 */
 #define FB_FMT_Y800           FB_FMT_Y8 /* BPP=8 */
 
-#define FB_ISMONO(f)          ((f) >= FB_FMT_Y4) && (f) <= FB_FMT_Y16)
+#define FB_ISMONO(f)          (((f) >= FB_FMT_Y4) && (f) <= FB_FMT_Y16)
 
 /* RGB video formats ********************************************************/
 
@@ -92,8 +92,8 @@
 
 #define FB_FMT_RGBRAW         16          /* BPP=? */
 
-/* Raw RGB with arbitrary sample packing within a pixel. Packing and precision
- * of R, G and B components is determined by bit masks for each.
+/* Raw RGB with arbitrary sample packing within a pixel. Packing and
+ * precision of R, G and B components is determined by bit masks for each.
  */
 
 #define FB_FMT_RGBBTFLD16     17          /* BPP=16 */
@@ -110,7 +110,7 @@
 #define FB_FMT_RGBT16         22          /* BPP=16 */
 #define FB_FMT_RGBT32         23          /* BPP=32 */
 
-#define FB_ISRGB(f)           ((f) >= FB_FMT_RGB1) && (f) <= FB_FMT_RGBT32)
+#define FB_ISRGB(f)           (((f) >= FB_FMT_RGB1) && (f) <= FB_FMT_RGBT32)
 
 /* Packed YUV Formats *******************************************************/
 
@@ -148,7 +148,7 @@
 #define FB_FMT_Y42T           44          /* BPP=16  UYVY LSB for transparency */
 #define FB_FMT_YUVP           45          /* BPP=24? YCbCr 4:2:2 Y0U0Y1V0 order */
 
-#define FB_ISYUVPACKED(f)     ((f) >= FB_FMT_AYUV) && (f) <= FB_FMT_YUVP)
+#define FB_ISYUVPACKED(f)     (((f) >= FB_FMT_AYUV) && (f) <= FB_FMT_YUVP)
 
 /* Packed Planar YUV Formats ************************************************/
 
@@ -196,7 +196,7 @@
 #  define FB_CUR_XOR          0x10        /* Use XOR vs COPY ROP on image */
 #endif
 
-/* Hardware overlay acceleration *******************************************/
+/* Hardware overlay acceleration ********************************************/
 
 #ifdef CONFIG_FB_OVERLAY
 #  define FB_ACCL_TRANSP      0x01        /* Hardware tranparency support */
@@ -445,7 +445,9 @@ struct fb_cursorsize_s
 };
 #endif
 
-/* The following are used to get/get the cursor attributes via IOCTL command. */
+/* The following are used to get/get the cursor attributes via IOCTL
+ * command.
+ */
 
 struct fb_cursorattrib_s
 {
@@ -624,7 +626,8 @@ int up_fbinitialize(int display);
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
- *   plane of the specified plane.  Many OSDs support multiple planes of video.
+ *   plane of the specified plane.  Many OSDs support multiple planes of
+ *   video.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
