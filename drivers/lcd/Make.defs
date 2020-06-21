@@ -131,6 +131,11 @@ endif
 ifeq ($(CONFIG_LCD_RA8875),y)
   CSRCS += ra8875.c
 endif
+
+ifeq ($(CONFIG_LCD_ST7735),y)
+  CSRCS += st7735.c
+endif
+
 endif # CONFIG_LCD
 
 ifeq ($(CONFIG_SLCD),y)

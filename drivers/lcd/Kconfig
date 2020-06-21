@@ -55,7 +55,7 @@ config LCD_EXTERNINIT
 	depends on LCD_FRAMEBUFFER
 	---help---
 		Define to support external LCD initialization by platform-specific
-		code.  This this option is defined, then the LCD framebuffer
+		code.  If this option is defined, then the LCD framebuffer
 		emulation will call board_graphics_setup() to initialize the
 		graphics device.  This option is necessary if display is used that
 		cannot be initialized using the standard LCD interfaces.
@@ -573,6 +573,32 @@ config SSD1351_MSTRCONTRAST
 		Specifies the master contrast ratio in sixteenths.
 
 endif
+
+config LCD_ST7735
+	bool "Sitronix ST7735 TFT Controller"
+	default n
+
+if LCD_ST7735
+	config LCD_ST7735_GM00
+		bool "132x162 Display Resolution"
+		default n
+		---help---
+			Two resolutions are availabe, either the 132x162 or
+			the 128x160
+
+	config LCD_ST7735_BPP
+		int "Bit Per Pixel (12, 16 or 18)"
+		default 16
+
+	config LCD_ST7735_SPIMODE
+		int "SPI Mode"
+		default 0
+
+	config LCD_ST7735_FREQUENCY
+		int "SPI Frequency"
+		default 3000000
+
+endif # LCD_ST7735
 
 config LCD_PCD8544
 	bool "Nokia 5110 LCD Display (Philips PCD8544)"
