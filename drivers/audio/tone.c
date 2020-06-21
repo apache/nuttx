@@ -328,7 +328,16 @@ static void stop_note(FAR struct tone_upperhalf_s *upper)
 {
   FAR struct pwm_lowerhalf_s *tone = upper->devtone;
 
-  tone->ops->stop(tone);
+#ifdef CONFIG_PWM_MULTICHAN
+  upper->tone.channels[0].channel = upper->channel;
+  upper->tone.channels[0].duty    = 0;
+#else
+  upper->tone.duty                = 0;
+#endif
+
+  /* REVISIT: Should check the return value */
+
+  tone->ops->start(tone, &upper->tone);
 }
 
 /****************************************************************************
