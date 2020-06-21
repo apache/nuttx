@@ -361,12 +361,9 @@ static void start_tune(FAR struct tone_upperhalf_s *upper, const char *tune)
   g_silence_length = 0;
   g_repeat         = false;
 
-  /* Schedule a callback to start playing */
+  /* Start playing tune */
 
-  ts.tv_sec        = 1;
-  ts.tv_nsec       = 0;
-
-  ONESHOT_START(upper->oneshot, oneshot_callback, upper, &ts);
+  next_note(upper);
 }
 
 /****************************************************************************
