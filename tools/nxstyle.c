@@ -195,6 +195,12 @@ static const char *g_white_prefix[] =
   NULL
 };
 
+static const char *g_white_list[] =
+{
+  "_Exit",   /* Ref:  stdlib.h */
+  NULL
+};
+
 /********************************************************************************
  * Private Functions
  ********************************************************************************/
@@ -502,7 +508,7 @@ static bool check_section_header(const char *line, int lineno)
  *
  ********************************************************************************/
 
-static bool white_prefix(const char *ident, int lineno)
+static bool white_list(const char *ident, int lineno)
 {
   const char **pptr;
   const char *str;
@@ -512,6 +518,19 @@ static bool white_prefix(const char *ident, int lineno)
        pptr++)
     {
       if (strncmp(ident, str, strlen(str)) == 0)
+        {
+          return true;
+        }
+    }
+
+  for (pptr = g_white_list;
+       (str = *pptr) != NULL;
+       pptr++)
+    {
+      size_t len = strlen(str);
+
+      if (strncmp(ident, str, len) == 0 &&
+          isalnum(ident[len]) == 0)
         {
           return true;
         }
@@ -1485,7 +1504,7 @@ int main(int argc, char **argv, char **envp)
                 {
                   /* Ignore symbols that begin with white-listed prefixes */
 
-                  if (white_prefix(&line[ident_index], lineno))
+                  if (white_list(&line[ident_index], lineno))
                     {
                       /* No error */
                     }
