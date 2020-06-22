@@ -103,7 +103,31 @@
 #undef  _POSIX_ASYNC_IO
 #undef  _POSIX_PRIO_IO
 
-/* Constants used with POSIX sysconf().  sysconf() will return -2 and set
+/* Constants used with POSIX pathconf().  pathconf() will return -1 and set
+ * errno to ENOSYS for most of these.
+ */
+
+#define _PC_2_SYMLINKS                   0x0001
+#define _PC_ALLOC_SIZE_MIN               0x0002
+#define _PC_ASYNC_IO                     0x0003
+#define _PC_CHOWN_RESTRICTED             0x0004
+#define _PC_FILESIZEBITS                 0x0005
+#define _PC_LINK_MAX                     0x0006
+#define _PC_MAX_CANON                    0x0007
+#define _PC_MAX_INPUT                    0x0008
+#define _PC_NAME_MAX                     0x0009
+#define _PC_NO_TRUNC                     0x000a
+#define _PC_PATH_MAX                     0x000b
+#define _PC_PIPE_BUF                     0x000c
+#define _PC_PRIO_IO                      0x000d
+#define _PC_REC_INCR_XFER_SIZE           0x000e
+#define _PC_REC_MIN_XFER_SIZE            0x000f
+#define _PC_REC_XFER_ALIGN               0x0010
+#define _PC_SYMLINK_MAX                  0x0011
+#define _PC_SYNC_IO                      0x0012
+#define _PC_VDISABLE                     0x0013
+
+/* Constants used with POSIX sysconf().  sysconf() will return -1 and set
  * errno to ENOSYS for most of these.
  */
 
@@ -365,6 +389,8 @@ int     sethostname(FAR const char *name, size_t size);
 /* Get configurable system variables */
 
 long    sysconf(int name);
+long    fpathconf(int fildes, int name);
+long    pathconf(FAR const char *path, int name);
 
 /* User and group identity management */
 
