@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-WD=`pwd`
+WD=$(dirname $0)
 
 # Get command line parameters
 
@@ -86,7 +86,7 @@ done
 OUTFILE=$1
 
 if [ -z ${VERSION} ] ; then
-  VERSION=`git tag --sort=taggerdate | tail -1 | cut -d'-' -f2`
+  VERSION=`git -C ${WD} tag --sort=taggerdate | tail -1 | cut -d'-' -f2`
 
   # Earlier tags used the format "major.minor", append a "0" for a patch.
 
@@ -133,12 +133,12 @@ PATCH=`echo ${VERSION} | cut -d'.' -f3`
 # Get GIT information (if not provided on the command line)
 
 if [ -z "${BUILD}" ]; then
-  BUILD=`git log --oneline -1 | cut -d' ' -f1 2>/dev/null`
+  BUILD=`git -C ${WD} log --oneline -1 | cut -d' ' -f1 2>/dev/null`
   if [ -z "${BUILD}" ]; then
     echo "GIT version information is not available"
     exit 5
   fi
-  if [ -n "`git diff-index --name-only HEAD | head -1`" ]; then
+  if [ -n "`git -C ${WD} diff-index --name-only HEAD | head -1`" ]; then
     BUILD=${BUILD}-dirty
   fi
 fi
