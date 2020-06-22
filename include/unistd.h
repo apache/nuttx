@@ -268,6 +268,7 @@
 
 /* Helpers and legacy compatibility definitions */
 
+#define symlink(p1, p2)                  link((p1), (p2))
 #define fdatasync(f)                     fsync(f)
 #define getdtablesize(f)                 ((int)sysconf(_SC_OPEN_MAX))
 
