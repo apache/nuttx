@@ -156,6 +156,7 @@ extern "C"
 int mkdir(FAR const char *pathname, mode_t mode);
 int mkfifo(FAR const char *pathname, mode_t mode);
 int stat(FAR const char *path, FAR struct stat *buf);
+int lstat(FAR const char *path, FAR struct stat *buf);
 int fstat(int fd, FAR struct stat *buf);
 int chmod(FAR const char *path, mode_t mode);
 int fchmod(int fd, mode_t mode);
