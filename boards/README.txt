@@ -188,6 +188,10 @@ boards/arm/stm32/axoloti
   Support for the Axoloti synthesizer board based on the STMicro
   STM32F427IGH6 MCU.  See: http://www.axoloti.com/
 
+boards/arm/stm32/b-g474e-dpow1
+  Initial support for booting NuttX to a functional NSH prompt on the
+  STMicro B-G474E-DPOW1 Discovery kit with STM32G474RE MCU.
+
 boards/arm/stm32f0l0g0/b-l072z-lrwan1
   STMicro STM32L0 Discovery kit with LoRa/SigFox based on STM32L072CZ MCU.
 
