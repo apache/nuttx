@@ -48,12 +48,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The number of functions that may be registered to be called
- * at program exit.
- */
-
-#define ATEXIT_MAX 1
-
 /* Values for seeking */
 
 #define SEEK_SET    0  /* From the start of the file */
