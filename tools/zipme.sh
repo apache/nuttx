@@ -121,7 +121,7 @@ done
 VERSION=$1
 if [ -n ${VERSION} ] ; then
   VERSIONOPT="-v ${VERSION}"
-if
+fi
 
 # Full tar options
 
