@@ -2112,6 +2112,8 @@ nuttx/
  |   |   |- stm32/
  |   |   |   |- axoloti/
  |   |   |   |   `- README.txt
+ |   |   |   |- b-g474e-dpow1/
+ |   |   |   |   `- README.txt
  |   |   |   |- clicker2-stm32/
  |   |   |   |   `- README.txt
  |   |   |   |- cloudctrl/
