@@ -45,6 +45,7 @@
 "link","unistd.h","defined(CONFIG_PSEUDOFS_SOFTLINKS)","int","FAR const char *","FAR const char *"
 "listen","sys/socket.h","defined(CONFIG_NET)","int","int","int"
 "lseek","unistd.h","","off_t","int","off_t","int"
+"lstat","sys/stat.h","","int","FAR const char *","FAR struct stat *"
 "mkdir","sys/stat.h","!defined(CONFIG_DISABLE_MOUNTPOINT)","int","FAR const char *","mode_t"
 "mmap","sys/mman.h","","FAR void *","FAR void *","size_t","int","int","int","off_t"
 "modhandle","nuttx/module.h","defined(CONFIG_MODULE)","FAR void *","FAR const char *"

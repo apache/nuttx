@@ -78,7 +78,7 @@
 #  define _NX_WRITE(f,b,s)     nx_write(f,b,s)
 #  define _NX_SEEK(f,o,w)      nx_seek(f,o,w)
 #  define _NX_IOCTL(f,r,a)     nx_ioctl(f,r,a)
-#  define _NX_STAT(p,s)        nx_stat(p,s)
+#  define _NX_STAT(p,s)        nx_stat(p,s,1)
 #  define _NX_GETERRNO(r)      (-(r))
 #  define _NX_SETERRNO(r)      set_errno(-(r))
 #  define _NX_GETERRVAL(r)     (r)
@@ -1450,7 +1450,7 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf);
  *
  ****************************************************************************/
 
-int nx_stat(FAR const char *path, FAR struct stat *buf);
+int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve);
 
 #undef EXTERN
 #if defined(__cplusplus)

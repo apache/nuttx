@@ -104,7 +104,7 @@ static int  automount_interrupt(FAR const struct automount_lower_s *lower,
  *
  * Returned Value:
  *   OK_EXIST if the inode exists
- *   OK_NOENT if the indoe does not exist
+ *   OK_NOENT if the inode does not exist
  *   Negated errno if some failure occurs
  *
  ****************************************************************************/

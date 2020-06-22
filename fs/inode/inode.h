@@ -248,9 +248,10 @@ int inode_find(FAR struct inode_search_s *desc);
  *   <sys/stat.h>, into which information is placed concerning the file.
  *
  * Input Parameters:
- *   inode - The indoe of interest
- *   buf   - The caller provide location in which to return information about
- *           the inode.
+ *   inode   - The inode of interest
+ *   buf     - The caller provide location in which to return information
+ *             about the inode.
+ *   resolve - Whether to resolve the symbolic link
  *
  * Returned Value:
  *   Zero (OK) returned on success.  Otherwise, a negated errno value is
@@ -259,7 +260,7 @@ int inode_find(FAR struct inode_search_s *desc);
  ****************************************************************************/
 
 struct stat;  /* Forward reference */
-int inode_stat(FAR struct inode *inode, FAR struct stat *buf);
+int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve);
 
 /****************************************************************************
  * Name: inode_free
