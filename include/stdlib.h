@@ -167,6 +167,8 @@ static inline void _Exit(int s)
 int       system(FAR const char *cmd);
 #endif
 
+FAR char *realpath(FAR const char *path, FAR char *resolved);
+
 /* String to binary conversions */
 
 long      strtol(FAR const char *nptr, FAR char **endptr, int base);
