@@ -338,9 +338,9 @@ int getitimer(int which, FAR struct itimerval *value);
  *   to indicate the error.
  *
  *   EINVAL - The which argument does not correspond to an predefined ID.
- *   EINVAL - A value structure specified a microsecond value less than zero or
- *     greater than or equal to 1000 million, and the it_value member of that
- *     structure did not specify zero seconds and nanoseconds.
+ *   EINVAL - A value structure specified a microsecond value less than zero
+ *     or greater than or equal to 1000 million, and the it_value member of
+ *     that structure did not specify zero seconds and nanoseconds.
  *
  * Assumptions:
  *
@@ -348,6 +348,40 @@ int getitimer(int which, FAR struct itimerval *value);
 
 int setitimer(int which, FAR const struct itimerval *value,
               FAR struct itimerval *ovalue);
+
+/****************************************************************************
+ * Name: utimes
+ *
+ * Description:
+ * The utimes() function shall set the access and modification times of the
+ * file pointed to by the path argument to the value of the times argument.
+ * utimes() function allows time specifications accurate to the microsecond.
+
+ * For utimes(), the times argument is an array of timeval structures. The
+ * first array member represents the date and time of last access, and the
+ * second member represents the date and time of last modification. The times
+ * in the timeval structure are measured in seconds and microseconds since
+ * the Epoch, although rounding toward the nearest second may occur.
+
+ * If the times argument is a null pointer, the access and modification times
+ * of the file shall be set to the current time. The effective user ID of the
+ * process shall match the owner of the file, has write access to the file or
+ * appropriate privileges to use this call in this manner. Upon completion,
+ * utimes() shall mark the time of the last file status change, st_ctime, for
+ * update.
+ *
+ * Input Parameters:
+ *   path  - Specifies the file to be modified
+ *   times - Specifies the time value to set
+ *
+ * Returned Value:
+ *   Upon successful completion, 0 shall be returned. Otherwise, -1 shall be
+ *   returned and errno shall be set to indicate the error, and the file
+ *   times shall not be affected.
+ *
+ ****************************************************************************/
+
+int utimes(FAR const char *path, const struct timeval times[2]);
 
 #undef EXTERN
 #if defined(__cplusplus)
