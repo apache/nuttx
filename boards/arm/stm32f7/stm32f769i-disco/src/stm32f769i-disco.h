@@ -74,9 +74,11 @@
 
 #define GPIO_BTN_USER      (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
 
-/* Sporadic scheduler instrumentation. This configuration has been used for evaluating the NuttX
- * sporadic scheduler.  In this evaluation, two GPIO outputs are used.  One indicating the priority
- * (high or low) of the sporadic thread and one indicating where the thread is running or not.
+/* Sporadic scheduler instrumentation.
+ * This configuration has been used for evaluating the NuttX sporadic scheduler.
+ * In this evaluation, two GPIO outputs are used.  One indicating the priority
+ * (high or low) of the sporadic thread and one indicating where the thread is
+ * running or not.
  *
  * There is nothing special about the pin selections:
  *
@@ -155,6 +157,18 @@ void weak_function stm32_spidev_initialize(void);
 
 #ifdef CONFIG_SPORADIC_INSTRUMENTATION
 void arch_sporadic_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_sdram_initialize
+ *
+ * Description:
+ *   Called from stm32_bringup to initialize external SDRAM access.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F7_FMC
+void stm32_sdram_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
