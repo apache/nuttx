@@ -280,7 +280,7 @@ board/libboard$(LIBEXT):
 nuttx-names.dat: nuttx-names.in
 	$(call PREPROCESS, $<, $@)
 
-nuttx.rel : libarch$(LIBEXT) board/libboard$(LIBEXT) nuttx-names.dat $(LINKOBJS)
+nuttx.rel: libarch$(LIBEXT) board/libboard$(LIBEXT) nuttx-names.dat $(LINKOBJS)
 	$(Q) echo "LD:  nuttx.rel"
 	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o $@ $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP) $(LDUNEXPORTSYMBOLS)
 ifneq ($(HOSTOS),Darwin)
@@ -316,7 +316,8 @@ export_startup: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS)
 depend: .depend
 
 cleanrel:
-	$(Q) rm -f nuttx.rel nuttx-names.dat
+	$(call DELFILE, nuttx-names.dat)
+	$(call DELFILE, nuttx.rel)
 
 clean: cleanrel
 	$(Q) if [ -e board/Makefile ]; then \
