@@ -101,135 +101,6 @@ static const uint32_t g_dataconfig[STM32_FMC_NDATACONFIGS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_fmc_sdram_wait
- *
- * Description:
- *   Wait for the SDRAM controller to be ready.
- *
- ****************************************************************************/
-
-static void stm32_fmc_sdram_wait(void)
-{
-  int timeout = 0xffff;
-  while (timeout > 0)
-    {
-      if ((getreg32(STM32_FMC_SDSR) & FMC_SDSR_BUSY) == 0)
-        {
-          break;
-        }
-
-      timeout--;
-    }
-
-  DEBUGASSERT(timeout > 0);
-}
-
-/****************************************************************************
- * Name: stm32_fmc_enable
- *
- * Description:
- *   Enable clocking to the FMC.
- *
- ****************************************************************************/
-
-static void stm32_fmc_enable(void)
-{
-  modifyreg32(STM32_RCC_AHB3ENR, 0, RCC_AHB3ENR_FMCEN);
-}
-
-/****************************************************************************
- * Name: stm32_fmc_sdram_set_refresh_rate
- *
- * Description:
- *   Set the SDRAM refresh rate.
- *
- ****************************************************************************/
-
-static void stm32_fmc_sdram_set_refresh_rate(int count)
-{
-  uint32_t val;
-
-  DEBUGASSERT(count <= 0x1fff && count >= 0x29);
-
-  stm32_fmc_sdram_wait();
-
-  val  = getreg32(STM32_FMC_SDRTR);
-  val &= ~(0x1fff << 1);        /* preserve non-count bits */
-  val |= (count << 1);
-  putreg32(val, STM32_FMC_SDRTR);
-}
-
-/****************************************************************************
- * Name: stm32_fmc_sdram_set_timing
- *
- * Description:
- *   Set the SDRAM timing parameters.
- *
- ****************************************************************************/
-
-static void stm32_fmc_sdram_set_timing(int bank, uint32_t timing)
-{
-  uint32_t val;
-  uint32_t sdtr;
-
-  DEBUGASSERT((bank == 1) || (bank == 2));
-  DEBUGASSERT((timing & FMC_SDTR_RESERVED) == 0);
-
-  sdtr = (bank == 1) ? STM32_FMC_SDTR1 : STM32_FMC_SDTR2;
-  val  = getreg32(sdtr);
-  val &= FMC_SDTR_RESERVED;     /* preserve reserved bits */
-  val |= timing;
-  putreg32(val, sdtr);
-}
-
-/****************************************************************************
- * Name: stm32_fmc_sdram_set_control
- *
- * Description:
- *   Set the SDRAM control parameters.
- *
- ****************************************************************************/
-
-static void stm32_fmc_sdram_set_control(int bank, uint32_t ctrl)
-{
-  uint32_t val;
-  uint32_t sdcr;
-
-  DEBUGASSERT((bank == 1) || (bank == 2));
-  DEBUGASSERT((ctrl & FMC_SDCR_RESERVED) == 0);
-
-  sdcr = (bank == 1) ? STM32_FMC_SDCR1 : STM32_FMC_SDCR2;
-  val  = getreg32(sdcr);
-  val &= FMC_SDCR_RESERVED;     /* preserve reserved bits */
-  val |= ctrl;
-  putreg32(val, sdcr);
-}
-
-/****************************************************************************
- * Name: stm32_fmc_sdram_command
- *
- * Description:
- *   Send a command to the SDRAM.
- *
- ****************************************************************************/
-
-static void stm32_fmc_sdram_command(uint32_t cmd)
-{
-  uint32_t val;
-
-  DEBUGASSERT((cmd & FMC_SDCMR_RESERVED) == 0);
-
-  /* Wait for the controller to be ready */
-
-  stm32_fmc_sdram_wait();
-
-  val = getreg32(STM32_FMC_SDCMR);
-  val &= FMC_SDCMR_RESERVED;    /* Preserve reserved bits */
-  val |= cmd;
-  putreg32(val, STM32_FMC_SDCMR);
-}
-
-/****************************************************************************
  * Name: stm32_extmemgpios
  *
  * Description:
@@ -271,9 +142,9 @@ void stm32_sdram_initialize(void)
   stm32_extmemgpios(g_addressconfig, STM32_FMC_NADDRCONFIGS);
   stm32_extmemgpios(g_dataconfig, STM32_FMC_NDATACONFIGS);
 
-  /* Enable AHB clocking to the FMC */
+  /* Initialize the FMC peripheral */
 
-  stm32_fmc_enable();
+  stm32_fmc_init();
 
   /* Configure and enable the SDRAM bank1
    *
