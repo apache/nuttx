@@ -63,9 +63,10 @@
  * Name: stm32_boardinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All STM32 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
  ****************************************************************************/
 
@@ -74,8 +75,8 @@ void stm32_boardinitialize(void)
 #if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
     defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
     defined(CONFIG_STM32F7_SPI5)
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spidev_initialize() has been brought into the link.
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function stm32_spidev_initialize() has been brought into the link.
    */
 
   if (stm32_spidev_initialize)
@@ -85,7 +86,8 @@ void stm32_boardinitialize(void)
 #endif
 
 #ifdef CONFIG_SPORADIC_INSTRUMENTATION
-  /* This configuration has been used for evaluating the NuttX sporadic scheduler.
+  /* This configuration has been used for evaluating the NuttX sporadic
+   * scheduler.
    * The following call initializes the sporadic scheduler monitor.
    */
 
@@ -107,12 +109,13 @@ void stm32_boardinitialize(void)
  * Name: board_late_initialize
  *
  * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional initialization call
- *   will be performed in the boot-up sequence to a function called
- *   board_late_initialize().  board_late_initialize() will be called immediately after
- *   up_initialize() is called and just before the initial application is started.
- *   This additional initialization phase may be used, for example, to initialize
- *   board-specific device drivers.
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().
+ *   board_late_initialize() will be called immediately after up_initialize()
+ *   is called and just before the initial application is started.
+ *   This additional initialization phase may be used, for example, to
+ *   initialize board-specific device drivers.
  *
  ****************************************************************************/
 
