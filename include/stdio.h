@@ -90,7 +90,6 @@
 #define putchar(c) fputc(c, stdout)
 #define getc(s)    fgetc(s)
 #define getchar()  fgetc(stdin)
-#define rewind(s)  ((void)fseek((s),0,SEEK_SET))
 
 /* Path to the directory where temporary files can be created */
 
@@ -168,6 +167,7 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
 ssize_t getline(FAR char **lineptr, size_t *n, FAR FILE *stream);
 FAR char *gets(FAR char *s);
 FAR char *gets_s(FAR char *s, rsize_t n);
+void   rewind(FAR FILE *stream);
 void   setbuf(FAR FILE *stream, FAR char *buf);
 int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
 int    ungetc(int c, FAR FILE *stream);

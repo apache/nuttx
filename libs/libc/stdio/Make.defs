@@ -59,8 +59,8 @@ CSRCS += lib_fputs.c lib_ungetc.c lib_vprintf.c lib_fprintf.c lib_vfprintf.c
 CSRCS += lib_stdinstream.c lib_stdoutstream.c lib_stdsistream.c
 CSRCS += lib_stdsostream.c lib_perror.c lib_feof.c lib_ferror.c
 CSRCS += lib_rawinstream.c lib_rawoutstream.c lib_rawsistream.c
-CSRCS += lib_rawsostream.c lib_remove.c lib_clearerr.c lib_scanf.c
-CSRCS += lib_vscanf.c lib_fscanf.c lib_vfscanf.c lib_tmpfile.c
+CSRCS += lib_rawsostream.c lib_remove.c lib_rewind.c lib_clearerr.c
+CSRCS += lib_scanf.c lib_vscanf.c lib_fscanf.c lib_vfscanf.c lib_tmpfile.c
 
 endif
 
