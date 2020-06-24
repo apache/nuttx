@@ -192,6 +192,10 @@ if [ ! -d "${ARCHDIR}" ]; then
   exit 1
 fi
 
+# Copy the depends script
+
+cp "${TOPDIR}/tools/mkdeps.c" "${EXPORTDIR}/tools/."
+
 # Copy the default linker script
 
 cp -f "${TOPDIR}/binfmt/libelf/gnu-elf.ld" "${EXPORTDIR}/scripts/."
