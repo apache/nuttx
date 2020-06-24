@@ -267,7 +267,6 @@ if [ "X${USRONLY}" != "Xy" ]; then
   echo "HEAD_OBJ     = ${HEAD_OBJ}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "EXTRA_OBJS   = ${EXTRA_OBJS}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "LDSTARTGROUP = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LDLIBS       = ${LDLIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "EXTRA_LIBS   = ${EXTRA_LIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "LIBGCC       = ${LIBGCC}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "LDENDGROUP   = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
@@ -362,58 +361,21 @@ if [ "X${USRONLY}" != "Xy" ]; then
   fi
 fi
 
+LDLIBS=`basename -a ${LIBLIST} | sed -e "s/lib/-l/g" -e "s/\.${LIBEXT:1}//g" | tr "\n" " "`
+
+if [ "X${USRONLY}" != "Xy" ]; then
+  echo "LDLIBS           = ${LDLIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
+fi
+
 # Then process each library
 
-AR=${CROSSDEV}ar
 for lib in ${LIBLIST}; do
   if [ ! -f "${TOPDIR}/${lib}" ]; then
     echo "MK: Library ${TOPDIR}/${lib} does not exist"
     exit 1
   fi
 
-  # Get some shorter names for the library
-
-  libname=`basename ${lib} ${LIBEXT}`
-  shortname=`echo ${libname} | sed -e "s/^lib//g"`
-
-  # Copy the application library unmodified
-
-  if [ "X${libname}" = "Xlibapps" ]; then
-    cp -p "${TOPDIR}/${lib}" "${EXPORTDIR}/libs/." || \
-      { echo "MK: cp ${TOPDIR}/${lib} failed"; exit 1; }
-  else
-
-    # Create a temporary directory and extract all of the objects there
-    # Hmmm.. this probably won't work if the archiver is not 'ar'
-
-    mkdir "${EXPORTDIR}/tmp" || \
-      { echo "MK: 'mkdir ${EXPORTDIR}/tmp' failed"; exit 1; }
-    cd "${EXPORTDIR}/tmp" || \
-      { echo "MK: 'cd ${EXPORTDIR}/tmp' failed"; exit 1; }
-    if [ "X${WINTOOL}" = "Xy" ]; then
-      WLIB=`cygpath -w "${TOPDIR}/${lib}"`
-      ${AR} x "${WLIB}"
-    else
-      ${AR} x "${TOPDIR}/${lib}"
-    fi
-
-    # Rename each object file (to avoid collision when they are combined)
-    # and add the file to libnuttx
-
-    for file in `ls`; do
-      mv "${file}" "${shortname}-${file}"
-      if [ "X${WINTOOL}" = "Xy" ]; then
-        WLIB=`cygpath -w "${EXPORTDIR}/libs/libnuttx${LIBEXT}"`
-        ${AR} rcs "${WLIB}" "${shortname}-${file}"
-      else
-        ${AR} rcs "${EXPORTDIR}/libs/libnuttx${LIBEXT}" "${shortname}-${file}"
-      fi
-    done
-
-    cd "${TOPDIR}" || \
-      { echo "MK: 'cd ${TOPDIR}' failed"; exit 1; }
-    rm -rf "${EXPORTDIR}/tmp"
-  fi
+  cp ${TOPDIR}/${lib} ${EXPORTDIR}/libs
 done
 
 # Copy the essential build script file(s)
