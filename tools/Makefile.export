@@ -61,40 +61,48 @@ default: all
 $(EXPORTDIR)/makeinfo.sh: $(TOPDIR)/.config $(EXPORTDIR)/Make.defs
 	@echo "#!/bin/bash" > $(EXPORTDIR)/makeinfo.sh
 	@echo "" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "ARCHSUBDIR=\"$(ARCHSUBDIR)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "AR=\"$(AR)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHCFLAGS=\"$(ARCHCFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHCPUFLAGS=\"$(ARCHCPUFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHCXXFLAGS=\"$(ARCHCXXFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHDIR=\"$(ARCHDIR)\"" >> $(EXPORTDIR)/makeinfo.sh
-ifdef ARCHSCRIPT
-	@echo "LDNAME=\"$(LDNAME)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "LDDIR=\"$(LDDIR)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "LDPATH=\"$(LDPATH)\"" >> $(EXPORTDIR)/makeinfo.sh
-endif
-	@echo "ARCHCFLAGS=\"$(ARCHCFLAGS) $(ARCHCPUFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "ARCHCXXFLAGS=\"$(ARCHCXXFLAGS) $(ARCHCPUFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHOPTIMIZATION=\"$(ARCHOPTIMIZATION)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHPICFLAGS=\"$(ARCHPICFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHSUBDIR=\"$(ARCHSUBDIR)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHWARNINGS=\"$(ARCHWARNINGS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHWARNINGSXX=\"$(ARCHWARNINGSXX)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "ARCHOPTIMIZATION=\"$(ARCHOPTIMIZATION)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "CROSSDEV=\"$(CROSSDEV)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "CC=\"$(CC)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "CXX=\"$(CXX)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "CPP=\"$(CPP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "CROSSDEV=\"$(CROSSDEV)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "CXX=\"$(CXX)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "EXEEXT=\"$(EXEEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "EXTRA_LIBPATHS=\"$(EXTRA_LIBPATHS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "EXTRA_LIBS=\"$(EXTRA_LIBS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "EXTRA_OBJS=\"$(EXTRA_OBJS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTCC=\"$(HOSTCC)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTCFLAGS=\"$(HOSTCFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTEXEEXT=\"$(HOSTEXEEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTINCLUDES=\"$(HOSTINCLUDES)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTLDFLAGS=\"$(HOSTLDFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+ifdef ARCHSCRIPT
+	@echo "LDDIR=\"$(LDDIR)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDNAME=\"$(LDNAME)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDPATH=\"$(LDPATH)\"" >> $(EXPORTDIR)/makeinfo.sh
+endif
 	@echo "LD=\"$(LD)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "AR=\"$(AR)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDENDGROUP=\"$(LDENDGROUP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDFLAGS=\"$(LDFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDLIBS=\"$(LDLIBS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDSCRIPT=\"$(LDSCRIPT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDSTARTGROUP=\"$(LDSTARTGROUP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LIBEXT=\"$(LIBEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "NM=\"$(NM)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "STRIP=\"$(STRIP)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "OBJCOPY=\"$(OBJCOPY)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "OBJDUMP=\"$(OBJDUMP)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "NXFLATLDFLAGS1=\"$(NXFLATLDFLAGS1)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "NXFLATLDFLAGS2=\"$(NXFLATLDFLAGS2)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "OBJCOPY=\"$(OBJCOPY)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "OBJDUMP=\"$(OBJDUMP)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "OBJEXT=\"$(OBJEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "LIBEXT=\"$(LIBEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "EXEEXT=\"$(EXEEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "HOSTCC=\"$(HOSTCC)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "HOSTINCLUDES=\"$(HOSTINCLUDES)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "HOSTCFLAGS=\"$(HOSTCFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "HOSTLDFLAGS=\"$(HOSTLDFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "HOSTEXEEXT=\"$(HOSTEXEEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
-	@echo "LDSCRIPT=\"$(LDSCRIPT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "STRIP=\"$(STRIP)\"" >> $(EXPORTDIR)/makeinfo.sh
 	$(Q) chmod 755 $(EXPORTDIR)/makeinfo.sh
 
 clean:

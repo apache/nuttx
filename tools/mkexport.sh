@@ -233,6 +233,7 @@ fi
 # Save the compilation options
 
 echo "ARCHCFLAGS       = ${ARCHCFLAGS}" >"${EXPORTDIR}/scripts/Make.defs"
+echo "ARCHCPUFLAGS     = ${ARCHCPUFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "ARCHCXXFLAGS     = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "ARCHPICFLAGS     = ${ARCHPICFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "ARCHWARNINGS     = ${ARCHWARNINGS}" >>"${EXPORTDIR}/scripts/Make.defs"
@@ -263,13 +264,13 @@ echo "LDSCRIPT         = ${LDSCRIPT}" >>"${EXPORTDIR}/scripts/Make.defs"
 # Additional compilation options when the kernel is built
 
 if [ "X${USRONLY}" != "Xy" ]; then
-  echo "LDFLAGS      = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "HEAD_OBJ     = ${HEAD_OBJ}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "EXTRA_OBJS   = ${EXTRA_OBJS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LDSTARTGROUP = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "EXTRA_LIBS   = ${EXTRA_LIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LIBGCC       = ${LIBGCC}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LDENDGROUP   = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "EXTRA_LIBS       = ${EXTRA_LIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "EXTRA_OBJS       = ${EXTRA_OBJS}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "HEAD_OBJ         = ${HEAD_OBJ}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDENDGROUP       = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDFLAGS          = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDSTARTGROUP     = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LIBGCC           = ${LIBGCC}" >>"${EXPORTDIR}/scripts/Make.defs"
 fi
 
 # Copy the system map file(s)
@@ -376,6 +377,36 @@ for lib in ${LIBLIST}; do
   fi
 
   cp ${TOPDIR}/${lib} ${EXPORTDIR}/libs
+done
+
+# Process extra librarys
+
+for lib in ${EXTRA_LIBS}; do
+
+  # Convert library name
+
+  if [ ${lib:0:2} = "-l" ]; then
+    lib=`echo "${lib}" | sed -e "s/-l/lib/" -e "s/$/${LIBEXT}/"`
+  fi
+
+  for path in ${EXTRA_LIBPATHS}; do
+
+    # Skip the library path options
+
+    if [ ${#path} == 2 ]; then continue; fi
+
+    if [ ${path:0:2} = "-l" ] || [ ${path:0:2} = "-L" ]; then
+      path=${path:2}
+    fi
+
+    # Export the extra librarys
+
+    if [ -f "${path}/${lib}" ]; then
+      cp -a ${path}/${lib} ${EXPORTDIR}/libs
+      break
+    fi
+
+  done
 done
 
 # Copy the essential build script file(s)
