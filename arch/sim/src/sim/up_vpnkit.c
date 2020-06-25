@@ -111,6 +111,7 @@ static int vpnkit_connect(void)
   INFO("Successfully negotiated with vpnkit");
   g_vpnkit_fd = fd;
   g_connect_warned = false;
+  netdriver_setmacaddr(g_vifinfo.mac);
   return 0;
 }
 
@@ -138,7 +139,6 @@ static void vpnkit_disconnect(void)
 void vpnkit_init(void)
 {
   vpnkit_connect();
-  netdriver_setmacaddr(g_vifinfo.mac);
 }
 
 /****************************************************************************
