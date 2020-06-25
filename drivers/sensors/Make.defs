@@ -227,10 +227,6 @@ ifeq ($(CONFIG_LIS3DH),y)
   CSRCS += lis3dh.c
 endif
 
-ifeq ($(CONFIG_SENSORS_MPU60X0),y)
-  CSRCS += mpu60x0.c
-endif
-
 ifeq ($(CONFIG_SENSORS_MAX31855),y)
   CSRCS += max31855.c
 endif
@@ -260,6 +256,10 @@ ifeq ($(CONFIG_SENSORS_ADT7320),y)
 endif
 
 endif # CONFIG_SPI
+
+ifeq ($(CONFIG_SENSORS_MPU60X0),y)
+  CSRCS += mpu60x0.c
+endif
 
 # Quadrature encoder upper half
 
