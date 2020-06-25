@@ -1,0 +1,20 @@
+:name: QuickLogic QuickFeather
+:description: This script runs NuttX on a QuickFeather board.
+
+$name?="QuickFeather"
+
+using sysbus
+mach create $name
+machine LoadPlatformDescription @platforms/boards/eos-s3-quickfeather.repl
+
+showAnalyzer uart
+sysbus LogPeripheralAccess sysbus.uart
+logLevel -1 sysbus.uart
+machine StartGdbServer 3333
+
+macro reset
+"""
+    sysbus LoadELF $CWD/nuttx
+"""
+runMacro $reset
+

@@ -1,0 +1,70 @@
+############################################################################
+# arch/arm/src/eoss3/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
+CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
+
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+CMN_ASRCS += arm_setjmp.S
+endif
+endif
+
+CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c arm_copyfullstate.c
+CMN_CSRCS += arm_createstack.c arm_doirq.c arm_exit.c arm_hardfault.c
+CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
+CMN_CSRCS += arm_itm.c arm_mdelay.c arm_memfault.c arm_modifyreg8.c
+CMN_CSRCS += arm_modifyreg16.c arm_modifyreg32.c arm_releasepending.c
+CMN_CSRCS += arm_releasestack.c arm_reprioritizertr.c arm_schedulesigaction.c
+CMN_CSRCS += arm_sigdeliver.c arm_stackframe.c arm_svcall.c arm_systemreset.c
+CMN_CSRCS += arm_trigger_irq.c arm_udelay.c arm_unblocktask.c arm_usestack.c arm_vfork.c
+
+ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
+CMN_ASRCS += arm_lazyexception.S
+else
+CMN_ASRCS += arm_exception.S
+endif
+CMN_CSRCS += arm_vectors.c
+
+ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
+CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CMN_CSRCS += arm_task_start.c arm_pthread_start.c
+CMN_CSRCS += arm_signal_dispatch.c
+CMN_UASRCS += arm_signal_handler.S
+endif
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += arm_checkstack.c
+endif
+
+CHIP_CSRCS  = eoss3_start.c eoss3_gpio.c eoss3_lowputc.c eoss3_clockconfig.c
+CHIP_CSRCS += eoss3_irq.c
+CHIP_CSRCS += eoss3_serial.c
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += eoss3_idle.c
+endif
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += eoss3_timerisr.c
+endif
