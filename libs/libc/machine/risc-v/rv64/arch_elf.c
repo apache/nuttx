@@ -150,7 +150,7 @@ static void _calc_imm(long offset, long *imm_hi, long *imm_lo)
     {
       hi++;
     }
-  else if (r <= -2048)
+  else if (r < -2048)
     {
       hi--;
     }
