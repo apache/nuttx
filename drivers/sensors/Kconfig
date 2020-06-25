@@ -549,6 +549,11 @@ config MPU60X0_I2C
 
 endchoice
 
+config MPU60X0_I2C_FREQ
+	int "MPU60x0 I2C Frequency"
+	depends on MPU60X0_I2C
+	default 400000
+
 config MPU60X0_EXTI
 	bool "Enable interrupts"
 	default n
