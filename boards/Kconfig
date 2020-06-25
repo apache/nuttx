@@ -178,6 +178,16 @@ config ARCH_BOARD_EKKLM3S9B96
 		TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
 		an EKK-LM3S9B96 which is a Cortex-M3.
 
+config ARCH_BOARD_QUICKFEATHER
+	bool "EOS S3 QuickFeather"
+	depends on ARCH_CHIP_EOSS3
+	select ARCH_HAVE_LEDS
+	---help---
+		QuickLogic EOS S3 QuickFeather board. This is the feather form factor
+		low cost development board.  This includes 16-Mbit external flash,
+		MC3635 accelerometer, DPS310 pressure sensor, IM69D130 PDM microphone,
+		internal programmable FPGA fabric.
+
 config ARCH_BOARD_ESP32CORE
 	bool "Espressif ESP32 Core board V2"
 	depends on ARCH_CHIP_ESP32
@@ -2126,6 +2136,7 @@ config ARCH_BOARD
 	default "efm32-g8xx-stk"           if ARCH_BOARD_EFM32G8XXSTK
 	default "efm32gg-stk3700"          if ARCH_BOARD_EFM32GG_STK3700
 	default "ekk-lm3s9b96"             if ARCH_BOARD_EKKLM3S9B96
+	default "quickfeather"             if ARCH_BOARD_QUICKFEATHER
 	default "esp32-core"               if ARCH_BOARD_ESP32CORE
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
