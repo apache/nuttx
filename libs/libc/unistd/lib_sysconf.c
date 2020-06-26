@@ -233,6 +233,14 @@ long sysconf(int name)
         return 0;
 #endif
 
+      case _SC_NPROCESSORS_CONF:
+      case _SC_NPROCESSORS_ONLN:
+#ifdef CONFIG_SMP_NCPUS
+        return CONFIG_SMP_NCPUS;
+#else
+        return 1;
+#endif
+
       default:
 #if 0 /* Assume valid but not implemented for the time being */
         errcode = EINVAL;
