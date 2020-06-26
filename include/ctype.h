@@ -49,8 +49,16 @@
 #include <nuttx/compiler.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Inline Functions
  ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Name: isspace
@@ -69,9 +77,7 @@ static inline int isspace(int c)
          c == '\f' || c == '\v';
 }
 #else
-#  define isspace(c) \
-    ((c) == ' '  || (c) == '\t' || (c) == '\n' || (c) == '\r' || \
-     (c) == '\f' || (c) == '\v')
+int isspace(int c);
 #endif
 
 /****************************************************************************
@@ -89,7 +95,7 @@ static inline int isascii(int c)
   return c >= 0 && c <= 0x7f;
 }
 #else
-#  define isascii(c)   ((c) >= 0 && (c) <= 0x7f)
+int isascii(int c);
 #endif
 
 /****************************************************************************
@@ -106,7 +112,7 @@ static inline int isprint(int c)
   return c >= 0x20 && c < 0x7f;
 }
 #else
-#  define isprint(c)   ((c) >= 0x20 && (c) < 0x7f)
+int isprint(int c);
 #endif
 
 /****************************************************************************
@@ -123,7 +129,7 @@ static inline int isgraph(int c)
   return c > 0x20 && c < 0x7f;
 }
 #else
-#  define isgraph(c)   ((c) > 0x20 && (c) < 0x7f)
+int isgraph(int c);
 #endif
 
 /****************************************************************************
@@ -140,7 +146,7 @@ static inline int iscntrl(int c)
   return !isprint(c);
 }
 #else
-#  define iscntrl(c) (!isprint(c))
+int iscntrl(int c);
 #endif
 
 /****************************************************************************
@@ -157,7 +163,7 @@ static inline int islower(int c)
   return c >= 'a' && c <= 'z';
 }
 #else
-#  define islower(c)   ((c) >= 'a' && (c) <= 'z')
+int islower(int c);
 #endif
 
 /****************************************************************************
@@ -174,7 +180,7 @@ static inline int isupper(int c)
   return c >= 'A' && c <= 'Z';
 }
 #else
-#  define isupper(c)   ((c) >= 'A' && (c) <= 'Z')
+int isupper(int c);
 #endif
 
 /****************************************************************************
@@ -191,7 +197,7 @@ static inline int isalpha(int c)
   return islower(c) || isupper(c);
 }
 #else
-#  define isalpha(c)   (islower(c) || isupper(c))
+int isalpha(int c);
 #endif
 
 /****************************************************************************
@@ -208,7 +214,7 @@ static inline int isblank(int c)
   return c == ' ' || c == '\t';
 }
 #else
-#  define isblank(c)   ((c) == ' ' || (c) == '\t')
+int isblank(int c);
 #endif
 
 /****************************************************************************
@@ -225,7 +231,7 @@ static inline int isdigit(int c)
   return c >= '0' && c <= '9';
 }
 #else
-#  define isdigit(c)   ((c) >= '0' && (c) <= '9')
+int isdigit(int c);
 #endif
 
 /****************************************************************************
@@ -242,7 +248,7 @@ static inline int isalnum(int c)
   return isalpha(c) || isdigit(c);
 }
 #else
-#  define isalnum(c)   (isalpha(c) || isdigit(c))
+int isalnum(int c);
 #endif
 
 /****************************************************************************
@@ -260,7 +266,7 @@ static inline int ispunct(int c)
   return isgraph(c) && !isalnum(c);
 }
 #else
-#  define ispunct(c)   (isgraph(c) && !isalnum(c))
+int ispunct(int c);
 #endif
 
 /****************************************************************************
@@ -279,10 +285,7 @@ static inline int isxdigit(int c)
          (c >= 'A' && c <= 'F');
 }
 #else
-#  define isxdigit(c) \
-    (((c) >= '0' && (c) <= '9') || \
-     ((c) >= 'a' && (c) <= 'f') || \
-     ((c) >= 'A' && (c) <= 'F'))
+int isxdigit(int c);
 #endif
 
 /****************************************************************************
@@ -299,8 +302,7 @@ static inline int toupper(int c)
   return (c >= 'a' && c <= 'z') ? c - 'a' + 'A' : c;
 }
 #else
-#  define toupper(c) \
-    (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))
+int toupper(int c);
 #endif
 
 /****************************************************************************
@@ -317,20 +319,7 @@ static inline int tolower(int c)
   return (c >= 'A' && c <= 'Z') ? (c - 'A' + 'a') : c;
 }
 #else
-#  define tolower(c) \
-    (((c) >= 'A' && (c) <= 'Z') ? ((c) - 'A' + 'a') : (c))
-#endif
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
+int tolower(int c);
 #endif
 
 #undef EXTERN
