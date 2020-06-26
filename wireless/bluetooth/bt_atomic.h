@@ -48,52 +48,27 @@
 #include <stdbool.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define bt_atomic_set(ptr, value)     (*(ptr) = (value))
+#define bt_atomic_get(ptr)            (*(ptr))
+#define bt_atomic_testbit(ptr, bitno) ((*(ptr) & (1 << (bitno))) != 0)
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
 typedef uint8_t bt_atomic_t;
 
 /****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifdef CONFIG_HAVE_INLINE
-/* These operations are inherently atomic */
-
-static inline void bt_atomic_set(FAR bt_atomic_t *ptr, bt_atomic_t value)
-{
-  *ptr = value;
-}
-
-static inline bt_atomic_t bt_atomic_get(FAR bt_atomic_t *ptr)
-{
-  return *ptr;
-}
-
-static inline bool bt_atomic_testbit(FAR bt_atomic_t *ptr,
-                                     bt_atomic_t bitno)
-{
-  return (*ptr & (1 << bitno)) != 0;
-}
-#endif
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-#ifndef CONFIG_HAVE_INLINE
-void bt_atomic_set(FAR bt_atomic_t *ptr, bt_atomic_t value);
-bt_atomic_t bt_atomic_get(FAR bt_atomic_t *ptr);
-#endif
 
 bt_atomic_t bt_atomic_incr(FAR bt_atomic_t *ptr);
 bt_atomic_t bt_atomic_decr(FAR bt_atomic_t *ptr);
 bt_atomic_t bt_atomic_setbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno);
 bt_atomic_t bt_atomic_clrbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno);
-
-#ifndef CONFIG_HAVE_INLINE
-bool bt_atomic_testbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno);
-#endif
 
 bool bt_atomic_testsetbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno);
 bool bt_atomic_testclrbit(FAR bt_atomic_t *ptr, bt_atomic_t bitno);

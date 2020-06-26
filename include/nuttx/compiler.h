@@ -255,15 +255,6 @@
 #  undef  CONFIG_PTR_IS_NOT_INT
 #endif
 
-/* GCC supports inlined functions for C++ and for C version C99 and above */
-
-#  if defined(__cplusplus) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
-#    define CONFIG_HAVE_INLINE 1
-#  else
-#    undef CONFIG_HAVE_INLINE
-#    define inline
-#  endif
-
 /* ISO C11 supports anonymous (unnamed) structures and unions, added in
  * GCC 4.6 (but might be suppressed with -std= option).  ISO C++11 also
  * adds un-named unions, but NOT unnamed structures (although compilers
@@ -422,10 +413,6 @@
 #  define CONFIG_PTR_IS_NOT_INT 1
 #endif
 
-/* New versions of SDCC supports inline function */
-
-#  define CONFIG_HAVE_INLINE 1
-
 /* SDCC does types long long and float, but not types double and long
  * double.
  */
@@ -543,11 +530,6 @@
 #    endif
 #  endif
 
-/* The Zilog compiler does not support inline functions */
-
-#  undef  CONFIG_HAVE_INLINE
-#  define inline
-
 /* ISO C11 supports anonymous (unnamed) structures and unions.  Zilog does
  * not support C11
  */
@@ -659,8 +641,6 @@
 #  undef  CONFIG_SMALL_MEMORY
 #  undef  CONFIG_LONG_IS_NOT_INT
 #  undef  CONFIG_PTR_IS_NOT_INT
-#  undef  CONFIG_HAVE_INLINE
-#  define inline
 #  undef  CONFIG_HAVE_LONG_LONG
 #  define CONFIG_HAVE_FLOAT 1
 #  undef  CONFIG_HAVE_DOUBLE

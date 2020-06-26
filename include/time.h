@@ -200,17 +200,7 @@ clock_t clock(void);
 int clock_settime(clockid_t clockid, FAR const struct timespec *tp);
 int clock_gettime(clockid_t clockid, FAR struct timespec *tp);
 int clock_getres(clockid_t clockid, FAR struct timespec *res);
-
-#ifdef CONFIG_HAVE_INLINE
-static inline int timespec_get(FAR struct timespec *t, int b)
-{
-  return b == TIME_UTC ? (clock_gettime(CLOCK_REALTIME, t), b) : 0;
-}
-
-#else
-#define timespec_get(t, b) \
-  ((b) == TIME_UTC ? (clock_gettime(CLOCK_REALTIME, (t)), (b)) : 0)
-#endif
+int timespec_get(FAR struct timespec *t, int b);
 
 time_t mktime(FAR struct tm *tp);
 FAR struct tm *gmtime(FAR const time_t *timep);
