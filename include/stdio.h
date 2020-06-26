@@ -158,8 +158,10 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
          FAR FILE *stream);
 int    fscanf(FAR FILE *stream, FAR const IPTR char *fmt, ...);
 int    fseek(FAR FILE *stream, long int offset, int whence);
+int    fseeko(FAR FILE *stream, off_t offset, int whence);
 int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
 long   ftell(FAR FILE *stream);
+off_t  ftello(FAR FILE *stream);
 size_t fwrite(FAR const void *ptr, size_t size, size_t n_items,
          FAR FILE *stream);
 ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
