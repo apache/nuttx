@@ -214,17 +214,32 @@ enum stm32_intstate_e
 
 enum stm32_trace_e
 {
-  I2CEVENT_NONE = 0,      /* No events have occurred with this status */
-  I2CEVENT_SENDADDR,      /* Start/Master bit set and address sent, param = msgc */
-  I2CEVENT_SENDBYTE,      /* Send byte, param = dcnt */
-  I2CEVENT_ITBUFEN,       /* Enable buffer interrupts, param = 0 */
-  I2CEVENT_RCVBYTE,       /* Read more dta, param = dcnt */
-  I2CEVENT_REITBUFEN,     /* Re-enable buffer interrupts, param = 0 */
-  I2CEVENT_DISITBUFEN,    /* Disable buffer interrupts, param = 0 */
-  I2CEVENT_BTFNOSTART,    /* BTF on last byte with no restart, param = msgc */
-  I2CEVENT_BTFRESTART,    /* Last byte sent, re-starting, param = msgc */
-  I2CEVENT_BTFSTOP,       /* Last byte sten, send stop, param = 0 */
-  I2CEVENT_ERROR          /* Error occurred, param = 0 */
+  I2CEVENT_NONE = 0,
+  I2CEVENT_STATE_ERROR,
+  I2CEVENT_ISR_SHUTDOWN,
+  I2CEVENT_ISR_CALL,
+  I2CEVENT_ISR_EMPTY_CALL,
+  I2CEVENT_MSG_HANDLING,
+  I2CEVENT_POLL_NOT_READY,
+  I2CEVENT_EMPTY_MSG,
+  I2CEVENT_START,
+  I2CEVENT_SENDADDR,
+  I2CEVENT_ADDRESS_ACKED,
+  I2CEVENT_ADDRESS_NACKED,
+  I2CEVENT_NACK,
+  I2CEVENT_READ,
+  I2CEVENT_READ_ERROR,
+  I2CEVENT_ADDRESS_ACKED_READ_1,
+  I2CEVENT_ADDRESS_ACKED_READ_2,
+  I2CEVENT_WRITE_TO_DR,
+  I2CEVENT_WRITE_STOP,
+  I2CEVENT_WRITE_RESTART,
+  I2CEVENT_WRITE_NO_RESTART,
+  I2CEVENT_WRITE_ERROR,
+  I2CEVENT_WRITE_FLAG_ERROR,
+  I2CEVENT_TC_RESTART,
+  I2CEVENT_TC_NO_RESTART,
+  I2CEVENT_ERROR
 };
 
 /* Trace data */
@@ -369,25 +384,6 @@ static void stm32_i2c_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg
 /************************************************************************************
  * Private Data
  ************************************************************************************/
-
-/* Trace events strings */
-
-#ifdef CONFIG_I2C_TRACE
-static const char *g_trace_names[] =
-{
-  "NONE      ",
-  "SENDADDR  ",
-  "SENDBYTE  ",
-  "ITBUFEN   ",
-  "RCVBYTE   ",
-  "REITBUFEN ",
-  "DISITBUFEN",
-  "BTFNOSTART",
-  "BTFRESTART",
-  "BTFSTOP   ",
-  "ERROR     "
-};
-#endif
 
 /* I2C interface */
 
@@ -953,9 +949,9 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
-             "%2d. STATUS: %08x COUNT: %3d EVENT: %s(%2d) PARM: %08x TIME: %d\n",
-             i + 1, trace->status, trace->count, g_trace_names[trace->event],
-             trace->event, trace->parm, trace->time - priv->start_time);
+             "%2d. STATUS: %08x COUNT: %3d EVENT: %2d PARM: %08x TIME: %d\n",
+             i + 1, trace->status, trace->count, trace->event, trace->parm,
+             (int)(trace->time - priv->start_time));
     }
 }
 #endif /* CONFIG_I2C_TRACE */
