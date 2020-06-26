@@ -390,6 +390,12 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
+      if ((options & WNOHANG) != 0)
+        {
+          pid = 0;
+          break;
+        }
+
       /* Wait for any death-of-child signal */
 
       ret = nxsig_waitinfo(&set, &info);
