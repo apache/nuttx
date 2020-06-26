@@ -311,6 +311,22 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
         }
 #endif
 
+      if ((options & WNOHANG) != 0)
+        {
+          /* SUSv4 says:
+           *
+           * "If waitid() returns because WNOHANG was specified and status
+           * is not available for any process specified by idtype and id,
+           * then the si_signo and si_pid members of the structure pointed
+           * to by infop shall be set to zero and the values of other
+           * members of the structure are unspecified."
+           */
+
+          info->si_signo = 0;
+          info->si_pid = 0;
+          break;
+        }
+
       /* Wait for any death-of-child signal */
 
       ret = nxsig_waitinfo(&set, info);
