@@ -29,7 +29,6 @@
 #include <nuttx/compiler.h>
 
 #include <sys/types.h>
-#include <errno.h>
 #include <stdint.h>
 #include <limits.h>
 
@@ -146,16 +145,7 @@ int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
 
 /* _Exit() is a stdlib.h equivalent to the unistd.h _exit() function */
 
-void      _exit(int status); /* See unistd.h */
-
-#ifdef CONFIG_HAVE_INLINE
-static inline void _Exit(int s)
-{
-  _exit(s);
-}
-#else
-#define _Exit(s) _exit(s)
-#endif
+void      _Exit(int status) noreturn_function;
 
 /* System() command is not implemented in the NuttX libc because it is so
  * entangled with shell logic.  There is an experimental version at
@@ -186,44 +176,13 @@ double    strtod(FAR const char *str, FAR char **endptr);
 long double strtold(FAR const char *str, FAR char **endptr);
 #endif
 
-#ifdef CONFIG_HAVE_INLINE
-static inline int atoi(FAR const char *nptr)
-{
-  return (int)strtol(nptr, NULL, 10);
-}
-#else
-#define atoi(nptr) ((int)strtol((nptr), NULL, 10))
-#endif
-
-#ifdef CONFIG_HAVE_INLINE
-static inline int atol(FAR const char *nptr)
-{
-  return strtol(nptr, NULL, 10);
-}
-#else
-#define atol(nptr) strtol((nptr), NULL, 10)
-#endif
-
+int atoi(FAR const char *nptr);
+long atol(FAR const char *nptr);
 #ifdef CONFIG_HAVE_LONG_LONG
-#ifdef CONFIG_HAVE_INLINE
-static inline long long atoll(FAR const char *nptr)
-{
-  return strtoll(nptr, NULL, 10);
-}
-#else
-#define atoll(nptr) strtoll((nptr), NULL, 10)
+long long atoll(FAR const char *nptr);
 #endif
-#endif
-
 #ifdef CONFIG_HAVE_DOUBLE
-#ifdef CONFIG_HAVE_INLINE
-static inline double atof(FAR const char *nptr)
-{
-  return strtod(nptr, NULL);
-}
-#else
-#define atof(nptr) strtod((nptr), NULL)
-#endif
+double atof(FAR const char *nptr);
 #endif
 
 /* Binary to string conversions */
@@ -248,21 +207,8 @@ FAR void *realloc(FAR void *, size_t);
 FAR void *memalign(size_t, size_t);
 FAR void *zalloc(size_t);
 FAR void *calloc(size_t, size_t);
-
-#ifdef CONFIG_HAVE_INLINE
-static inline FAR void *aligned_alloc(size_t a, size_t s)
-{
-  return memalign(a, s);
-}
-
-static inline int posix_memalign(FAR void **m, size_t a, size_t s)
-{
-  return (*m = memalign(a, s)) ? OK : ENOMEM;
-}
-#else
-#define aligned_alloc(a, s) memalign((a), (s))
-#define posix_memalign(m, a, s) ((*(m) = memalign((a), (s))) ? OK : ENOMEM)
-#endif
+FAR void *aligned_alloc(size_t, size_t);
+int posix_memalign(FAR void **, size_t, size_t);
 
 /* Pseudo-Terminals */
 

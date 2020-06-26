@@ -48,7 +48,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_HAVE_INLINE
 /* Compatibility definitions
  *
  * Marked LEGACY in Open Group Base Specifications Issue 6/
@@ -57,13 +56,11 @@
  * IEEE Std 1003.1-2008
  */
 
-#  define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
-#  define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
-#  define bzero(s,n)       (void)memset(s,0,n)
-#  define index(s,c)       strchr(s,c)
-#  define rindex(s,c)      strrchr(s,c)
-
-#endif /* !CONFIG_HAVE_INLINE */
+#define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
+#define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
+#define bzero(s,n)       (void)memset(s,0,n)
+#define index(s,c)       strchr(s,c)
+#define rindex(s,c)      strrchr(s,c)
 
 /****************************************************************************
  * Inline Functions
@@ -77,41 +74,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-#ifdef CONFIG_HAVE_INLINE
-/* Compatibility inline functions.
- *
- * Marked LEGACY in Open Group Base Specifications Issue 6/
- * IEEE Std 1003.1-2004
- * Removed from Open Group Base Specifications Issue 7/
- * IEEE Std 1003.1-2008
- */
-
-static inline int bcmp(FAR const void *b1, FAR const void *b2, size_t len)
-{
-  return memcmp(b1, b2, len);
-}
-
-static inline void bcopy(FAR const void *b1, FAR void *b2, size_t len)
-{
-  memmove(b2, b1, len);
-}
-
-static inline void bzero(FAR void *s, size_t len)
-{
-  memset(s, 0, len);
-}
-
-static inline FAR char *index(FAR const char *s, int c)
-{
-  return strchr(s, c);
-}
-
-static inline FAR char *rindex(FAR const char *s, int c)
-{
-  return strrchr(s, c);
-}
-#endif /* CONFIG_HAVE_INLINE */
 
 /****************************************************************************
  * Public Function Prototypes

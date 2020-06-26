@@ -82,15 +82,6 @@
 #define stdout     (&nxsched_get_streams()->sl_streams[1])
 #define stderr     (&nxsched_get_streams()->sl_streams[2])
 
-/* These APIs are not implemented and/or can be synthesized from
- * supported APIs.
- */
-
-#define putc(c,s)  fputc((c),(s))
-#define putchar(c) fputc(c, stdout)
-#define getc(s)    fgetc(s)
-#define getchar()  fgetc(stdin)
-
 /* Path to the directory where temporary files can be created */
 
 #ifndef CONFIG_LIBC_TMPDIR
@@ -164,6 +155,8 @@ long   ftell(FAR FILE *stream);
 off_t  ftello(FAR FILE *stream);
 size_t fwrite(FAR const void *ptr, size_t size, size_t n_items,
          FAR FILE *stream);
+int     getc(FAR FILE *stream);
+int     getchar(void);
 ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
          FAR FILE *stream);
 ssize_t getline(FAR char **lineptr, size_t *n, FAR FILE *stream);
@@ -180,6 +173,8 @@ int    ungetc(int c, FAR FILE *stream);
 
 void   perror(FAR const char *s);
 int    printf(FAR const IPTR char *fmt, ...);
+int    putc(int c, FAR FILE *stream);
+int    putchar(int c);
 int    puts(FAR const IPTR char *s);
 int    rename(FAR const char *oldpath, FAR const char *newpath);
 int    sprintf(FAR char *buf, FAR const IPTR char *fmt, ...);
