@@ -292,6 +292,7 @@ ifneq ($(CONFIG_ARCH_CHIP),)
 endif
 
 dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip drivers\platform
+	$(Q) $(MAKE) -C libs/libxx dirlinks TOPDIR="$(TOPDIR)"
 	$(Q) $(MAKE) -C boards dirlinks TOPDIR="$(TOPDIR)"
 	$(Q) $(MAKE) -C openamp dirlinks TOPDIR="$(TOPDIR)"
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks TOPDIR="$(TOPDIR)"

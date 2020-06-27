@@ -48,7 +48,7 @@ CXXSRCS = libxx_cxa_atexit.cxx libxx_eabi_atexit.cxx
 # in the NuttX uClibc++ GIT repository for more information
 
 ifeq ($(CONFIG_UCLIBCXX),y)
-include uClibc++/Make.defs
+include uClibc++.defs
 else ifeq ($(CONFIG_LIBCXX),y)
 include libcxx/Make.defs
 else
@@ -68,7 +68,7 @@ OBJS = $(AOBJS) $(COBJS) $(CXXOBJS) $(CPPOBJS)
 BIN = libxx$(LIBEXT)
 
 all: $(BIN)
-.PHONY: depend clean distclean
+.PHONY: depend clean distclean dirlinks
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -85,6 +85,8 @@ $(CPPOBJS): %$(OBJEXT): %.cpp
 $(BIN):	$(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
+dirlinks::
+
 .depend: Makefile $(SRCS)
 	$(Q) $(MKDEP) $(DEPPATH) "$(CXX)" -- $(CXXFLAGS) -- $(SRCS) >Make.dep
 	$(Q) touch $@
@@ -95,7 +97,7 @@ clean:
 	$(call DELFILE, $(BIN))
 	$(call CLEAN)
 
-distclean: clean
+distclean:: clean
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 
