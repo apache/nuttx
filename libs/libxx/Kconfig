@@ -66,8 +66,8 @@ config UCLIBCXX
 
 if UCLIBCXX
 
-config UCLIBCXX_IOSTREAM_BUFSIZE
-	int "IO Stream Buffer Size"
+config UCLIBCXX_BUFSIZE
+	int "IO Stream/Container Buffer Size"
 	default 32
 
 endif
