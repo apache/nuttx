@@ -122,10 +122,8 @@ namespace std
 
   // Networking
 
-#ifdef CONFIG_NET
   using ::gethostname;
   using ::sethostname;
-#endif
 }
 
 #endif // __INCLUDE_CXX_CUNISTD
