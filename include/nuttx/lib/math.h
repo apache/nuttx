@@ -125,6 +125,21 @@
 #define M_PI_2_F   ((float)M_PI_2)
 
 /****************************************************************************
+ * Type Declarations
+ ****************************************************************************/
+
+/* Floating point types */
+
+typedef float        float32;
+#ifndef CONFIG_HAVE_DOUBLE
+typedef float        double_t;
+typedef float        float64;
+#else
+typedef double       double_t;
+typedef double       float64;
+#endif
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 

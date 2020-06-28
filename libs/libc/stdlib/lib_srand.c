@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <math.h>
 #include <stdlib.h>
 
 #include <nuttx/lib/lib.h>
@@ -120,9 +120,9 @@ static inline unsigned long fgenerate1(void)
 {
   unsigned long randint;
 
-  /* First order congruential generator.  One may be added to the result of the
-   * generated value to avoid the value zero.  This would be fatal for the
-   * first order random number generator.
+  /* First order congruential generator.  One may be added to the result of
+   * the generated value to avoid the value zero.  This would be fatal for
+   * the first order random number generator.
    */
 
   randint    = (RND1_CONSTK * g_randint1) % RND1_CONSTP;
@@ -158,8 +158,8 @@ static inline unsigned long fgenerate2(void)
   g_randint2 = g_randint1;
   g_randint1 = randint;
 
-  /* We cannot permit both values to become zero.  That would be fatal for the
-   * second order random number generator.
+  /* We cannot permit both values to become zero.  That would be fatal for
+   * the second order random number generator.
    */
 
   if (g_randint2 == 0 && g_randint1 == 0)
@@ -200,8 +200,8 @@ static inline unsigned long fgenerate3(void)
   g_randint2 = g_randint1;
   g_randint1 = randint;
 
-  /* We cannot permit all three values to become zero.  That would be fatal for the
-   * third order random number generator.
+  /* We cannot permit all three values to become zero.  That would be fatal
+   * for the third order random number generator.
    */
 
   if (g_randint3 == 0 && g_randint2 == 0 && g_randint1 == 0)

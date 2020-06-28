@@ -41,9 +41,7 @@
 
 #include <nuttx/compiler.h>
 
-#include <sys/types.h>
-
-#include <sys/types.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdbool.h>
