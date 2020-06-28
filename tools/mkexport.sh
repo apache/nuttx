@@ -39,6 +39,7 @@ unset TOPDIR
 unset LIBLIST
 unset TGZ
 unset APPDIR
+unset BOARDDIR
 
 USRONLY=n
 WINTOOL=n
@@ -49,6 +50,10 @@ while [ ! -z "$1" ]; do
   -a )
     shift
     APPDIR="$1"
+    ;;
+  -b )
+    shift
+    BOARDDIR="$1"
     ;;
   -d )
     set -x
@@ -200,6 +205,12 @@ cp "${TOPDIR}/tools/incdir.c" "${EXPORTDIR}/tools/."
 # Copy the default linker script
 
 cp -f "${TOPDIR}/binfmt/libelf/gnu-elf.ld" "${EXPORTDIR}/scripts/."
+
+# Copy the board config script
+
+if [ -f "${BOARDDIR}/scripts/Config.mk" ]; then
+  cp -f "${BOARDDIR}/scripts/Config.mk" "${EXPORTDIR}/scripts/."
+fi
 
 # Is there a linker script in this configuration?
 
