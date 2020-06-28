@@ -270,17 +270,17 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                                     (next->preceding & MM_ALLOC_BIT);
             }
 
-          /* Now we want to return newnode */
-
-          oldnode = newnode;
-          oldsize = newnode->size;
-
           /* Now we have to move the user contents 'down' in memory.  memcpy
            * should be safe for this.
            */
 
           newmem = (FAR void *)((FAR char *)newnode + SIZEOF_MM_ALLOCNODE);
           memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
+
+          /* Now we want to return newnode */
+
+          oldnode = newnode;
+          oldsize = newnode->size;
         }
 
       /* Extend into the next free chunk */
