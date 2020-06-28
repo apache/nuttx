@@ -37,9 +37,6 @@ include $(TOPDIR)/Make.defs
 
 CXXSRCS  = libxx_cxapurevirtual.cxx libxx_eabi_atexit.cxx libxx_cxa_atexit.cxx
 CXXSRCS += libxx_cxa_guard.cxx
-ifeq ($(CONFIG_CXX_EXCEPTION),y)
-CXXSRCS += libxx__gnu_unwind_find_exidx.cxx
-endif
 
 # Some of the libs/libxx/ files are not need if uClibc++ or libcxx is installed
 # because uClibx++ or libcxx will replace them
