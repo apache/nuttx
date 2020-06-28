@@ -53,14 +53,6 @@ namespace std
 {
   // Standard types
 
-  using ::float32;
-#ifndef CONFIG_HAVE_DOUBLE
-  using ::double_t;
-  using ::float64;
-#else
-  using ::double_t;
-  using ::float64;
-#endif
   using ::mode_t;
   using ::size_t;
   using ::ssize_t;

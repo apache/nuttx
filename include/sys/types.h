@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/sys/types.h
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014-2015 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,17 +105,6 @@
 
 #ifndef __ASSEMBLY__
 
-/* Floating point types */
-
-typedef float        float32;
-#ifndef CONFIG_HAVE_DOUBLE
-typedef float        double_t;
-typedef float        float64;
-#else
-typedef double       double_t;
-typedef double       float64;
-#endif
-
 /* Misc. scalar types */
 
 /* mode_t is an integer type used for file attributes.  mode_t needs
@@ -165,8 +155,8 @@ typedef uint16_t     ino_t;
 
 typedef uint16_t     nlink_t;
 
-/* pid_t is used for process IDs and process group IDs. It must be signed because
- * negative PID values are used to represent invalid PIDs.
+/* pid_t is used for process IDs and process group IDs. It must be signed
+ * because negative PID values are used to represent invalid PIDs.
  */
 
 typedef int16_t      pid_t;
@@ -177,9 +167,9 @@ typedef int16_t      pid_t;
 
 typedef int16_t      id_t;
 
-/* Unix requires a key of type key_t defined in file sys/types.h for requesting
- * resources such as shared memory segments, message queues and semaphores. A key
- * is simply an integer of type key_t
+/* Unix requires a key of type key_t defined in file sys/types.h for
+ * requesting resources such as shared memory segments, message queues and
+ * semaphores. A key is simply an integer of type key_t
  */
 
 typedef int16_t      key_t;

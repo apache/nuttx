@@ -39,7 +39,7 @@
 
 #include <nuttx/compiler.h>
 
-#include <sys/types.h>
+#include <math.h>
 #include <wchar.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -100,7 +100,7 @@
  * string data cannot be accessed by simply de-referencing the format string
  * pointer.  This might be in the case in Harvard architectures where string
  * data might be stored in instruction space or if string data were stored
- * on some media like EEPROM or external serial FLASH.  In all of these cases,
+ * on some media like EEPROM or external serial FLASH. In all of these cases,
  * string data has to be accessed indirectly using the architecture-supplied
  * up_romgetc().  The following mechanisms attempt to make these different
  * access methods indistinguishable in the following code.
@@ -177,11 +177,14 @@ static int  getlusize(uint8_t fmt, FAR uint16_t flags, unsigned long ln);
 /* Unsigned long long int to ASCII conversions */
 
 #if defined(CONFIG_HAVE_LONG_LONG) && defined(CONFIG_LIBC_LONG_LONG)
-static void llutodec(FAR struct lib_outstream_s *obj, unsigned long long lln);
-static void llutohex(FAR struct lib_outstream_s *obj, unsigned long long lln,
-                     uint8_t a);
-static void llutooct(FAR struct lib_outstream_s *obj, unsigned long long lln);
-static void llutobin(FAR struct lib_outstream_s *obj, unsigned long long lln);
+static void llutodec(FAR struct lib_outstream_s *obj,
+                     unsigned long long lln);
+static void llutohex(FAR struct lib_outstream_s *obj,
+                     unsigned long long lln, uint8_t a);
+static void llutooct(FAR struct lib_outstream_s *obj,
+                     unsigned long long lln);
+static void llutobin(FAR struct lib_outstream_s *obj,
+                     unsigned long long lln);
 static void llutoascii(FAR struct lib_outstream_s *obj, uint8_t fmt,
                        uint16_t flags, unsigned long long lln);
 static void llfixup(uint8_t fmt, FAR uint16_t *flags, FAR long long *lln);
@@ -220,12 +223,12 @@ static const char g_nullstring[] = "(null)";
 static void ptohex(FAR struct lib_outstream_s *obj, uint16_t flags,
                    FAR void *p)
 {
+  uint8_t bits;
   union
   {
     uint32_t  dw;
     FAR void *p;
   } u;
-  uint8_t bits;
 
   /* Check for alternate form */
 
@@ -1210,22 +1213,22 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 
       if (FMT_CHAR != '%')
         {
-           /* Output the character */
+          /* Output the character */
 
-           obj->put(obj, FMT_CHAR);
+          obj->put(obj, FMT_CHAR);
 
-           /* Flush the buffer if a newline is encountered */
+          /* Flush the buffer if a newline is encountered */
 
-           if (FMT_CHAR == '\n')
-             {
-               /* Should return an error on a failure to flush */
+          if (FMT_CHAR == '\n')
+            {
+              /* Should return an error on a failure to flush */
 
-               obj->flush(obj);
-             }
+              obj->flush(obj);
+            }
 
-           /* Process the next character in the format */
+          /* Process the next character in the format */
 
-           continue;
+          continue;
         }
 
       /* We have found a format specifier. Move past it. */
@@ -1263,6 +1266,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
             {
               justify = FMT_RJUST0;
             }
+
 #if 0
           /* Center justification. */
 

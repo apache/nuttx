@@ -40,11 +40,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <math.h>
 #include <stdint.h>
 #include <float.h>
-
-#include <nuttx/lib/float.h>
 
 /****************************************************************************
  * Pre-processor Definitions
