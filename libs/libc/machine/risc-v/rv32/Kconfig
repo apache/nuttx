@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config RISCV_MEMCPY
+        bool "Enable optimized memcpy() for RISC-V"
+        select LIBC_ARCH_MEMCPY
+        ---help---
+                Enable optimized RISC-V specific memcpy() library function

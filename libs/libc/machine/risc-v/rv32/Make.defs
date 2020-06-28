@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/machine/risc-v/Make.defs
+# libs/libc/machine/risc-v/rv32/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,10 +18,12 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARCH_RV64GC),y)
-include $(TOPDIR)/libs/libc/machine/risc-v/rv64/Make.defs
+ifeq ($(CONFIG_RISCV_MEMCPY),y)
+
+ASRCS += arch_memcpy.S
+
+DEPPATH += --dep-path machine/risc-v/rv32
+VPATH += :machine/risc-v/rv32
+
 endif
 
-ifeq ($(CONFIG_ARCH_RV32IM),y)
-include $(TOPDIR)/libs/libc/machine/risc-v/rv32/Make.defs
-endif
