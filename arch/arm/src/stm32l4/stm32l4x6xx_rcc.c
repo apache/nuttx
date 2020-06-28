@@ -682,6 +682,32 @@ static void stm32l4_stdclockconfig(void)
   uint32_t regval;
   volatile int32_t timeout;
 
+  /* Enable FLASH prefetch, instruction cache, data cache,
+   * and 4 wait states. We do this early since the default is zero
+   * wait states and if we are about to increase clock frequency
+   * bad things will happen.
+   *
+   * TODO: could reduce flash wait states according to vcore range
+   * and freq
+   */
+
+#ifdef CONFIG_STM32L4_FLASH_PREFETCH
+  regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |
+            FLASH_ACR_PRFTEN);
+#else
+  regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
+#endif
+  putreg32(regval, STM32L4_FLASH_ACR);
+
+  /* Wait until the requested number of wait states is set */
+
+  while ((getreg32(STM32L4_FLASH_ACR) & FLASH_ACR_LATENCY_MASK) !=
+         FLASH_ACR_LATENCY_4)
+    {
+    }
+
+  /* Proceed to clock configuration */
+
 #if defined(STM32L4_BOARD_USEHSI) || defined(STM32L4_I2C_USE_HSI16)
   /* Enable Internal High-Speed Clock (HSI) */
 
@@ -958,20 +984,6 @@ static void stm32l4_stdclockconfig(void)
         {
         }
 #endif
-
-      /* Enable FLASH prefetch, instruction cache, data cache,
-       * and 4 wait states.
-       * TODO: could reduce flash wait states according to vcore range
-       * and freq
-       */
-
-#ifdef CONFIG_STM32L4_FLASH_PREFETCH
-      regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |
-                FLASH_ACR_PRFTEN);
-#else
-      regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
-#endif
-      putreg32(regval, STM32L4_FLASH_ACR);
 
       /* Select the system clock source */
 
