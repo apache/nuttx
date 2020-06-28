@@ -44,6 +44,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <math.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -60,7 +61,6 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/vs1053.h>
-#include <nuttx/lib/math.h>
 
 #include "vs1053.h"
 

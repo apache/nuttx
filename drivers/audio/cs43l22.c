@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -62,7 +63,6 @@
 #include <nuttx/audio/i2s.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/cs43l22.h>
-#include <nuttx/lib/math.h>
 
 #include "cs43l22.h"
 
