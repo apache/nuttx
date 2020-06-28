@@ -1357,7 +1357,7 @@ Configuration Sub-directories
 
        arm-none-eabi-ar.exe rcs libsupc++.a vterminate.o
 
-  3. Exceptions are enabled and workking (CONFIG_UCLIBCXX_EXCEPTION=y)
+  3. Exceptions are enabled and workking (CONFIG_CXX_EXCEPTION=y)
 
   elf:
   ---
@@ -1393,8 +1393,8 @@ Configuration Sub-directories
        CONFIG_HAVE_CXXINITIALIZE=y
 
        CONFIG_UCLIBCXX=y
-       CONFIG_UCLIBCXX_EXCEPTION=y
-       CONFIG_UCLIBCXX_HAVE_LIBSUPCXX=y
+       CONFIG_CXX_EXCEPTION=y
+       CONFIG_CXX_LIBSUPCXX=y
        CONFIG_UCLIBCXX_IOSTREAM_BUFSIZE=32
 
        CONFIG_EXAMPLES_ELF_CXX=y

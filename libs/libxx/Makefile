@@ -35,17 +35,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CXXSRCS  = libxx_cxapurevirtual.cxx libxx_eabi_atexit.cxx libxx_cxa_atexit.cxx
-CXXSRCS += libxx_cxa_guard.cxx
-
-# Some of the libs/libxx/ files are not need if uClibc++ or libcxx is installed
-# because uClibx++ or libcxx will replace them
-
-ifeq (,$(findstring y,$(CONFIG_UCLIBCXX) $(CONFIG_LIBCXX)))
-CXXSRCS += libxx_delete.cxx libxx_delete_sized.cxx libxx_deletea.cxx
-CXXSRCS += libxx_deletea_sized.cxx libxx_new.cxx libxx_newa.cxx
-CXXSRCS += libxx_stdthrow.cxx
-endif
+CXXSRCS = libxx_cxa_atexit.cxx libxx_eabi_atexit.cxx
 
 # Include the uClibc++ Make.defs file if selected.  If it is included,
 # the uClibc++/Make.defs file will add its files to the source file list,
@@ -59,10 +49,10 @@ endif
 
 ifeq ($(CONFIG_UCLIBCXX),y)
 include uClibc++/Make.defs
-endif
-
-ifeq ($(CONFIG_LIBCXX),y)
+else ifeq ($(CONFIG_LIBCXX),y)
 include libcxx/Make.defs
+else
+include cxx.defs
 endif
 
 # Object Files

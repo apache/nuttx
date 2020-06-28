@@ -80,7 +80,7 @@ ifeq ($(CONFIG_LIBCXX),y)
   CXXFLAGS += -std=c++14 -D__NuttX__ -D__GLIBCXX__ -DMB_LEN_MAX=8 -DHAVE_DEPENDENT_EH_ABI=0 \
     -fno-builtin -D_DEBUG -D_LIBCPP_BUILD_STATIC -D_LIBCPP_STD_VER=14
 
-  ifneq ($(CONFIG_LIBCXX_EXCEPTION),y)
+  ifneq ($(CONFIG_CXX_EXCEPTION),y)
     CXXFLAGS += -fno-exceptions -fno-rtti -fcheck-new -D_LIBCPP_NO_EXCEPTIONS
   endif
 
