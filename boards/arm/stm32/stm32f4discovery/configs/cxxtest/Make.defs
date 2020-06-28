@@ -62,7 +62,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCFLAGS = -fno-builtin
-ifeq ($(CONFIG_UCLIBCXX_EXCEPTION),y)
+ifeq ($(CONFIG_CXX_EXCEPTION),y)
   ARCHCPUFLAGSXX = -fno-builtin
 else
   ARCHCPUFLAGSXX = -fno-builtin -fno-exceptions -fcheck-new

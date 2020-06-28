@@ -561,7 +561,7 @@ cxxtest
      on how to install uClibc++
 
   2. At present (2012/11/02), exceptions are disabled in this example
-     (CONFIG_UCLIBCXX_EXCEPTION=n).  It is probably not necessary to disable
+     (CONFIG_CXX_EXCEPTION=n).  It is probably not necessary to disable
      exceptions.
 
   3. Unfortunately, this example will not run now.

@@ -31,10 +31,15 @@ config HAVE_CXXINITIALIZE
 		toolchain (via up_cxxinitialize()).
 
 config CXX_EXCEPTION
-	bool
+	bool "Enable Exception Support"
+	default LIBCXX || UCLIBCXX
 
 config CXX_LIBSUPCXX
-	bool
+	bool "Have libsupc++ (required)"
+	default LIBCXX || UCLIBCXX
+	---help---
+		Select if your toolchain provides libsupc++.  This option is required
+		at present because the built-in libsupc++ support is incomplete.
 
 comment "LLVM C++ Library (libcxx)"
 
@@ -49,23 +54,6 @@ config LIBCXX
 		be built by selecting this option.  See the README.txt file in the
 		libcxx package for information on installing libcxx.
 
-if LIBCXX
-
-config LIBCXX_EXCEPTION
-	bool "Enable Exception Support"
-	default y
-	select CXX_EXCEPTION
-
-config LIBCXX_HAVE_LIBSUPCXX
-	bool "Have libsupc++ (required)"
-	default y
-	select CXX_LIBSUPCXX
-	---help---
-		Select if your toolchain provides libsupc++.  This option is required
-		at present because the built-in libsupc++ support is incomplete.
-
-endif
-
 comment "uClibc++ Standard C++ Library"
 
 config UCLIBCXX
@@ -78,22 +66,9 @@ config UCLIBCXX
 
 if UCLIBCXX
 
-config UCLIBCXX_EXCEPTION
-	bool "Enable Exception Support"
-	default y
-	select CXX_EXCEPTION
-
 config UCLIBCXX_IOSTREAM_BUFSIZE
 	int "IO Stream Buffer Size"
 	default 32
-
-config UCLIBCXX_HAVE_LIBSUPCXX
-	bool "Have libsupc++ (required)"
-	default y
-	select CXX_LIBSUPCXX
-	---help---
-		Select if your toolchain provides libsupc++.  This option is required
-		at present because the built-in libsupc++ support is incomplete.
 
 endif
 endif
