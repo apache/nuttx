@@ -50,3 +50,10 @@ include $(TOPDIR)/libs/libc/machine/arm/armv7-m/Make.defs
 else ifeq ($(CONFIG_ARCH_CORTEXM33),y)  # Cortex-M33 is ARMv8-M
 include $(TOPDIR)/libs/libc/machine/arm/armv8/Make.defs
 endif
+
+ifeq ($(CONFIG_CXX_EXCEPTION),y)
+CSRCS += gnu_unwind_find_exidx.c
+endif
+
+DEPPATH += --dep-path machine/arm
+VPATH += :machine/arm
