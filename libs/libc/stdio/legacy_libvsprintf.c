@@ -39,7 +39,6 @@
 
 #include <nuttx/compiler.h>
 
-#include <math.h>
 #include <wchar.h>
 #include <stdint.h>
 #include <stdbool.h>

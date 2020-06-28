@@ -46,7 +46,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <stdbool.h>
 #include <math.h>
 #include <assert.h>

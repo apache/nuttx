@@ -42,7 +42,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
