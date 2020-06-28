@@ -342,7 +342,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
     }
 #endif
 
-#ifdef CONFIG_CXX_EXCEPTION
+#ifdef CONFIG_ELF_EXIDX_SECTNAME
   exidx = elf_findsection(loadinfo, CONFIG_ELF_EXIDX_SECTNAME);
   if (exidx < 0)
     {
