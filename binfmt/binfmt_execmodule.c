@@ -117,7 +117,7 @@ int exec_module(FAR const struct binary_s *binp)
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   save_addrenv_t oldenv;
 #endif
-  FAR uint32_t *stack;
+  FAR void *stack;
   pid_t pid;
   int ret;
 
@@ -157,7 +157,7 @@ int exec_module(FAR const struct binary_s *binp)
    * will need to change if/when we want to support dynamic stack allocation.
    */
 
-  stack = (FAR uint32_t *)kumm_malloc(binp->stacksize);
+  stack = kumm_malloc(binp->stacksize);
   if (!stack)
     {
       ret = -ENOMEM;

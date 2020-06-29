@@ -83,7 +83,7 @@
  ****************************************************************************/
 
 int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
-                FAR uint32_t *stack, uint32_t stack_size,
+                FAR void *stack, uint32_t stack_size,
                 main_t entry, FAR char * const argv[])
 {
   FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
