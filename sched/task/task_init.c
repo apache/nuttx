@@ -82,12 +82,11 @@
  *
  ****************************************************************************/
 
-int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
+int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
                 FAR void *stack, uint32_t stack_size,
                 main_t entry, FAR char * const argv[])
 {
-  FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
-  uint8_t ttype = tcb->flags & TCB_FLAG_TTYPE_MASK;
+  uint8_t ttype = tcb->cmn.flags & TCB_FLAG_TTYPE_MASK;
   int ret;
 
   /* Only tasks and kernel threads can be initialized in this way */
@@ -98,7 +97,7 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Create a new task group */
 
-  ret = group_allocate(ttcb, tcb->flags);
+  ret = group_allocate(tcb, tcb->cmn.flags);
   if (ret < 0)
     {
       return ret;
@@ -106,7 +105,7 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Associate file descriptors with the new task */
 
-  ret = group_setuptaskfiles(ttcb);
+  ret = group_setuptaskfiles(tcb);
   if (ret < 0)
     {
       goto errout_with_group;
@@ -116,13 +115,13 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
     {
       /* Use pre-allocated stack */
 
-      ret = up_use_stack(tcb, stack, stack_size);
+      ret = up_use_stack(&tcb->cmn, stack, stack_size);
     }
   else
     {
       /* Allocate the stack for the TCB */
 
-      ret = up_create_stack(tcb, stack_size, ttype);
+      ret = up_create_stack(&tcb->cmn, stack_size, ttype);
     }
 
   if (ret < OK)
@@ -132,7 +131,7 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Initialize the task control block */
 
-  ret = nxtask_setup_scheduler(ttcb, priority, nxtask_start,
+  ret = nxtask_setup_scheduler(tcb, priority, nxtask_start,
                                entry, ttype);
   if (ret < OK)
     {
@@ -141,11 +140,11 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Setup to pass parameters to the new task */
 
-  nxtask_setup_arguments(ttcb, name, argv);
+  nxtask_setup_arguments(tcb, name, argv);
 
   /* Now we have enough in place that we can join the group */
 
-  ret = group_initialize(ttcb);
+  ret = group_initialize(tcb);
   if (ret == OK)
     {
       return ret;
@@ -159,7 +158,7 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
 errout_with_group:
 
-  if (!stack && tcb->stack_alloc_ptr)
+  if (!stack && tcb->cmn.stack_alloc_ptr)
     {
 #ifdef CONFIG_BUILD_KERNEL
       /* If the exiting thread is not a kernel thread, then it has an
@@ -175,11 +174,11 @@ errout_with_group:
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
 #endif
         {
-          up_release_stack(tcb, ttype);
+          up_release_stack(&tcb->cmn, ttype);
         }
     }
 
-  group_leave(tcb);
+  group_leave(&tcb->cmn);
 
   return ret;
 }
@@ -205,7 +204,7 @@ errout_with_group:
  *
  ****************************************************************************/
 
-void nxtask_uninit(FAR struct tcb_s *tcb)
+void nxtask_uninit(FAR struct task_tcb_s *tcb)
 {
   /* The TCB was added to the inactive task list by
    * nxtask_setup_scheduler().
@@ -218,5 +217,5 @@ void nxtask_uninit(FAR struct tcb_s *tcb)
    */
 
   nxsched_release_tcb((FAR struct tcb_s *)tcb,
-                      tcb->flags & TCB_FLAG_TTYPE_MASK);
+                      tcb->cmn.flags & TCB_FLAG_TTYPE_MASK);
 }
