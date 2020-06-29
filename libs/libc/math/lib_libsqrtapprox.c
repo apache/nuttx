@@ -38,13 +38,16 @@
 
 float lib_sqrtapprox(float x)
 {
-  int32_t i;
+  union
+  {
+    int32_t i;
+    float x;
+  } u;
 
   /* Floats + bit manipulation = +inf fun! */
 
-  i = *((int32_t *) & x);
-  i = 0x1fc00000 + (i >> 1);
-  x = *((float *)&i);
+  u.x = x;
+  u.i = 0x1fc00000 + (u.i >> 1);
 
-  return x;
+  return u.x;
 }
