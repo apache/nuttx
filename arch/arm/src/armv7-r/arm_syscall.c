@@ -286,19 +286,21 @@ uint32_t *arm_syscall(uint32_t *regs)
        *   R2 = arg
        */
 
-#if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_DISABLE_PTHREAD)
+#if !defined(CONFIG_BUILD_FLAT) && !defined(CONFIG_DISABLE_PTHREAD)
       case SYS_pthread_start:
         {
           /* Set up to return to the user-space pthread start-up function in
            * unprivileged mode. We need:
            *
-           *   R0   = arg
+           *   R0   = startup
+           *   R1   = arg
            *   PC   = entrypt
            *   CSPR = user mode
            */
 
           regs[REG_PC]   = regs[REG_R1];
           regs[REG_R0]   = regs[REG_R2];
+          regs[REG_R1]   = regs[REG_R3];
 
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = cpsr | PSR_MODE_USR;
