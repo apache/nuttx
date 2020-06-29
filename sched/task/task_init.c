@@ -87,13 +87,13 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
                 main_t entry, FAR char * const argv[])
 {
   FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
+  uint8_t ttype = tcb->flags & TCB_FLAG_TTYPE_MASK;
   int ret;
 
   /* Only tasks and kernel threads can be initialized in this way */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  DEBUGASSERT(tcb &&
-              (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+  DEBUGASSERT(tcb && ttype != TCB_FLAG_TTYPE_PTHREAD);
 #endif
 
   /* Create a new task group */
@@ -101,7 +101,7 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
   ret = group_allocate(ttcb, tcb->flags);
   if (ret < 0)
     {
-      goto errout;
+      return ret;
     }
 
   /* Associate file descriptors with the new task */
@@ -112,14 +112,28 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
       goto errout_with_group;
     }
 
-  /* Configure the user provided stack region */
+  if (stack)
+    {
+      /* Use pre-allocated stack */
 
-  up_use_stack(tcb, stack, stack_size);
+      ret = up_use_stack(tcb, stack, stack_size);
+    }
+  else
+    {
+      /* Allocate the stack for the TCB */
+
+      ret = up_create_stack(tcb, stack_size, ttype);
+    }
+
+  if (ret < OK)
+    {
+      goto errout_with_group;
+    }
 
   /* Initialize the task control block */
 
-  ret = nxtask_setup_scheduler(ttcb, priority, nxtask_start, entry,
-                          TCB_FLAG_TTYPE_TASK);
+  ret = nxtask_setup_scheduler(ttcb, priority, nxtask_start,
+                               entry, ttype);
   if (ret < OK)
     {
       goto errout_with_group;
@@ -132,17 +146,41 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
   /* Now we have enough in place that we can join the group */
 
   ret = group_initialize(ttcb);
-  if (ret < 0)
+  if (ret == OK)
     {
-      goto errout_with_group;
+      return ret;
     }
 
-  return OK;
+  /* The TCB was added to the inactive task list by
+   * nxtask_setup_scheduler().
+   */
+
+  dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
 
 errout_with_group:
+
+  if (!stack && tcb->stack_alloc_ptr)
+    {
+#ifdef CONFIG_BUILD_KERNEL
+      /* If the exiting thread is not a kernel thread, then it has an
+       * address environment.  Don't bother to release the stack memory
+       * in this case... There is no point since the memory lies in the
+       * user memory region that will be destroyed anyway (and the
+       * address environment has probably already been destroyed at
+       * this point.. so we would crash if we even tried it).  But if
+       * this is a privileged group, when we still have to release the
+       * memory using the kernel allocator.
+       */
+
+      if (ttype == TCB_FLAG_TTYPE_KERNEL)
+#endif
+        {
+          up_release_stack(tcb, ttype);
+        }
+    }
+
   group_leave(tcb);
 
-errout:
   return ret;
 }
 
