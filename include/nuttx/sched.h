@@ -964,7 +964,7 @@ FAR struct socketlist *nxsched_get_sockets(void);
  ********************************************************************************/
 
 int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
-                FAR uint32_t *stack, uint32_t stack_size, main_t entry,
+                FAR void *stack, uint32_t stack_size, main_t entry,
                 FAR char * const argv[]);
 
 /********************************************************************************
