@@ -58,9 +58,6 @@
  *   nature of the created task.  For example:
  *
  *     - Task type may be set in the TCB flags to create kernel thread
- *     - If a custom stack is used, i.e., one allocated, managed, and freed
- *       by the caller, then TCB_FLAG_CUSTOM_STACK should be set in the
- *       TCB flags.
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
@@ -193,8 +190,6 @@ errout_with_group:
  *   was when a subsequent call to task_activate fails.
  *
  *   Caution:  Freeing of the TCB itself might be an unexpected side-effect.
- *   The stack will also be freed UNLESS TCB_FLAG_CUSTOM_STACK was set in
- *   in the tcb->flags field when nxtask_init() was called.
  *
  * Input Parameters:
  *   tcb - Address of the TCB initialized by task_init()
