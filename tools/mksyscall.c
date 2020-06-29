@@ -191,7 +191,7 @@ static void generate_proxy(int nfixed, int nparms)
   char formal[MAX_PARMSIZE];
   char actual[MAX_PARMSIZE];
   char fieldname[MAX_PARMSIZE];
-  int i;
+  int i = 0;
 
   /* Generate "up-front" information, include correct header files */
 
