@@ -47,9 +47,10 @@
  *   pthread.
  *
  *   Normally the a user-mode start-up stub will also execute before the
- *   pthread actually starts.  See libc/pthread/pthread_startup.c
+ *   pthread actually starts.  See libc/pthread/pthread_create.c
  *
  * Input Parameters:
+ *   startup - The user-space pthread startup function
  *   entrypt - The user-space address of the pthread entry point
  *   arg     - Standard argument for the pthread entry point
  *
@@ -60,11 +61,13 @@
  *
  ****************************************************************************/
 
-void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
+void up_pthread_start(pthread_startroutine_t startup,
+                      pthread_startroutine_t entrypt, pthread_addr_t arg)
 {
   /* Let sys_call2() do all of the work */
 
-  sys_call2(SYS_pthread_start, (uintptr_t)entrypt, (uintptr_t)arg);
+  sys_call3(SYS_pthread_start, (uintptr_t)startup, (uintptr_t)entrypt,
+            (uintptr_t)arg);
 
   PANIC();
 }

@@ -313,22 +313,22 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
        *   R2 = arg
        */
 
-#if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_DISABLE_PTHREAD)
+#if !defined(CONFIG_BUILD_FLAT) && !defined(CONFIG_DISABLE_PTHREAD)
       case SYS_pthread_start:
         {
           /* Set up to return to the user-space pthread start-up function in
            * unprivileged mode.
            */
 
-          regs[REG_PC]         = (uint32_t)USERSPACE->pthread_startup;
+          regs[REG_PC]         = (uint32_t)regs[REG_R1]; /* startup */
           regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
 
-          /* Change the parameter ordering to match the expectation of struct
-           * userpace_s pthread_startup:
+          /* Change the parameter ordering to match the expectation of the
+           * useri space pthread_startup:
            */
 
-          regs[REG_R0]         = regs[REG_R1]; /* pthread entry */
-          regs[REG_R1]         = regs[REG_R2]; /* arg */
+          regs[REG_R0]         = regs[REG_R2]; /* pthread entry */
+          regs[REG_R1]         = regs[REG_R3]; /* arg */
         }
         break;
 #endif

@@ -72,28 +72,29 @@ static const char g_pthreadname[] = "<pthread>";
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_argsetup
+ * Name: pthread_tcb_setup
  *
  * Description:
  *   This functions sets up parameters in the Task Control Block (TCB) in
  *   preparation for starting a new thread.
  *
- *   pthread_argsetup() is called from nxtask_init() and nxtask_start() to
+ *   pthread_tcb_setup() is called from nxtask_init() and nxtask_start() to
  *   create a new task (with arguments cloned via strdup) or pthread_create()
  *   which has one argument passed by value (distinguished by the pthread
  *   boolean argument).
  *
  * Input Parameters:
- *   tcb        - Address of the new task's TCB
- *   arg        - The argument to provide to the pthread on startup.
+ *   tcb     - Address of the new task's TCB
+ *   startup - User-space pthread startup function
+ *   arg     - The argument to provide to the pthread on startup.
  *
  * Returned Value:
  *  None
  *
  ****************************************************************************/
 
-static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb,
-                                    pthread_addr_t arg)
+static inline void pthread_tcb_setup(FAR struct pthread_tcb_s *tcb,
+                                     pthread_addr_t arg)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   /* Copy the pthread name into the TCB */
@@ -106,7 +107,8 @@ static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb,
    * type wrapped by pthread_addr_t is unknown.
    */
 
-  tcb->arg = arg;
+  tcb->startup = startup;
+  tcb->arg     = arg;
 }
 
 /****************************************************************************
@@ -160,7 +162,7 @@ static void pthread_start(void)
   FAR struct join_s *pjoin = (FAR struct join_s *)ptcb->joininfo;
   pthread_addr_t exit_status;
 
-  DEBUGASSERT(group && pjoin);
+  DEBUGASSERT(group != NULL && pjoin != NULL);
 
   /* Successfully spawned, add the pjoin to our data set. */
 
@@ -188,15 +190,18 @@ static void pthread_start(void)
    * to switch to user-mode before calling into the pthread.
    */
 
+  DEBUGASSERT(ptcb->startup != NULL && ptcb->cmn.entry.pthread != NULL);
+
 #ifdef CONFIG_BUILD_FLAT
-  exit_status = (*ptcb->cmn.entry.pthread)(ptcb->arg);
+  exit_status = ptcb->startup(ptcb->cmn.entry.pthread, ptcb->arg);
 #else
-  up_pthread_start(ptcb->cmn.entry.pthread, ptcb->arg);
+  up_pthread_start(ptcb->startup, ptcb->cmn.entry.pthread, ptcb->arg);
   exit_status = NULL;
 #endif
 
-  /* The thread has returned (should never happen in the kernel mode case) */
+  /* The thread has returned (should never happen) */
 
+  DEBUGPANIC();
   pthread_exit(exit_status);
 }
 
@@ -205,13 +210,14 @@ static void pthread_start(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  pthread_create
+ * Name:  nx_pthread_create
  *
  * Description:
  *   This function creates and activates a new thread with a specified
  *   attributes.
  *
  * Input Parameters:
+ *    startup
  *    thread
  *    attr
  *    start_routine
@@ -223,8 +229,9 @@ static void pthread_start(void)
  *
  ****************************************************************************/
 
-int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
-                   pthread_startroutine_t start_routine, pthread_addr_t arg)
+int nx_pthread_create(pthread_startroutine_t startup, FAR pthread_t *thread,
+                      FAR const pthread_attr_t *attr,
+                      pthread_startroutine_t entry, pthread_addr_t arg);
 {
   FAR struct pthread_tcb_s *ptcb;
   FAR struct join_s *pjoin;
@@ -234,6 +241,8 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   pid_t pid;
   int ret;
   bool group_joined = false;
+
+  DEBUGASSERT(startup != NULL);
 
   /* If attributes were not supplied, use the default attributes */
 
@@ -430,7 +439,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
    * passed by value
    */
 
-  pthread_argsetup(ptcb, arg);
+  pthread_tcb_setup(ptcb, startup, arg);
 
   /* Join the parent's task group */
 

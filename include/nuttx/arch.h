@@ -554,9 +554,10 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
  *   pthread by calling this function.
  *
  *   Normally the a user-mode start-up stub will also execute before the
- *   pthread actually starts.  See libc/pthread/pthread_startup.c
+ *   pthread actually starts.  See libc/pthread/pthread_create.c
  *
  * Input Parameters:
+ *   startup - The user-space pthread startup function
  *   entrypt - The user-space address of the pthread entry point
  *   arg     - Standard argument for the pthread entry point
  *
@@ -569,7 +570,8 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \
     !defined(CONFIG_DISABLE_PTHREAD)
-void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
+void up_pthread_start(pthread_startroutine_t startup,
+                      pthread_startroutine_t entrypt, pthread_addr_t arg);
        noreturn_function;
 #endif
 
