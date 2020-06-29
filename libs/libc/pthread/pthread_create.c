@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_startup.c
+ * libs/libc/pthread/pthread_create.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,70 +24,68 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
-#include <assert.h>
+#include <debug.h>
 
-#include <nuttx/userspace.h>
-
-#if !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+#include <nuttx/pthread.h>
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: pthread_startup
  *
  * Description:
- *   This function is the user-space, pthread startup function.  It is called
- *   from up_pthread_start() in user-mode.
+ *   This function is the user space pthread startup function.  Its purpose
+ *   is to catch the return from the pthread main function so that
+ *   pthread_exit() can be called from user space
  *
  * Input Parameters:
- *   entrypt - The user-space address of the pthread entry point
- *   arg     - Standard argument for the pthread entry point
+ *   entry - The user-space address of the pthread entry point
+ *   arg   - Standard argument for the pthread entry point
  *
  * Returned Value:
  *   None.  This function does not return.
  *
  ****************************************************************************/
 
-void pthread_startup(pthread_startroutine_t entrypt, pthread_addr_t arg)
+static void pthread_startup(pthread_startroutine_t entry,
+                            pthread_addr_t arg)
 {
-  pthread_addr_t exit_status;
+  DEBUGASSERT(entry != NULL);
 
-  DEBUGASSERT(entrypt);
+  /* Pass control to the thread entry point.  Handle any returned value. */
 
-  /* Pass control to the thread entry point. */
-
-  exit_status = entrypt(arg);
-
-  /* The pthread has returned */
-
-  pthread_exit(exit_status);
+  pthread_exit(entry(arg));
 }
 
-#endif /* !CONFIG_BUILD_FLAT && !__KERNEL__ */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name:  pthread_create
+ *
+ * Description:
+ *   This function creates and activates a new thread with specified
+ *   attributes.  It is simply a wrapper around the nx_pthread_create system
+ *   call.
+ *
+ * Input Parameters:
+ *    thread
+ *    attr
+ *    pthread_entry
+ *    arg
+ *
+ * Returned Value:
+ *   OK (0) on success; a (non-negated) errno value on failure. The errno
+ *   variable is not set.
+ *
+ ****************************************************************************/
+
+int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
+                   pthread_startroutine_t pthread_entry, pthread_addr_t arg)
+{
+  return nx_pthread_create(pthread_startup, thread, attr, pthread_entry,
+                           arg);
+}
