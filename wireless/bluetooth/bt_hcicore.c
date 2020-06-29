@@ -1428,7 +1428,7 @@ static void cmd_queue_init(void)
 
   g_btdev.ncmd = 1;
   pid = kthread_create("BT HCI Tx", CONFIG_BLUETOOTH_TXCMD_PRIORITY,
-                       CONFIG_BLUETOOTH_TXCMD_STACKSIZE,
+                       NULL, CONFIG_BLUETOOTH_TXCMD_STACKSIZE,
                        hci_tx_kthread, NULL);
   DEBUGASSERT(pid > 0);
   UNUSED(pid);

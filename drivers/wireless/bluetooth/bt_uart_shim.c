@@ -477,7 +477,7 @@ FAR void *bt_uart_shim_getdevice(FAR char *path)
 
   s->serialmontask = kthread_create("BT HCI Rx",
                                     CONFIG_BLUETOOTH_TXCONN_PRIORITY,
-                                    1024, hcicollecttask, NULL);
+                                    NULL, 1024, hcicollecttask, NULL);
 
   return g_n;
 }

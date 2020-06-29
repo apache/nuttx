@@ -411,7 +411,7 @@ int stm32_max3421e_setup(void)
 
   monpid = kthread_create("MAX3421E ConnMon",
                           CONFIG_VIEWTOOL_MAX3421E_CONNMON_PRIORITY,
-                          CONFIG_VIEWTOOL_MAX3421E_CONNMON_STACKSIZE,
+                          NULL, CONFIG_VIEWTOOL_MAX3421E_CONNMON_STACKSIZE,
                           usbhost_detect, NULL);
   if (monpid < 0)
     {

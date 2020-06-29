@@ -68,8 +68,8 @@
  *
  ****************************************************************************/
 
-static int nxthread_create(FAR const char *name, uint8_t ttype,
-                           int priority, int stack_size, main_t entry,
+static int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
+                           FAR void *stack, int stack_size, main_t entry,
                            FAR char * const argv[])
 {
   FAR struct task_tcb_s *tcb;
@@ -91,7 +91,7 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   /* Initialize the task */
 
-  ret = nxtask_init(tcb, name, priority, NULL, stack_size, entry, argv);
+  ret = nxtask_init(tcb, name, priority, stack, stack_size, entry, argv);
   if (ret < OK)
     {
       kmm_free(tcb);
@@ -154,8 +154,8 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 int nxtask_create(FAR const char *name, int priority,
                   int stack_size, main_t entry, FAR char * const argv[])
 {
-  return nxthread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size,
-                         entry, argv);
+  return nxthread_create(name, TCB_FLAG_TTYPE_TASK, priority, NULL,
+                         stack_size, entry, argv);
 }
 
 /****************************************************************************
@@ -229,9 +229,9 @@ int task_create(FAR const char *name, int priority,
  *
  ****************************************************************************/
 
-int kthread_create(FAR const char *name, int priority,
+int kthread_create(FAR const char *name, int priority, FAR void *stack,
                    int stack_size, main_t entry, FAR char * const argv[])
 {
-  return nxthread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size,
-                         entry, argv);
+  return nxthread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack,
+                         stack_size, entry, argv);
 }

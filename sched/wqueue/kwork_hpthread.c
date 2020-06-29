@@ -147,7 +147,7 @@ int work_start_highpri(void)
   for (wndx = 0; wndx < CONFIG_SCHED_HPNTHREADS; wndx++)
     {
       pid = kthread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY,
-                           CONFIG_SCHED_HPWORKSTACKSIZE,
+                           NULL, CONFIG_SCHED_HPWORKSTACKSIZE,
                            (main_t)work_hpthread,
                            (FAR char * const *)NULL);
 

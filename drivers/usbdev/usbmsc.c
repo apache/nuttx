@@ -1688,7 +1688,7 @@ int usbmsc_exportluns(FAR void *handle)
 
   uinfo("Starting SCSI worker thread\n");
   priv->thpid = kthread_create("scsid", CONFIG_USBMSC_SCSI_PRIO,
-                               CONFIG_USBMSC_SCSI_STACKSIZE,
+                               NULL, CONFIG_USBMSC_SCSI_STACKSIZE,
                                usbmsc_scsi_main, NULL);
   if (priv->thpid <= 0)
     {

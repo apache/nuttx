@@ -822,6 +822,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 
   ret = kthread_create("rptun",
                        CONFIG_RPTUN_PRIORITY,
+                       NULL,
                        CONFIG_RPTUN_STACKSIZE,
                        rptun_thread,
                        argv);

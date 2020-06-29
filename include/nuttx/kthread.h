@@ -116,6 +116,8 @@ int nxtask_create(FAR const char *name, int priority,
  * Input Parameters:
  *   name       - Name of the new task
  *   priority   - Priority of the new task
+ *   stack      - Start of the pre-allocated stack
+ *              - NULL will allocate the stack from internal
  *   stack_size - size (in bytes) of the stack needed
  *   entry      - Entry point of a new task
  *   arg        - A pointer to an array of input parameters.  The array
@@ -129,8 +131,8 @@ int nxtask_create(FAR const char *name, int priority,
  *
  ********************************************************************************/
 
-int kthread_create(FAR const char *name, int priority, int stack_size,
-                   main_t entry, FAR char * const argv[]);
+int kthread_create(FAR const char *name, int priority, FAR void *stack,
+                   int stack_size, main_t entry, FAR char * const argv[]);
 
 /****************************************************************************
  * Name: kthread_delete

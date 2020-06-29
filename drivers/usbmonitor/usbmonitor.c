@@ -226,7 +226,7 @@ int usbmonitor_start(void)
       g_usbmonitor.stop    = false;
 
       ret = kthread_create("USB Monitor", CONFIG_USBMONITOR_PRIORITY,
-                           CONFIG_USBMONITOR_STACKSIZE,
+                           NULL, CONFIG_USBMONITOR_STACKSIZE,
                            (main_t)usbmonitor_daemon,
                            (FAR char * const *)NULL);
       if (ret < 0)

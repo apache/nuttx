@@ -202,7 +202,7 @@ int sam_watchdog_initialize(void)
 
   int taskid = kthread_create(CONFIG_WDT_THREAD_NAME,
                               CONFIG_WDT_THREAD_PRIORITY,
-                              CONFIG_WDT_THREAD_STACKSIZE,
+                              NULL, CONFIG_WDT_THREAD_STACKSIZE,
                               (main_t)wdog_daemon, (FAR char * const *)NULL);
 
   DEBUGASSERT(taskid > 0);

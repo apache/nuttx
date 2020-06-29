@@ -239,7 +239,7 @@ int stm32l4_usbhost_initialize(void)
       uvdbg("Start usbhost_waiter\n");
 
       pid = kthread_create("usbhost", CONFIG_STM32L4DISCO_USBHOST_PRIO,
-                           CONFIG_STM32L4DISCO_USBHOST_STACKSIZE,
+                           NULL, CONFIG_STM32L4DISCO_USBHOST_STACKSIZE,
                            (main_t)usbhost_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }

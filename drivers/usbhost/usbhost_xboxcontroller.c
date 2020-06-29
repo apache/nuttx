@@ -1418,7 +1418,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   uinfo("Starting thread\n");
   priv->pollpid = kthread_create("xbox", CONFIG_XBOXCONTROLLER_DEFPRIO,
-                                 CONFIG_XBOXCONTROLLER_STACKSIZE,
+                                 NULL, CONFIG_XBOXCONTROLLER_STACKSIZE,
                                  (main_t)usbhost_xboxcontroller_poll,
                                  (FAR char * const *)NULL);
   if (priv->pollpid < 0)

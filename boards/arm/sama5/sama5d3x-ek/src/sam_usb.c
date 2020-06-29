@@ -362,7 +362,7 @@ int sam_usbhost_initialize(void)
 
   pid = kthread_create("OHCI Monitor",
                       CONFIG_SAMA5D3xEK_USBHOST_PRIO,
-                      CONFIG_SAMA5D3xEK_USBHOST_STACKSIZE,
+                      NULL, CONFIG_SAMA5D3xEK_USBHOST_STACKSIZE,
                       (main_t)ohci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {
@@ -384,7 +384,7 @@ int sam_usbhost_initialize(void)
   /* Start a thread to handle device connection. */
 
   pid = kthread_create("EHCI Monitor", CONFIG_SAMA5D3xEK_USBHOST_PRIO,
-                       CONFIG_SAMA5D3xEK_USBHOST_STACKSIZE,
+                       NULL, CONFIG_SAMA5D3xEK_USBHOST_STACKSIZE,
                        (main_t)ehci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {

@@ -238,7 +238,7 @@ int stm32_usbhost_setup(void)
       uinfo("Start usbhost_waiter\n");
 
       pid = kthread_create("usbhost", CONFIG_OLIMEXP407_USBHOST_PRIO,
-                           CONFIG_OLIMEXP407_USBHOST_STACKSIZE,
+                           NULL, CONFIG_OLIMEXP407_USBHOST_STACKSIZE,
                            (main_t)usbhost_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }

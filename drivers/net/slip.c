@@ -1010,8 +1010,8 @@ int slip_initialize(int intf, FAR const char *devname)
   argv[1] = NULL;
 
   priv->rxpid = kthread_create("rxslip", CONFIG_NET_SLIP_DEFPRIO,
-                               CONFIG_NET_SLIP_STACKSIZE, slip_rxtask,
-                               (FAR char * const *)argv);
+                               NULL, CONFIG_NET_SLIP_STACKSIZE,
+                               slip_rxtask, (FAR char * const *)argv);
   if (priv->rxpid < 0)
     {
       nerr("ERROR: Failed to start receiver task\n");
@@ -1025,8 +1025,8 @@ int slip_initialize(int intf, FAR const char *devname)
   /* Start the SLIP transmitter kernel thread */
 
   priv->txpid = kthread_create("txslip", CONFIG_NET_SLIP_DEFPRIO,
-                               CONFIG_NET_SLIP_STACKSIZE, slip_txtask,
-                               (FAR char * const *)argv);
+                               NULL, CONFIG_NET_SLIP_STACKSIZE,
+                               slip_txtask, (FAR char * const *)argv);
   if (priv->txpid < 0)
     {
       nerr("ERROR: Failed to start receiver task\n");

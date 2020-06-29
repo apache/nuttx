@@ -586,6 +586,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
               g_conn_handoff.conn = bt_conn_addref(conn);
               pid = kthread_create("BT Conn Tx",
                                    CONFIG_BLUETOOTH_TXCONN_PRIORITY,
+                                   NULL,
                                    CONFIG_BLUETOOTH_TXCONN_STACKSIZE,
                                    conn_tx_kthread, NULL);
               DEBUGASSERT(pid > 0);

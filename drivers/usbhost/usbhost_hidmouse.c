@@ -1701,7 +1701,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   g_priv = priv;
 
   priv->pollpid = kthread_create("mouse", CONFIG_HIDMOUSE_DEFPRIO,
-                                 CONFIG_HIDMOUSE_STACKSIZE,
+                                 NULL, CONFIG_HIDMOUSE_STACKSIZE,
                                  (main_t)usbhost_mouse_poll,
                                  (FAR char * const *)NULL);
   if (priv->pollpid < 0)

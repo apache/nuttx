@@ -147,7 +147,7 @@ int work_start_lowpri(void)
   for (wndx = 0; wndx < CONFIG_SCHED_LPNTHREADS; wndx++)
     {
       pid = kthread_create(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
-                           CONFIG_SCHED_LPWORKSTACKSIZE,
+                           NULL, CONFIG_SCHED_LPWORKSTACKSIZE,
                            (main_t)work_lpthread,
                            (FAR char * const *)NULL);
 

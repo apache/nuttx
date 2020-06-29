@@ -308,7 +308,7 @@ static int nsh_usbhostinitialize(void)
       syslog(LOG_ERR, "ERROR: Start nsh_waiter\n");
 
       pid = kthread_create("usbhost", CONFIG_MCB1700_USBHOST_PRIO,
-                           CONFIG_MCB1700_USBHOST_STACKSIZE,
+                           NULL, CONFIG_MCB1700_USBHOST_STACKSIZE,
                            (main_t)nsh_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }

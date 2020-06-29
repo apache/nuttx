@@ -1118,8 +1118,8 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
       g_telnet_io_kthread =
         kthread_create("telnet_io", CONFIG_TELNET_IOTHREAD_PRIORITY,
-                       CONFIG_TELNET_IOTHREAD_STACKSIZE, telnet_io_main,
-                       NULL);
+                       NULL, CONFIG_TELNET_IOTHREAD_STACKSIZE,
+                       telnet_io_main, NULL);
     }
 
   /* Save ourself in the list of Telnet client threads */

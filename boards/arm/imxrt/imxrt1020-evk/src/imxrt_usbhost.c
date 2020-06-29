@@ -221,7 +221,7 @@ int imxrt_usbhost_initialize(void)
   /* Start a thread to handle device connection. */
 
   pid = kthread_create("EHCI Monitor", CONFIG_USBHOST_DEFPRIO,
-                       CONFIG_USBHOST_STACKSIZE,
+                       NULL, CONFIG_USBHOST_STACKSIZE,
                        (main_t)ehci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {

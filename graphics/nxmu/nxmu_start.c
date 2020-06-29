@@ -210,7 +210,7 @@ int nxmu_start(int display, int plane)
       snprintf(plane_str, 8, "%d", plane);
 
       ginfo("Starting server task\n");
-      server = kthread_create("NX Server", CONFIG_NXSTART_SERVERPRIO,
+      server = kthread_create("NX Server", CONFIG_NXSTART_SERVERPRIO, NULL,
                               CONFIG_NXSTART_SERVERSTACK, nx_server, argv);
       if (server < 0)
         {

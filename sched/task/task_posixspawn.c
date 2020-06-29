@@ -397,7 +397,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
    */
 
   proxy = kthread_create("nxposix_spawn_proxy", param.sched_priority,
-                         CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
+                         NULL, CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
                          (main_t)nxposix_spawn_proxy,
                          (FAR char * const *)NULL);
   if (proxy < 0)

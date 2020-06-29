@@ -236,7 +236,7 @@ int stm32_usbhost_initialize(void)
       uinfo("Start usbhost_waiter\n");
 
       pid = kthread_create("usbhost", CONFIG_STM32H747XI_DISCO_USBHOST_PRIO,
-                           CONFIG_STM32H747XI_DISCO_USBHOST_STACKSIZE,
+                           NULL, CONFIG_STM32H747XI_DISCO_USBHOST_STACKSIZE,
                            (main_t)usbhost_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }

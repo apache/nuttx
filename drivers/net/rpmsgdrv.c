@@ -530,7 +530,7 @@ static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
   /* Move the action into a temp thread to avoid the deadlock */
 
   rpmsg_hold_rx_buffer(ept, data);
-  kthread_create("rpmsg-net", CONFIG_NET_RPMSG_PRIORITY,
+  kthread_create("rpmsg-net", CONFIG_NET_RPMSG_PRIORITY, NULL,
           CONFIG_NET_RPMSG_STACKSIZE, net_rpmsg_drv_sockioctl_task, argv);
 
   return 0;
