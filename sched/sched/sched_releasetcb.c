@@ -127,12 +127,9 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
           nxsched_releasepid(tcb->pid);
         }
 
-      /* Delete the thread's stack if one has been allocated and it is
-       * not some custom stack managed by the caller.
-       */
+      /* Delete the thread's stack if one has been allocated */
 
-      if (tcb->stack_alloc_ptr &&
-          (tcb->flags & TCB_FLAG_CUSTOM_STACK) == 0)
+      if (tcb->stack_alloc_ptr)
         {
           up_release_stack(tcb, ttype);
         }

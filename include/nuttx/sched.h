@@ -103,10 +103,9 @@
 #  define TCB_FLAG_SCHED_SPORADIC  (2 << TCB_FLAG_POLICY_SHIFT)  /* Sporadic scheding policy */
 #  define TCB_FLAG_SCHED_OTHER     (3 << TCB_FLAG_POLICY_SHIFT)  /* Other scheding policy */
 #define TCB_FLAG_CPU_LOCKED        (1 << 7)                      /* Bit 7: Locked to this CPU */
-#define TCB_FLAG_CUSTOM_STACK      (1 << 8)                      /* Bit 8: Thread uses a custom stack */
-#define TCB_FLAG_SIGNAL_ACTION     (1 << 9)                      /* Bit 9: In a signal handler */
-#define TCB_FLAG_SYSCALL           (1 << 10)                     /* Bit 10: In a system call */
-#define TCB_FLAG_EXIT_PROCESSING   (1 << 11)                     /* Bit 11: Exitting */
+#define TCB_FLAG_SIGNAL_ACTION     (1 << 8)                      /* Bit 8: In a signal handler */
+#define TCB_FLAG_SYSCALL           (1 << 9)                      /* Bit 9: In a system call */
+#define TCB_FLAG_EXIT_PROCESSING   (1 << 10)                     /* Bit 10: Exitting */
                                                                  /* Bits 11-15: Available */
 
 /* Values for struct task_group tg_flags */
@@ -939,9 +938,6 @@ FAR struct socketlist *nxsched_get_sockets(void);
  *   nature of the created task.  For example:
  *
  *     - Task type may be set in the TCB flags to create kernel thread
- *     - If a custom stack is used, i.e., one allocated, managed, and freed
- *       by the caller, then TCB_FLAG_CUSTOM_STACK should be set in the
- *       TCB flags.
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
@@ -977,8 +973,6 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
  *   was when a subsequent call to task_activate fails.
  *
  *   Caution:  Freeing of the TCB itself might be an unexpected side-effect.
- *   The stack will also be freed UNLESS TCB_FLAG_CUSTOM_STACK was set in
- *   in the tcb->flags field when nxtask_init() was called.
  *
  * Input Parameters:
  *   tcb - Address of the TCB initialized by task_init()
