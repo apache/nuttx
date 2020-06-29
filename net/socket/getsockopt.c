@@ -375,11 +375,11 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
   switch (level)
     {
-      case SOL_SOCKET: /* Socket-level options (see include/sys/socket.h) */
+      case SOL_SOCKET:   /* Socket-level options (see include/sys/socket.h) */
        ret = psock_socketlevel_option(psock, option, value, value_len);
        break;
 
-      case SOL_TCP:    /* TCP protocol socket options (see include/netinet/tcp.h) */
+      case IPPROTO_TCP:  /* TCP protocol socket options (see include/netinet/tcp.h) */
 #ifdef CONFIG_NET_TCPPROTO_OPTIONS
        ret = tcp_getsockopt(psock, option, value, value_len);
        break;
@@ -395,13 +395,13 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
        * implemented.
        */
 
-      case SOL_IP:     /* TCP protocol socket options (see include/netinet/ip.h) */
-      case SOL_IPV6:   /* TCP protocol socket options (see include/netinet/ip6.h) */
-      case SOL_UDP:    /* TCP protocol socket options (see include/netinit/udp.h) */
+      case IPPROTO_IP:   /* TCP protocol socket options (see include/netinet/ip.h) */
+      case IPPROTO_IPV6: /* TCP protocol socket options (see include/netinet/ip6.h) */
+      case IPPROTO_UDP:  /* TCP protocol socket options (see include/netinit/udp.h) */
         ret = -ENOSYS;
        break;
 
-      default:         /* The provided level is invalid */
+      default:           /* The provided level is invalid */
         ret = -EINVAL;
        break;
     }

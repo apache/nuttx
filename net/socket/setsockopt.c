@@ -399,26 +399,26 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
         ret = psock_socketlevel_option(psock, option, value, value_len);
         break;
 
-      case SOL_TCP:    /* TCP protocol socket options (see include/netinet/tcp.h) */
+      case IPPROTO_TCP:/* TCP protocol socket options (see include/netinet/tcp.h) */
 #ifdef CONFIG_NET_TCPPROTO_OPTIONS
         ret = tcp_setsockopt(psock, option, value, value_len);
         break;
 #endif
 
-      case SOL_UDP:    /* UDP protocol socket options (see include/netinet/udp.h) */
+      case IPPROTO_UDP:/* UDP protocol socket options (see include/netinet/udp.h) */
 #ifdef CONFIG_NET_UDPPROTO_OPTIONS
         ret = udp_setsockopt(psock, option, value, value_len);
         break;
 #endif
 
 #ifdef CONFIG_NET_IPv4
-      case SOL_IP:     /* TCP protocol socket options (see include/netinet/in.h) */
+      case IPPROTO_IP:/* TCP protocol socket options (see include/netinet/in.h) */
         ret = ipv4_setsockopt(psock, option, value, value_len);
         break;
 #endif
 
 #ifdef CONFIG_NET_IPv6
-      case SOL_IPV6:   /* TCP protocol socket options (see include/netinet/in.h) */
+      case IPPROTO_IPV6:/* TCP protocol socket options (see include/netinet/in.h) */
         ret = ipv6_setsockopt(psock, option, value, value_len);
         break;
 #endif
