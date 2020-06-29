@@ -117,7 +117,6 @@ int exec_module(FAR const struct binary_s *binp)
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   save_addrenv_t oldenv;
 #endif
-  FAR void *stack;
   pid_t pid;
   int ret;
 
@@ -151,27 +150,17 @@ int exec_module(FAR const struct binary_s *binp)
     }
 #endif
 
-  /* Allocate the stack for the new task.
-   *
-   * REVISIT:  This allocation is currently always from the user heap.  That
-   * will need to change if/when we want to support dynamic stack allocation.
-   */
+  /* Note that tcb->flags are not modified.  0=normal task */
 
-  stack = kumm_malloc(binp->stacksize);
-  if (!stack)
-    {
-      ret = -ENOMEM;
-      goto errout_with_addrenv;
-    }
+  /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
 
   /* Initialize the task */
 
   ret = nxtask_init((FAR struct tcb_s *)tcb, binp->filename, binp->priority,
-                    stack, binp->stacksize, binp->entrypt, binp->argv);
+                    NULL, binp->stacksize, binp->entrypt, binp->argv);
   if (ret < 0)
     {
       berr("nxtask_init() failed: %d\n", ret);
-      kumm_free(stack);
       goto errout_with_addrenv;
     }
 
@@ -182,10 +171,6 @@ int exec_module(FAR const struct binary_s *binp)
    */
 
   binfmt_freeargv((FAR struct binary_s *)binp);
-
-  /* Note that tcb->flags are not modified.  0=normal task */
-
-  /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Allocate the kernel stack */
@@ -273,7 +258,6 @@ int exec_module(FAR const struct binary_s *binp)
 errout_with_tcbinit:
   tcb->cmn.stack_alloc_ptr = NULL;
   nxsched_release_tcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
-  kumm_free(stack);
   return ret;
 #endif
 
