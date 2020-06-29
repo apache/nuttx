@@ -72,13 +72,13 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
                            int priority, int stack_size, main_t entry,
                            FAR char * const argv[])
 {
-  FAR struct tcb_s *tcb;
+  FAR struct task_tcb_s *tcb;
   pid_t pid;
   int ret;
 
   /* Allocate a TCB for the new task. */
 
-  tcb = (FAR struct tcb_s *)kmm_zalloc(sizeof(struct task_tcb_s));
+  tcb = (FAR struct task_tcb_s *)kmm_zalloc(sizeof(struct task_tcb_s));
   if (!tcb)
     {
       serr("ERROR: Failed to allocate TCB\n");
@@ -87,7 +87,7 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   /* Setup the task type */
 
-  tcb->flags = ttype;
+  tcb->cmn.flags = ttype;
 
   /* Initialize the task */
 
@@ -100,11 +100,11 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   /* Get the assigned pid before we start the task */
 
-  pid = tcb->pid;
+  pid = tcb->cmn.pid;
 
   /* Activate the task */
 
-  nxtask_activate(tcb);
+  nxtask_activate(&tcb->cmn);
 
   return (int)pid;
 }

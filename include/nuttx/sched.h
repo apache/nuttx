@@ -963,7 +963,7 @@ FAR struct socketlist *nxsched_get_sockets(void);
  *
  ********************************************************************************/
 
-int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
+int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
                 FAR void *stack, uint32_t stack_size, main_t entry,
                 FAR char * const argv[]);
 
@@ -988,7 +988,7 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
  *
  ********************************************************************************/
 
-void nxtask_uninit(FAR struct tcb_s *tcb);
+void nxtask_uninit(FAR struct task_tcb_s *tcb);
 
 /********************************************************************************
  * Name: nxtask_activate
