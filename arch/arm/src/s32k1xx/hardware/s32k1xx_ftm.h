@@ -587,12 +587,14 @@
 #  define FTP_SC_PS_DIV32                (5 << FTM_SC_PS_SHIFT) /* Divide by 32 */
 #  define FTP_SC_PS_DIV64                (6 << FTM_SC_PS_SHIFT) /* Divide by 64 */
 #  define FTP_SC_PS_DIV128               (7 << FTM_SC_PS_SHIFT) /* Divide by 128 */
+
 #define FTM_SC_CLKS_SHIFT                (3)       /* Bits 3-4: Clock Source Selection */
 #define FTM_SC_CLKS_MASK                 (0x03 << FTM_SC_CLKS_SHIFT)
 #  define FTM_SC_CLKS_DIS                (0 << FTM_SC_CLKS_SHIFT) /* No clock selected. This in effect disables the FTM counter */
 #  define FTM_SC_CLKS_FTM                (1 << FTM_SC_CLKS_SHIFT) /* FTM input clock */
 #  define FTM_SC_CLKS_FIXED              (2 << FTM_SC_CLKS_SHIFT) /* Fixed frequency clock */
 #  define FTM_SC_CLKS_EXTCLK             (3 << FTM_SC_CLKS_SHIFT) /* External clock */
+
 #define FTM_SC_CPWMS                     (1 << 5)  /* Bit 5: Center-Aligned PWM Select */
 #define FTM_SC_RIE                       (1 << 6)  /* Bit 6: Reload Point Interrupt Enable */
 #define FTM_SC_RF                        (1 << 7)  /* Bit 7: Reload Flag */
@@ -695,6 +697,7 @@
 #  define FTM_MODE_FAULTM_EVEN_MAN       (1 << FTM_MODE_FAULTM_SHIFT) /* Fault control is enabled for even channels only (channels 0, 2, 4, and 6), and the selected mode is the manual fault clearing. */
 #  define FTM_MODE_FAULTM_ALL_MAN        (2 << FTM_MODE_FAULTM_SHIFT) /* Fault control is enabled for all channels, and the selected mode is the manual fault clearing. */
 #  define FTM_MODE_FAULTM_ALL_AUTO       (3 << FTM_MODE_FAULTM_SHIFT) /* Fault control is enabled for all channels, and the selected mode is the automatic fault clearing. */
+
 #define FTM_MODE_FAULTIE                 (1 << 7)  /* Bit 7: Fault Interrupt Enable */
 
                                                    /* Bits 8-31: Reserved */

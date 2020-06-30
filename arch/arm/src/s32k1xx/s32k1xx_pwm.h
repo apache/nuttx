@@ -95,13 +95,13 @@
 #include <arch/board/board.h>
 #include "hardware/s32k1xx_pinmux.h"
 
-/* For each timer that is enabled for PWM usage, we need the following additional
- * configuration settings:
+/* For each timer that is enabled for PWM usage, we need the following
+ * additional configuration settings:
  *
  * CONFIG_S32K1XX_FTMx_CHANNEL - Specifies the timer output channel {0,..,7}
- * PWM_FTMx_PINCFG - One of the values defined in s32k1*_pinmux.h.  In the case
- *   where there are multiple pin selections, the correct setting must be provided
- *   in the arch/board/board.h file.
+ * PWM_FTMx_PINCFG - One of the values defined in s32k1*_pinmux.h.  In the
+ *   case where there are multiple pin selections, the correct setting must
+ *   be provided in the arch/board/board.h file.
  */
 
 #ifdef CONFIG_S32K1XX_FTM0_PWM
@@ -332,7 +332,7 @@ extern "C"
  *   On success, a pointer to the S32K1XX lower half PWM driver is returned.
  *   NULL is returned on any failure.
  *
- ************************************************************************************/
+ *****************************************************************************/
 
 FAR struct pwm_lowerhalf_s *s32k1xx_pwminitialize(int timer);
 
