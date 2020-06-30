@@ -156,9 +156,9 @@ int s32k1xx_bringup(void)
 #endif
 
 #ifdef CONFIG_S32K1XX_EEEPROM
-      /* Register EEEPROM block device */
+  /* Register EEEPROM block device */
 
-      s32k1xx_eeeprom_register(0, 4096);
+  s32k1xx_eeeprom_register(0, 4096);
 #endif
 
   return ret;
