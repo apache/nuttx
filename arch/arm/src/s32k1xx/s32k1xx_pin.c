@@ -161,6 +161,7 @@ int s32k1xx_pinconfig(uint32_t cfgset)
            * as an input
            */
 
+          base   = S32K1XX_GPIO_BASE(port);
           regval = getreg32(base + S32K1XX_GPIO_PIDR_OFFSET);
           if ((cfgset & PIN_DISABLE_INPUT) != 0)
             {
