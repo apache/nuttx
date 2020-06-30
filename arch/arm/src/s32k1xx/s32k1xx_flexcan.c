@@ -1698,14 +1698,14 @@ static void s32k1xx_reset(struct s32k1xx_driver_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: s32k1xx_netinitialize
+ * Function: s32k1xx_caninitialize
  *
  * Description:
- *   Initialize the Ethernet controller and driver
+ *   Initialize the CAN controller and driver
  *
  * Input Parameters:
- *   intf - In the case where there are multiple EMACs, this value
- *          identifies which EMAC is to be initialized.
+ *   intf - In the case where there are multiple CAN devices, this value
+ *          identifies which CAN device is to be initialized.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -1714,7 +1714,7 @@ static void s32k1xx_reset(struct s32k1xx_driver_s *priv)
  *
  ****************************************************************************/
 
-int s32k1xx_netinitialize(int intf)
+int s32k1xx_caninitialize(int intf)
 {
   struct s32k1xx_driver_s *priv;
   int ret;
@@ -1894,10 +1894,10 @@ int s32k1xx_netinitialize(int intf)
  * Name: arm_netinitialize
  *
  * Description:
- *   Initialize the first network interface.  If there are more than one
- *   interface in the chip, then board-specific logic will have to provide
- *   this function to determine which, if any, Ethernet controllers should
- *   be initialized.
+ *   Initialize the enabled CAN device interfaces.  If there are more
+ *   different network devices in the chip, then board-specific logic will
+ *   have to provide this function to determine which, if any, network
+ *   devices should be initialized.
  *
  ****************************************************************************/
 
@@ -1905,15 +1905,15 @@ int s32k1xx_netinitialize(int intf)
 void arm_netinitialize(void)
 {
 #ifdef CONFIG_S32K1XX_FLEXCAN0
-  s32k1xx_netinitialize(0);
+  s32k1xx_caninitialize(0);
 #endif
 
 #ifdef CONFIG_S32K1XX_FLEXCAN1
-  s32k1xx_netinitialize(1);
+  s32k1xx_caninitialize(1);
 #endif
 
 #ifdef CONFIG_S32K1XX_FLEXCAN2
-  s32k1xx_netinitialize(2);
+  s32k1xx_caninitialize(2);
 #endif
 }
 #endif
