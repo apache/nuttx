@@ -62,7 +62,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration **********************************************************/
+/* Configuration ************************************************************/
 
 /* Select SCI parameters for the selected console */
 
@@ -117,22 +117,22 @@ static void tms570_sci_initialize(uint32_t base)
   uint32_t reg;
 
   reg = 0x83e70b13u;
-  putreg32(reg,TMS570_IOMM_KICK0);
+  putreg32(reg, TMS570_IOMM_KICK0);
 
   reg = 0x95a4f1e0u;
-  putreg32(reg,TMS570_IOMM_KICK1);
+  putreg32(reg, TMS570_IOMM_KICK1);
 
   reg = (2 << 16);
-  putreg32(reg,TMS570_IOMM_PINMMR7);
+  putreg32(reg, TMS570_IOMM_PINMMR7);
 
   reg = (2 << 0);
-  putreg32(reg,TMS570_IOMM_PINMMR8);
+  putreg32(reg, TMS570_IOMM_PINMMR8);
 
   reg = 0;
-  putreg32(reg,TMS570_IOMM_KICK0);
+  putreg32(reg, TMS570_IOMM_KICK0);
 
   reg = 0;
-  putreg32(reg,TMS570_IOMM_KICK1);
+  putreg32(reg, TMS570_IOMM_KICK1);
 #endif
 
   /* Bring SCI1 out of reset */
@@ -141,6 +141,7 @@ static void tms570_sci_initialize(uint32_t base)
   putreg32(SCI_GCR0_RESET, base + TMS570_SCI_GCR0_OFFSET);
 
   /* Configure pins */
+
   /* Pin Function Register: RX is receive pin, TX is transmit pin. */
 
   putreg32(SCI_PIO_RX | SCI_PIO_TX, base + TMS570_SCI_FUN_OFFSET);
@@ -272,19 +273,20 @@ void tms570_lowsetup(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: tms570_sci_configure
  *
  * Description:
  *   Configure an SCI for non-interrupt driven operation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-int tms570_sci_configure(uint32_t base, FAR const struct sci_config_s *config)
+int tms570_sci_configure(uint32_t base,
+                         FAR const struct sci_config_s *config)
 {
-  float32 divb7;
+  float_t divb7;
   uint32_t intpart;
-  float32 frac;
+  float_t frac;
   uint32_t p;
   uint32_t m;
   uint32_t u;
@@ -330,7 +332,8 @@ int tms570_sci_configure(uint32_t base, FAR const struct sci_config_s *config)
    * TXENA=1       Transmitter is enabled
    */
 
-  gcr1 = (SCI_GCR1_TIMING | SCI_GCR1_CLOCK | SCI_GCR1_RXENA | SCI_GCR1_TXENA);
+  gcr1 = (SCI_GCR1_TIMING | SCI_GCR1_CLOCK |
+          SCI_GCR1_RXENA | SCI_GCR1_TXENA);
 
   DEBUGASSERT(config->parity >= 0 && config->parity <= 2);
   if (config->parity == 1)
@@ -348,7 +351,8 @@ int tms570_sci_configure(uint32_t base, FAR const struct sci_config_s *config)
     }
 
   gcr1 = 0;
-  gcr1 = (SCI_GCR1_TIMING | SCI_GCR1_CLOCK | SCI_GCR1_RXENA | SCI_GCR1_TXENA);
+  gcr1 = (SCI_GCR1_TIMING | SCI_GCR1_CLOCK |
+          SCI_GCR1_RXENA | SCI_GCR1_TXENA);
   putreg32(gcr1, base + TMS570_SCI_GCR1_OFFSET);
 
   p    = (uint32_t)intpart - 1;
