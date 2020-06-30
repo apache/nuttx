@@ -88,9 +88,9 @@
 #  define pwm_dumpgpio(p,m)
 #endif
 
-/****************************************************************************
+/*****************************************************************************
  * Private Types
- ****************************************************************************/
+ *****************************************************************************/
 
 /* This structure represents the state of one PWM timer */
 
@@ -443,7 +443,8 @@ static int pwm_timer(FAR struct s32k1xx_pwmtimer_s *priv,
 
   cv = b16toi(info->duty * modulo + b16HALF);
 
-  pwminfo("FTM%d PCLK: %d frequency: %d FTMCLK: %d prescaler: %d modulo: %d c0v: %d\n",
+  pwminfo("FTM%d PCLK: %d frequency: %d FTMCLK: %d prescaler: %d modulo: %d \
+           c0v: %d\n",
           priv->tpmid, priv->pclk, info->frequency, tpmclk,
           presc_values[prescaler], modulo, cv);
 
@@ -462,55 +463,63 @@ static int pwm_timer(FAR struct s32k1xx_pwmtimer_s *priv,
     {
       case 0:  /* PWM Mode configuration: Channel 0 */
         {
-          pwm_putreg(priv, S32K1XX_FTM_C0SC_OFFSET, FTM_CNSC_MSB | FTM_CNSC_ELSB);
+          pwm_putreg(priv, S32K1XX_FTM_C0SC_OFFSET,
+                     FTM_CNSC_MSB | FTM_CNSC_ELSB);
           pwm_putreg(priv, S32K1XX_FTM_C0V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 1:  /* PWM Mode configuration: Channel 1 */
         {
-          pwm_putreg(priv, S32K1XX_FTM_C1SC_OFFSET, FTM_CNSC_MSB | FTM_CNSC_ELSB);
+          pwm_putreg(priv, S32K1XX_FTM_C1SC_OFFSET,
+                     FTM_CNSC_MSB | FTM_CNSC_ELSB);
           pwm_putreg(priv, S32K1XX_FTM_C1V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 2:  /* PWM Mode configuration: Channel 2 */
         {
-          pwm_putreg(priv, S32K1XX_FTM_C2SC_OFFSET, FTM_CNSC_MSB | FTM_CNSC_ELSB);
+          pwm_putreg(priv, S32K1XX_FTM_C2SC_OFFSET,
+                     FTM_CNSC_MSB | FTM_CNSC_ELSB);
           pwm_putreg(priv, S32K1XX_FTM_C2V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 3:  /* PWM Mode configuration: Channel 3 */
         {
-          pwm_putreg(priv, S32K1XX_FTM_C3SC_OFFSET, FTM_CNSC_MSB | FTM_CNSC_ELSB);
+          pwm_putreg(priv, S32K1XX_FTM_C3SC_OFFSET,
+                     FTM_CNSC_MSB | FTM_CNSC_ELSB);
           pwm_putreg(priv, S32K1XX_FTM_C3V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 4:  /* PWM Mode configuration: Channel 4 */
         {
-          pwm_putreg(priv, S32K1XX_FTM_C4SC_OFFSET, FTM_CNSC_MSB | FTM_CNSC_ELSB);
+          pwm_putreg(priv, S32K1XX_FTM_C4SC_OFFSET,
+                     FTM_CNSC_MSB | FTM_CNSC_ELSB);
           pwm_putreg(priv, S32K1XX_FTM_C4V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 5:  /* PWM Mode configuration: Channel 5 */
         {
-          pwm_putreg(priv, S32K1XX_FTM_C5SC_OFFSET, FTM_CNSC_MSB | FTM_CNSC_ELSB);
+          pwm_putreg(priv, S32K1XX_FTM_C5SC_OFFSET,
+                     FTM_CNSC_MSB | FTM_CNSC_ELSB);
           pwm_putreg(priv, S32K1XX_FTM_C5V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 6:  /* PWM Mode configuration: Channel 6 */
         {
-          pwm_putreg(priv, S32K1XX_FTM_C6SC_OFFSET, FTM_CNSC_MSB | FTM_CNSC_ELSB);
+          pwm_putreg(priv, S32K1XX_FTM_C6SC_OFFSET,
+                     FTM_CNSC_MSB | FTM_CNSC_ELSB);
           pwm_putreg(priv, S32K1XX_FTM_C6V_OFFSET, (uint16_t) cv);
         }
         break;
       case 7:  /* PWM Mode configuration: Channel 7 */
         {
-          pwm_putreg(priv, S32K1XX_FTM_C7SC_OFFSET, FTM_CNSC_MSB | FTM_CNSC_ELSB);
+          pwm_putreg(priv, S32K1XX_FTM_C7SC_OFFSET,
+                     FTM_CNSC_MSB | FTM_CNSC_ELSB);
           pwm_putreg(priv, S32K1XX_FTM_C7V_OFFSET, (uint16_t) cv);
         }
         break;
@@ -533,7 +542,7 @@ static int pwm_timer(FAR struct s32k1xx_pwmtimer_s *priv,
   return OK;
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: pwm_setup
  *
  * Description:
@@ -551,14 +560,15 @@ static int pwm_timer(FAR struct s32k1xx_pwmtimer_s *priv,
  *   AHB1 or 2 clocking for the GPIOs and timer has already been configured
  *   by the RCC logic at power up.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 {
   FAR struct s32k1xx_pwmtimer_s *priv = (FAR struct s32k1xx_pwmtimer_s *)dev;
 
   /* Note: The appropriate clock should for the right FTM device should
-   * already be enabled in the board-specific s32k1xx_periphclocks.c file. */
+   * already be enabled in the board-specific s32k1xx_periphclocks.c file.
+   */
 
   pwminfo("FTM%d pincfg: %08x\n", priv->tpmid, priv->pincfg);
   pwm_dumpregs(priv, "Initially");
@@ -570,7 +580,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
   return OK;
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: pwm_shutdown
  *
  * Description:
@@ -584,7 +594,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  * Returned Value:
  *   Zero on success; a negated errno value on failure
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 {
@@ -605,7 +615,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
   return OK;
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: pwm_start
  *
  * Description:
@@ -618,7 +628,7 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  * Returned Value:
  *   Zero on success; a negated errno value on failure
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info)
@@ -627,7 +637,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
   return pwm_timer(priv, info);
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: pwm_stop
  *
  * Description:
@@ -644,7 +654,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
  *   method is also called from the timer interrupt handler when a repetition
  *   count expires... automatically stopping the timer.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 {
@@ -711,7 +721,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
   return OK;
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: pwm_ioctl
  *
  * Description:
@@ -725,9 +735,10 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  * Returned Value:
  *   Zero on success; a negated errno value on failure
  *
- ****************************************************************************/
+ *****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
+static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
+                     unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct s32k1xx_pwmtimer_s *priv = (FAR struct s32k1xx_pwmtimer_s *)dev;
@@ -739,11 +750,11 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg
   return -ENOTTY;
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Public Functions
- ****************************************************************************/
+ *****************************************************************************/
 
-/****************************************************************************
+/*****************************************************************************
  * Name: s32k1xx_pwminitialize
  *
  * Description:
@@ -756,7 +767,7 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg
  *   On success, a pointer to the S32K1XX lower half PWM driver is returned.
  *   NULL is returned on any failure.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 FAR struct pwm_lowerhalf_s *s32k1xx_pwminitialize(int timer)
 {
