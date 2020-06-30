@@ -89,7 +89,7 @@
 void nxtask_start(void)
 {
   FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s *)this_task();
-  int exitcode;
+  int exitcode = EXIT_FAILURE;
   int argc;
 
   DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != \
@@ -138,13 +138,14 @@ void nxtask_start(void)
   if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       up_task_start(tcb->cmn.entry.main, argc, tcb->argv);
-      exitcode = EXIT_FAILURE; /* Should not get here */
     }
   else
-#endif
     {
       exitcode = tcb->cmn.entry.main(argc, tcb->argv);
     }
+#else
+  nxtask_startup(tcb->cmn.entry.main, argc, tcb->argv);
+#endif
 
   /* Call exit() if/when the task returns */
 

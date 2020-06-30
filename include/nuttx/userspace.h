@@ -117,8 +117,7 @@ struct userspace_s
 
   /* Task/thread startup routines */
 
-  CODE void (*task_startup)(main_t entrypt, int argc, FAR char *argv[])
-    noreturn_function;
+  CODE void (*task_startup)(main_t entrypt, int argc, FAR char *argv[]);
 #ifndef CONFIG_DISABLE_PTHREAD
   CODE void (*pthread_startup)(pthread_startroutine_t entrypt,
     pthread_addr_t arg);
@@ -151,27 +150,6 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: nxtask_startup
- *
- * Description:
- *   This function is the user-space, task startup function.  It is called
- *   from up_task_start() in user-mode.
- *
- * Input Parameters:
- *   entrypt - The user-space address of the task entry point
- *   argc and argv - Standard arguments for the task entry point
- *
- * Returned Value:
- *   None.  This function does not return.
- *
- ****************************************************************************/
-
-#ifndef __KERNEL__
-void nxtask_startup(main_t entrypt, int argc, FAR char *argv[])
-       noreturn_function;
-#endif
 
 /****************************************************************************
  * Name: pthread_startup
