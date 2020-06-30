@@ -1034,6 +1034,26 @@ void nxtask_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
 #endif
 
 /********************************************************************************
+ * Name: nxtask_startup
+ *
+ * Description:
+ *   This function is the user-space, task startup function.  It is called
+ *   from up_task_start() in user-mode.
+ *
+ * Input Parameters:
+ *   entrypt - The user-space address of the task entry point
+ *   argc and argv - Standard arguments for the task entry point
+ *
+ * Returned Value:
+ *   None.  This function does not return.
+ *
+ ********************************************************************************/
+
+#ifndef CONFIG_BUILD_KERNEL
+void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
+#endif
+
+/********************************************************************************
  * Internal vfork support.  The overall sequence is:
  *
  * 1) User code calls vfork().  vfork() is provided in architecture-specific
