@@ -43,6 +43,8 @@ config ARCH_CHIP_S32K144
 config ARCH_CHIP_S32K146
 	bool "S32K146"
 	select ARCH_CHIP_S32K14X
+	select S32K1XX_HAVE_FTM4
+	select S32K1XX_HAVE_FTM5
 	select S32K1XX_HAVE_LPSPI2
 	select S32K1XX_HAVE_FLEXCAN1
 	select S32K1XX_HAVE_FLEXCAN2
@@ -53,6 +55,10 @@ config ARCH_CHIP_S32K148
 	bool "S32K148"
 	select ARCH_CHIP_S32K14X
 	select S32K1XX_HAVE_ENET
+	select S32K1XX_HAVE_FTM4
+	select S32K1XX_HAVE_FTM5
+	select S32K1XX_HAVE_FTM6
+	select S32K1XX_HAVE_FTM7
 	select S32K1XX_HAVE_LPI2C1
 	select S32K1XX_HAVE_LPSPI2
 	select S32K1XX_HAVE_SAI
@@ -76,6 +82,8 @@ config ARCH_CHIP_S32K14X
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_FETCHADD
 	select S32K1XX_HAVE_EWM
+	select S32K1XX_HAVE_FTM2
+	select S32K1XX_HAVE_FTM3
 	select S32K1XX_HAVE_SPLL
 	select S32K1XX_HAVE_HSRUN
 	select S32K1XX_HAVE_LMEM
@@ -95,6 +103,30 @@ config S32K1XX_HAVE_EWM
 	default n
 
 config S32K1XX_HAVE_FIRC_CMU
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM2
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM3
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM4
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM5
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM6
+	bool
+	default n
+
+config S32K1XX_HAVE_FTM7
 	bool
 	default n
 
@@ -139,6 +171,10 @@ config S32K1XX_HAVE_SPLL
 	default n
 
 # Peripheral Group Selections
+
+config S32K1XX_FTM
+	bool
+	default n
 
 config S32K1XX_LPUART
 	bool
@@ -189,6 +225,52 @@ config S32K1XX_FLEXCAN2
 	select NET_CAN_HAVE_TX_DEADLINE
 	default n
 	depends on S32K1XX_HAVE_FLEXCAN2
+
+config S32K1XX_FTM0
+	bool "FTM0"
+	default n
+	select S32K1XX_FTM
+
+config S32K1XX_FTM1
+	bool "FTM1"
+	default n
+	select S32K1XX_FTM
+
+config S32K1XX_FTM2
+	bool "FTM2"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM2
+
+config S32K1XX_FTM3
+	bool "FTM3"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM3
+
+config S32K1XX_FTM4
+	bool "FTM4"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM4
+
+config S32K1XX_FTM5
+	bool "FTM5"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM5
+
+config S32K1XX_FTM6
+	bool "FTM6"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM6
+
+config S32K1XX_FTM7
+	bool "FTM7"
+	default n
+	select S32K1XX_FTM
+	depends on S32K1XX_HAVE_FTM7
 
 menuconfig S32K1XX_LPI2C0
 	bool "LPI2C0"
@@ -264,6 +346,99 @@ config S32K1XX_EEEPROM
        as a ramdisk block device
 
 endmenu # S32K1XX Peripheral Selection
+
+menu "S32K1XX FTM PWM Configuration"
+	depends on S32K1XX_FTM
+
+config S32K1XX_FTM0_PWM
+	bool "FTM0 PWM"
+	default n
+	depends on S32K1XX_FTM0
+
+config S32K1XX_FTM0_CHANNEL
+	int "FTM0 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM0_PWM
+
+config S32K1XX_FTM1_PWM
+	bool "FTM1 PWM"
+	default n
+	depends on S32K1XX_FTM1
+
+config S32K1XX_FTM1_CHANNEL
+	int "FTM1 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM1_PWM
+
+config S32K1XX_FTM2_PWM
+	bool "FTM2 PWM"
+	default n
+	depends on S32K1XX_FTM2
+
+config S32K1XX_FTM2_CHANNEL
+	int "FTM2 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM2_PWM
+
+config S32K1XX_FTM3_PWM
+	bool "FTM3 PWM"
+	default n
+	depends on S32K1XX_FTM3
+
+config S32K1XX_FTM3_CHANNEL
+	int "FTM3 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM3_PWM
+
+config S32K1XX_FTM4_PWM
+	bool "FTM4 PWM"
+	default n
+	depends on S32K1XX_FTM4
+
+config S32K1XX_FTM4_CHANNEL
+	int "FTM4 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM4_PWM
+
+config S32K1XX_FTM5_PWM
+	bool "FTM5 PWM"
+	default n
+	depends on S32K1XX_FTM5
+
+config S32K1XX_FTM5_CHANNEL
+	int "FTM5 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM5_PWM
+
+config S32K1XX_FTM6_PWM
+	bool "FTM6 PWM"
+	default n
+	depends on S32K1XX_FTM6
+
+config S32K1XX_FTM6_CHANNEL
+	int "FTM6 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM6_PWM
+
+config S32K1XX_FTM7_PWM
+	bool "FTM7 PWM"
+	default n
+	depends on S32K1XX_FTM7
+
+config S32K1XX_FTM7_CHANNEL
+	int "FTM7 PWM Output Channel"
+	default 0
+	range 0 7
+	depends on S32K1XX_FTM7_PWM
+
+endmenu # S32K1XX FTM PWM Configuration
 
 config S32K1XX_WDT_DISABLE
 	bool "Disable watchdog on reset"

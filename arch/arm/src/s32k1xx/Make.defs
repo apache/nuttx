@@ -58,6 +58,10 @@ ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
 CHIP_CSRCS += s32k1xx_flashcfg.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CHIP_CSRCS += s32k1xx_pwm.c
+endif
+
 ifeq ($(CONFIG_S32K1XX_LPUART),y)
 CHIP_CSRCS += s32k1xx_serial.c
 endif
