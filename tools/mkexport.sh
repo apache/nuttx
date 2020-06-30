@@ -195,6 +195,7 @@ fi
 # Copy the depends script
 
 cp "${TOPDIR}/tools/mkdeps.c" "${EXPORTDIR}/tools/."
+cp "${TOPDIR}/tools/incdir.c" "${EXPORTDIR}/tools/."
 
 # Copy the default linker script
 
