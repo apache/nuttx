@@ -130,13 +130,11 @@
 
 /* Floating point types */
 
-typedef float        float32;
+typedef float        float_t;
 #ifndef CONFIG_HAVE_DOUBLE
 typedef float        double_t;
-typedef float        float64;
 #else
 typedef double       double_t;
-typedef double       float64;
 #endif
 
 /****************************************************************************
