@@ -55,7 +55,7 @@
 #define EMAC_INTF 0
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -68,6 +68,8 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+#if !defined(CONFIG_NETDEV_LATEINIT)
 
 /************************************************************************************
  * Function: arm_netinitialize
@@ -90,6 +92,29 @@ extern "C"
  ************************************************************************************/
 
 void arm_netinitialize(void);
+
+#else
+
+/************************************************************************************
+ * Function: s32k1xx_netinitialize
+ *
+ * Description:
+ *   Initialize the Ethernet controller and driver
+ *
+ * Input Parameters:
+ *   intf - In the case where there are multiple EMACs, this value
+ *          identifies which EMAC is to be initialized.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ************************************************************************************/
+
+int s32k1xx_netinitialize(int intf);
+
+#endif
 
 /************************************************************************************
  * Function: s32k1xx_phy_boardinitialize
