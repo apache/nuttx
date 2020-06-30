@@ -155,6 +155,7 @@
 #define PCC_PCD_SHIFT      (0)       /* Bits 0-2:  Peripheral Clock Divider Select */
 #define PCC_PCD_MASK       (7 << PCC_PCD_SHIFT)
 #  define PCC_PCD(n)       ((uint32_t)((n) - 1) << PCC_PCD_SHIFT) /* n=1..8 */
+
 #define PCC_FRAC           (1 << 3)  /* Bits 3:  Peripheral Clock Divider Fraction */
 #define PCC_PCS_SHIFT      (24)      /* Bits 24-26:  Peripheral Clock Source Select */
 #define PCC_PCS_MASK       (7 << PCC_PCS_SHIFT)
@@ -167,6 +168,7 @@
 #  define PCC_PCS_OPTION5  (5 << PCC_PCS_SHIFT)  /* Clock option 5 */
 #  define PCC_PCS_OPTION6  (6 << PCC_PCS_SHIFT)  /* Clock option 6 */
 #  define PCC_PCS_OPTION7  (7 << PCC_PCS_SHIFT)  /* Clock option 7 */
+
 #define PCC_CGC            (1 << 30) /* Clock Gate Control */
 #define PCC_PR             (1 << 31) /* Present */
 

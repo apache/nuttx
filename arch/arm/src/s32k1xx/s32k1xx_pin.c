@@ -174,7 +174,9 @@ int s32k1xx_pinconfig(uint32_t cfgset)
 
           putreg32(regval, base + S32K1XX_GPIO_PIDR_OFFSET);
 
-          /* Additional configuration for the case of Alternative 1 (GPIO) modes */
+          /* Additional configuration for the case of Alternative 1 (GPIO)
+           * modes
+           */
 
           if (mode == PIN_MODE_GPIO)
             {
@@ -198,7 +200,8 @@ int s32k1xx_pinconfig(uint32_t cfgset)
 
                   /* Set the initial value of the GPIO output */
 
-                  s32k1xx_gpiowrite(cfgset, ((cfgset & GPIO_OUTPUT_ONE) != 0));
+                  s32k1xx_gpiowrite(cfgset,
+                                    ((cfgset & GPIO_OUTPUT_ONE) != 0));
                 }
             }
         }
@@ -223,7 +226,7 @@ int s32k1xx_pinconfig(uint32_t cfgset)
  *           false: Digital Filters are clocked by the 1 kHz LPO clock
  *   width - Filter Length
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int s32k1xx_pinfilter(unsigned int port, bool lpo, unsigned int width)
 {
