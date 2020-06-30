@@ -47,7 +47,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "nucleo-f412zg.h"
 /****************************************************************************
  * Public Functions
