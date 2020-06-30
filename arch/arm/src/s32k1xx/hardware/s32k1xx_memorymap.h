@@ -60,7 +60,7 @@
 #define S32K1XX_DMAMUX_BASE      0x40021000  /* DMA Channel Multiplexer  */
 #define S32K1XX_FLEXCAN0_BASE    0x40024000  /* FlexCAN 0 */
 #define S32K1XX_FLEXCAN1_BASE    0x40025000  /* FlexCAN 1 */
-#define S32K1XX_FLEXTIMER_BASE   0x40026000  /* FlexTimer */
+#define S32K1XX_FTM3_BASE        0x40026000  /* FlexTimer 3 */
 #define S32K1XX_ADC1_BASE        0x40027000  /* Analog-to-digital converter 1 */
 #define S32K1XX_FLEXCAN2_BASE    0x4002b000  /* FlexCAN 2 */
 #define S32K1XX_LPSPI0_BASE      0x4002c000  /* Low Power SPI 0 */

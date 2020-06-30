@@ -168,7 +168,7 @@
 #define S32K1XX_IRQ_CAN2_16_31    (112)  /* CAN2 OR'ed Message buffer (16-31) */
                                          /* Reserved (113-114) */
 #define S32K1XX_IRQ_FTM0_CH0_1    (115)  /* FTM0 Channel 0/1 Interrupt */
-#define S32K1XX_IRQ_FTM0_CH2_2    (116)  /* FTM0 Channel 2/3 Interrupt */
+#define S32K1XX_IRQ_FTM0_CH2_3    (116)  /* FTM0 Channel 2/3 Interrupt */
 #define S32K1XX_IRQ_FTM0_CH4_5    (117)  /* FTM0 Channel 4/5 Interrupt */
 #define S32K1XX_IRQ_FTM0_CH6_7    (118)  /* FTM0 Channel 6/7 Interrupt */
 #define S32K1XX_IRQ_FTM0_FAULT    (119)  /* FTM0 Fault Interrupt */

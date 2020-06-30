@@ -46,7 +46,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/s32k1xx_ftfc.h"
 #include "hardware/s32k1xx_sim.h"
@@ -54,7 +54,7 @@
 #include "s32k1xx_config.h"
 #include "s32k1xx_eeeprom.h"
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #include <arch/board/board.h> /* Include last:  has dependencies */
 
