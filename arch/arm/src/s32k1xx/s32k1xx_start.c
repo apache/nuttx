@@ -69,6 +69,10 @@
 #include "s32k1xx_progmem.h"
 #endif
 
+#ifdef CONFIG_S32K1XX_EEEPROM
+#include "s32k1xx_eeeprom.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
