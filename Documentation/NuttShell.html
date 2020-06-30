@@ -4730,19 +4730,14 @@ set FOOBAR ABC_${FOO}_${BAR}
 
 <p>
   The NSH start-up sequence is very simple.
-  As an example, the code at <code>apps/examples/nsh/nsh_main.c</code> illustrates how to start NSH.
+  As an example, the code at <code>apps/system/nsh/nsh_main.c</code> illustrates how to start NSH.
   It simple does the following:
 </p>
 
 <ol>
   <li>
     <p>
-      If you have C++ static initializers, it will call your implementation of <code>up_cxxinitialize()</code> which will, in turn, call those static initializers.
-      For the case of the STM3240G-EVAL board, the implementation of <code>up_cxxinitialize()</code> can be found at <code>nuttx/boards/arm/stm32/stm3240g-eval/src/up_cxxinitialize.c</code>.
-    </p>
-  <li>
-    <p>
-      This function then calls <code>nsh_initialize()</code> which initializes the NSH library.
+      This function calls <code>nsh_initialize()</code> which initializes the NSH library.
       <code>nsh_initialize()</code> is described in more detail below.
     </p>
   <li>
@@ -5993,7 +5988,6 @@ xxd -i romfs_img >nsh_romfsimg.h
   <li><a href="#cmduname"><code>uname</code></a></li>
   <li><a href="#cmdunset"><code>unset</code></a></li>
   <li><a href="#looping"><code>until</code></a></li>
-  <li><a href="#custonshlib"><code>up_cxxinitialize()</code></a></li>
   <li><a href="#cmdurldec"><code>urldecode</code></a></li>
   <li><a href="#cmdurlencode"><code>urlencode</code></a></li>
   <li><a href="#usbstartup">USB console startup</a></li>

@@ -53,10 +53,6 @@ CSRCS += kl_spi.c
 endif
 endif
 
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += kl_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += kl_led.c
 endif
