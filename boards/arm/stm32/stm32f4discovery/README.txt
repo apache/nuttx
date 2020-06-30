@@ -1397,8 +1397,7 @@ Configuration Sub-directories
        CONFIG_UCLIBCXX_HAVE_LIBSUPCXX=y
        CONFIG_UCLIBCXX_IOSTREAM_BUFSIZE=32
 
-       CONFIG_EXAMPLES_ELF_CXXINITIALIZE=y
-       CONFIG_EXAMPLES_ELF_UCLIBCXX=y
+       CONFIG_EXAMPLES_ELF_CXX=y
 
     6. By default, this configuration uses the ROMFS file system.  It can also
        be modified to use the compressed CROMFS:

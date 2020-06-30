@@ -719,7 +719,6 @@ Configurations
 
       CONFIG_HAVE_CXX=y
       CONFIG_HAVE_CXXINITIALIZE=y
-      CONFIG_SYSTEM_NSH_CXXINITIALIZE=y
 
   usbnsh:
 

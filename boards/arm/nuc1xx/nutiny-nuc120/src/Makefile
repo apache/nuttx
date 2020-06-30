@@ -37,10 +37,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = nuc_boardinitialize.c
 
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += nuc_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += nuc_led.c
 endif
