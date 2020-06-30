@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_startup
+ * Name: nxtask_startup
  *
  * Description:
  *   This function is the user-space, task startup function.  It is called
@@ -66,7 +66,7 @@
  *
  ****************************************************************************/
 
-void task_startup(main_t entrypt, int argc, FAR char *argv[])
+void nxtask_startup(main_t entrypt, int argc, FAR char *argv[])
 {
   DEBUGASSERT(entrypt);
 

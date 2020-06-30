@@ -108,7 +108,7 @@ const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
 
   /* Task/thread startup routines */
 
-  .task_startup     = task_startup,
+  .task_startup     = nxtask_startup,
 #ifndef CONFIG_DISABLE_PTHREAD
   .pthread_startup  = pthread_startup,
 #endif
