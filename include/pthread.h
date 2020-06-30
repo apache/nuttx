@@ -207,10 +207,10 @@
  */
 
 #define pthread_setname_np(thread, name) \
-  prctl((int)PR_SET_NAME, (char*)name, (int)thread)
+  prctl((int)PR_SET_NAME_EXT, (char*)name, (int)thread)
 
 #define pthread_getname_np(thread, name) \
-  prctl((int)PR_GET_NAME, (char*)name, (int)thread)
+  prctl((int)PR_GET_NAME_EXT, (char*)name, (int)thread)
 
 /********************************************************************************
  * Public Type Definitions
