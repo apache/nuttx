@@ -75,7 +75,7 @@ static const char g_pthreadname[] = "<pthread>";
  * Name: pthread_tcb_setup
  *
  * Description:
- *   This functions sets up parameters in the Task Control Block (TCB) in
+ *   This function sets up parameters in the Task Control Block (TCB) in
  *   preparation for starting a new thread.
  *
  *   pthread_tcb_setup() is called from nxtask_init() and nxtask_start() to
@@ -85,7 +85,7 @@ static const char g_pthreadname[] = "<pthread>";
  *
  * Input Parameters:
  *   tcb     - Address of the new task's TCB
- *   startup - User-space pthread startup function
+ *   startup - User space pthread startup function
  *   arg     - The argument to provide to the pthread on startup.
  *
  * Returned Value:
@@ -213,7 +213,7 @@ static void pthread_start(void)
  * Name:  nx_pthread_create
  *
  * Description:
- *   This function creates and activates a new thread with a specified
+ *   This function creates and activates a new thread with specified
  *   attributes.
  *
  * Input Parameters:

@@ -34,8 +34,8 @@
  * Name: pthread_startup
  *
  * Description:
- *   This function is the user-space, pthread startup function.  Its purpose
- *   is to to catch the return from the pthread main function so that
+ *   This function is the user space pthread startup function.  Its purpose
+ *   is to catch the return from the pthread main function so that
  *   pthread_exit() can be called from user space
  *
  * Input Parameters:
@@ -65,7 +65,7 @@ static void pthread_startup(pthread_startroutine_t entry,
  * Name:  pthread_create
  *
  * Description:
- *   This function creates and activates a new thread with a specified
+ *   This function creates and activates a new thread with specified
  *   attributes.  It is simply a wrapper around the nx_pthread_create system
  *   call.
  *

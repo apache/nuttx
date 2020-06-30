@@ -324,7 +324,7 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
           regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
 
           /* Change the parameter ordering to match the expectation of the
-           * useri space pthread_startup:
+           * user space pthread_startup:
            */
 
           regs[REG_R0]         = regs[REG_R2]; /* pthread entry */
