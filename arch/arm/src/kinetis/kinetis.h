@@ -777,7 +777,7 @@ int kinetis_netinitialize(int intf);
  * Assumptions:
  *
  ************************************************************************************/
-#ifdef CONFIG_KINETIS_CAN
+#ifdef CONFIG_KINETIS_FLEXCAN
 int kinetis_caninitialize(int intf)
 #endif
 

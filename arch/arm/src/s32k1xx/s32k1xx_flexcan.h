@@ -65,14 +65,16 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#if !defined(CONFIG_NETDEV_LATEINIT)
+
 /************************************************************************************
  * Function: arm_netinitialize
  *
  * Description:
- *   Initialize the first network interface.  If there are more than one
- *   interface in the chip, then board-specific logic will have to provide
- *   this function to determine which, if any, Ethernet controllers should
- *   be initialized.  Also prototyped in up_internal.h.
+ *   Initialize the enabled CAN device interfaces.  If there are more
+ *   different network devices in the chip, then board-specific logic will
+ *   have to provide this function to determine which, if any, network
+ *   devices should be initialized.
  *
  * Input Parameters:
  *   None
@@ -87,23 +89,28 @@ extern "C"
 
 void arm_netinitialize(void);
 
+#else
+
 /************************************************************************************
- * Function: s32k1xx_phy_boardinitialize
+ * Function: s32k1xx_caninitialize
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can be
- *   used.  This may include such things as configuring GPIOs, resetting the PHY,
- *   etc.  If CONFIG_S32K1XX_FLEXCAN_PHYINIT is defined in the configuration then the
- *   board specific logic must provide s32k1xx_phyinitialize();  The i.MX RT Ethernet
- *   driver will call this function one time before it first uses the PHY.
+ *   Initialize the CAN controller and driver
  *
  * Input Parameters:
- *   intf - Always zero for now.
+ *   intf - In the case where there are multiple CAN devices, this value
+ *          identifies which CAN device is to be initialized.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
+ * Assumptions:
+ *
  ************************************************************************************/
+
+int s32k1xx_caninitialize(int intf);
+
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
