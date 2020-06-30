@@ -78,12 +78,14 @@
 #define S32K1XX_CMU1_BASE        0x4003f000  /* Clock Monitor Unit 1 */
 #define S32K1XX_LPTMR0_BASE      0x40040000  /* Low-power timer 0 */
 #define S32K1XX_SIM_BASE         0x40048000  /* System integration module */
+
 #define S32K1XX_PORT_BASE(n)     (0x40049000 + ((n) << 12)) /* Port n multiplexing control */
-#  define S32K1XX_PORTA_BASE     0x40049000  /* Port A multiplexing control */
-#  define S32K1XX_PORTB_BASE     0x4004a000  /* Port B multiplexing control */
-#  define S32K1XX_PORTC_BASE     0x4004b000  /* Port C multiplexing control */
-#  define S32K1XX_PORTD_BASE     0x4004c000  /* Port D multiplexing control */
-#  define S32K1XX_PORTE_BASE     0x4004d000  /* Port E multiplexing control */
+#  define S32K1XX_PORTA_BASE     0x40049000                 /* Port A multiplexing control */
+#  define S32K1XX_PORTB_BASE     0x4004a000                 /* Port B multiplexing control */
+#  define S32K1XX_PORTC_BASE     0x4004b000                 /* Port C multiplexing control */
+#  define S32K1XX_PORTD_BASE     0x4004c000                 /* Port D multiplexing control */
+#  define S32K1XX_PORTE_BASE     0x4004d000                 /* Port E multiplexing control */
+
 #define S32K1XX_WDOG_BASE        0x40052000  /* Software watchdog */
 #define S32K1XX_SAI0_BASE        0x40054000  /* Synchronous Audio Interface 0 */
 #define S32K1XX_SAI1_BASE        0x40055000  /* Synchronous Audio Interface 1 */
@@ -107,12 +109,13 @@
 #define S32K1XX_PMC_BASE         0x4007d000  /* Power management controller */
 #define S32K1XX_SMC_BASE         0x4007e000  /* System Mode controller */
 #define S32K1XX_RCM_BASE         0x4007f000  /* Reset Control Module */
+
 #define S32K1XX_GPIO_BASE(n)     (0x400ff000 +((n) << 6)) /* GPIO controller */
-#  define S32K1XX_GPIOA_BASE     0x400ff000  /* GPIOA controller */
-#  define S32K1XX_GPIOB_BASE     0x400ff040  /* GPIOB controller */
-#  define S32K1XX_GPIOC_BASE     0x400ff080  /* GPIOC controller */
-#  define S32K1XX_GPIOD_BASE     0x400ff0c0  /* GPIOD controller */
-#  define S32K1XX_GPIOE_BASE     0x400ff100  /* GPIOE controller */
+#  define S32K1XX_GPIOA_BASE     0x400ff000               /* GPIOA controller */
+#  define S32K1XX_GPIOB_BASE     0x400ff040               /* GPIOB controller */
+#  define S32K1XX_GPIOC_BASE     0x400ff080               /* GPIOC controller */
+#  define S32K1XX_GPIOD_BASE     0x400ff0c0               /* GPIOD controller */
+#  define S32K1XX_GPIOE_BASE     0x400ff100               /* GPIOE controller */
 
 #if defined(CONFIG_ARCH_CHIP_S32K14X)
 #  define S32K1XX_ITM_BASE       0xe0000000  /* Instrumentation Trace Macrocell */
