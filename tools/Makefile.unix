@@ -421,7 +421,7 @@ ifeq ($(CONFIG_UBOOT_UIMAGE),y)
 		cp -f uImage /tftpboot/uImage; \
 	fi
 endif
-	$(call POSTBUILD)
+	$(call POSTBUILD, $(TOPDIR))
 
 # download
 #
