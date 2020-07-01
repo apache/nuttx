@@ -94,7 +94,7 @@ endif
 
 CROSSDEV =
 CC = $(ZDSBINDIR)$(DELIM)zneocc.exe
-CPP = gcc -E
+CPP = gcc -E -P -x c
 LD = $(ZDSBINDIR)$(DELIM)zneolink.exe
 AS = $(ZDSBINDIR)$(DELIM)zneoasm.exe
 AR = $(ZDSBINDIR)$(DELIM)zneolib.exe

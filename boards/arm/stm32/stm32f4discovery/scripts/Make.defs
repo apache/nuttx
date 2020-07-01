@@ -30,13 +30,6 @@ else
   ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 endif
 
-LD = $(CROSSDEV)ld
-STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(ARCROSSDEV)ar rcs
-NM = $(ARCROSSDEV)nm
-OBJCOPY = $(CROSSDEV)objcopy
-OBJDUMP = $(CROSSDEV)objdump
-
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
 endif
@@ -52,15 +45,9 @@ ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
-  CC = clang
-  CXX = clang++
-  CPP = clang -E
   ARCHCFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m4
   ARCHCXXFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m4 -DCONFIG_WCHAR_BUILTIN
 else
-  CC = $(CROSSDEV)gcc
-  CXX = $(CROSSDEV)g++
-  CPP = $(CROSSDEV)gcc -E
   ARCHCFLAGS += -funwind-tables
   ARCHCXXFLAGS += -fno-rtti -funwind-tables
   ifneq ($(CONFIG_DEBUG_NOOPT),y)

@@ -139,8 +139,22 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
+  ARCHCPUFLAGS = -target arm-none-eabi $(TOOLCHAIN_MCPU) $(TOOLCHAIN_MFLOAT)
+  CC = clang
+  CXX = clang++
+  CPP = clang -E -P -x c
+else
+  CC = $(CROSSDEV)gcc
+  CXX = $(CROSSDEV)g++
+  CPP = $(CROSSDEV)gcc -E -P -x c
 endif
+
+LD = $(CROSSDEV)ld
+STRIP = $(CROSSDEV)strip --strip-unneeded
+AR = $(ARCROSSDEV)ar rcs
+NM = $(ARCROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
 
 # Add the builtin library
 

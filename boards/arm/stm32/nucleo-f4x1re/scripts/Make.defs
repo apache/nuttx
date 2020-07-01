@@ -64,28 +64,14 @@ ARCHCFLAGS = -fno-builtin
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
-  CC = clang
-  CXX = clang++
-  CPP = clang -E
-  ARCHCFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m4
-  ARCHCXXFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m4 -DCONFIG_WCHAR_BUILTIN
+  ARCHCFLAGS += -nostdlib -ffreestanding
+  ARCHCXXFLAGS += -nostdlib -ffreestanding DCONFIG_WCHAR_BUILTIN
 else
-  CC = $(CROSSDEV)gcc
-  CXX = $(CROSSDEV)g++
-  CPP = $(CROSSDEV)gcc -E
   ARCHCXXFLAGS += -fno-rtti
   ifneq ($(CONFIG_DEBUG_NOOPT),y)
     ARCHOPTIMIZATION += -fno-strength-reduce
   endif
-
 endif
-
-LD = $(CROSSDEV)ld
-STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(ARCROSSDEV)ar rcs
-NM = $(ARCROSSDEV)nm
-OBJCOPY = $(CROSSDEV)objcopy
-OBJDUMP = $(CROSSDEV)objdump
 
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef

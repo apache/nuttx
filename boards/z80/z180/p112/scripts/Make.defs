@@ -35,78 +35,8 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
-
-# These are the directories where the SDCC toolchain is installed.  NOTE
-# that short 8.3 path names are used in order to avoid spaces.  On my machine
-# I have:
-#
-# C:\PROGRA~1\ = C:\Profram Files\
-# C:\PROGRA~2\ = C:\Program Files (x86)\
-#
-# Your PC may be configured differently.
-
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  SDCC_INSTALLDIR = C:\PROGRA~2\SDCC
-  SDCC_BINDIR = $(SDCC_INSTALLDIR)\bin
-  SDCC_LIBDIR = $(SDCC_INSTALLDIR)\lib\z180
-else
-  SDCC_INSTALLDIR = /usr/local
-  SDCC_BINDIR = $(SDCC_INSTALLDIR)/bin
-  SDCC_LIBDIR = $(SDCC_INSTALLDIR)/share/sdcc/lib/z180
-endif
-
-CC = sdcc
-CPP = sdcpp
-LD = sdldz80
-AS = sdasz80
-AR = sdar -r
-ARCHCPUFLAGS = -mz180
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = --debug
-endif
+include $(TOPDIR)/arch/z80/src/z180/Toolchain.defs
 
 CFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS = -x -a -l -o -s -g
-
-SDCCLIB = z180.lib
-
-ASMEXT = .asm
-OBJEXT = .rel
-LIBEXT = .lib
-EXEEXT = .hex
-
-# Custom ASSEMBLE definition.  The most common toolchain, GCC, uses the
-# compiler to assemble files because this has the advantage of running the C
-# Pre-Processor against.  This is not possible with other SDCC; we need to
-# define AS and over-ride the common definition in order to use the assembler
-# directly.
-
-define ASSEMBLE
-	@echo "AS: $1"
-	$(Q) $(AS) $(AFLAGS) $($(strip $1)_AFLAGS) $2 $1
-endef
-
-# Custom CLEAN definition
-
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-define CLEAN
-	$(Q) if exist *.o (del /f /q *.o)
-	$(Q) if exist *.asm (del /f /q *.asm)
-	$(Q) if exist *.rel (del /f /q *.rel)
-	$(Q) if exist *.lst (del /f /q *.lst)
-	$(Q) if exist *.rst (del /f /q *.rst)
-	$(Q) if exist *.sym (del /f /q *.sym)
-	$(Q) if exist *.adb (del /f /q *.adb)
-	$(Q) if exist *.lnk (del /f /q *.lnk)
-	$(Q) if exist *.map (del /f /q *.map)
-	$(Q) if exist *.mem (del /f /q *.mem)
-	$(Q) if exist *.hex (del /f /q *.hex)
-	$(Q) if exist *.cmd (del /f /q *.cmd)
-endef
-else
-define CLEAN
-	$(Q) rm -f *.o *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.hex *.cmd
-endef
-endif

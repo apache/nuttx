@@ -70,6 +70,18 @@ LDFLAGS += -nostartfiles -nodefaultlibs
 LDSCRIPT = or1k-elf-debug.ld
 #endif
 
+# Default toolchain
+
+CC = $(CROSSDEV)gcc
+CXX = $(CROSSDEV)g++
+CPP = $(CROSSDEV)gcc -E -P -x c
+LD = $(CROSSDEV)ld
+STRIP = $(CROSSDEV)strip --strip-unneeded
+AR = $(ARCROSSDEV)ar rcs
+NM = $(ARCROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
+
 # Add the builtin library
 
 EXTRA_LIBS += -lgcc
