@@ -88,6 +88,10 @@ CMODULEFLAGS += -fno-pic
 # Even on Linux, NuttX modules are loaded into the NuttX heap, which
 # can be out of range with -mcmodel=small.
 CMODULEFLAGS += -mcmodel=large
+# On Linux, we (ab)use the host compiler to compile binaries for NuttX.
+# Explicitly disable features which might be default on the host while
+# not available on NuttX.
+CMODULEFLAGS += -fno-stack-protector
 
 LDMODULEFLAGS = -r -e module_initialize
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
