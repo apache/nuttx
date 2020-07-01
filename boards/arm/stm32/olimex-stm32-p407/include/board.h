@@ -244,6 +244,18 @@
 #define GPIO_USART3_CTS   GPIO_USART3_CTS_2 /* PD11 */
 #define GPIO_USART3_RTS   GPIO_USART3_RTS_2 /* PD12 */
 
+/* UEXT USART3: This will redefine the above macros if enabled. */
+
+#ifdef CONFIG_STM32_OLIMEXP407_UEXT_USART3
+#  undef  GPIO_USART3_RX    GPIO_USART3_RX_3
+#  undef  GPIO_USART3_TX    GPIO_USART3_TX_3
+#  undef  GPIO_USART3_CTS   GPIO_USART3_CTS_2
+#  undef  GPIO_USART3_RTS   GPIO_USART3_RTS_2
+
+#  define GPIO_USART3_RX    GPIO_USART3_RX_2 /* PC11 */
+#  define GPIO_USART3_TX    GPIO_USART3_TX_2 /* PC10 */
+#endif
+
 /* USART6: */
 
 #define GPIO_USART6_RX    GPIO_USART6_RX_2  /* PG9  */
