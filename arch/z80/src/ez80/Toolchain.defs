@@ -108,7 +108,7 @@ endif
 
 CROSSDEV =
 CC = $(ZDSBINDIR)$(DELIM)ez80cc.exe
-CPP = gcc -E
+CPP = gcc -E -P -x c
 LD = $(ZDSBINDIR)$(DELIM)ez80link.exe
 AS = $(ZDSBINDIR)$(DELIM)ez80asm.exe
 AR = $(ZDSBINDIR)$(DELIM)ez80lib.exe

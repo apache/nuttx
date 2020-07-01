@@ -41,15 +41,6 @@ LDSCRIPT = ld.script
 
 ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-CC = $(CROSSDEV)gcc.exe
-CXX = $(CROSSDEV)g++.exe
-CPP = $(CROSSDEV)gcc.exe -E
-LD = $(CROSSDEV)ld.exe
-AR = $(ARCROSSDEV)ar.exe rcs
-NM = $(ARCROSSDEV)nm.exe
-OBJCOPY = $(CROSSDEV)objcopy.exe
-OBJDUMP = $(CROSSDEV)objdump.exe
-
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
 endif

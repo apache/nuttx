@@ -45,16 +45,6 @@ else
   ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 endif
 
-CC = $(CROSSDEV)gcc
-CXX = $(CROSSDEV)g++
-CPP = $(CROSSDEV)gcc -E
-LD = $(CROSSDEV)ld
-STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(ARCROSSDEV)ar rcs
-NM = $(ARCROSSDEV)nm
-OBJCOPY = $(CROSSDEV)objcopy
-OBJDUMP = $(CROSSDEV)objdump
-
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
@@ -63,15 +53,9 @@ ARCHCFLAGS = -fno-builtin
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
-  CC = clang
-  CXX = clang++
-  CPP = clang -E
   ARCHCFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m7
   ARCHCXXFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m7 -DCONFIG_WCHAR_BUILTIN
 else
-  CC = $(CROSSDEV)gcc
-  CXX = $(CROSSDEV)g++
-  CPP = $(CROSSDEV)gcc -E
   ARCHCXXFLAGS += -fno-rtti
   ifneq ($(CONFIG_DEBUG_NOOPT),y)
     ARCHOPTIMIZATION += -fno-strength-reduce

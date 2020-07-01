@@ -88,6 +88,18 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN),GNU_EABI)
   MAXOPTIMIZATION ?= -Os
 endif
 
+# Default toolchain
+
+CC = $(CROSSDEV)gcc
+CXX = $(CROSSDEV)g++
+CPP = $(CROSSDEV)gcc -E
+LD = $(CROSSDEV)ld
+STRIP = $(CROSSDEV)strip --strip-unneeded
+AR = $(ARCROSSDEV)ar rcs
+NM = $(ARCROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
+
 # Add the builtin library
 
 EXTRA_LIBS += -lgcc
