@@ -82,6 +82,12 @@ AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 CMODULEFLAGS = $(CFLAGS)
 # -fno-pic to avoid GOT relocations
 CMODULEFLAGS += -fno-pic
+# It seems macOS/x86_64 loads the program text around 00000001_xxxxxxxx.
+# The gcc default (-mcmodel=small) would produce out-of-range 32-bit
+# relocations.
+# Even on Linux, NuttX modules are loaded into the NuttX heap, which
+# can be out of range with -mcmodel=small.
+CMODULEFLAGS += -mcmodel=large
 
 LDMODULEFLAGS = -r -e module_initialize
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
@@ -97,10 +103,6 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   MODULECC = x86_64-elf-gcc
   MODULELD = x86_64-elf-ld
   MODULESTRIP = x86_64-elf-strip --strip-unneeded
-  # It seems macOS/x86_64 loads the program text around 00000001_xxxxxxxx.
-  # The gcc default (-mcmodel=small) would produce out-of-range 32-bit
-  # relocations.
-  CMODULEFLAGS += -mcmodel=large
 endif
 
 # ELF module definitions
