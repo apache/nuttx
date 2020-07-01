@@ -24,7 +24,9 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
+#include <debug.h>
+
+#include <nuttx/pthread.h>
 
 /****************************************************************************
  * Private Functions

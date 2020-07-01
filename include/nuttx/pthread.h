@@ -129,7 +129,7 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
  *   attributes.
  *
  * Input Parameters:
- *    startup
+ *    trampoline
  *    thread
  *    attr
  *    pthread_entry
@@ -141,7 +141,7 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
  *
  ****************************************************************************/
 
-int nx_pthread_create(pthread_startroutine_t startup, FAR pthread_t *thread,
+int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
                       FAR const pthread_attr_t *attr,
                       pthread_startroutine_t entry, pthread_addr_t arg);
 

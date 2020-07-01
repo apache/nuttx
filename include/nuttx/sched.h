@@ -800,7 +800,7 @@ struct pthread_tcb_s
 
   /* Task Management Fields *****************************************************/
 
-  pthread_startroutine_t startup;        /* User-space pthread startup function */
+  pthread_trampoline_t trampoline;       /* User-space pthread startup function */
   pthread_addr_t arg;                    /* Startup argument                    */
   FAR void *joininfo;                    /* Detach-able info to support join    */
 };
