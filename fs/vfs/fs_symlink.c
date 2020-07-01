@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/vfs/fs_link.c
+ * fs/vfs/fs_symlink.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -47,10 +47,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: link
+ * Name: symlink
  *
  * Description:
- *   The link() function will create a new link (directory entry) for the
+ *   The symlink() function will create a new link (directory entry) for the
  *   existing file, path2.  This implementation is simplied for use with
  *   NuttX in these ways:
  *
@@ -72,7 +72,7 @@
  *
  ****************************************************************************/
 
-int link(FAR const char *path1, FAR const char *path2)
+int symlink(FAR const char *path1, FAR const char *path2)
 {
   struct inode_search_s desc;
   FAR struct inode *inode = NULL;
