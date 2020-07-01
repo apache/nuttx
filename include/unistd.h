@@ -268,7 +268,7 @@
 
 /* Helpers and legacy compatibility definitions */
 
-#define symlink(p1, p2)                  link((p1), (p2))
+#define link(p1, p2)                     symlink((p1), (p2))
 #define fdatasync(f)                     fsync(f)
 #define getdtablesize(f)                 ((int)sysconf(_SC_OPEN_MAX))
 
@@ -359,7 +359,7 @@ int     unlink(FAR const char *pathname);
 int     truncate(FAR const char *path, off_t length);
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-int     link(FAR const char *path1, FAR const char *path2);
+int     symlink(FAR const char *path1, FAR const char *path2);
 ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
 #endif
 

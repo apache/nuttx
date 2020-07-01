@@ -246,7 +246,7 @@ SYSCALL_LOOKUP(telldir,                    1)
 #endif
 
 #if defined(CONFIG_PSEUDOFS_SOFTLINKS)
-  SYSCALL_LOOKUP(link,                     2)
+  SYSCALL_LOOKUP(symlink,                  2)
   SYSCALL_LOOKUP(readlink,                 3)
 #endif
 
