@@ -381,7 +381,7 @@ ifeq ($(CONFIG_RAW_BINARY),y)
 	@echo "CP: $(NUTTXNAME).bin"
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $(BIN) $(NUTTXNAME).bin
 endif
-	$(call POSTBUILD)
+	$(call POSTBUILD, $(TOPDIR))
 
 # download
 #
