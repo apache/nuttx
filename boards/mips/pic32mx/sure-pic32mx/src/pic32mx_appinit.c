@@ -307,7 +307,8 @@ static int nsh_usbhostinitialize(void)
   if (ret != OK)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+             "ERROR: Failed to register the CDC/ACM serial class: %d\n",
+             ret);
     }
 #endif
 
@@ -327,6 +328,7 @@ static int nsh_usbhostinitialize(void)
                            (main_t)nsh_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;
     }
+
   return -ENODEV;
 }
 #else

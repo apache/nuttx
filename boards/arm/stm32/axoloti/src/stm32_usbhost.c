@@ -224,6 +224,7 @@ int stm32_usbhost_initialize(void)
   /* First, register all of the class drivers needed to support the drivers
    * that we care about:
    */
+
   uinfo("Register class drivers\n");
 
 #ifdef CONFIG_USBHOST_MSC

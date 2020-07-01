@@ -288,7 +288,8 @@ static int nsh_usbhostinitialize(void)
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+             "ERROR: Failed to register the CDC/ACM serial class: %d\n",
+             ret);
     }
 #endif
 

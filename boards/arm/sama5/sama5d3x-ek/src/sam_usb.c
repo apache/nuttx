@@ -361,9 +361,9 @@ int sam_usbhost_initialize(void)
   /* Start a thread to handle device connection. */
 
   pid = kthread_create("OHCI Monitor",
-                      CONFIG_SAMA5D3xEK_USBHOST_PRIO,
-                      NULL, CONFIG_SAMA5D3xEK_USBHOST_STACKSIZE,
-                      (main_t)ohci_waiter, (FAR char * const *)NULL);
+                       CONFIG_SAMA5D3xEK_USBHOST_PRIO,
+                       NULL, CONFIG_SAMA5D3xEK_USBHOST_STACKSIZE,
+                       (main_t)ohci_waiter, (FAR char * const *)NULL);
   if (pid < 0)
     {
       uerr("ERROR: Failed to create ohci_waiter task: %d\n", ret);
@@ -535,8 +535,8 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
  * Name:  sam_usbsuspend
  *
  * Description:
- *   Board logic must provide the sam_usbsuspend logic if the USBDEV driver is
- *   used.
+ *   Board logic must provide the sam_usbsuspend logic if the USBDEV driver
+ *   is used.
  *   This function is called whenever the USB enters or leaves suspend mode.
  *   This is an opportunity for the board logic to shutdown clocks, power,
  *   etc. while the USB is suspended.
