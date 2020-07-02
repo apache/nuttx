@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 18, 2020)
+NuttX TODO List (Last updated July 2, 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -17,7 +17,7 @@ nuttx/:
   (2)  pthreads (sched/pthread, libs/libc/pthread)
   (0)  Message Queues (sched/mqueue)
   (1)  Work Queues (sched/wqueue)
-  (8)  Kernel/Protected Build
+  (6)  Kernel/Protected Build
   (3)  C++ Support
   (5)  Binary loaders (binfmt/)
  (17)  Network (net/, drivers/net)
@@ -34,7 +34,7 @@ apps/ and other Add-Ons:
 
   (1)  Network Utilities (apps/netutils/)
   (1)  NuttShell (NSH) (apps/nshlib)
-  (1)  System libraries apps/system (apps/system)
+  (2)  System libraries apps/system (apps/system)
   (1)  Modbus (apps/modbus)
   (5)  Other Applications & Tests (apps/examples/)
 
@@ -767,7 +767,7 @@ o Signals (sched/signal, arch/)
                embedded system.
 
   Title:       SIGEV_THREAD
-  Description: Implementation of support for support for SIGEV_THREAD is available
+  Description: Implementation of support for SIGEV_THREAD is available
                only in the FLAT build mode because it uses the OS work queues to
                perform the callback.  The alternative for the PROTECTED and KERNEL
                builds would be to create pthreads in the user space to perform the
@@ -951,25 +951,6 @@ o Work Queues (sched/wqueue)
 o Kernel/Protected Build
   ^^^^^^^^^^^^^^^^^^^^^^
 
-  Title:       apps/system PARTITIONING
-  Description: Several of the USB device helper applications in apps/system
-               violate OS/application partitioning and will fail on a kernel
-               or protected build.  Many of these have been fixed by adding
-               the BOARDIOC_USBDEV_CONTROL boardctl() command.  But there are
-               still issues.
-
-               These functions still call directly into operating system
-               functions:
-
-                 - usbmsc_configure - Called from apps/system/usbmsc and
-                   apps/system/composite
-                 - usbmsc_bindlun - Called from apps/system/usbmsc
-                 - usbmsc_exportluns - Called from apps/system/usbmsc.
-
-  Status:      Open
-  Priority:    Medium/High -- the kernel build configuration is not fully fielded
-               yet.
-
   Title:       C++ CONSTRUCTORS HAVE TOO MANY PRIVILEGES (PROTECTED MODE)
   Description: When a C++ ELF module is loaded, its C++ constructors are called
                via sched/task_starthook.c logic.  This logic runs in protected mode.
@@ -1102,26 +1083,6 @@ o Kernel/Protected Build
   Status:      Open
   Priority:    Low for most embedded systems but would be a critical need if
                NuttX were used in a secure system.
-
-  Title:       ERRNO VARIABLE in KERNEL MODE
-  Description: In the FLAT and PROTECTED mode, the errno variable is retained
-               within the TCB.  It requires a call into the OS to access the
-               errno variable.
-
-               In the KERNEL build, TLS should be used:  The errno should be
-               stored at the base of the callers stack along with other TLS
-               data.
-
-               To do this, NuttX system calls should be reorganized.  The
-               system calls should go to the internal OS functions (like
-               nxsem_wait() vs sem_wait()) which do not set the errno value.
-               The implementation available to applications (sem_wait() in
-               this example) should call the internal OS function then set the
-               errno variable in TLS.
-  Status:      Open
-  Priority:    Low, this primarily an aesthetic issue but may also have some
-               performance implications if the the errno variable is accessed
-               via a system call at high rates.
 
   Title:       SIGNAL ACTION VULNERABILITY
   Description: When a signal action is performed, the user stack is used.
@@ -2693,6 +2654,25 @@ o System libraries apps/system (apps/system)
   Priority:    Low (unless you are using mixed C-buffered I/O with readline and
                fgetc, for example).
 
+  Title:       apps/system PARTITIONING
+  Description: Several of the USB device helper applications in apps/system
+               violate OS/application partitioning and will fail on a kernel
+               or protected build.  Many of these have been fixed by adding
+               the BOARDIOC_USBDEV_CONTROL boardctl() command.  But there are
+               still issues.
+
+               These functions still call directly into operating system
+               functions:
+
+                 - usbmsc_configure - Called from apps/system/usbmsc and
+                   apps/system/composite
+                 - usbmsc_bindlun - Called from apps/system/usbmsc
+                 - usbmsc_exportluns - Called from apps/system/usbmsc.
+
+  Status:      Open
+  Priority:    Medium/High -- the kernel build configuration is not fully fielded
+               yet.
+
 o Modbus (apps/modbus)
   ^^^^^^^^^^^^^^^^^^^^
 
@@ -2706,7 +2686,7 @@ o Modbus (apps/modbus)
                handling.
 
                A more USB-friendly solution would be to: (1) Re-connect and
-               (2) re-open the serial drviers.  That is what is done is NSH.
+               (2) re-open the serial drivers.  That is what is done is NSH.
                When the serial USB device is removed, this terminates the
                session and NSH will then try to re-open the USB device.  See
                the function nsh_waitusbready() in the file
@@ -2716,6 +2696,7 @@ o Modbus (apps/modbus)
   Status:      Open
   Priority:    Low.  This is really an enhancement request:  Modbus was never
                designed to work with removable serial devices.
+
 o Other Applications & Tests (apps/examples/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
