@@ -56,13 +56,15 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* NXFFS Definitions ********************************************************/
+
 /* General NXFFS organization.  The following example assumes 4 logical
  * blocks per FLASH erase block.  The actual relationship is determined by
  * the FLASH geometry reported by the MTD driver.
  *
- * ERASE LOGICAL                   Inodes begin with a inode header.  inode may
- * BLOCK BLOCK       CONTENTS      be marked as "deleted," pending re-packing.
+ * ERASE LOGICAL                   Inodes begin with a inode header which may
+ * BLOCK BLOCK       CONTENTS      be marked as deleted, pending re-packing.
  *   n   4*n     --+--------------+
  *                 |BBBBBBBBBBBBBB| Logic block header
  *                 |IIIIIIIIIIIIII| Inodes begin with a inode header
@@ -70,10 +72,10 @@
  *                 | (Inode Data) |
  *       4*n+1   --+--------------+
  *                 |BBBBBBBBBBBBBB| Logic block header
- *                 |DDDDDDDDDDDDDD| Inodes may consist of multiple data blocks
+ *                 |DDDDDDDDDDDDDD| Inodes may consist multiple data blocks
  *                 | (Inode Data) |
  *                 |IIIIIIIIIIIIII| Next inode header
- *                 |              | Possibly a few unused bytes at the end of a block
+ *                 |              | Possibly unused bytes at the end of block
  *       4*n+2   --+--------------+
  *                 |BBBBBBBBBBBBBB| Logic block header
  *                 |DDDDDDDDDDDDDD|
@@ -85,8 +87,8 @@
  *                 | (Inode Data) |
  *  n+1  4*(n+1) --+--------------+
  *                 |BBBBBBBBBBBBBB| Logic block header
- *                 |              | All FLASH is unused after the end of the final
- *                 |              | inode.
+ *                 |              | All FLASH is unused after the end of the
+ *                 |              | final inode.
  *               --+--------------+
  *
  * General operation:
@@ -106,9 +108,9 @@
  *   formatted and also indicates bad blocks which should never be used.
  *
  * INODE HEADER:
- *   Each inode begins with an inode header that contains, among other things,
- *   the name of the inode, the offset to the first data block, and the
- *   length of the inode data.
+ *   Each inode begins with an inode header that contains, among other
+ *   things, the name of the inode, the offset to the first data block,
+ *   and the length of the inode data.
  *
  *   At present, the only kind of inode support is a file.  So for now, the
  *   term file and inode are interchangeable.
@@ -129,8 +131,8 @@
  *    writing will not work.
  * 4. There are no directories, however, '/' may be used within a file name
  *    string providing some illusion of directories.
- * 5. Files may be opened for reading or for writing, but not both: The O_RDWR
- *    open flag is not supported.
+ * 5. Files may be opened for reading or for writing, but not both: The
+ *    O_RDWR open flag is not supported.
  * 6. The re-packing process occurs only during a write when the free FLASH
  *    memory at the end of the FLASH is exhausted.  Thus, occasionally, file
  *    writing may take a long time.
@@ -160,8 +162,8 @@
  * INODE_STATE_DELETED - The inode has been deleted.
  * Other values        - The inode is bad and has an invalid state.
  *
- * Care is taken so that the VALID to DELETED transition only involves burning
- * bits from the erased to non-erased state.
+ * Care is taken so that the VALID to DELETED transition only involves
+ * burning bits from the erased to non-erased state.
  */
 
 #define INODE_STATE_FILE          (CONFIG_NXFFS_ERASEDSTATE ^ 0x22)
@@ -179,6 +181,7 @@
 #define NXFFS_MINDATA             16
 
 /* Internal definitions *****************************************************/
+
 /* If we encounter this number of erased bytes, we assume that all of the
  * flash beyond this point is erased.
  */
@@ -554,7 +557,7 @@ off_t nxffs_iotell(FAR struct nxffs_volume_s *volume);
  *   over bad blocks and block headers as necessary.
  *
  * Input Parameters:
- *   volume - Describes the NXFFS volume.  The parameters ioblock and iooffset
+ *   volume - Describes the NXFFS volume. The parameters ioblock and iooffset
  *     in the volume structure determine the behavior of nxffs_getc().
  *   reserve - If less than this much space is available at the end of the
  *     block, then skip to the next block.
@@ -822,7 +825,8 @@ FAR struct nxffs_ofile_s *nxffs_findofile(FAR struct nxffs_volume_s *volume,
  *
  ****************************************************************************/
 
-FAR struct nxffs_wrfile_s *nxffs_findwriter(FAR struct nxffs_volume_s *volume);
+FAR struct nxffs_wrfile_s *
+nxffs_findwriter(FAR struct nxffs_volume_s *volume);
 
 /****************************************************************************
  * Name: nxffs_wrinode
@@ -841,8 +845,8 @@ FAR struct nxffs_wrfile_s *nxffs_findwriter(FAR struct nxffs_volume_s *volume);
  *   entry  - Describes the inode header to write
  *
  * Returned Value:
- *   Zero is returned on success; Otherwise, a negated errno value is returned
- *   indicating the nature of the failure.
+ *   Zero is returned on success; Otherwise, a negated errno value is
+ *   returned indicating the nature of the failure.
  *
  * Defined in nxffs_open.c
  *
@@ -863,8 +867,8 @@ int nxffs_wrinode(FAR struct nxffs_volume_s *volume,
  *   entry  - Describes the new inode entry
  *
  * Returned Value:
- *   Zero is returned on success; Otherwise, a negated errno value is returned
- *   indicating the nature of the failure.
+ *   Zero is returned on success; Otherwise, a negated errno value is
+ *   returned indicating the nature of the failure.
  *
  ****************************************************************************/
 
@@ -1030,8 +1034,8 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
  *
  * Input Parameters:
  *   volume - Describes the current volume.
- *   offset - The byte offset from the beginning of FLASH where the data block
- *     header is expected.
+ *   offset - The byte offset from the beginning of FLASH where the data
+ *     block header is expected.
  *   datlen  - A memory location to return the data block length.
  *
  * Returned Value:

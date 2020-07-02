@@ -993,7 +993,6 @@ static off_t smartfs_seek(FAR struct file *filep, off_t offset, int whence)
   /* Call our internal routine to perform the seek */
 
   ret = smartfs_seek_internal(fs, sf, offset, whence);
-
   if (ret >= 0)
     {
       filep->f_pos = ret;
@@ -1670,7 +1669,9 @@ static int smartfs_unlink(struct inode *mountpt, const char *relpath)
 
       /* TODO:  Need to check permissions?  */
 
-      /* Okay, we are clear to delete the file.  Use the deleteentry routine. */
+      /* Okay, we are clear to delete the file.  Use the deleteentry
+       * routine.
+       */
 
       smartfs_deleteentry(fs, &entry);
     }
@@ -1846,7 +1847,9 @@ int smartfs_rmdir(struct inode *mountpt, const char *relpath)
           goto errout_with_semaphore;
         }
 
-      /* Okay, we are clear to delete the directory.  Use the deleteentry routine. */
+      /* Okay, we are clear to delete the directory.  Use the deleteentry
+       * routine.
+       */
 
       ret = smartfs_deleteentry(fs, &entry);
       if (ret < 0)

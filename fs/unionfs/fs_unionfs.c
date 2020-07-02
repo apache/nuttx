@@ -1533,7 +1533,9 @@ static int unionfs_opendir(FAR struct inode *mountpt,
 
       if (unionfs_ispartprefix(relpath, ui->ui_fs[0].um_prefix))
         {
-          /* File system 1 offset includes this relpath.  Make sure that only one */
+          /* File system 1 offset includes this relpath.  Make sure that only
+           * one
+           */
 
           fu->fu_ndx = 0;
           fu->fu_prefix[0] = true;
@@ -1816,7 +1818,9 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                     {
                       int tmp;
 
-                      /* Check if anything exists at this path on file system 1 */
+                      /* Check if anything exists at this path on file
+                       * system 1
+                       */
 
                       um0 = &ui->ui_fs[0];
                       tmp = unionfs_trystat(um0->um_node, relpath,

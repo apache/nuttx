@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/statfs.h>
 #include <sys/stat.h>
 
 #include <stdint.h>
@@ -163,7 +162,7 @@ static int cpuload_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate a container to hold the file attributes */
 
-  attr = (FAR struct cpuload_file_s *)kmm_zalloc(sizeof(struct cpuload_file_s));
+  attr = kmm_zalloc(sizeof(struct cpuload_file_s));
   if (!attr)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -235,8 +234,8 @@ static ssize_t cpuload_read(FAR struct file *filep, FAR char *buffer,
 
       DEBUGVERIFY(clock_cpuload(0, &cpuload));
 
-      /* On the simulator, you may hit cpuload.total == 0, but probably never on
-       * real hardware.
+      /* On the simulator, you may hit cpuload.total == 0, but probably never
+       * on real hardware.
        */
 
       if (cpuload.total > 0)
@@ -264,7 +263,7 @@ static ssize_t cpuload_read(FAR struct file *filep, FAR char *buffer,
   /* Transfer the system up time to user receive buffer */
 
   offset = filep->f_pos;
-  ret    = procfs_memcpy(attr->line, attr->linesize, buffer, buflen, &offset);
+  ret = procfs_memcpy(attr->line, attr->linesize, buffer, buflen, &offset);
 
   /* Update the file offset */
 
@@ -298,7 +297,7 @@ static int cpuload_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newattr = (FAR struct cpuload_file_s *)kmm_malloc(sizeof(struct cpuload_file_s));
+  newattr = kmm_malloc(sizeof(struct cpuload_file_s));
   if (!newattr)
     {
       ferr("ERROR: Failed to allocate file attributes\n");

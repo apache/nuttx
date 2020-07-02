@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/statfs.h>
 #include <sys/stat.h>
 
 #include <stdint.h>
@@ -136,7 +135,6 @@ extern int8_t   g_dvfs_enabled;
 extern int8_t   g_dvfs_auto;
 extern uint16_t g_dvfs_cur_freq;
 extern uint32_t g_dvfs_freq_stat[3];
-
 
 /****************************************************************************
  * Private Functions
@@ -269,7 +267,8 @@ static ssize_t dvfs_read(FAR struct file *filep, FAR char *buffer,
                           "idle%d %lld \n",
                           i, idletime[i]);
 
-      copysize = procfs_memcpy(priv->line, linesize, buffer, remaining, &offset);
+      copysize = procfs_memcpy(priv->line, linesize, buffer,
+                               remaining, &offset);
       totalsize += copysize;
       buffer    += copysize;
       remaining -= copysize;

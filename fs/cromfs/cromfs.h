@@ -52,7 +52,7 @@
  * target machines but 64-bits on 64-host machines.  We restrict offsets to
  * 32-bits for commonality (limiting the size of the CROMFS image to 4Gb).
  *
- * REVISIT:  What about small memory systems where the size_t is only 16-bits?
+ * REVISIT: What about small memory systems where the size_t is only 16-bits?
  *
  * Similarly, the NuttX mode_t is only 16-bits so uint16_t is explicitly used
  * for NuttX file modes.
@@ -94,8 +94,8 @@ struct cromfs_volume_s
   uint32_t cv_bsize;     /* Optimal block size for transfers */
 };
 
-/* This describes one node in the CROMFS file system.  It holds node meta
- * data that provides the information that will be return by stat() or fstat()
+/* This describes one node in the CROMFS file system. It holds node meta data
+ * that provides the information that will be return by stat() or fstat()
  * and also provides the information needed by the CROMFS file system to
  * access the node data.
  *
