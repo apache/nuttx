@@ -256,9 +256,13 @@ static int pcf8574_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   FAR struct pcf8574_dev_s *priv = (FAR struct pcf8574_dev_s *)dev;
   int ret;
 
-  DEBUGASSERT(priv != NULL && priv->config != NULL && pin < 8 &&
-              (direction == IOEXPANDER_DIRECTION_IN ||
-               direction == IOEXPANDER_DIRECTION_OUT));
+  if (direction != IOEXPANDER_DIRECTION_IN &&
+      direction != IOEXPANDER_DIRECTION_OUT)
+    {
+      return -EINVAL;
+    }
+
+  DEBUGASSERT(priv != NULL && priv->config != NULL && pin < 8);
 
   gpioinfo("I2C addr=%02x pin=%u direction=%s\n",
            priv->config->address, pin,

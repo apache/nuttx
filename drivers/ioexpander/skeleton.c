@@ -193,12 +193,16 @@ static int skel_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
   int ret;
 
+  if (direction != IOEXPANDER_DIRECTION_IN &&
+      direction != IOEXPANDER_DIRECTION_OUT)
+    {
+      return -EINVAL;
+    }
+
   gpioinfo("pin=%u direction=%s\n",
            pin, (direction == IOEXPANDER_DIRECTION_IN) ? "IN" : "OUT");
 
-  DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS &&
-              (direction == IOEXPANDER_DIRECTION_IN ||
-               direction == IOEXPANDER_DIRECTION_IN));
+  DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS);
 
   /* Get exclusive access to the I/O Expander */
 
@@ -730,7 +734,9 @@ static void skel_interrupt(FAR void *arg)
       /* Disable interrupts */
 #warning Missing logic
 
-      /* Schedule interrupt related work on the high priority worker thread. */
+      /* Schedule interrupt related work on the high priority worker
+       * thread.
+       */
 
       work_queue(HPWORK, &priv->work, skel_irqworker,
                  (FAR void *)priv, 0);

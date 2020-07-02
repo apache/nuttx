@@ -337,6 +337,12 @@ static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   int ret;
 
+  if (direction != IOEXPANDER_DIRECTION_IN &&
+      direction != IOEXPANDER_DIRECTION_OUT)
+    {
+      return -EINVAL;
+    }
+
   /* Get exclusive access to the PCA555 */
 
   ret = pca9555_lock(pca);

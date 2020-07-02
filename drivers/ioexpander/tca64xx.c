@@ -419,10 +419,14 @@ static int tca64_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   uint8_t regval;
   int ret;
 
+  if (direction != IOEXPANDER_DIRECTION_IN &&
+      direction != IOEXPANDER_DIRECTION_OUT)
+    {
+      return -EINVAL;
+    }
+
   DEBUGASSERT(priv != NULL && priv->config != NULL &&
-              pin < CONFIG_IOEXPANDER_NPINS &&
-              (direction == IOEXPANDER_DIRECTION_IN ||
-               direction == IOEXPANDER_DIRECTION_OUT));
+              pin < CONFIG_IOEXPANDER_NPINS);
 
   gpioinfo("I2C addr=%02x pin=%u direction=%s\n",
            priv->config->address, pin,
