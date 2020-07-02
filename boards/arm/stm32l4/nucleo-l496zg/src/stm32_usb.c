@@ -106,7 +106,7 @@ static int usbhost_waiter(int argc, char *argv[])
   struct usbhost_hubport_s *hport;
 
   uinfo("Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 
@@ -137,16 +137,20 @@ static int usbhost_waiter(int argc, char *argv[])
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the nucleo-144 board.
+ *   Called from stm32_usbinitialize very early in inialization to setup
+ *   USB-related GPIO pins for the nucleo-144 board.
  *
  ****************************************************************************/
 
 void stm32_usbinitialize(void)
 {
-  /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
+  /* The OTG FS has an internal soft pull-up.
+   * No GPIO configuration is required
+   */
 
-  /* Configure the OTG FS VBUS sensing GPIO, Power On, and Overcurrent GPIOs */
+  /* Configure the OTG FS VBUS sensing GPIO,
+   * Power On, and Overcurrent GPIOs
+   */
 
 #ifdef CONFIG_STM32L4_OTGFS
   stm32l4_configgpio(GPIO_OTGFS_VBUS);
@@ -155,15 +159,16 @@ void stm32_usbinitialize(void)
 #endif
 }
 
-/***********************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality.
+ *   Called at application startup time to initialize the USB host
+ *   functionality.
  *   This function will start a thread that will monitor for device
  *   connection/disconnection events.
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 int stm32_usbhost_initialize(void)
@@ -250,31 +255,34 @@ int stm32_usbhost_initialize(void)
 }
 #endif
 
-/***********************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided be
- *   each platform that implements the STM32 OTG FS host interface
+ *   Enable/disable driving of VBUS 5V output. This function must be
+ *    provided be each platform that implements the STM32 OTG FS host
+ *    interface
  *
- *   "On-chip 5 V VBUS generation is not supported. For this reason, a charge pump
- *    or, if 5 V are available on the application board, a basic power switch, must
- *    be added externally to drive the 5 V VBUS line. The external charge pump can
- *    be driven by any GPIO output. When the application decides to power on VBUS
- *    using the chosen GPIO, it must also set the port power bit in the host port
- *    control and status register (PPWR bit in OTG_FS_HPRT).
+ *   "On-chip 5 V VBUS generation is not supported. For this reason, a
+ *    charge pump or, if 5 V are available on the application board, a
+ *    basic power switch, must be added externally to drive the 5 V VBUS
+ *    line. The external charge pump can be driven by any GPIO output.
+ *    When the application decides to power on VBUS using the chosen GPIO,
+ *    it must also set the port power bit in the host port control and status
+ *    register (PPWR bit in OTG_FS_HPRT).
  *
- *   "The application uses this field to control power to this port, and the core
- *    clears this bit on an overcurrent condition."
+ *   "The application uses this field to control power to this port,
+ *    and the core clears this bit on an overcurrent condition."
  *
  * Input Parameters:
- *   iface - For future growth to handle multiple USB host interface.  Should be zero.
+ *   iface - For future growth to handle multiple USB host interface.
+ *           Should be zero.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
  *   None
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 void stm32_usbhost_vbusdrive(int iface, bool enable)
@@ -291,23 +299,24 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
  * Name: stm32_setup_overcurrent
  *
  * Description:
- *   Setup to receive an interrupt-level callback if an overcurrent condition is
- *   detected.
+ *   Setup to receive an interrupt-level callback if an overcurrent
+ *   condition is detected.
  *
  * Input Parameters:
  *   handler - New overcurrent interrupt handler
  *   arg     - The argument provided for the interrupt handler
  *
  * Returned Value:
- *   Zero (OK) is returned on success.  Otherwise, a negated errno value is returned
- *   to indicate the nature of the failure.
+ *   Zero (OK) is returned on success. Otherwise, a negated errno value
+ *   is returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 int stm32_setup_overcurrent(xcpt_t handler, void *arg)
 {
-  return stm32l4_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, arg);
+  return stm32l4_gpiosetevent(GPIO_OTGFS_OVER,
+                              true, true, true, handler, arg);
 }
 #endif
 
@@ -315,10 +324,10 @@ int stm32_setup_overcurrent(xcpt_t handler, void *arg)
  * Name:  stm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV
+ *   driver is used. This function is called whenever the USB enters or
+ *   leaves suspend mode. This is an opportunity for the board logic to
+ *   shutdown clocks, power, etc. while the USB is suspended.
  *
  ****************************************************************************/
 
