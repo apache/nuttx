@@ -85,7 +85,8 @@ static int gplh_handler(FAR struct ioexpander_dev_s *ioe,
 static int gplh_read(FAR struct gpio_dev_s *gpio, FAR bool *value);
 static int gplh_write(FAR struct gpio_dev_s *gpio, bool value);
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
-static int gplh_attach(FAR struct gpio_dev_s *gpio, pin_interrupt_t callback);
+static int gplh_attach(FAR struct gpio_dev_s *gpio,
+                       pin_interrupt_t callback);
 static int gplh_enable(FAR struct gpio_dev_s *gpio, bool enable);
 #endif
 static int gplh_setpintype(FAR struct gpio_dev_s *gpio,
@@ -118,6 +119,8 @@ static const struct gpio_operations_s g_gplh_ops =
 static const uint32_t g_gplh_inttype[] =
 {
   [GPIO_INPUT_PIN]              = IOEXPANDER_VAL_DISABLE,
+  [GPIO_INPUT_PIN_PULLUP]       = IOEXPANDER_VAL_DISABLE,
+  [GPIO_INPUT_PIN_PULLDOWN]     = IOEXPANDER_VAL_DISABLE,
   [GPIO_INTERRUPT_PIN]          = CONFIG_GPIO_LOWER_HALF_INTTYPE,
   [GPIO_INTERRUPT_HIGH_PIN]     = IOEXPANDER_VAL_HIGH,
   [GPIO_INTERRUPT_LOW_PIN]      = IOEXPANDER_VAL_LOW,
@@ -332,7 +335,8 @@ static int gplh_enable(FAR struct gpio_dev_s *gpio, bool enable)
  *
  ****************************************************************************/
 
-static int gplh_setpintype(FAR struct gpio_dev_s *gpio, enum gpio_pintype_e pintype)
+static int gplh_setpintype(FAR struct gpio_dev_s *gpio,
+                           enum gpio_pintype_e pintype)
 {
   FAR struct gplh_dev_s *priv = (FAR struct gplh_dev_s *)gpio;
   FAR struct ioexpander_dev_s *ioe = priv->ioe;
@@ -346,9 +350,25 @@ static int gplh_setpintype(FAR struct gpio_dev_s *gpio, enum gpio_pintype_e pint
     {
       IOEXP_SETDIRECTION(ioe, pin, IOEXPANDER_DIRECTION_OUT);
     }
+  else if (pintype == GPIO_OUTPUT_PIN_OPENDRAIN)
+    {
+      IOEXP_SETDIRECTION(ioe, pin, IOEXPANDER_DIRECTION_OUT_OPENDRAIN);
+    }
   else
     {
-      IOEXP_SETDIRECTION(ioe, pin, IOEXPANDER_DIRECTION_IN);
+      if (pintype == GPIO_INPUT_PIN)
+        {
+          IOEXP_SETDIRECTION(ioe, pin, IOEXPANDER_DIRECTION_IN);
+        }
+      else if (pintype == GPIO_INPUT_PIN_PULLUP)
+        {
+          IOEXP_SETDIRECTION(ioe, pin, IOEXPANDER_DIRECTION_IN_PULLUP);
+        }
+      else
+        {
+          IOEXP_SETDIRECTION(ioe, pin, IOEXPANDER_DIRECTION_IN_PULLDOWN);
+        }
+
       IOEXP_SETOPTION(ioe, pin, IOEXPANDER_OPTION_INTCFG,
                       (FAR void *)g_gplh_inttype[pintype]);
     }

@@ -1214,9 +1214,13 @@ static int lmp92001_gpio_direction(FAR struct ioexpander_dev_s *dev,
 
   int ret;
 
-  DEBUGASSERT(priv != NULL && pin < LMP92001_GPIO_MAX_PINS &&
-              (direction == IOEXPANDER_DIRECTION_IN ||
-               direction == IOEXPANDER_DIRECTION_OUT));
+  if (direction != IOEXPANDER_DIRECTION_IN &&
+      direction != IOEXPANDER_DIRECTION_OUT)
+    {
+      return -EINVAL;
+    }
+
+  DEBUGASSERT(priv != NULL && pin < LMP92001_GPIO_MAX_PINS);
 
   gpioinfo("I2C addr=%02x pin=%u direction=%s\n",
            priv->addr, pin,

@@ -58,8 +58,11 @@
 
 /* Pin definitions **********************************************************/
 
-#define IOEXPANDER_DIRECTION_IN    0
-#define IOEXPANDER_DIRECTION_OUT   1
+#define IOEXPANDER_DIRECTION_IN            0  /* float */
+#define IOEXPANDER_DIRECTION_IN_PULLUP     1
+#define IOEXPANDER_DIRECTION_IN_PULLDOWN   2
+#define IOEXPANDER_DIRECTION_OUT           3  /* push-pull */
+#define IOEXPANDER_DIRECTION_OUT_OPENDRAIN 4
 
 #define IOEXPANDER_PINMASK         (((ioe_pinset_t)1 << CONFIG_IOEXPANDER_NPINS) - 1)
 #define PINSET_ALL                 (~((ioe_pinset_t)0))
@@ -144,14 +147,15 @@
  * Name: IOEXP_READPIN
  *
  * Description:
- *   Read the actual PIN level. This can be different from the last value written
- *      to this pin. Required.
+ *   Read the actual PIN level. This can be different from the last value
+ *   written to this pin. Required.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
  *   pin    - The index of the pin
  *   valptr - Pointer to a buffer where the pin level is stored. Usually TRUE
- *            if the pin is high, except if OPTION_INVERT has been set on this pin.
+ *            if the pin is high, except if OPTION_INVERT has been set on
+ *            this pin.
  *
  * Returned Value:
  *   0 on success, else a negative error code
@@ -225,8 +229,8 @@
  * Name: IOEXP_MULTIREADBUF
  *
  * Description:
- *   Read the buffered level of multiple pins. This routine may be faster than
- *   individual pin accesses. Optional.
+ *   Read the buffered level of multiple pins. This routine may be faster
+ *   than individual pin accesses. Optional.
  *
  * Input Parameters:
  *   dev    - Device-specific state data

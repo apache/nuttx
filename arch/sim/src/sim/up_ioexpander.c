@@ -199,9 +199,13 @@ static int sim_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 {
   FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
 
-  DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS &&
-              (direction == IOEXPANDER_DIRECTION_IN ||
-               direction == IOEXPANDER_DIRECTION_OUT));
+  if (direction != IOEXPANDER_DIRECTION_IN &&
+      direction != IOEXPANDER_DIRECTION_OUT)
+    {
+      return -EINVAL;
+    }
+
+  DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS);
 
   gpioinfo("pin=%u direction=%s\n",
            pin, (direction == IOEXPANDER_DIRECTION_IN) ? "IN" : "OUT");
