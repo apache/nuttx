@@ -274,7 +274,7 @@ void imxrt_usbhost_vbusdrive(int rhport, bool enable)
     }
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: imxrt_setup_overcurrent
  *
  * Description:
@@ -289,7 +289,7 @@ void imxrt_usbhost_vbusdrive(int rhport, bool enable)
  *   Zero (OK) returned on success; a negated errno value is returned on
  *   failure.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 #if 0 /* Not ready yet */
 int imxrt_setup_overcurrent(xcpt_t handler, void *arg)

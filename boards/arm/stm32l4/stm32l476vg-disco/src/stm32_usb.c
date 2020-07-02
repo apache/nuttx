@@ -104,7 +104,7 @@ static int usbhost_waiter(int argc, char *argv[])
   struct usbhost_hubport_s *hport;
 
   uvdbg("Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 
@@ -135,16 +135,20 @@ static int usbhost_waiter(int argc, char *argv[])
  * Name: stm32l4_usbinitialize
  *
  * Description:
- *   Called from stm32l4_usbinitialize very early in initialization to setup USB-related
- *   GPIO pins for the STM32L4Discovery board.
+ *   Called from stm32l4_usbinitialize very early in initialization to
+ *   setup USB-related GPIO pins for the STM32L4Discovery board.
  *
  ****************************************************************************/
 
 void stm32l4_usbinitialize(void)
 {
-  /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
+  /* The OTG FS has an internal soft pull-up.
+   * No GPIO configuration is required
+   */
 
-  /* Configure the OTG FS VBUS sensing GPIO, Power On, and Over current GPIOs */
+  /* Configure the OTG FS VBUS sensing GPIO,
+   * Power On, and Over current GPIOs
+   */
 
 #ifdef CONFIG_STM32L4_OTGFS
   stm32l4_configgpio(GPIO_OTGFS_VBUS);
@@ -158,7 +162,7 @@ void stm32l4_usbinitialize(void)
  *
  * Description:
  *   Called at application startup time to initialize the USB host
-*    functionality.
+ *   functionality.
  *   This function will start a thread that will monitor for device
  *   connection/disconnection events.
  *
@@ -249,31 +253,33 @@ int stm32l4_usbhost_initialize(void)
 }
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l4_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided be
- *   each platform that implements the STM32 OTG FS host interface
+ *   Enable/disable driving of VBUS 5V output. This function must be provided
+ *   be each platform that implements the STM32 OTG FS host interface
  *
- *   "On-chip 5 V VBUS generation is not supported. For this reason, a charge pump
- *    or, if 5 V are available on the application board, a basic power switch, must
- *    be added externally to drive the 5 V VBUS line. The external charge pump can
- *    be driven by any GPIO output. When the application decides to power on VBUS
- *    using the chosen GPIO, it must also set the port power bit in the host port
- *    control and status register (PPWR bit in OTG_FS_HPRT).
+ *   "On-chip 5 V VBUS generation is not supported. For this reason, a charge
+ *    pump or, if 5 V are available on the application board, a basic power
+ *    switch, must be added externally to drive the 5 V VBUS line. The
+ *    external charge pump can be driven by any GPIO output. When the
+ *    application decides to power on VBUS using the chosen GPIO, it must
+ *    also set the port power bit in the host port control and status
+ *    register (PPWR bit in OTG_FS_HPRT).
  *
- *   "The application uses this field to control power to this port, and the core
- *    clears this bit on an over current condition."
+ *   "The application uses this field to control power to this port,
+ *    and the core clears this bit on an over current condition."
  *
  * Input Parameters:
- *   iface - For future growth to handle multiple USB host interface.  Should be zero.
+ *   iface - For future growth to handle multiple USB host interface.
+ *           Should be zero.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 void stm32l4_usbhost_vbusdrive(int iface, bool enable)
@@ -299,8 +305,8 @@ void stm32l4_usbhost_vbusdrive(int iface, bool enable)
  * Name: stm32l4_setup_overcurrent
  *
  * Description:
- *   Setup to receive an interrupt-level callback if an over current condition is
- *   detected.
+ *   Setup to receive an interrupt-level callback if an over current
+ *   condition is detected.
  *
  * Input Parameters:
  *   handler - New over current interrupt handler
@@ -322,10 +328,10 @@ xcpt_t stm32l4_setup_overcurrent(xcpt_t handler)
  * Name:  stm32l4_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32l4_usbsuspend logic if the USBDEV driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *   Board logic must provide the stm32l4_usbsuspend logic if the USBDEV
+ *   driver is used.  This function is called whenever the USB enters or
+ *   leaves suspend mode. This is an opportunity for the board logic to
+ *   shutdown clocks, power, etc. while the USB is suspended.
  *
  ****************************************************************************/
 

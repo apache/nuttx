@@ -194,8 +194,8 @@ static int ehci_waiter(int argc, char *argv[])
  * USB Ports
  *   The SAMA5D3 series-MB features three USB communication ports:
  *
- *     1. Port A Host High Speed (EHCI) and Full Speed (OHCI) multiplexed with
- *        USB Device High Speed Micro AB connector, J20
+ *     1. Port A Host High Speed (EHCI) and Full Speed (OHCI) multiplexed
+ *        with USB Device High Speed Micro AB connector, J20
  *
  *     2. Port B Host High Speed (EHCI) and Full Speed (OHCI) standard type A
  *        connector, J19 upper port

@@ -104,7 +104,7 @@ static int usbhost_waiter(int argc, char *argv[])
   struct usbhost_hubport_s *hport;
 
   uinfo("Running\n");
-  for (;;)
+  for (; ; )
     {
       /* Wait for the device to change state */
 
@@ -142,9 +142,13 @@ static int usbhost_waiter(int argc, char *argv[])
 
 void stm32_usbinitialize(void)
 {
-  /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
+  /* The OTG FS has an internal soft pull-up.
+   * No GPIO configuration is required
+   */
 
-  /* Configure the OTG FS VBUS sensing GPIO, Power On, and Overcurrent GPIOs */
+  /* Configure the OTG FS VBUS sensing GPIO,
+   * Power On, and Overcurrent GPIOs
+   */
 
 #ifdef CONFIG_STM32_OTGFS
   stm32_configgpio(GPIO_OTGFS_VBUS);
@@ -153,7 +157,7 @@ void stm32_usbinitialize(void)
 #endif
 }
 
-/***************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
@@ -161,7 +165,7 @@ void stm32_usbinitialize(void)
  *   functionality.  This function will start a thread that will monitor
  *   for device connection/disconnection events.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
 int stm32_usbhost_initialize(void)
