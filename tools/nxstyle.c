@@ -197,7 +197,10 @@ static const char *g_white_prefix[] =
 
 static const char *g_white_list[] =
 {
-  "_Exit",   /* Ref:  stdlib.h */
+  "__EIT_entry",             /* Ref:  gnu_unwind_find_exidx.c */
+  "__gnu_Unwind_Find_exidx", /* Ref:  gnu_unwind_find_exidx.c */
+  "_Exit",                   /* Ref:  stdlib.h */
+  "_Unwind_Ptr",             /* Ref:  unwind-arm-common.h */
   NULL
 };
 
