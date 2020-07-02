@@ -278,7 +278,7 @@ start64:
  *
  ****************************************************************************/
 
-    .section .text, "a"
+    .section .text, "ax"
     .type   __nxstart, @function
 
 __nxstart:
@@ -482,7 +482,7 @@ pt_low:
  * do in the system (see up_idle()).
  */
 
-    .section    .bss, "a"
+    .section    .bss
 
     .type    idle_stack, @object
     .comm    idle_stack, CONFIG_IDLETHREAD_STACKSIZE, 32
