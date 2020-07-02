@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/statfs.h>
 #include <sys/stat.h>
 
 #include <stdint.h>
@@ -237,7 +236,7 @@ static ssize_t version_read(FAR struct file *filep, FAR char *buffer,
     }
 
   offset = filep->f_pos;
-  ret    = procfs_memcpy(attr->line, attr->linesize, buffer, buflen, &offset);
+  ret = procfs_memcpy(attr->line, attr->linesize, buffer, buflen, &offset);
 
   /* Update the file offset */
 

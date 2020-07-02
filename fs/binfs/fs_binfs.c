@@ -67,11 +67,14 @@
 static int     binfs_open(FAR struct file *filep, const char *relpath,
                           int oflags, mode_t mode);
 static int     binfs_close(FAR struct file *filep);
-static ssize_t binfs_read(FAR struct file *filep, char *buffer, size_t buflen);
-static int     binfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static ssize_t binfs_read(FAR struct file *filep,
+                          char *buffer, size_t buflen);
+static int     binfs_ioctl(FAR struct file *filep,
+                           int cmd, unsigned long arg);
 
 static int     binfs_dup(FAR const struct file *oldp, FAR struct file *newp);
-static int     binfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
+static int     binfs_fstat(FAR const struct file *filep,
+                           FAR struct stat *buf);
 
 static int     binfs_opendir(struct inode *mountpt, const char *relpath,
                              struct fs_dirent_s *dir);
@@ -185,7 +188,8 @@ static int binfs_close(FAR struct file *filep)
  * Name: binfs_read
  ****************************************************************************/
 
-static ssize_t binfs_read(FAR struct file *filep, char *buffer, size_t buflen)
+static ssize_t binfs_read(FAR struct file *filep,
+                          char *buffer, size_t buflen)
 {
   /* Reading is not supported.  Just return end-of-file */
 
@@ -426,7 +430,8 @@ static int binfs_statfs(struct inode *mountpt, struct statfs *buf)
  *
  ****************************************************************************/
 
-static int binfs_stat(struct inode *mountpt, const char *relpath, struct stat *buf)
+static int binfs_stat(struct inode *mountpt,
+                      const char *relpath, struct stat *buf)
 {
   finfo("Entry\n");
 

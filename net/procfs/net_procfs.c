@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/statfs.h>
 #include <sys/stat.h>
 
 #include <stdint.h>
@@ -96,8 +95,9 @@
 
 /* File system methods */
 
-static int     netprocfs_open(FAR struct file *filep, FAR const char *relpath,
-                 int oflags, mode_t mode);
+static int     netprocfs_open(FAR struct file *filep,
+                              FAR const char *relpath,
+                              int oflags, mode_t mode);
 static int     netprocfs_close(FAR struct file *filep);
 static ssize_t netprocfs_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
@@ -182,7 +182,9 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
     }
   else
 #ifdef CONFIG_NET_MLD
-  /* "net/mld" is an acceptable value for the relpath only if MLD is enabled. */
+  /* "net/mld" is an acceptable value for the relpath only if MLD is
+   * enabled.
+   */
 
   if (strcmp(relpath, "net/mld") == 0)
     {

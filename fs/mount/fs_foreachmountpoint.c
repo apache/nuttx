@@ -90,7 +90,7 @@ static int mountpoint_filter(FAR struct inode *node,
   /* Check if the inode is a mountpoint.  Mountpoints must support statfs.
    * If this one does not for some reason, then it will be ignored.
    *
-   * The root node is a special case:  It has no operations (u.i_mops == NULL)
+   * The root node is a special case: It has no operations (u.i_mops == NULL)
    */
 
   if (INODE_IS_MOUNTPT(node) && node->u.i_mops && node->u.i_mops->statfs)
