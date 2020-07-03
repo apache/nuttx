@@ -59,8 +59,8 @@
  *   but may not reflect the actual value of the semaphore when it is
  *   returned to the calling task.
  *
- *   If 'sem' is locked, the value return by nxsem_get_value() will either be
- *   zero or a negative number whose absolute value represents the number
+ *   If 'sem' is locked, then the object to which 'sval' points shall either
+ *   be zero or a negative number whose absolute value represents the number
  *   of tasks waiting for the semaphore.
  *
  * Input Parameters:
@@ -96,8 +96,8 @@ int nxsem_get_value(FAR sem_t *sem, FAR int *sval)
  *   but may not reflect the actual value of the semaphore when it is
  *   returned to the calling task.
  *
- *   If 'sem' is locked, the value return by sem_getvalue() will either be
- *   zero or a negative number whose absolute value represents the number
+ *   If 'sem' is locked, then the object to which 'sval' points shall either
+ *   be zero or a negative number whose absolute value represents the number
  *   of tasks waiting for the semaphore.
  *
  * Input Parameters:
