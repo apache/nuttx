@@ -77,12 +77,15 @@ AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 CMODULEFLAGS = $(CFLAGS)
 # -fno-pic to avoid GOT relocations
 CMODULEFLAGS += -fno-pic
-# It seems macOS/x86_64 loads the program text around 00000001_xxxxxxxx.
-# The gcc default (-mcmodel=small) would produce out-of-range 32-bit
-# relocations.
-# Even on Linux, NuttX modules are loaded into the NuttX heap, which
-# can be out of range with -mcmodel=small.
-CMODULEFLAGS += -mcmodel=large
+ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
+  # For amd64:
+  # It seems macOS/x86_64 loads the program text around 00000001_xxxxxxxx.
+  # The gcc default (-mcmodel=small) would produce out-of-range 32-bit
+  # relocations.
+  # Even on Linux, NuttX modules are loaded into the NuttX heap, which
+  # can be out of range with -mcmodel=small.
+  CMODULEFLAGS += -mcmodel=large
+endif
 # On Linux, we (ab)use the host compiler to compile binaries for NuttX.
 # Explicitly disable features which might be default on the host while
 # not available on NuttX.
