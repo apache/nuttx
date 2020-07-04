@@ -1,6 +1,5 @@
 *.a
 *.adb
-*.asm
 *.bin
 *.d
 *.dSYM
