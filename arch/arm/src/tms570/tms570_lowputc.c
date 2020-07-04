@@ -284,9 +284,8 @@ void tms570_lowsetup(void)
 int tms570_sci_configure(uint32_t base,
                          FAR const struct sci_config_s *config)
 {
-  float_t divb7;
+  float    divb7;
   uint32_t intpart;
-  float_t frac;
   uint32_t p;
   uint32_t m;
   uint32_t u;
