@@ -389,10 +389,13 @@ int host_readdir(void *dirp, struct nuttx_dirent_s *entry)
 
       /* Map the type */
 
-      entry->d_type = 0;
       if (ent->d_type == DT_REG)
         {
           entry->d_type = NUTTX_DTYPE_FILE;
+        }
+      else if (ent->d_type == DT_FIFO)
+        {
+          entry->d_type = NUTTX_DTYPE_FIFO;
         }
       else if (ent->d_type == DT_CHR)
         {
@@ -409,6 +412,14 @@ int host_readdir(void *dirp, struct nuttx_dirent_s *entry)
       else if (ent->d_type == DT_LNK)
         {
           entry->d_type = NUTTX_DTYPE_LINK;
+        }
+      else if (ent->d_type == DT_SOCK)
+        {
+          entry->d_type = NUTTX_DTYPE_SOCK;
+        }
+      else
+        {
+          entry->d_type = NUTTX_DTYPE_UNKNOWN;
         }
 
       return 0;

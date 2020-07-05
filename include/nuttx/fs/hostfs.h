@@ -58,11 +58,18 @@
 
 /* These must exactly match the definitions from include/dirent.h: */
 
-#define NUTTX_DTYPE_FILE        0x01
-#define NUTTX_DTYPE_CHR         0x02
-#define NUTTX_DTYPE_BLK         0x04
-#define NUTTX_DTYPE_DIRECTORY   0x08
-#define NUTTX_DTYPE_LINK        0x10
+#define NUTTX_DTYPE_UNKNOWN     0
+#define NUTTX_DTYPE_FIFO        1
+#define NUTTX_DTYPE_CHR         2
+#define NUTTX_DTYPE_SEM         3
+#define NUTTX_DTYPE_DIRECTORY   4
+#define NUTTX_DTYPE_MQ          5
+#define NUTTX_DTYPE_BLK         6
+#define NUTTX_DTYPE_SHM         7
+#define NUTTX_DTYPE_FILE        8
+#define NUTTX_DTYPE_MTD         9
+#define NUTTX_DTYPE_LINK        10
+#define NUTTX_DTYPE_SOCK        12
 
 /* These must exactly match the definitions from include/sys/stat.h: */
 
