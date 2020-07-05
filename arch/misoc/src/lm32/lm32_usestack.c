@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z16/common/z16_usestack.c
+ * arch/misoc/src/lm32/lm32_usestack.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -32,8 +32,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>
-
-#include "z16_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -102,16 +100,16 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
     }
 #endif
 
-  /* The ZNEO uses a push-down stack:  the stack grows toward lower
-   * addresses in memory.  The stack pointer register, points to the
-   * lowest, valid work address (the "top" of the stack).  Items on
-   * the stack are referenced as positive word offsets from sp.
+  /* The i486 uses a push-down stack:  the stack grows toward loweraddresses
+   * in memory.  The stack pointer register, points to the lowest, valid work
+   * address (the "top" of the stack).  Items on the stack are referenced as
+   * positive word offsets from sp.
    */
 
   top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
 
-  /* Align the stack to word (4 byte) boundaries.  This is probably
-   * a greater alignment than is required.
+  /* The i486 stack must be aligned at word (4 byte) boundaries. If necessary
+   * top_of_stack must be rounded down to the next boundary
    */
 
   top_of_stack &= ~3;
@@ -119,7 +117,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->adj_stack_size = top_of_stack;
+  tcb->adj_stack_ptr  = (uint32_t *)top_of_stack;
   tcb->adj_stack_size = size_of_stack;
 
   /* Initialize the TLS data structure */

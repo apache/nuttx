@@ -123,16 +123,8 @@ static void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  if (rtcb->pid == 0)
-    {
-      ustackbase = g_idle_topstack - 8;
-      ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-  else
-    {
-      ustackbase = (uint64_t)rtcb->adj_stack_ptr;
-      ustacksize = (uint64_t)rtcb->adj_stack_size;
-    }
+  ustackbase = (uint64_t)rtcb->adj_stack_ptr;
+  ustacksize = (uint64_t)rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
 
@@ -216,7 +208,7 @@ static void _up_assert(void)
 {
   /* Are we in an interrupt handler or the idle task? */
 
-  if (g_current_regs || (this_task())->pid == 0)
+  if (g_current_regs || (running_task())->flink == NULL)
     {
       (void)up_irq_save();
       for (; ; )

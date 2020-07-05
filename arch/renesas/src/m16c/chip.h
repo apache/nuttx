@@ -266,7 +266,6 @@ extern uint32_t g_enronly;       /* Start of relocated read-only data in FLASH *
   extern uint32_t g_efronly;     /* Start of relocated read-only data in FLASH */
 #endif
 extern uint32_t g_svarvect;      /* Start of variable vectors */
-extern uint32_t g_idle_topstack; /* Start of the heap */
 
 /* Address of the saved user stack pointer */
 

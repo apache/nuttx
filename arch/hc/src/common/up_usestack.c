@@ -50,14 +50,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -112,6 +104,17 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
   /* Save the new stack allocation */
 
   tcb->stack_alloc_ptr = stack;
+
+  /* If stack debug is enabled, then fill the stack with a recognizable value
+   * that we can use later to test for high water marks.
+   */
+
+#ifdef CONFIG_STACK_COLORATION
+  if (tcb->pid != 0)
+    {
+      memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
+    }
+#endif
 
   /* The CPU12 uses a push-down stack: the stack grows
    * toward lower addresses in memory. Because the CPU12 stack

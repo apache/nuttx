@@ -70,6 +70,14 @@ void up_initial_state(FAR struct tcb_s *tcb)
   FAR struct xcptcontext *xcp  = &tcb->xcp;
   FAR uint8_t            *regs = xcp->regs;
 
+  /* Initialize the idle thread stack */
+
+  if (tcb->pid == 0)
+    {
+      up_use_stack(tcb, (FAR void *)(g_idle_topstack -
+        CONFIG_IDLETHREAD_STACKSIZE), CONFIG_IDLETHREAD_STACKSIZE);
+    }
+
   /* Initialize the initial exception register context structure */
 
   memset(xcp, 0, sizeof(struct xcptcontext));
