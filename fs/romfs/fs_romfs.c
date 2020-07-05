@@ -943,6 +943,11 @@ static int romfs_readdir(FAR struct inode *mountpt,
           dir->fd_dir.d_type = DTYPE_FILE;
           break;
         }
+      else if (IS_SOFTLINK(next))
+        {
+          dir->fd_dir.d_type = DTYPE_LINK;
+          break;
+        }
     }
 
 errout_with_semaphore:

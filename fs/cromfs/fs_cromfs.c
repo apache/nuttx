@@ -1069,14 +1069,41 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
         break;
 
       case S_IFIFO:  /* FIFO */
+        dir->fd_dir.d_type = DTYPE_FIFO;
+        break;
+
       case S_IFCHR:  /* Character driver */
+        dir->fd_dir.d_type = DTYPE_CHR;
+        break;
+
       case S_IFBLK:  /* Block driver */
-#if 0
+        dir->fd_dir.d_type = DTYPE_BLK;
+        break;
+
       case S_IFSOCK: /* Socket */
-#endif
+        dir->fd_dir.d_type = DTYPE_SOCK;
+        break;
+
       case S_IFMQ:   /* Message queue */
+        dir->fd_dir.d_type = DTYPE_MQ;
+        break;
+
       case S_IFSEM:  /* Semaphore */
+        dir->fd_dir.d_type = DTYPE_SEM;
+        break;
+
       case S_IFSHM:  /* Shared memory */
+        dir->fd_dir.d_type = DTYPE_SHM;
+        break;
+
+      case S_IFMTD:  /* MTD driver */
+        dir->fd_dir.d_type = DTYPE_MTD;
+        break;
+
+      case S_IFSOCK: /* Socket */
+        dir->fd_dir.d_type = DTYPE_SOCK;
+        break;
+
       default:
         DEBUGPANIC();
         dir->fd_dir.d_type = DTYPE_UNKNOWN;
