@@ -71,14 +71,6 @@
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -165,9 +157,12 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * water marks.
    */
 
-  up_stack_color((FAR void *)((uintptr_t)tcb->stack_alloc_ptr +
-                 sizeof(struct tls_info_s)),
-                 tcb->adj_stack_size - sizeof(struct tls_info_s));
+  if (tcb->pid != 0)
+    {
+      up_stack_color((FAR void *)((uintptr_t)tcb->stack_alloc_ptr +
+                     sizeof(struct tls_info_s)),
+                     size_of_stack - sizeof(struct tls_info_s));
+    }
 #endif
 
   return OK;

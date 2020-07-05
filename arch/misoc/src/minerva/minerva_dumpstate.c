@@ -148,16 +148,8 @@ void minerva_dumpstate(void)
    * == NULL)
    */
 
-  if (rtcb->flink == NULL)
-    {
-      ustackbase = g_idle_topstack - 4;
-      ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-  else
-    {
-      ustackbase = (uint32_t) rtcb->adj_stack_ptr;
-      ustacksize = (uint32_t) rtcb->adj_stack_size;
-    }
+  ustackbase = (uint32_t) rtcb->adj_stack_ptr;
+  ustacksize = (uint32_t) rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
 

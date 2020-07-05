@@ -50,4 +50,4 @@ CHIP_CSRCS += lm32_initialize.c lm32_initialstate.c lm32_interruptcontext.c
 CHIP_CSRCS += lm32_irq.c lm32_releasepending.c lm32_releasestack.c
 CHIP_CSRCS += lm32_stackframe.c lm32_swint.c lm32_unblocktask.c
 CHIP_CSRCS += lm32_reprioritizertr.c lm32_schedulesigaction.c lm32_sigdeliver.c
-CHIP_CSRCS += lm32_flushcache.c
+CHIP_CSRCS += lm32_flushcache.c  lm32_usetack.c

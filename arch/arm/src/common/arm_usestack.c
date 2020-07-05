@@ -146,8 +146,11 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * water marks.
    */
 
-  arm_stack_color((FAR void *)((uintptr_t)tcb->adj_stack_ptr -
-      tcb->adj_stack_size), tcb->adj_stack_size);
+  if (tcb->pid != 0)
+    {
+      arm_stack_color((FAR void *)((uintptr_t)tcb->adj_stack_ptr -
+          tcb->adj_stack_size), tcb->adj_stack_size);
+    }
 #endif /* CONFIG_STACK_COLORATION */
 
   return OK;

@@ -142,16 +142,8 @@ void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  if (rtcb->pid == 0) /* Check for CPU0 IDLE thread */
-    {
-      ustackbase = g_idle_topstack - 1;
-      ustacksize = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-  else
-    {
-      ustackbase = (uint32_t)rtcb->adj_stack_ptr;
-      ustacksize = (uint16_t)rtcb->adj_stack_size;
-    }
+  ustackbase = (uint32_t)rtcb->adj_stack_ptr;
+  ustacksize = (uint16_t)rtcb->adj_stack_size;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   istackbase = ebss; /* check how to declare ebss, as of now declared in chip.h */
