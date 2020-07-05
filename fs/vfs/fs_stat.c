@@ -375,7 +375,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
             {
               /* Make sure the caller knows that this is a symbolic link. */
 
-              buf->st_mode |= S_IFLNK;
+              buf->st_mode = S_IRWXO | S_IRWXG | S_IRWXU | S_IFLNK;
             }
         }
       else

@@ -66,35 +66,47 @@ static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
 {
   /* Map the return values */
 
-  buf->st_mode = hostbuf->st_mode & 0777;
+  buf->st_mode = hostbuf->st_mode & 07777;
 
-  if (hostbuf->st_mode & S_IFDIR)
+  if (S_ISDIR(hostbuf->st_mode))
     {
       buf->st_mode |= NUTTX_S_IFDIR;
     }
-  else if (hostbuf->st_mode & S_IFREG)
+  else if (S_ISREG(hostbuf->st_mode))
     {
       buf->st_mode |= NUTTX_S_IFREG;
     }
-  else if (hostbuf->st_mode & S_IFCHR)
+  else if (S_ISCHR(hostbuf->st_mode))
     {
       buf->st_mode |= NUTTX_S_IFCHR;
     }
-  else if (hostbuf->st_mode & S_IFBLK)
+  else if (S_ISBLK(hostbuf->st_mode))
     {
       buf->st_mode |= NUTTX_S_IFBLK;
     }
-  else if (hostbuf->st_mode & S_IFLNK)
+  else if (S_ISLNK(hostbuf->st_mode))
     {
       buf->st_mode |= NUTTX_S_IFLNK;
     }
-  else if (hostbuf->st_mode & S_IFIFO)
+  else if (S_ISFIFO(hostbuf->st_mode))
     {
       buf->st_mode |= NUTTX_S_IFIFO;
     }
-  else if (hostbuf->st_mode & S_IFSOCK)
+  else if (S_ISSOCK(hostbuf->st_mode))
     {
       buf->st_mode |= NUTTX_S_IFSOCK;
+    }
+  else if (S_TYPEISSEM(hostbuf))
+    {
+      buf->st_mode |= NUTTX_S_IFSEM;
+    }
+  else if (S_TYPEISMQ(hostbuf))
+    {
+      buf->st_mode |= NUTTX_S_IFMQ;
+    }
+  else if (S_TYPEISSHM(hostbuf))
+    {
+      buf->st_mode |= NUTTX_S_IFSHM;
     }
 
   buf->st_dev          = hostbuf->st_dev;

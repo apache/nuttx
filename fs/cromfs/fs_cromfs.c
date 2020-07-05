@@ -106,7 +106,8 @@ static uint32_t cromfs_addr2offset(FAR const struct cromfs_volume_s *fs,
                                    FAR const void *addr);
 static int      cromfs_foreach_node(FAR const struct cromfs_volume_s *fs,
                                     FAR const struct cromfs_node_s *node,
-                                    cromfs_foreach_t callback, FAR void *arg);
+                                    cromfs_foreach_t callback,
+                                    FAR void *arg);
 static uint16_t cromfs_seglen(FAR const char *relpath);
 static int      cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
                                    FAR const struct cromfs_node_s *node,
@@ -120,11 +121,15 @@ static int      cromfs_findnode(FAR const struct cromfs_volume_s *fs,
 static int      cromfs_open(FAR struct file *filep, const char *relpath,
                             int oflags, mode_t mode);
 static int      cromfs_close(FAR struct file *filep);
-static ssize_t  cromfs_read(FAR struct file *filep, char *buffer, size_t buflen);
-static int      cromfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static ssize_t  cromfs_read(FAR struct file *filep,
+                            char *buffer, size_t buflen);
+static int      cromfs_ioctl(FAR struct file *filep,
+                             int cmd, unsigned long arg);
 
-static int      cromfs_dup(FAR const struct file *oldp, FAR struct file *newp);
-static int      cromfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
+static int      cromfs_dup(FAR const struct file *oldp,
+                           FAR struct file *newp);
+static int      cromfs_fstat(FAR const struct file *filep,
+                             FAR struct stat *buf);
 
 static int      cromfs_opendir(struct inode *mountpt, const char *relpath,
                                struct fs_dirent_s *dir);
@@ -133,15 +138,15 @@ static int      cromfs_readdir(FAR struct inode *mountpt,
 static int      cromfs_rewinddir(FAR struct inode *mountpt,
                                  FAR struct fs_dirent_s *dir);
 
-static int      cromfs_bind(FAR struct inode *blkdriver, FAR const void *data,
-                            FAR void **handle);
+static int      cromfs_bind(FAR struct inode *blkdriver,
+                            FAR const void *data, FAR void **handle);
 static int      cromfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
                               unsigned int flags);
 static int      cromfs_statfs(FAR struct inode *mountpt,
                               FAR struct statfs *buf);
 
-static int      cromfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
-                            FAR struct stat *buf);
+static int      cromfs_stat(FAR struct inode *mountpt,
+                            FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
  * Public Data
@@ -521,7 +526,9 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
   ret  = cromfs_findnode(fs, &node, relpath);
   if (ret < 0)
     {
-      /* Nothing exists at that relative path (or a really bad error occurred) */
+      /* Nothing exists at that relative path (or a really bad error
+       * occurred)
+       */
 
       return ret;
     }
@@ -662,8 +669,8 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
   while (remaining > 0)
     {
       /* Search for the next block containing the fpos file offset.  This is
-       * real search on the first time through but the remaining blocks should
-       * be contiguous so that the logic should not loop.
+       * real search on the first time through but the remaining blocks
+       * should be contiguous so that the logic should not loop.
        *
        */
 
@@ -702,7 +709,9 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
         }
       while (fpos >= (blkoffs + ulen));
 
-      /* Check if we need to decompress the next block into the user buffer. */
+      /* Check if we need to decompress the next block into the user
+       * buffer.
+       */
 
       if (currhdr->lzf_type == LZF_TYPE0_HDR)
         {
@@ -756,9 +765,10 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                   ff->ff_ulen   = decomplen;
                 }
 
-              finfo("voloffs=%lu blkoffs=%lu ulen=%u ff_offset=%u copysize=%u\n",
-                    (unsigned long)voloffs, (unsigned long)blkoffs, ulen,
-                    ff->ff_offset, copysize);
+              finfo(
+                "voloffs=%lu blkoffs=%lu ulen=%u ff_offset=%u copysize=%u\n",
+                (unsigned long)voloffs, (unsigned long)blkoffs, ulen,
+                ff->ff_offset, copysize);
               DEBUGASSERT(ff->ff_ulen >= copysize);
             }
           else
@@ -769,7 +779,8 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                * decompression buffer.
                */
 
-              copyoffs = (blkoffs >= filep->f_pos) ? 0 : filep->f_pos - blkoffs;
+              copyoffs = (blkoffs >= filep->f_pos) ?
+                            0 : filep->f_pos - blkoffs;
               DEBUGASSERT(ulen > copyoffs);
               copysize = ulen - copyoffs;
 
@@ -863,7 +874,7 @@ static int cromfs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * same node.
    */
 
-  newff = (FAR struct cromfs_file_s *)kmm_zalloc(sizeof(struct cromfs_file_s));
+  newff = kmm_zalloc(sizeof(struct cromfs_file_s));
   if (newff == NULL)
     {
       return -ENOMEM;
@@ -966,7 +977,9 @@ static int cromfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   ret  = cromfs_findnode(fs, &node, relpath);
   if (ret < 0)
     {
-      /* Nothing exists at that relative path (or a really bad error occurred) */
+      /* Nothing exists at that relative path (or a really bad error
+       * occurred)
+       */
 
       return ret;
     }
@@ -1045,7 +1058,7 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   finfo("Entry %lu: %s\n", (unsigned long)offset, name);
   strncpy(dir->fd_dir.d_name, name, NAME_MAX + 1);
 
-  switch (node->cn_mode & s_IFTGT)
+  switch (node->cn_mode & S_IFMT)
     {
       case S_IFDIR:  /* Directory */
         dir->fd_dir.d_type = DTYPE_DIRECTORY;

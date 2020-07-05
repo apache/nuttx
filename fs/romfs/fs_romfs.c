@@ -1248,11 +1248,20 @@ static int romfs_stat_common(uint8_t type, uint32_t size,
       buf->st_mode = S_IFDIR | S_IROTH | S_IXOTH | S_IRGRP | S_IXGRP |
                      S_IRUSR | S_IXUSR;
     }
-  else if (IS_FILE(type))
+  else if (IS_FILE(type) || IS_SOFTLINK(type))
     {
+      if (IS_FILE(type))
+        {
+          buf->st_mode = S_IFREG;
+        }
+      else
+        {
+          buf->st_mode = S_IFLNK;
+        }
+
       /* It's a read-only file name */
 
-      buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+      buf->st_mode |= S_IROTH | S_IRGRP | S_IRUSR;
       if (IS_EXECUTABLE(type))
         {
           /* It's a read-execute file name */

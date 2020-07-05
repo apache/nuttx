@@ -66,32 +66,37 @@
 
 /* These must exactly match the definitions from include/sys/stat.h: */
 
-#define NUTTX_S_IFIFO           (0 << 11)
-#define NUTTX_S_IFCHR           (1 << 11)
-#define NUTTX_S_IFDIR           (2 << 11)
-#define NUTTX_S_IFBLK           (3 << 11)
-#define NUTTX_S_IFREG           (4 << 11)
-#define NUTTX_S_IFSOCK          (8 << 11)
-#define NUTTX_S_IFLNK           (1 << 15)
+#define NUTTX_S_IFIFO           (1 << 12)
+#define NUTTX_S_IFCHR           (2 << 12)
+#define NUTTX_S_IFSEM           (3 << 12)
+#define NUTTX_S_IFDIR           (4 << 12)
+#define NUTTX_S_IFMQ            (5 << 12)
+#define NUTTX_S_IFBLK           (6 << 12)
+#define NUTTX_S_IFSHM           (7 << 12)
+#define NUTTX_S_IFREG           (8 << 12)
+#define NUTTX_S_IFMTD           (9 << 12)
+#define NUTTX_S_IFLNK           (10 << 12)
+#define NUTTX_S_IFSOCK          (12 << 12)
+#define NUTTX_S_IFMT            (15 << 12)
 
 /* These must exactly match the definitions from include/fcntl.h: */
 
-#define NUTTX_O_RDONLY   (1 << 0)  /* Open for read access (only) */
-#define NUTTX_O_WRONLY   (1 << 1)  /* Open for write access (only) */
-#define NUTTX_O_CREAT    (1 << 2)  /* Create file/sem/mq object */
-#define NUTTX_O_EXCL     (1 << 3)  /* Name must not exist when opened  */
-#define NUTTX_O_APPEND   (1 << 4)  /* Keep contents, append to end */
-#define NUTTX_O_TRUNC    (1 << 5)  /* Delete contents */
-#define NUTTX_O_NONBLOCK (1 << 6)  /* Don't wait for data */
-#define NUTTX_O_SYNC     (1 << 7)  /* Synchronize output on write */
-#define NUTTX_O_BINARY   (1 << 8)  /* Open the file in binary mode. */
-#define NUTTX_O_DIRECT   (1 << 9)  /* Avoid caching, write directly to hardware */
+#define NUTTX_O_RDONLY          (1 << 0)  /* Open for read access (only) */
+#define NUTTX_O_WRONLY          (1 << 1)  /* Open for write access (only) */
+#define NUTTX_O_CREAT           (1 << 2)  /* Create file/sem/mq object */
+#define NUTTX_O_EXCL            (1 << 3)  /* Name must not exist when opened  */
+#define NUTTX_O_APPEND          (1 << 4)  /* Keep contents, append to end */
+#define NUTTX_O_TRUNC           (1 << 5)  /* Delete contents */
+#define NUTTX_O_NONBLOCK        (1 << 6)  /* Don't wait for data */
+#define NUTTX_O_SYNC            (1 << 7)  /* Synchronize output on write */
+#define NUTTX_O_BINARY          (1 << 8)  /* Open the file in binary mode. */
+#define NUTTX_O_DIRECT          (1 << 9)  /* Avoid caching, write directly to hardware */
 
-#define NUTTX_O_RDWR     (NUTTX_O_RDONLY | NUTTX_O_WRONLY)
+#define NUTTX_O_RDWR            (NUTTX_O_RDONLY | NUTTX_O_WRONLY)
 
 /* Should match definition in include/limits.h */
 
-#define NUTTX_NAME_MAX   CONFIG_NAME_MAX
+#define NUTTX_NAME_MAX          CONFIG_NAME_MAX
 
 #endif /* __SIM__ */
 
