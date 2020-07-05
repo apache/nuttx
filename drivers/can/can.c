@@ -1360,7 +1360,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
            * message buffer.
            */
 
-          if (sval < 0)
+          if (sval <= 0)
             {
               can_givesem(&fifo->rx_sem);
             }
