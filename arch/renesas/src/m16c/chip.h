@@ -62,6 +62,7 @@
                                      /* Bits 8-11: Reserved */
 #define M16C_FLG_IPLMASK   0x7000    /* Bits 12:14: Processor interrupt priority level */
                                      /* Bit 15: Reserved */
+
 /* Memory Map */
 
 /* Memory-mapped special function registers begin at address 0x00000 */
