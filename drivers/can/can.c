@@ -1337,13 +1337,24 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
           fifo->rx_tail = nexttail;
 
-          /* The increment the counting semaphore. The maximum value should
+          sval = 0;
+          if (nxsem_get_value(&fifo->rx_sem, &sval) < 0)
+            {
+              DEBUGASSERT(false);
+#ifdef CONFIG_CAN_ERRORS
+              /* Report unspecified error */
+
+              dev->cd_error |= CAN_ERROR5_UNSPEC;
+#endif
+              return -EINVAL;
+            }
+
+          /* Increment the counting semaphore. The maximum value should
            * be CONFIG_CAN_FIFOSIZE -- one possible count for each allocated
            * message buffer.
            */
 
-          sval = 0;
-          if (nxsem_get_value(&fifo->rx_sem, &sval) <= 0)
+          if (sval < 0)
             {
               can_givesem(&fifo->rx_sem);
             }
