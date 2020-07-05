@@ -364,7 +364,7 @@ int stm32_bbsram_int(void)
       state = (desc.lastwrite.tv_sec || desc.lastwrite.tv_nsec) ?  OK : 1;
 
       syslog(LOG_INFO, "Fault Log info File No %d Length %d flags:0x%02x "
-          "state:%d\n", (unsigned int)desc.fileno, (unsigned int) desc.len,
+          "state:%d\n", (unsigned int)desc.fileno, (unsigned int)desc.len,
           (unsigned int)desc.flags, state);
 
       if (state == OK)
