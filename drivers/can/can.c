@@ -1024,6 +1024,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct can_reader_s *reader = NULL;
   pollevent_t eventset;
   int ndx;
+  irqstate_t flags;
   int ret;
   int i;
 
@@ -1035,6 +1036,8 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
       return -ENODEV;
     }
 #endif
+
+  flags = enter_critical_section();
 
   DEBUGASSERT(filep->f_priv != NULL);
   reader = (FAR struct can_reader_s *)filep->f_priv;
@@ -1048,7 +1051,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * will abort the operation
        */
 
-      return ret;
+      goto return_with_irqdisabled;
     }
 
   /* Are we setting up the poll?  Or tearing it down? */
@@ -1162,6 +1165,9 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 errout:
   can_givesem(&dev->cd_pollsem);
+
+return_with_irqdisabled:
+  leave_critical_section(flags);
   return ret;
 }
 
