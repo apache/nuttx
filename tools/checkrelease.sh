@@ -27,7 +27,6 @@ ORIGINAL_DIR="$(pwd)"
 trap "rm -rf $TEMPDIR" EXIT
 
 function download_release() {
-    rm -rf "$TEMPDIR"
     wget -r -np -R "index.html*" -P . --cut-dirs 7 "$URL"
     cd "$TEMPDIR"
 }
@@ -126,4 +125,3 @@ fi
 download_release
 check_nuttx 
 check_nuttx_apps 
-cd "$ORIGINAL_DIR"
