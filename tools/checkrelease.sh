@@ -96,13 +96,18 @@ function usage() {
     echo "Usage: $0 <URL-of-release-candidate-directory-or-release-name>"
     echo "   Given release name or release full URL, downloads all files in"
     echo "   in that directory (which should include nuttx and nuttx-apps"
-    echo "   sha512, asc, and tar.gz files, checks their SHA512 and GPG "
+    echo "   sha512, asc, and tar.gz files), checks the release SHA512 and GPG "
     echo "   signatures, and checks the unpacked directories for required "
     echo "   files. Creates a temporary directory to do its work in."
     echo
     echo "   nuttx and nuttx-apps tar.gz files are left in the current"
     echo "   directory."
     echo 
+    echo "Examples:"
+    echo
+    echo "  $0 9.1.0-RC1"
+    echo "  $0 https://dist.apache.org/repos/dist/dev/incubator/nuttx/9.1.0-RC1/"
+    echo
 }
 
 if [ "-h" == "$1" ]; then
