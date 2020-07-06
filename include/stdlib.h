@@ -121,7 +121,6 @@ int       rand(void);
 #define   srandom(s) srand(s)
 long      random(void);
 
-#ifndef CONFIG_DISABLE_ENVIRON
 /* Environment variable support */
 
 FAR char **get_environ_ptr(void);
@@ -130,18 +129,13 @@ int       putenv(FAR const char *string);
 int       clearenv(void);
 int       setenv(FAR const char *name, FAR const char *value, int overwrite);
 int       unsetenv(FAR const char *name);
-#endif
 
 /* Process exit functions */
 
 void      exit(int status) noreturn_function;
 void      abort(void) noreturn_function;
-#ifdef CONFIG_SCHED_ATEXIT
 int       atexit(CODE void (*func)(void));
-#endif
-#ifdef CONFIG_SCHED_ONEXIT
 int       on_exit(CODE void (*func)(int, FAR void *), FAR void *arg);
-#endif
 
 /* _Exit() is a stdlib.h equivalent to the unistd.h _exit() function */
 
