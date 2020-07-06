@@ -357,11 +357,8 @@ int     access(FAR const char *path, int amode);
 int     rmdir(FAR const char *pathname);
 int     unlink(FAR const char *pathname);
 int     truncate(FAR const char *path, off_t length);
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
 int     symlink(FAR const char *path1, FAR const char *path2);
 ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
-#endif
 
 /* Execution of programs from files */
 
