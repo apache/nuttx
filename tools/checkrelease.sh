@@ -24,7 +24,7 @@ set -e
 BASE_URL="https://dist.apache.org/repos/dist/dev/incubator/nuttx"
 TEMPDIR="dist.apache.org"
 ORIGINAL_DIR="$(pwd)"
-trap "rm -rf $TEMPDIR" EXIT
+trap "{ cd $ORIGINAL_DIR; rm -rf $TEMPDIR; }" EXIT
 
 function download_release() {
     wget -r -np -R "index.html*" -P . --cut-dirs 7 "$URL"
