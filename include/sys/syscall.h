@@ -83,16 +83,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef __KERNEL__
-
-/* Function lookup tables.  This table is indexed by the system call numbers
- * defined above.  Given the system call number, this table provides the
- * address of the corresponding system function.
- *
- * This table is only available during the kernel phase of a kernel build.
- */
-
-EXTERN const uintptr_t g_funclookup[SYS_nsyscalls];
+#ifdef CONFIG_LIB_SYSCALL
 
 /* Given the system call number, the corresponding entry in this table
  * provides the address of the stub function.
@@ -103,12 +94,6 @@ EXTERN const uintptr_t g_funclookup[SYS_nsyscalls];
 EXTERN const uintptr_t g_stublookup[SYS_nsyscalls];
 
 #endif
-
-/* Given the system call number, the corresponding entry in this table
- * provides the number of parameters needed by the function.
- */
-
-EXTERN const uint8_t g_funcnparms[SYS_nsyscalls];
 
 /****************************************************************************
  * Public Function Prototypes
