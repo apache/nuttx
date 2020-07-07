@@ -91,7 +91,6 @@ struct i2c_master_s;
  * them to disable or enable the unused interface type without
  * changing their code.
  *
- * Note, I2C support is unimplemented at present.
  */
 
 struct mpu_config_s
@@ -107,10 +106,14 @@ struct mpu_config_s
   FAR struct spi_dev_s *spi;
   int spi_devid;
 #else
-    /* For users on I2C. (Unimplemented.) */
+  /* For users on I2C.
+   *
+   *  i2c  : the I2C master device
+   *  addr : the I2C address.
+   */
 
-    FAR struct i2c_master_s *i2c;
-    int addr;
+  FAR struct i2c_master_s *i2c;
+  int addr;
 #endif
   };
 
