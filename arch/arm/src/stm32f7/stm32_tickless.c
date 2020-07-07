@@ -34,6 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Tickless OS Support.
  *
@@ -223,7 +224,7 @@ static inline void stm32_tickless_ackint(int channel)
 
 /****************************************************************************
  * Name: stm32_tickless_getint
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t stm32_tickless_getint(void)
 {
@@ -1016,13 +1017,10 @@ int up_alarm_start(FAR const struct timespec *ts)
 
   g_tickless.pending = true;
 
-  /* We must protect for a race condition here with very small differences
-   * between the time of the alarm and the time now. We must ensure that the
-   * compare register is set, and interrupts are enabled BEFORE the rising edge
-   * of the clock when COUNT==COMPARE. Otherwise, we cannot be sure we are 
-   * going to get the interrupt. If we didn't catch this case, we wouldn't
-   * interrupt until a full loop of the clock.
-   * 
+  /* If we have already passed this time, there is a chance we didn't set the
+   * compare register in time and we've missed the interrupt. If we don't
+   * catch this case, we won't interrupt until a full loop of the clock.
+   *
    * Since we can't make assumptions about the clock speed and tick rate,
    * we simply keep adding an offset to the current time, until we can leave
    * certain that the interrupt is going to fire as soon as we leave the
@@ -1032,7 +1030,8 @@ int up_alarm_start(FAR const struct timespec *ts)
   while (tm <= stm32_get_counter())
     {
       tm = stm32_get_counter() + offset++;
-      STM32_TIM_SETCOMPARE(g_tickless.tch, CONFIG_STM32F7_TICKLESS_CHANNEL, tm);
+      STM32_TIM_SETCOMPARE(g_tickless.tch, CONFIG_STM32F7_TICKLESS_CHANNEL,
+                           tm);
     }
 
   leave_critical_section(flags);
