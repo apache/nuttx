@@ -129,7 +129,7 @@ for pat in ${EXCLPAT} ; do
   TAR+=" --exclude=${pat}"
 done
 
-TAR+=" --exclude-vcs-ignores --exclude-vcs"
+TAR+=" --exclude-vcs"
 
 if [ $verbose != 0 ] ; then
   TAR+=" -czvf"
