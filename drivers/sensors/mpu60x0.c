@@ -694,8 +694,6 @@ static void inline mpu_unlock(FAR struct mpu_dev_s *dev)
 
 static int mpu_reset(FAR struct mpu_dev_s *dev)
 {
-  /* We support only SPI right now. */
-
 #ifdef CONFIG_MPU60X0_SPI
   if (dev->config.spi == NULL)
     {
