@@ -32,6 +32,7 @@
 #endif
 
 NXSYMBOLS(__errno)
+NXSYMBOLS(__cxa_atexit)
 NXSYMBOLS(_exit)
 NXSYMBOLS(accept)
 NXSYMBOLS(asprintf)
