@@ -124,6 +124,24 @@ do { \
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: arm_getsp
+ ****************************************************************************/
+
+/* I don't know if the builtin to get SP is enabled */
+
+static inline uint32_t arm_getsp(void)
+{
+  uint32_t sp;
+  __asm__
+  (
+    "\tmov %0, sp\n\t"
+    : "=r"(sp)
+  );
+
+  return sp;
+}
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -134,8 +152,8 @@ do { \
  * nuttx/arch/<architecture>/include/arch.h.
  *
  * These tables would hold the physical address of the level 2 page tables.
- * All would be initially NULL and would not be backed up with physical memory
- * until mappings in the level 2 page table are required.
+ * All would be initially NULL and would not be backed up with physical
+ * memory until mappings in the level 2 page table are required.
  */
 
 struct group_addrenv_s

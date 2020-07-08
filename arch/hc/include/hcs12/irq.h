@@ -50,6 +50,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* CCR bit definitions */
 
 #define HCS12_CCR_C (1 << 0) /* Bit 0: Carry/Borrow status bit */
@@ -62,7 +63,7 @@
 #define HCS12_CCR_S (1 << 7) /* Bit 7: STOP instruction control bit */
 
 /************************************************************************************
- *	Register state save strucure
+ * Register state save strucure
  *   Low Address        <-- SP after state save
  *                [PPAGE]
  *                [soft regisers]
@@ -88,6 +89,7 @@
  ************************************************************************************/
 
 /* Byte offsets */
+
 /* PPAGE register (only in banked mode) */
 
 #ifndef CONFIG_HCS12_NONBANKED
@@ -174,9 +176,9 @@ struct xcptcontext
   uint8_t regs[XCPTCONTEXT_REGS];
 };
 
-/****************************************************************************
+/************************************************************************************
  * Inline functions
- ****************************************************************************/
+ ************************************************************************************/
 
 /* Name: up_irq_save, up_irq_restore, and friends.
  *
@@ -193,19 +195,6 @@ struct xcptcontext
 #define idisable() __asm("orcc #0x10")
 #define xenable()  __asm("andcc #0xbf")
 #define xdisable() __asm("orcc #0x40")
-
-/* Get the current value of the stack pointer */
-
-static inline uint16_t up_getsp(void)
-{
-  uint16_t ret;
-  __asm__
-  (
-    "\tsts %0\n"
-	: "=m"(ret) :
-  );
-  return ret;
-}
 
 /* Get the current value of the CCR */
 
@@ -256,6 +245,7 @@ static inline void system_call3(unsigned int nbr, uintptr_t parm1,
                                 uintptr_t parm2, uintptr_t parm3)
 {
   /* To be provided */
+
   /* __asm("swi") */
 }
 
@@ -272,7 +262,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ************************************************************************************/
 
 #undef EXTERN
