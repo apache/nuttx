@@ -458,7 +458,7 @@ static inline void write_gsbase(unsigned long val)
 
 /* Return stack pointer */
 
-static inline uint64_t up_getrsp()
+static inline uint64_t x64_getsp()
 {
   uint64_t regval;
 
