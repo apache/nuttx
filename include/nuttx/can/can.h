@@ -580,17 +580,14 @@ struct can_ops_s
 struct can_reader_s
 {
   struct list_node     list;
-  sem_t                read_sem;
   struct can_rxfifo_s  fifo;             /* Describes receive FIFO */
 };
 
 struct can_dev_s
 {
-  uint8_t              cd_ocount;        /* The number of times the device has been opened */
   uint8_t              cd_npendrtr;      /* Number of pending RTR messages */
   volatile uint8_t     cd_ntxwaiters;    /* Number of threads waiting to enqueue a message */
-  volatile uint8_t     cd_nrxwaiters;    /* Number of threads waiting to receive a message */
-  struct list_node     cd_readers;       /* Number of readers */
+  struct list_node     cd_readers;       /* List of readers */
 #ifdef CONFIG_CAN_ERRORS
   uint8_t              cd_error;         /* Flags to indicate internal device errors */
 #endif
@@ -644,7 +641,7 @@ struct canioc_bittiming_s
 struct canioc_connmodes_s
 {
   uint8_t               bm_loopback : 1; /* Enable reception of messages sent
-                                          * by this node.*/
+                                          * by this node. */
   uint8_t               bm_silent   : 1; /* Disable transmission of messages.
                                           * The node still receives messages. */
 };
