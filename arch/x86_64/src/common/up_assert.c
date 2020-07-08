@@ -109,7 +109,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 static void up_dumpstate(void)
 {
   struct tcb_s *rtcb = this_task();
-  uint64_t sp = up_getrsp();
+  uint64_t sp = x64_getsp();
   uint64_t ustackbase;
   uint64_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
@@ -259,7 +259,7 @@ void up_assert(const uint8_t *filename, int lineno)
   up_dumpstate();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getrsp(), this_task(), filename, lineno);
+  board_crashdump(x64_getsp(), this_task(), filename, lineno);
 #endif
 
   _up_assert(EXIT_FAILURE);
