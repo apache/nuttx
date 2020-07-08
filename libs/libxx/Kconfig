@@ -24,7 +24,7 @@ if HAVE_CXX
 
 config HAVE_CXXINITIALIZE
 	bool "Have C++ initialization"
-	default n
+	default LIBCXX || UCLIBCXX
 	---help---
 		The platform-specific logic includes support for initialization
 		of static C++ instances for this architecture and for the selected
