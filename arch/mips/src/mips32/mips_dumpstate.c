@@ -59,23 +59,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_getsp
- ****************************************************************************/
-
-/* I don't know if the builtin to get SP is enabled */
-
-static inline uint32_t up_getsp(void)
-{
-  register uint32_t sp;
-  __asm__
-  (
-    "\tadd  %0, $0, $29\n"
-    : "=r"(sp)
-  );
-  return sp;
-}
-
-/****************************************************************************
  * Name: up_stackdump
  ****************************************************************************/
 
@@ -147,7 +130,7 @@ static inline void up_registerdump(void)
 void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp = up_getsp();
+  uint32_t sp = mips_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3

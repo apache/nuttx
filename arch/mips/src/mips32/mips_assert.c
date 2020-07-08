@@ -177,7 +177,7 @@ void up_assert(const uint8_t *filename, int lineno)
 #endif
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), running_task(), filename, lineno);
+  board_crashdump(mips_getsp(), running_task(), filename, lineno);
 #endif
 
   _up_assert(EXIT_FAILURE);
