@@ -82,11 +82,13 @@
 #  define CONFIG_HAVE_WEAKFUNCTIONS 1
 #  define weak_alias(name, aliasname) \
    extern __typeof (name) aliasname __attribute__ ((weak, alias (#name)));
+#  define weak_data __attribute__ ((weak))
 #  define weak_function __attribute__ ((weak))
 #  define weak_const_function __attribute__ ((weak, __const__))
 # else
 #  undef  CONFIG_HAVE_WEAKFUNCTIONS
 #  define weak_alias(name, aliasname)
+#  define weak_data
 #  define weak_function
 #  define weak_const_function
 # endif
@@ -324,6 +326,7 @@
 
 #  undef  CONFIG_HAVE_WEAKFUNCTIONS
 #  define weak_alias(name, aliasname)
+#  define weak_data
 #  define weak_function
 #  define weak_const_function
 #  define restrict /* REVISIT */
@@ -462,6 +465,7 @@
 
 #  undef  CONFIG_HAVE_WEAKFUNCTIONS
 #  define weak_alias(name, aliasname)
+#  define weak_data
 #  define weak_function
 #  define weak_const_function
 #  define restrict
@@ -565,6 +569,7 @@
 #  define UNUSED(a) ((void)(a))
 
 #  define weak_alias(name, aliasname)
+#  define weak_data            __weak
 #  define weak_function        __weak
 #  define weak_const_function
 #  define noreturn_function
@@ -618,6 +623,7 @@
 #  undef  CONFIG_HAVE_WEAKFUNCTIONS
 #  undef CONFIG_HAVE_CXX14
 #  define weak_alias(name, aliasname)
+#  define weak_data
 #  define weak_function
 #  define weak_const_function
 #  define restrict
