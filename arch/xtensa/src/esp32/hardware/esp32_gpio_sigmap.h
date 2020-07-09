@@ -435,5 +435,6 @@
 #define SIG_IN_FUNC226_IDX            226
 #define SIG_IN_FUNC227_IDX            227
 #define SIG_IN_FUNC228_IDX            228
+#define SIG_GPIO_OUT_IDX              256
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_GPIO_SIGMAP_H */

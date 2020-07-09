@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <errno.h>
 #include <debug.h>
 #include <time.h>
@@ -47,21 +48,45 @@
 #include "esp32_spi.h"
 #include "esp32_gpio.h"
 #include "esp32_cpuint.h"
+#include "esp32_dma.h"
 
 #include "xtensa.h"
 #include "hardware/esp32_gpio_sigmap.h"
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_spi.h"
 #include "hardware/esp32_soc.h"
+#include "hardware/esp32_pinmap.h"
 #include "rom/esp32_gpio.h"
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-#ifndef CONFIG_ESP_SPI_SLAVE_QSIZE
-  #define CONFIG_ESP_SPI_SLAVE_QSIZE 1024
+#define SPI_SLAVE_BUFSIZE     (CONFIG_SPI_SLAVE_BUFSIZE)
+
+/* SPI DMA channel number */
+
+#define SPI_DMA_CHANNEL_MAX   (2)
+
+/* SPI DMA RX/TX description number */
+
+#if SPI_SLAVE_BUFSIZE % ESP32_DMA_BUFLEN_MAX
+#  define SPI_DMADESC_NUM (SPI_SLAVE_BUFSIZE / ESP32_DMA_BUFLEN_MAX + 1)
+#else
+#  define SPI_DMADESC_NUM (SPI_SLAVE_BUFSIZE / ESP32_DMA_BUFLEN_MAX)
 #endif
+
+/* SPI DMA reset before exchange */
+
+#define SPI_DMA_RESET_MASK (SPI_AHBM_RST_M | SPI_AHBM_FIFO_RST_M | \
+                            SPI_OUT_RST_M | SPI_IN_RST_M)
+
+#ifndef MIN
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
+#define WORDS2BYTES(_priv, _wn)   (_wn * ((_priv)->nbits / 8))
+#define BYTES2WORDS(_priv, _bn)   (_bn / ((_priv)->nbits / 8))
 
 /* SPI Device hardware configuration */
 
@@ -82,6 +107,12 @@ struct esp32_spislv_config_s
 
   uint32_t clk_bit;           /* Clock enable bit */
   uint32_t rst_bit;           /* I2C reset bit */
+
+  bool use_dma;               /* Use DMA */
+  uint8_t dma_chan_s;         /* DMA channel regitser shift */
+  uint8_t dma_chan;           /* DMA channel */
+  uint32_t dma_clk_bit;       /* DMA clock enable bit */
+  uint32_t dma_rst_bit;       /* DMA reset bit */
 
   uint32_t cs_insig;          /* SPI CS input signal index */
   uint32_t cs_outsig;         /* SPI CS output signal index */
@@ -109,16 +140,27 @@ struct esp32_spislv_priv_s
   uint8_t          nbits;       /* Actual SPI send/receive bits once transmission */
   int              refs;        /* Check if it is initialized */
 
-  uint32_t         head;        /* Location of next value */
-  uint32_t         tail;        /* Index of first value */
+  uint32_t         txlen;       /* Location of next RX value */
 
-  /* SPI slave output queue buffer */
+  /* SPI slave TX queue buffer */
 
-  uint16_t         outq[CONFIG_ESP_SPI_SLAVE_QSIZE];
+  uint8_t          txbuffer[SPI_SLAVE_BUFSIZE];
+
+  uint32_t         rxlen;       /* Location of next RX value */
+
+  /* SPI slave RX queue buffer */
+
+  uint8_t          rxbuffer[SPI_SLAVE_BUFSIZE];
 
   uint32_t         outval;      /* Default shift-out value */
 
   bool             process;     /* If SPI Slave process */
+
+  bool             txen;        /* Enable TX */
+
+  /* Copy from config to speed up checking */
+
+  bool dma_chan;
 };
 
 /****************************************************************************
@@ -140,6 +182,7 @@ static int esp32_spislv_enqueue(struct spi_sctrlr_s *sctrlr,
                                 size_t nwords);
 static bool esp32_spislv_qfull(struct spi_sctrlr_s *sctrlr);
 static void esp32_spislv_qflush(struct spi_sctrlr_s *sctrlr);
+static size_t esp32_spislv_qpoll(FAR struct spi_sctrlr_s *sctrlr);
 
 /****************************************************************************
  * Private Data
@@ -159,6 +202,15 @@ static const struct esp32_spislv_config_s esp32_spi2_config =
   .irq          = ESP32_IRQ_SPI2,
   .clk_bit      = DPORT_SPI_CLK_EN_2,
   .rst_bit      = DPORT_SPI_RST_2,
+#ifdef CONFIG_ESP32_SPI2_DMA
+  .use_dma      = true,
+#else
+  .use_dma      = false,
+#endif
+  .dma_chan_s   = 2,
+  .dma_chan     = 1,
+  .dma_clk_bit  = DPORT_SPI_DMA_CLK_EN,
+  .dma_rst_bit  = DPORT_SPI_DMA_RST,
   .cs_insig     = HSPICS0_IN_IDX,
   .cs_outsig    = HSPICS0_OUT_IDX,
   .mosi_insig   = HSPID_IN_IDX,
@@ -175,7 +227,8 @@ static const struct spi_sctrlrops_s esp32_spi2slv_ops =
   .unbind   = esp32_spislv_unbind,
   .enqueue  = esp32_spislv_enqueue,
   .qfull    = esp32_spislv_qfull,
-  .qflush   = esp32_spislv_qflush
+  .qflush   = esp32_spislv_qflush,
+  .qpoll    = esp32_spislv_qpoll
 };
 
 static struct esp32_spislv_priv_s esp32_spi2slv_priv =
@@ -203,6 +256,15 @@ static const struct esp32_spislv_config_s esp32_spi3_config =
   .irq          = ESP32_IRQ_SPI3,
   .clk_bit      = DPORT_SPI_CLK_EN,
   .rst_bit      = DPORT_SPI_RST,
+#ifdef CONFIG_ESP32_SPI3_DMA
+  .use_dma      = true,
+#else
+  .use_dma      = false,
+#endif
+  .dma_chan_s   = 4,
+  .dma_chan     = 2,
+  .dma_clk_bit  = DPORT_SPI_DMA_CLK_EN,
+  .dma_rst_bit  = DPORT_SPI_DMA_RST,
   .cs_insig     = VSPICS0_IN_IDX,
   .cs_outsig    = VSPICS0_OUT_IDX,
   .mosi_insig   = VSPID_IN_IDX,
@@ -232,6 +294,11 @@ static struct esp32_spislv_priv_s esp32_spi3slv_priv =
   .mode = SPIDEV_MODE3
 };
 #endif /* CONFIG_ESP32_SPI3 */
+
+/* SPI DMA RX/TX description */
+
+struct esp32_dmadesc_s s_rx_desc[SPI_DMA_CHANNEL_MAX][SPI_DMADESC_NUM];
+struct esp32_dmadesc_s s_tx_desc[SPI_DMA_CHANNEL_MAX][SPI_DMADESC_NUM];
 
 /****************************************************************************
  * Private Functions
@@ -332,6 +399,49 @@ static inline void esp32_spi_reset_regbits(struct esp32_spislv_priv_s *priv,
 }
 
 /****************************************************************************
+ * Name: esp32_spi_iomux
+ *
+ * Description:
+ *   Check if the option SPI GPIO pins can use IOMUX directly
+ *
+ * Input Parameters:
+ *   priv   - Private SPI device structure
+ *
+ * Returned Value:
+ *   True if can use IOMUX or false if can't.
+ *
+ ****************************************************************************/
+
+static inline bool esp32_spi_iomux(struct esp32_spislv_priv_s *priv)
+{
+  bool mapped = false;
+  const struct esp32_spislv_config_s *cfg = priv->config;
+
+  if (REG_SPI_BASE(2) == cfg->reg_base)
+    {
+      if (cfg->mosi_pin == SPI2_IOMUX_MOSIPIN &&
+          cfg->cs_pin == SPI2_IOMUX_CSPIN &&
+          cfg->miso_pin == SPI2_IOMUX_MISOPIN &&
+          cfg->clk_pin == SPI2_IOMUX_CLKPIN)
+        {
+          mapped = true;
+        }
+    }
+  else if (REG_SPI_BASE(3) == cfg->reg_base)
+    {
+      if (cfg->mosi_pin == SPI3_IOMUX_MOSIPIN &&
+          cfg->cs_pin == SPI3_IOMUX_CSPIN &&
+          cfg->miso_pin == SPI3_IOMUX_MISOPIN &&
+          cfg->clk_pin == SPI3_IOMUX_CLKPIN)
+        {
+          mapped = true;
+        }
+    }
+
+  return mapped;
+}
+
+/****************************************************************************
  * Name: esp32_spislv_setmode
  *
  * Description:
@@ -365,16 +475,28 @@ static void esp32_spislv_setmode(FAR struct spi_sctrlr_s *dev,
     {
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-          ck_idle_edge = 1;
-          ck_in_edge = 0;
-          miso_delay_mode = 0;
-          miso_delay_num = 0;
-          mosi_delay_mode = 2;
-          mosi_delay_num = 2;
+        case SPISLAVE_MODE0: /* CPOL=0; CPHA=0 */
+          if (priv->dma_chan)
+            {
+              ck_idle_edge = 0;
+              ck_in_edge = 1;
+              miso_delay_mode = 0;
+              miso_delay_num = 1;
+              mosi_delay_mode = 0;
+              mosi_delay_num = 1;
+            }
+          else
+            {
+              ck_idle_edge = 1;
+              ck_in_edge = 0;
+              miso_delay_mode = 0;
+              miso_delay_num = 0;
+              mosi_delay_mode = 2;
+              mosi_delay_num = 2;
+            }
           break;
 
-        case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
+        case SPISLAVE_MODE1: /* CPOL=0; CPHA=1 */
           ck_idle_edge = 1;
           ck_in_edge = 1;
           miso_delay_mode = 2;
@@ -383,16 +505,28 @@ static void esp32_spislv_setmode(FAR struct spi_sctrlr_s *dev,
           mosi_delay_num = 0;
           break;
 
-        case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-          ck_idle_edge = 0;
-          ck_in_edge = 1;
-          miso_delay_mode = 0;
-          miso_delay_num = 0;
-          mosi_delay_mode = 1;
-          mosi_delay_num = 2;
+        case SPISLAVE_MODE2: /* CPOL=1; CPHA=0 */
+          if (priv->dma_chan)
+            {
+              ck_idle_edge = 1;
+              ck_in_edge = 0;
+              miso_delay_mode = 0;
+              miso_delay_num = 1;
+              mosi_delay_mode = 0;
+              mosi_delay_num = 1;
+            }
+          else
+            {
+              ck_idle_edge = 0;
+              ck_in_edge = 1;
+              miso_delay_mode = 0;
+              miso_delay_num = 0;
+              mosi_delay_mode = 1;
+              mosi_delay_num = 2;
+            }
           break;
 
-        case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
+        case SPISLAVE_MODE3: /* CPOL=1; CPHA=1 */
           ck_idle_edge = 0;
           ck_in_edge = 0;
           miso_delay_mode = 1;
@@ -460,52 +594,7 @@ static void esp32_spislv_setbits(FAR struct spi_sctrlr_s *dev, int nbits)
   if (nbits != priv->nbits)
     {
       priv->nbits = nbits;
-
-      esp32_spi_set_reg(priv, SPI_SLV_WRBUF_DLEN_OFFSET, nbits - 1);
-      esp32_spi_set_reg(priv, SPI_SLV_RDBUF_DLEN_OFFSET, nbits - 1);
     }
-}
-
-/****************************************************************************
- * Name: spi_dequeue
- *
- * Description:
- *   Get the next queued output value.
- *
- * Input Parameters:
- *   priv  - SPI controller CS state
- *   pdata - output data buffer
- *
- * Returned Value:
- *   true if there is data or fail
- *
- * Assumptions:
- *   Called only from the SPI interrupt handler so all interrupts are
- *   disabled.
- *
- ****************************************************************************/
-
-static int spi_dequeue(struct esp32_spislv_priv_s *priv, uint32_t *pdata)
-{
-  int ret = false;
-  int next;
-
-  if (priv->head != priv->tail)
-    {
-      *pdata = priv->outq[priv->tail];
-
-      next = priv->tail + 1;
-      if (next >= CONFIG_ESP_SPI_SLAVE_QSIZE)
-        {
-          next = 0;
-        }
-
-      priv->tail = next;
-
-      ret = true;
-    }
-
-  return ret;
 }
 
 /****************************************************************************
@@ -526,10 +615,127 @@ static int esp32_io_interrupt(int irq, void *context, FAR void *arg)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)arg;
 
-  priv->process = false;
-  SPI_SDEV_SELECT(priv->sdev, false);
+  if (priv->process == true)
+    {
+      priv->process = false;
+      SPI_SDEV_SELECT(priv->sdev, false);
+    }
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: esp32_spislv_tx
+ *
+ * Description:
+ *   Process SPI slave TX.
+ *
+ *   DMA mode    : Initliaze register to prepare for TX
+ *   Non-DMA mode: Fill data to TX register
+ *
+ * Input Parameters:
+ *   priv   - Private SPI device structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp32_spislv_tx(struct esp32_spislv_priv_s *priv)
+{
+  int i;
+  uint32_t regval;
+
+  if (priv->dma_chan)
+    {
+      esp32_dma_init(s_tx_desc[priv->dma_chan - 1], SPI_DMADESC_NUM,
+                     priv->txbuffer, priv->txlen, 0);
+
+      regval = (uint32_t)s_tx_desc[priv->dma_chan - 1] & SPI_OUTLINK_ADDR_V;
+      esp32_spi_set_reg(priv, SPI_DMA_OUT_LINK_OFFSET,
+                        regval | SPI_OUTLINK_START_M);
+      esp32_spi_set_reg(priv, SPI_SLV_WRBUF_DLEN_OFFSET,
+                        priv->txlen * 8 - 1);
+
+      esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MISO_M);
+    }
+  else
+    {
+      for (i = 0; i < priv->txlen; i += 4)
+        {
+          esp32_spi_set_reg(priv, SPI_W8_OFFSET + i,
+                            *(uint32_t *)(&priv->txbuffer[i]));
+        }
+
+      esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MISO_M);
+    }
+}
+
+/****************************************************************************
+ * Name: esp32_spislv_rx
+ *
+ * Description:
+ *   Process SPI slave RX. Process SPI slave device receive callback by
+ *   calling SPI_SDEV_RECEIVE and prepare for next RX.
+ *
+ *   DMA mode : Initliaze register to prepare for RX
+ *
+ * Input Parameters:
+ *   priv   - Private SPI device structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp32_spislv_rx(struct esp32_spislv_priv_s *priv)
+{
+  uint32_t tmp;
+  uint32_t recv_n;
+  uint32_t regval;
+
+  tmp = SPI_SDEV_RECEIVE(priv->sdev, priv->rxbuffer,
+                         BYTES2WORDS(priv, priv->rxlen));
+  recv_n = WORDS2BYTES(priv, tmp);
+
+  if (priv->dma_chan)
+    {
+      DEBUGASSERT((recv_n % 4) == 0);
+    }
+
+  if (recv_n < priv->rxlen)
+    {
+      /** If upper layer does not receive all data of receive
+       *  buffer, move the rest data to head of the buffer
+       */
+
+      priv->rxlen -= recv_n;
+      memmove(priv->rxbuffer, priv->rxbuffer + recv_n, priv->rxlen);
+    }
+  else
+    {
+      priv->rxlen = 0;
+    }
+
+  if (priv->dma_chan)
+    {
+      tmp = SPI_SLAVE_BUFSIZE - priv->rxlen;
+      if (tmp)
+        {
+          /* Start to receive next block of data */
+
+          esp32_dma_init(s_rx_desc[priv->dma_chan - 1], SPI_DMADESC_NUM,
+                        priv->rxbuffer + priv->rxlen, tmp, 1);
+
+          regval = (uint32_t)s_rx_desc[priv->dma_chan - 1] &
+                   SPI_INLINK_ADDR_V;
+          esp32_spi_set_reg(priv, SPI_DMA_IN_LINK_OFFSET,
+                            regval | SPI_INLINK_START_M);
+          esp32_spi_set_reg(priv, SPI_SLV_RDBUF_DLEN_OFFSET, tmp * 8 - 1);
+
+          esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MOSI_M);
+        }
+    }
 }
 
 /****************************************************************************
@@ -548,36 +754,78 @@ static int esp32_io_interrupt(int irq, void *context, FAR void *arg)
 
 static int esp32_spislv_interrupt(int irq, void *context, FAR void *arg)
 {
-  uint32_t rd;
-  uint32_t wd;
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)arg;
-  irqstate_t flags;
-
-  flags = enter_critical_section();
+  uint32_t n;
+  uint32_t tmp;
+  int i;
 
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_TRANS_DONE_M);
 
-  if (!priv->process)
+  if (priv->dma_chan)
+    {
+      esp32_spi_set_reg(priv, SPI_DMA_CONF_OFFSET, SPI_DMA_RESET_MASK);
+      esp32_spi_reset_regbits(priv, SPI_DMA_CONF_OFFSET,
+                              SPI_DMA_RESET_MASK);
+    }
+
+  if (priv->process == false)
     {
       SPI_SDEV_SELECT(priv->sdev, true);
       priv->process = true;
     }
 
-  rd = esp32_spi_get_reg(priv, SPI_W0_OFFSET);
-  if (spi_dequeue(priv, &wd))
+  /* Read and calculate read bytes */
+
+  n = (esp32_spi_get_reg(priv, SPI_SLV_RD_BIT_OFFSET) + 1) / 8;
+
+  esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MOSI_M);
+
+  /* RX process */
+
+  if (!priv->dma_chan)
     {
-      esp32_spi_set_reg(priv, SPI_W0_OFFSET, wd);
-      esp32_spi_set_regbits(priv, SPI_CMD_OFFSET, SPI_USR_M);
+      /** With DMA, software should copy data from regitser
+       *  to receive buffer
+       */
+
+      for (i = 0; i < n; i += 4)
+        {
+          tmp = esp32_spi_get_reg(priv, SPI_W0_OFFSET + i);
+          memcpy(priv->rxbuffer + priv->rxlen + i, &tmp, n);
+        }
     }
 
-  SPI_SDEV_RECEIVE(priv->sdev, &rd, 1);
+  priv->rxlen += n;
 
-  if (priv->process == false)
+  esp32_spislv_rx(priv);
+
+  /* TX process */
+
+  if (priv->txen)
     {
+      if (n < priv->txlen)
+        {
+          priv->txlen -= n;
+          memmove(priv->txbuffer, priv->txbuffer + n, priv->txlen);
+        }
+      else
+        {
+          priv->txlen = 0;
+          priv->txen = false;
+        }
+    }
+
+  if (priv->txlen)
+    {
+      esp32_spislv_tx(priv);
+      priv->txen = true;
+    }
+
+  if (priv->process == true && esp32_gpioread(priv->config->cs_pin))
+    {
+      priv->process = false;
       SPI_SDEV_SELECT(priv->sdev, false);
     }
-
-  leave_critical_section(flags);
 
   return 0;
 }
@@ -600,34 +848,46 @@ static void esp32_spislv_initialize(FAR struct spi_sctrlr_s *dev)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)dev;
   const struct esp32_spislv_config_s *config = priv->config;
+  uint32_t regval;
 
   esp32_gpiowrite(config->cs_pin, 1);
   esp32_gpiowrite(config->mosi_pin, 1);
   esp32_gpiowrite(config->miso_pin, 1);
   esp32_gpiowrite(config->clk_pin, 1);
 
-  esp32_configgpio(config->cs_pin, INPUT | PULLUP | FUNCTION_2);
-  gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
-  gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
+  if (esp32_spi_iomux(priv))
+    {
+      esp32_configgpio(config->cs_pin, INPUT_FUNCTION_1 | PULLUP);
+      esp32_configgpio(config->mosi_pin, INPUT_FUNCTION_1 | PULLUP);
+      esp32_configgpio(config->miso_pin, OUTPUT_FUNCTION_1);
+      esp32_configgpio(config->clk_pin, INPUT_FUNCTION_1 | PULLUP);
+    }
+  else
+    {
+      esp32_configgpio(config->cs_pin, INPUT_FUNCTION_2 | PULLUP);
+      gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
+      gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
 
-  esp32_configgpio(config->mosi_pin, INPUT | PULLUP | FUNCTION_2);
-  gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
-  gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
+      esp32_configgpio(config->mosi_pin, INPUT_FUNCTION_2 | PULLUP);
+      gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
+      gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
 
-  esp32_configgpio(config->miso_pin, OUTPUT | PULLUP | FUNCTION_2);
-  gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
-  gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+      esp32_configgpio(config->miso_pin, OUTPUT_FUNCTION_2);
+      gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
+      gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
 
-  esp32_configgpio(config->clk_pin, INPUT | PULLUP | FUNCTION_2);
-  gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
-  gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
+      esp32_configgpio(config->clk_pin, INPUT_FUNCTION_2 | PULLUP);
+      gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
+      gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
+    }
 
   modifyreg32(DPORT_PERIP_CLK_EN_REG, 0, config->clk_bit);
   modifyreg32(DPORT_PERIP_RST_EN_REG, config->rst_bit, 0);
 
   esp32_spi_set_reg(priv, SPI_USER_OFFSET, SPI_DOUTDIN_M |
                                            SPI_USR_MOSI_M |
-                                           SPI_USR_MISO_M);
+                                           SPI_USR_MISO_M |
+                                           SPI_USR_MISO_HIGHPART_M);
   esp32_spi_set_reg(priv, SPI_USER1_OFFSET, 0);
   esp32_spi_set_reg(priv, SPI_PIN_OFFSET, SPI_CS1_DIS_M | SPI_CS2_DIS_M);
   esp32_spi_set_reg(priv, SPI_CTRL_OFFSET, 0);
@@ -638,6 +898,39 @@ static void esp32_spislv_initialize(FAR struct spi_sctrlr_s *dev)
                                             SPI_SLV_WR_RD_BUF_EN_M |
                                             SPI_INT_EN_M);
 
+  if (priv->dma_chan)
+    {
+      modifyreg32(DPORT_PERIP_CLK_EN_REG, 0, config->dma_clk_bit);
+      modifyreg32(DPORT_PERIP_RST_EN_REG, config->dma_rst_bit, 0);
+
+      modifyreg32(DPORT_SPI_DMA_CHAN_SEL_REG, 0,
+                  (config->dma_chan << config->dma_chan_s));
+
+      esp32_spi_set_reg(priv, SPI_DMA_CONF_OFFSET, SPI_OUT_DATA_BURST_EN_M |
+                                                   SPI_INDSCR_BURST_EN_M |
+                                                   SPI_OUTDSCR_BURST_EN_M);
+
+      esp32_dma_init(s_rx_desc[priv->dma_chan - 1], SPI_DMADESC_NUM,
+                     priv->rxbuffer, SPI_SLAVE_BUFSIZE, 1);
+
+      regval = (uint32_t)s_rx_desc[priv->dma_chan - 1] & SPI_INLINK_ADDR_V;
+      esp32_spi_set_reg(priv, SPI_DMA_IN_LINK_OFFSET,
+                        regval | SPI_INLINK_START_M);
+      esp32_spi_set_reg(priv, SPI_SLV_RDBUF_DLEN_OFFSET,
+                        SPI_SLAVE_BUFSIZE * 8 - 1);
+      esp32_spi_set_reg(priv, SPI_SLV_WRBUF_DLEN_OFFSET,
+                        SPI_SLAVE_BUFSIZE * 8 - 1);
+
+      esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MOSI_M);
+    }
+  else
+    {
+      /* TX/RX hardware fill can cache 4 words = 32 bytes = 256 bits */
+
+      esp32_spi_set_reg(priv, SPI_SLV_WRBUF_DLEN_OFFSET, 256 - 1);
+      esp32_spi_set_reg(priv, SPI_SLV_RDBUF_DLEN_OFFSET, 256 - 1);
+    }
+
   esp32_spislv_setmode(dev, config->mode);
   esp32_spislv_setbits(dev, 8);
 
@@ -645,6 +938,8 @@ static void esp32_spislv_initialize(FAR struct spi_sctrlr_s *dev)
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_SYNC_RESET_M);
 
   esp32_gpioirqenable(ESP32_PIN2IRQ(config->cs_pin), RISING);
+
+  esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_TRANS_DONE_M);
 }
 
 /****************************************************************************
@@ -697,10 +992,8 @@ static void esp32_spislv_bind(struct spi_sctrlr_s *sctrlr,
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)sctrlr;
   irqstate_t flags;
-  FAR const void *data;
-  int ret;
 
-  spiinfo("sdev=%p mode=%d nbits=%d\n", sdv, mode, nbits);
+  spiinfo("sdev=%p mode=%d nbits=%d\n", sdev, mode, nbits);
 
   DEBUGASSERT(priv != NULL && priv->sdev == NULL && sdev != NULL);
 
@@ -712,21 +1005,18 @@ static void esp32_spislv_bind(struct spi_sctrlr_s *sctrlr,
 
   SPI_SDEV_CMDDATA(sdev, false);
 
+  priv->rxlen = 0;
+
+  priv->txlen = 0;
+  priv->txen  = false;
+
   esp32_spislv_initialize(sctrlr);
 
   esp32_spislv_setmode(sctrlr, mode);
   esp32_spislv_setbits(sctrlr, nbits);
 
-  priv->head  = 0;
-  priv->tail  = 0;
+  up_enable_irq(priv->cpuint);
 
-  ret = SPI_SDEV_GETDATA(sdev, &data);
-  if (ret == 1)
-    {
-      priv->outval = *(const uint16_t *)data;
-    }
-
-  esp32_spi_set_reg(priv, SPI_W0_OFFSET, priv->outval);
   esp32_spi_set_regbits(priv, SPI_CMD_OFFSET, SPI_USR_M);
 
   leave_critical_section(flags);
@@ -761,11 +1051,18 @@ static void esp32_spislv_unbind(struct spi_sctrlr_s *sctrlr)
 
   flags = enter_critical_section();
 
-  priv->sdev = NULL;
+  up_disable_irq(priv->cpuint);
 
   esp32_gpioirqdisable(ESP32_PIN2IRQ(priv->config->cs_pin));
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
+  if (priv->dma_chan)
+    {
+      modifyreg32(DPORT_PERIP_CLK_EN_REG, priv->config->dma_clk_bit, 0);
+    }
+
   modifyreg32(DPORT_PERIP_CLK_EN_REG, priv->config->clk_bit, 0);
+
+  priv->sdev = NULL;
 
   leave_critical_section(flags);
 }
@@ -796,39 +1093,33 @@ static int esp32_spislv_enqueue(struct spi_sctrlr_s *sctrlr,
                                 size_t nwords)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)sctrlr;
+  size_t n = WORDS2BYTES(priv, nwords);
+  size_t bufsize;
   irqstate_t flags;
-  uint32_t next;
   int ret;
 
   spiinfo("spi_enqueue(sctrlr=%p, data=%p, nwords=%d)\n",
           sctrlr, data, nwords);
   DEBUGASSERT(priv != NULL && priv->sdev != NULL);
 
-  if (!nwords || nwords > 1)
-    {
-      return -EINVAL;
-    }
-
   flags = enter_critical_section();
-  next = priv->head + 1;
-  if (next >= CONFIG_ESP_SPI_SLAVE_QSIZE)
-    {
-      next = 0;
-    }
 
-  if (next == priv->tail)
+  bufsize = SPI_SLAVE_BUFSIZE - priv->txlen;
+  if (!bufsize)
     {
       ret = -ENOSPC;
     }
   else
     {
-      priv->outq[priv->head] = *(uint16_t *)data;
-      priv->head = next;
+      n = MIN(n, bufsize);
+      memcpy(priv->txbuffer + priv->txlen, data, n);
+      priv->txlen += n;
       ret = OK;
 
-      if (!priv->process)
+      if (priv->process == false)
         {
-          esp32_spi_set_regbits(priv, SPI_SLAVE_OFFSET, SPI_TRANS_DONE_M);
+          esp32_spislv_tx(priv);
+          priv->txen = true;
         }
     }
 
@@ -856,21 +1147,14 @@ static bool esp32_spislv_qfull(struct spi_sctrlr_s *sctrlr)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)sctrlr;
   irqstate_t flags;
-  uint32_t next;
-  bool ret;
+  bool ret = 0;
 
   DEBUGASSERT(priv != NULL && priv->sdev != NULL);
 
   spiinfo("spi_qfull(sctrlr=%p)\n", sctrlr);
 
   flags = enter_critical_section();
-  next = priv->head + 1;
-  if (next >= CONFIG_ESP_SPI_SLAVE_QSIZE)
-    {
-      next = 0;
-    }
-
-  ret = (next == priv->tail);
+  ret = priv->txlen == SPI_SLAVE_BUFSIZE;
   leave_critical_section(flags);
 
   return ret;
@@ -897,14 +1181,46 @@ static void esp32_spislv_qflush(struct spi_sctrlr_s *sctrlr)
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)sctrlr;
   irqstate_t flags;
 
-  spiinfo("data=%04x\n", data);
+  DEBUGASSERT(priv != NULL && priv->sdev != NULL);
+
+  flags = enter_critical_section();
+  priv->rxlen = 0;
+  priv->txlen = 0;
+  priv->txen  = false;
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: esp32_spislv_qpoll
+ *
+ * Description:
+ *   Tell the controller to output all the receive queue data.
+ *
+ * Input Parameters:
+ *   sctrlr - SPI slave controller interface instance
+ *
+ * Returned Value:
+ *   Number of units of width "nbits" left in the rx queue. If the device
+ *   accepted all the data, the return value will be 0
+ *
+ ****************************************************************************/
+
+static size_t esp32_spislv_qpoll(FAR struct spi_sctrlr_s *sctrlr)
+{
+  struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)sctrlr;
+  irqstate_t flags;
+  uint32_t n;
 
   DEBUGASSERT(priv != NULL && priv->sdev != NULL);
 
   flags = enter_critical_section();
-  priv->head = 0;
-  priv->tail = 0;
+
+  esp32_spislv_rx(priv);
+  n = priv->rxlen;
+
   leave_critical_section(flags);
+
+  return n;
 }
 
 /****************************************************************************
@@ -948,11 +1264,20 @@ FAR struct spi_sctrlr_s *esp32_spislv_sctrlr_initialize(int port)
 
   flags = enter_critical_section();
 
-  if ((volatile int)priv->refs++ != 0)
+  if ((volatile int)priv->refs != 0)
     {
       leave_critical_section(flags);
 
       return spislv_dev;
+    }
+
+  if (priv->config->use_dma)
+    {
+      priv->dma_chan = priv->config->dma_chan;
+    }
+  else
+    {
+      priv->dma_chan = 0;
     }
 
   DEBUGVERIFY(irq_attach(ESP32_PIN2IRQ(priv->config->cs_pin),
@@ -985,7 +1310,7 @@ FAR struct spi_sctrlr_s *esp32_spislv_sctrlr_initialize(int port)
       return NULL;
     }
 
-  up_enable_irq(priv->cpuint);
+  priv->refs++;
 
   leave_critical_section(flags);
 

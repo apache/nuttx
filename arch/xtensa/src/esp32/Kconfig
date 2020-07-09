@@ -382,11 +382,43 @@ endmenu # I2C configuration
 menu "SPI configuration"
 	depends on ESP32_SPI
 
+config ESP32_SPI_SWCS
+	bool "SPI software CS"
+	default y
+	---help---
+		Use SPI software CS.
+
+config ESP32_SPI_UDCS
+	bool "User defined CS"
+	default n
+	depends on ESP32_SPI_SWCS
+	---help---
+		Use user defined CS.
+
+config ESP32_SPI2_DMA
+	bool "SPI2 use DMA"
+	default y
+	depends on ESP32_SPI2
+
+config ESP32_SPI3_DMA
+	bool "SPI3 use DMA"
+	default y
+	depends on ESP32_SPI3
+
+config SPI_DMADESC_NUM
+	int "SPI master DMA description number"
+	default 2
+
+config SPI_SLAVE_BUFSIZE
+	int "SPI slave buffer size"
+	default 2048
+	depends on SPI_SLAVE
+
 if ESP32_SPI2
 
 config ESP32_SPI2_CSPIN
 	int "SPI2 CS Pin"
-	default 13
+	default 15
 	range 0 39
 
 config ESP32_SPI2_CLKPIN
@@ -396,12 +428,12 @@ config ESP32_SPI2_CLKPIN
 
 config ESP32_SPI2_MOSIPIN
 	int "SPI2 MOSI Pin"
-	default 15
+	default 13
 	range 0 39
 
 config ESP32_SPI2_MISOPIN
 	int "SPI2 MISO Pin"
-	default 2
+	default 12
 	range 0 39
 
 endif # ESP32_SPI2
@@ -410,22 +442,22 @@ if ESP32_SPI3
 
 config ESP32_SPI3_CSPIN
 	int "SPI3 CS Pin"
-	default 13
+	default 5
 	range 0 39
 
 config ESP32_SPI3_CLKPIN
 	int "SPI3 CLK Pin"
-	default 14
+	default 18
 	range 0 39
 
 config ESP32_SPI3_MOSIPIN
 	int "SPI3 MOSI Pin"
-	default 15
+	default 23
 	range 0 39
 
 config ESP32_SPI3_MISOPIN
 	int "SPI3 MISO Pin"
-	default 2
+	default 19
 	range 0 39
 
 endif # ESP32_SPI3

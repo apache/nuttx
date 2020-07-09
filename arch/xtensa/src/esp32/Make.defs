@@ -87,6 +87,7 @@ CHIP_CSRCS  = esp32_allocateheap.c esp32_clockconfig.c esp32_cpuint.c
 CHIP_CSRCS += esp32_gpio.c esp32_intdecode.c esp32_irq.c esp32_region.c
 CHIP_CSRCS += esp32_timerisr.c
 CHIP_CSRCS += esp32_user.c
+CHIP_CSRCS += esp32_dma.c
 
 ifeq ($(CONFIG_ESP32_I2C),y)
 CHIP_CSRCS += esp32_i2c.c
