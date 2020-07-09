@@ -230,6 +230,7 @@ OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 ifeq ($(HOSTOS),Darwin)
   LDUNEXPORTSYMBOLS ?= -unexported_symbols_list nuttx-names.dat
 else
+  ARCHSCRIPT += -T nuttx.ld
   LDSTARTGROUP ?= --start-group
   LDENDGROUP ?= --end-group
 endif
@@ -279,16 +280,31 @@ board/libboard$(LIBEXT):
 # Generate the final NuttX binary by linking the host-specific objects with the NuttX
 # specific objects (with munged names)
 
+# C++ global objects are constructed before main get executed, but it isn't a good
+# point for simulator because NuttX doesn't finish the kernel initialization yet.
+# So we have to skip the standard facilities and do the construction by ourself.
+# But how to achieve the goal?
+# 1.Command linker generate the default script(-verbose)
+# 2.Replace __init_array_start/__init_array_end with _sinit/_einit
+# 3.Append __init_array_start = .; __init_array_end = .;
+# Step 2 let nxtask_startup find objects need to construct
+# Step 3 cheat the host there is no object to construct
+# Note: the destructor can be fixed in the same way.
+
 nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(LINKOBJS) $(HOSTOBJS)
 	$(Q) echo "LD:  nuttx$(EXEEXT)"
 	$(call PREPROCESS, nuttx-names.in, nuttx-names.dat)
 	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP) $(LDUNEXPORTSYMBOLS)
 ifneq ($(HOSTOS),Darwin)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
+	$(Q) $(CC) $(CCLINKFLAGS) -Wl,-verbose 2>&1 | \
+	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' -e 's/__init_array_start/_sinit/g' \
+	         -e 's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
+	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
 endif
 	$(if $(CONFIG_HAVE_CXX),\
-	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS),\
-	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS))
+	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS),\
+	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS))
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map
@@ -315,6 +331,7 @@ clean:
 	$(Q) if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
 	fi
+	$(call DELFILE, nuttx.ld)
 	$(call DELFILE, nuttx.rel)
 	$(call DELFILE, nuttx-names.dat)
 	$(call DELFILE, libarch$(LIBEXT))

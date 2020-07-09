@@ -1,4 +1,5 @@
 /nuttx-names.dat
+/nuttx.ld
 /hostfs.h
 /chip
 /board
