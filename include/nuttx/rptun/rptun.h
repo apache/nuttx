@@ -74,7 +74,8 @@
  *
  ****************************************************************************/
 
-#define RPTUN_GET_CPUNAME(d) ((d)->ops->get_cpuname(d))
+#define RPTUN_GET_CPUNAME(d) ((d)->ops->get_cpuname ? \
+                              (d)->ops->get_cpuname(d) : NULL)
 
 /****************************************************************************
  * Name: RPTUN_GET_FIRMWARE
@@ -90,7 +91,8 @@
  *
  ****************************************************************************/
 
-#define RPTUN_GET_FIRMWARE(d) ((d)->ops->get_firmware(d))
+#define RPTUN_GET_FIRMWARE(d) ((d)->ops->get_firmware ? \
+                               (d)->ops->get_firmware(d) : NULL)
 
 /****************************************************************************
  * Name: RPTUN_GET_ADDRENV
@@ -106,7 +108,8 @@
  *
  ****************************************************************************/
 
-#define RPTUN_GET_ADDRENV(d) ((d)->ops->get_addrenv(d))
+#define RPTUN_GET_ADDRENV(d) ((d)->ops->get_addrenv ? \
+                              (d)->ops->get_addrenv(d) : NULL)
 
 /****************************************************************************
  * Name: RPTUN_GET_RESOURCE
@@ -122,7 +125,8 @@
  *
  ****************************************************************************/
 
-#define RPTUN_GET_RESOURCE(d) ((d)->ops->get_resource(d))
+#define RPTUN_GET_RESOURCE(d) ((d)->ops->get_resource ? \
+                               (d)->ops->get_resource(d) : NULL)
 
 /****************************************************************************
  * Name: RPTUN_IS_AUTOSTART
@@ -138,7 +142,8 @@
  *
  ****************************************************************************/
 
-#define RPTUN_IS_AUTOSTART(d) ((d)->ops->is_autostart(d))
+#define RPTUN_IS_AUTOSTART(d) ((d)->ops->is_autostart ? \
+                               (d)->ops->is_autostart(d) : false)
 
 /****************************************************************************
  * Name: RPTUN_IS_MASTER
@@ -154,7 +159,8 @@
  *
  ****************************************************************************/
 
-#define RPTUN_IS_MASTER(d) ((d)->ops->is_master(d))
+#define RPTUN_IS_MASTER(d) ((d)->ops->is_master ? \
+                            (d)->ops->is_master(d) : false)
 
 /****************************************************************************
  * Name: RPTUN_CONFIG
@@ -170,7 +176,8 @@
  *   OK unless an error occurs.  Then a negated errno value is returned
  *
  ****************************************************************************/
-#define RPTUN_CONFIG(d, p) ((d)->ops->config(d, p))
+#define RPTUN_CONFIG(d, p) ((d)->ops->config ?\
+                            (d)->ops->config(d, p) : 0)
 
 /****************************************************************************
  * Name: RPTUN_START
@@ -186,7 +193,8 @@
  *
  ****************************************************************************/
 
-#define RPTUN_START(d) ((d)->ops->start(d))
+#define RPTUN_START(d) ((d)->ops->start ? \
+                        (d)->ops->start(d) : -ENOSYS)
 
 /****************************************************************************
  * Name: RPTUN_STOP
@@ -202,7 +210,8 @@
  *
  ****************************************************************************/
 
-#define RPTUN_STOP(d) ((d)->ops->stop(d))
+#define RPTUN_STOP(d) ((d)->ops->stop ? \
+                       (d)->ops->stop(d) : -ENOSYS)
 
 /****************************************************************************
  * Name: RPTUN_NOTIFY
@@ -219,7 +228,8 @@
  *
  ****************************************************************************/
 
-#define RPTUN_NOTIFY(d,v) ((d)->ops->notify(d,v))
+#define RPTUN_NOTIFY(d,v) ((d)->ops->notify ? \
+                           (d)->ops->notify(d,v) : -ENOSYS)
 
 /****************************************************************************
  * Name: RPTUN_REGISTER_CALLBACK
@@ -237,7 +247,8 @@
  *
  ****************************************************************************/
 
-#define RPTUN_REGISTER_CALLBACK(d,c,a) ((d)->ops->register_callback(d,c,a))
+#define RPTUN_REGISTER_CALLBACK(d,c,a) ((d)->ops->register_callback ? \
+                                        (d)->ops->register_callback(d,c,a) : -ENOSYS)
 
 /****************************************************************************
  * Name: RPTUN_UNREGISTER_CALLBACK
@@ -253,7 +264,8 @@
  *
  ****************************************************************************/
 
-#define RPTUN_UNREGISTER_CALLBACK(d) ((d)->ops->register_callback(d,NULL,NULL))
+#define RPTUN_UNREGISTER_CALLBACK(d) ((d)->ops->register_callback ? \
+                                      (d)->ops->register_callback(d,NULL,NULL) : -ENOSYS)
 
 /****************************************************************************
  * Public Types
