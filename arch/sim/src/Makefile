@@ -280,18 +280,15 @@ board/libboard$(LIBEXT):
 nuttx-names.dat: nuttx-names.in
 	$(call PREPROCESS, $<, $@)
 
-nuttx.rel: libarch$(LIBEXT) board/libboard$(LIBEXT) nuttx-names.dat $(LINKOBJS)
-	$(Q) echo "LD:  nuttx.rel"
-	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o $@ $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP) $(LDUNEXPORTSYMBOLS)
-ifneq ($(HOSTOS),Darwin)
-	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat $@
-endif
-
 # Generate the final NuttX binary by linking the host-specific objects with the NuttX
 # specific objects (with munged names)
 
-nuttx$(EXEEXT): cleanrel nuttx.rel $(HOSTOBJS)
+nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) nuttx-names.dat $(LINKOBJS) $(HOSTOBJS)
 	$(Q) echo "LD:  nuttx$(EXEEXT)"
+	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP) $(LDUNEXPORTSYMBOLS)
+ifneq ($(HOSTOS),Darwin)
+	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
+endif
 	$(if $(CONFIG_HAVE_CXX),\
 	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS),\
 	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS))
@@ -317,15 +314,12 @@ export_startup: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS)
 
 depend: .depend
 
-cleanrel:
-	$(call DELFILE, nuttx-names.dat)
-	$(call DELFILE, nuttx.rel)
-
-clean: cleanrel
+clean:
 	$(Q) if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
 	fi
 	$(call DELFILE, nuttx.rel)
+	$(call DELFILE, nuttx-names.dat)
 	$(call DELFILE, libarch$(LIBEXT))
 	$(call CLEAN)
 
