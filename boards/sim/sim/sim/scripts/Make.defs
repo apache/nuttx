@@ -122,10 +122,6 @@ else
   LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
 endif
 
-LDLINKFLAGS = $(ARCHSCRIPT) # Link flags used with $(LD)
-CCLINKFLAGS = $(ARCHSCRIPT) # Link flags used with $(CC)
-LDFLAGS = $(ARCHSCRIPT) # For backward compatibility, same as CCLINKFLAGS
-
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   CCLINKFLAGS += -g
 endif
