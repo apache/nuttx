@@ -63,7 +63,7 @@
  * 4. Board-Specific Interfaces.
  *
  *    Any interface that is unique to a board should be prefixed with
- *    the board name, for example stm32f4discovery_. Sometimes the board
+ *    the board name, for example stm32f4discovery_.  Sometimes the board
  *    name is too long so stm32_ would be okay too.  These should be
  *    prototyped in boards/<arch>/<chip><board>/src/<board>.h and should
  *    not be used outside of that board directory since board-specific
@@ -110,11 +110,11 @@ extern "C"
 #endif
 
 #ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-/* By default, the RTOS tickless logic assumes that range of times that can
- * be represented by the underlying hardware time is so large that no special
- * precautions need to taken.  That is not always the case.  If there is a
- * limit to the maximum timing interval that be represented by the timer,
- * then that limit must be respected.
+/* By default, the RTOS tickless logic assumes that the range of times that
+ * can be represented by the underlying hardware timer is so large that no
+ * special precautions need to be taken.  That is not always the case.  If
+ * there is a limit to the maximum timing interval that can be represented by
+ * the timer, then that limit must be respected.
  *
  * If CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP is defined, then use a 32-bit
  * global variable called g_oneshot_maxticks variable is enabled. This
@@ -192,10 +192,9 @@ void up_systemreset(void) noreturn_function;
  * Name: up_idle
  *
  * Description:
- *   up_idle() is the logic that will be executed
- *   when their is no other ready-to-run task.  This is processor
- *   idle time and will continue until some interrupt occurs to
- *   cause a context switch from the idle task.
+ *   up_idle() is the logic that will be executed when there is no other
+ *   ready-to-run task.  This is processor idle time and will continue until
+ *   some interrupt occurs to cause a context switch from the idle task.
  *
  *   Processing in this state may be processor-specific. e.g.,
  *   this is where power management operations might be performed.
@@ -208,13 +207,13 @@ void up_idle(void);
  * Name: up_initial_state
  *
  * Description:
- *   A new thread is being started and a new TCB
- *   has been created. This function is called to initialize
- *   the processor specific portions of the new TCB.
+ *   A new thread is being started and a new TCB has been created.
+ *   This function is called to initialize the processor specific portions
+ *   of the new TCB.
  *
- *   This function must setup the initial architecture registers
- *   and/or  stack so that execution will begin at tcb->start
- *   on the next context switch.
+ *   This function must setup the initial architecture registers and/or
+ *   stack so that execution will begin at tcb->start on the next context
+ *   switch.
  *
  ****************************************************************************/
 
@@ -264,7 +263,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);
  * Name: up_use_stack
  *
  * Description:
- *   Setup up stack-related information in the TCB using pre-allocated stack
+ *   Setup stack-related information in the TCB using pre-allocated stack
  *   memory.  This function is called only from nxtask_init() when a task or
  *   kernel thread is started (never for pthreads).
  *
@@ -682,12 +681,12 @@ void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size);
  * Name: pgalloc
  *
  * Description:
- *   If there is a page allocator in the configuration and if and MMU is
- *   available to map physical addresses to virtual address, then function
- *   must be provided by the platform-specific code.  This is part of the
- *   implementation of sbrk().  This function will allocate the requested
- *   number of pages using the page allocator and map them into consecutive
- *   virtual addresses beginning with 'brkaddr'
+ *   If there is a page allocator in the configuration and if an MMU is
+ *   available to map physical addresses to virtual address, then this
+ *   function must be provided by the platform-specific code.  This is part
+ *   of the implementation of sbrk().  This function will allocate the
+ *   requested number of pages using the page allocator and map them into
+ *   consecutive virtual addresses beginning with 'brkaddr'
  *
  *   NOTE:  This function does not use the up_ naming standard because it
  *   is indirectly callable from user-space code via a system trap.
@@ -704,7 +703,8 @@ void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size);
  *     will be contiguous beginning beginning at 'brkaddr'
  *
  * Returned Value:
- *   The (virtual) base address of the mapped page will returned on success.
+ *   The (virtual) base address of the mapped page will be returned on
+ *   success.
  *   Normally this will be the same as the 'brkaddr' input. However, if
  *   the 'brkaddr' input was zero, this will be the virtual address of the
  *   beginning of the heap.  Zero is returned on any failure.
@@ -756,8 +756,8 @@ void up_module_text_free(FAR void *p);
  * Name: up_setpicbase and up_getpicbase
  *
  * Description:
- *   It NXFLAT external modules (or any other binary format that requires)
- *   PIC) are supported, then these macros must defined to (1) get or get
+ *   It NXFLAT external modules (or any other binary format that requires
+ *   PIC) are supported, then these macros must defined to (1) set or get
  *   the PIC base register value.  These must be implemented with in-line
  *   assembly.
  *
@@ -1686,7 +1686,7 @@ int up_timer_start(FAR const struct timespec *ts);
  * FAR struct tls_info_s *up_tls_info(void);
  *
  * The actual declaration or definition is provided in arch/tls.h.  The
- * actual implementation may be a MACRO or and inline function.
+ * actual implementation may be a MACRO or an inline function.
  */
 
 /****************************************************************************
@@ -1912,8 +1912,8 @@ bool up_cpu_pausereq(int cpu);
  * Description:
  *   Handle a pause request from another CPU.  Normally, this logic is
  *   executed from interrupt handling logic within the architecture-specific
- *   However, it is sometimes necessary necessary to perform the pending
- *   pause operation in other contexts where the interrupt cannot be taken
+ *   However, it is sometimes necessary to perform the pending pause
+ *   operation in other contexts where the interrupt cannot be taken
  *   in order to avoid deadlocks.
  *
  *   This function performs the following operations:
@@ -1945,8 +1945,8 @@ int up_cpu_paused(int cpu);
  *   state of the task at the head of the g_assignedtasks[cpu] list, and
  *   resume normal tasking.
  *
- *   This function is called after up_cpu_pause in order resume operation of
- *   the CPU after modifying its g_assignedtasks[cpu] list.
+ *   This function is called after up_cpu_pause in order ot resume operation
+ *   of the CPU after modifying its g_assignedtasks[cpu] list.
  *
  * Input Parameters:
  *   cpu - The index of the CPU being resumed.
@@ -2008,7 +2008,7 @@ char up_romgetc(FAR const char *ptr);
  *
  * Description:
  *   Some device drivers may require that the plaform-specific logic
- *   provide these timing loops for short delays.
+ *   provides these timing loops for short delays.
  *
  ****************************************************************************/
 
@@ -2016,8 +2016,8 @@ void up_mdelay(unsigned int milliseconds);
 void up_udelay(useconds_t microseconds);
 
 /****************************************************************************
- * These are standard interfaces that are exported by the OS for use by the.
- * architecture specific logic
+ * These are standard interfaces that are exported by the OS for use by the
+ * architecture specific logic.
  ****************************************************************************/
 
 /****************************************************************************
@@ -2040,7 +2040,7 @@ void nxsched_process_timer(void);
  * Name:  nxsched_timer_expiration
  *
  * Description:
- *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
+ *   If CONFIG_SCHED_TICKLESS is defined, then this function is provided by
  *   the RTOS base code and called from platform-specific code when the
  *   interval timer used to implement the tick-less OS expires.
  *
@@ -2090,7 +2090,7 @@ void nxsched_alarm_expiration(FAR const struct timespec *ts);
  * Description:
  *   Collect data that can be used for CPU load measurements.  When
  *   CONFIG_SCHED_CPULOAD_EXTCLK is defined, this is an exported interface,
- *   use the the external clock logic.  Otherwise, it is an OS Internal
+ *   use the the external clock logic.  Otherwise, it is an OS internal
  *   interface.
  *
  * Input Parameters:
@@ -2180,7 +2180,7 @@ int up_rtc_initialize(void);
  * Description:
  *   Get the current time in seconds.  This is similar to the standard time()
  *   function.  This interface is only required if the low-resolution
- *   RTC/counter hardware implementation selected.  It is only used by the
+ *   RTC/counter hardware implementation is selected.  It is only used by the
  *   RTOS during initialization to set up the system time when CONFIG_RTC is
  *   set but neither CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
