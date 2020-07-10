@@ -654,6 +654,7 @@ static ssize_t ee25xx_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct ee25xx_dev_s *eedev;
   FAR struct inode        *inode = filep->f_inode;
+  int ret;
 
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
