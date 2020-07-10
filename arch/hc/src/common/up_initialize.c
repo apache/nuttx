@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/hc/src/common/up_initialize.c
  *
- *   Copyright (C) 2009-2010, 2012-2013, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012-2013, 2015-2017 Gregory Nutt. All rights
+ *   reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,8 +100,8 @@ void up_initialize(void)
 #endif
 
 #ifdef CONFIG_ARCH_DMA
-  /* Initialize the DMA subsystem if the weak function up_dma_initialize has been
-   * brought into the build
+  /* Initialize the DMA subsystem if the weak function up_dma_initialize has
+   * been brought into the build
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS

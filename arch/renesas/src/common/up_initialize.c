@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/common/up_initialize.c
  *
- *   Copyright (C) 2008-2010, 2012-2013, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012-2013, 2015-2017 Gregory Nutt. All rights
+ *   reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -131,9 +132,10 @@ void up_initialize(void)
 #endif
 
   /* Initialize the console device driver (if it is other than the standard
-   * serial driver). NOTE that the naming implies that the console is a serial
-   * driver.  That is usually the case, however, if no UARTs are enabled, the
-   * console could also be provided through some other device, such as an LCD.
+   * serial driver). NOTE that the naming implies that the console is a
+   * serial driver.  That is usually the case, however, if no UARTs are
+   * enabled, the console could also be provided through some other device,
+   * such as an LCD.
    * Architecture-specific logic will have to detect that case.
    */
 
