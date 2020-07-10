@@ -202,6 +202,11 @@ typedef int wint_t;
 
 typedef int wctype_t;
 
+/* fsblkcnt_t and fsfilcnt_t shall be defined as unsigned integer types. */
+
+typedef uint32_t     fsblkcnt_t;
+typedef uint32_t     fsfilcnt_t;
+
 /* blkcnt_t and off_t are signed integer types.
  *
  *   blkcnt_t is used for file block counts.
