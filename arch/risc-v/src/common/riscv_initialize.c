@@ -45,6 +45,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/serial/pty.h>
+#include <nuttx/syslog/note_driver.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/drivers/drivers.h>
 
@@ -142,6 +143,10 @@ void up_initialize(void)
 
 #if defined(CONFIG_DEV_ZERO)
   devzero_register();   /* Standard /dev/zero */
+#endif
+
+#if defined(CONFIG_DRIVER_NOTE)
+  note_register();      /* Non-standard /dev/note */
 #endif
 
   /* Initialize the serial device driver */
