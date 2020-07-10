@@ -28,7 +28,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/sched_note.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
@@ -36,6 +35,7 @@
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/syslog/note_driver.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
@@ -160,8 +160,7 @@ void up_initialize(void)
   loop_register();      /* Standard /dev/loop */
 #endif
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_DRIVER_NOTE)
+#if defined(CONFIG_DRIVER_NOTE)
   note_register();      /* Non-standard /dev/note */
 #endif
 
