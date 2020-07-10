@@ -276,15 +276,12 @@ board/libboard$(LIBEXT):
 
 # A partially linked object containing only NuttX code (no interface to host OS)
 # Change the names of most symbols that conflict with libc symbols.
-
-nuttx-names.dat: nuttx-names.in
-	$(call PREPROCESS, $<, $@)
-
 # Generate the final NuttX binary by linking the host-specific objects with the NuttX
 # specific objects (with munged names)
 
-nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) nuttx-names.dat $(LINKOBJS) $(HOSTOBJS)
+nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(LINKOBJS) $(HOSTOBJS)
 	$(Q) echo "LD:  nuttx$(EXEEXT)"
+	$(call PREPROCESS, nuttx-names.in, nuttx-names.dat)
 	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP) $(LDUNEXPORTSYMBOLS)
 ifneq ($(HOSTOS),Darwin)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
