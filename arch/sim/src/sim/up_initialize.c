@@ -91,7 +91,9 @@ static void up_init_smartfs(void)
     {
       mtd = m25p_initialize(spi);
 
-      /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the MTD
+       * device
+       */
 
       if (mtd != NULL)
         {
@@ -108,7 +110,9 @@ static void up_init_smartfs(void)
     {
       mtd = sst26_initialize_spi(spi);
 
-      /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the MTD
+       * device
+       */
 
       if (mtd != NULL)
         {
@@ -125,7 +129,9 @@ static void up_init_smartfs(void)
     {
       mtd = w25_initialize(spi);
 
-      /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the MTD
+       * device
+       */
 
       if (mtd != NULL)
         {
@@ -143,7 +149,9 @@ static void up_init_smartfs(void)
     {
       mtd = n25qxxx_initialize(qspi, 0);
 
-      /* Now initialize a SMART Flash block device and bind it to the MTD device */
+      /* Now initialize a SMART Flash block device and bind it to the MTD
+       * device
+       */
 
       if (mtd != NULL)
         {

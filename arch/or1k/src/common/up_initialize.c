@@ -74,7 +74,8 @@ void up_enable_icache(void)
 
   mfspr(SPR_SYS_ICCFGR, iccfg);
 
-  syslog(LOG_INFO, "ICACHE NCW: %d NCS: %d CBS: %d CCRI: %d CBIRI: %d CBPRI: %d\n",
+  syslog(LOG_INFO,
+         "ICACHE NCW: %d NCS: %d CBS: %d CCRI: %d CBIRI: %d CBPRI: %d\n",
          (iccfg & SPR_ICCFGR_NCW_MASK) >> SPR_ICCFGR_NCW_SHIFT,
          (iccfg & SPR_ICCFGR_NCS_MASK) >> SPR_ICCFGR_NCS_SHIFT,
          (iccfg & SPR_ICCFGR_CBS) ? 1 : 0,
@@ -91,7 +92,6 @@ void up_enable_icache(void)
   mfspr(SPR_SYS_SR, sr);
   sr |= SPR_SR_ICE;
   mtspr(SPR_SYS_SR, sr);
-
 }
 #endif
 
@@ -104,7 +104,8 @@ void up_enable_dcache(void)
 
   mfspr(SPR_SYS_DCCFGR, dccfg);
 
-  syslog(LOG_INFO, "DCACHE NCW: %d NCS: %d CBS: %d CCRI: %d CBIRI: %d CBPRI: %d\n",
+  syslog(LOG_INFO,
+         "DCACHE NCW: %d NCS: %d CBS: %d CCRI: %d CBIRI: %d CBPRI: %d\n",
          (dccfg & SPR_DCCFGR_NCW_MASK) >> SPR_DCCFGR_NCW_SHIFT,
          (dccfg & SPR_DCCFGR_NCS_MASK) >> SPR_DCCFGR_NCS_SHIFT,
          (dccfg & SPR_DCCFGR_CBS) ? 1 : 0,
@@ -194,8 +195,8 @@ void up_initialize(void)
 #endif
 
 #ifdef CONFIG_ARCH_DMA
-  /* Initialize the DMA subsystem if the weak function up_dma_initialize has been
-   * brought into the build
+  /* Initialize the DMA subsystem if the weak function up_dma_initialize has
+   * been brought into the build
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
