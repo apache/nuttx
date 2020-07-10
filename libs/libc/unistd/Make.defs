@@ -37,7 +37,7 @@
 
 CSRCS += lib_access.c lib_daemon.c lib_swab.c lib_pathconf.c lib_sysconf.c
 CSRCS += lib_getopt.c lib_getoptargp.c lib_getoptindp.c lib_getoptoptp.c
-CSRCS += lib_alarm.c lib_sleep.c lib_usleep.c
+CSRCS += lib_alarm.c lib_fstatvfs.c lib_statvfs.c lib_sleep.c lib_usleep.c
 CSRCS += lib_seteuid.c lib_setegid.c lib_geteuid.c lib_getegid.c
 CSRCS += lib_setreuid.c lib_setregid.c
 CSRCS += lib_getrusage.c
