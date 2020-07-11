@@ -40,10 +40,6 @@ endif
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
-ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
-ARCHINCLUDESXX += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
-ARCHINCLUDESXX += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
-ARCHINCLUDESXX += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)uClibc++}
 
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
@@ -73,7 +69,7 @@ OBJDUMP = $(CROSSDEV)objdump
 CFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CXXFLAGS = $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGSXX) $(ARCHINCLUDESXX) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+   $(ARCHCPUFLAGSXX) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 

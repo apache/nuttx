@@ -42,12 +42,6 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/arm/Toolchain.defs
 
-CINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
-CXXINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
-
-ARCHINCLUDES += $(CINCPATH)
-ARCHXXINCLUDES += $(CINCPATH) $(CXXINCPATH)
-
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)ld.script}"
 else

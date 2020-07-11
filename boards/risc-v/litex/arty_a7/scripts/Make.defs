@@ -24,12 +24,6 @@ include $(TOPDIR)/arch/risc-v/src/rv32im/Toolchain.defs
 
 LDSCRIPT = ld.script
 
-CINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
-CXXINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
-
-ARCHINCLUDES += $(CINCPATH)
-ARCHXXINCLUDES += $(CINCPATH) $(CXXINCPATH)
-
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
 else

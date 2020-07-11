@@ -24,20 +24,8 @@ include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
 LDSCRIPT = l476rg.ld
 
-CINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
-CXXINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
-LIBCXXINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)libcxx}
-
-ARCHINCLUDES += $(CINCPATH)
-ARCHXXINCLUDES += $(CINCPATH) $(CXXINCPATH)
-
-ifeq ($(CONFIG_LIBCXX),y)
-  ARCHXXINCLUDES += $(LIBCXXINCPATH)
-endif
-
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
-
 else
   ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 endif

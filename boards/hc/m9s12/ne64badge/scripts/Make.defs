@@ -54,12 +54,6 @@ ifneq ($(CONFIG_HCS12_MSOFTREGS),0)
   ARCHCPUFLAGS += -msoft-reg-count=$(CONFIG_HCS12_MSOFTREGS)
 endif
 
-CINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
-CXXINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
-
-ARCHINCLUDES += $(CINCPATH)
-ARCHXXINCLUDES += $(CINCPATH) $(CXXINCPATH)
-
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
   MAXOPTIMIZATION = -O2

@@ -57,13 +57,6 @@ LIBSUPXX = ${shell $(CC) $(CXXFLAGS) --print-file-name=libsupc++.a}
 EXTRA_LIBPATHS = -L "${shell dirname "$(LIBSUPXX)"}"
 EXTRA_LIBS = -lsupc++
 
-CINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
-CXXINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
-LIBCXXINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)libcxx}
-
-ARCHINCLUDES += $(CINCPATH)
-ARCHXXINCLUDES += $(CINCPATH) $(CXXINCPATH) $(LIBCXXINCPATH)
-
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w \
                    $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"

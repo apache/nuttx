@@ -38,12 +38,6 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/boards/xtensa/esp32/esp32-core/scripts/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx6/Toolchain.defs
 
-CINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
-CXXINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
-
-ARCHINCLUDES += $(CINCPATH)
-ARCHXXINCLUDES += $(CINCPATH) $(CXXINCPATH)
-
 LDSCRIPT1 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
 LDSCRIPT3 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
 LDSCRIPT4 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_peripherals.ld

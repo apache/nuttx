@@ -34,7 +34,6 @@ CINCPATH := ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
 ARCHCPUFLAGS = -m1 -fno-builtin
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHINCLUDES +=$(CINCPATH)
 ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)sdram.ld
 
 CROSSDEV = sh-nuttx-elf-
