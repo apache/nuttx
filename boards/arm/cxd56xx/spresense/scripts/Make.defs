@@ -130,6 +130,3 @@ ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
 else
   LDFLAGS += -Map=$(TOPDIR)/nuttx.map --cref
 endif
-
-HOSTCC = gcc
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

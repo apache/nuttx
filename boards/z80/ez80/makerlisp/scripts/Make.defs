@@ -88,14 +88,4 @@ endif
 
 LINKCMDTEMPLATE = $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-# Host tool definitions
-
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  HOSTCC = mingw32-gcc.exe
-else
-  HOSTCC = gcc
-endif
-
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-
 MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh

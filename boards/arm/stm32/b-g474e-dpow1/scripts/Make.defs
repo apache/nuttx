@@ -79,10 +79,6 @@ endif
 # Provide map file needed by the "Memory Allocation" view in Eclipse:
 LDFLAGS += -Map=$(TOPDIR)/NuttX.map --gc-sections
 
-HOSTCC = gcc
-HOSTINCLUDES = -I.
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-
 # Embed absolute path to source file in debug information so that Eclipse
 # source level debugging won't get confused. See:
 # https://stackoverflow.com/questions/1275476/gcc-gdb-how-to-embed-absolute-path-to-source-file-in-debug-information

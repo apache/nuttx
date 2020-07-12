@@ -61,7 +61,6 @@ ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
   ARCHCCVERSION = {shell $(CC) -v 2>&1 | sed -n '/clang version/p' | sed -e 's/.* clang version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g'}
-  HOSTCC = clang
   CC = clang
   CXX = clang++
   CPP = clang -E
@@ -69,7 +68,6 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
   ARCHCXXFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m4 -DCONFIG_WCHAR_BUILTIN
 else
   ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
-  HOSTCC = gcc
   CC = $(CROSSDEV)gcc
   CXX = $(CROSSDEV)g++
   CPP = $(CROSSDEV)gcc -E
@@ -91,5 +89,3 @@ AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
-
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
