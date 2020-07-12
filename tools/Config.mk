@@ -74,6 +74,34 @@ MODULECC ?= $(CC)
 MODULELD ?= $(LD)
 MODULESTRIP ?= $(STRIP)
 
+# Define HOSTCC on the make command line if it differs from these defaults
+# Define HOSTCFLAGS with -g on the make command line to build debug versions
+
+HOSTOS = ${shell uname -o 2>/dev/null || uname -s 2>/dev/null || echo "Other"}
+
+ifeq ($(HOSTOS),MinGW)
+
+# In the Windows native environment, the MinGW GCC compiler is used
+
+HOSTCC ?= mingw32-gcc.exe
+HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -DCONFIG_WINDOWS_NATIVE=y
+
+else
+
+# GCC or clang is assumed in all other POSIX environments
+# (Linux, Cygwin, MSYS2, macOS).
+# strtok_r is used in some tools, but does not seem to be available in
+# the MinGW environment.
+
+HOSTCC ?= cc
+HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow
+HOSTCFLAGS += -DHAVE_STRTOK_C=1
+
+ifeq ($(HOSTOS),Cygwin)
+HOSTCFLAGS += -DHOST_CYGWIN=1
+endif
+endif
+
 # Some defaults just to prohibit some bad behavior if for some reason they
 # are not defined
 

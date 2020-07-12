@@ -79,7 +79,3 @@ NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotof
 LDNXFLATFLAGS = -e main -s 2048
 
 EXEEXT = .elf
-
-
-HOSTCC = gcc
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

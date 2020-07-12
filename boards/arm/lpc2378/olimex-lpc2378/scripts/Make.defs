@@ -116,6 +116,3 @@ endif
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
   LDFLAGS += -g
 endif
-
-HOSTCC = gcc
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

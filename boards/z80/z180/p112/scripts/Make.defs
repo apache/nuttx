@@ -110,15 +110,3 @@ define CLEAN
 	$(Q) rm -f *.o *.asm *.rel *.lst *.rst *.sym *.adb *.lnk *.map *.mem *.hex *.cmd
 endef
 endif
-
-# Host tool definitions
-
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-# You may need to customize the binary name:
-# HOSTCC = mingw32-gcc.exe
-  HOSTCC = x86_64-w64-mingw32-gcc.exe
-else
-  HOSTCC = gcc
-endif
-
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

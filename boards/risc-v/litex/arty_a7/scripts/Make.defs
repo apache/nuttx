@@ -73,6 +73,3 @@ NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel
 LDNXFLATFLAGS = -e main -s 2048
 
 LDFLAGS += --gc-sections -melf32lriscv
-
-HOSTCC = gcc
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

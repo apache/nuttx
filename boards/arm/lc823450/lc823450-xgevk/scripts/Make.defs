@@ -118,8 +118,6 @@ endif
 
 LDFLAGS += --gc-sections
 
-HOSTCC = gcc
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 
 ifeq ($(CONFIG_LC823450_SDIF_PATCH),y)
 ARCH_LIBS += -lSdDr_patch_es2

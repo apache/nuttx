@@ -96,6 +96,3 @@ endif
 #LDFLAGS += -Map=$(TOPDIR)/nuttx.map
 #CFLAGS += -Wa,-adhln
 #CXXFLAGS += -Wa,-adhln
-
-HOSTCC = gcc
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

@@ -78,13 +78,3 @@ ARFLAGS = -quiet -warn
 # Linker definitions
 
 LINKCMDTEMPLATE = $(BOARD_DIR)$(DELIM)configs$(DELIM)ostest$(DELIM)ostest.linkcmd
-
-# Host tool definitions
-
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  HOSTCC = mingw32-gcc.exe
-else
-  HOSTCC = gcc
-endif
-
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe

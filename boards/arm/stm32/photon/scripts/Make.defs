@@ -100,9 +100,6 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 
-HOSTCC = gcc
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-
 ifeq ($(CONFIG_DFU_BINARY),y)
 
 define DOWNLOAD
