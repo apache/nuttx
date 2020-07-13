@@ -391,27 +391,6 @@ ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
 ssize_t sched_note_size(void);
 #endif
 
-/****************************************************************************
- * Name: note_register
- *
- * Description:
- *   Register a serial driver at /dev/note that can be used by an
- *   application to read data from the circular not buffer.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero is returned if the circular buffer is empty.  Otherwise, a negated
- *   errno value is returned.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_DRIVER_NOTE)
-int note_register(void);
-#endif
-
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 
 #  define sched_note_start(t)
