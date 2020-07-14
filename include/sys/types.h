@@ -290,6 +290,18 @@ typedef unsigned long  ulong;
 typedef signed char    s_char;
 typedef FAR char      *caddr_t;
 
+/* These were defined by ISO C without the first `_'.  */
+
+typedef uint8_t  u_int8_t;
+typedef uint16_t u_int16_t;
+typedef uint32_t u_int32_t;
+#ifdef __INT24_DEFINED
+typedef uint24_t u_int24_t;
+#endif
+#ifdef __INT64_DEFINED
+typedef uint64_t u_int64_t;
+#endif
+
 /* Task entry point */
 
 typedef CODE int (*main_t)(int argc, FAR char *argv[]);
