@@ -163,6 +163,16 @@ FAR char *strsignal(int signum)
         return (FAR char *)"SIGINT";
 #endif
 
+#ifdef SIGQUIT
+      case SIGQUIT:
+        return (FAR char *)"SIGQUIT";
+#endif
+
+#ifdef SIGTERM
+      case SIGTERM:
+        return (FAR char *)"SIGTERM";
+#endif
+
       /* Non-standard signals */
 
 #ifdef SIGCONDTIMEDOUT

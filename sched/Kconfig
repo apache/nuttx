@@ -1353,7 +1353,7 @@ config SIG_SIGSTOP_ACTION
 		task) and SIGCONT (resume the task).
 
 config SIG_SIGKILL_ACTION
-	bool "SIGINT and SIGKILL"
+	bool "SIGINT SIGKILL SIGQUIT and SIGTERM"
 	default y
 	---help---
 		Enable the default action for SIGINT and SIGKILL (terminate the
@@ -1448,6 +1448,22 @@ config SIG_INT
 	---help---
 		The SIGINT signal is sent to cause a task termination event.
 		SIGINT may be ignored or caught by the receiving task.
+
+config SIG_QUIT
+	int "SIGQUIT"
+	default 11
+	depends on SIG_SIGKILL_ACTION
+	---help---
+		The SIGINT signal is sent to cause a task termination event.
+		SIGQUIT may be ignored or caught by the receiving task.
+
+config SIG_TERM
+	int "SIGTERM"
+	default 12
+	depends on SIG_SIGKILL_ACTION
+	---help---
+		The SIGINT signal is sent to cause a task termination event.
+		SIGTERM may be ignored or caught by the receiving task.
 
 endif # SIG_DEFAULT
 
