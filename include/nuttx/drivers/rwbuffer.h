@@ -144,7 +144,6 @@ struct rwbuffer_s
   uint8_t      *wrbuffer;        /* Allocated write buffer */
   uint16_t      wrnblocks;       /* Number of blocks in write buffer */
   off_t         wrblockstart;    /* First block in write buffer */
-  off_t         wrexpectedblock; /* Next block expected */
 #endif
 
   /* This is the state of the read-ahead buffering */
