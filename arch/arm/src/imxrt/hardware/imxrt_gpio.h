@@ -90,4 +90,7 @@
 #define GPIO_ICR_MASK(n)         (3 << GPIO_ICR_SHIFT(n))
 #define GPIO_ICR(i,n)            ((uint32_t)(i) << GPIO_ICR_SHIFT(n))
 
+#define GPIO_EDGE_MASK(n)         (1 << n)
+#define GPIO_EDGE(i,n)            ((uint32_t)(i) << n)
+
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_GPIO_H */

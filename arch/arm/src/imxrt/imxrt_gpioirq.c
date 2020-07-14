@@ -617,18 +617,21 @@ static int imxrt_gpio5_16_31_interrupt(int irq, FAR void *context,
 
   return OK;
 }
+
 #endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_gpioirq_initialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void imxrt_gpioirq_initialize(void)
 {
@@ -695,7 +698,7 @@ void imxrt_gpioirq_initialize(void)
 
 #ifdef CONFIG_IMXRT_GPIO2_0_15_IRQ
   DEBUGVERIFY(irq_attach(IMXRT_IRQ_GPIO2_0_15,
-                         imxrt_gpio2_0_15_interrupt,NULL));
+                         imxrt_gpio2_0_15_interrupt, NULL));
   up_enable_irq(IMXRT_IRQ_GPIO2_0_15);
 #endif
 
@@ -744,13 +747,13 @@ void imxrt_gpioirq_initialize(void)
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_gpioirq_configure
  *
  * Description:
  *   Configure an interrupt for the specified GPIO pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int imxrt_gpioirq_configure(gpio_pinset_t pinset)
 {
@@ -759,12 +762,15 @@ int imxrt_gpioirq_configure(gpio_pinset_t pinset)
   uintptr_t regaddr;
   uint32_t regval;
   uint32_t icr;
+  uint32_t bothedge;
 
   /* Decode information in the pin configuration */
 
-  port    = ((unsigned int)pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pin     = ((unsigned int)pinset & GPIO_PIN_MASK)  >> GPIO_PIN_SHIFT;
-  icr     = ((uint32_t)pinset & GPIO_INTCFG_MASK)   >> GPIO_INTCFG_SHIFT;
+  port     = ((unsigned int)pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pin      = ((unsigned int)pinset & GPIO_PIN_MASK)  >> GPIO_PIN_SHIFT;
+  icr      = ((uint32_t)pinset & GPIO_INTCFG_MASK)   >> GPIO_INTCFG_SHIFT;
+  bothedge = ((uint32_t)pinset & GPIO_INTBOTHCFG_MASK) >>
+             GPIO_INTBOTHCFG_SHIFT;
 
   /* Set the right field in the right ICR register */
 
@@ -774,16 +780,24 @@ int imxrt_gpioirq_configure(gpio_pinset_t pinset)
   regval |= GPIO_ICR(icr, pin);
   putreg32(regval, regaddr);
 
+  /* Add any both-edge setup (overrides above see User Manual 12.5.9) */
+
+  regaddr = IMXRT_GPIO_EDGE(port);
+  regval = getreg32(regaddr);
+  regval &= ~GPIO_EDGE_MASK(pin);
+  regval |= GPIO_EDGE(bothedge, pin);
+  putreg32(regval, regaddr);
+
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_gpioirq_enable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int imxrt_gpioirq_enable(int irq)
 {
@@ -800,13 +814,13 @@ int imxrt_gpioirq_enable(int irq)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_gpioirq_disable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int imxrt_gpioirq_disable(int irq)
 {
