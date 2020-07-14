@@ -4,6 +4,7 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
+ *            Dave Marples <dave@marples.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -65,6 +66,15 @@
  * 1. SW8 (IRQ88)   GPIO5-00
  */
 
+const uint32_t gpio_pins[NUM_BUTTONS]     =
+                                            {
+                                              GPIO_SW8
+                                            };
+const uint32_t gpio_pins_int[NUM_BUTTONS] =
+                                            {
+                                              GPIO_SW8_INT
+                                            };
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -82,9 +92,15 @@
 
 uint32_t board_button_initialize(void)
 {
-  /* Configure the button as input */
+  uint32_t i;
 
-  imxrt_config_gpio(GPIO_SW8);
+  /* Configure the buttons as input */
+
+  for (i = 0; i < NUM_BUTTONS; i++)
+    {
+      imxrt_config_gpio(gpio_pins[i]);
+    }
+
   return NUM_BUTTONS;
 }
 
@@ -102,10 +118,11 @@ uint32_t board_button_initialize(void)
 uint8_t board_buttons(void)
 {
   uint8_t ret = 0;
+  uint8_t i   = 0;
 
-  if (!imxrt_gpio_read(GPIO_SW8))
+  for (i = 0; i < NUM_BUTTONS; i++)
     {
-      ret |= BUTTON_SW8_BIT;
+      ret |= ((!imxrt_gpio_read(gpio_pins[i])) << i);
     }
 
   return ret;
@@ -124,7 +141,7 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-int board_button_irq(int id, xcpt_t irqhandler)
+int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
   int ret = -EINVAL;
 
@@ -134,11 +151,26 @@ int board_button_irq(int id, xcpt_t irqhandler)
    * Attach the new button handler.
    */
 
-  ret = irq_attach(id, irqhandler, NULL);
+  if (id < NUM_BUTTONS)
+    {
+      uint32_t irqnum = gpio_pins_int[id];
+      if (irqhandler)
+        {
+          ret = irq_attach(irqnum, irqhandler, arg);
+          imxrt_gpioirq_enable (irqnum);
 
-  /* Then make sure that interrupts are enabled on the pin */
+          /* Then make sure that interrupts are enabled on the pin */
 
-  up_enable_irq(id);
+          up_enable_irq(irqnum);
+        }
+      else
+        {
+          up_disable_irq(irqnum);
+          imxrt_gpioirq_disable(irqnum);
+          ret = OK;
+        }
+    }
+
   return ret;
 }
 #endif
