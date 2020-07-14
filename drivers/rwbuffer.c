@@ -492,7 +492,7 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
 
       else if (wrbend > startblock && wrbend <= invend)
         {
-          rwb->wrnblocks = wrbend - startblock;
+          rwb->wrnblocks -= wrbend - startblock;
           ret = OK;
         }
 
@@ -612,11 +612,11 @@ int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
 
       else if (rhbend > startblock && rhbend <= invend)
         {
-          rwb->rhnblocks = rhbend - startblock;
+          rwb->rhnblocks -= rhbend - startblock;
           ret = OK;
         }
 
-      /* 4. We invalidate a portion at the beginning of the write buffer */
+      /* 4. We invalidate a portion at the begin of the read-ahead buffer */
 
       else /* if (rwb->rhblockstart >= startblock && rhbend > invend) */
         {
