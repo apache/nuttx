@@ -258,3 +258,13 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),PINGUINOW)
   LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = mips-elf-debug.ld
 endif
+
+# Add the builtin library
+
+EXTRA_LIBS += ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcc.a}
+ifneq ($(CONFIG_LIBM),y)
+  EXTRA_LIBS += ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}
+endif
+ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+  EXTRA_LIBS += ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}
+endif

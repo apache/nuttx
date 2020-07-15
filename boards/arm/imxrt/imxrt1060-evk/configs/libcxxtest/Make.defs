@@ -57,10 +57,6 @@ else
   LDSCRIPT = flash-ocram.ld
 endif
 
-LIBSUPXX = ${shell $(CC) $(CXXFLAGS) --print-file-name=libsupc++.a}
-EXTRA_LIBPATHS = -L "${shell dirname "$(LIBSUPXX)"}"
-EXTRA_LIBS = -lsupc++
-
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
 else

@@ -105,3 +105,18 @@ ifeq ($(CONFIG_ARMV7A_TOOLCHAIN),GNU_EABI)
   ARCROSSDEV ?= $(TARGET_ARCH)-none-eabi-
   MAXOPTIMIZATION ?= -Os
 endif
+
+# Add the builtin library
+
+EXTRA_LIBS += -lgcc
+EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcc.a}}"
+
+ifneq ($(CONFIG_LIBM),y)
+  EXTRA_LIBS += -lm
+  EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}"
+endif
+
+ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+  EXTRA_LIBS += -lsupc++
+  EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}}"
+endif

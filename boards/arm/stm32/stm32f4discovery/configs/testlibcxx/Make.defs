@@ -53,10 +53,6 @@ ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e \
 ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
 
 LDSCRIPT = ld.script
-LIBSUPXX = ${shell $(CC) $(CXXFLAGS) --print-file-name=libsupc++.a}
-EXTRA_LIBPATHS = -L "${shell dirname "$(LIBSUPXX)"}"
-EXTRA_LIBS = -lsupc++
-
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w \
                    $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"

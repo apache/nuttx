@@ -97,14 +97,19 @@ ifeq ($(BOARDMAKE),y)
   LDLIBS += -lboard
 endif
 
-LIBGCC = "${shell "$(CC)" $(ARCHCPUFLAGS) -print-libgcc-file-name}"
+# Add the builtin library
 
-ifeq ($(HOSTOS),FreeBSD)
-  HOST_ARCH = ${shell uname -m 2>/dev/null || echo "Other"}
-  ifeq ($(HOST_ARCH),amd64)
-    LDFLAGS += -melf_i386
-    LIBGCC = "/usr/lib32/libgcc.a"
-  endif
+EXTRA_LIBS += -lgcc
+EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcc.a}}"
+
+ifneq ($(CONFIG_LIBM),y)
+  EXTRA_LIBS += -lm
+  EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}"
+endif
+
+ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+  EXTRA_LIBS += -lsupc++
+  EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}}"
 endif
 
 VPATH = chip:common:$(ARCH_SUBDIR)
@@ -127,8 +132,9 @@ board/libboard$(LIBEXT):
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx$(EXEEXT)"
-	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
-		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LIBGCC) $(LDENDGROUP)
+	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
+		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
+		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
