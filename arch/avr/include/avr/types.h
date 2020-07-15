@@ -74,6 +74,9 @@ typedef unsigned long      _uint32_t;
 
 typedef signed long long   _int64_t;   /* long long is 64-bits */
 typedef unsigned long long _uint64_t;
+
+typedef double double_t;
+
 #define __INT64_DEFINED
 
 /* A (near) size is 2 bytes */
