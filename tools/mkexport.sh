@@ -282,7 +282,6 @@ if [ "X${USRONLY}" != "Xy" ]; then
   echo "LDENDGROUP       = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "LDFLAGS          = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
   echo "LDSTARTGROUP     = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LIBGCC           = ${LIBGCC}" >>"${EXPORTDIR}/scripts/Make.defs"
 fi
 
 # Copy the system map file(s)

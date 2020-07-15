@@ -74,10 +74,6 @@ BOARDDIR = $(TOPDIR)\arch\$(CONFIG_ARCH)\src\board
 
 VPATH = chip:common:board
 
-# Libraries
-
-LIBGCC = ${shell "$(CC)" $(ARCHCPUFLAGS) -print-libgcc-file-name}
-
 # Targets
 
 all: $(HEAD_OBJ) libarch$(LIBEXT)

@@ -68,12 +68,6 @@ ifeq ($(CONFIG_LIBCXX),y)
   ifneq ($(CONFIG_CXX_EXCEPTION),y)
     CXXFLAGS += -fno-exceptions -fno-rtti -fcheck-new -D_LIBCPP_NO_EXCEPTIONS
   endif
-
-  # supc++ is always needed with libcxx
-
-  LIBSUPXX = ${shell $(CC) $(CFLAGS) --print-file-name=libsupc++.a}
-  EXTRA_LIBPATHS = -L "${shell dirname "$(LIBSUPXX)"}"
-  EXTRA_LIBS = -lsupc++
 endif
 
 NXFLATLDFLAGS1 = -r -d -warn-common
