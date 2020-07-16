@@ -722,6 +722,14 @@ config ARCH_BOARD_NRF52_FEATHER
 	---help---
 		This option selects the Adafruit nRF52832 Feather board
 
+config ARCH_BOARD_NRF52832_SPARKFUN
+	bool "Sparkfun nRF52832 breakout board"
+	depends on ARCH_CHIP_NRF52
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		This option selects the Sparkfun nRF52832 breakout board
+
 config ARCH_BOARD_NRF52840_DK
 	bool "Nordic nRF52840 Development Kit (PCA10056)"
 	depends on ARCH_CHIP_NRF52
@@ -2187,6 +2195,7 @@ config ARCH_BOARD
 	default "moteino-mega"             if ARCH_BOARD_MOTEINO_MEGA
 	default "ne64badge"                if ARCH_BOARD_NE64BADGE
 	default "nrf52-feather"            if ARCH_BOARD_NRF52_FEATHER
+	default "nrf52832-sparkfun"        if ARCH_BOARD_NRF52832_SPARKFUN
 	default "nrf52832-dk"              if ARCH_BOARD_NRF52832_DK
 	default "nrf52840-dk"              if ARCH_BOARD_NRF52840_DK
 	default "nrf52840-dongle"          if ARCH_BOARD_NRF52840_DONGLE
@@ -2525,6 +2534,9 @@ source "boards/arm/moxart/moxa/Kconfig"
 endif
 if ARCH_BOARD_NRF52_FEATHER
 source "boards/arm/nrf52/nrf52-feather/Kconfig"
+endif
+if ARCH_BOARD_NRF52832_SPARKFUN
+source "boards/arm/nrf52/nrf52832-sparkfun/Kconfig"
 endif
 if ARCH_BOARD_NRF52832_DK
 source "boards/arm/nrf52/nrf52832-dk/Kconfig"
