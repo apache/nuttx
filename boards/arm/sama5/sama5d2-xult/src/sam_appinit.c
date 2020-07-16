@@ -23,6 +23,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <syslog.h>
+#include <debug.h>
 
 #include <nuttx/board.h>
 
@@ -68,6 +70,7 @@ int board_app_initialize(uintptr_t arg)
 #ifndef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform board initialization */
 
+  mcinfo("Entry\n");
   return sam_bringup();
 #else
   return OK;
