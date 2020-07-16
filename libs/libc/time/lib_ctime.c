@@ -64,7 +64,6 @@
 
 FAR char *ctime(FAR const time_t *timep)
 {
-#ifdef CONFIG_LIBC_LOCALTIME
   /* Section 4.12.3.2 of X3.159-1989 requires that
    *    The ctime function converts the calendar time pointed to by timer
    *    to local time in the form of a string. It is equivalent to
@@ -72,7 +71,4 @@ FAR char *ctime(FAR const time_t *timep)
    */
 
   return asctime(localtime(timep));
-#else
-  return asctime(gmtime(timep));
-#endif
 }

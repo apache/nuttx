@@ -301,7 +301,7 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
  *
  ****************************************************************************/
 
-FAR struct tm *gmtime_r(FAR const time_t *timer, FAR struct tm *result)
+FAR struct tm *gmtime_r(FAR const time_t *timep, FAR struct tm *result)
 {
   time_t epoch;
   time_t jdn;
@@ -314,7 +314,7 @@ FAR struct tm *gmtime_r(FAR const time_t *timer, FAR struct tm *result)
 
   /* Get the seconds since the EPOCH */
 
-  epoch = *timer;
+  epoch = *timep;
   linfo("timer=%d\n", (int)epoch);
 
   /* Convert to days, hours, minutes, and seconds since the EPOCH */
@@ -357,3 +357,10 @@ FAR struct tm *gmtime_r(FAR const time_t *timer, FAR struct tm *result)
 
   return result;
 }
+
+#ifndef CONFIG_LIBC_LOCALTIME
+FAR struct tm *localtime_r(FAR const time_t *timep, FAR struct tm *result)
+{
+  return gmtime_r(timep, result);
+}
+#endif

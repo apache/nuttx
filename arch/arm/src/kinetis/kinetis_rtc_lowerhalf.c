@@ -531,13 +531,8 @@ static int kinetis_rdalarm(FAR struct rtc_lowerhalf_s *lower,
       sched_lock();
       ret = kinetis_rtc_rdalarm(&ts);
 
-#ifdef CONFIG_LIBC_LOCALTIME
       localtime_r((FAR const time_t *)&ts.tv_sec,
                   (FAR struct tm *)alarminfo->time);
-#else
-      gmtime_r((FAR const time_t *)&ts.tv_sec,
-               (FAR struct tm *)alarminfo->time);
-#endif
       sched_unlock();
     }
 

@@ -100,13 +100,6 @@
 
 #define TIME_UTC           1
 
-#ifndef CONFIG_LIBC_LOCALTIME
-/* Local time is the same as gmtime in this implementation */
-
-#  define localtime(c)     gmtime(c)
-#  define localtime_r(c,r) gmtime_r(c,r)
-#endif
-
 /********************************************************************************
  * Public Types
  ********************************************************************************/
@@ -206,10 +199,8 @@ time_t mktime(FAR struct tm *tp);
 FAR struct tm *gmtime(FAR const time_t *timep);
 FAR struct tm *gmtime_r(FAR const time_t *timep, FAR struct tm *result);
 
-#ifdef CONFIG_LIBC_LOCALTIME
 FAR struct tm *localtime(FAR const time_t *timep);
 FAR struct tm *localtime_r(FAR const time_t *timep, FAR struct tm *result);
-#endif
 
 size_t strftime(FAR char *s, size_t max, FAR const char *format,
                 FAR const struct tm *tm);

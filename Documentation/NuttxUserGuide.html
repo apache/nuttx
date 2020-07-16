@@ -4204,11 +4204,7 @@ Otherwise, an -1 (<code>ERROR</code>) will be returned and the <code>errno</code
 <H3><a name="localtime">2.6.6 localtime</a></H3>
 <ul><pre>
 #include &lt;time.h&gt;
-#ifdef CONFIG_LIBC_LOCALTIME
-#  define localtime(c) gmtime(c)
-#else
 FAR struct tm *localtime(FAR const time_t *timep);
-#endif
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -4317,11 +4313,7 @@ FAR char *ctime(FAR const time_t *timep);
 <H3><a name="localtimer">2.6.10 localtime_r</a></H3>
 <ul><pre>
 #include &lt;time.h&gt;
-#ifdef CONFIG_LIBC_LOCALTIME
-#  define localtime_r(c,r) gmtime_r(c,r)
-#else
 FAR struct tm *localtime_r(FAR const time_t *timep, FAR struct tm *result);
-#endif
 </pre></ul>
 <p>
   <b>Description:</b>

@@ -774,7 +774,6 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Day of the week (0-6, 0=Sunday) */
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   RTC.RWKCNT.BYTE = rtc_dec2bcd((uint8_t) newtime.tm_wday);
 
   /* WAIT_LOOP */
@@ -783,7 +782,6 @@ int up_rtc_settime(FAR const struct timespec *tp)
     {
       dummy_byte = RTC.RWKCNT.BYTE;
     }
-#endif
 
   /* Day of the month (1-31) */
 
@@ -1355,9 +1353,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
       /* Days since Sunday (0-6) */
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
-    tp->tm_wday = (int) (RTC.RWKCNT.BYTE & 0x07u);
-#endif
+      tp->tm_wday = (int) (RTC.RWKCNT.BYTE & 0x07u);
       rtc_dumptime(tp, "Returning");
     }
 

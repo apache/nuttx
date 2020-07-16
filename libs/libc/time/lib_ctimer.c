@@ -71,9 +71,5 @@ FAR char *ctime_r(FAR const time_t *timep, FAR char *buf)
 {
   struct tm tm;
 
-#ifdef CONFIG_LIBC_LOCALTIME
   return asctime_r(localtime_r(timep, &tm), buf);
-#else
-  return asctime_r(gmtime_r(timep, &tm), buf);
-#endif
 }
