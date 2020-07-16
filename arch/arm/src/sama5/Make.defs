@@ -128,6 +128,10 @@ ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += sam_timerisr.c
 endif
 
+ifeq ($(CONFIG_SAMA5_SYSTEMRESET),y)
+CHIP_CSRCS += sam_systemreset.c
+endif
+
 ifeq ($(CONFIG_SAMA5_DMAC0),y)
 CHIP_CSRCS += sam_dmac.c
 else
