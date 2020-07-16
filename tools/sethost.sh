@@ -182,8 +182,4 @@ fi
 
 echo "  Refreshing..."
 
-if grep -q "V=1" <<< "$*" ; then
-  make olddefconfig $* || { echo "ERROR: failed to refresh"; exit 1; }
-else
-  make olddefconfig $* 1>/dev/null || { echo "ERROR: failed to refresh"; exit 1; }
-fi
+make olddefconfig $* || { echo "ERROR: failed to refresh"; exit 1; }
