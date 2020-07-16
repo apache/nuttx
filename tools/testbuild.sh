@@ -199,7 +199,7 @@ function distclean {
 
 function configure {
   echo "  Configuring..."
-  if ! ./tools/configure.sh ${HOPTION} $config ${JOPTION}; then
+  if ! ./tools/configure.sh ${HOPTION} $config ${JOPTION} 1>/dev/null; then
     fail=1
   fi
 
