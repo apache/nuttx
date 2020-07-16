@@ -59,6 +59,14 @@ CSRCS += sam_at25.c
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_SDMMC0),y)
+CSRCS += sam_sdmmc.c
+else
+ifeq ($(CONFIG_SAMA5_SDMMC1),y)
+CSRCS += sam_sdmmc.c
+endif
+
+endif
 ifeq ($(CONFIG_SAMA5_HSMCI0),y)
 CSRCS += sam_hsmci.c
 else

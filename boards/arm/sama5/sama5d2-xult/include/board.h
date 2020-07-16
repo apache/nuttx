@@ -65,8 +65,8 @@
 #if defined(CONFIG_SAMA5_BOOT_SDRAM)
 /* When booting from SDRAM, NuttX is loaded in SDRAM by an intermediate
  * bootloader.
- * That bootloader had to have already configured the PLL and SDRAM for proper
- * operation.
+ * That bootloader had to have already configured the PLL and SDRAM for
+ * proper operation.
  *
  * In this case, we don not reconfigure the clocking.
  * Rather, we need to query the register settings to determine the clock
@@ -316,6 +316,24 @@
  *    14  UART_TX PB28 FLEXCOM0
  *   ---- ------- ---- --------
  */
+
+/* SDIO - Used for both Port 0 & 1 ******************************************/
+
+/* 386 KHz for initial inquiry stuff */
+
+#define BOARD_SDMMC_IDMODE_PRESCALER    SDMMC_SYSCTL_SDCLKFS_DIV256
+#define BOARD_SDMMC_IDMODE_DIVISOR      SDMMC_SYSCTL_DVS_DIV(2)
+
+/* 24.8MHz for other modes */
+
+#define BOARD_SDMMC_MMCMODE_PRESCALER   SDMMC_SYSCTL_SDCLKFS_DIV8
+#define BOARD_SDMMC_MMCMODE_DIVISOR     SDMMC_SYSCTL_DVS_DIV(1)
+
+#define BOARD_SDMMC_SD1MODE_PRESCALER   SDMMC_SYSCTL_SDCLKFS_DIV8
+#define BOARD_SDMMC_SD1MODE_DIVISOR     SDMMC_SYSCTL_DVS_DIV(1)
+
+#define BOARD_SDMMC_SD4MODE_PRESCALER   SDMMC_SYSCTL_SDCLKFS_DIV8
+#define BOARD_SDMMC_SD4MODE_DIVISOR     SDMMC_SYSCTL_DVS_DIV(1)
 
 /****************************************************************************
  * Assembly Language Macros

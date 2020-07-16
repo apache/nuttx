@@ -42,7 +42,7 @@
 
 /* Configuration ************************************************************/
 
-#define HAVE_HSMCI      1
+#define HAVE_SDMMC      1
 #define HAVE_AT25       1
 #define HAVE_NAND       1
 #define HAVE_USBHOST    1
@@ -50,26 +50,26 @@
 #define HAVE_USBMONITOR 1
 #define HAVE_NETWORK    1
 
-/* HSMCI */
+/* SDMMC */
 
 /* Can't support MMC/SD if the card interface(s) are not enable */
 
-#if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI1)
-#  undef HAVE_HSMCI
+#if !defined(CONFIG_SAMA5_SDMMC) && !defined(CONFIG_SAMA5_SDMMC0)
+#  undef HAVE_SDMMC
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
-#if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#if defined(HAVE_SDMMC) && defined(CONFIG_DISABLE_MOUNTPOINT)
 #  warning Mountpoints disabled.  No MMC/SD support
-#  undef HAVE_HSMCI
+#  undef HAVE_SDMCC
 #endif
 
 /* We need PIO interrupts on PIOD to support card detect interrupts */
 
-#if defined(HAVE_HSMCI) && !defined(CONFIG_SAMA5_PIOD_IRQ)
-#  warning PIOD interrupts not enabled.  No MMC/SD support.
-#  undef HAVE_HSMCI
+#if defined(HAVE_SDMMC) && !defined(CONFIG_SAMA5_PIOA_IRQ)
+#  warning PIOA interrupts not enabled.  No MMC/SD support.
+#  undef HAVE_SDMMC
 #endif
 
 /* NAND FLASH */
@@ -95,27 +95,27 @@
 #endif
 
 /* If we are going to mount the NAND, then they user must also have told
- * us what to do with it by setting one of CONFIG_SAMA5D3XPLAINED_NAND_FTL or
- * CONFIG_SAMA5D3XPLAINED_NAND_NXFFS.
+ * us what to do with it by setting one of CONFIG_SAMA5D2XULT_NAND_FTL or
+ * CONFIG_SAMA5D2XULT_NAND_NXFFS.
  */
 
 #ifndef CONFIG_MTD
-#  undef CONFIG_SAMA5D3XPLAINED_NAND_NXFFS
-#  undef CONFIG_SAMA5D3XPLAINED_NAND_FTL
+#  undef CONFIG_SAMA5D2XULT_NAND_NXFFS
+#  undef CONFIG_SAMA5D2XULT_NAND_FTL
 #endif
 
 #if !defined(CONFIG_FS_NXFFS) || !defined(CONFIG_NXFFS_NAND)
-#  undef CONFIG_SAMA5D3XPLAINED_NAND_NXFFS
+#  undef CONFIG_SAMA5D2XULT_NAND_NXFFS
 #endif
 
-#if !defined(CONFIG_SAMA5D3XPLAINED_NAND_FTL) && !defined(CONFIG_SAMA5D3XPLAINED_NAND_NXFFS)
+#if !defined(CONFIG_SAMA5D2XULT_NAND_FTL) && !defined(CONFIG_SAMA5D2XULT_NAND_NXFFS)
 #  undef HAVE_NAND
 #endif
 
-#if defined(CONFIG_SAMA5D3XPLAINED_NAND_FTL) && defined(CONFIG_SAMA5D3XPLAINED_NAND_NXFFS)
-#  warning Both CONFIG_SAMA5D3XPLAINED_NAND_FTL and CONFIG_SAMA5D3XPLAINED_NAND_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D3XPLAINED_NAND_NXFFS
-#  undef CONFIG_SAMA5D3XPLAINED_NAND_NXFFS
+#if defined(CONFIG_SAMA5D2XULT_NAND_FTL) && defined(CONFIG_SAMA5D2XULT_NAND_NXFFS)
+#  warning Both CONFIG_SAMA5D2XULT_NAND_FTL and CONFIG_SAMA5D2XULT_NAND_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5D2XULT_NAND_NXFFS
+#  undef CONFIG_SAMA5DXULT_NAND_NXFFS
 #endif
 
 /* AT25 Serial FLASH */
@@ -142,14 +142,14 @@
 #  undef CONFIG_SAMA5D3XPLAINED_AT25_NXFFS
 #endif
 
-#if !defined(CONFIG_SAMA5D3XPLAINED_AT25_FTL) && !defined(CONFIG_SAMA5D3XPLAINED_AT25_NXFFS)
+#if !defined(CONFIG_SAMA5D2XULT_AT25_FTL) && !defined(CONFIG_SAMA5D2XULT_AT25_NXFFS)
 #  undef HAVE_AT25
 #endif
 
-#if defined(CONFIG_SAMA5D3XPLAINED_AT25_FTL) && defined(CONFIG_SAMA5D3XPLAINED_AT25_NXFFS)
-#  warning Both CONFIG_SAMA5D3XPLAINED_AT25_FTL and CONFIG_SAMA5D3XPLAINED_AT25_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D3XPLAINED_AT25_NXFFS
-#  undef CONFIG_SAMA5D3XPLAINED_AT25_NXFFS
+#if defined(CONFIG_SAMA5D2XULT_AT25_FTL) && defined(CONFIG_SAMA5D2XULT_AT25_NXFFS)
+#  warning Both CONFIG_SAMA5D2XULT_AT25_FTL and CONFIG_SAMA5D2XULT_AT25_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5D2XULT_AT25_NXFFS
+#  undef CONFIG_SAMA5D2XULT_AT25_NXFFS
 #endif
 
 /* Assign minor device numbers.  For example, if we also use MINOR number 0
@@ -178,16 +178,25 @@
 #  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
-#ifdef HAVE_HSMCI
+#ifdef HAVE_SDMMC
 
-#  define HSMCI0_SLOTNO 0
-#  define HSMCI1_SLOTNO 1
-
-#  ifdef CONFIG_SAMA5_HSMCI0
-#     define HSMCI0_MINOR  CONFIG_NSH_MMCSDMINOR
-#     define HSMCI1_MINOR  (CONFIG_NSH_MMCSDMINOR+1)
+#  if ( defined(CONFIG_SAMA5_SDMMC0) && defined(CONFIG_SAMA5_SDMMC1) )
+#    define SDMMC0_SLOTNO 0
+#    define SDMMC1_SLOTNO 1
 #  else
-#     define HSMCI1_MINOR  CONFIG_NSH_MMCSDMINOR
+#    if ( defined(CONFIG_SAMA5_SDMMC0) )
+#      define SDMMC0_SLOTNO 0
+#    endif
+#    if ( defined(CONFIG_SAMA5_SDMMC1) )
+#      define SDMMC1_SLOTNO 0
+#    endif
+#  endif
+
+#  ifdef CONFIG_SAMA5_SDMMC0
+#     define SDMMC0_MINOR  CONFIG_NSH_MMCSDMINOR
+#     define SDMMC1_MINOR  (CONFIG_NSH_MMCSDMINOR+1)
+#  else
+#     define SDMMC1_MINOR  CONFIG_NSH_MMCSDMINOR
 #  endif
 #else
 #endif
@@ -300,33 +309,51 @@
                       PIO_INT_BOTHEDGES | PIO_PORT_PIOB | PIO_PIN6)
 #define IRQ_BTN_USER  SAM_IRQ_PB6
 
-/* HSMCI Card Slots *********************************************************/
-
-/* The SAMA5D2-XULT provides a SD memory card slots:
- *  a full size SD card slot (J19)
+/* SDMMC clocking
  *
- * The full size SD card slot connects via HSMCI0.  The card detect discrete
- * is available on PD17 (pulled high).  The write protect discrete is tied to
- * ground (via PP6) and not available to software.  The slot supports 8-bit
- * wide transfer mode, but the NuttX driver currently uses only the 4-bit
- * wide transfer mode
+ * Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock (MCK)
+ * divided by (2*(CLKDIV+1)).
  *
- *   PD17 MCI0_CD
- *   PD1  MCI0_DA0
- *   PD2  MCI0_DA1
- *   PD3  MCI0_DA2
- *   PD4  MCI0_DA3
- *   PD5  MCI0_DA4
- *   PD6  MCI0_DA5
- *   PD7  MCI0_DA6
- *   PD8  MCI0_DA7
- *   PD9  MCI0_CK
- *   PD0  MCI0_CDA
+ *   MCI_SPEED = MCK / (2*(CLKDIV+1))
+ *   CLKDIV = MCI / MCI_SPEED / 2 - 1
+ *
+ * Where CLKDIV has a range of 0-255.
  */
 
-#define PIO_MCI0_CD  (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOA | PIO_PIN11)
-#define IRQ_MCI0_CD   SAM_IRQ_PA11
+/* MCK = 96MHz, CLKDIV = 119, MCI_SPEED = 96MHz / 2 * (119+1) = 400 KHz */
+
+#define SDMMC_INIT_CLKDIV          (119 << SDMMC_MR_CLKDIV_SHIFT)
+
+/* MCK = 96MHz, CLKDIV = 3, MCI_SPEED = 96MHz / 2 * (3+1) = 12 MHz */
+
+#define SDMMC_MMCXFR_CLKDIV        (3 << SDMMC_MR_CLKDIV_SHIFT)
+
+/* MCK = 96MHz, CLKDIV = 1, MCI_SPEED = 96MHz / 2 * (1+1) = 24 MHz */
+
+#define SDMMC_SDXFR_CLKDIV         (1 << SDMMC_MR_CLKDIV_SHIFT)
+#define SDMMC_SDWIDEXFR_CLKDIV     SDMMC_SDXFR_CLKDIV
+
+/* SDMMC Card Slots *********************************************************/
+
+/* The SAMA5D2-XULT provides a SD memory card slot:
+ *  a full size SD card slot (J19)
+ *
+ * The full size SD card slot connects via SDMMC1.  The card detect discrete
+ * is available on PA30 (pulled high).  The write protect discrete is tied to
+ * ground and not available to software.  The slot only supports 4-bit
+ * wide transfer mode, and the NuttX driver currently uses only the 4-bit
+ * wide transfer mode.
+ *
+ *   PA30 SDMMC1_CD
+ *   PA18 SDMMC1_DAT0
+ *   PA19 SDMMC1_DAT1
+ *   PA20 SDMMC1_DAT2
+ *   PA21 SDMMC1_DAT3
+ *   PA22 SDMMC1_CK
+ *   PA28 SDMMC1_CDA
+ */
+
+#define IRQ_SDMMC1_CD   SAM_IRQ_PA30
 
 /* USB Ports ****************************************************************/
 
@@ -413,6 +440,42 @@
  ****************************************************************************/
 
 int sam_bringup(void);
+
+/****************************************************************************
+ * Name: sam_sdmmc_initialize
+ *
+ * Description:
+ *   Initialize and configure one SDMMC slot
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_SDMMC
+int sam_sdmmc_initialize(int slotno, int minor);
+#endif
+
+/****************************************************************************
+ * Name: sam_cardinserted
+ *
+ * Description:
+ *   Check if a card is inserted into the selected SDMMC slot
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_SDMMC
+bool sam_cardinserted(int slotno);
+#endif
+
+/****************************************************************************
+ * Name: sam_writeprotected
+ *
+ * Description:
+ *   Check if the card in the MMCSD slot is write protected
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_HSMCI
+bool sam_writeprotected(int slotno);
+#endif
 
 /****************************************************************************
  * Name: sam_usbinitialize
