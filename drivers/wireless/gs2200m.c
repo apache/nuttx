@@ -543,13 +543,11 @@ static bool _control_pkt_q(FAR struct gs2200m_dev_s *dev)
 {
   bool over = BULK_THRESHOLD < dev->total_bulk ? true : false;
 
-  /* TODO: should enable again if disabled for long time
-   * Or, should use flow control commands for gs2200m
-   */
+  /* TODO: should enable again if disabled for long time */
 
   if (dev->int_enabled && over)
     {
-      wlinfo("--- pkt_q[%d] exceeds, disable irq \n", c);
+      wlinfo("--- disable irq \n");
       dev->int_enabled = false;
       dev->lower->disable();
     }
