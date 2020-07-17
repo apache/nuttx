@@ -459,4 +459,54 @@ void kinetis_pinirqdisable(uint32_t pinset)
     }
 #endif /* HAVE_PORTINTS */
 }
+
+/************************************************************************************
+ * Name: kinetis_gpiosetevent
+ *
+ * Description:
+ *   Sets/clears GPIO based event and interrupt triggers.
+ *
+ * Input Parameters:
+ *  - pinset: gpio pin configuration
+ *  - rising/falling edge: enables
+ *  - event:  generate event when set
+ *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
+ *
+ ************************************************************************************/
+
+int kinetis_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                       bool event, xcpt_t func, void *arg)
+{
+  int ret = -ENOSYS;
+#ifdef HAVE_PORTINTS
+
+  if (func == NULL)
+    {
+      kinetis_pinirqdisable(pinset);
+      ret = kinetis_pinirqattach(pinset, NULL, NULL);
+    }
+  else
+    {
+      ret = kinetis_pinirqattach(pinset, func, arg);
+      pinset &= ~_PIN_INT_MASK
+      DEBUGASSERT(port < KINETIS_NPORTS);
+      if (risingedge)
+        {
+          pinset |= PIN_INT_RISING;
+        }
+      if (fallingedge)
+        {
+          pinset |= PIN_INT_FALLING;
+        }
+
+      kinetis_pinirqenable(pinset);
+    }
+#endif /* HAVE_PORTINTS */
+  return ret;
+}
 #endif /* CONFIG_KINETIS_GPIOIRQ */

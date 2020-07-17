@@ -574,6 +574,28 @@ void kinetis_pinirqinitialize(void);
 #endif
 
 /************************************************************************************
+ * Name: kinetis_gpiosetevent
+ *
+ * Description:
+ *   Sets/clears GPIO based event and interrupt triggers.
+ *
+ * Input Parameters:
+ *  - pinset: gpio pin configuration
+ *  - rising/falling edge: enables
+ *  - event:  generate event when set
+ *  - func:   when non-NULL, generate interrupt
+ *  - arg:    Argument passed to the interrupt callback
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
+ *
+ ************************************************************************************/
+
+int kinetis_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                       bool event, xcpt_t func, void *arg);
+
+/************************************************************************************
  * Name: kinetis_pinirqattach
  *
  * Description:
