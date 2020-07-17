@@ -495,7 +495,11 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
         }
       else
         {
-          offset += nerased + 1;
+          volume->ioblock += 1;
+          volume->iooffset = SIZEOF_NXFFS_BLOCK_HDR;
+
+          offset = volume->ioblock * volume->geo.blocksize +
+                   volume->iooffset;
           nerased = 0;
         }
     }
