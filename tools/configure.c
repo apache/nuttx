@@ -380,7 +380,6 @@ static void parse_args(int argc, char **argv)
 static int run_make(const char *arg)
 {
   char **argv;
-  bool v1 = false;
 
   snprintf(g_buffer, BUFFER_SIZE, "make %s", arg);
 
@@ -388,17 +387,6 @@ static int run_make(const char *arg)
     {
       strncat(g_buffer, " ", BUFFER_SIZE - 1);
       strncat(g_buffer, *argv, BUFFER_SIZE - 1);
-      if (strcmp(*argv, "V=1") == 0)
-        {
-          v1 = true;
-        }
-    }
-
-  if (!v1)
-    {
-#ifndef WIN32
-      strncat(g_buffer, " 1>/dev/null", BUFFER_SIZE - 1);
-#endif
     }
 
   return system(g_buffer);
@@ -1414,13 +1402,17 @@ static void configure(void)
 
           if (g_winpaths)
             {
-              /* Using Windows paths, but the configuration wants POSIX paths */
+              /* Using Windows paths, but the configuration wants POSIX
+               * paths.
+               */
 
               substitute(appdir, '\\', '/');
             }
           else
             {
-              /* Using POSIX paths, but the configuration wants Windows paths */
+              /* Using POSIX paths, but the configuration wants Windows
+               * paths.
+               */
 
               substitute(appdir, '/', '\\');
             }
