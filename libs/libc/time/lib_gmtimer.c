@@ -273,14 +273,14 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
     }
   while (min < max);
 
-  /* The selected month number is in value. Subtract the number of days in the
-   * selected month
+  /* The selected month number is in value. Subtract the number of days in
+   * the selected month
    */
 
   days -= clock_daysbeforemonth(value, leapyear);
 
-  /* At this point, value has the month into this year (zero based) and days has
-   * number of days into this month (zero based)
+  /* At this point, value has the month into this year (zero based) and days
+   * has number of days into this month (zero based)
    */
 
   *month = value + 1; /* 1-based */
