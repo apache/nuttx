@@ -23,6 +23,7 @@ RETURN_CODE=0
 
 BASE_URL="https://dist.apache.org/repos/dist/dev/incubator/nuttx"
 TEMPDIR="/tmp/nuttx-checkrelease"
+KEY="$BASE_URL/KEYS"
 
 function validate_url() {
   if [[ `wget -S --spider $1 2>&1 | grep 'HTTP/1.1 200 OK'` ]]; then echo "true"; fi
@@ -43,6 +44,17 @@ function download_release() {
     fi
   else
     cp -r "$DIRECTORY"/* .
+  fi
+}
+
+function import_key() {
+  if [[ $(validate_url "$KEY") ]]; then
+    export GNUPGHOME="$TEMPDIR/.gnupg"
+    wget -q -O- "$KEY" | gpg --import
+    echo " OK: $KEY is imported."
+  else
+    echo " - Error importing $KEY."
+    exit 1
   fi
 }
 
@@ -150,7 +162,7 @@ function usage() {
     echo "Examples:"
     echo
     echo "  $0 --release 9.1.0-RC1"
-    echo "  $0 --url https://dist.apache.org/repos/dist/dev/incubator/nuttx/9.1.0-RC1/"
+    echo "  $0 --url https://dist.apache.org/repos/dist/dev/incubator/nuttx/9.1.0-RC1"
     echo "  $0 --dir ./some-dir-that-has-nuttx-and-apps"
     echo
 }
@@ -164,6 +176,7 @@ do
     -U|--url)
     shift
     URL="$1/"
+    KEY="$1/../KEYS"
     ;;
     -R|--release)
     shift
@@ -196,6 +209,7 @@ if [[ (-z "$URL") && (-z "$DIRECTORY") ]]; then
 fi
 
 download_release
+import_key
 check_nuttx
 check_nuttx_apps
 check_sim_nsh_build
