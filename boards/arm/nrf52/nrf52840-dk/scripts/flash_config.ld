@@ -82,6 +82,12 @@ SECTIONS
 
     _eronly = ABSOLUTE(.);
 
+    /* The RAM vector table (if present) should lie at the beginning of SRAM */
+
+    .ram_vectors : {
+        *(.ram_vectors)
+    } > datamem
+
     .data :
     {
         _sdata = ABSOLUTE(.);
