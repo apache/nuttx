@@ -94,6 +94,10 @@ config NRF52_TIMER
 	bool
 	default n
 
+config NRF52_RTC
+	bool
+	default n
+
 config NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
 	bool "SPI Master 1 Byte transfer anomaly workaround"
 	depends on NRF52_SPI_MASTER && ARCH_FAMILY_NRF52832
@@ -210,14 +214,17 @@ config NRF52_TIMER4
 
 config NRF52_RTC0
 	bool "RTC0"
+	select NRF52_RTC
 	default n
 
 config NRF52_RTC1
 	bool "RTC1"
+	select NRF52_RTC
 	default n
 
 config NRF52_RTC2
 	bool "RTC2"
+	select NRF52_RTC
 	default n
 
 config NRF52_I2S
