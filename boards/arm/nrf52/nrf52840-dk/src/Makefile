@@ -71,4 +71,8 @@ ifeq ($(CONFIG_LPWAN_SX127X),y)
 CSRCS += nrf52_sx127x.c
 endif
 
+ifeq ($(CONFIG_NRF52840DK_HIGHPRI),y)
+CSRCS += nrf52_highpri.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

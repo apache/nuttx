@@ -5,4 +5,8 @@
 
 if ARCH_BOARD_NRF52840_DK
 
+config NRF52840DK_HIGHPRI
+	bool "High priority interrupt test"
+	default n
+
 endif
