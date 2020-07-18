@@ -3,6 +3,7 @@
 *.asm
 *.bin
 *.d
+!*.d/
 *.dSYM
 *.elf
 *.exe
