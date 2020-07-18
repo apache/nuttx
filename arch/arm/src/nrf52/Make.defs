@@ -128,5 +128,8 @@ endif
 
 ifeq ($(CONFIG_NRF52_RADIO),y)
 CHIP_CSRCS += nrf52_radio.c
+endif
 
+ifeq ($(CONFIG_NRF52_TIMER),y)
+CHIP_CSRCS += nrf52_tim.c
 endif

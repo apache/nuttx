@@ -1,4 +1,4 @@
-/**************************************************************************
+/************************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_tim.h
  *
  *   Copyright (C) 2020 Gregory Nutt. All rights reserved.
@@ -31,60 +31,81 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ***************************************************************************/
+ ************************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_TIM_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_TIM_H
 
-/***************************************************************************
+/************************************************************************************
  * Included Files
- ***************************************************************************/
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
-/***************************************************************************
+/************************************************************************************
  * Pre-processor Definitions
- ***************************************************************************/
+ ************************************************************************************/
 
-/* Register offsets for TIM ************************************************/
+/* TIMER constants ******************************************************************/
 
-#define NRF52_TIM_TASKS_START_OFFSET       0x0000 /* Start Timer */
-#define NRF52_TIM_TASKS_STOP_OFFSET        0x0004 /* Stop Timer */
-#define NRF52_TIM_TASKS_COUNT_OFFSET       0x0008 /* Increment Timer*/
-#define NRF52_TIM_TASKS_CLEAR_OFFSET       0x000c /* Clear time */
-#define NRF52_TIM_TASKS_SHUTDOWN_OFFSET    0x0010 /* Shutdown Timer */
-#define NRF52_TIM_TASKS_CAPTURE_OFFSET(x)  (0x0040 + ((x) * 0x04)) /* Capture Timer value to CC[x] */
-#define NRF52_TIM_EVENTS_COMPARE_OFFSET(x) (0x0140 + ((x) * 0x04)) /* Compare event on CC[x] */
-#define NRF52_TIM_SHORTS_OFFSET            0x0200 /* Shortcuts between local events and tasks */
-#define NRF52_TIM_INTENSET_OFFSET          0x0304 /* Enable interrupt */
-#define NRF52_TIM_MODE_OFFSET              0x0504 /* Timer mode selection */
-#define NRF52_TIM_BITMODE_OFFSET           0x0508 /* Configure the number of bits used by the Timer */
-#define NRF52_TIM_PRESCALER_OFFSET         0x0510 /* Timer prescaler register */
-#define NRF52_TIM_CC_OFFSET(x)             (0x0540 + ((x) * 0x04)) /* Capture/Compare register x */
+#define TIMER_BASE_FERQUENCY              (16000000)
 
-/* Register offsets for TIM ************************************************/
+/* Register offsets for TIM *********************************************************/
+
+#define NRF52_TIM_TASKS_START_OFFSET       0x0000                  /* Start Timer */
+#define NRF52_TIM_TASKS_STOP_OFFSET        0x0004                  /* Stop Timer */
+#define NRF52_TIM_TASKS_COUNT_OFFSET       0x0008                  /* Increment Timer */
+#define NRF52_TIM_TASKS_CLEAR_OFFSET       0x000c                  /* Clear time */
+#define NRF52_TIM_TASKS_SHUTDOWN_OFFSET    0x0010                  /* Shutdown Timer */
+#define NRF52_TIM_TASKS_CAPTURE_OFFSET(x)  (0x0040 + ((x) * 4))    /* Capture Timer value to CC[x] */
+#define NRF52_TIM_EVENTS_COMPARE_OFFSET(x) (0x0140 + ((x) * 4))    /* Compare event on CC[x] */
+#define NRF52_TIM_SHORTS_OFFSET            0x0200                  /* Shortcuts between local events and tasks */
+#define NRF52_TIM_INTENSET_OFFSET          0x0304                  /* Enable interrupt */
+#define NRF52_TIM_INTCLR_OFFSET            0x0308                  /* Disable interrupt */
+#define NRF52_TIM_MODE_OFFSET              0x0504                  /* Timer mode selection */
+#define NRF52_TIM_BITMODE_OFFSET           0x0508                  /* Configure the number of bits used by the Timer */
+#define NRF52_TIM_PRESCALER_OFFSET         0x0510                  /* Timer prescaler register */
+#define NRF52_TIM_CC_OFFSET(x)             (0x0540 + ((x) * 4))    /* Capture/Compare register x */
+
+/* Register offsets for TIM *********************************************************/
+
+/* TASKS_START Register */
+
+#define TIM_TASKS_START                    (1 << 0)                /* Bit 0: Start Timer */
+
+/* TASKS_STOP Register */
+
+#define TIM_TASKS_STOP                     (1 << 0)                /* Bit 0: Stop Timer */
+
+/* TASKS_COUNT Register */
+
+#define TIM_TASKS_COUNT                    (1 << 0)                /* Bit 0: Increment Timer */
+
+/* TASKS_CLEAR Register */
+
+#define TIM_TASKS_CLEAR                    (1 << 0)                /* Bit 0: Clear Timer */
 
 /* SHORTS Register */
 
-#define TIM_SHORTS_COMPARE_CLEAR(x)        (1 << (x))        /* Bits 0-5: */
-#define TIM_SHORTS_COMPARE_STOP(x)         (1 << (x + 0x8))  /* Bits 8-13 */
+#define TIM_SHORTS_COMPARE_CLEAR(x)        (1 << (x))              /* Bits 0-5: */
+#define TIM_SHORTS_COMPARE_STOP(x)         (1 << (x + 8))          /* Bits 8-13 */
 
 /* INTENSET/INTENCLR Register */
 
-#define TIM_INT_COMPARE(x)                 (1 << (x + 0x16)) /* Bits 16-21 */
+#define TIM_INT_COMPARE(x)                 (1 << (x + 16))         /* Bits 16-21 */
 
 /* MODE Register */
 
-#define TIM_MODE_SHIFT                     (0)               /* Bits 0-1: Timer mode */
+#define TIM_MODE_SHIFT                     (0)                     /* Bits 0-1: Timer mode */
 #define TIM_MODE_MASK                      (0x3 << TIM_MODE_SHIFT)
 #  define TIM_MODE_TIMER                   (0x0 << TIM_MODE_SHIFT) /* 0: Timer mode */
 #  define TIM_MODE_COUNTER                 (0x1 << TIM_MODE_SHIFT) /* 1: Counter mode */
-#  define TIM_MODE_LPCONUTER               (0x2 << TIM_MODE_SHIFT) /* 2: Low Power Counter mode */
+#  define TIM_MODE_LPCOUNTER               (0x2 << TIM_MODE_SHIFT) /* 2: Low Power Counter mode */
 
 /* BITMODE Register */
 
-#define TIM_BITMODE_SHIFT                  (0)               /* Bits 0-1: Timer bit width */
+#define TIM_BITMODE_SHIFT                  (0)                        /* Bits 0-1: Timer bit width */
 #define TIM_BITMODE_MASK                   (0x3 << TIM_BITMODE_SHIFT)
 #  define TIM_BITMODE_16B                  (0x0 << TIM_BITMODE_SHIFT) /* 0: 16 bit */
 #  define TIM_BITMODE_8B                   (0x1 << TIM_BITMODE_SHIFT) /* 1: 8 bit */
@@ -93,7 +114,8 @@
 
 /* PRESCALER Register */
 
-#define TIM_PRESCALER_SHIFT                (0)               /* Bits 0-3: Prescaler value */
-#define TIM_PRESCALER_MASK                 (0xf << TIM_PRESCALER_SHIFT)
+#define TIM_PRESCALER_SHIFT                (0)                        /* Bits 0-3: Prescaler value */
+#define TIM_PRESCALER_MAX                  (0xf)
+#define TIM_PRESCALER_MASK                 (TIM_PRESCALER_MAX << TIM_PRESCALER_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_TIM_H */
