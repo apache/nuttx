@@ -181,7 +181,6 @@ jobs:
           run: |
             echo "::add-matcher::sources/nuttx/.github/gcc.json"
             cd sources/testing
-            echo -e "/avr\n-avr32dev1:nsh\n-avr32dev1:ostest" >> testlist/avr-mips-riscv-x86-xtensa.dat
             ./cibuild.sh -x testlist/${{matrix.boards}}.dat
 
   macOS:
@@ -234,5 +233,4 @@ jobs:
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
           cd sources/testing
-          echo -e "/avr\n-avr32dev1:nsh\n-avr32dev1:ostest" >> testlist/avr-mips-riscv-x86-xtensa.dat
           ./cibuild.sh -i -x testlist/${{matrix.boards}}.dat
