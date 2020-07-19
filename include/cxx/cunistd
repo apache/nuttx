@@ -71,7 +71,9 @@ namespace std
 
   // Terminal I/O
 
+#ifdef CONFIG_SERIAL_TERMIOS
   using ::isatty;
+#endif
 
   // Memory management
 

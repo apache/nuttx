@@ -44,6 +44,8 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+#ifdef CONFIG_SERIAL_TERMIOS
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -325,4 +327,5 @@ int tcsetattr(int fd, int options, FAR const struct termios *termiosp);
 }
 #endif
 
+#endif /* CONFIG_SERIAL_TERMIOS */
 #endif /* __INCLUDE_TERMIOS_H */
