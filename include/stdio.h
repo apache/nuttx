@@ -163,8 +163,12 @@ ssize_t getline(FAR char **lineptr, size_t *n, FAR FILE *stream);
 FAR char *gets(FAR char *s);
 FAR char *gets_s(FAR char *s, rsize_t n);
 void   rewind(FAR FILE *stream);
+
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
 void   setbuf(FAR FILE *stream, FAR char *buf);
 int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
+#endif
+
 int    ungetc(int c, FAR FILE *stream);
 
 /* Operations on the stdout stream, buffers, paths,
