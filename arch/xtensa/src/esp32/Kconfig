@@ -81,25 +81,23 @@ config ESP32_SDMMC
 	---help---
 		No yet implemented
 
-config ESP32_SPI0
-	bool "SPI 0"
+config ESP32_SPI
+	bool
 	default n
-	depends on EXPERIMENTAL
-	---help---
-		No yet implemented
-
-config ESP32_SPI1
-	bool "SPI 1"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		No yet implemented
 
 config ESP32_SPI2
 	bool "SPI 2"
 	default n
-	---help---
-		No yet implemented
+	select ESP32_SPI
+	select ESP32_GPIO_IRQ
+	select SPI
+
+config ESP32_SPI3
+	bool "SPI 3"
+	default n
+	select ESP32_SPI
+	select ESP32_GPIO_IRQ
+	select SPI
 
 config XTENSA_TIMER1
 	bool "Xtensa Timer 1"
@@ -309,4 +307,58 @@ endif # SERIAL_IFLOWCONTROL || SERIAL_OFLOWCONTROL
 endif # ESP32_UART2
 
 endmenu # UART configuration
+
+menu "SPI configuration"
+	depends on ESP32_SPI
+
+if ESP32_SPI2
+
+config ESP32_SPI2_CSPIN
+	int "SPI2 CS Pin"
+	default 13
+	range 0 39
+
+config ESP32_SPI2_CLKPIN
+	int "SPI2 CLK Pin"
+	default 14
+	range 0 39
+
+config ESP32_SPI2_MOSIPIN
+	int "SPI2 MOSI Pin"
+	default 15
+	range 0 39
+
+config ESP32_SPI2_MISOPIN
+	int "SPI2 MISO Pin"
+	default 2
+	range 0 39
+
+endif # ESP32_SPI2
+
+if ESP32_SPI3
+
+config ESP32_SPI3_CSPIN
+	int "SPI3 CS Pin"
+	default 13
+	range 0 39
+
+config ESP32_SPI3_CLKPIN
+	int "SPI3 CLK Pin"
+	default 14
+	range 0 39
+
+config ESP32_SPI3_MOSIPIN
+	int "SPI3 MOSI Pin"
+	default 15
+	range 0 39
+
+config ESP32_SPI3_MISOPIN
+	int "SPI3 MISO Pin"
+	default 2
+	range 0 39
+
+endif # ESP32_SPI3
+
+endmenu # ESP32_SPI
+
 endif # ARCH_CHIP_ESP32
