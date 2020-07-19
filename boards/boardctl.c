@@ -152,7 +152,6 @@ static inline int
             case BOARDIOC_USBDEV_CONNECT:    /* Connect the USB MSC device */
               {
                 DEBUGASSERT(ctrl->handle != NULL);
-#warning Missing logic
                 ret = -ENOSYS;
               }
               break;
