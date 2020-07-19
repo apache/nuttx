@@ -188,11 +188,15 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   FAR struct avr_spidev_s *priv = (FAR struct avr_spidev_s *)dev;
   uint32_t actual;
 
+  /* TODO: This is missing the actual logic to update the frequency.
+   * The divider bits are computed but not actually used.
+   */
+
   /* Has the request frequency changed? */
 
   if (frequency != priv->frequency)
     {
-      /* Read the SPI status and control registers, clearing all divider bits */
+      /* Read the SPI status and control registers, clearing all div bits */
 
       uint8_t spcr = SPCR & ~((1 << SPR0) | (1 << SPR1));
       uint8_t spsr = SPSR & ~(1 << SPI2X);
@@ -235,8 +239,6 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
           spcr  |= (1 << SPR0) | (1 << SPR1);
           actual = BOARD_CPU_CLOCK / 128;
         }
-
-#warning REVISIT: spcr/spsr are never used
 
       /* Save the frequency setting */
 
