@@ -54,7 +54,7 @@ ARCHCPUFLAGS = -mpart=uc3b0256
 # Add the builtin library
 
 EXTRA_LIBS += -lgcc
-EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcc.a}}"
+EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name}}"
 
 ifneq ($(CONFIG_LIBM),y)
   EXTRA_LIBS += -lm
