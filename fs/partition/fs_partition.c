@@ -156,7 +156,8 @@ int parse_block_partition(FAR const char *path,
 
   state.mtd = NULL;
 
-  ret = state.blk->u.i_bops->ioctl(state.blk, MTDIOC_GEOMETRY, (unsigned long)&mgeo);
+  ret = state.blk->u.i_bops->ioctl(
+    state.blk, MTDIOC_GEOMETRY, (unsigned long)(uintptr_t)&mgeo);
   if (ret >= 0)
     {
       state.blocksize = mgeo.blocksize;
@@ -207,7 +208,7 @@ int parse_mtd_partition(FAR struct mtd_dev_s *mtd,
   struct mtd_geometry_s mgeo;
   int ret;
 
-  ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)&mgeo);
+  ret = mtd->ioctl(mtd, MTDIOC_GEOMETRY, (unsigned long)(uintptr_t)&mgeo);
   if (ret < 0)
     {
       return ret;

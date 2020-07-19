@@ -224,6 +224,7 @@ static int part_geometry(FAR struct inode *inode, struct geometry *geometry)
 
 static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 {
+  FAR uintptr_t ptr_arg = (uintptr_t)arg;
   FAR struct part_struct_s *dev = inode->i_private;
   FAR struct inode *parent = dev->parent;
   int ret = -ENOTTY;
@@ -232,7 +233,8 @@ static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
     {
       if (cmd == MTDIOC_PROTECT || cmd == MTDIOC_UNPROTECT)
         {
-          FAR struct mtd_protect_s *prot = (FAR struct mtd_protect_s *)arg;
+          FAR struct mtd_protect_s *prot =
+            (FAR struct mtd_protect_s *)ptr_arg;
 
           prot->startblock += dev->firstsector;
         }
@@ -242,7 +244,7 @@ static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
         {
           if (cmd == BIOC_XIPBASE || cmd == MTDIOC_XIPBASE)
             {
-              FAR void **base = (FAR void **)arg;
+              FAR void **base = (FAR void **)ptr_arg;
               struct geometry geo;
 
               ret = parent->u.i_bops->geometry(parent, &geo);
@@ -255,7 +257,7 @@ static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
           else if (cmd == MTDIOC_GEOMETRY)
             {
               FAR struct mtd_geometry_s *mgeo =
-                (FAR struct mtd_geometry_s *)arg;
+                (FAR struct mtd_geometry_s *)ptr_arg;
               uint32_t blkper = mgeo->erasesize / mgeo->blocksize;
 
               mgeo->neraseblocks = dev->nsectors / blkper;
