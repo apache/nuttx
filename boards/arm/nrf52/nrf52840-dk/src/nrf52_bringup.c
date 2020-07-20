@@ -49,6 +49,12 @@
 #include "nrf52840-dk.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NRF52_TIMER (0)
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -173,6 +179,18 @@ int nrf52_bringup(void)
              ret);
     }
 #endif /* CONFIG_LPWAN_SX127X */
+
+#ifdef CONFIG_TIMER
+  /* Configure TIMER driver */
+
+  ret = nrf52_timer_driver_setup("/dev/timer0", NRF52_TIMER);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+    }
+#endif
 
   UNUSED(ret);
   return OK;

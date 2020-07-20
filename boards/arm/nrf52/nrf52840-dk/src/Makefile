@@ -75,4 +75,8 @@ ifeq ($(CONFIG_NRF52840DK_HIGHPRI),y)
 CSRCS += nrf52_highpri.c
 endif
 
+ifeq ($(CONFIG_TIMER),y)
+CSRCS += nrf52_timer.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
