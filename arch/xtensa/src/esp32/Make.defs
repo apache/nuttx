@@ -100,6 +100,10 @@ CHIP_CSRCS += esp32_gpio.c esp32_intdecode.c esp32_irq.c esp32_region.c
 CHIP_CSRCS += esp32_timerisr.c
 CHIP_CSRCS += esp32_user.c
 
+ifeq ($(CONFIG_ESP32_I2C),y)
+CHIP_CSRCS += esp32_i2c.c
+endif
+
 ifeq ($(CONFIG_ESP32_SPI),y)
 CHIP_CSRCS += esp32_spi.c
   ifeq ($(CONFIG_SPI_SLAVE),y)
