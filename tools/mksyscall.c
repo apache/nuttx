@@ -158,7 +158,7 @@ static void get_fieldname(const char *arg, char *fieldname)
            */
 
           pstart++;
-          strncpy(fieldname, pstart, MAX_PARMSIZE);
+          strncpy(fieldname, pstart, MAX_PARMSIZE - 1);
           return;
         }
     }
