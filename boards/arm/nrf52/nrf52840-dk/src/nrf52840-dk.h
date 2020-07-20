@@ -161,10 +161,23 @@ int nrf52_hts221_initialize(char *devpath);
  *
  * Description:
  *   Initialize SX127X LPWAN interaface.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_LPWAN_SX127X
 int nrf52_lpwaninitialize(void);
+#endif
+
+/****************************************************************************
+ * Name: nrf52_timer_driver_setup
+ *
+ * Description:
+ *   Initialize TIMER driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIMER
+int nrf52_timer_driver_setup(FAR const char *devpath, int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */
