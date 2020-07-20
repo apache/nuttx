@@ -266,7 +266,7 @@
 #define SPI_FLASH_PER_S         16
 
 #define SPI_ADDR_OFFSET         (0x4)
-#define SPI_ADDR_REG            (i)  (REG_SPI_BASE(i) + SPI_ADDR_OFFSET)
+#define SPI_ADDR_REG(i)         (REG_SPI_BASE(i) + SPI_ADDR_OFFSET)
 
 /* The CSV actually is wrong here. It indicates that the lower 8 bits of
  * this register are reserved. This is not true, all 32 bits of
@@ -274,7 +274,7 @@
  */
 
 #define SPI_CTRL_OFFSET         (0x8)
-#define SPI_CTRL_REG            (i)  (REG_SPI_BASE(i) + SPI_CTRL_OFFSET)
+#define SPI_CTRL_REG(i)         (REG_SPI_BASE(i) + SPI_CTRL_OFFSET)
 
 /* SPI_WR_BIT_ORDER : R/W ;bitpos:[26] ;default: 1'b0 ; */
 
@@ -437,7 +437,7 @@
 #define SPI_FCS_CRC_EN_S        10
 
 #define SPI_CTRL1_OFFSET        (0xC)
-#define SPI_CTRL1_REG           (i)  (REG_SPI_BASE(i) + SPI_CTRL1_OFFSET)
+#define SPI_CTRL1_REG(i)        (REG_SPI_BASE(i) + SPI_CTRL1_OFFSET)
 
 /* SPI_CS_HOLD_DELAY : R/W ;bitpos:[31:28] ;default: 4'h5 ; */
 
@@ -460,7 +460,7 @@
 #define SPI_CS_HOLD_DELAY_RES_S  16
 
 #define SPI_RD_STATUS_OFFSET    (0x10)
-#define SPI_RD_STATUS_REG       (i)  (REG_SPI_BASE(i) + SPI_RD_STATUS_OFFSET)
+#define SPI_RD_STATUS_REG(i)    (REG_SPI_BASE(i) + SPI_RD_STATUS_OFFSET)
 
 /* SPI_STATUS_EXT : R/W ;bitpos:[31:24] ;default: 8'h00 ; */
 
@@ -492,7 +492,7 @@
 #define SPI_S_STATUS_S          0
 
 #define SPI_CTRL2_OFFSET        (0x14)
-#define SPI_CTRL2_REG           (i)  (REG_SPI_BASE(i) + SPI_CTRL2_OFFSET)
+#define SPI_CTRL2_REG(i)        (REG_SPI_BASE(i) + SPI_CTRL2_OFFSET)
 
 /* SPI_CS_DELAY_NUM : R/W ;bitpos:[31:28] ;default: 4'h0 ; */
 
@@ -614,7 +614,7 @@
 #define SPI_SETUP_TIME_S        0
 
 #define SPI_CLOCK_OFFSET        (0x18)
-#define SPI_CLOCK_REG           (i)  (REG_SPI_BASE(i) + SPI_CLOCK_OFFSET)
+#define SPI_CLOCK_REG(i)        (REG_SPI_BASE(i) + SPI_CLOCK_OFFSET)
 
 /* SPI_CLK_EQU_SYSCLK : R/W ;bitpos:[31] ;default: 1'b1 ; */
 
@@ -670,7 +670,7 @@
 #define SPI_CLKCNT_L_S          0
 
 #define SPI_USER_OFFSET         (0x1C)
-#define SPI_USER_REG            (i)  (REG_SPI_BASE(i) + SPI_USER_OFFSET)
+#define SPI_USER_REG(i)         (REG_SPI_BASE(i) + SPI_USER_OFFSET)
 
 /* SPI_USR_COMMAND : R/W ;bitpos:[31] ;default: 1'b1 ; */
 
@@ -967,7 +967,7 @@
 #define SPI_DOUTDIN_S           0
 
 #define SPI_USER1_OFFSET        (0x20)
-#define SPI_USER1_REG           (i)  (REG_SPI_BASE(i) + SPI_USER1_OFFSET)
+#define SPI_USER1_REG(i)        (REG_SPI_BASE(i) + SPI_USER1_OFFSET)
 
 /* SPI_USR_ADDR_BITLEN : RO ;bitpos:[31:26] ;default: 6'd23 ; */
 
@@ -992,7 +992,7 @@
 #define SPI_USR_DUMMY_CYCLELEN_S  0
 
 #define SPI_USER2_OFFSET        (0x24)
-#define SPI_USER2_REG           (i)  (REG_SPI_BASE(i) + SPI_USER2_OFFSET)
+#define SPI_USER2_REG(i)        (REG_SPI_BASE(i) + SPI_USER2_OFFSET)
 
 /* SPI_USR_COMMAND_BITLEN : R/W ;bitpos:[31:28] ;default: 4'd7 ; */
 
@@ -1015,7 +1015,7 @@
 #define SPI_USR_COMMAND_VALUE_S  0
 
 #define SPI_MOSI_DLEN_OFFSET    (0x28)
-#define SPI_MOSI_DLEN_REG       (i)  (REG_SPI_BASE(i) + SPI_MOSI_DLEN_OFFSET)
+#define SPI_MOSI_DLEN_REG(i)    (REG_SPI_BASE(i) + SPI_MOSI_DLEN_OFFSET)
 
 /* SPI_USR_MOSI_DBITLEN : R/W ;bitpos:[23:0] ;default: 24'h0 ; */
 
@@ -1029,7 +1029,7 @@
 #define SPI_USR_MOSI_DBITLEN_S  0
 
 #define SPI_MISO_DLEN_OFFSET    (0x2C)
-#define SPI_MISO_DLEN_REG       (i)  (REG_SPI_BASE(i) + SPI_MISO_DLEN_OFFSET)
+#define SPI_MISO_DLEN_REG(i)    (REG_SPI_BASE(i) + SPI_MISO_DLEN_OFFSET)
 
 /* SPI_USR_MISO_DBITLEN : R/W ;bitpos:[23:0] ;default: 24'h0 ; */
 
@@ -1146,7 +1146,7 @@
 #define SPI_CS0_DIS_S           0
 
 #define SPI_SLAVE_OFFSET        (0x38)
-#define SPI_SLAVE_REG           (i)  (REG_SPI_BASE(i) + SPI_SLAVE_OFFSET)
+#define SPI_SLAVE_REG(i)        (REG_SPI_BASE(i) + SPI_SLAVE_OFFSET)
 
 /* SPI_SYNC_RESET : R/W ;bitpos:[31] ;default: 1'b0 ; */
 
@@ -1308,7 +1308,7 @@
 #define SPI_SLV_RD_BUF_DONE_S   0
 
 #define SPI_SLAVE1_OFFSET       (0x3C)
-#define SPI_SLAVE1_REG          (i)  (REG_SPI_BASE(i) + SPI_SLAVE1_OFFSET)
+#define SPI_SLAVE1_REG(i)       (REG_SPI_BASE(i) + SPI_SLAVE1_OFFSET)
 
 /* SPI_SLV_STATUS_BITLEN : R/W ;bitpos:[31:27] ;default: 5'b0 ; */
 
@@ -1407,7 +1407,7 @@
 #define SPI_SLV_RDBUF_DUMMY_EN_S  0
 
 #define SPI_SLAVE2_OFFSET       (0x40)
-#define SPI_SLAVE2_REG          (i)  (REG_SPI_BASE(i) + SPI_SLAVE2_OFFSET)
+#define SPI_SLAVE2_REG(i)       (REG_SPI_BASE(i) + SPI_SLAVE2_OFFSET)
 
 /* SPI_SLV_WRBUF_DUMMY_CYCLELEN : R/W ;bitpos:[31:24] ;default: 8'b0 ; */
 
@@ -1458,7 +1458,7 @@
 #define SPI_SLV_RDSTA_DUMMY_CYCLELEN_S  0
 
 #define SPI_SLAVE3_OFFSET       (0x44)
-#define SPI_SLAVE3_REG          (i)  (REG_SPI_BASE(i) + SPI_SLAVE3_OFFSET)
+#define SPI_SLAVE3_REG(i)       (REG_SPI_BASE(i) + SPI_SLAVE3_OFFSET)
 
 /* SPI_SLV_WRSTA_CMD_VALUE : R/W ;bitpos:[31:24] ;default: 8'b0 ; */
 
@@ -1525,7 +1525,7 @@
 #define SPI_SLV_RDBUF_DBITLEN_S  0
 
 #define SPI_CACHE_FCTRL_OFFSET  (0x50)
-#define SPI_CACHE_FCTRL_REG     (i)  (REG_SPI_BASE(i) + SPI_CACHE_FCTRL_OFFSET)
+#define SPI_CACHE_FCTRL_REG(i)  (REG_SPI_BASE(i) + SPI_CACHE_FCTRL_OFFSET)
 
 /* SPI_CACHE_FLASH_PES_EN : R/W ;bitpos:[3] ;default: 1'b0 ; */
 
@@ -1576,7 +1576,7 @@
 #define SPI_CACHE_REQ_EN_S      0
 
 #define SPI_CACHE_SCTRL_OFFSET  (0x54)
-#define SPI_CACHE_SCTRL_REG     (i)  (REG_SPI_BASE(i) + SPI_CACHE_SCTRL_OFFSET)
+#define SPI_CACHE_SCTRL_REG(i)  (REG_SPI_BASE(i) + SPI_CACHE_SCTRL_OFFSET)
 
 /* SPI_CACHE_SRAM_USR_WCMD : R/W ;bitpos:[28] ;default: 1'b1 ; */
 
@@ -1680,7 +1680,7 @@
 #define SPI_USR_SRAM_DIO_S  1
 
 #define SPI_SRAM_CMD_OFFSET     (0x58)
-#define SPI_SRAM_CMD_REG        (i)  (REG_SPI_BASE(i) + SPI_SRAM_CMD_OFFSET)
+#define SPI_SRAM_CMD_REG(i)     (REG_SPI_BASE(i) + SPI_SRAM_CMD_OFFSET)
 
 /* SPI_SRAM_RSTIO : R/W ;bitpos:[4] ;default: 1'b0 ; */
 
@@ -1769,7 +1769,7 @@
 #define SPI_CACHE_SRAM_USR_WR_CMD_VALUE_S  0
 
 #define SPI_SLV_RD_BIT_OFFSET   (0x64)
-#define SPI_SLV_RD_BIT_REG      (i)  (REG_SPI_BASE(i) + SPI_SLV_RD_BIT_OFFSET)
+#define SPI_SLV_RD_BIT_REG(i)   (REG_SPI_BASE(i) + SPI_SLV_RD_BIT_OFFSET)
 
 /* SPI_SLV_RDATA_BIT : RW ;bitpos:[23:0] ;default: 24'b0 ; */
 
@@ -1795,7 +1795,7 @@
 #define SPI_BUF0_S              0
 
 #define SPI_W1_OFFSET           (0x84)
-#define SPI_W1_REG              (i)  (REG_SPI_BASE(i) + SPI_W1_OFFSET)
+#define SPI_W1_REG(i)           (REG_SPI_BASE(i) + SPI_W1_OFFSET)
 
 /* SPI_BUF1 : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1807,7 +1807,7 @@
 #define SPI_BUF1_S              0
 
 #define SPI_W2_OFFSET           (0x88)
-#define SPI_W2_REG              (i)  (REG_SPI_BASE(i) + SPI_W2_OFFSET)
+#define SPI_W2_REG(i)           (REG_SPI_BASE(i) + SPI_W2_OFFSET)
 
 /* SPI_BUF2 : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1819,7 +1819,7 @@
 #define SPI_BUF2_S              0
 
 #define SPI_W3_OFFSET           (0x8C)
-#define SPI_W3_REG              (i)  (REG_SPI_BASE(i) + SPI_W3_OFFSET)
+#define SPI_W3_REG(i)           (REG_SPI_BASE(i) + SPI_W3_OFFSET)
 
 /* SPI_BUF3 : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1831,7 +1831,7 @@
 #define SPI_BUF3_S              0
 
 #define SPI_W4_OFFSET           (0x90)
-#define SPI_W4_REG              (i)  (REG_SPI_BASE(i) + SPI_W4_OFFSET)
+#define SPI_W4_REG(i)           (REG_SPI_BASE(i) + SPI_W4_OFFSET)
 
 /* SPI_BUF4 : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1843,7 +1843,7 @@
 #define SPI_BUF4_S              0
 
 #define SPI_W5_OFFSET           (0x94)
-#define SPI_W5_REG              (i)  (REG_SPI_BASE(i) + SPI_W5_OFFSET)
+#define SPI_W5_REG(i)           (REG_SPI_BASE(i) + SPI_W5_OFFSET)
 
 /* SPI_BUF5 : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1855,7 +1855,7 @@
 #define SPI_BUF5_S              0
 
 #define SPI_W6_OFFSET           (0x98)
-#define SPI_W6_REG              (i)  (REG_SPI_BASE(i) + SPI_W6_OFFSET)
+#define SPI_W6_REG(i)           (REG_SPI_BASE(i) + SPI_W6_OFFSET)
 
 /* SPI_BUF6 : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1867,7 +1867,7 @@
 #define SPI_BUF6_S              0
 
 #define SPI_W7_OFFSET           (0x9C)
-#define SPI_W7_REG              (i)  (REG_SPI_BASE(i) + SPI_W7_OFFSET)
+#define SPI_W7_REG(i)           (REG_SPI_BASE(i) + SPI_W7_OFFSET)
 
 /* SPI_BUF7 : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1879,7 +1879,7 @@
 #define SPI_BUF7_S              0
 
 #define SPI_W8_OFFSET           (0xA0)
-#define SPI_W8_REG              (i)  (REG_SPI_BASE(i) + SPI_W8_OFFSET)
+#define SPI_W8_REG(i)           (REG_SPI_BASE(i) + SPI_W8_OFFSET)
 
 /* SPI_BUF8 : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1891,7 +1891,7 @@
 #define SPI_BUF8_S              0
 
 #define SPI_W9_OFFSET           (0xA4)
-#define SPI_W9_REG              (i)  (REG_SPI_BASE(i) + SPI_W9_OFFSET)
+#define SPI_W9_REG(i)           (REG_SPI_BASE(i) + SPI_W9_OFFSET)
 
 /* SPI_BUF9 : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1903,7 +1903,7 @@
 #define SPI_BUF9_S              0
 
 #define SPI_W10_OFFSET          (0xA8)
-#define SPI_W10_REG             (i)  (REG_SPI_BASE(i) + SPI_W10_OFFSET)
+#define SPI_W10_REG(i)          (REG_SPI_BASE(i) + SPI_W10_OFFSET)
 
 /* SPI_BUF10 : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1915,7 +1915,7 @@
 #define SPI_BUF10_S             0
 
 #define SPI_W11_OFFSET          (0xAC)
-#define SPI_W11_REG             (i)  (REG_SPI_BASE(i) + SPI_W11_OFFSET)
+#define SPI_W11_REG(i)          (REG_SPI_BASE(i) + SPI_W11_OFFSET)
 
 /* SPI_BUF11 : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1975,7 +1975,7 @@
 #define SPI_BUF15_S             0
 
 #define SPI_TX_CRC_OFFSET       (0xC0)
-#define SPI_TX_CRC_REG          (i)  (REG_SPI_BASE(i) + SPI_TX_CRC_OFFSET)
+#define SPI_TX_CRC_REG(i)       (REG_SPI_BASE(i) + SPI_TX_CRC_OFFSET)
 
 /* SPI_TX_CRC_DATA : R/W ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -1987,7 +1987,7 @@
 #define SPI_TX_CRC_DATA_S       0
 
 #define SPI_EXT0_OFFSET         (0xF0)
-#define SPI_EXT0_REG            (i)  (REG_SPI_BASE(i) + SPI_EXT0_OFFSET)
+#define SPI_EXT0_REG(i)         (REG_SPI_BASE(i) + SPI_EXT0_OFFSET)
 
 /* SPI_T_PP_ENA : R/W ;bitpos:[31] ;default: 1'b1 ; */
 
@@ -2017,7 +2017,7 @@
 #define SPI_T_PP_TIME_S         0
 
 #define SPI_EXT1_OFFSET         (0xF4)
-#define SPI_EXT1_REG            (i)  (REG_SPI_BASE(i) + SPI_EXT1_OFFSET)
+#define SPI_EXT1_REG(i)         (REG_SPI_BASE(i) + SPI_EXT1_OFFSET)
 
 /* SPI_T_ERASE_ENA : R/W ;bitpos:[31] ;default: 1'b1 ; */
 
@@ -2047,7 +2047,7 @@
 #define SPI_T_ERASE_TIME_S      0
 
 #define SPI_EXT2_OFFSET         (0xF8)
-#define SPI_EXT2_REG            (i)  (REG_SPI_BASE(i) + SPI_EXT2_OFFSET)
+#define SPI_EXT2_REG(i)         (REG_SPI_BASE(i) + SPI_EXT2_OFFSET)
 
 /* SPI_ST : RO ;bitpos:[2:0] ;default: 3'b0 ; */
 
@@ -2059,7 +2059,7 @@
 #define SPI_ST_S                0
 
 #define SPI_EXT3_OFFSET         (0xFC)
-#define SPI_EXT3_REG            (i)  (REG_SPI_BASE(i) + SPI_EXT3_OFFSET)
+#define SPI_EXT3_REG(i)         (REG_SPI_BASE(i) + SPI_EXT3_OFFSET)
 
 /* SPI_INT_HOLD_ENA : R/W ;bitpos:[1:0] ;default: 2'b0 ; */
 
@@ -2076,7 +2076,7 @@
 #define SPI_INT_HOLD_ENA_S      0
 
 #define SPI_DMA_CONF_OFFSET     (0x100)
-#define SPI_DMA_CONF_REG        (i)  (REG_SPI_BASE(i) + SPI_DMA_CONF_OFFSET)
+#define SPI_DMA_CONF_REG(i)     (REG_SPI_BASE(i) + SPI_DMA_CONF_OFFSET)
 
 /* SPI_DMA_CONTINUE : R/W ;bitpos:[16] ;default: 1'b0 ; */
 
@@ -2212,7 +2212,7 @@
 #define SPI_IN_RST_S            2
 
 #define SPI_DMA_OUT_LINK_OFFSET (0x104)
-#define SPI_DMA_OUT_LINK_REG    (i)  (REG_SPI_BASE(i) + SPI_DMA_OUT_LINK_OFFSET)
+#define SPI_DMA_OUT_LINK_REG(i) (REG_SPI_BASE(i) + SPI_DMA_OUT_LINK_OFFSET)
 
 /* SPI_OUTLINK_RESTART : R/W ;bitpos:[30] ;default: 1'b0 ; */
 
@@ -2251,7 +2251,7 @@
 #define SPI_OUTLINK_ADDR_S      0
 
 #define SPI_DMA_IN_LINK_OFFSET  (0x108)
-#define SPI_DMA_IN_LINK_REG     (i)  (REG_SPI_BASE(i) + SPI_DMA_IN_LINK_OFFSET)
+#define SPI_DMA_IN_LINK_REG(i)  (REG_SPI_BASE(i) + SPI_DMA_IN_LINK_OFFSET)
 
 /* SPI_INLINK_RESTART : R/W ;bitpos:[30] ;default: 1'b0 ; */
 
@@ -2301,7 +2301,7 @@
 #define SPI_INLINK_ADDR_S       0
 
 #define SPI_DMA_STATUS_OFFSET   (0x10C)
-#define SPI_DMA_STATUS_REG      (i)  (REG_SPI_BASE(i) + SPI_DMA_STATUS_OFFSET)
+#define SPI_DMA_STATUS_REG(i)   (REG_SPI_BASE(i) + SPI_DMA_STATUS_OFFSET)
 
 /* SPI_DMA_TX_EN : RO ;bitpos:[1] ;default: 1'b0 ; */
 
@@ -2322,7 +2322,7 @@
 #define SPI_DMA_RX_EN_S         0
 
 #define SPI_DMA_INT_ENA_OFFSET  (0x110)
-#define SPI_DMA_INT_ENA_REG     (i)  (REG_SPI_BASE(i) + SPI_DMA_INT_ENA_OFFSET)
+#define SPI_DMA_INT_ENA_REG(i)  (REG_SPI_BASE(i) + SPI_DMA_INT_ENA_OFFSET)
 
 /* SPI_OUT_TOTAL_EOF_INT_ENA : R/W ;bitpos:[8] ;default: 1'b0 ; */
 
@@ -2410,7 +2410,7 @@
 #define SPI_INLINK_DSCR_EMPTY_INT_ENA_S  0
 
 #define SPI_DMA_INT_RAW_OFFSET  (0x114)
-#define SPI_DMA_INT_RAW_REG     (i)  (REG_SPI_BASE(i) + SPI_DMA_INT_RAW_OFFSET)
+#define SPI_DMA_INT_RAW_REG(i)  (REG_SPI_BASE(i) + SPI_DMA_INT_RAW_OFFSET)
 
 /* SPI_OUT_TOTAL_EOF_INT_RAW : RO ;bitpos:[8] ;default: 1'b0 ; */
 
@@ -2495,7 +2495,7 @@
 #define SPI_INLINK_DSCR_EMPTY_INT_RAW_S  0
 
 #define SPI_DMA_INT_ST_OFFSET   (0x118)
-#define SPI_DMA_INT_ST_REG      (i)  (REG_SPI_BASE(i) + SPI_DMA_INT_ST_OFFSET)
+#define SPI_DMA_INT_ST_REG(i)   (REG_SPI_BASE(i) + SPI_DMA_INT_ST_OFFSET)
 
 /* SPI_OUT_TOTAL_EOF_INT_ST : RO ;bitpos:[8] ;default: 1'b0 ; */
 
@@ -2581,7 +2581,7 @@
 #define SPI_INLINK_DSCR_EMPTY_INT_ST_S  0
 
 #define SPI_DMA_INT_CLR_OFFSET  (0x11C)
-#define SPI_DMA_INT_CLR_REG     (i)  (REG_SPI_BASE(i) + SPI_DMA_INT_CLR_OFFSET)
+#define SPI_DMA_INT_CLR_REG(i)  (REG_SPI_BASE(i) + SPI_DMA_INT_CLR_OFFSET)
 
 /* SPI_OUT_TOTAL_EOF_INT_CLR : R/W ;bitpos:[8] ;default: 1'b0 ; */
 
@@ -2807,7 +2807,7 @@
 #define SPI_DMA_OUT_STATUS_S  0
 
 #define SPI_DMA_TSTATUS_OFFSET  (0x14C)
-#define SPI_DMA_TSTATUS_REG     (i)  (REG_SPI_BASE(i) + SPI_DMA_TSTATUS_OFFSET)
+#define SPI_DMA_TSTATUS_REG(i)  (REG_SPI_BASE(i) + SPI_DMA_TSTATUS_OFFSET)
 
 /* SPI_DMA_IN_STATUS : RO ;bitpos:[31:0] ;default: 32'b0 ; */
 
@@ -2819,7 +2819,7 @@
 #define SPI_DMA_IN_STATUS_S  0
 
 #define SPI_DATE_OFFSET         (0x3FC)
-#define SPI_DATE_REG            (i)  (REG_SPI_BASE(i) + SPI_DATE_OFFSET)
+#define SPI_DATE_REG(i)         (REG_SPI_BASE(i) + SPI_DATE_OFFSET)
 
 /* SPI_DATE : RO ;bitpos:[27:0] ;default: 32'h1604270 ; */
 
