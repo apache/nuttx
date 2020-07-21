@@ -59,6 +59,7 @@ include tls/Make.defs
 include uio/Make.defs
 include unistd/Make.defs
 include userfs/Make.defs
+include uuid/Make.defs
 include wchar/Make.defs
 include wctype/Make.defs
 include wqueue/Make.defs
