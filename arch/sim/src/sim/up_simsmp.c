@@ -99,8 +99,15 @@ volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
 
 void nx_start(void);
 void up_cpu_started(void);
-int up_cpu_paused(int cpu);
+int  up_cpu_paused(int cpu);
 void host_sleepuntil(uint64_t nsec);
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+struct tcb_s *up_this_task(void);
+void sched_note_cpu_start(struct tcb_s *tcb, int cpu);
+void sched_note_cpu_pause(struct tcb_s *tcb, int cpu);
+void sched_note_cpu_resume(struct tcb_s *tcb, int cpu);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -330,6 +337,12 @@ int up_cpu_start(int cpu)
   struct sim_cpuinfo_s cpuinfo;
   int ret;
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the start event */
+
+  sched_note_cpu_start(up_this_task(), cpu);
+#endif
+
   /* Initialize the CPU info */
 
   cpuinfo.cpu = cpu;
@@ -400,6 +413,12 @@ errout_with_mutex:
 
 int up_cpu_pause(int cpu)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the pause event */
+
+  sched_note_cpu_pause(up_this_task(), cpu);
+#endif
+
   /* Take the spinlock that will prevent the CPU thread from running */
 
   g_cpu_wait[cpu]   = SP_LOCKED;
@@ -440,6 +459,12 @@ int up_cpu_pause(int cpu)
 
 int up_cpu_resume(int cpu)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the resume event */
+
+  sched_note_cpu_resume(up_this_task(), cpu);
+#endif
+
   /* Release the spinlock that will alloc the CPU thread to continue */
 
   g_cpu_wait[cpu] = SP_UNLOCKED;
