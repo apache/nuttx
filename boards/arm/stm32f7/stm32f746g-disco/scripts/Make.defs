@@ -53,8 +53,8 @@ ARCHCFLAGS = -fno-builtin
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
-  ARCHCFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m7
-  ARCHCXXFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m7 -DCONFIG_WCHAR_BUILTIN
+  ARCHCFLAGS += -nostdlib -ffreestanding
+  ARCHCXXFLAGS += -nostdlib -ffreestanding -DCONFIG_WCHAR_BUILTIN
 else
   ARCHCXXFLAGS += -fno-rtti
   ifneq ($(CONFIG_DEBUG_NOOPT),y)
