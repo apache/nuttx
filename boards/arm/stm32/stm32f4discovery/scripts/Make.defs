@@ -45,8 +45,8 @@ ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
-  ARCHCFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m4
-  ARCHCXXFLAGS += -nostdlib -ffreestanding -target arm-none-eabi -march=armv7-m -mcpu=cortex-m4 -DCONFIG_WCHAR_BUILTIN
+  ARCHCFLAGS += -nostdlib -ffreestanding
+  ARCHCXXFLAGS += -nostdlib -ffreestanding -DCONFIG_WCHAR_BUILTIN
 else
   ARCHCFLAGS += -funwind-tables
   ARCHCXXFLAGS += -fno-rtti -funwind-tables
