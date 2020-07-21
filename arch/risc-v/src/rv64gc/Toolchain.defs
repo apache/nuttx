@@ -58,8 +58,6 @@ endif
 # Each toolchain definition should set:
 #
 #  CROSSDEV         The GNU toolchain triple (command prefix)
-#  ARCROSSDEV       If required, an alternative prefix used when
-#                   invoking ar and nm.
 #  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
 #                   options, etc.
 #  MAXOPTIMIZATION  The maximum optimization level that results in
@@ -74,7 +72,6 @@ endif
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
   CROSSDEV ?= riscv64-unknown-elf-
-  ARCROSSDEV ?= riscv64-unknown-elf-
 endif
 
 # Individual tools may limit the optimization level but, by default, the
@@ -91,8 +88,8 @@ CXX = $(CROSSDEV)g++
 CPP = $(CROSSDEV)gcc -E -P -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(ARCROSSDEV)ar rcs
-NM = $(ARCROSSDEV)nm
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
