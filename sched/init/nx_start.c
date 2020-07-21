@@ -450,12 +450,12 @@ void nx_start(void)
       if (cpu > 0)
         {
           g_idletcb[cpu].cmn.start      = nx_idle_trampoline;
-          g_idletcb[cpu].cmn.entry.main = nx_idle_task;
+          g_idletcb[cpu].cmn.entry.main = (main_t)nx_idle_trampoline;
         }
       else
 #endif
         {
-          g_idletcb[cpu].cmn.start      = (start_t)nx_start;
+          g_idletcb[cpu].cmn.start      = nx_start;
           g_idletcb[cpu].cmn.entry.main = (main_t)nx_start;
         }
 
