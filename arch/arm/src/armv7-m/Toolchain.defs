@@ -63,8 +63,6 @@ endif
 # Each toolchain definition should set:
 #
 #  CROSSDEV         The GNU toolchain triple (command prefix)
-#  ARCROSSDEV       If required, an alternative prefix used when
-#                   invoking ar and nm.
 #  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
 #                   FPU options, etc.
 #  MAXOPTIMIZATION  The maximum optimization level that results in
@@ -114,11 +112,9 @@ endif
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),BUILDROOT)
 ifeq ($(CONFIG_ARMV7M_OABI_TOOLCHAIN),y)
   CROSSDEV ?= arm-nuttx-elf-
-  ARCROSSDEV ?= arm-nuttx-elf-
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) $(TOOLCHAIN_MFLOAT)
 else
   CROSSDEV ?= arm-nuttx-eabi-
-  ARCROSSDEV ?= arm-nuttx-eabi-
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
   MAXOPTIMIZATION ?= -Os
@@ -128,7 +124,6 @@ endif
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= arm-none-eabi-
-  ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
@@ -137,7 +132,6 @@ endif
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
   CROSSDEV ?= arm-none-eabi-
-  ARCROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os
   ARCHCPUFLAGS = -target arm-none-eabi $(TOOLCHAIN_MCPU) $(TOOLCHAIN_MFLOAT)
   CC = clang
@@ -151,8 +145,8 @@ endif
 
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(ARCROSSDEV)ar rcs
-NM = $(ARCROSSDEV)nm
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 

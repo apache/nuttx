@@ -36,7 +36,6 @@
 ############################################################################
 
 CROSSDEV = riscv32-unknown-elf-
-ARCROSSDEV = riscv32-unknown-elf-
 ARCHCPUFLAGS = -march=rv32i
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),)
@@ -50,8 +49,8 @@ CXX = $(CROSSDEV)g++
 CPP = $(CROSSDEV)gcc -E -P -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(ARCROSSDEV)ar rcs
-NM = $(ARCROSSDEV)nm
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
