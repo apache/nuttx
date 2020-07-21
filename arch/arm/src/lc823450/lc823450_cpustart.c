@@ -132,7 +132,7 @@ static void cpu1_boot(void)
 
   /* Then transfer control to the IDLE task */
 
-  nx_idle_task(0, NULL);
+  nx_idle_trampoline();
 }
 
 /****************************************************************************
