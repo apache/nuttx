@@ -239,14 +239,14 @@ struct note_spinlock_s
 struct note_syscall_enter_s
 {
   struct note_common_s nsc_cmn; /* Common note parameters */
-  int nsc_nr;                   /* System call number */
+  uint8_t nsc_nr;               /* System call number */
 };
 
 struct note_syscall_leave_s
 {
   struct note_common_s nsc_cmn; /* Common note parameters */
   uintptr_t nsc_result;         /* Result of the system call */
-  int nsc_nr;                   /* System call number */
+  uint8_t nsc_nr;               /* System call number */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_SYSCALL */
 
@@ -256,7 +256,7 @@ struct note_syscall_leave_s
 struct note_irqhandler_s
 {
   struct note_common_s nih_cmn; /* Common note parameters */
-  int nih_irq;                  /* IRQ number */
+  uint8_t nih_irq;              /* IRQ number */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER */
 #endif /* CONFIG_SCHED_INSTRUMENTATION_BUFFER */

@@ -585,6 +585,7 @@ void sched_note_syscall_enter(int nr, int argc, ...)
 
   note_common(tcb, &note.nsc_cmn, sizeof(struct note_syscall_enter_s),
               NOTE_SYSCALL_ENTER);
+  DEBUGASSERT(nr <= UCHAR_MAX);
   note.nsc_nr = nr;
 
   /* Add the note to circular buffer */
@@ -602,6 +603,7 @@ void sched_note_syscall_leave(int nr, uintptr_t result)
   note_common(tcb, &note.nsc_cmn, sizeof(struct note_syscall_leave_s),
               NOTE_SYSCALL_LEAVE);
   note.nsc_result = result;
+  DEBUGASSERT(nr <= UCHAR_MAX);
   note.nsc_nr     = nr;
 
   /* Add the note to circular buffer */
@@ -620,6 +622,7 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
 
   note_common(tcb, &note.nih_cmn, sizeof(struct note_irqhandler_s),
               enter ? NOTE_IRQ_ENTER : NOTE_IRQ_LEAVE);
+  DEBUGASSERT(irq <= UCHAR_MAX);
   note.nih_irq = irq;
 
   /* Add the note to circular buffer */
