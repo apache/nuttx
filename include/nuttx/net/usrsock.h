@@ -168,6 +168,7 @@ begin_packed_struct struct usrsock_request_sendto_s
   struct usrsock_request_common_s head;
 
   int16_t usockid;
+  int32_t flags;
   uint16_t addrlen;
   uint16_t buflen;
 } end_packed_struct;
@@ -177,6 +178,7 @@ begin_packed_struct struct usrsock_request_recvfrom_s
   struct usrsock_request_common_s head;
 
   int16_t usockid;
+  int32_t flags;
   uint16_t max_buflen;
   uint16_t max_addrlen;
 } end_packed_struct;
