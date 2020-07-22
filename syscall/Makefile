@@ -93,7 +93,7 @@ $(BIN3): $(WRAP_OBJS)
 
 $(SYSCALLWRAPS): .context
 
-.depend: Makefile $(SRCS)
+.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
 	$(Q) $(MKDEP) $(PROXYDEPPATH) $(STUBDEPPATH) $(WRAPDEPPATH) \
 	  "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 	$(Q) touch $@

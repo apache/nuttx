@@ -207,7 +207,7 @@ export_startup: board/libboard$(LIBEXT) $(STARTUP_OBJS)
 
 # Build dependencies
 
-.depend: Makefile asm_mem.h chip/Make.defs $(DEPSRCS)
+.depend: Makefile asm_mem.h chip/Make.defs $(DEPSRCS) $(TOPDIR)$(DELIM).config
 	$(Q) if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
 	fi

@@ -138,7 +138,7 @@ export_startup: board/libboard$(LIBEXT) $(STARTUP_OBJS)
 
 # Dependencies
 
-.depend: Makefile chip/Make.defs $(SRCS)
+.depend: Makefile chip/Make.defs $(SRCS) $(TOPDIR)$(DELIM).config
 ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" depend
 endif

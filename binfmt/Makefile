@@ -81,7 +81,7 @@ $(BINFMT_COBJS): %$(OBJEXT): %.c
 $(BIN): $(BINFMT_OBJS)
 	$(call ARCHIVE, $@, $(BINFMT_OBJS))
 
-.depend: Makefile $(BINFMT_SRCS)
+.depend: Makefile $(BINFMT_SRCS) $(TOPDIR)$(DELIM).config
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(BINFMT_SRCS) >Make.dep
 	$(Q) touch $@
 
