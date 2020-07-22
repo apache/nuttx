@@ -179,7 +179,6 @@ static enum compiler_e get_compiler(char *ccname, enum os_e os)
 
   if (strstr(ccname, "gcc")     != NULL ||
       strstr(ccname, "g++")     != NULL ||
-      strcmp(ccname, "cc")      == 0    ||
       strncmp(ccname, "cc.", 3) == 0)
     {
       return COMPILER_GCC;
@@ -204,8 +203,9 @@ static enum compiler_e get_compiler(char *ccname, enum os_e os)
     }
   else
     {
-      fprintf(stderr, "ERROR:  Unknown compiler: %s\n", ccname);
-      return COMPILER_UNKNOWN;
+      /* Unknown compiler. Assume GCC-compatible */
+
+      return COMPILER_GCC;
     }
 }
 
