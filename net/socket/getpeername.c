@@ -105,12 +105,10 @@ int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
    * system (?)
    */
 
-#ifdef CONFIG_DEBUG_FEATURES
-  if (addr == NULL || *addrlen <= 0)
+  if (addr == NULL || addrlen == NULL || *addrlen <= 0)
     {
       return -EINVAL;
     }
-#endif
 
   /* Let the address family's send() method handle the operation */
 

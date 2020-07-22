@@ -126,12 +126,10 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Verify that non-NULL pointers were passed */
 
-#ifdef CONFIG_DEBUG_FEATURES
   if (buf == NULL)
     {
       return -EINVAL;
     }
-#endif
 
   /* If to is NULL or tolen is zero, then this function is same as send (for
    * connected socket types)
