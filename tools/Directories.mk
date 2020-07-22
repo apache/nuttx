@@ -99,7 +99,12 @@ ifeq ($(CONFIG_LIB_SYSCALL),y)
 CONTEXTDIRS += syscall
 USERDEPDIRS += syscall
 else
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION_SYSCALL),y)
+CONTEXTDIRS += syscall
+USERDEPDIRS += syscall
+else
 CLEANDIRS += syscall
+endif
 endif
 
 ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
