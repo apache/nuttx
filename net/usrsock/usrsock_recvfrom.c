@@ -424,6 +424,15 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                */
 
               outaddrlen = state.valuelen_nontrunc;
+
+              /* If the MSG_PEEK flag is enabled, it will only peek
+               * from the buffer, so remark the input as ready.
+               */
+
+              if (flags & MSG_PEEK)
+                {
+                  conn->flags |= USRSOCK_EVENT_RECVFROM_AVAIL;
+                }
             }
         }
 
