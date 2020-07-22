@@ -194,7 +194,7 @@ endif
 
 # Dependencies
 
-.depend: Makefile chip$(DELIM)Make.defs $(SRCS)
+.depend: Makefile chip$(DELIM)Make.defs $(SRCS) $(TOPDIR)$(DELIM).config
 ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" depend
 endif

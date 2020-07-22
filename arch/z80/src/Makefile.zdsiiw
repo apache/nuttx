@@ -126,7 +126,7 @@ nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) nuttx.linkcmd
 	@echo "LD:  nuttx$(EXEEXT)"
 	$(Q) "$(LD)" $(LDFLAGS)
 
-.depend: Makefile chip$(DELIM)Make.defs $(DEPSRCS)
+.depend: Makefile chip$(DELIM)Make.defs $(DEPSRCS) $(TOPDIR)$(DELIM).config
 	$(Q) if exist board$(DELIM)Makefile ( $(MAKE) -C board TOPDIR="$(TOPDIR)" depend )
 	$(Q) $(MKDEP) --dep-path chip --dep-path common "$(CC)" -- $(CFLAGS) -- $(DEPSRCS) >Make.dep
 	$(Q) touch $@

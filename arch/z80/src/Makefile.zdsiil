@@ -137,7 +137,7 @@ nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) nuttx.linkcmd
 	@echo "LD:  nuttx$(EXEEXT)"
 	$(Q) "$(LD)" $(LDFLAGS)
 
-.depend: Makefile chip$(DELIM)Make.defs $(DEPSRCS)
+.depend: Makefile chip$(DELIM)Make.defs $(DEPSRCS) $(TOPDIR)$(DELIM).config
 	$(Q) if [ -e board$(DELIM)Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
 	fi

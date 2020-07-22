@@ -235,7 +235,7 @@ endif
 
 # Dependencies
 
-.depend: Makefile gensources $(SRCS)
+.depend: Makefile gensources $(SRCS) $(TOPDIR)$(DELIM).config
 	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >bin/Make.dep
 ifneq ($(CONFIG_BUILD_FLAT),y)
 	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >kbin/Make.dep

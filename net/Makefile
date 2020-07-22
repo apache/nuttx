@@ -92,7 +92,7 @@ $(COBJS): %$(OBJEXT): %.c
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-.depend: Makefile $(SRCS)
+.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
 ifeq ($(CONFIG_NET),y)
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif

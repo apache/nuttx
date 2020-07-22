@@ -124,7 +124,7 @@ $(BIN): $(OBJS)
 
 mklibgraphics: $(BIN)
 
-.depend: gensources Makefile $(SRCS)
+.depend: gensources Makefile $(SRCS) $(TOPDIR)$(DELIM).config
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 	$(Q) touch $@
 
