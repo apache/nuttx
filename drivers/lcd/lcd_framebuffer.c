@@ -198,7 +198,7 @@ static int lcdfb_update(FAR struct lcdfb_dev_s *priv,
   endx = rect->pt2.x;
   if (endx >= priv->xres)
     {
-      endx = priv->xres-1;
+      endx = priv->xres - 1;
     }
 
   starty = rect->pt1.y;
@@ -210,7 +210,7 @@ static int lcdfb_update(FAR struct lcdfb_dev_s *priv,
   endy = rect->pt2.y;
   if (endy >= priv->yres)
     {
-      endy = priv->yres-1;
+      endy = priv->yres - 1;
     }
 
   /* If the display uses a value of BPP < 8, then we may have to extend the
@@ -330,7 +330,7 @@ static int lcdfb_getcmap(FAR struct fb_vtable_s *vtable,
 
   if (priv != NULL && cmap != NULL)
     {
-      /* Get the video info from the contained LCD */
+      /* Get the color map from the contained LCD */
 
       lcd = priv->lcd
       DEBUGASSERT(lcd->getcmap != NULL);
@@ -364,7 +364,7 @@ static int lcdfb_putcmap(FAR struct fb_vtable_s *vtable,
 
   if (priv != NULL && cmap != NULL)
     {
-      /* Get the video info from the contained LCD */
+      /* Set the color map to the contained LCD */
 
       lcd = priv->lcd
       DEBUGASSERT(lcd->putcmap != NULL);
@@ -399,7 +399,7 @@ static int lcdfb_getcursor(FAR struct fb_vtable_s *vtable,
 
   if (priv != NULL && attrib != NULL)
     {
-      /* Get the video info from the contained LCD */
+      /* Get the cursor info from the contained LCD */
 
       lcd = priv->lcd
       DEBUGASSERT(lcd->getcursor != NULL);
@@ -433,7 +433,7 @@ static int lcdfb_setcursor(FAR struct fb_vtable_s *vtable,
 
   if (priv != NULL && settings != NULL)
     {
-      /* Get the video info from the contained LCD */
+      /* Set the cursor info to the contained LCD */
 
       lcd = priv->lcd
       DEBUGASSERT(lcd->setcursor != NULL);
@@ -510,7 +510,8 @@ int up_fbinitialize(int display)
   if (lcd == NULL)
     {
       gerr("ERROR: board_graphics_setup failed, devno=%d\n", display);
-      return EXIT_FAILURE;
+      ret = -ENODEV;
+      goto errout_with_state;
     }
 #else
   /* Initialize the LCD device */
@@ -589,15 +590,15 @@ int up_fbinitialize(int display)
 
   /* Turn the LCD on at 75% power */
 
-  priv->lcd->setpower(priv->lcd, ((3*CONFIG_LCD_MAXPOWER + 3)/4));
+  priv->lcd->setpower(priv->lcd, ((3*CONFIG_LCD_MAXPOWER + 3) / 4));
   return OK;
 
 errout_with_lcd:
 #ifndef CONFIG_LCD_EXTERNINIT
   board_lcd_uninitialize();
+#endif
 
 errout_with_state:
-#endif
   kmm_free(priv);
   return ret;
 }
@@ -607,7 +608,8 @@ errout_with_state:
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
- *   plane of the specified plane.  Many OSDs support multiple planes of video.
+ *   plane of the specified plane.  Many OSDs support multiple planes of
+ *   video.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
