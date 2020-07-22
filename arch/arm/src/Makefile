@@ -69,6 +69,12 @@ else
   NUTTX = "$(TOPDIR)$(DELIM)nuttx$(EXEEXT)"
 endif
 
+# Additional rules for system call wrapper
+
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION_SYSCALL),y)
+  EXTRALINKCMDS += @$(TOPDIR)/syscall/syscall_wraps.ldcmd
+endif
+
 # The "head" object
 
 HEAD_OBJ = $(HEAD_ASRC:.S=$(OBJEXT))
@@ -99,7 +105,7 @@ UOBJS = $(UAOBJS) $(UCOBJS)
 KBIN = libkarch$(LIBEXT)
 BIN  = libarch$(LIBEXT)
 
-LDFLAGS += $(ARCHSCRIPT)
+LDFLAGS += $(ARCHSCRIPT) $(EXTRALINKCMDS)
 
 # Override in Make.defs if linker is not 'ld'
 
