@@ -60,10 +60,10 @@
  * Name: psock_getpeername
  *
  * Description:
- *   The psock_getpeername() function retrieves the remote-connected name of the
- *   specified socket, stores this address in the sockaddr structure pointed
- *   to by the 'addr' argument, and stores the length of this address in the
- *   object pointed to by the 'addrlen' argument.
+ *   The psock_getpeername() function retrieves the remote-connected name of
+ *   the specified socket, stores this address in the sockaddr structure
+ *   pointed to by the 'addr' argument, and stores the length of this address
+ *   in the object pointed to by the 'addrlen' argument.
  *
  *   If the actual length of the address is greater than the length of the
  *   supplied sockaddr structure, the stored address will be truncated.
@@ -79,8 +79,8 @@
  * Returned Value:
  *   On success, 0 is returned, the 'addr' argument points to the address
  *   of the socket, and the 'addrlen' argument points to the length of the
- *   address. Otherwise, -1 is returned and errno is set to indicate the error.
- *   Possible errno values that may be returned include:
+ *   address. Otherwise, -1 is returned and errno is set to indicate the
+ *   error. Possible errno values that may be returned include:
  *
  *   EBADF      - The socket argument is not a valid file descriptor.
  *   ENOTSOCK   - The socket argument does not refer to a socket.
@@ -145,8 +145,8 @@ int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
  * Returned Value:
  *   On success, 0 is returned, the 'addr' argument points to the address
  *   of the socket, and the 'addrlen' argument points to the length of the
- *   address. Otherwise, -1 is returned and errno is set to indicate the error.
- *   Possible errno values that may be returned include:
+ *   address. Otherwise, -1 is returned and errno is set to indicate the
+ *   error. Possible errno values that may be returned include:
  *
  *   EBADF      - The socket argument is not a valid file descriptor.
  *   ENOTSOCK   - The socket argument does not refer to a socket.
@@ -157,7 +157,8 @@ int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-int getpeername(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
+int getpeername(int sockfd, FAR struct sockaddr *addr,
+                FAR socklen_t *addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
   int ret;
