@@ -159,8 +159,9 @@ static uint16_t recvfrom_event(FAR struct net_driver_s *dev,
  * Name: do_recvfrom_request
  ****************************************************************************/
 
-static int do_recvfrom_request(FAR struct usrsock_conn_s *conn, size_t buflen,
-                               socklen_t addrlen)
+static int do_recvfrom_request(FAR struct usrsock_conn_s *conn,
+                               size_t buflen, socklen_t addrlen,
+                               int32_t flags)
 {
   struct usrsock_request_recvfrom_s req =
   {
@@ -182,6 +183,7 @@ static int do_recvfrom_request(FAR struct usrsock_conn_s *conn, size_t buflen,
 
   req.head.reqid = USRSOCK_REQUEST_RECVFROM;
   req.usockid = conn->usockid;
+  req.flags = flags;
   req.max_addrlen = addrlen;
   req.max_buflen = buflen;
 
@@ -397,9 +399,13 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       usrsock_setup_datain(conn, inbufs, ARRAY_SIZE(inbufs));
 
+      /* MSG_DONTWAIT is only use in usrsock. */
+
+      flags &= ~MSG_DONTWAIT;
+
       /* Request user-space daemon to close socket. */
 
-      ret = do_recvfrom_request(conn, len, addrlen);
+      ret = do_recvfrom_request(conn, len, addrlen, flags);
       if (ret >= 0)
         {
           /* Wait for completion of request. */
