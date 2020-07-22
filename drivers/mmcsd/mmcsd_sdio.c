@@ -68,7 +68,7 @@
 #define MMCSD_POWERUP_DELAY     ((useconds_t)250)    /* 74 clock cycles @ 400KHz = 185uS */
 #define MMCSD_IDLE_DELAY        ((useconds_t)50000)  /* Short delay to allow change to IDLE state */
 #define MMCSD_DSR_DELAY         ((useconds_t)100000) /* Time to wait after setting DSR */
-#define MMCSD_CLK_DELAY         ((useconds_t)500000) /* Delay after changing clock speeds */
+#define MMCSD_CLK_DELAY         ((useconds_t)5000)   /* Delay after changing clock speeds */
 
 /* Data delays (all in units of milliseconds).
  *
@@ -1830,6 +1830,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       if (ret != OK)
         {
           ferr("ERROR: mmsd_recv_r1 for CMD24 failed: %d\n", ret);
+          SDIO_CANCEL(priv->dev);
           return ret;
         }
     }
@@ -2036,6 +2037,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       if (ret != OK)
         {
           ferr("ERROR: mmsd_recv_r1 for CMD25 failed: %d\n", ret);
+          SDIO_CANCEL(priv->dev);
           return ret;
         }
     }
@@ -2630,7 +2632,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
       priv->widebus = true;
 
       SDIO_CLOCK(priv->dev, CLOCK_SD_TRANSFER_4BIT);
-      up_udelay(MMCSD_CLK_DELAY);
+      usleep(MMCSD_CLK_DELAY);
       return OK;
     }
 
@@ -2762,7 +2764,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
   /* Select high speed MMC clocking (which may depend on the DSR setting) */
 
   SDIO_CLOCK(priv->dev, CLOCK_MMC_TRANSFER);
-  up_udelay(MMCSD_CLK_DELAY);
+  usleep(MMCSD_CLK_DELAY);
   return OK;
 }
 
@@ -3480,11 +3482,11 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
                     (unsigned long)(priv->capacity / 1024));
               priv->mediachanged = true;
             }
+
+          /* When the card is identified, we have probed this card */
+
+          priv->probed = true;
         }
-
-      /* In any event, we have probed this card */
-
-      priv->probed = true;
 
       /* Regardless of whether or not a card was successfully initialized,
        * there is apparently a card inserted. If it wasn't successfully
