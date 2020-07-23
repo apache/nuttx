@@ -8,7 +8,6 @@ menu "LCD Driver Support"
 menuconfig LCD
 	bool "Graphic LCD Driver Support"
 	default n
-	select NX_LCDDRIVER if NX
 	---help---
 		Drivers for parallel and serial LCD and OLED type devices.  These
 		drivers support interfaces as defined in include/nuttx/lcd/lcd.h
