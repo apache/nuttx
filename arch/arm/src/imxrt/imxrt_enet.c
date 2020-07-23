@@ -2144,6 +2144,13 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
       imxrt_writemii(priv, phyaddr, MII_KSZ8081_PHYCTRL2,
                      (phydata | (1 << 4)));
 
+      imxrt_writemii(priv, phyaddr, MII_ADVERTISE,
+                     MII_ADVERTISE_100BASETXFULL |
+                     MII_ADVERTISE_100BASETXHALF |
+                     MII_ADVERTISE_10BASETXFULL |
+                     MII_ADVERTISE_10BASETXHALF |
+                     MII_ADVERTISE_CSMA);
+
 #elif defined (CONFIG_ETH0_PHY_LAN8720)
       /* Make sure that PHY comes up in correct mode when it's reset */
 
