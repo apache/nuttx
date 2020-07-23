@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/sched.h>
 #include <nuttx/clock.h>
 #include <nuttx/spinlock.h>
@@ -39,6 +40,19 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+struct note_filter_s
+{
+  struct note_filter_mode_s mode;
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+  struct note_filter_irq_s irq_mask;
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+  struct note_filter_syscall_s syscall_mask;
+#endif
+};
+#endif
 
 struct note_startalloc_s
 {
@@ -52,6 +66,25 @@ struct note_startalloc_s
 #  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s) + (n) - 1)
 #else
 #  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s))
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+static struct note_filter_s g_note_filter =
+{
+#ifdef CONFIG_SMP
+  .mode.cpuset = CONFIG_SCHED_INSTRUMENTATION_CPUSET
+#endif
+};
+
+#ifdef CONFIG_SMP
+static unsigned int g_note_disabled_irq_nest[CONFIG_SMP_NCPUS];
+#else
+static unsigned int g_note_disabled_irq_nest[1];
+#endif
 #endif
 
 /****************************************************************************
@@ -101,6 +134,158 @@ static void note_common(FAR struct tcb_s *tcb,
 }
 
 /****************************************************************************
+ * Name: note_isenabled
+ *
+ * Description:
+ *   Check whether the instrumentation is enabled.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   True is returned if the instrumentation is enabled.
+ *
+ ****************************************************************************/
+
+static inline int note_isenabled(void)
+{
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_ENABLE))
+    {
+      return false;
+    }
+
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((g_note_filter.mode.cpuset & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return false;
+    }
+#endif
+#endif
+
+  return true;
+}
+
+/****************************************************************************
+ * Name: note_isenabled_syscall
+ *
+ * Description:
+ *   Check whether the syscall instrumentation is enabled.
+ *
+ * Input Parameters:
+ *   nr - syscall number
+ *
+ * Returned Value:
+ *   True is returned if the instrumentation is enabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+static inline int note_isenabled_syscall(int nr)
+{
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  if (!note_isenabled())
+    {
+      return false;
+    }
+
+  /* Exclude the case of syscall called by the interrupt handler which is
+   * not traced.
+   */
+
+  if (up_interrupt_context())
+    {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+#ifdef CONFIG_SMP
+      int cpu = this_cpu();
+#else
+      int cpu = 0;
+#endif
+
+      if (g_note_disabled_irq_nest[cpu] > 0)
+        {
+          return false;
+        }
+#else
+      return false;
+#endif
+    }
+
+  /* If the syscall trace is disabled or the syscall number is masked,
+   * do nothing.
+   */
+
+  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_SYSCALL) ||
+      NOTE_FILTER_SYSCALLMASK_ISSET(nr - CONFIG_SYS_RESERVED,
+                                    &g_note_filter.syscall_mask))
+    {
+      return false;
+    }
+#endif
+
+  return true;
+}
+#endif
+
+/****************************************************************************
+ * Name: note_isenabled_irqhandler
+ *
+ * Description:
+ *   Check whether the interrupt handler instrumentation is enabled.
+ *
+ * Input Parameters:
+ *   irq   - IRQ number
+ *   enter - interrupt enter/leave flag
+ *
+ * Returned Value:
+ *   True is returned if the instrumentation is enabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+static inline int note_isenabled_irq(int irq, bool enter)
+{
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  if (!note_isenabled())
+    {
+      return false;
+    }
+
+  /* If the IRQ trace is disabled or the IRQ number is masked, disable
+   * subsequent syscall traces until leaving the interrupt handler
+   */
+
+  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_IRQ) ||
+      NOTE_FILTER_IRQMASK_ISSET(irq, &g_note_filter.irq_mask))
+    {
+#ifdef CONFIG_SMP
+      int cpu = this_cpu();
+#else
+      int cpu = 0;
+#endif
+
+      if (enter)
+        {
+          g_note_disabled_irq_nest[cpu]++;
+        }
+      else
+        {
+          g_note_disabled_irq_nest[cpu]--;
+        }
+
+      return false;
+    }
+#endif
+
+  return true;
+}
+#endif
+
+/****************************************************************************
  * Name: note_spincommon
  *
  * Description:
@@ -122,16 +307,10 @@ static void note_spincommon(FAR struct tcb_s *tcb,
 {
   struct note_spinlock_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -176,16 +355,10 @@ void sched_note_start(FAR struct tcb_s *tcb)
   int namelen;
 #endif
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Copy the task name (if possible) and get the length of the note */
 
@@ -213,16 +386,10 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 {
   struct note_stop_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -237,16 +404,10 @@ void sched_note_suspend(FAR struct tcb_s *tcb)
 {
   struct note_suspend_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -263,16 +424,10 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 {
   struct note_resume_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -288,16 +443,10 @@ void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_start_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -314,16 +463,10 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
 {
   struct note_cpu_started_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -339,16 +482,10 @@ void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_pause_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -365,16 +502,10 @@ void sched_note_cpu_paused(FAR struct tcb_s *tcb)
 {
   struct note_cpu_paused_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -390,16 +521,10 @@ void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_resume_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -416,16 +541,10 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 {
   struct note_cpu_resumed_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -443,16 +562,10 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 {
   struct note_preempt_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -472,16 +585,10 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 {
   struct note_csection_s note;
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled())
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -528,16 +635,10 @@ void sched_note_syscall_enter(int nr, int argc, ...)
   struct note_syscall_enter_s note;
   FAR struct tcb_s *tcb = this_task();
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled_syscall(nr))
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -556,16 +657,10 @@ void sched_note_syscall_leave(int nr, uintptr_t result)
   struct note_syscall_leave_s note;
   FAR struct tcb_s *tcb = this_task();
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled_syscall(nr))
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -587,16 +682,10 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
   struct note_irqhandler_s note;
   FAR struct tcb_s *tcb = this_task();
 
-#ifdef CONFIG_SMP
-  /* Ignore notes that are not in the set of monitored CPUs */
-
-  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+  if (!note_isenabled_irq(irq, enter))
     {
-      /* Not in the set of monitored CPUs.  Do not log the note. */
-
       return;
     }
-#endif
 
   /* Format the note */
 
@@ -611,3 +700,139 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
                  sizeof(struct note_irqhandler_s));
 }
 #endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+
+/****************************************************************************
+ * Name: sched_note_filter_mode
+ *
+ * Description:
+ *   Set and get note filter mode.
+ *   (Same as NOTECTL_GETMODE / NOTECTL_SETMODE ioctls)
+ *
+ * Input Parameters:
+ *   oldm - A writable pointer to struct note_filter_mode_s to get current
+ *          filter mode
+ *          If 0, no data is written.
+ *   newm - A read-only pointer to struct note_filter_mode_s which holds the
+ *          new filter mode
+ *          If 0, the filter mode is not updated.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sched_note_filter_mode(struct note_filter_mode_s *oldm,
+                            struct note_filter_mode_s *newm)
+{
+  irqstate_t irq_mask;
+
+  irq_mask = enter_critical_section();
+
+  if (oldm != NULL)
+    {
+      *oldm = g_note_filter.mode;
+    }
+
+  if (newm != NULL)
+    {
+      g_note_filter.mode = *newm;
+    }
+
+  leave_critical_section(irq_mask);
+}
+
+/****************************************************************************
+ * Name: sched_note_filter_syscall
+ *
+ * Description:
+ *   Set and get syscall filter setting
+ *   (Same as NOTECTL_GETSYSCALLFILTER / NOTECTL_SETSYSCALLFILTER ioctls)
+ *
+ * Input Parameters:
+ *   oldf - A writable pointer to struct note_filter_syscall_s to get
+ *          current syscall filter setting
+ *          If 0, no data is written.
+ *   newf - A read-only pointer to struct note_filter_syscall_s of the
+ *          new syscall filter setting
+ *          If 0, the setting is not updated.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+void sched_note_filter_syscall(struct note_filter_syscall_s *oldf,
+                               struct note_filter_syscall_s *newf)
+{
+  irqstate_t irq_mask;
+
+  irq_mask = enter_critical_section();
+
+  if (oldf != NULL)
+    {
+      /* Return the current filter setting */
+
+      *oldf = g_note_filter.syscall_mask;
+    }
+
+  if (newf != NULL)
+    {
+      /* Replace the syscall filter mask by the provided setting */
+
+      g_note_filter.syscall_mask = *newf;
+    }
+
+  leave_critical_section(irq_mask);
+}
+#endif
+
+/****************************************************************************
+ * Name: sched_note_filter_irq
+ *
+ * Description:
+ *   Set and get IRQ filter setting
+ *   (Same as NOTECTL_GETIRQFILTER / NOTECTL_SETIRQFILTER ioctls)
+ *
+ * Input Parameters:
+ *   oldf - A writable pointer to struct note_filter_irq_s to get
+ *          current IRQ filter setting
+ *          If 0, no data is written.
+ *   newf - A read-only pointer to struct note_filter_irq_s of the new
+ *          IRQ filter setting
+ *          If 0, the setting is not updated.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+void sched_note_filter_irq(struct note_filter_irq_s *oldf,
+                           struct note_filter_irq_s *newf)
+{
+  irqstate_t irq_mask;
+
+  irq_mask = enter_critical_section();
+
+  if (oldf != NULL)
+    {
+      /* Return the current filter setting */
+
+      *oldf = g_note_filter.irq_mask;
+    }
+
+  if (newf != NULL)
+    {
+      /* Replace the syscall filter mask by the provided setting */
+
+      g_note_filter.irq_mask = *newf;
+    }
+
+  leave_critical_section(irq_mask);
+}
+#endif
+
+#endif /* CONFIG_SCHED_INSTRUMENTATION_FILTER */
