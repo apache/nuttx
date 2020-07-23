@@ -69,6 +69,9 @@
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
 #define NOTE_FILTER_MODE_FLAG_IRQ          (1 << 2) /* Enable IRQ instrumentaiton */
 #endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+#define NOTE_FILTER_MODE_FLAG_SYSCALL_ARGS (1 << 3) /* Enable collecting syscall arguments */
+#endif
 
 /* Helper macros for syscall instrumentation filter */
 
@@ -278,10 +281,17 @@ struct note_spinlock_s
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
 /* This is the specific form of the NOTE_SYSCALL_ENTER/LEAVE notes */
 
+#define MAX_SYSCALL_ARGS  6
+#define SIZEOF_NOTE_SYSCALL_ENTER(n) (sizeof(struct note_common_s) + \
+                                      sizeof(uint8_t) + sizeof(uint8_t) + \
+                                      (sizeof(uintptr_t) * (n)))
+
 struct note_syscall_enter_s
 {
-  struct note_common_s nsc_cmn; /* Common note parameters */
-  uint8_t nsc_nr;               /* System call number */
+  struct note_common_s nsc_cmn;                           /* Common note parameters */
+  uint8_t nsc_nr;                                         /* System call number */
+  uint8_t nsc_argc;                                       /* Number of system call arguments */
+  uint8_t nsc_args[sizeof(uintptr_t) * MAX_SYSCALL_ARGS]; /* System call arguments */
 };
 
 struct note_syscall_leave_s

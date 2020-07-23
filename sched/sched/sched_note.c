@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdarg.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -651,22 +652,60 @@ void sched_note_syscall_enter(int nr, int argc, ...)
 {
   struct note_syscall_enter_s note;
   FAR struct tcb_s *tcb = this_task();
+  unsigned int length;
+  va_list ap;
+  uintptr_t arg;
+  int i;
+  uint8_t *args;
 
   if (!note_isenabled_syscall(nr))
     {
       return;
     }
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_SYSCALL_ARGS))
+    {
+      argc = 0;
+    }
+#endif
+
   /* Format the note */
 
-  note_common(tcb, &note.nsc_cmn, sizeof(struct note_syscall_enter_s),
-              NOTE_SYSCALL_ENTER);
+  length = SIZEOF_NOTE_SYSCALL_ENTER(argc);
+  note_common(tcb, &note.nsc_cmn, length, NOTE_SYSCALL_ENTER);
   DEBUGASSERT(nr <= UCHAR_MAX);
   note.nsc_nr = nr;
+  DEBUGASSERT(argc <= MAX_SYSCALL_ARGS);
+  note.nsc_argc = argc;
+
+  /* If needed, retrieve the given syscall arguments */
+
+  va_start(ap, argc);
+
+  args = note.nsc_args;
+  for (i = 0; i < argc; i++)
+    {
+      arg = (uintptr_t)va_arg(ap, uintptr_t);
+      *args++ = (uint8_t)(arg & 0xff);
+      *args++ = (uint8_t)((arg >> 8)  & 0xff);
+#if UINTPTR_MAX > UINT16_MAX
+      *args++ = (uint8_t)((arg >> 16) & 0xff);
+      *args++ = (uint8_t)((arg >> 24) & 0xff);
+#if UINTPTR_MAX > UINT32_MAX
+      *args++ = (uint8_t)((arg >> 32) & 0xff);
+      *args++ = (uint8_t)((arg >> 40) & 0xff);
+      *args++ = (uint8_t)((arg >> 48) & 0xff);
+      *args++ = (uint8_t)((arg >> 56) & 0xff);
+#endif
+#endif
+    }
+
+  va_end(ap);
 
   /* Add the note to circular buffer */
 
-  sched_note_add(&note, sizeof(struct note_syscall_enter_s));
+  sched_note_add((FAR const uint8_t *)&note, length);
 }
 
 void sched_note_syscall_leave(int nr, uintptr_t result)
