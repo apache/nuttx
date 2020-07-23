@@ -476,6 +476,11 @@ int main(int argc, char **argv, char **envp)
 
       /* Clean up for the next pass */
 
+      if (saveresp != NULL)
+        {
+          free(saveresp);
+        }
+
       if (segment != NULL)
         {
           free(segment);
@@ -492,5 +497,7 @@ int main(int argc, char **argv, char **envp)
     }
 
   fputs(response, stdout);
+  free(response);
+
   return EXIT_SUCCESS;
 }
