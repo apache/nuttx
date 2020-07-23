@@ -18,10 +18,6 @@ menuconfig LCD
 
 if LCD
 
-config LCD_HWCURSOR
-	bool
-	default n
-
 config LCD_PACKEDMSFIRST
 	bool
 	default n

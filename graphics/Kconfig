@@ -103,7 +103,7 @@ config NX_SWCURSOR
 
 config NX_HWCURSOR
 	bool "Hardware cursor support"
-	depends on (FB_HWCURSOR || LCD_HWCURSOR) && EXPERIMENTAL
+	depends on FB_HWCURSOR && EXPERIMENTAL
 	---help---
 		Hardware cursor support has not been implemented, hence the
 		EXPERIMENTAL dependency.
