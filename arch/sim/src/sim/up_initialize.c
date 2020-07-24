@@ -42,6 +42,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/audio/audio.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/fs/ioctl.h>
@@ -280,5 +281,10 @@ void up_initialize(void)
 
 #if defined(CONFIG_FS_SMARTFS) && (defined(CONFIG_SIM_SPIFLASH) || defined(CONFIG_SIM_QSPIFLASH))
   up_init_smartfs();
+#endif
+
+#ifdef CONFIG_SIM_SOUND
+  audio_register("pcm0p", sim_audio_initialize(true));
+  audio_register("pcm0c", sim_audio_initialize(false));
 #endif
 }

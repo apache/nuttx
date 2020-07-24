@@ -397,6 +397,13 @@ int bthcisock_register(int dev_id);
 int bthcisock_loop(void);
 #endif
 
+/* up_audio.c ***************************************************************/
+
+#ifdef CONFIG_SIM_SOUND
+struct audio_lowerhalf_s *sim_audio_initialize(bool playback);
+void sim_audio_loop(void);
+#endif
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
