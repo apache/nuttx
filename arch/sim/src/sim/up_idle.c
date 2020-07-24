@@ -113,6 +113,10 @@ void up_idle(void)
   bthcisock_loop();
 #endif
 
+#ifdef CONFIG_SIM_SOUND
+  sim_audio_loop();
+#endif
+
 #ifdef CONFIG_ONESHOT
   /* Driver the simulated interval timer */
 

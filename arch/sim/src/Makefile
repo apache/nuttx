@@ -205,6 +205,11 @@ ifeq ($(CONFIG_RPTUN),y)
   CSRCS += up_rptun.c
 endif
 
+ifeq ($(CONFIG_SIM_SOUND_ALSA),y)
+  CSRCS += up_alsa.c
+  STDLIBS += -lasound
+endif
+
 ifeq ($(CONFIG_FS_HOSTFS),y)
 ifneq ($(CONFIG_FS_HOSTFS_RPMSG),y)
   HOSTSRCS += up_hostfs.c

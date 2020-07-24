@@ -201,6 +201,25 @@ config SIM_NET_BRIDGE_DEVICE
 
 endif
 
+config SIM_SOUND
+	bool "Simulated sound support"
+	depends on AUDIO
+	default y
+
+if SIM_SOUND
+
+choice
+	prompt "Simulated sound Type"
+	default SIM_SOUND_ALSA
+
+config SIM_SOUND_ALSA
+	bool "alsa support on sim"
+	depends on HOST_LINUX
+
+endchoice
+
+endif
+
 config SIM_RPTUN_MASTER
 	bool "Remote Processor Tunneling Role"
 	depends on RPTUN
