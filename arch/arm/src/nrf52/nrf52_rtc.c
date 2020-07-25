@@ -68,6 +68,8 @@ static void nrf52_rtc_putreg(FAR struct nrf52_rtc_dev_s *dev,
 
 static uint32_t nrf52_rtc_irq2reg(FAR struct nrf52_rtc_dev_s *dev,
                                   uint8_t s);
+static uint32_t nrf52_rtc_evt2reg(FAR struct nrf52_rtc_dev_s *dev,
+                                  uint8_t evt);
 
 /* RTC operations ***********************************************************/
 
@@ -86,6 +88,8 @@ static int nrf52_rtc_enableint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
 static int nrf52_rtc_disableint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
 static int nrf52_rtc_checkint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
 static int nrf52_rtc_ackint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
+static int nrf52_rtc_enableevt(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
+static int nrf52_rtc_disableevt(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
 
 /****************************************************************************
  * Private Data
@@ -106,7 +110,9 @@ struct nrf52_rtc_ops_s nrf52_rtc_ops =
   .enableint  = nrf52_rtc_enableint,
   .disableint = nrf52_rtc_disableint,
   .checkint   = nrf52_rtc_checkint,
-  .ackint     = nrf52_rtc_ackint
+  .ackint     = nrf52_rtc_ackint,
+  .enableevt  = nrf52_rtc_enableevt,
+  .disableevt = nrf52_rtc_disableevt,
 };
 
 #ifdef CONFIG_NRF52_RTC0
@@ -189,7 +195,7 @@ static void nrf52_rtc_putreg(FAR struct nrf52_rtc_dev_s *dev,
  * Name: nrf52_rtc_irq2reg
  *
  * Description:
- *   Get the vaule of the interrupt register corresponding to the given
+ *   Get the value of the interrupt register corresponding to the given
  *   interrupt source
  *
  ****************************************************************************/
@@ -239,6 +245,69 @@ static uint32_t nrf52_rtc_irq2reg(FAR struct nrf52_rtc_dev_s *dev, uint8_t s)
       default:
         {
           rtcerr("ERROR: unsupported IRQ source %d\n", s);
+          regval = 0;
+          goto errout;
+        }
+    }
+
+errout:
+  return regval;
+}
+
+/****************************************************************************
+ * Name: nrf52_rtc_evt2reg
+ *
+ * Description:
+ *   Get the offset of the event register corresponding to the given event
+ *
+ ****************************************************************************/
+
+static uint32_t nrf52_rtc_evt2reg(FAR struct nrf52_rtc_dev_s *dev,
+                                  uint8_t evt)
+{
+  uint32_t regval;
+
+  switch (evt)
+    {
+      case NRF52_RTC_EVT_TICK:
+        {
+          regval = RTC_EVTEN_TICK;
+          break;
+        }
+
+      case NRF52_RTC_EVT_OVRFLW:
+        {
+          regval = RTC_EVTEN_OVRFLW;
+          break;
+        }
+
+      case NRF52_RTC_EVT_COMPARE0:
+        {
+          regval = RTC_EVTEN_COMPARE(0);
+          break;
+        }
+
+      case NRF52_RTC_EVT_COMPARE1:
+        {
+          regval = RTC_EVTEN_COMPARE(1);
+          break;
+        }
+
+      case NRF52_RTC_EVT_COMPARE2:
+        {
+          regval = RTC_EVTEN_COMPARE(2);
+          break;
+        }
+
+      case NRF52_RTC_EVT_COMPARE3:
+        {
+          regval = RTC_EVTEN_COMPARE(3);
+          break;
+        }
+
+      default:
+        {
+          rtcerr("ERROR: unsupported EVENT %d\n", evt);
           regval = 0;
           goto errout;
         }
@@ -583,6 +652,58 @@ static int nrf52_rtc_ackint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s)
           goto errout;
         }
     }
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nrf52_rtc_enableevt
+ ****************************************************************************/
+
+static int nrf52_rtc_enableevt(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt)
+{
+  uint32_t regval = 0;
+  int      ret    = OK;
+
+  DEBUGASSERT(dev);
+
+  /* Get register value for given event */
+
+  regval = nrf52_rtc_evt2reg(dev, evt);
+  if (regval == 0)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  nrf52_rtc_putreg(dev, NRF52_RTC_EVTENSET_OFFSET, regval);
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nrf52_rtc_disableevt
+ ****************************************************************************/
+
+static int nrf52_rtc_disableevt(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt)
+{
+  uint32_t regval = 0;
+  int      ret    = OK;
+
+  DEBUGASSERT(dev);
+
+  /* Get register value for given event */
+
+  regval = nrf52_rtc_evt2reg(dev, evt);
+  if (regval == 0)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  nrf52_rtc_putreg(dev, NRF52_RTC_EVTENCLR_OFFSET, regval);
 
 errout:
   return ret;
