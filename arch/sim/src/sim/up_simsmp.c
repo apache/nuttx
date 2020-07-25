@@ -135,6 +135,9 @@ void sched_note_cpu_resume(struct tcb_s *tcb, int cpu);
 static void *sim_idle_trampoline(void *arg)
 {
   struct sim_cpuinfo_s *cpuinfo = (struct sim_cpuinfo_s *)arg;
+#ifdef CONFIG_SIM_WALLTIME
+  uint64_t now = 0;
+#endif
   sigset_t set;
   int ret;
 
@@ -173,8 +176,6 @@ static void *sim_idle_trampoline(void *arg)
   for (; ; )
     {
 #ifdef CONFIG_SIM_WALLTIME
-      uint64_t now = 0;
-
       /* Wait a bit so that the timing is close to the correct rate. */
 
       now += 1000 * CONFIG_USEC_PER_TICK;
