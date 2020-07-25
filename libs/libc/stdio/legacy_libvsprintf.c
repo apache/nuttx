@@ -508,7 +508,7 @@ static int getusize(uint8_t fmt, uint16_t flags, unsigned int n)
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
-static int getdblsize(uint8_t fmt, int trunc, uint16_t flags, double_t n)
+static int getdblsize(uint8_t fmt, int trunc, uint16_t flags, double n)
 {
   struct lib_outstream_s nulloutstream;
   lib_nulloutstream(&nulloutstream);
@@ -1565,7 +1565,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj, FAR const IPTR char *src,
 #ifdef CONFIG_LIBC_FLOATINGPOINT
       else if (strchr("eEfgG", FMT_CHAR))
         {
-          double_t dblval = va_arg(ap, double_t);
+          double dblval = va_arg(ap, double);
           int dblsize;
 
           if (FMT_CHAR == 'g' || FMT_CHAR == 'G')
