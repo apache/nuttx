@@ -39,6 +39,7 @@
 
 #include <stdint.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <signal.h>
 #include <errno.h>
 
@@ -63,8 +64,8 @@ typedef unsigned char spinlock_t;
 
 struct sim_cpuinfo_s
 {
-  int cpu;                /* CPU number */
-  pthread_mutex_t mutex;  /* For synchronization */
+  int cpu;    /* CPU number */
+  sem_t done; /* For synchronization */
 };
 
 /****************************************************************************
@@ -159,7 +160,7 @@ static void *sim_idle_trampoline(void *arg)
 
   /* Let up_cpu_start() continue */
 
-  pthread_mutex_unlock(&cpuinfo->mutex);
+  sem_post(&cpuinfo->done);
 
   /* up_cpu_started() is logically a part of this function but needs to be
    * inserted in the path because in needs to access NuttX domain definition.
@@ -344,19 +345,10 @@ int up_cpu_start(int cpu)
   /* Initialize the CPU info */
 
   cpuinfo.cpu = cpu;
-  ret = pthread_mutex_init(&cpuinfo.mutex, NULL);
+  ret = sem_init(&cpuinfo.done, 0, 0);
   if (ret != 0)
     {
-      return -ret;  /* REVISIT:  That is a host errno value. */
-    }
-
-  /* Lock the mutex */
-
-  ret = pthread_mutex_lock(&cpuinfo.mutex);
-  if (ret != 0)
-    {
-      ret = -ret;  /* REVISIT: This is a host errno value. */
-      goto errout_with_mutex;
+      return -errno;  /* REVISIT:  That is a host errno value. */
     }
 
   /* Start the CPU emulation thread.  This is analogous to starting the CPU
@@ -368,24 +360,19 @@ int up_cpu_start(int cpu)
   if (ret != 0)
     {
       ret = -ret;  /* REVISIT:  That is a host errno value. */
-      goto errout_with_lock;
+      goto errout_with_sem;
     }
 
-  /* Try to lock the mutex again.  This will block until the pthread unlocks
-   * the mutex.
-   */
+  /* This will block until the pthread post the semaphore */
 
-  ret = pthread_mutex_lock(&cpuinfo.mutex);
+  ret = sem_wait(&cpuinfo.done);
   if (ret != 0)
     {
-      ret = -ret;  /* REVISIT:  That is a host errno value. */
+      ret = -errno;  /* REVISIT:  That is a host errno value. */
     }
 
-errout_with_lock:
-  pthread_mutex_unlock(&cpuinfo.mutex);
-
-errout_with_mutex:
-  pthread_mutex_destroy(&cpuinfo.mutex);
+errout_with_sem:
+  sem_destroy(&cpuinfo.done);
   return ret;
 }
 
