@@ -263,7 +263,7 @@ void sim_cpu0_start(void)
   sigemptyset(&set);
   sigaddset(&set, SIGUSR1);
 
-  ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
+  ret = pthread_sigmask(SIG_UNBLOCK, &set, NULL);
   if (ret < 0)
     {
       return;
