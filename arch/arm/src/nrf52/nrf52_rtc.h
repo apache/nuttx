@@ -42,11 +42,13 @@
 #define NRF52_RTC_SETCC(d, i, cc)         ((d)->ops->setcc(d, i, cc))
 #define NRF52_RTC_GETCC(d, i, cc)         ((d)->ops->setcc(d, i, cc))
 #define NRF52_RTC_SETPRE(d, pre)          ((d)->ops->setpre(d, pre))
-#define NRF52_RTC_SETISR(d, hnd, arg, s)  ((d)->ops->setisr(d, hnd, arg, s))
+#define NRF52_RTC_SETISR(d, hnd, arg)     ((d)->ops->setisr(d, hnd, arg))
 #define NRF52_RTC_ENABLEINT(d, s)         ((d)->ops->enableint(d, s))
 #define NRF52_RTC_DISABLEINT(d, s)        ((d)->ops->disableint(d, s))
 #define NRF52_RTC_CHECKINT(d, s)          ((d)->ops->checkint(d, s))
 #define NRF52_RTC_ACKINT(d, s)            ((d)->ops->ackint(d, s))
+#define NRF52_RTC_ENABLEEVT(d, s)         ((d)->ops->enableevt(d, s))
+#define NRF52_RTC_DISABLEEVT(d, s)        ((d)->ops->disableevt(d, s))
 
 /****************************************************************************
  * Public Types
@@ -72,6 +74,18 @@ enum nrf52_rtc_irq_e
   NRF52_RTC_INT_COMPARE1 = 3,
   NRF52_RTC_INT_COMPARE2 = 4,
   NRF52_RTC_INT_COMPARE3 = 5,
+};
+
+/* RTC Events */
+
+enum nrf52_rtc_evt_e
+{
+  NRF52_RTC_EVT_TICK     = 0,
+  NRF52_RTC_EVT_OVRFLW   = 1,
+  NRF52_RTC_EVT_COMPARE0 = 2,
+  NRF52_RTC_EVT_COMPARE1 = 3,
+  NRF52_RTC_EVT_COMPARE2 = 4,
+  NRF52_RTC_EVT_COMPARE3 = 5,
 };
 
 /* NRF52 RTC device */
@@ -107,6 +121,11 @@ struct nrf52_rtc_ops_s
   CODE int (*disableint)(FAR struct nrf52_rtc_dev_s *dev, uint8_t source);
   CODE int (*checkint)(FAR struct nrf52_rtc_dev_s *dev, uint8_t source);
   CODE int (*ackint)(FAR struct nrf52_rtc_dev_s *dev, uint8_t source);
+
+  /* RTC events */
+
+  CODE int (*enableevt)(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
+  CODE int (*disableevt)(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
 };
 
 /****************************************************************************
