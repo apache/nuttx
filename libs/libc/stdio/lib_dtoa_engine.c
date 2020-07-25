@@ -61,7 +61,7 @@
  * Public Functions
  ****************************************************************************/
 
-int __dtoa_engine(double_t x, FAR struct dtoa_s *dtoa, int max_digits,
+int __dtoa_engine(double x, FAR struct dtoa_s *dtoa, int max_digits,
                   int max_decimals)
 {
   int32_t exp = 0;
@@ -90,7 +90,7 @@ int __dtoa_engine(double_t x, FAR struct dtoa_s *dtoa, int max_digits,
     }
   else
     {
-      double_t y;
+      double y;
 
       exp = MIN_MANT_EXP;
 

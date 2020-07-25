@@ -144,14 +144,14 @@ static FAR bigint_t *g_freelist[KMAX + 1];
 static FAR bigint_t *g_p5s;
 
 #ifdef IEEE_ARITH
-static const double_t g_bigtens[] =
+static const double g_bigtens[] =
 {
   1e16, 1e32, 1e64, 1e128, 1e256
 };
 
 #  define n_bigtens 5
 #else
-static const double_t g_bigtens[] =
+static const double g_bigtens[] =
 {
   1e16, 1e32
 };
@@ -770,7 +770,7 @@ static FAR bigint_t *diff(FAR bigint_t *a, FAR bigint_t *b)
   return c;
 }
 
-static FAR bigint_t *d2b(double_t d, int *e, int *bits)
+static FAR bigint_t *d2b(double d, int *e, int *bits)
 {
   FAR bigint_t *b;
   FAR unsigned long *x;
@@ -906,7 +906,7 @@ static FAR bigint_t *d2b(double_t d, int *e, int *bits)
   return b;
 }
 
-static const double_t tens[] =
+static const double tens[] =
 {
   1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9,
   1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19,
@@ -1088,7 +1088,7 @@ static int quorem(FAR bigint_t *b, FAR bigint_t *s)
  *         calculation.
  */
 
-FAR char *__dtoa(double_t d, int mode, int ndigits, FAR int *decpt,
+FAR char *__dtoa(double d, int mode, int ndigits, FAR int *decpt,
                  FAR int *sign, FAR char **rve)
 {
   /* Arguments ndigits, decpt, sign are similar to those of ecvt and fcvt;
@@ -1126,9 +1126,9 @@ FAR char *__dtoa(double_t d, int mode, int ndigits, FAR int *decpt,
   FAR bigint_t *s;
   FAR char *st;
   FAR char *st0;
-  double_t d2;
-  double_t ds;
-  double_t eps;
+  double d2;
+  double ds;
+  double eps;
   long l;
   unsigned long x;
   int denorm;
