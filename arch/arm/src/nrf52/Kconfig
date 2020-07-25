@@ -212,6 +212,10 @@ config NRF52_TIMER4
 	select NRF52_TIMER
 	default n
 
+config NRF52_PPI
+  bool "PPI"
+  default n
+
 config NRF52_RTC0
 	bool "RTC0"
 	select NRF52_RTC
