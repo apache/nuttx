@@ -37,8 +37,6 @@
  * Included Files
  ****************************************************************************/
 
-#define _GNU_SOURCE 1
-
 #include <stdint.h>
 #include <pthread.h>
 #include <signal.h>
@@ -73,8 +71,8 @@ struct sim_cpuinfo_s
  * Private Data
  ****************************************************************************/
 
-static pthread_key_t          g_cpukey;
-static pthread_t              g_sim_cputhread[CONFIG_SMP_NCPUS];
+static pthread_key_t g_cpu_key;
+static pthread_t     g_cpu_thread[CONFIG_SMP_NCPUS];
 
 /* These spinlocks are used in the SMP configuration in order to implement
  * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
@@ -139,9 +137,9 @@ static void *sim_idle_trampoline(void *arg)
   sigset_t set;
   int ret;
 
-  /* Set the CPU number zero for the CPU thread */
+  /* Set the CPU number for the CPU thread */
 
-  ret = pthread_setspecific(g_cpukey,
+  ret = pthread_setspecific(g_cpu_key,
                            (const void *)((uintptr_t)cpuinfo->cpu));
   if (ret != 0)
     {
@@ -207,7 +205,7 @@ static void *sim_idle_trampoline(void *arg)
 
 static void sim_handle_signal(int signo, siginfo_t *info, void *context)
 {
-  int cpu = (int)((uintptr_t)pthread_getspecific(g_cpukey));
+  int cpu = (int)((uintptr_t)pthread_getspecific(g_cpu_key));
 
   up_cpu_paused(cpu);
 }
@@ -237,11 +235,11 @@ void sim_cpu0_start(void)
   sigset_t set;
   int ret;
 
-  g_sim_cputhread[0] = pthread_self();
+  g_cpu_thread[0] = pthread_self();
 
   /* Create the pthread key */
 
-  ret = pthread_key_create(&g_cpukey, NULL);
+  ret = pthread_key_create(&g_cpu_key, NULL);
   if (ret != 0)
     {
       return;
@@ -249,7 +247,7 @@ void sim_cpu0_start(void)
 
   /* Set the CPU number zero for the CPU thread */
 
-  ret = pthread_setspecific(g_cpukey, (const void *)0);
+  ret = pthread_setspecific(g_cpu_key, (const void *)0);
   if (ret != 0)
     {
       return;
@@ -301,7 +299,7 @@ void sim_cpu0_start(void)
 
 int up_cpu_index(void)
 {
-  void *value = pthread_getspecific(g_cpukey);
+  void *value = pthread_getspecific(g_cpu_key);
   return (int)((uintptr_t)value);
 }
 
@@ -365,7 +363,7 @@ int up_cpu_start(int cpu)
    * in a multi-CPU hardware model.
    */
 
-  ret = pthread_create(&g_sim_cputhread[cpu],
+  ret = pthread_create(&g_cpu_thread[cpu],
                        NULL, sim_idle_trampoline, &cpuinfo);
   if (ret != 0)
     {
@@ -426,7 +424,7 @@ int up_cpu_pause(int cpu)
 
   /* Signal the CPU thread */
 
-  pthread_kill(g_sim_cputhread[cpu], SIGUSR1);
+  pthread_kill(g_cpu_thread[cpu], SIGUSR1);
 
   /* Spin, waiting for the thread to pause */
 
