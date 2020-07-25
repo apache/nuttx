@@ -193,6 +193,16 @@ config ARCH_CHIP_LPC54XX
 	---help---
 		NPX LPC54XX architectures (ARM Cortex-M4).
 
+config ARCH_CHIP_LPC55XX
+	bool "NXP LPC55XX"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_FETCHADD
+	---help---
+		NPX LPC55XX architectures (ARM Cortex-M33).
+
 config ARCH_CHIP_MAX326XX
 	bool "Maxim Integrated MAX326XX"
 	select ARCH_HAVE_FETCHADD
@@ -726,6 +736,7 @@ config ARCH_CHIP
 	default "lpc31xx"	if ARCH_CHIP_LPC31XX
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
 	default "lpc54xx"	if ARCH_CHIP_LPC54XX
+	default "lpc55xx"	if ARCH_CHIP_LPC55XX
 	default "max326xx"	if ARCH_CHIP_MAX326XX
 	default "moxart"	if ARCH_CHIP_MOXART
 	default "nrf52"		if ARCH_CHIP_NRF52
@@ -957,6 +968,9 @@ source arch/arm/src/lpc43xx/Kconfig
 endif
 if ARCH_CHIP_LPC54XX
 source arch/arm/src/lpc54xx/Kconfig
+endif
+if ARCH_CHIP_LPC55XX
+source arch/arm/src/lpc55xx/Kconfig
 endif
 if ARCH_CHIP_S32K1XX
 source arch/arm/src/s32k1xx/Kconfig

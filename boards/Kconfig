@@ -471,6 +471,15 @@ config ARCH_BOARD_LPCXPRESSO_LPC54628
 	---help---
 		LPCXpresso LPC54626 board featuring the NXP LPC54628 MCU.
 
+config ARCH_BOARD_LPCXPRESSO_LPC55S69
+	bool "NXP LPCXpresso LPC55S69"
+	depends on ARCH_CHIP_LPC55S69
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		LPCXpresso LPC55S69 board featuring the NXPLPC55S69 MCU.
+
 config ARCH_BOARD_BAMBINO_200E
 	bool "Micromint Bambino 200E"
 	depends on ARCH_CHIP_LPC4330FBD144
@@ -2172,6 +2181,7 @@ config ARCH_BOARD
 	default "lpc4370-link2"            if ARCH_BOARD_LPC4370_LINK2
 	default "lpcxpresso-lpc1768"       if ARCH_BOARD_LPCXPRESSO
 	default "lpcxpresso-lpc54628"      if ARCH_BOARD_LPCXPRESSO_LPC54628
+	default "lpcxpresso-lpc55s69"      if ARCH_BOARD_LPCXPRESSO_LPC55S69
 	default "lx_cpu"                   if ARCH_BOARD_LX_CPU
 	default "maix-bit"                 if ARCH_BOARD_MAIX_BIT
 	default "maple"                    if ARCH_BOARD_MAPLE
@@ -2513,6 +2523,9 @@ source "boards/arm/lpc43xx/lpc4370-link2/Kconfig"
 endif
 if ARCH_BOARD_LPCXPRESSO_LPC54628
 source "boards/arm/lpc54xx/lpcxpresso-lpc54628/Kconfig"
+endif
+if ARCH_BOARD_LPCXPRESSO_LPC55S69
+source "boards/arm/lpc55xx/lpcxpresso-lpc55s69/Kconfig"
 endif
 if ARCH_BOARD_LX_CPU
 source "boards/arm/lpc17xx_40xx/lx_cpu/Kconfig"

@@ -1,0 +1,311 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "LPC55xx Configuration Options"
+
+choice
+	prompt "LPC55XX Chip Selection"
+	default ARCH_CHIP_LPC55S66
+	depends on ARCH_CHIP_LPC55XX
+
+config ARCH_CHIP_LPC55S66
+	bool "LPC55S66"
+	select ARCH_FAMILY_LPC55S6X
+	select ARCH_LPC55_HAVE_FSUSB
+	select ARCH_LPC55_HAVE_HSUSB
+
+config ARCH_CHIP_LPC55S69
+	bool "LPC55S69"
+	select ARCH_FAMILY_LPC55S6X
+	select ARCH_LPC55_HAVE_FSUSB
+	select ARCH_LPC55_HAVE_HSUSB
+
+
+endchoice # LPC55XX Chip Selection
+
+# LPC55xx Families
+
+config ARCH_FAMILY_LPC55S6X
+	bool
+	default n
+
+# Peripheral support
+
+config ARCH_LPC55_HAVE_FSUSB
+	bool
+	default n
+
+config ARCH_LPC55_HAVE_HSUSB
+	bool
+	default n
+
+# Peripheral Selection
+
+
+config LPC55_HAVE_I2C_MASTER
+	bool
+	default n
+
+config LPC55_HAVE_FLEXCOMM
+	bool
+	default n
+
+config LPC55_FLEXCOMM0
+	bool
+	default n
+	select LPC55_HAVE_FLEXCOMM
+
+config LPC55_FLEXCOMM1
+	bool
+	default n
+	select LPC55_HAVE_FLEXCOMM
+
+config LPC55_FLEXCOMM2
+	bool
+	default n
+	select LPC55_HAVE_FLEXCOMM
+
+config LPC55_FLEXCOMM3
+	bool
+	default n
+	select LPC55_HAVE_FLEXCOMM
+
+config LPC55_FLEXCOMM4
+	bool
+	default n
+	select LPC55_HAVE_FLEXCOMM
+
+config LPC55_FLEXCOMM5
+	bool
+	default n
+	select LPC55_HAVE_FLEXCOMM
+
+config LPC55_FLEXCOMM6
+	bool
+	default n
+	select LPC55_HAVE_FLEXCOMM
+
+config LPC55_FLEXCOMM7
+	bool
+	default n
+	select LPC55_HAVE_FLEXCOMM
+
+config LPC55_FLEXCOMM8
+	bool
+	default n
+	select LPC55_HAVE_FLEXCOMM
+
+config LPC55_HAVE_SPI_MASTER
+	bool
+	default n
+
+config LPC55_HAVE_USART
+	bool
+	default n
+
+menu "LPC55xx Peripheral Selection"
+
+config LPC55_DMA
+	bool "DMA"
+	default n
+	select ARCH_DMA
+
+menu "Flexcomm Peripherals"
+
+
+config LPC55_I2C0_MASTER
+	bool "I2C0 Master"
+	default n
+	select LPC55_FLEXCOMM0
+	select LPC55_HAVE_I2C_MASTER
+
+config LPC55_I2C1_MASTER
+	bool "I2C1 Master"
+	default n
+	select LPC55_FLEXCOMM1
+	select LPC55_HAVE_I2C_MASTER
+
+config LPC55_I2C2_MASTER
+	bool "I2C2 Master"
+	default n
+	select LPC55_FLEXCOMM2
+	select LPC55_HAVE_I2C_MASTER
+
+config LPC55_I2C3_MASTER
+	bool "I2C3 Master"
+	default n
+	select LPC55_FLEXCOMM3
+	select LPC55_HAVE_I2C_MASTER
+
+config LPC55_I2C4_MASTER
+	bool "I2C4 Master"
+	default n
+	select LPC55_FLEXCOMM4
+	select LPC55_HAVE_I2C_MASTER
+
+config LPC55_I2C5_MASTER
+	bool "I2C5 Master"
+	default n
+	select LPC55_FLEXCOMM5
+	select LPC55_HAVE_I2C_MASTER
+
+config LPC55_I2C6_MASTER
+	bool "I2C6 Master"
+	default n
+	select LPC55_FLEXCOMM6
+	select LPC55_HAVE_I2C_MASTER
+
+config LPC55_I2C7_MASTER
+	bool "I2C7 Master"
+	default n
+	select LPC55_FLEXCOMM7
+	select LPC55_HAVE_I2C_MASTER
+
+config LPC55_SPI0_MASTER
+	bool "SPI0 Master"
+	default n
+	depends on !LPC55_I2C0_MASTER && EXPERIMENTAL
+	select LPC55_FLEXCOMM0
+	select LPC55_HAVE_SPI_MASTER
+
+config LPC55_SPI1_MASTER
+	bool "SPI1 Master"
+	default n
+	depends on !LPC55_I2C1_MASTER && EXPERIMENTAL
+	select LPC55_FLEXCOMM1
+	select LPC55_HAVE_SPI_MASTER
+
+config LPC55_SPI2_MASTER
+	bool "SPI2 Master"
+	default n
+	depends on !LPC55_I2C2_MASTER && EXPERIMENTAL
+	select LPC55_FLEXCOMM2
+	select LPC55_HAVE_SPI_MASTER
+
+config LPC55_SPI3_MASTER
+	bool "SPI3 Master"
+	default n
+	depends on !LPC55_I2C3_MASTER && EXPERIMENTAL
+	select LPC55_FLEXCOMM3
+	select LPC55_HAVE_SPI_MASTER
+
+config LPC55_SPI4_MASTER
+	bool "SPI4 Master"
+	default n
+	depends on !LPC55_I2C4_MASTER && EXPERIMENTAL
+	select LPC55_FLEXCOMM4
+	select LPC55_HAVE_SPI_MASTER
+
+config LPC55_SPI5_MASTER
+	bool "SPI5 Master"
+	default n
+	depends on !LPC55_I2C5_MASTER && EXPERIMENTAL
+	select LPC55_FLEXCOMM5
+	select LPC55_HAVE_SPI_MASTER
+
+config LPC55_SPI6_MASTER
+	bool "SPI6 Master"
+	default n
+	depends on !LPC55_I2C6_MASTER && EXPERIMENTAL
+	select LPC55_FLEXCOMM6
+	select LPC55_HAVE_SPI_MASTER
+
+config LPC55_SPI7_MASTER
+	bool "SPI7 Master"
+	default n
+	depends on !LPC55_I2C7_MASTER && EXPERIMENTAL
+	select LPC55_FLEXCOMM7
+	select LPC55_HAVE_SPI_MASTER
+
+config LPC55_USART0
+	bool "USART0"
+	default n
+	depends on !LPC55_I2C0_MASTER && !LPC55_SPI0_MASTER
+	select LPC55_FLEXCOMM0
+	select USART0_SERIALDRIVER
+	select LPC55_HAVE_USART
+
+config LPC55_USART1
+	bool "USART1"
+	default n
+	depends on !LPC55_I2C1_MASTER && !LPC55_SPI1_MASTER
+	select LPC55_FLEXCOMM1
+	select USART1_SERIALDRIVER
+	select LPC55_HAVE_USART
+
+config LPC55_USART2
+	bool "USART2"
+	default n
+	depends on !LPC55_I2C2_MASTER && !LPC55_SPI2_MASTER
+	select LPC55_FLEXCOMM2
+	select USART2_SERIALDRIVER
+	select LPC55_HAVE_USART
+
+config LPC55_USART3
+	bool "USART3"
+	default n
+	depends on !LPC55_I2C3_MASTER && !LPC55_SPI3_MASTER
+	select LPC55_FLEXCOMM3
+	select USART3_SERIALDRIVER
+	select LPC55_HAVE_USART
+
+config LPC55_USART4
+	bool "USART4"
+	default n
+	depends on !LPC55_I2C4_MASTER && !LPC55_SPI4_MASTER
+	select LPC55_FLEXCOMM4
+	select USART4_SERIALDRIVER
+	select LPC55_HAVE_USART
+
+config LPC55_USART5
+	bool "USART5"
+	default n
+	depends on !LPC55_I2C5_MASTER && !LPC55_SPI5_MASTER
+	select LPC55_FLEXCOMM5
+	select USART5_SERIALDRIVER
+	select LPC55_HAVE_USART
+
+config LPC55_USART6
+	bool "USART6"
+	default n
+	depends on !LPC55_I2C6_MASTER && !LPC55_SPI6_MASTER
+	select LPC55_FLEXCOMM6
+	select USART6_SERIALDRIVER
+	select LPC55_HAVE_USART
+
+config LPC55_USART7
+	bool "USART7"
+	default n
+	depends on !LPC55_I2C7_MASTER && !LPC55_SPI7_MASTER
+	select LPC55_FLEXCOMM7
+	select USART7_SERIALDRIVER
+	select LPC55_HAVE_USART
+
+endmenu # Flexcomm Peripherals
+
+config LPC55_RNG
+	bool "Random Number Generator (RNG)"
+	default n
+	select ARCH_HAVE_RNG
+
+config LPC55_RTC
+	bool "Real Time Clock (RTC)"
+	default n
+	select RTC
+
+endmenu # LPC55xx Peripheral Selection
+
+menu "GPIO Interrupt Configuration"
+
+config LPC55_GPIOIRQ
+	bool "Support GPIO Interrupts"
+	default n
+
+config LPC55_GPIOIRQ_GROUPS
+	bool "Support GPIO Interrupt groups"
+	default n
+	depends on LPC55_GPIOIRQ
+
+endmenu # GPIO Interrupt Configuration
