@@ -79,12 +79,9 @@ VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
 HOSTCFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)}
-HOSTSRCS = up_hosttime.c
-
-ifeq ($(CONFIG_LIBC_MODLIB),y)
-  HOSTSRCS += up_hostmemory.c
-else ifeq ($(CONFIG_BINFMT_LOADABLE),y)
-  HOSTSRCS += up_hostmemory.c
+HOSTSRCS = up_hostmemory.c up_hosttime.c
+ifneq ($(CONFIG_HOST_MACOS),y)
+  STDLIBS += -lrt
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
@@ -201,10 +198,6 @@ endif
 
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += up_rptun.c
-  HOSTSRCS += up_shmem.c
-ifneq ($(CONFIG_HOST_MACOS),y)
-  STDLIBS += -lrt
-endif
 endif
 
 ifeq ($(CONFIG_FS_HOSTFS),y)
