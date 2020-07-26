@@ -41,20 +41,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/compiler.h>
-
-#ifndef __ASSEMBLY__
+#ifdef __ASSEMBLY__
+#  include <nuttx/config.h>
+#else
 #  include <sys/types.h>
 #  include <stdbool.h>
 #  include <netinet/in.h>
-
-#  include <nuttx/irq.h>
-#  include <arch/irq.h>
-#  ifdef CONFIG_SMP
-#    include <nuttx/sched.h>
-#    include <nuttx/spinlock.h>
-#  endif
 #endif
 
 /****************************************************************************
@@ -186,15 +178,20 @@
 
 #define STACK_COLOR         0xdeadbeef
 
+#ifndef __ASSEMBLY__
+
 /****************************************************************************
- * Public Types
+ * Public Type Definitions
  ****************************************************************************/
+
+struct tcb_s;
+struct spi_dev_s;
+struct qspi_dev_s;
+struct ioexpander_dev_s;
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 #ifdef CONFIG_SMP
 /* These spinlocks are used in the SMP configuration in order to implement
@@ -211,8 +208,8 @@
  * so that it will be ready for the next pause operation.
  */
 
-extern volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS] SP_SECTION;
-extern volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
+extern volatile uint8_t g_cpu_wait[CONFIG_SMP_NCPUS];
+extern volatile uint8_t g_cpu_paused[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************
@@ -221,8 +218,8 @@ extern volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
 
 /* up_setjmp32.S ************************************************************/
 
-int  up_setjmp(xcpt_reg_t *jb);
-void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
+int  up_setjmp(void *jb);
+void up_longjmp(void *jb, int val);
 
 /* up_hostmemory.c **********************************************************/
 
@@ -246,6 +243,8 @@ void sim_cpu0_start(void);
 
 #ifdef CONFIG_SMP
 void up_cpu_started(void);
+int up_cpu_paused(int cpu);
+struct tcb_s *up_this_task(void);
 #endif
 
 /* up_oneshot.c *************************************************************/
@@ -315,8 +314,7 @@ int sim_ajoy_initialize(void);
 /* up_ioexpander.c **********************************************************/
 
 #ifdef CONFIG_SIM_IOEXPANDER
-struct ioexpander_dev_s;
-FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void);
+struct ioexpander_dev_s *sim_ioexpander_initialize(void);
 #endif
 
 /* up_tapdev.c **************************************************************/
@@ -372,12 +370,10 @@ void vpnkit_ifdown(void);
 
 /* up_netdriver.c ***********************************************************/
 
-#ifdef CONFIG_SIM_NETDEV
 int netdriver_init(void);
 void netdriver_setmacaddr(unsigned char *macaddr);
 void netdriver_setmtu(int mtu);
 void netdriver_loop(void);
-#endif
 
 /* up_rptun.c ***************************************************************/
 
@@ -387,19 +383,17 @@ void up_rptun_loop(void);
 #endif
 
 #ifdef CONFIG_SIM_SPIFLASH
-struct spi_dev_s;
-struct spi_dev_s *up_spiflashinitialize(FAR const char *name);
+struct spi_dev_s *up_spiflashinitialize(const char *name);
 #endif
 
 #ifdef CONFIG_SIM_QSPIFLASH
-struct qspi_dev_s;
 struct qspi_dev_s *up_qspiflashinitialize(void);
 #endif
 
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes);
+void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #endif /* __ASSEMBLY__ */

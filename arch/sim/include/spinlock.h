@@ -41,7 +41,6 @@
  ****************************************************************************/
 
 #include <stdint.h>
-#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -49,15 +48,15 @@
 
 /* Must match definitions in up_testset.c */
 
-#define SP_UNLOCKED false  /* The Un-locked state */
-#define SP_LOCKED   true   /* The Locked state */
+#define SP_UNLOCKED 0 /* The Un-locked state */
+#define SP_LOCKED   1 /* The Locked state */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 /* Must match definitions in up_testset.c */
 
-typedef bool spinlock_t;
+typedef uint8_t spinlock_t;
 
 /****************************************************************************
  * Public Functions

@@ -95,4 +95,8 @@ void up_exit(int status)
   /* Then switch contexts */
 
   up_longjmp(tcb->xcp.regs, 1);
+
+  /* The function does not return */
+
+  for (; ; );
 }
