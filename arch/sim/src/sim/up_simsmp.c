@@ -43,24 +43,11 @@
 #include <signal.h>
 #include <errno.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Must match definitions in arch/sim/include/spinlock.h */
-
-#define SP_UNLOCKED   0   /* The Un-locked state */
-#define SP_LOCKED     1   /* The Locked state */
+#include "up_internal.h"
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-/* Must match definitions in arch/sim/include/spinlock.h.  Assuming that
- * bool and unsigned char are equivalent.
- */
-
-typedef unsigned char spinlock_t;
 
 struct sim_cpuinfo_s
 {
@@ -89,20 +76,14 @@ static pthread_t     g_cpu_thread[CONFIG_SMP_NCPUS];
  * so that it will be ready for the next pause operation.
  */
 
-volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
-volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
+volatile uint8_t g_cpu_wait[CONFIG_SMP_NCPUS];
+volatile uint8_t g_cpu_paused[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * NuttX domain function prototypes
  ****************************************************************************/
 
-void nx_start(void);
-void up_cpu_started(void);
-int  up_cpu_paused(int cpu);
-void host_sleepuntil(uint64_t nsec);
-
 #ifdef CONFIG_SCHED_INSTRUMENTATION
-struct tcb_s *up_this_task(void);
 void sched_note_cpu_start(struct tcb_s *tcb, int cpu);
 void sched_note_cpu_pause(struct tcb_s *tcb, int cpu);
 void sched_note_cpu_resume(struct tcb_s *tcb, int cpu);
@@ -277,10 +258,6 @@ void sim_cpu0_start(void)
     {
       return;
     }
-
-  /* Give control to nx_start() */
-
-  nx_start();
 }
 
 /****************************************************************************
@@ -407,8 +384,8 @@ int up_cpu_pause(int cpu)
 
   /* Take the spinlock that will prevent the CPU thread from running */
 
-  g_cpu_wait[cpu]   = SP_LOCKED;
-  g_cpu_paused[cpu] = SP_LOCKED;
+  g_cpu_wait[cpu]   = 1;
+  g_cpu_paused[cpu] = 1;
 
   /* Signal the CPU thread */
 
@@ -453,6 +430,6 @@ int up_cpu_resume(int cpu)
 
   /* Release the spinlock that will alloc the CPU thread to continue */
 
-  g_cpu_wait[cpu] = SP_UNLOCKED;
+  g_cpu_wait[cpu] = 0;
   return 0;
 }

@@ -66,6 +66,8 @@
 #include <linux/net.h>
 #include <netinet/in.h>
 
+#include "up_internal.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -86,13 +88,6 @@ struct sel_arg_struct
   fd_set         *exp;
   struct timeval *tvp;
 };
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-void netdriver_setmacaddr(unsigned char *macaddr);
-void netdriver_setmtu(int mtu);
 
 /****************************************************************************
  * Private Data

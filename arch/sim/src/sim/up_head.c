@@ -89,11 +89,10 @@ int main(int argc, char **argv, char **envp)
       /* Start the CPU0 emulation.  This should not return. */
 
       sim_cpu0_start();
-#else
+#endif
       /* Start the Nuttx emulation.  This should not return. */
 
       nx_start();
-#endif
     }
 
   return g_exitcode;

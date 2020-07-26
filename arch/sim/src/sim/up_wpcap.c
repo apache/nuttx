@@ -55,6 +55,8 @@
 
 #include <netinet/in.h>
 
+#include "up_internal.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -113,12 +115,6 @@ static pcap_findalldevs_t pcap_findalldevs;
 static pcap_open_live_t   pcap_open_live;
 static pcap_next_ex_t     pcap_next_ex;
 static pcap_sendpacket_t  pcap_sendpacket;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-void netdriver_setmacaddr(unsigned char *macaddr);
 
 /****************************************************************************
  * Private Functions
