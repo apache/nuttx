@@ -85,7 +85,8 @@ struct pcap_if
     struct sockaddr *netmask;
     struct sockaddr *broadaddr;
     struct sockaddr *dstaddr;
-  } *addresses;
+  }
+  *addresses;
   DWORD flags;
 };
 
@@ -147,7 +148,8 @@ static void init_pcap(struct in_addr addr)
           struct in_addr interface_addr;
           interface_addr =
             ((struct sockaddr_in *)interfaces->addresses->addr)->sin_addr;
-          printf("init_pcap: with address: %s\r\n", inet_ntoa(interface_addr));
+          printf("init_pcap: with address: %s\r\n",
+                 inet_ntoa(interface_addr));
 
           if (interface_addr.s_addr == addr.s_addr)
             {
@@ -209,18 +211,17 @@ static void set_ethaddr(struct in_addr addr)
           adapter_addr =
             ((struct sockaddr_in *)adapters->FirstUnicastAddress->Address.
              lpSockaddr)->sin_addr;
-          printf("set_ethaddr: with address: %s\r\n", inet_ntoa(adapter_addr));
+          printf("set_ethaddr: with address: %s\r\n",
+                 inet_ntoa(adapter_addr));
 
           if (adapter_addr.s_addr == addr.s_addr)
             {
               if (adapters->PhysicalAddressLength != 6)
                 {
-                  error_exit
-                    ("ip addr specified does not belong to an ethernet card");
+                  error_exit("ip addr does not belong to an ethernet card");
                 }
 
-              printf
-                ("set_ethaddr: ethernetaddr: %02X-%02X-%02X-%02X-%02X-%02X\r\n",
+              printf("set_ethaddr: %02X-%02X-%02X-%02X-%02X-%02X\r\n",
                  adapters->PhysicalAddress[0], adapters->PhysicalAddress[1],
                  adapters->PhysicalAddress[2], adapters->PhysicalAddress[3],
                  adapters->PhysicalAddress[4], adapters->PhysicalAddress[5]);
