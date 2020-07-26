@@ -56,6 +56,8 @@
 #include <nuttx/fs/userfs.h>
 #include <nuttx/semaphore.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -939,7 +941,7 @@ int userfs_run(FAR const char *mountpt,
    */
 
   iolen = USERFS_REQ_MAXSIZE + mxwrite;
-  info  = (FAR struct userfs_info_s *)zalloc(SIZEOF_USERFS_INFO_S(iolen));
+  info  = lib_zalloc(SIZEOF_USERFS_INFO_S(iolen));
   if (info == NULL)
     {
       ferr("ERROR: Failed to allocate state structure\n");
@@ -1165,6 +1167,6 @@ errout_with_sockfd:
   /* Free the IO Buffer */
 
 errout_with_info:
-  free(info);
+  lib_free(info);
   return ret;
 }

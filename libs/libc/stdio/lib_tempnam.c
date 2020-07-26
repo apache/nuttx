@@ -43,6 +43,8 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -97,7 +99,7 @@ FAR char *tempnam(FAR const char *dir, FAR const char *pfx)
           return path;
         }
 
-      free(path);
+      lib_free(path);
     }
 
   set_errno(ENOMEM);

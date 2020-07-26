@@ -42,6 +42,8 @@
 
 #include <nuttx/streams.h>
 
+#include "libc.h"
+
 #ifdef CONFIG_LIB_HEX2BIN
 
 /****************************************************************************
@@ -422,7 +424,7 @@ int hex2bin(FAR struct lib_instream_s *instream,
 
   /* Allocate buffer memory */
 
-  alloc = (FAR uint8_t *)malloc(LINE_ALLOC + BIN_ALLOC);
+  alloc = (FAR uint8_t *)lib_malloc(LINE_ALLOC + BIN_ALLOC);
   if (alloc == NULL)
     {
       lerr("ERROR: Failed to allocate memory\n");
@@ -703,7 +705,7 @@ errout_with_einval:
 
 errout_with_buffers:
 exit_with_buffers:
-  free(alloc);
+  lib_free(alloc);
   return ret;
 }
 

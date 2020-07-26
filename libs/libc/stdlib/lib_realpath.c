@@ -30,6 +30,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -62,7 +64,7 @@ FAR char *realpath(FAR const char *path, FAR char *resolved)
 
   if (resolved == NULL)
     {
-      fres = resolved = malloc(PATH_MAX);
+      fres = resolved = lib_malloc(PATH_MAX);
       if (resolved == NULL)
         {
           return NULL;
@@ -230,6 +232,6 @@ loop:
   goto loop;
 
 out:
-  free(fres);
+  lib_free(fres);
   return NULL;
 }

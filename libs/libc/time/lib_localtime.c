@@ -60,6 +60,8 @@
 
 #include <nuttx/fs/fs.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -544,7 +546,7 @@ static int tzload(FAR const char *name,
   int doaccess;
   union local_storage *lsp;
 
-  lsp = malloc(sizeof *lsp);
+  lsp = lib_malloc(sizeof *lsp);
   if (!lsp)
     {
       return -1;
@@ -897,11 +899,11 @@ static int tzload(FAR const char *name,
     }
 
   sp->defaulttype = i;
-  free(up);
+  lib_free(up);
   return 0;
 
 oops:
-  free(up);
+  lib_free(up);
   return -1;
 }
 
@@ -1646,7 +1648,7 @@ static void tzsetwall(void)
 
   if (lclptr == NULL)
     {
-      lclptr = malloc(sizeof *lclptr);
+      lclptr = lib_malloc(sizeof *lclptr);
       if (lclptr == NULL)
         {
           settzname();          /* all we can do */
@@ -1791,7 +1793,7 @@ static struct tm *gmtsub(FAR const time_t * const timep,
 {
   if (!g_gmt_isset)
     {
-      gmtptr = malloc(sizeof *gmtptr);
+      gmtptr = lib_malloc(sizeof *gmtptr);
       g_gmt_isset = gmtptr != NULL;
       if (g_gmt_isset)
         {
@@ -2510,7 +2512,7 @@ void tzset(void)
 
   if (lclptr == NULL)
     {
-      lclptr = malloc(sizeof *lclptr);
+      lclptr = lib_malloc(sizeof *lclptr);
       if (lclptr == NULL)
         {
           settzname(); /* all we can do */
