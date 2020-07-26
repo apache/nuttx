@@ -58,6 +58,13 @@ config FAT_LFN_ALIAS_HASH
 		filename. This method is similar to what is used by Windows 2000 and
 		later.
 
+config FAT_LFN_UTF8
+	bool "Allow UTF8 long filenames"
+	depends on FAT_LFN
+	default n
+	---help---
+		UTF8 long filenames are accepted and converted to UCS2.
+
 config FAT_LFN_ALIAS_TRAILCHARS
 	int "Number of trailing characters to use for 8.3 alias"
 	depends on FAT_LFN
