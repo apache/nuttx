@@ -600,7 +600,7 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
         {
           ret = bt_start_advertising(btreq->btr_advtype,
                                      btreq->btr_advad,
-                                     btreq->btr_advad);
+                                     btreq->btr_advsd);
           wlinfo("Start advertising: %d\n", ret);
         }
         break;
