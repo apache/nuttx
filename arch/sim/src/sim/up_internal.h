@@ -227,6 +227,8 @@ void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
 /* up_hostmemory.c **********************************************************/
 
 void *host_alloc_heap(size_t sz);
+void *host_alloc_shmem(const char *name, size_t size, int master);
+void  host_free_shmem(void *mem);
 
 /* up_hosttime.c ************************************************************/
 
@@ -377,18 +379,11 @@ void netdriver_setmtu(int mtu);
 void netdriver_loop(void);
 #endif
 
-#ifdef CONFIG_RPTUN
-
-/* up_shmem.c ***************************************************************/
-
-void *shmem_open(const char *name, size_t size, int master);
-void shmem_close(void *mem);
-
 /* up_rptun.c ***************************************************************/
 
+#ifdef CONFIG_RPTUN
 int up_rptun_init(void);
 void up_rptun_loop(void);
-
 #endif
 
 #ifdef CONFIG_SIM_SPIFLASH

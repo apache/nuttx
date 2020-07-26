@@ -192,9 +192,9 @@ int up_rptun_init(void)
 {
   int ret;
 
-  g_dev.shmem = shmem_open("rptun-shmem",
-                           sizeof(*g_dev.shmem),
-                           CONFIG_SIM_RPTUN_MASTER);
+  g_dev.shmem = host_alloc_shmem("rptun-shmem",
+                                 sizeof(*g_dev.shmem),
+                                 CONFIG_SIM_RPTUN_MASTER);
   if (g_dev.shmem == NULL)
     {
       return -ENOMEM;
@@ -244,7 +244,7 @@ int up_rptun_init(void)
   ret = rptun_initialize(&g_dev.rptun);
   if (ret < 0)
     {
-      shmem_close(g_dev.shmem);
+      host_free_shmem(g_dev.shmem);
       return ret;
     }
 
