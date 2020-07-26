@@ -45,6 +45,7 @@
 #include <pwd.h>
 
 #include "pwd/lib_pwd.h"
+#include "libc.h"
 
 /****************************************************************************
  * Private Data
@@ -87,7 +88,7 @@ FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
 
   buflen = strlen(name) + 1 + strlen(dir) + 1 + strlen(shell) + 1;
 
-  newbuf = (FAR char *)realloc(g_buf, buflen);
+  newbuf = (FAR char *)lib_realloc(g_buf, buflen);
 
   if (!newbuf)
     {
@@ -99,7 +100,7 @@ FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
 
   if (!g_pwd)
     {
-      g_pwd = (FAR struct passwd *)malloc(sizeof(struct passwd));
+      g_pwd = (FAR struct passwd *)lib_malloc(sizeof(struct passwd));
     }
 
   if (!g_pwd)
@@ -108,7 +109,8 @@ FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
       goto error;
     }
 
-  err = getpwbuf_r(uid, gid, name, dir, shell, g_pwd, g_buf, buflen, &result);
+  err = getpwbuf_r(uid, gid, name, dir, shell,
+                   g_pwd, g_buf, buflen, &result);
 
   if (err)
     {
@@ -118,8 +120,8 @@ FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
   return result;
 
 error:
-  free(g_pwd);
-  free(g_buf);
+  lib_free(g_pwd);
+  lib_free(g_buf);
   g_pwd = NULL;
   g_buf = NULL;
   set_errno(err);

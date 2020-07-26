@@ -45,6 +45,7 @@
 #include <grp.h>
 
 #include "grp/lib_grp.h"
+#include "libc.h"
 
 /****************************************************************************
  * Private Data
@@ -85,7 +86,7 @@ FAR struct group *getgrbuf(gid_t gid, FAR const char *name,
 
   buflen = sizeof(FAR char **) + strlen(name) + 1 + strlen(passwd) + 1;
 
-  newbuf = (FAR char *)realloc(g_buf, buflen);
+  newbuf = (FAR char *)lib_realloc(g_buf, buflen);
 
   if (!newbuf)
     {
@@ -97,7 +98,7 @@ FAR struct group *getgrbuf(gid_t gid, FAR const char *name,
 
   if (!g_grp)
     {
-      g_grp = (FAR struct group *)malloc(sizeof(struct group));
+      g_grp = (FAR struct group *)lib_malloc(sizeof(struct group));
     }
 
   if (!g_grp)
@@ -116,8 +117,8 @@ FAR struct group *getgrbuf(gid_t gid, FAR const char *name,
   return result;
 
 error:
-  free(g_grp);
-  free(g_buf);
+  lib_free(g_grp);
+  lib_free(g_buf);
   g_grp = NULL;
   g_buf = NULL;
   set_errno(err);

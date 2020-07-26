@@ -44,6 +44,8 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include "libc.h"
+
 /* The scandir() function is not appropriate for use within the kernel in its
  * current form because it uses user space memory allocators and modifies
  * the errno value.
@@ -59,18 +61,18 @@
  * Name: scandir
  *
  * Description:
- *   The scandir() function scans the directory dirp, calling filter() on each
- *   directory entry.  Entries for which filter() returns nonzero are stored
- *   in strings allocated via malloc(), sorted using qsort() with comparison
- *   function compar(), and collected in array namelist which is allocated via
- *   malloc().  If filter is NULL, all entries are selected.
+ *   The scandir() function scans the directory dirp, calling filter() on
+ *   each directory entry.  Entries for which filter() returns nonzero are
+ *   stored in strings allocated via malloc(), sorted using qsort() with
+ *   comparison function compar(), and collected in array namelist which is
+ *   allocated via malloc().  If filter is NULL, all entries are selected.
  *
  * Input Parameters:
  *   path     - Pathname of the directory to scan
  *   namelist - An array of pointers to directory entries, which is allocated
  *              by scandir via malloc.  Each directory entry is allocated via
  *              malloc as well.  The caller is responsible to free said
-               objects.
+ *              objects.
  *   filter   - Directory entries for which filter returns zero are not
  *              included in the namelist.  If filter is NULL, all entries are
  *              included.
@@ -149,7 +151,7 @@ int scandir(FAR const char *path, FAR struct dirent ***namelist,
               listsize *= 2;
             }
 
-          newlist = realloc(list, listsize * sizeof(*list));
+          newlist = lib_realloc(list, listsize * sizeof(*list));
 
           if (!newlist)
             {
@@ -163,14 +165,12 @@ int scandir(FAR const char *path, FAR struct dirent ***namelist,
           list = newlist;
         }
 
-      /* Allocate a new directory entry, but restrict its heap size to what is
-       * really required given the directories' path name.
+      /* Allocate a new directory entry, but restrict its heap size to what
+       * is really required given the directories' path name.
        */
 
       dsize = (size_t)(&d->d_name[strlen(d->d_name) + 1] - (char *)d);
-
-      dnew = malloc(dsize);
-
+      dnew = lib_malloc(dsize);
       if (!dnew)
         {
           /* malloc failed and set errno.  This will tell follow up code that
@@ -197,14 +197,14 @@ int scandir(FAR const char *path, FAR struct dirent ***namelist,
 
   if (get_errno() == 0)
     {
-      /* If the caller provided a comparison function, use it to sort the list
-       * of directory entries.
+      /* If the caller provided a comparison function, use it to sort the
+       * list of directory entries.
        */
 
       if (compar)
         {
-          qsort(list, cnt, sizeof(*list),
-                (CODE int (*)(FAR const void *, FAR const void *))compar);
+          typedef int (*compar_fn_t)(FAR const void *, FAR const void *);
+          qsort(list, cnt, sizeof(*list), (compar_fn_t)compar);
         }
 
       /* Set the output parameters. */
@@ -220,10 +220,10 @@ int scandir(FAR const char *path, FAR struct dirent ***namelist,
 
       for (i = 0; i < cnt; i++)
         {
-          free(list[i]);
+          lib_free(list[i]);
         }
 
-      free(list);
+      lib_free(list);
 
       result = -1;
     }

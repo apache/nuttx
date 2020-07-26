@@ -290,10 +290,12 @@ static inline FAR void *dlinsert(FAR const char *filename)
       return NULL;
     }
 
-  /* Then install the file using the basename of the file as the module name. */
+  /* Then install the file using the basename of the file as the module
+   * name.
+   */
 
   handle = insmod(filename, basename(name));
-  free(name);
+  lib_free(name);
   return handle;
 }
 #else /* if defined(CONFIG_BUILD_KERNEL) */
