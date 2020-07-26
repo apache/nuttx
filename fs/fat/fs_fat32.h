@@ -943,6 +943,14 @@ struct fat_dirseq_s
 #endif
 };
 
+#ifdef CONFIG_FAT_LFN
+#  ifdef CONFIG_FAT_LFN_UTF8
+typedef wchar_t lfnchar;
+#  else
+typedef uint8_t lfnchar;
+#  endif
+#endif
+
 /* This structure is used internally for describing directory entries */
 
 struct fat_dirinfo_s
@@ -950,7 +958,7 @@ struct fat_dirinfo_s
   /* The file/directory name */
 
 #ifdef CONFIG_FAT_LFN
-  uint8_t fd_lfname[LDIR_MAXFNAME + 1]; /* Long filename with terminator */
+  lfnchar fd_lfname[LDIR_MAXFNAME + 1]; /* Long filename with terminator */
 #endif
   uint8_t fd_name[DIR_MAXFNAME];   /* Short 8.3 alias filename (no terminator) */
 
