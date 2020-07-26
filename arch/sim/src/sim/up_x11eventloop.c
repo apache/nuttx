@@ -120,7 +120,7 @@ void up_x11events(void)
             break;
 
           case ButtonPress  : /* Enabled by ButtonPressMask */
-          case ButtonRelease : /* Enabled by ButtonReleaseMask */
+          case ButtonRelease: /* Enabled by ButtonReleaseMask */
             {
               up_buttonevent(event.xbutton.x, event.xbutton.y,
                              up_buttonmap(event.xbutton.state));
