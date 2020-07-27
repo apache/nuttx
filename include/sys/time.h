@@ -44,6 +44,7 @@
 
 #include <time.h>
 #include <sys/select.h>
+#include <sys/types.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -137,6 +138,8 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+typedef clock_t hrtime_t;
 
 /* struct timeval represents time as seconds plus microseconds */
 
@@ -382,6 +385,19 @@ int setitimer(int which, FAR const struct itimerval *value,
  ****************************************************************************/
 
 int utimes(FAR const char *path, const struct timeval times[2]);
+
+/****************************************************************************
+ * Name: gethrtime
+ *
+ * Description:
+ *   Get the current time
+ *
+ * Returned Value:
+ *   The current value of the system time in ns
+ *
+ ****************************************************************************/
+
+hrtime_t gethrtime(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
