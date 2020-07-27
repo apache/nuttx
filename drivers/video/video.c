@@ -1199,7 +1199,7 @@ static int video_g_ext_ctrls(FAR struct video_mng_s *priv,
 static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
                              FAR struct v4l2_ext_controls *ctrls)
 {
-  int ret;
+  int ret = OK;
   int cnt;
   FAR struct v4l2_ext_control *control;
 
@@ -1221,12 +1221,6 @@ static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
           ctrls->error_idx = cnt;
           return ret;
         }
-    }
-
-  ret = g_video_devops->refresh();
-  if (ret < 0)
-    {
-      ctrls->error_idx = cnt;
     }
 
   return ret;

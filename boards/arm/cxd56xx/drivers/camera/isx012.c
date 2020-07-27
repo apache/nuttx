@@ -205,8 +205,8 @@ typedef struct isx012_modeparam_s isx012_modeparam_t;
 
 struct isx012_param_s
 {
-  isx012_modeparam_t monitor;  /* Parameter for monitor mode */
-  isx012_modeparam_t capture;  /* Parameter for capture mode */
+  isx012_modeparam_t video;  /* Parameter for video capture mode */
+  isx012_modeparam_t still;  /* Parameter for still capture mode */
 };
 
 typedef struct isx012_param_s isx012_param_t;
@@ -258,6 +258,8 @@ static int isx012_set_supported_frminterval(uint32_t fps_index,
                                             FAR struct v4l2_fract *interval);
 static int8_t isx012_get_maximum_fps(FAR struct v4l2_frmivalenum *frmival);
 static int isx012_set_shd(FAR isx012_dev_t *priv);
+
+static bool is_movie_needed(isx012_modeparam_t *param);
 
 /* video driver HAL infterface */
 
@@ -793,6 +795,21 @@ static int isx012_replace_fmt_v4l2val_to_regval(uint32_t v4l2val,
   return OK;
 }
 
+static bool is_movie_needed(isx012_modeparam_t *param)
+{
+  bool need = true;
+
+  if (param->format == V4L2_PIX_FMT_UYVY)
+    {
+      if (param->fps >= REGVAL_FPSTYPE_30FPS)   /* This means fps <= 30 */
+        {
+          need = false;
+        }
+    }
+
+  return need;
+}
+
 static int isx012_set_mode_param(isx012_dev_t *priv,
                                  enum v4l2_buf_type type,
                                  isx012_modeparam_t *param)
@@ -810,11 +827,31 @@ static int isx012_set_mode_param(isx012_dev_t *priv,
 
   if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE)
     {
-      fps_regaddr      = FPSTYPE_MONI;
-      fmt_regaddr      = OUTFMT_MONI;
-      sensmode_regaddr = SENSMODE_MONI;
-      hsize_regaddr    = HSIZE_MONI;
-      vsize_regaddr    = VSIZE_MONI;
+      if (is_movie_needed(param))
+        {
+          if (priv->mode == REGVAL_MODESEL_HREL)
+            {
+              /* In Half release state,
+               * the setting which need movie mode is prohibited.
+               */
+
+              return -EPERM;
+            }
+
+          fps_regaddr      = FPSTYPE_MOVIE;
+          fmt_regaddr      = OUTFMT_MOVIE;
+          sensmode_regaddr = SENSMODE_MOVIE;
+          hsize_regaddr    = HSIZE_MOVIE;
+          vsize_regaddr    = VSIZE_MOVIE;
+        }
+      else
+        {
+          fps_regaddr      = FPSTYPE_MONI;
+          fmt_regaddr      = OUTFMT_MONI;
+          sensmode_regaddr = SENSMODE_MONI;
+          hsize_regaddr    = HSIZE_MONI;
+          vsize_regaddr    = VSIZE_MONI;
+        }
     }
   else
     {
@@ -910,13 +947,13 @@ void isx012_callback(uint8_t code, uint32_t size, uint32_t addr)
 
   if (priv->mode == REGVAL_MODESEL_CAP)
     {
-      /* ISX012 capture mode = still capture */
+      /* ISX012 capture mode => still capture */
 
       type = V4L2_BUF_TYPE_STILL_CAPTURE;
     }
   else
     {
-      /* ISX012 monitor mode or halfrelease mode = video capture */
+      /* ISX012 monitor/halfrelease/movie mode => video capture */
 
       type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     }
@@ -951,6 +988,10 @@ static int isx012_change_camera_mode(isx012_dev_t *priv, uint8_t mode)
       case REGVAL_MODESEL_MON:
       case REGVAL_MODESEL_HREL:
         format_addr = OUTFMT_MONI;
+        break;
+
+      case REGVAL_MODESEL_MOV:
+        format_addr = OUTFMT_MOVIE;
         break;
 
       case REGVAL_MODESEL_CAP:
@@ -1196,16 +1237,16 @@ int init_isx012(FAR struct isx012_dev_s *priv)
 
   /* monitor mode default format: YUV4:2:2 QVGA */
 
-  priv->param.monitor.fps         = REGVAL_FPSTYPE_30FPS;
-  priv->param.monitor.format      = V4L2_PIX_FMT_UYVY;
-  priv->param.monitor.hsize       = VIDEO_HSIZE_QVGA;
-  priv->param.monitor.vsize       = VIDEO_VSIZE_QVGA;
-  priv->param.monitor.int_hsize   = 0;
-  priv->param.monitor.int_vsize   = 0;
+  priv->param.video.fps         = REGVAL_FPSTYPE_30FPS;
+  priv->param.video.format      = V4L2_PIX_FMT_UYVY;
+  priv->param.video.hsize       = VIDEO_HSIZE_QVGA;
+  priv->param.video.vsize       = VIDEO_VSIZE_QVGA;
+  priv->param.video.int_hsize   = 0;
+  priv->param.video.int_vsize   = 0;
 
   ret = isx012_set_mode_param(priv,
                               V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                              &priv->param.monitor);
+                              &priv->param.video);
   if (ret < 0)
     {
       board_isx012_set_reset();
@@ -1214,16 +1255,16 @@ int init_isx012(FAR struct isx012_dev_s *priv)
 
   /* capture mode default format: JPEG FULLHD */
 
-  priv->param.capture.fps         = REGVAL_FPSTYPE_15FPS;
-  priv->param.capture.format      = V4L2_PIX_FMT_JPEG;
-  priv->param.capture.hsize       = VIDEO_HSIZE_FULLHD;
-  priv->param.capture.vsize       = VIDEO_VSIZE_FULLHD;
-  priv->param.capture.int_hsize   = 0;
-  priv->param.capture.int_vsize   = 0;
+  priv->param.still.fps         = REGVAL_FPSTYPE_15FPS;
+  priv->param.still.format      = V4L2_PIX_FMT_JPEG;
+  priv->param.still.hsize       = VIDEO_HSIZE_FULLHD;
+  priv->param.still.vsize       = VIDEO_VSIZE_FULLHD;
+  priv->param.still.int_hsize   = 0;
+  priv->param.still.int_vsize   = 0;
 
   ret = isx012_set_mode_param(priv,
                               V4L2_BUF_TYPE_STILL_CAPTURE,
-                              &priv->param.capture);
+                              &priv->param.still);
   if (ret < 0)
     {
       board_isx012_set_reset();
@@ -1369,7 +1410,14 @@ static int isx012_set_buftype(enum v4l2_buf_type type)
            *                 or MONITORING -> MONITORING
            */
 
-          mode = REGVAL_MODESEL_MON;
+          if (is_movie_needed(&priv->param.video))
+            {
+              mode = REGVAL_MODESEL_MOV;
+            }
+          else
+            {
+              mode = REGVAL_MODESEL_MON;
+            }
         }
     }
   else
@@ -1425,11 +1473,11 @@ static int isx012_set_buf(uint32_t bufaddr, uint32_t bufsize)
     {
       if (priv->mode == REGVAL_MODESEL_CAP)
         {
-          mode_param = &priv->param.capture;
+          mode_param = &priv->param.still;
         }
       else
         {
-          mode_param = &priv->param.monitor;
+          mode_param = &priv->param.video;
         }
 
       switch (mode_param->format)
@@ -1495,15 +1543,6 @@ static int isx012_check_fmt(enum v4l2_buf_type buf_type,
   switch (buf_type)
     {
       case V4L2_BUF_TYPE_VIDEO_CAPTURE:
-        if (pixel_format != V4L2_PIX_FMT_UYVY)
-          {
-            /* Unsupported format */
-
-            return -EINVAL;
-          }
-
-        break;
-
       case V4L2_BUF_TYPE_STILL_CAPTURE:
         if ((pixel_format != V4L2_PIX_FMT_JPEG) &&
             (pixel_format != V4L2_PIX_FMT_JPEG_WITH_SUBIMG) &&
@@ -1534,22 +1573,6 @@ static int isx012_get_range_of_fmt(FAR struct v4l2_fmtdesc *format)
   switch (format->type)
     {
       case V4L2_BUF_TYPE_VIDEO_CAPTURE:
-
-        switch (format->index)
-          {
-            case 0:  /* YUV 4:2:2 */
-
-              strncpy(format->description, "YUV 4:2:2", V4L2_FMT_DSC_MAX);
-              format-> pixelformat = V4L2_PIX_FMT_UYVY;
-
-              break;
-
-            default:  /* 1, 2, ... */
-              return -EINVAL;
-          }
-
-        break;
-
       case V4L2_BUF_TYPE_STILL_CAPTURE:
         switch (format->index)
           {
@@ -1752,11 +1775,11 @@ static int isx012_set_format(FAR struct v4l2_format *format)
   switch (format->type)
     {
       case V4L2_BUF_TYPE_VIDEO_CAPTURE:
-        current_param = &priv->param.monitor;
+        current_param = &priv->param.video;
         break;
 
       case V4L2_BUF_TYPE_STILL_CAPTURE:
-        current_param = &priv->param.capture;
+        current_param = &priv->param.still;
         break;
 
       default:
@@ -2030,8 +2053,8 @@ static int isx012_set_frameinterval(FAR struct v4l2_streamparm *parm)
   int                     ret;
   int8_t                  fps;
   int8_t                  max_fps;
-  uint16_t                fps_regaddr;
-  FAR isx012_modeparam_t  *modeparam;
+  isx012_modeparam_t      mode_param;
+  FAR isx012_modeparam_t  *current_param;
   struct v4l2_frmivalenum frmival;
   FAR struct isx012_dev_s *priv = &g_isx012_private;
 
@@ -2045,27 +2068,27 @@ static int isx012_set_frameinterval(FAR struct v4l2_streamparm *parm)
   switch (frmival.buf_type)
     {
       case V4L2_BUF_TYPE_VIDEO_CAPTURE:
-        modeparam = &priv->param.monitor;
-        fps_regaddr = FPSTYPE_MONI;
+        current_param = &priv->param.video;
         break;
 
       case V4L2_BUF_TYPE_STILL_CAPTURE:
-        modeparam = &priv->param.capture;
-        fps_regaddr = FPSTYPE_CAP;
+        current_param = &priv->param.still;
         break;
 
       default:
         return -EINVAL;
     }
 
+  memcpy(&mode_param, current_param, sizeof(mode_param));
+
   /* Get maximum fps settable value in current image format */
 
-  frmival.pixel_format        = modeparam->format;
-  frmival.height              = modeparam->vsize;
-  frmival.width               = modeparam->hsize;
+  frmival.pixel_format        = mode_param.format;
+  frmival.height              = mode_param.vsize;
+  frmival.width               = mode_param.hsize;
   frmival.subimg_pixel_format = V4L2_PIX_FMT_UYVY;
-  frmival.subimg_height       = modeparam->int_vsize;
-  frmival.subimg_width        = modeparam->int_hsize;
+  frmival.subimg_height       = mode_param.int_vsize;
+  frmival.subimg_width        = mode_param.int_hsize;
   max_fps = isx012_get_maximum_fps(&frmival);
   if (max_fps < 0)
     {
@@ -2077,13 +2100,17 @@ static int isx012_set_frameinterval(FAR struct v4l2_streamparm *parm)
       return -EINVAL;
     }
 
-  ret = isx012_putreg(priv, fps_regaddr, fps, sizeof(uint8_t));
-  if (ret < 0)
+  mode_param.fps = fps;
+
+  ret = isx012_set_mode_param(priv,
+                              parm->type,
+                              &mode_param);
+  if (ret != OK)
     {
       return ret;
     }
 
-  modeparam->fps = fps;
+  memcpy(current_param, &mode_param, sizeof(mode_param));
 
   return OK;
 }
