@@ -379,6 +379,53 @@ static void *set_halt_cmd(void *cmdbuf)
   return (void *)((uintptr_t) cmdbuf + 16);
 }
 
+static void imageproc_convert_(int      is_yuv2rgb,
+                               uint8_t * ibuf,
+                               uint32_t hsize,
+                               uint32_t vsize)
+{
+  int ret;
+
+  if ((hsize & 1) || (vsize & 1))
+    {
+      return;
+    }
+
+  ret = ip_semtake(&g_rotexc);
+  if (ret)
+    {
+      return;
+    }
+
+  /* Image processing hardware want to be set horizontal/vertical size
+   * to actual size - 1.
+   */
+
+  --hsize;
+  --vsize;
+
+  putreg32(1, ROT_INTR_ENABLE);
+  putreg32(0, ROT_INTR_DISABLE);
+  putreg32(0, ROT_SET_DIRECTION);
+
+  putreg32(hsize, ROT_SET_SRC_HSIZE);
+  putreg32(vsize, ROT_SET_SRC_VSIZE);
+  putreg32((uint32_t) (uintptr_t) ibuf, ROT_SET_SRC_ADDRESS);
+
+  putreg32(hsize, ROT_SET_SRC_PITCH);
+  putreg32((uint32_t) (uintptr_t) ibuf, ROT_SET_DST_ADDRESS);
+
+  putreg32(hsize, ROT_SET_DST_PITCH);
+
+  putreg32(is_yuv2rgb ? 1 : 2, ROT_CONV_CTRL);
+  putreg32(0, ROT_RGB_ALIGNMENT);
+  putreg32(1, ROT_COMMAND);
+
+  ip_semtake(&g_rotwait);
+
+  ip_semgive(&g_rotexc);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -424,46 +471,14 @@ void imageproc_convert_yuv2rgb(uint8_t * ibuf,
                                uint32_t hsize,
                                uint32_t vsize)
 {
-  int ret;
+  imageproc_convert_(1, ibuf, hsize, vsize);
+}
 
-  if ((hsize & 1) || (vsize & 1))
-    {
-      return;
-    }
-
-  ret = ip_semtake(&g_rotexc);
-  if (ret)
-    {
-      return;
-    }
-
-  /* Image processing hardware want to be set horizontal/vertical size
-   * to actual size - 1.
-   */
-
-  --hsize;
-  --vsize;
-
-  putreg32(1, ROT_INTR_ENABLE);
-  putreg32(0, ROT_INTR_DISABLE);
-  putreg32(0, ROT_SET_DIRECTION);
-
-  putreg32(hsize, ROT_SET_SRC_HSIZE);
-  putreg32(vsize, ROT_SET_SRC_VSIZE);
-  putreg32((uint32_t) (uintptr_t) ibuf, ROT_SET_SRC_ADDRESS);
-
-  putreg32(hsize, ROT_SET_SRC_PITCH);
-  putreg32((uint32_t) (uintptr_t) ibuf, ROT_SET_DST_ADDRESS);
-
-  putreg32(hsize, ROT_SET_DST_PITCH);
-
-  putreg32(1, ROT_CONV_CTRL);
-  putreg32(0, ROT_RGB_ALIGNMENT);
-  putreg32(1, ROT_COMMAND);
-
-  ip_semtake(&g_rotwait);
-
-  ip_semgive(&g_rotexc);
+void imageproc_convert_rgb2yuv(uint8_t * ibuf,
+                               uint32_t hsize,
+                               uint32_t vsize)
+{
+  imageproc_convert_(0, ibuf, hsize, vsize);
 }
 
 void imageproc_convert_yuv2gray(uint8_t * ibuf, uint8_t * obuf, size_t hsize,
