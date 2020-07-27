@@ -2385,6 +2385,29 @@ static int isx012_get_range_of_ctrlval(FAR struct v4l2_query_ext_ctrl *range)
 
               break;
 
+            case V4L2_CID_3A_PARAMETER:
+              range->type          = V4L2_CTRL_TYPE_U16;
+              range->minimum       = 0;
+              range->maximum       = 65535;
+              range->step          = 1;
+              range->elems         = 3;
+              strncpy(range->name,
+                      "AWB/AE parameter",
+                      sizeof(range->name));
+
+              break;
+
+            case V4L2_CID_3A_STATUS:
+              range->type          = V4L2_CTRL_TYPE_INTEGER;
+              range->minimum       = 0;
+              range->maximum       = 3;
+              range->step          = 1;
+              strncpy(range->name,
+                      "AWB/AE status",
+                      sizeof(range->name));
+
+              break;
+
             default: /* Unsupported control id */
 
               return -EINVAL;
@@ -2505,6 +2528,7 @@ static int isx012_get_ctrlval(uint16_t ctrl_class,
   FAR struct isx012_dev_s *priv = &g_isx012_private;
   int16_t    readvalue;
   uint8_t    cnt;
+  uint8_t    threea_enable;
   uint16_t   read_src;
   uint16_t   *read_dst;
   int        ret = -EINVAL;
@@ -2824,6 +2848,76 @@ static int isx012_get_ctrlval(uint16_t ctrl_class,
                 }
 
               control->value = g_isx012_supported_photometry[cnt].v4l2;
+
+              break;
+
+            case V4L2_CID_3A_PARAMETER:
+              if (control->p_u16 == NULL)
+                {
+                  return -EINVAL;
+                }
+
+              /* Get AWB parameter */
+
+              control->p_u16[0] = isx012_getreg(priv,
+                                                RATIO_R,
+                                                2);
+              control->p_u16[1] = isx012_getreg(priv,
+                                                RATIO_B,
+                                                2);
+
+              /* Get AE parameter */
+
+              control->p_u16[2] = isx012_getreg(priv,
+                                                AELEVEL,
+                                                2);
+
+              break;
+
+            case V4L2_CID_3A_STATUS:
+
+              /* Initialize returned status */
+
+              control->value = V4L2_3A_STATUS_STABLE;
+
+              /* Get AWB/AE enable or not */
+
+              threea_enable = isx012_getreg(priv,
+                                            CPUEXT,
+                                            1);
+
+              /* Check AWB */
+
+              if ((threea_enable & REGVAL_CPUEXT_BIT_AWBSTOP)
+                  != REGVAL_CPUEXT_BIT_AWBSTOP)
+                {
+                  /* Check AWB status */
+
+                  readvalue = isx012_getreg(priv,
+                                            AWBSTS,
+                                            1);
+                  if (readvalue != REGVAL_AWBSTS_STOP) /* AWB is not stopped */
+                    {
+                      control->value |= V4L2_3A_STATUS_AWB_OPERATING;
+                    }
+                }
+
+              /* Check AE */
+
+              if ((threea_enable & REGVAL_CPUEXT_BIT_AESTOP)
+                  != REGVAL_CPUEXT_BIT_AESTOP)
+                {
+                  /* Check AE status */
+
+                  readvalue = isx012_getreg(priv,
+                                            AESTS,
+                                            1);
+                  if (readvalue != REGVAL_AESTS_STOP) /* AE is not stopped */
+                    {
+                      control->value |= V4L2_3A_STATUS_AE_OPERATING;
+                    }
+                }
+              break;
 
             default: /* Unsupported control id */
 
@@ -3382,6 +3476,39 @@ static int isx012_set_ctrlval(uint16_t ctrl_class,
                                   ISX012_REG_3ALOCK,
                                   regval,
                                   ISX012_SIZE_3ALOCK);
+
+              break;
+
+            case V4L2_CID_3A_PARAMETER:
+
+              /* AWB parameter : red */
+
+              ret = isx012_putreg(priv,
+                                  INIT_CONT_INR,
+                                  control->p_u16[0],
+                                  2);
+              ret = isx012_putreg(priv,
+                                  INIT_CONT_OUTR,
+                                  control->p_u16[0],
+                                  2);
+
+              /* AWB parameter : blue */
+
+              ret = isx012_putreg(priv,
+                                  INIT_CONT_INB,
+                                  control->p_u16[1],
+                                  2);
+              ret = isx012_putreg(priv,
+                                  INIT_CONT_OUTB,
+                                  control->p_u16[1],
+                                  2);
+
+              /* AE parameter */
+
+              ret = isx012_putreg(priv,
+                                  AE_START_LEVEL,
+                                  control->p_u16[2],
+                                  2);
 
               break;
 
