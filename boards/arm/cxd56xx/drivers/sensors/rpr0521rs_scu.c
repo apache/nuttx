@@ -52,7 +52,7 @@
 #include <nuttx/irq.h>
 #include <arch/chip/scu.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_RPR0521RS) && defined(CONFIG_CXD56_SCU)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_RPR0521RS_SCU)
 
 /****************************************************************************
  * Pre-processor Definitions

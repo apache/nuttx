@@ -775,7 +775,7 @@ DMA_HANDLE cxd56_dmachannel(int ch, ssize_t maxsize)
 
   /* Get exclusive access to allocate channel */
 
-  nxsem_wait(&g_dmaexc);
+  nxsem_wait_uninterruptible(&g_dmaexc);
 
   if (ch < 0 || ch >= NCHANNELS)
     {
@@ -858,7 +858,7 @@ void cxd56_dmafree(DMA_HANDLE handle)
       return;
     }
 
-  nxsem_wait(&g_dmaexc);
+  nxsem_wait_uninterruptible(&g_dmaexc);
 
   if (!dmach->inuse)
     {

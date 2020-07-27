@@ -50,7 +50,7 @@
 
 #include "cxd56_i2c.h"
 
-#ifdef CONFIG_CXD56_DECI_BM1422GMV
+#ifdef CONFIG_SENSORS_BM1422GMV_SCU_DECI
 #  define BM1422GMV_PATH_CNT 3
 #else
 #  define BM1422GMV_PATH_CNT 1

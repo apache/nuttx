@@ -83,7 +83,9 @@ const uint32_t g_idle_topstack = (uint32_t)&_ebss +
 #  error Invalid memory configuration
 #endif
 
-#define MM_RAM_END CONFIG_RAM_END
+/* __stack is the end of RAM address, it would be set by linker. */
+
+extern char __stack[];
 
 /****************************************************************************
  * Private Functions
@@ -131,7 +133,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   board_autoled_on(LED_HEAPALLOCATE);
   *heap_start = (FAR void *)g_idle_topstack;
-  *heap_size = MM_RAM_END - g_idle_topstack;
+  *heap_size = (uint32_t)&__stack - g_idle_topstack;
 
   /* Colorize the heap for debug */
 

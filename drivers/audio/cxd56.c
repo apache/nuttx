@@ -119,7 +119,7 @@
 #define CXD56_ACA_OSC_49_152MHZ       3  /* 49.152MHz */
 #define CXD56_ACA_OSC_49_152MHZ_HIRES 4  /* 49.152MHz, Hi-Res */
 
-/* Control IDs for external as_aca_control */
+/* Control IDs for external fw_as_acacontrol */
 #define CXD56_ACA_CTL_CHECK_ID          0
 #define CXD56_ACA_CTL_POWER_ON_COMMON   1
 #define CXD56_ACA_CTL_POWER_ON_INPUT    2
@@ -193,7 +193,7 @@ extern bool cxd56_audio_clock_is_enabled(void);
 
 /* Located in arch/arm/src/cxd56xx/cxd56_farapistub.S */
 
-extern uint32_t as_aca_control(uint8_t type, uint32_t param);
+extern uint32_t fw_as_acacontrol(uint8_t type, uint32_t param);
 
 /****************************************************************************
  * Private Types
@@ -1511,7 +1511,7 @@ static int cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol)
     {
       /* Disable analog out */
 
-      ret = as_aca_control(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
+      ret = fw_as_acacontrol(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
                            (uint32_t)CXD56_OUT_DEV_OFF);
       if (ret != CXD56_AUDIO_ECODE_OK)
         {
@@ -1523,7 +1523,7 @@ static int cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol)
     {
       /* Enable analog out */
 
-      ret = as_aca_control(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
+      ret = fw_as_acacontrol(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
                            (uint32_t)CXD56_OUT_DEV_SP);
       if (ret != CXD56_AUDIO_ECODE_OK)
         {
@@ -1711,7 +1711,7 @@ static int cxd56_power_on_aca(uint32_t samplerate)
   uint8_t mic_sel;
   uint8_t i;
 
-  if (as_aca_control(CXD56_ACA_CTL_CHECK_ID, (uint32_t)NULL) != 0)
+  if (fw_as_acacontrol(CXD56_ACA_CTL_CHECK_ID, (uint32_t)NULL) != 0)
     {
       return -ENXIO;
     }
@@ -1735,7 +1735,7 @@ static int cxd56_power_on_aca(uint32_t samplerate)
   pwon_param.mclk_ds = CXD56_MCLKOUT_DS;
   pwon_param.gpo_ds = CXD56_GPO_A_DS;
 
-  if (as_aca_control(CXD56_ACA_CTL_POWER_ON_COMMON,
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_COMMON,
                     (uint32_t)&pwon_param) != 0)
     {
       return -EBUSY;
@@ -1763,7 +1763,7 @@ static int cxd56_power_on_aca(uint32_t samplerate)
       ser_param.sel_ch.in[i] = (enum cxd56_pulco_ser_sel_ch_id_e)mic_sel;
     }
 
-  if (as_aca_control(CXD56_ACA_CTL_SET_SERDES, (uint32_t)&ser_param) != 0)
+  if (fw_as_acacontrol(CXD56_ACA_CTL_SET_SERDES, (uint32_t)&ser_param) != 0)
     {
       return -EBUSY;
     }
@@ -1802,13 +1802,13 @@ static int cxd56_power_on_analog_output(FAR struct cxd56_dev_s *dev)
   pwon_param.sp_spliton  = CXD56_SP_SPLIT_ON;
   pwon_param.sp_drv      = CXD56_SP_DRIVER;
 
-  if (as_aca_control(CXD56_ACA_CTL_SET_SMASTER,
+  if (fw_as_acacontrol(CXD56_ACA_CTL_SET_SMASTER,
                     (uint32_t)&smaster_param) != 0)
     {
       return -EBUSY;
     }
 
-  if (as_aca_control(CXD56_ACA_CTL_POWER_ON_OUTPUT,
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_OUTPUT,
                     (uint32_t)&pwon_param) != 0)
     {
       return -EBUSY;
@@ -1939,7 +1939,7 @@ static int cxd56_power_on_micbias(FAR struct cxd56_dev_s *dev)
 {
   struct timespec start;
 
-  if (as_aca_control(CXD56_ACA_CTL_POWER_ON_MICBIAS, (uint32_t)NULL) != 0)
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_MICBIAS, (uint32_t)NULL) != 0)
     {
       return -EBUSY;
     }
@@ -2207,7 +2207,7 @@ static int cxd56_power_on_input(FAR struct cxd56_dev_s *dev)
 
   cxd56_set_mic_gains(120, &param);
 
-  if (as_aca_control(CXD56_ACA_CTL_POWER_ON_INPUT,
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_ON_INPUT,
                      (uint32_t)&param) != 0)
     {
       return -EBUSY;
@@ -2423,7 +2423,7 @@ static int cxd56_power_off(FAR struct cxd56_dev_s *dev)
 
   cxd56_audio_clock_disable();
 
-  if (as_aca_control(CXD56_ACA_CTL_POWER_OFF_COMMON, (uint32_t)NULL) != 0)
+  if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_OFF_COMMON, (uint32_t)NULL) != 0)
     {
       return -EBUSY;
     }
@@ -2857,7 +2857,7 @@ static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv)
 
           /* Disable input */
 
-          if (as_aca_control(CXD56_ACA_CTL_POWER_OFF_INPUT,
+          if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_OFF_INPUT,
                              (uint32_t)NULL) != 0)
             {
               return -EBUSY;
@@ -2881,7 +2881,7 @@ static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv)
           write_reg(REG_AC_NSPMUTE, 1);
           write_reg(REG_AC_PDN_SMSTR, 1);
 
-          if (as_aca_control(CXD56_ACA_CTL_POWER_OFF_OUTPUT,
+          if (fw_as_acacontrol(CXD56_ACA_CTL_POWER_OFF_OUTPUT,
                                (uint32_t)NULL) != 0)
             {
               return -EBUSY;

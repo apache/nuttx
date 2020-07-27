@@ -58,7 +58,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_CXD56_DECI_AK09912
+#ifdef CONFIG_SENSORS_AK09912_SCU_DECI
 #  define MAG_SEQ_TYPE SEQ_TYPE_DECI
 #else
 #  define MAG_SEQ_TYPE SEQ_TYPE_NORMAL

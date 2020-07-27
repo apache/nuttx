@@ -335,7 +335,7 @@ static int gauge_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct bat_gauge_dev_s *priv  = inode->i_private;
   int ret = -ENOTTY;
 
-  nxsem_wait(&priv->batsem);
+  nxsem_wait_uninterruptible(&priv->batsem);
 
   switch (cmd)
     {

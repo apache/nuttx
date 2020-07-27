@@ -55,7 +55,7 @@
 #include "cxd56_farapistub.h"
 #include "hardware/cxd5602_backupmem.h"
 
-int PM_WakeUpCpu(int cpuid);
+int fw_pm_wakeupcpu(int cpuid);
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -120,7 +120,7 @@ struct farmsg_s
  * Public Data
  ****************************************************************************/
 
-extern char Image$$MODLIST$$Base[];
+extern char _image_modlist_base[];
 
 /****************************************************************************
  * Private Data
@@ -210,7 +210,7 @@ void farapi_main(int id, void *arg, struct modulelist_s *mlist)
       if (((gnscken & GNSDSP_CKEN_P1) != GNSDSP_CKEN_P1) &&
           ((gnscken & GNSDSP_CKEN_COP) != GNSDSP_CKEN_COP))
         {
-          PM_WakeUpCpu(GPS_CPU_ID);
+          fw_pm_wakeupcpu(GPS_CPU_ID);
         }
     }
 #endif
@@ -220,7 +220,7 @@ void farapi_main(int id, void *arg, struct modulelist_s *mlist)
   api = &msg.u.api;
 
   msg.cpuid      = getreg32(CPU_ID);
-  msg.modid      = mlist - (struct modulelist_s *)&Image$$MODLIST$$Base;
+  msg.modid      = mlist - (struct modulelist_s *)&_image_modlist_base;
 
   api->id        = id;
   api->arg       = arg;
@@ -274,6 +274,7 @@ void cxd56_farapiinitialize(void)
 #endif
   nxsem_init(&g_farlock, 0, 1);
   nxsem_init(&g_farwait, 0, 0);
+  nxsem_set_protocol(&g_farwait, SEM_PRIO_NONE);
 
   cxd56_iccinit(CXD56_PROTO_MBX);
   cxd56_iccinit(CXD56_PROTO_FLG);

@@ -429,6 +429,7 @@ config ARCH_CHIP_CXD56XX
 	select ARCH_HAVE_MULTICPU
 	select ARCH_GLOBAL_IRQDISABLE
 	select ARCH_HAVE_SDIO if MMCSD
+	select ARCH_HAVE_MATH_H
 	---help---
 		Sony CXD56XX (ARM Cortex-M4) architectures
 

@@ -50,7 +50,7 @@
 
 #include "cxd56_i2c.h"
 
-#ifdef CONFIG_CXD56_DECI_KX022
+#ifdef CONFIG_SENSORS_KX022_SCU_DECI
 #  define KX022_FIFO_CNT 3
 #else
 #  define KX022_FIFO_CNT 1

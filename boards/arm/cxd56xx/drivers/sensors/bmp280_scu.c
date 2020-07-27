@@ -51,18 +51,18 @@
 #include <nuttx/sensors/bmp280.h>
 #include <arch/chip/scu.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_BMP280_SCU)
+#if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BMP280_SCU)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_CXD56_DECI_PRESS
+#ifdef CONFIG_SENSORS_BMI280_SCU_DECI_PRESS
 #  define PRESS_SEQ_TYPE SEQ_TYPE_DECI
 #else
 #  define PRESS_SEQ_TYPE SEQ_TYPE_NORMAL
 #endif
-#ifdef CONFIG_CXD56_DECI_TEMP
+#ifdef CONFIG_SENSORS_BMI280_SCU_DECI_TEMP
 #  define TEMP_SEQ_TYPE SEQ_TYPE_DECI
 #else
 #  define TEMP_SEQ_TYPE SEQ_TYPE_NORMAL
@@ -883,7 +883,7 @@ static int bmp280_ioctl_temp(FAR struct file *filep, int cmd,
 int bmp280_init(FAR struct i2c_master_s *i2c, int port)
 {
   struct bmp280_dev_s tmp;
-  struct *priv = &tmp;
+  struct bmp280_dev_s *priv = &tmp;
   int ret;
 
   /* Setup temporary device structure for initialization */

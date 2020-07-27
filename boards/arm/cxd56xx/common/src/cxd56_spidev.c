@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/cxd56xx/cxd56_farapistub.h
+ * boards/arm/cxd56xx/common/src/cxd56_spidev.c
  *
- *   Copyright 2018 Sony Semiconductor Solutions Corporation
+ *   Copyright 2020 Sony Semiconductor Solutions Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,9 +33,52 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_FARAPISTUB_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_FARAPISTUB_H
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
-#define FARAPISTUB_VERSION 20129
+#include <nuttx/config.h>
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_FARAPISTUB_H */
+#include <stdio.h>
+#include <debug.h>
+#include <errno.h>
+#include <nuttx/spi/spi_transfer.h>
+
+#include "cxd56_spi.h"
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_spidev_initialize
+ *
+ * Description:
+ *   Initialize and register spi driver for the specified spi port
+ *
+ ****************************************************************************/
+
+int board_spidev_initialize(int port)
+{
+  int ret;
+  FAR struct spi_dev_s *spi;
+
+  _info("Initializing /dev/spi%d..\n", port);
+
+  /* Initialize spi device */
+
+  spi = cxd56_spibus_initialize(port);
+  if (!spi)
+    {
+      _err("ERROR: Failed to initialize spi%d.\n", port);
+      return -ENODEV;
+    }
+
+  ret = spi_register(spi, port);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to register spi%d: %d\n", port, ret);
+    }
+
+  return ret;
+}

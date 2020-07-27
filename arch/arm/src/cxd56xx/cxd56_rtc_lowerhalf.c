@@ -319,12 +319,11 @@ static int cxd56_setalarm(FAR struct rtc_lowerhalf_s *lower,
   int ret = -EINVAL;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
-  DEBUGASSERT((RTC_ALARM0 == alarminfo->id) ||
-              (RTC_ALARM1 == alarminfo->id));
+  DEBUGASSERT(RTC_ALARM0 == alarminfo->id);
 
   priv = (FAR struct cxd56_lowerhalf_s *)lower;
 
-  if ((RTC_ALARM0 == alarminfo->id) || (RTC_ALARM1 == alarminfo->id))
+  if (RTC_ALARM0 == alarminfo->id)
     {
       /* Remember the callback information */
 
@@ -380,9 +379,6 @@ static int cxd56_setrelative(FAR struct rtc_lowerhalf_s *lower,
 {
   struct lower_setalarm_s setalarm;
   FAR struct timespec ts;
-  struct alm_setalarm_s lowerinfo;
-  FAR struct cxd56_lowerhalf_s *priv;
-  FAR struct cxd56_cbinfo_s *cbinfo;
   time_t seconds;
   int ret = -EINVAL;
 
@@ -390,9 +386,7 @@ static int cxd56_setrelative(FAR struct rtc_lowerhalf_s *lower,
   DEBUGASSERT((RTC_ALARM0 <= alarminfo->id) &&
               (alarminfo->id < RTC_ALARM_LAST));
 
-  if (((alarminfo->id == RTC_ALARM0) ||
-       (alarminfo->id == RTC_ALARM1)) &&
-       (alarminfo->reltime > 0))
+  if ((alarminfo->id == RTC_ALARM0) && (alarminfo->reltime > 0))
     {
       /* Disable pre-emption while we do this so that we don't have to worry
        * about being suspended and working on an old time.
@@ -431,36 +425,6 @@ static int cxd56_setrelative(FAR struct rtc_lowerhalf_s *lower,
       setalarm.priv = alarminfo->priv;
 
       ret = cxd56_setalarm(lower, &setalarm);
-
-      sched_unlock();
-    }
-  else if ((alarminfo->id == RTC_ALARM2) && (alarminfo->reltime > 0))
-    {
-      sched_lock();
-
-      priv = (FAR struct cxd56_lowerhalf_s *)lower;
-
-      /* Remember the callback information */
-
-      cbinfo       = &priv->cbinfo[alarminfo->id];
-      cbinfo->cb   = alarminfo->cb;
-      cbinfo->priv = alarminfo->priv;
-
-      /* Set the alarm */
-
-      lowerinfo.as_id   = alarminfo->id;
-      lowerinfo.as_cb   = cxd56_alarm_callback;
-      lowerinfo.as_arg  = priv;
-
-      lowerinfo.as_time.tv_sec  = alarminfo->reltime;
-      lowerinfo.as_time.tv_nsec = 0;
-
-      ret = cxd56_rtc_setalarm(&lowerinfo);
-      if (ret < 0)
-        {
-          cbinfo->cb   = NULL;
-          cbinfo->priv = NULL;
-        }
 
       sched_unlock();
     }
