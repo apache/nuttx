@@ -629,6 +629,11 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond,
                            FAR pthread_mutex_t *mutex,
                            FAR const struct timespec *abstime);
 
+int pthread_cond_clockwait(FAR pthread_cond_t *cond,
+                           FAR pthread_mutex_t *mutex,
+                           clockid_t clockid,
+                           FAR const struct timespec *abstime);
+
 /* Barrier attributes */
 
 int pthread_barrierattr_destroy(FAR pthread_barrierattr_t *attr);
@@ -659,9 +664,15 @@ int pthread_rwlock_init(FAR pthread_rwlock_t *rw_lock,
 int pthread_rwlock_rdlock(pthread_rwlock_t *lock);
 int pthread_rwlock_timedrdlock(FAR pthread_rwlock_t *lock,
                                FAR const struct timespec *abstime);
+int pthread_rwlock_clockrdlock(FAR pthread_rwlock_t *lock,
+                               clockid_t clockid,
+                               FAR const struct timespec *abstime);
 int pthread_rwlock_tryrdlock(FAR pthread_rwlock_t *lock);
 int pthread_rwlock_wrlock(FAR pthread_rwlock_t *lock);
 int pthread_rwlock_timedwrlock(FAR pthread_rwlock_t *lock,
+                               FAR const struct timespec *abstime);
+int pthread_rwlock_clockwrlock(FAR pthread_rwlock_t *lock,
+                               clockid_t clockid,
                                FAR const struct timespec *abstime);
 int pthread_rwlock_trywrlock(FAR pthread_rwlock_t *lock);
 int pthread_rwlock_unlock(FAR pthread_rwlock_t *lock);

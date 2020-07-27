@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_condtimedwait.c
+ * sched/pthread/pthread_condclockwait.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -140,14 +140,15 @@ static void pthread_condtimedout(int argc, wdparm_t arg1, ...)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_cond_timedwait
+ * Name: pthread_cond_clockwait
  *
  * Description:
  *   A thread can perform a timed wait on a condition variable.
  *
  * Input Parameters:
- *   cond   - the condition variable to wait on
+ *   cond    - the condition variable to wait on
  *   mutex   - the mutex that protects the condition variable
+ *   clockid - The timing source to use in the conversion
  *   abstime - wait until this absolute time
  *
  * Returned Value:
@@ -158,8 +159,9 @@ static void pthread_condtimedout(int argc, wdparm_t arg1, ...)
  *
  ****************************************************************************/
 
-int pthread_cond_timedwait(FAR pthread_cond_t *cond,
+int pthread_cond_clockwait(FAR pthread_cond_t *cond,
                            FAR pthread_mutex_t *mutex,
+                           clockid_t clockid,
                            FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
@@ -173,7 +175,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond,
 
   DEBUGASSERT(rtcb->waitdog == NULL);
 
-  /* pthread_cond_timedwait() is a cancellation point */
+  /* pthread_cond_clockwait() is a cancellation point */
 
   enter_cancellation_point();
 
@@ -227,7 +229,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond,
            * begins.
            */
 
-          ret = clock_abstime2ticks(CLOCK_REALTIME, abstime, &ticks);
+          ret = clock_abstime2ticks(clockid, abstime, &ticks);
           if (ret)
             {
               /* Restore interrupts  (pre-emption will be enabled when

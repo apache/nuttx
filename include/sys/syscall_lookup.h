@@ -61,6 +61,7 @@ SYSCALL_LOOKUP(sethostname,                2)
 
 SYSCALL_LOOKUP(sem_destroy,                1)
 SYSCALL_LOOKUP(sem_post,                   1)
+SYSCALL_LOOKUP(sem_clockwait,              3)
 SYSCALL_LOOKUP(sem_timedwait,              2)
 SYSCALL_LOOKUP(sem_trywait,                1)
 SYSCALL_LOOKUP(sem_wait,                   1)
@@ -315,7 +316,7 @@ SYSCALL_LOOKUP(telldir,                    1)
   SYSCALL_LOOKUP(pthread_setaffinity_np,   3)
   SYSCALL_LOOKUP(pthread_getaffinity_np,   3)
 #endif
-  SYSCALL_LOOKUP(pthread_cond_timedwait,   3)
+  SYSCALL_LOOKUP(pthread_cond_clockwait,   4)
   SYSCALL_LOOKUP(pthread_kill,             2)
   SYSCALL_LOOKUP(pthread_sigmask,          3)
 #ifdef CONFIG_PTHREAD_CLEANUP
