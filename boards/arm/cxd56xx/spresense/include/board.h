@@ -255,6 +255,14 @@ enum board_power_device
 
 #define BOARDIOC_USBDEV_SETNOTIFYSIG      (BOARDIOC_USER+0x0001)
 
+/* Altair modem device pin definitions **************************************/
+
+#define ALTMDM_SLAVE_REQ          PIN_SPI2_SCK
+#define ALTMDM_MASTER_REQ         PIN_RTC_IRQ_OUT
+#define ALTMDM_WAKEUP             PIN_SPI2_MOSI
+#define ALTMDM_SHUTDOWN           PIN_SPI2_MISO
+#define ALTMDM_LTE_POWER_BUTTON   PIN_AP_CLK
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#if defined(CONFIG_MODEM_ALTMDM) && defined(CONFIG_CXD56_LTE) && \
+  defined(CONFIG_CXD56_GPIO_IRQ) && defined(CONFIG_CXD56_SPI)
+
 #include <stdio.h>
 #include <debug.h>
 #include <errno.h>
@@ -47,277 +50,405 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/modem/altmdm.h>
 
-#if defined(CONFIG_MODEM_ALTMDM) && defined(CONFIG_CXD56_GPIO_IRQ)
 #include <arch/board/board.h>
 #include <arch/board/cxd56_altmdm.h>
 
+#include "cxd56_spi.h"
+#include "cxd56_dmac.h"
 #include "cxd56_gpio.h"
 #include "cxd56_gpioint.h"
 #include "cxd56_pinconfig.h"
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_MODEM_ALTMDM) && defined(CONFIG_CXD56_GPIO_IRQ)
+#if !defined(CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE)
+#  error CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE is not set
+#endif
 
-#define ALTMDM_SHUTDOWN  (PIN_SPI2_MISO)
-#define MODEM_WAKEUP     (PIN_SPI2_MOSI)
-#define MASTER_REQUEST   (PIN_RTC_IRQ_OUT)
-#define SLAVE_REQUEST    (PIN_SPI2_SCK)
-#define LTE_POWER_BUTTON (PIN_AP_CLK)
-#define NUM_OF_PINS      (sizeof(pincfg) / sizeof(struct altmdm_pincfg))
-
+#if defined(CONFIG_CXD56_LTE_SPI4)
+#  define SPI_CH           (4)
+#  define SPI_MAXFREQUENCY (9750000)
+#  if  defined(CONFIG_CXD56_LTE_SPI4_DMAC)
+#    define DMA_TXCH       (2)
+#    define DMA_RXCH       (3)
+#    define DMA_TXCHCHG    (CXD56_DMA_PERIPHERAL_SPI4_TX)
+#    define DMA_RXCHCFG    (CXD56_DMA_PERIPHERAL_SPI4_RX)
+#  endif
+#elif defined(CONFIG_CXD56_LTE_SPI5)
+#  define SPI_CH           (5)
+#  define SPI_MAXFREQUENCY (13000000)
+#  if  defined(CONFIG_CXD56_LTE_SPI5_DMAC)
+#    define DMA_TXCH       (4)
+#    define DMA_RXCH       (5)
+#    define DMA_TXCHCHG    (CXD56_DMA_PERIPHERAL_SPI5_TX)
+#    define DMA_RXCHCFG    (CXD56_DMA_PERIPHERAL_SPI5_RX)
+#  endif
+#else
+#  error "Select LTE SPI 4 or 5"
 #endif
 
 /****************************************************************************
- * Private Types
+ * Private Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_MODEM_ALTMDM) && defined(CONFIG_CXD56_GPIO_IRQ)
-
-struct altmdm_pincfg
-{
-  uint32_t pin;
-  bool input_enable;
-  bool init_val;
-};
-
-#endif
+static void altmdm_poweron(void);
+static void altmdm_poweroff(void);
+static void altmdm_sready_irqattach(bool attach, xcpt_t handler);
+static void altmdm_sready_irqenable(bool enable);
+static bool altmdm_sready(void);
+static void altmdm_master_request(bool request);
+static void altmdm_wakeup(bool wakeup);
+static uint32_t altmdm_spi_maxfreq(void);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_MODEM_ALTMDM) && defined(CONFIG_CXD56_GPIO_IRQ)
-
-static const struct altmdm_pincfg pincfg[] =
+static void *g_devhandle = NULL;
+static const struct altmdm_lower_s g_altmdm_lower =
 {
-  {MODEM_WAKEUP, false, false},    /* out, low */
-  {MASTER_REQUEST, false, false},  /* out, low */
-  {SLAVE_REQUEST, true, false},    /* in, low */
+  .poweron          = altmdm_poweron,
+  .poweroff         = altmdm_poweroff,
+  .sready_irqattach = altmdm_sready_irqattach,
+  .sready_irqenable = altmdm_sready_irqenable,
+  .sready           = altmdm_sready,
+  .master_request   = altmdm_master_request,
+  .wakeup           = altmdm_wakeup,
+  .spi_maxfreq      = altmdm_spi_maxfreq
 };
 
-#endif
-
-#if defined(CONFIG_MODEM_ALTMDM) && defined(CONFIG_CXD56_GPIO_IRQ)
-
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_altmdm_poweron
+ * Name: spi_pincontrol
+ *
+ * Description:
+ *   Configure the SPI pin
+ *
+ * Input Parameter:
+ *   bus - SPI bus number to control
+ *   on - true: enable pin, false: disable pin
+ *
+ ****************************************************************************/
+
+static void spi_pincontrol(int bus, bool on)
+{
+  switch (bus)
+    {
+#ifdef CONFIG_CXD56_SPI4
+      case 4:
+        if (on)
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_SPI4);
+          }
+        else
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_SPI4_GPIO);
+          }
+        break;
+#endif /* CONFIG_CXD56_SPI4 */
+
+#ifdef CONFIG_CXD56_SPI5
+      case 5:
+#ifdef CONFIG_CXD56_SPI5_PINMAP_EMMC
+        if (on)
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_EMMCA_SPI5);
+          }
+        else
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_EMMCA_GPIO);
+          }
+#endif /* CONFIG_CXD56_SPI5_PINMAP_EMMC */
+
+#ifdef CONFIG_CXD56_SPI5_PINMAP_SDIO
+        if (on)
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_SDIOA_SPI5);
+          }
+        else
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_SDIOA_GPIO);
+          }
+#endif /* CONFIG_CXD56_SPI5_PINMAP_SDIO */
+        break;
+#endif /* CONFIG_CXD56_SPI5 */
+      default:
+        break;
+    }
+}
+
+/****************************************************************************
+ * Name: altmdm_poweron
  *
  * Description:
  *   Power on the Altair modem device on the board.
  *
  ****************************************************************************/
 
-void board_altmdm_poweron(void)
+static void altmdm_poweron(void)
 {
-  int i;
+  /* power on altair modem device */
 
-  /* Power on altair modem device */
+  board_altmdm_poweron();
 
-  cxd56_gpio_config(ALTMDM_SHUTDOWN, false);
-  cxd56_gpio_write(ALTMDM_SHUTDOWN, true);
+  /* Input enable */
 
-  cxd56_gpio_config(LTE_POWER_BUTTON, false);
-  cxd56_gpio_write(LTE_POWER_BUTTON, true);
+  cxd56_gpio_config(ALTMDM_SLAVE_REQ, true);
 
-  board_power_control(POWER_LTE, true);
+  /* Output enable */
 
-  for (i = 0; i < NUM_OF_PINS; i++)
-    {
-      /* input pin: input enable */
+  cxd56_gpio_config(ALTMDM_MASTER_REQ, false);
+  cxd56_gpio_config(ALTMDM_WAKEUP, false);
 
-      cxd56_gpio_config(pincfg[i].pin, pincfg[i].input_enable);
+  /* Write a default value for output pin */
 
-      /* if it is an output pin, write a default value */
-
-      if (pincfg[i].input_enable == false)
-        {
-          cxd56_gpio_write(pincfg[i].pin, pincfg[i].init_val);
-        }
-    }
+  cxd56_gpio_write(ALTMDM_MASTER_REQ, false);
+  cxd56_gpio_write(ALTMDM_WAKEUP, false);
 
   /* Slave request seems to float in Lite Hibernation and becomes HIGH at
    * some times when it should stay LOW.
    */
 
-  cxd56_pin_config(PINCONF_SET(SLAVE_REQUEST,
+  cxd56_pin_config(PINCONF_SET(ALTMDM_SLAVE_REQ,
                                PINCONF_MODE0,
                                PINCONF_INPUT_ENABLE,
                                PINCONF_DRIVE_NORMAL, PINCONF_PULLDOWN));
+
+  /* enable the SPI pin */
+
+  spi_pincontrol(SPI_CH, true);
 }
 
 /****************************************************************************
- * Name: board_altmdm_poweroff
+ * Name: altmdm_poweroff
  *
  * Description:
  *   Power off the Altair modem device on the board.
  *
  ****************************************************************************/
 
-void board_altmdm_poweroff(void)
+static void altmdm_poweroff(void)
 {
-  int i;
+  /* disable the SPI pin */
 
-  for (i = 0; i < NUM_OF_PINS; i++)
-    {
-      /* input disable, output disable(Hi-z) */
+  spi_pincontrol(SPI_CH, false);
 
-      cxd56_gpio_config(pincfg[i].pin, false);
-    }
+  /* Input disable */
+
+  cxd56_gpio_config(ALTMDM_SLAVE_REQ, false);
+
+  /* Output disable(Hi-z) */
+
+  cxd56_gpio_config(ALTMDM_MASTER_REQ, false);
+  cxd56_gpio_config(ALTMDM_WAKEUP, false);
 
   /* power off Altair modem device */
 
-  cxd56_gpio_write(ALTMDM_SHUTDOWN, true);
-
-  board_power_control(POWER_LTE, false);
-
-  cxd56_gpio_write(ALTMDM_SHUTDOWN, false);
-  cxd56_gpio_write(LTE_POWER_BUTTON, false);
+  board_altmdm_poweroff();
 }
 
 /****************************************************************************
- * Name: board_altmdm_gpio_write
+ * Name: altmdm_sready_irqattach
  *
  * Description:
- *   Write GPIO pin.
+ *   Register Slave-Request GPIO irq.
  *
  ****************************************************************************/
 
-void board_altmdm_gpio_write(uint32_t pin, bool value)
+static void altmdm_sready_irqattach(bool attach, xcpt_t handler)
 {
-  if (pin < NUM_OF_PINS)
+  uint32_t pol = GPIOINT_LEVEL_HIGH;
+  uint32_t nf = GPIOINT_NOISE_FILTER_DISABLE;
+
+  if (attach)
     {
-      if (pincfg[pin].input_enable == false)
-        {
-          cxd56_gpio_write(pincfg[pin].pin, value);
-        }
-    }
-}
+      /* Attach then enable the new interrupt handler */
 
-/****************************************************************************
- * Name: board_altmdm_gpio_read
- *
- * Description:
- *   Read GPIO pin.
- *
- ****************************************************************************/
-
-bool board_altmdm_gpio_read(uint32_t pin)
-{
-  bool val = false;
-
-  if (pin < NUM_OF_PINS)
-    {
-      if (pincfg[pin].input_enable == true)
-        {
-          val = cxd56_gpio_read(pincfg[pin].pin);
-        }
-    }
-
-  return val;
-}
-
-/****************************************************************************
- * Name: board_altmdm_gpio_irq
- *
- * Description:
- *   Register GPIO irq.
- *
- ****************************************************************************/
-
-void board_altmdm_gpio_irq(uint32_t pin, uint32_t polarity,
-                           uint32_t noise_filter, xcpt_t irqhandler)
-{
-  uint32_t pol;
-  uint32_t nf;
-
-  switch (polarity)
-    {
-    case ALTMDM_GPIOINT_LEVEL_HIGH:
-      pol = GPIOINT_LEVEL_HIGH;
-      break;
-
-    case ALTMDM_GPIOINT_LEVEL_LOW:
-      pol = GPIOINT_LEVEL_LOW;
-      break;
-
-    case ALTMDM_GPIOINT_EDGE_RISE:
-      pol = GPIOINT_EDGE_RISE;
-      break;
-
-    case ALTMDM_GPIOINT_EDGE_FALL:
-      pol = GPIOINT_EDGE_FALL;
-      break;
-
-    case ALTMDM_GPIOINT_EDGE_BOTH:
-      pol = GPIOINT_EDGE_BOTH;
-      break;
-
-    default:
-      return;
-      break;
-    }
-
-  if (noise_filter == ALTMDM_GPIOINT_NOISE_FILTER_ENABLE)
-    {
-      nf = GPIOINT_NOISE_FILTER_ENABLE;
+      cxd56_gpioint_config(ALTMDM_SLAVE_REQ,
+                           (GPIOINT_TOGGLE_MODE_MASK | nf | pol),
+                           handler, NULL);
     }
   else
     {
-      nf = GPIOINT_NOISE_FILTER_DISABLE;
-    }
+      /* Disable the interrupt handler */
 
-  if (pin < NUM_OF_PINS)
-    {
-      if (pincfg[pin].input_enable == true)
-        {
-          if (irqhandler)
-            {
-              /* Attach then enable the new interrupt handler */
-
-              cxd56_gpioint_config(pincfg[pin].pin,
-                                   (GPIOINT_TOGGLE_MODE_MASK | nf | pol),
-                                   irqhandler, NULL);
-            }
-        }
+      cxd56_gpioint_config(ALTMDM_SLAVE_REQ, 0, NULL, NULL);
     }
 }
 
 /****************************************************************************
- * Name: board_altmdm_gpio_int_control
+ * Name: altmdm_sready_irqenable
  *
  * Description:
- *   Enable or disable GPIO interrupt.
+ *   Enable or disable Slave-Request GPIO interrupt.
  *
  ****************************************************************************/
 
-void board_altmdm_gpio_int_control(uint32_t pin, bool en)
+static void altmdm_sready_irqenable(bool enable)
 {
-  if (pin < NUM_OF_PINS)
+  if (enable)
     {
-      if (pincfg[pin].input_enable == true)
-        {
-          if (en)
-            {
-              /* enable interrupt */
+      /* enable interrupt */
 
-              cxd56_gpioint_enable(pincfg[pin].pin);
-            }
-          else
-            {
-              /* disable interrupt */
-
-              cxd56_gpioint_disable(pincfg[pin].pin);
-            }
-        }
+      cxd56_gpioint_enable(ALTMDM_SLAVE_REQ);
     }
+  else
+    {
+      /* disable interrupt */
+
+      cxd56_gpioint_disable(ALTMDM_SLAVE_REQ);
+    }
+}
+
+/****************************************************************************
+ * Name: altmdm_sready
+ *
+ * Description:
+ *   Read Slave-Request GPIO pin.
+ *
+ ****************************************************************************/
+
+static bool altmdm_sready(void)
+{
+  return cxd56_gpio_read(ALTMDM_SLAVE_REQ);
+}
+
+/****************************************************************************
+ * Name: altmdm_master_request
+ *
+ * Description:
+ *   Write Master-Request GPIO pin.
+ *
+ ****************************************************************************/
+
+static void altmdm_master_request(bool request)
+{
+  cxd56_gpio_write(ALTMDM_MASTER_REQ, request);
+}
+
+/****************************************************************************
+ * Name: altmdm_wakeup
+ *
+ * Description:
+ *   Write Modme-Wakeup GPIO pin.
+ *
+ ****************************************************************************/
+
+static void altmdm_wakeup(bool wakeup)
+{
+  cxd56_gpio_write(ALTMDM_WAKEUP, wakeup);
+}
+
+/****************************************************************************
+ * Name: altmdm_spi_maxfreq
+ *
+ * Description:
+ *   Get the maximum SPI clock frequency.
+ *
+ ****************************************************************************/
+
+static uint32_t altmdm_spi_maxfreq(void)
+{
+  return SPI_MAXFREQUENCY;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_altmdm_initialize
+ *
+ * Description:
+ *   Initialize Altair modem
+ *
+ ****************************************************************************/
+
+int board_altmdm_initialize(FAR const char *devpath)
+{
+  FAR struct spi_dev_s *spi;
+#if defined(CONFIG_CXD56_LTE_SPI4_DMAC) || defined(CONFIG_CXD56_LTE_SPI5_DMAC)
+  DMA_HANDLE            hdl;
+  dma_config_t          conf;
+#endif
+
+  m_info("Initializing ALTMDM..\n");
+
+  if (!g_devhandle)
+    {
+      /* Initialize spi deivce */
+
+      spi = cxd56_spibus_initialize(SPI_CH);
+      if (!spi)
+        {
+          m_err("ERROR: Failed to initialize spi%d.\n", SPI_CH);
+          return -ENODEV;
+        }
+
+#if defined(CONFIG_CXD56_LTE_SPI4_DMAC) || defined(CONFIG_CXD56_LTE_SPI5_DMAC)
+      hdl = cxd56_dmachannel(DMA_TXCH,
+                             CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE);
+      if (hdl)
+        {
+          conf.channel_cfg = DMA_TXCHCHG;
+          conf.dest_width  = CXD56_DMAC_WIDTH8;
+          conf.src_width   = CXD56_DMAC_WIDTH8;
+          cxd56_spi_dmaconfig(SPI_CH, CXD56_SPI_DMAC_CHTYPE_TX, hdl,
+                              &conf);
+        }
+
+      hdl = cxd56_dmachannel(DMA_RXCH,
+                             CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE);
+      if (hdl)
+        {
+          conf.channel_cfg = DMA_RXCHCFG;
+          conf.dest_width  = CXD56_DMAC_WIDTH8;
+          conf.src_width   = CXD56_DMAC_WIDTH8;
+          cxd56_spi_dmaconfig(SPI_CH, CXD56_SPI_DMAC_CHTYPE_RX, hdl,
+                              &conf);
+        }
+#endif
+
+      spi_pincontrol(SPI_CH, false);
+
+      g_devhandle = altmdm_register(devpath, spi, &g_altmdm_lower);
+      if (!g_devhandle)
+        {
+          m_err("ERROR: Failed to register altmdm driver.\n");
+          return -ENODEV;
+        }
+
+      board_altmdm_poweroff();
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: board_altmdm_uninitialize
+ *
+ * Description:
+ *   Uninitialize Altair modem
+ *
+ ****************************************************************************/
+
+int board_altmdm_uninitialize(void)
+{
+  m_info("Uninitializing ALTMDM..\n");
+
+  if (g_devhandle)
+    {
+      altmdm_unregister(g_devhandle);
+
+      g_devhandle = NULL;
+    }
+
+  return OK;
 }
 
 #endif
