@@ -2548,7 +2548,16 @@ static int isx012_get_ctrlval(uint16_t ctrl_class,
                                         ISX012_REG_AUTOWB,
                                         ISX012_SIZE_AUTOWB);
 
-              control->value = (~readvalue) & REGVAL_CPUEXT_BIT_AWBSTOP;
+              /* Convert to V4L2 value */
+
+              if (readvalue & REGVAL_CPUEXT_BIT_AWBSTOP)
+                {
+                  control->value = false;
+                }
+              else
+                {
+                  control->value = true;
+                }
 
               break;
 

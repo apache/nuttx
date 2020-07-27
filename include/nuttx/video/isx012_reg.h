@@ -1335,8 +1335,8 @@
 #define REGVAL_FPSTYPE_6FPS         (6)
 #define REGVAL_FPSTYPE_5FPS         (7)
 
-#define REGVAL_CPUEXT_BIT_AESTOP    (0x01)
-#define REGVAL_CPUEXT_BIT_AWBSTOP   (0x02)
+#define REGVAL_CPUEXT_BIT_AESTOP    (0x02)
+#define REGVAL_CPUEXT_BIT_AWBSTOP   (0x04)
 
 #define REGVAL_READVECT_BIT_V       (0x01)
 #define REGVAL_READVECT_BIT_H       (0x02)
