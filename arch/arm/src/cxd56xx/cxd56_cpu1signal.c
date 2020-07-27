@@ -83,7 +83,10 @@ struct cxd56cpu1_info_s
  * Private Data
  ****************************************************************************/
 
-static struct cxd56cpu1_info_s g_cpu1_info = {0};
+static struct cxd56cpu1_info_s g_cpu1_info =
+  {
+    0
+  };
 
 /****************************************************************************
  * Private Functions
@@ -105,6 +108,7 @@ static FAR void *cxd56cpu1_worker(FAR void *arg)
         {
           continue;
         }
+
       sigtype = (uint8_t)CXD56_CPU1_GET_DEV(msg.data);
       if (sigtype >= CXD56_CPU1_DATA_TYPE_MAX)
         {
@@ -180,7 +184,7 @@ int cxd56_cpu1siginit(uint8_t sigtype, FAR void *data)
   if (priv->sigtype[sigtype].use)
     {
       ret = -EBUSY;
-      goto _err1;
+      goto err1;
     }
 
   priv->sigtype[sigtype].use  = true;
@@ -189,7 +193,7 @@ int cxd56_cpu1siginit(uint8_t sigtype, FAR void *data)
   if (priv->ndev > 0)
     {
       ret = OK;
-      goto _err1;
+      goto err1;
     }
 
   priv->ndev++;
@@ -202,7 +206,7 @@ int cxd56_cpu1siginit(uint8_t sigtype, FAR void *data)
   if (ret < 0)
     {
       _err("Failed to initialize ICC for GPS CPU: %d\n", ret);
-      goto _err0;
+      goto err0;
     }
 
   pthread_attr_init(&tattr);
@@ -216,18 +220,19 @@ int cxd56_cpu1siginit(uint8_t sigtype, FAR void *data)
     {
       cxd56_iccuninitmsg(CXD56CPU1_CPUID);
       ret = -ret; /* pthread_create does not modify errno. */
-      goto _err0;
+      goto err0;
     }
+
   priv->workertid = tid;
 
   return ret;
 
-_err0:
+err0:
   priv->sigtype[sigtype].use  = false;
   priv->sigtype[sigtype].data = NULL;
   return ret;
 
-_err1:
+err1:
   sched_unlock();
   return ret;
 }
@@ -248,7 +253,8 @@ int cxd56_cpu1siguninit(uint8_t sigtype)
   if (!priv->sigtype[sigtype].use)
     {
       ret = -EBUSY;
-      goto _err1;
+      sched_unlock();
+      return ret;
     }
 
   priv->ndev--;
@@ -258,7 +264,7 @@ int cxd56_cpu1siguninit(uint8_t sigtype)
   if (priv->ndev > 0)
     {
       ret = OK;
-      goto _err0;
+      return ret;
     }
 
   tid             = priv->workertid;
@@ -272,10 +278,4 @@ int cxd56_cpu1siguninit(uint8_t sigtype)
   cxd56_iccuninit(CXD56CPU1_CPUID);
 
   return 0;
-
-_err1:
-  sched_unlock();
-
-_err0:
-  return ret;
 }

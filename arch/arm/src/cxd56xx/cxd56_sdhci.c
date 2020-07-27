@@ -238,37 +238,6 @@
  * Private Types
  ****************************************************************************/
 
-#ifdef CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION
-/* Structure describing a single SDIO card slot. */
-
-struct sdio_softc_s
-{
-  int func_num;               /* number of I/O functions (SDIO) */
-
-  /* Selected card */
-
-  FAR struct sdio_function_s *fn[SDIO_FUNC_NUM_MAX + 1];
-
-  bool full_speed;            /* high speed mode */
-  uint8_t dma;                /* true: hardware supports DMA */
-  sem_t  sem;                 /* Assures mutually exclusive access to the
-                               * sdio */
-};
-
-/* Structure describing either an SDIO device I/O function. */
-
-struct sdio_function_s
-{
-  /* common members */
-
-  FAR struct sdio_softc_s *sc;      /* Dard slot softc */
-  sdio_irqhandler_t *irq_callback;  /* function callback */
-  int number;                       /* I/O function number or -1, 0 for
-                                     * func0,1 for func1... */
-  struct sdio_cis_s cis;            /* Decoded CIS */
-};
-#endif /* CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION */
-
 /* This structure defines the state of the CXD56xx SDIO interface */
 
 struct cxd56_sdiodev_s
@@ -318,10 +287,6 @@ struct cxd56_sdiodev_s
   /* Parameters */
 
   uint16_t blocksize;
-#ifdef CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION
-  struct sdio_softc_s sc;           /* Structure describing a single SDIO
-                                     * card slot. */
-#endif /* CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION */
 };
 
 /* Register logging support */
@@ -390,8 +355,10 @@ static void cxd56_dataconfig(struct cxd56_sdiodev_s *priv, bool bwrite,
                                unsigned int blocksize, unsigned int nblocks,
                                unsigned int timeout);
 static void cxd56_datadisable(void);
+#ifndef CONFIG_SDIO_DMA
 static void cxd56_transmit(struct cxd56_sdiodev_s *priv);
 static void cxd56_receive(struct cxd56_sdiodev_s *priv);
+#endif
 static void cxd56_eventtimeout(int argc, uint32_t arg, ...);
 static void cxd56_endwait(struct cxd56_sdiodev_s *priv,
               sdio_eventset_t wkupevent);
@@ -427,10 +394,12 @@ static int  cxd56_sdio_sendcmd(FAR struct sdio_dev_s *dev,
               uint32_t cmd, uint32_t arg);
 static void cxd56_blocksetup(FAR struct sdio_dev_s *dev,
               unsigned int blocklen, unsigned int nblocks);
+#ifndef CONFIG_SDIO_DMA
 static int  cxd56_sdio_recvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t nbytes);
 static int  cxd56_sdio_sendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, uint32_t nbytes);
+#endif
 static int  cxd56_sdio_cancel(FAR struct sdio_dev_s *dev);
 
 static int  cxd56_sdio_waitresponse(FAR struct sdio_dev_s *dev,
@@ -463,27 +432,6 @@ static int  cxd56_sdio_dmasendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, size_t buflen);
 #endif
 
-#ifdef CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION
-static int cxd56_sdio_enable_cardint(void);
-static int cxd56_sdio_register_irq(FAR struct sdio_dev_s *dev, int func_num,
-                                   FAR sdio_irqhandler_t * handler);
-static int cxd56_sdio_function_disable(FAR struct sdio_dev_s *dev,
-              int func_num);
-static int cxd56_sdio_function_enable(FAR struct sdio_dev_s *dev,
-              int func_num);
-static int cxd56_sdio_readb(FAR struct sdio_dev_s *dev, int func_num,
-              uint32_t addr, FAR uint8_t * rdata);
-static int cxd56_sdio_writeb(FAR struct sdio_dev_s *dev, int func_num,
-              uint32_t addr, uint8_t data, FAR uint8_t * rdata);
-static int cxd56_sdio_read(FAR struct sdio_dev_s *dev, int func_num,
-              uint32_t addr, FAR uint8_t * data, uint32_t size);
-static int cxd56_sdio_write(FAR struct sdio_dev_s *dev, int func_num,
-              uint32_t addr, FAR uint8_t * data, uint32_t size);
-static int cxd56_sdhci_irq_handler(FAR struct sdio_dev_s *dev);
-static int cxd56_sdio_get_cis(FAR struct sdio_dev_s *dev, int func_num,
-              FAR struct sdio_cis_s * cis);
-#endif /* CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION */
-
 /* Initialization/uninitialization/reset ************************************/
 
 static void cxd56_sdio_callback(void *arg);
@@ -507,8 +455,13 @@ struct cxd56_sdiodev_s g_sdhcdev =
       .attach           = cxd56_sdio_attach,
       .sendcmd          = cxd56_sdio_sendcmd,
       .blocksetup       = cxd56_blocksetup,
+#ifndef CONFIG_SDIO_DMA
       .recvsetup        = cxd56_sdio_recvsetup,
       .sendsetup        = cxd56_sdio_sendsetup,
+#else
+      .recvsetup        = cxd56_sdio_dmarecvsetup,
+      .sendsetup        = cxd56_sdio_dmasendsetup,
+#endif
       .cancel           = cxd56_sdio_cancel,
       .waitresponse     = cxd56_sdio_waitresponse,
       .recv_r1          = cxd56_sdio_recvshortcrc,
@@ -525,17 +478,10 @@ struct cxd56_sdiodev_s g_sdhcdev =
 #ifdef CONFIG_SDIO_DMA
       .dmarecvsetup     = cxd56_sdio_dmarecvsetup,
       .dmasendsetup     = cxd56_sdio_dmasendsetup,
+#else
+      .dmarecvsetup     = cxd56_sdio_recvsetup,
+      .dmasendsetup     = cxd56_sdio_sendsetup,
 #endif
-#ifdef CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION
-      .register_irq     = cxd56_sdio_register_irq,
-      .function_disable = cxd56_sdio_function_disable,
-      .function_enable  = cxd56_sdio_function_enable,
-      .readb            = cxd56_sdio_readb,
-      .writeb           = cxd56_sdio_writeb,
-      .read             = cxd56_sdio_read,
-      .write            = cxd56_sdio_write,
-      .get_cis          = cxd56_sdio_get_cis,
-#endif /* CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION */
     },
 };
 
@@ -855,6 +801,7 @@ static void cxd56_datadisable(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SDIO_DMA
 static void cxd56_transmit(struct cxd56_sdiodev_s *priv)
 {
   union
@@ -925,6 +872,7 @@ static void cxd56_transmit(struct cxd56_sdiodev_s *priv)
   mcinfo("Exit: remaining: %d IRQSTAT: %08x\n",
           priv->remaining, getreg32(CXD56_SDHCI_IRQSTAT));
 }
+#endif
 
 /****************************************************************************
  * Name: cxd56_receive
@@ -940,6 +888,7 @@ static void cxd56_transmit(struct cxd56_sdiodev_s *priv)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SDIO_DMA
 static void cxd56_receive(struct cxd56_sdiodev_s *priv)
 {
   union
@@ -1001,6 +950,7 @@ static void cxd56_receive(struct cxd56_sdiodev_s *priv)
         }
     }
 }
+#endif
 
 /****************************************************************************
  * Name: cxd56_eventtimeout
@@ -1195,16 +1145,19 @@ static int cxd56_interrupt(int irq, FAR void *context, FAR void *arg)
    * system.
    */
 
-  regval &= ~(SDHCI_INT_CINT | enabled);
+  regval &= ~SDHCI_INT_CINT;
   putreg32(regval, CXD56_SDHCI_IRQSIGEN);
 
   /* Clear all pending interrupts */
+
+  putreg32(enabled, CXD56_SDHCI_IRQSTAT);
 
   /* Handle in progress, interrupt driven data transfers ********************/
 
   pending  = enabled & priv->xfrints;
   if (pending != 0)
     {
+#ifndef CONFIG_SDIO_DMA
       /* Is the RX buffer read ready?  Is so then we must be processing a
        * non-DMA receive transaction.
        */
@@ -1227,6 +1180,7 @@ static int cxd56_interrupt(int irq, FAR void *context, FAR void *arg)
 
           cxd56_transmit(priv);
         }
+#endif
 
       /* Handle transfer complete events */
 
@@ -1258,21 +1212,6 @@ static int cxd56_interrupt(int irq, FAR void *context, FAR void *arg)
           cxd56_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT);
         }
     }
-
-#ifdef CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION
-  if (enabled & SDHCI_INT_CINT)
-    {
-      /* Handle card interrupt events */
-
-      putreg32(getreg32(CXD56_SDHCI_IRQSIGEN) & (~SDHCI_INT_CINT),
-                        CXD56_SDHCI_IRQSIGEN);
-      putreg32(getreg32(CXD56_SDHCI_IRQSTATEN) & (~SDHCI_INT_CINT),
-                        CXD56_SDHCI_IRQSTATEN);
-      work_cancel(HPWORK, &priv->cbwork);
-      work_queue(HPWORK, &priv->cbwork,
-                 (worker_t)cxd56_sdhci_irq_handler, &priv->dev, 0);
-    }
-#endif /* CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION */
 
   /* Handle error interrupts ************************************************/
 
@@ -1312,7 +1251,7 @@ static int cxd56_interrupt(int irq, FAR void *context, FAR void *arg)
   /* Re-enable card interrupts */
 
   regval  = getreg32(CXD56_SDHCI_IRQSIGEN);
-  regval |= SDHCI_INT_CINT | enabled;
+  regval |= SDHCI_INT_CINT;
   putreg32(regval, CXD56_SDHCI_IRQSIGEN);
 
   return OK;
@@ -2004,6 +1943,7 @@ static void cxd56_blocksetup(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SDIO_DMA
 static int cxd56_sdio_recvsetup(FAR struct sdio_dev_s *dev,
                                 FAR uint8_t *buffer, size_t nbytes)
 {
@@ -2039,6 +1979,7 @@ static int cxd56_sdio_recvsetup(FAR struct sdio_dev_s *dev,
   cxd56_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: cxd56_sdio_sendsetup
@@ -2060,6 +2001,7 @@ static int cxd56_sdio_recvsetup(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SDIO_DMA
 static int cxd56_sdio_sendsetup(FAR struct sdio_dev_s *dev,
                                 FAR const uint8_t *buffer, size_t nbytes)
 {
@@ -2093,6 +2035,7 @@ static int cxd56_sdio_sendsetup(FAR struct sdio_dev_s *dev,
   cxd56_sample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: cxd56_sdio_cancel
@@ -3253,1297 +3196,6 @@ static void cxd56_sdio_callback(void *arg)
     }
 }
 
-#ifdef CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION
-static int cxd56_sdio_takesem(FAR struct cxd56_sdiodev_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->sc.sem);
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_make_cmd52arg
- *
- * Description:
- *   Create argument parameters for CMD52
- *
- ****************************************************************************/
-
-static uint32_t cxd56_sdio_make_cmd52arg(uint32_t addr, uint8_t val_w,
-                         FAR uint8_t * out, int32_t write, uint32_t func_num)
-{
-  uint32_t arg = 0;
-
-  arg = write ? SDIO_CMD5253_WRITE : SDIO_CMD5253_READ;
-  arg |= func_num << SDIO_CMD5253_FUNC_SHIFT;
-  arg |= (write && out) ? 0x08000000 : 0x00000000;
-  arg |= addr << SDIO_CMD52_REG_SHIFT;
-  if (write)
-    {
-      arg |= (val_w & SDIO_CMD52_DATA_MASK) << 0;
-    }
-
-  return arg;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_make_cmd53arg
- *
- * Description:
- *   Create argument parameters for CMD53
- *
- ****************************************************************************/
-
-static uint32_t cxd56_sdio_make_cmd53arg(int32_t write, uint32_t func_num,
-                                         uint32_t addr, int32_t incr_addr,
-                                         uint32_t blocks, uint32_t bytesz)
-{
-  uint32_t arg = 0;
-
-  arg = write ? SDIO_CMD5253_WRITE : SDIO_CMD5253_READ;
-  arg |= func_num << SDIO_CMD5253_FUNC_SHIFT;
-  arg |= incr_addr ? 0x04000000 : 0x00000000;
-  arg |= addr << SDIO_CMD52_REG_SHIFT;
-  if (blocks == 0)
-    {
-      arg |= (bytesz == 512) ? 0 : bytesz;        /* byte mode */
-    }
-  else
-    {
-      arg |= 0x08000000 | blocks; /* block mode */
-    }
-
-  return arg;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_sendcmdpoll
- *
- * Description:
- *   Send a command and poll-wait for the response.
- *
- ****************************************************************************/
-
-static int cxd56_sdio_sendcmdpoll(FAR struct cxd56_sdiodev_s *priv,
-                                  uint32_t cmd, uint32_t arg)
-{
-  int ret;
-
-  /* Send the command */
-
-  ret = cxd56_sdio_sendcmd(&priv->dev, cmd, arg);
-  if (ret == OK)
-    {
-      /* Then poll-wait until the response is available */
-
-      ret = cxd56_sdio_waitresponse(&priv->dev, cmd);
-      if (ret != OK)
-        {
-          mcerr("ERROR: Wait for response to cmd: %08x failed: %d\n",
-                                                           cmd, ret);
-        }
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_readb_internal
- *
- * Description:
- *   Read a byte of data.
- *
- ****************************************************************************/
-
-static uint32_t cxd56_sdio_readb_internal(FAR struct sdio_function_s * sf,
-                                          uint32_t addr, FAR uint8_t * rdata)
-{
-  uint32_t response;
-  uint32_t cmd52arg;
-  struct cxd56_sdiodev_s *priv = &g_sdhcdev;
-  int ret;
-
-  DEBUGASSERT((NULL != rdata) && (NULL != sf));
-
-  cmd52arg = cxd56_sdio_make_cmd52arg(addr, 0, NULL, 0, sf->number);
-  ret = cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD52, cmd52arg);
-  if (ret == OK)
-    {
-      cxd56_sdio_recvshort(&priv->dev, SDIO_ACMD52, &response);
-      if (ret != OK)
-        {
-          mcerr("ERROR: Addr:0x%x, recv R5 error\n", addr);
-          goto READB_ERR;
-        }
-    }
-  else
-    {
-      mcerr("ERROR: Send cmd52 addr:0x%x error\n", addr);
-      goto READB_ERR;
-    }
-
-  if ((!CMD52_RESP_OK(response)) || (response == 0xffffffff))
-    {
-      mcerr("ERROR: Fail resp %u\n", response);
-      goto READB_ERR;
-    }
-
-  if (rdata)
-    {
-      *rdata = response & 0xff;
-    }
-
-  return 0;
-
-READB_ERR:
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_writeb_internal
- *
- * Description:
- *   Write a byte of data.
- *
- ****************************************************************************/
-
-static uint32_t cxd56_sdio_writeb_internal(FAR struct sdio_function_s * sf,
-             uint32_t addr, uint8_t data, FAR uint8_t * rdata)
-{
-  uint32_t response;
-  uint32_t cmd52arg;
-  struct cxd56_sdiodev_s *priv = &g_sdhcdev;
-  int ret;
-
-  DEBUGASSERT(NULL != sf);
-
-  cmd52arg = cxd56_sdio_make_cmd52arg(addr, data, rdata, 1, 0);
-  ret = cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD52, cmd52arg);
-  if (ret == OK)
-    {
-      cxd56_sdio_recvshort(&priv->dev, SDIO_ACMD52, &response);
-      if (ret != OK)
-        {
-          mcerr("ERROR: Addr:0x%x, recv R5 error\n", addr);
-          goto WRITEB_ERR;
-        }
-    }
-  else
-    {
-      mcerr("ERROR: Send cmd52 addr:0x%x error\n", addr);
-      goto WRITEB_ERR;
-    }
-
-  if ((!CMD52_RESP_OK(response)) || (response == 0xffffffff))
-    {
-      mcerr("ERROR: Fail resp %u\n", response);
-      goto WRITEB_ERR;
-    }
-
-  if (rdata)
-    {
-      *rdata = response & 0xff;
-    }
-
-  return 0;
-WRITEB_ERR:
-  return ret;
-}
-
-/****************************************************************************
- * Name: mmcsd_io_changeclock
- *
- * Description:
- *   change the sdio clock.
- *
- ****************************************************************************/
-
-static int cxd56_sdio_changeclock(FAR struct cxd56_sdiodev_s *priv)
-{
-  int ret;
-  uint32_t response = 0;
-
-  ret = cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD52, 0x08 << 9);
-  if (ret == OK)
-    {
-      cxd56_sdio_recvshort(&priv->dev, SDIO_ACMD52, &response);
-    }
-  else
-    {
-      mcerr("ERROR: Send cmd52, getclock error\n");
-      return ret;
-    }
-
-  if ((response & 0x40) != 0)
-    {
-      mcinfo("Set clock to 400KHz\n");
-      cxd56_sdio_clock(&priv->dev, CLOCK_IDMODE);
-    }
-  else
-    {
-      mcinfo("Set clock to 25MHz\n");
-      cxd56_sdio_clock(&priv->dev, CLOCK_SD_TRANSFER_4BIT);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_function_alloc
- *
- * Description:
- *   Allocate space for each function.
- *
- ****************************************************************************/
-
-static FAR struct sdio_function_s *
-  cxd56_sdio_function_alloc(FAR struct sdio_softc_s *sc)
-{
-  FAR struct sdio_function_s *sf;
-
-  DEBUGASSERT(sc);
-
-  sf = (FAR struct sdio_function_s *)
-    kmm_malloc(sizeof(struct sdio_function_s));
-  if (!sf)
-    {
-      mcerr("ERROR: Failed\n");
-      return NULL;
-    }
-
-  memset(sf, 0, sizeof(struct sdio_function_s));
-  sf->sc = sc;
-  sf->number = -1;
-  sf->cis.manufacturer = 0xffff;
-  sf->cis.product = 0xffff;
-  sf->cis.function = 0xff;
-  sf->irq_callback = NULL;
-  return sf;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_read_cis
- *
- * Description:
- *   Read the card information structure.
- *
- ****************************************************************************/
-
-static uint32_t cxd56_sdio_read_cis(FAR struct sdio_function_s * sf,
-                                    FAR struct sdio_cis_s * cis)
-{
-  int i;
-  FAR struct sdio_function_s *sf0;
-  uint8_t tplcode;
-  uint8_t tpllen;
-  uint32_t ret;
-  uint32_t cisptr = 0;
-  uint8_t response = 0;
-  uint32_t addr;
-
-  mcinfo("I/O func's num:%d\n", sf->number);
-
-  DEBUGASSERT(sf && cis);
-  sf0 = sf->sc->fn[0];
-  addr = SDIO_CCCR_CCP + (sf->number * SDIO_CCCR_SIZE);
-  for (i = 0; i < 3; i++)
-    {
-      ret = cxd56_sdio_readb_internal(sf0, (addr + i), &response);
-      if (ret == 0)
-        {
-          cisptr |= (response << (8 * i));
-        }
-    }
-
-  if ((cisptr < SDIO_CIS_START) || (cisptr >= SDIO_CIS_END))
-    {
-      mcerr("ERROR: Bad cis ptr %#x\n", cisptr);
-      return 1;
-    }
-
-  for (; ; )
-    {
-      ret = cxd56_sdio_readb_internal(sf0, cisptr++, &tplcode);
-      if (ret != 0)
-        {
-          return ret;
-        }
-
-      if (tplcode == SDIO_CISTPL_END)
-        {
-          break;
-        }
-      else if (tplcode == SDIO_CISTPL_NULL)
-        {
-          continue;
-        }
-
-      ret = cxd56_sdio_readb_internal(sf0, cisptr++, &tpllen);
-      if (ret != 0)
-        {
-          return ret;
-        }
-
-      if (tpllen == 0)
-        {
-          mcerr("ERROR: Cis error reg %d tpl %#x len %d\n",
-                cisptr, tplcode, tpllen);
-          break;
-        }
-
-      switch (tplcode)
-        {
-          case SDIO_CISTPL_FUNCID:
-            if (tpllen < 2)
-              {
-                mcerr("ERROR: Bad funcid length\n");
-                cisptr += tpllen;
-                break;
-              }
-
-            ret = cxd56_sdio_readb_internal(sf0, cisptr++, &response);
-            if (ret != 0)
-              {
-                return ret;
-              }
-
-            cis->function = response;
-            cisptr += tpllen;
-            mcinfo("get funcid 0x%x, len %d\n", cis->function, tpllen);
-          break;
-          case SDIO_CISTPL_MANFID:
-            if (tpllen < 4)
-              {
-                mcerr("ERROR: Bad manfid length\n");
-                cisptr += tpllen;
-                break;
-              }
-
-            ret = cxd56_sdio_readb_internal(sf0, cisptr++, &response);
-            if (ret != 0)
-              {
-                return ret;
-              }
-
-            cis->manufacturer = response;
-            ret = cxd56_sdio_readb_internal(sf0, cisptr++, &response);
-            if (ret != 0)
-              {
-                return ret;
-              }
-
-            cis->manufacturer |= response << 8;
-            ret = cxd56_sdio_readb_internal(sf0, cisptr++, &response);
-            if (ret != 0)
-              {
-                return ret;
-              }
-
-            cis->product = response;
-            ret = cxd56_sdio_readb_internal(sf0, cisptr++, &response);
-            if (ret != 0)
-              {
-                return ret;
-              }
-
-            cis->product = response << 8;
-            mcinfo("manufacturer/product ID: %x:%x, len %d\n",
-                   cis->manufacturer,
-                   cis->product,
-                   tpllen);
-          break;
-          default:
-          mcinfo("unknown tuple code %#x, length %d\n", tplcode, tpllen);
-          cisptr += tpllen;
-          break;
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_enable_cardint
- *
- * Description:
- *   Enable the card interrupt bit of the CXD56_SDHCI_IRQSIGEN and
- *   CXD56_SDHCI_IRQSTATEN register.
- *
- ****************************************************************************/
-
-static int cxd56_sdio_enable_cardint(void)
-{
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-  putreg32(getreg32(CXD56_SDHCI_IRQSIGEN) | SDHCI_INT_CINT,
-                    CXD56_SDHCI_IRQSIGEN);
-  putreg32(getreg32(CXD56_SDHCI_IRQSTATEN) | SDHCI_INT_CINT,
-                    CXD56_SDHCI_IRQSTATEN);
-  leave_critical_section(flags);
-  return OK;
-}
-
-/****************************************************************************
- * Name: cxd56_sdhci_irq_handler
- *
- * Description:
- *   Wait for the card interrupt and run the function's irq callback.
- *
- ****************************************************************************/
-
-static int cxd56_sdhci_irq_handler(FAR struct sdio_dev_s *dev)
-{
-  int ret = 0;
-  FAR struct sdio_softc_s *sc;
-  FAR struct sdio_function_s *sf0;
-  FAR struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
-  uint8_t response;
-  int i;
-
-  sc = &priv->sc;
-  sf0 = priv->sc.fn[0];
-  ret = cxd56_sdio_readb_internal(sf0, SDIO_CCCR_INTPEND, &response);
-  for (i = 1; i < 8; i++)
-    {
-      if (response & (1 << i))
-        {
-          if (sc->fn[i]->irq_callback)
-            {
-              sc->fn[i]->irq_callback(&priv->dev);
-            }
-        }
-    }
-
-  cxd56_sdio_enable_cardint();
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_register_irq
- *
- * Description:
- *   Register the func interrupt handler.
- *
- * Input Parameters:
- *   dev - An instance of the SDIO driver device state structure.
- *   func_num - I/O Function's num
- *   handler - The function's irq callback handler
- *
- ****************************************************************************/
-
-static int cxd56_sdio_register_irq(FAR struct sdio_dev_s *dev, int func_num,
-                                   FAR sdio_irqhandler_t * handler)
-{
-  int ret;
-  uint8_t reg;
-  uint8_t regorg;
-  FAR struct sdio_function_s *sf0;
-  FAR struct sdio_function_s *sf;
-  FAR struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
-
-  DEBUGASSERT(handler);
-
-  sf = priv->sc.fn[func_num];
-  sf0 = priv->sc.fn[0];
-
-  if (NULL != sf->irq_callback)
-    {
-      mcerr("ERROR: Already registered a sdio callback, fn number: %d\n",
-                 sf->number);
-      return -EBUSY;
-    }
-
-  ret = cxd56_sdio_takesem(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* enable irq in device side */
-
-  ret = cxd56_sdio_readb_internal(sf0, SDIO_CCCR_INTEN, &reg);
-  if (ret)
-    {
-      goto REG_IRQ_FAIL;
-    }
-
-  sf->irq_callback = handler;
-
-  regorg = reg;
-  reg |= ((1 << sf->number) | (1 << 0));
-
-  ret = cxd56_sdio_writeb_internal(sf0, SDIO_CCCR_INTEN, reg, NULL);
-  if (ret)
-    {
-      cxd56_sdio_writeb_internal(sf0, SDIO_CCCR_INTEN, regorg, NULL);
-      goto REG_IRQ_FAIL;
-    }
-
-  nxsem_post(&priv->sc.sem);
-  return ret;
-
-REG_IRQ_FAIL:
-  sf->irq_callback = NULL;
-  mcerr("ERROR: Ret: %d\n", ret);
-  nxsem_post(&priv->sc.sem);
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_blocksize
- *
- * Description:
- *   Set I/O block size for Function.
- *
- ****************************************************************************/
-
-static int cxd56_sdio_blocksize(FAR struct sdio_function_s * sf,
-                                uint32_t size)
-{
-  uint32_t cmd52arg;
-  uint32_t blksz_addr;
-  struct cxd56_sdiodev_s *priv = &g_sdhcdev;
-
-  blksz_addr = sf->number * SDIO_FBR_START + 0x10;
-
-  cmd52arg = cxd56_sdio_make_cmd52arg(blksz_addr, (size & 0xff),
-                                      NULL, true, 0);
-  cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD52, cmd52arg);
-
-  cmd52arg = cxd56_sdio_make_cmd52arg(blksz_addr + 1, ((size >> 8) & 0xff),
-                                      NULL, true, 0);
-  cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD52, cmd52arg);
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_func_ready
- *
- * Description:
- *   Function will become ready, and FN0 is always ready.
- *
- ****************************************************************************/
-
-static int cxd56_sdio_func_ready(FAR struct sdio_function_s * sf)
-{
-  FAR struct sdio_softc_s *sc;
-  FAR struct sdio_function_s *sf0;
-  uint8_t rv;
-  int ret;
-
-  DEBUGASSERT(NULL != sf);
-  if (sf->number == 0)
-    {
-      return 1;                   /* FN0 is always ready */
-    }
-
-  sc = sf->sc;
-  sf0 = sc->fn[0];
-  ret = cxd56_sdio_readb_internal(sf0, SDIO_CCCR_IORDY, &rv);
-  if (0 == ret)
-    {
-      return (rv & (1 << sf->number)) != 0;
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_function_disable
- *
- * Description:
- *   Function will be disabled, and FN0 is always enabled.
- *
- * Input Parameters:
- *   dev - An instance of the SDIO driver device state structure.
- *   func_num - I/O Function's num
- *
- ****************************************************************************/
-
-static int cxd56_sdio_function_disable(FAR struct sdio_dev_s *dev,
-                                       int func_num)
-{
-  FAR struct sdio_function_s *sf0;
-  FAR struct sdio_function_s *sf;
-  struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
-  uint8_t rv;
-  int ret;
-
-  sf = priv->sc.fn[func_num];
-  sf0 = priv->sc.fn[0];
-  mcinfo("I/O func's num:%d\n", sf->number);
-
-  ret = cxd56_sdio_takesem(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = cxd56_sdio_readb_internal(sf0, SDIO_CCCR_IOEN, &rv);
-  if (ret)
-    {
-      goto FUNC_DIS_ERR;
-    }
-
-  rv &= ~(1 << sf->number);
-  ret = cxd56_sdio_writeb_internal(sf0, SDIO_CCCR_IOEN, rv, NULL);
-  if (ret)
-    {
-      goto FUNC_DIS_ERR;
-    }
-
-  nxsem_post(&priv->sc.sem);
-  return 0;
-
-FUNC_DIS_ERR:
-  mcerr("ERROR: Io fail ret %u\n", ret);
-  nxsem_post(&priv->sc.sem);
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_function_enable
- *
- * Description:
- *   Function will be enabled.
- *
- * Input Parameters:
- *   dev - An instance of the SDIO driver device state structure.
- *   func_num - I/O Function's num
- *
- ****************************************************************************/
-
-static int cxd56_sdio_function_enable(FAR struct sdio_dev_s *dev,
-                                      int func_num)
-{
-  FAR struct sdio_function_s *sf0;
-  FAR struct sdio_function_s *sf;
-  uint8_t rv;
-  int retry = 10;
-  int ret = 0;
-  struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
-
-  sf = priv->sc.fn[func_num];
-  sf0 = priv->sc.fn[0];
-  mcinfo("I/O func's num:%d\n", sf->number);
-  if (sf->number == 0)
-    {
-      return 0;
-    }
-
-  ret = cxd56_sdio_takesem(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = cxd56_sdio_readb_internal(sf0, SDIO_CCCR_IOEN, &rv);
-  if (ret)
-    {
-      goto FUNC_EN_ERR;
-    }
-
-  rv |= (1 << sf->number);
-
-  /* according to sdio_rw_direct(), set NULL to rdata */
-
-  ret = cxd56_sdio_writeb_internal(sf0, SDIO_CCCR_IOEN, rv, NULL);
-  if (ret)
-    {
-      goto FUNC_EN_ERR;
-    }
-
-  /* Optimize SDIO transmission speed, so set blocksize here */
-
-  cxd56_sdio_blocksize(sf, priv->blocksize);
-  while (!cxd56_sdio_func_ready(sf) && retry-- > 0)
-    {
-      up_udelay(5 * 1000);
-    }
-
-  ret = (retry >= 0) ? 0 : -ETIMEDOUT;
-
-  if (0 == ret)
-    {
-      nxsem_post(&priv->sc.sem);
-      return 0;
-    }
-
-FUNC_EN_ERR:
-  mcerr("ERROR: Io fail ret %u\n", ret);
-  nxsem_post(&priv->sc.sem);
-  return -EIO;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_readb
- *
- * Description:
- *   Read a byte of data.
- *
- * Input Parameters:
- *   dev - An instance of the SDIO driver device state structure.
- *   func_num - I/O Function's num
- *   addr - This is the address of the byte of data inside of the selected
- *     function to read or write
- *   rdata - the actual value read from that I/O location is returned
- *     in this field
- *
- ****************************************************************************/
-
-static int cxd56_sdio_readb(FAR struct sdio_dev_s *dev, int func_num,
-                            uint32_t addr, FAR uint8_t * rdata)
-{
-  struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
-  int ret;
-
-  ret = cxd56_sdio_takesem(priv);
-  if (ret >= 0)
-    {
-      ret = cxd56_sdio_readb_internal(priv->sc.fn[func_num], addr, rdata);
-      nxsem_post(&priv->sc.sem);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_writeb
- *
- * Description:
- *   Write a byte of data.
- *
- * Input Parameters:
- *   dev - An instance of the SDIO driver device state structure.
- *   func_num - I/O Function's num
- *   addr - This is the address of the byte of data inside of the selected
- *     function to read or write
- *   data - This is the byte that is written to the selected address
- *   rdata - The value of the register after the write
- *
- ****************************************************************************/
-
-static int cxd56_sdio_writeb(FAR struct sdio_dev_s *dev, int func_num,
-                             uint32_t addr, uint8_t data,
-                             FAR uint8_t * rdata)
-{
-  struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
-  int ret;
-
-  ret = cxd56_sdio_takesem(priv);
-  if (ret >= 0)
-    {
-      ret = cxd56_sdio_writeb_internal(priv->sc.fn[func_num], addr, data,
-                                       data);
-      nxsem_post(&priv->sc.sem);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_write
- *
- * Description:
- *   Write large number data.
- *
- * Input Parameters:
- *   dev - An instance of the SDIO driver device state structure.
- *   func_num - I/O Function's num
- *   addr - Start Address of I/O register to write
- *   data - This is the large number data that is written to the selected
- *     address
- *   size - The size of the written data
- *
- ****************************************************************************/
-
-static int cxd56_sdio_write(FAR struct sdio_dev_s *dev, int func_num,
-                            uint32_t addr, FAR uint8_t * data,
-                            uint32_t size)
-{
-  uint32_t remainder = size;
-  int ret;
-  uint32_t cmd53arg;
-  sdio_eventset_t wkupevent;
-  FAR struct sdio_function_s *sf;
-  struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
-
-  sf = priv->sc.fn[func_num];
-  mcinfo("sf->number = %d\n", sf->number);
-
-  /* Do the bulk of the transfer using block mode (if supported). */
-
-  ret = cxd56_sdio_takesem(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  if (size >= SDIO_BLOCK_SIZE)
-    {
-      while (remainder >= SDIO_BLOCK_SIZE)
-        {
-          uint32_t blocks;
-          blocks = MIN(remainder / SDIO_BLOCK_SIZE, 8);
-          size = blocks * SDIO_BLOCK_SIZE;
-          cxd56_blocksetup(&priv->dev, SDIO_BLOCK_SIZE, blocks);
-          cxd56_sdio_waitenable(&priv->dev, SDIOWAIT_TRANSFERDONE |
-                                SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
-#ifdef CONFIG_SDIO_DMA
-          if (priv->sc.dma)
-            {
-              ret = cxd56_sdio_dmasendsetup(&priv->dev, data, size);
-              if (ret != OK)
-                {
-                  mcerr("ERROR: SDIO_DMASENDSETUP: error %d\n", ret);
-                  goto WRITE_ERR;
-                }
-            }
-          else
-#endif
-            {
-              cxd56_sdio_sendsetup(&priv->dev, data, size);
-            }
-
-          cmd53arg = cxd56_sdio_make_cmd53arg(1, sf->number, addr, 1, blocks,
-                                              priv->blocksize);
-          ret = cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD53 | MMCSD_MULTIBLOCK |
-                                       MMCSD_WRDATAXFR, cmd53arg);
-          if (ret != OK)
-            {
-              mcerr("ERROR: Send cmd53 error\n");
-              goto WRITE_ERR;
-            }
-
-          wkupevent = cxd56_sdio_eventwait(&priv->dev,
-                                           SDIO_BLOCK_TIMEOUT * blocks);
-          if ((wkupevent & (SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR)) != 0)
-            {
-              mcerr("ERROR: Sdio write time out %x\n", wkupevent);
-              goto WRITE_TIME_OUT;
-            }
-
-          remainder -= size;
-          data += size;
-          addr += size;
-        }
-    }
-
-  /* Write the remainder using byte mode. */
-
-  while (remainder > 0)
-    {
-      size = MIN(remainder, 64);
-      cxd56_blocksetup(&priv->dev, size, 1);
-      cxd56_sdio_waitenable(&priv->dev, SDIOWAIT_TRANSFERDONE |
-                            SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
-#ifdef CONFIG_SDIO_DMA
-      if (priv->sc.dma)
-        {
-          ret = cxd56_sdio_dmasendsetup(&priv->dev, data, size);
-          if (ret != OK)
-            {
-              mcerr("ERROR: SDIO_DMASENDSETUP: error %d\n", ret);
-              goto WRITE_ERR;
-            }
-        }
-      else
-#endif
-        {
-          cxd56_sdio_sendsetup(&priv->dev, data, size);
-        }
-
-      cmd53arg = cxd56_sdio_make_cmd53arg(1, sf->number, addr, 1, 0, size);
-      ret = cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD53 | MMCSD_WRDATAXFR,
-                                   cmd53arg);
-      if (ret != OK)
-        {
-          mcerr("ERROR: Send cmd53 error\n");
-          goto WRITE_ERR;
-        }
-
-      wkupevent = cxd56_sdio_eventwait(&priv->dev, SDIO_BLOCK_TIMEOUT);
-      if ((wkupevent & (SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR)) != 0)
-        {
-          mcerr("ERROR: Sdio write time out %x\n", wkupevent);
-          goto WRITE_TIME_OUT;
-        }
-
-      remainder -= size;
-      data += size;
-      addr += size;
-    }
-
-  nxsem_post(&priv->sc.sem);
-  return 0;
-WRITE_TIME_OUT:
-  nxsem_post(&priv->sc.sem);
-  return wkupevent & SDIOWAIT_TIMEOUT ? -ETIMEDOUT : -EIO;
-WRITE_ERR:
-  nxsem_post(&priv->sc.sem);
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_read
- *
- * Description:
- *   Read large number data.
- *
- * Input Parameters:
- *   dev - An instance of the SDIO driver device state structure.
- *   func_num - I/O Function's num
- *   addr - Start Address of I/O register to read
- *   data - the large number data read from that I/O location is returned
- *     in this field
- *   size - The size of the read data
- *
- ****************************************************************************/
-
-static int cxd56_sdio_read(FAR struct sdio_dev_s *dev, int func_num,
-                           uint32_t addr, FAR uint8_t * data, uint32_t size)
-{
-  uint32_t remainder = size;
-  int ret;
-  uint32_t cmd53arg;
-  sdio_eventset_t wkupevent;
-  FAR struct sdio_function_s *sf;
-  struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
-
-  sf = priv->sc.fn[func_num];
-  mcinfo("sf->number = %d\n", sf->number);
-
-  /* Do the bulk of the transfer using block mode (if supported). */
-
-  ret = cxd56_sdio_takesem(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  if (size >= SDIO_BLOCK_SIZE)
-    {
-      while (remainder >= SDIO_BLOCK_SIZE)
-        {
-          uint32_t blocks;
-          blocks = MIN(remainder / SDIO_BLOCK_SIZE, 8);
-          size = blocks * SDIO_BLOCK_SIZE;
-          cxd56_blocksetup(&priv->dev, SDIO_BLOCK_SIZE, blocks);
-          cxd56_sdio_waitenable(&priv->dev, SDIOWAIT_TRANSFERDONE |
-                                SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
-#ifdef CONFIG_SDIO_DMA
-          if (priv->sc.dma)
-            {
-              ret = cxd56_sdio_dmarecvsetup(&priv->dev, data, size);
-              if (ret != OK)
-                {
-                  mcerr("ERROR: SDIO_DMASENDSETUP: error %d\n", ret);
-                  goto READ_ERR;
-                }
-            }
-          else
-#endif
-            {
-              cxd56_sdio_recvsetup(&priv->dev, data, size);
-            }
-
-          cmd53arg = cxd56_sdio_make_cmd53arg(0, sf->number, addr, 1,
-                                       blocks, priv->blocksize);
-          ret = cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD53 | MMCSD_MULTIBLOCK |
-                                       MMCSD_RDDATAXFR, cmd53arg);
-          if (ret != OK)
-            {
-              mcerr("ERROR: Send cmd53 error\n");
-              goto READ_ERR;
-            }
-
-          wkupevent = cxd56_sdio_eventwait(&priv->dev,
-                                           SDIO_BLOCK_TIMEOUT * blocks);
-          if ((wkupevent & (SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR)) != 0)
-            {
-              mcerr("ERROR: Sdio read time out %x\n", wkupevent);
-              goto READ_TIME_OUT;
-            }
-
-          remainder -= size;
-          data += size;
-          addr += size;
-        }
-    }
-
-  /* Write the remainder using byte mode. */
-
-  while (remainder > 0)
-    {
-      size = MIN(remainder, 64);
-      cxd56_blocksetup(&priv->dev, size, 1);
-      cxd56_sdio_waitenable(&priv->dev, SDIOWAIT_TRANSFERDONE |
-                            SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
-#ifdef CONFIG_SDIO_DMA
-      if (priv->sc.dma)
-        {
-          ret = cxd56_sdio_dmarecvsetup(&priv->dev, data, size);
-          if (ret != OK)
-            {
-              mcerr("ERROR: SDIO_DMASENDSETUP: error %d\n", ret);
-              goto READ_ERR;
-            }
-        }
-      else
-#endif
-        {
-          cxd56_sdio_recvsetup(&priv->dev, data, size);
-        }
-
-      cmd53arg = cxd56_sdio_make_cmd53arg(0, sf->number, addr, 1, 0, size);
-      ret = cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD53 |
-                                   MMCSD_RDDATAXFR, cmd53arg);
-      if (ret != OK)
-        {
-          mcerr("ERROR: Send cmd53 error\n");
-          goto READ_ERR;
-        }
-
-      wkupevent = cxd56_sdio_eventwait(&priv->dev, SDIO_BLOCK_TIMEOUT);
-      if ((wkupevent & (SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR)) != 0)
-        {
-          mcerr("ERROR: Sdio read time out %x\n", wkupevent);
-          goto READ_TIME_OUT;
-        }
-
-      remainder -= size;
-      data += size;
-      addr += size;
-    }
-
-  nxsem_post(&priv->sc.sem);
-  return 0;
-READ_TIME_OUT:
-  nxsem_post(&priv->sc.sem);
-  return wkupevent & SDIOWAIT_TIMEOUT ? -ETIMEDOUT : -EIO;
-READ_ERR:
-  nxsem_post(&priv->sc.sem);
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_get_cis
- *
- * Description:
- *   get SDIO Card Information Structure.
- *
- ****************************************************************************/
-
-static int cxd56_sdio_get_cis(FAR struct sdio_dev_s *dev,
-                int func_num, FAR struct sdio_cis_s * cis)
-{
-  struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
-
-  if (cis)
-    {
-      *cis = priv->sc.fn[func_num]->cis;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: cxd56_sdio_initialize
- *
- * Description:
- *   We believe that there is A sdio device in the slot.initialize the sdio
- *   device.
- *
- ****************************************************************************/
-
-static int cxd56_sdio_initialize(struct cxd56_sdiodev_s *priv)
-{
-  int ret;
-  int i;
-  uint32_t response;
-  FAR struct sdio_function_s *fn;
-
-  priv->sc.func_num = 1;
-  priv->sc.full_speed = false;
-  priv->blocksize = SDIO_BLOCK_SIZE;
-
-  nxsem_init(&priv->sc.sem, 0, 1);
-#ifdef CONFIG_SDIO_DMA
-  priv->sc.dma = true;
-#endif
-  cxd56_sdio_attach(&priv->dev);
-  ret = cxd56_sdio_sendcmdpoll(priv, SDIO_CMD5, 0x0);
-
-  if (ret == OK)
-    {
-      ret = cxd56_sdio_recvshort(&priv->dev, SDIO_CMD5, &response);
-      if (ret != OK)
-        {
-          mcerr("ERROR: Recv R4 error\n");
-          return ret;
-        }
-    }
-  else
-    {
-      mcerr("ERROR: Send cmd5 error\n");
-      return ret;
-    }
-
-  mcinfo("response = 0x%x, card has %d function\n",
-          response, (response >> 28) & 7);
-  mcinfo("send cmd5 again to set card ready\n");
-  if (response != 0xffffffff)
-    {
-      do
-        {
-          ret = cxd56_sdio_sendcmdpoll(priv, SDIO_CMD5, 0x300000);
-          if (ret == OK)
-            {
-              cxd56_sdio_recvshort(&priv->dev, SDIO_CMD5, &response);
-            }
-
-          nxsig_usleep(4000);
-        }
-      while ((response == 0xffffffff) ||
-                ((response & 0x80000000) == 0));
-
-      mcinfo("response = 0x%x, card is ready(MSB=1)\n", response);
-      priv->sc.func_num = SDIO_OCR_NUM_FUNCTIONS(response) + 1;
-    }
-
-  mcinfo("send CMD3 to enter standby state\n");
-  cxd56_sdio_sendcmdpoll(priv, SD_CMD3, 0);
-  ret = cxd56_sdio_recvshortcrc(&priv->dev, SD_CMD3, &response);
-  if (ret != OK)
-    {
-      return ret;
-    }
-
-  mcinfo("RCA: 0x%x\n", (response >> 16));
-  if (response & 0xffff)
-    {
-      mcerr("ERROR: CMD3 resp error: 0x%x\n", (response & 0xffff));
-      if (response & 0x8000)
-        mcerr("ERROR: CRC error on previous command\n");
-    }
-
-  cxd56_sdio_sendcmdpoll(priv, MMCSD_CMD7S, response & 0xffff0000);
-  mcinfo("send cmd7(RCA:%x, %x) OK\n",
-        (response >> 16), response & 0xffff0000);
-  ret = cxd56_sdio_recvshortcrc(&priv->dev, MMCSD_CMD7S, &response);
-  if (ret != OK)
-    {
-      mcerr("ERROR: cxd56_sdio_recvshortcrc for CMD7 failed: %d\n", ret);
-      return ret;
-    }
-
-  cxd56_sdio_changeclock(priv);
-
-  ret = cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD52, 0x7 << 9);
-  if (ret == OK)
-    {
-      ret = cxd56_sdio_recvshort(&priv->dev, SDIO_ACMD52, &response);
-      if (ret != OK)
-        {
-          mcerr("ERROR: Addr:0x7, recv R5 error\n");
-          return ret;
-        }
-
-      mcinfo("Bus interface ctrl (@0x7):0x%x\n", response);
-
-      cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD52, 0x7 << 9 |
-                            (response & 0xff) | 0x80);
-      mcinfo("set CD disable = 1\n");
-    }
-  else
-    {
-      mcerr("ERROR: Send cmd52 addr:0x7 error\n");
-      return ret;
-    }
-
-  ret = cxd56_sdio_sendcmdpoll(priv, SDIO_ACMD52, 0x8 << 9);
-  if (ret == OK)
-    {
-      cxd56_sdio_recvshort(&priv->dev, SDIO_ACMD52, &response);
-      if (ret != OK)
-        {
-          mcerr("ERROR: Addr:0x8, recv R5 error\n");
-          return ret;
-        }
-
-      mcinfo("Card capability(@0x8):0x%x\n", response);
-
-      mcinfo("It's a %s card\n",
-            (response & 0x40) ? "low speed" : "full speed");
-      if ((response & 0x40) == 0)
-        {
-          priv->sc.full_speed = true;
-        }
-    }
-  else
-    {
-      mcerr("ERROR: Send cmd52 addr:0x8 error\n");
-      return ret;
-    }
-
-  mcinfo("func_num = %d\n", priv->sc.func_num);
-  for (i = 0; i < priv->sc.func_num; i++)
-    {
-      fn = cxd56_sdio_function_alloc(&priv->sc);
-      if (!fn)
-        {
-          goto SDIO_INIT_ERR;
-        }
-
-      fn->number = i;
-
-      priv->sc.fn[i] = fn;
-    }
-
-  for (i = 1; i < priv->sc.func_num; i++)
-    {
-      fn = priv->sc.fn[i];
-      if (cxd56_sdio_read_cis(fn, &fn->cis) != 0)
-        {
-          mcerr("ERROR: Can't read CIS\n");
-          goto SDIO_INIT_CIS_ERR;
-        }
-    }
-
-  if (priv->sc.full_speed)
-    {
-      uint8_t bus_ctrl;
-
-      /* enable 4-bits bus */
-
-      cxd56_sdio_readb_internal(priv->sc.fn[0], SDIO_CCCR_BUS_IF, &bus_ctrl);
-      bus_ctrl = (bus_ctrl & ~0x3) | 0x2;
-      cxd56_sdio_writeb_internal(priv->sc.fn[0], SDIO_CCCR_BUS_IF, bus_ctrl,
-                                 &bus_ctrl);
-
-      if ((bus_ctrl & 0x3) == 2)
-        {
-          mcinfo("Set card to 4-bits mode\n");
-          cxd56_sdio_widebus(&priv->dev, true);
-          mcinfo("Set controller to 4-bits mode\n");
-        }
-      else
-        {
-          mcinfo("Failed to enter 4-bits mode\n");
-        }
-    }
-
-  return OK;
-
-SDIO_INIT_ERR:
-  return -ENOMEM;
-
-SDIO_INIT_CIS_ERR:
-  return -EIO;
-}
-#endif /* CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION */
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -4607,20 +3259,6 @@ FAR struct sdio_dev_s *cxd56_sdhci_initialize(int slotno)
 
   cxd56_sdio_sdhci_reset(&(priv->dev));
 
-#ifdef CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION
-  /* Power ON for SDIO */
-
-  regval = getreg32(CXD56_SDHCI_PROCTL);
-  regval |= 0xf << 8;
-  putreg32(regval, CXD56_SDHCI_PROCTL);
-
-  up_mdelay(25);
-
-  /* SD clock enable */
-
-  cxd56_sdio_clock(&(priv->dev), CLOCK_IDMODE);
-#endif
-
 #ifdef CONFIG_SDIO_DMA
   for (i = 0;
        i < sizeof(cxd56_sdhci_adma_dscr) / sizeof(cxd56_sdhci_adma_dscr[0]);
@@ -4638,10 +3276,6 @@ FAR struct sdio_dev_s *cxd56_sdhci_initialize(int slotno)
   priv->dmasend_prepare = false;
   priv->dmasend_cmd = 0;
   priv->dmasend_regcmd = 0;
-#endif
-
-#ifdef CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION
-  cxd56_sdio_initialize(priv);
 #endif
 
   /* In addition to the system clock, the SDHC module needs a clock for the
@@ -4825,4 +3459,23 @@ void cxd56_sdhci_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
   mcinfo("cdstatus: %02x\n", priv->cdstatus);
   leave_critical_section(flags);
 }
+
+/****************************************************************************
+ * Name: cxd56_sdio_resetstatus
+ *
+ * Description:
+ *   Reset SDIO status.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ ****************************************************************************/
+
+void cxd56_sdio_resetstatus(FAR struct sdio_dev_s *dev)
+{
+  struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
+  priv->cdstatus = 0;
+  priv->cbevents = SDIOMEDIA_INSERTED;
+}
+
 #endif /* CONFIG_CXD56_SDIO */

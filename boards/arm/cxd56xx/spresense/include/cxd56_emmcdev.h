@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56xx/cxd56_farapistub.h
+ * boards/arm/cxd56xx/spresense/include/cxd56_emmcdev.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,9 +33,54 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_FARAPISTUB_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_FARAPISTUB_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_EMMCDEV_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_EMMCDEV_H
 
-#define FARAPISTUB_VERSION 20129
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_FARAPISTUB_H */
+#include <nuttx/config.h>
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_emmc_initialize
+ *
+ * Description:
+ *   Initialize the eMMC device and mount the file system.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CXD56_EMMC
+int board_emmc_initialize(void);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_EMMCDEV_H */

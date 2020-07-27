@@ -124,6 +124,40 @@
 #define ADC_BYTESPERSAMPLE   2
 #define ADC_ELEMENTSIZE      0
 
+/* Input Gain setting */
+
+#define INPUT_GAIN(a, g1, g2) (((a) << 24) | ((g2) << 16) | ((g1) << 12))
+#define INPUT_GAIN_MASK         INPUT_GAIN(3, 15, 15)
+#define INPUT_GAIN_MINUS_6DB    INPUT_GAIN(2, 0, 0)
+#define INPUT_GAIN_THROUGH      INPUT_GAIN(0, 0, 0)
+#define INPUT_GAIN_PLUS_6DB     INPUT_GAIN(0, 4, 0)
+#define INPUT_GAIN_PLUS_12DB    INPUT_GAIN(0, 12, 0)
+#define INPUT_GAIN_PLUS_14DB    INPUT_GAIN(0, 4, 8)
+
+#if defined(CONFIG_CXD56_HPADC0_INPUT_GAIN_M6DB)
+#define HPADC0_INPUT_GAIN       INPUT_GAIN_MINUS_6DB
+#elif defined(CONFIG_CXD56_HPADC0_INPUT_GAIN_6DB)
+#define HPADC0_INPUT_GAIN       INPUT_GAIN_PLUS_6DB
+#elif defined(CONFIG_CXD56_HPADC0_INPUT_GAIN_12DB)
+#define HPADC0_INPUT_GAIN       INPUT_GAIN_PLUS_12DB
+#elif defined(CONFIG_CXD56_HPADC0_INPUT_GAIN_14DB)
+#define HPADC0_INPUT_GAIN       INPUT_GAIN_PLUS_14DB
+#else
+#define HPADC0_INPUT_GAIN       INPUT_GAIN_THROUGH
+#endif
+
+#if defined(CONFIG_CXD56_HPADC1_INPUT_GAIN_M6DB)
+#define HPADC1_INPUT_GAIN       INPUT_GAIN_MINUS_6DB
+#elif defined(CONFIG_CXD56_HPADC1_INPUT_GAIN_6DB)
+#define HPADC1_INPUT_GAIN       INPUT_GAIN_PLUS_6DB
+#elif defined(CONFIG_CXD56_HPADC1_INPUT_GAIN_12DB)
+#define HPADC1_INPUT_GAIN       INPUT_GAIN_PLUS_12DB
+#elif defined(CONFIG_CXD56_HPADC1_INPUT_GAIN_14DB)
+#define HPADC1_INPUT_GAIN       INPUT_GAIN_PLUS_14DB
+#else
+#define HPADC1_INPUT_GAIN       INPUT_GAIN_THROUGH
+#endif
+
 typedef enum adc_ch
 {
   CH0 = 0,    /* LPADC0 */
@@ -522,6 +556,15 @@ static int adc_start(adc_ch_t ch, uint8_t freq, FAR struct seq_s *seq,
       addr = (ch == CH4) ? (uint32_t *)SCUADCIF_HPADC0_A2 :
                            (uint32_t *)SCUADCIF_HPADC1_A2;
       putreg32(1, addr);
+
+      /* HPADC.A3 */
+
+      addr = (ch == CH4) ? (uint32_t *)SCUADCIF_HPADC0_A3 :
+                           (uint32_t *)SCUADCIF_HPADC1_A3;
+
+      val = getreg32(addr) & ~INPUT_GAIN_MASK;
+      val |= (ch == CH4) ? HPADC0_INPUT_GAIN : HPADC1_INPUT_GAIN;
+      putreg32(val, addr);
 
       /* HPADC.D0 */
 

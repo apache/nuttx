@@ -50,7 +50,7 @@
 
 #include <arch/chip/scu.h>
 
-#ifdef CONFIG_CXD56_DECI_AK09912
+#ifdef CONFIG_SENSORS_AK09912_SCU_DECI
 #  define MAG_NR_SEQS 3
 #else
 #  define MAG_NR_SEQS 1

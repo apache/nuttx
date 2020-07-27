@@ -48,15 +48,19 @@
 #include <nuttx/sensors/bmi160.h>
 #include <arch/chip/scu.h>
 
+#if defined(CONFIG_SENSORS_BMI160_SCU_SPI)
 #include "cxd56_spi.h"
+#else
+#include "cxd56_i2c.h"
+#endif
 
-#ifdef CONFIG_CXD56_DECI_GYRO
+#ifdef CONFIG_SENSORS_BMI160_SCU_DECI_GYRO
 #  define GYRO_NR_SEQS 3
 #else
 #  define GYRO_NR_SEQS 1
 #endif
 
-#ifdef CONFIG_CXD56_DECI_ACCEL
+#ifdef CONFIG_SENSORS_BMI160_SCU_DECI_ACCEL
 #  define ACCEL_NR_SEQS 3
 #else
 #  define ACCEL_NR_SEQS 1
@@ -67,6 +71,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SENSORS_BMI160_SCU)
+#if defined(CONFIG_SENSORS_BMI160_SCU_SPI)
 
 int board_bmi160_initialize(int bus)
 {
@@ -120,4 +125,59 @@ int board_bmi160_initialize(int bus)
   return ret;
 }
 
-#endif
+#else /* !CONFIG_SENSORS_BMI160_SCU_SPI */
+
+int board_bmi160_initialize(int bus)
+{
+  int ret;
+  FAR struct i2c_master_s *i2c;
+
+  sninfo("Initializing BMI160..\n");
+
+  /* Initialize i2c deivce */
+
+  i2c = cxd56_i2cbus_initialize(bus);
+  if (!i2c)
+    {
+      snerr("ERROR: Failed to initialize i2c%d.\n", bus);
+      return -ENODEV;
+    }
+
+  int i;
+
+  ret = bmi160_init(i2c, bus);
+  if (ret < 0)
+    {
+      snerr("Error initialize BMI160\n");
+      return ret;
+    }
+
+  /* Create char devices for each FIFOs */
+
+  for (i = 0; i < GYRO_NR_SEQS; i++)
+    {
+      ret = bmi160gyro_register("/dev/gyro", i, i2c, bus);
+      if (ret < 0)
+        {
+          snerr("Error registering gyroscope. %d\n", ret);
+          return ret;
+        }
+    }
+
+  /* Create char devices for each FIFOs */
+
+  for (i = 0; i < ACCEL_NR_SEQS; i++)
+    {
+      ret = bmi160accel_register("/dev/accel", i, i2c, bus);
+      if (ret < 0)
+        {
+          snerr("Error registering accelerometer. %d\n", ret);
+          return ret;
+        }
+    }
+
+  return ret;
+}
+
+#endif  /* CONFIG_SENSORS_BMI160_SCU_SPI */
+#endif  /* CONFIG_SENSORS_BMI160_SCU */

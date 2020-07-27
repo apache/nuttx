@@ -426,3 +426,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
 
   return NULL;
 }
+
+void board_lcd_uninitialize(void)
+{
+}

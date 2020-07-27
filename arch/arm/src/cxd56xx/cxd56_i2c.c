@@ -146,6 +146,9 @@ static struct cxd56_i2cdev_s g_i2c2dev =
  * Private Functions
  ****************************************************************************/
 
+static inline int i2c_takesem(FAR sem_t *sem);
+static inline int i2c_givesem(FAR sem_t *sem);
+
 static inline uint32_t i2c_reg_read(struct cxd56_i2cdev_s *priv,
                                     uint32_t offset);
 static inline void i2c_reg_write(struct cxd56_i2cdev_s *priv,
@@ -171,6 +174,24 @@ static int cxd56_i2c_reset(FAR struct i2c_master_s * dev);
 static int  cxd56_i2c_transfer_scu(FAR struct i2c_master_s *dev,
                                    FAR struct i2c_msg_s *msgs, int count);
 #endif
+
+/****************************************************************************
+ * Name: i2c_takesem
+ ****************************************************************************/
+
+static inline int i2c_takesem(FAR sem_t *sem)
+{
+  return nxsem_wait_uninterruptible(sem);
+}
+
+/****************************************************************************
+ * Name: i2c_givesem
+ ****************************************************************************/
+
+static inline int i2c_givesem(FAR sem_t *sem)
+{
+  return nxsem_post(sem);
+}
 
 /****************************************************************************
  * Name: cxd56_i2c_pincontrol
@@ -368,7 +389,7 @@ static void cxd56_i2c_timeout(int argc, uint32_t arg, ...)
   irqstate_t flags            = enter_critical_section();
 
   priv->error = -ENODEV;
-  nxsem_post(&priv->wait);
+  i2c_givesem(&priv->wait);
   leave_critical_section(flags);
 }
 
@@ -475,7 +496,7 @@ static int cxd56_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
       ret = wd_cancel(priv->timeout);
       if (ret == OK)
         {
-          nxsem_post(&priv->wait);
+          i2c_givesem(&priv->wait);
         }
     }
 
@@ -538,7 +559,7 @@ static int cxd56_i2c_receive(struct cxd56_i2cdev_s *priv, int last)
 
       i2c_reg_rmw(priv, CXD56_IC_INTR_MASK, INTR_RX_FULL, INTR_RX_FULL);
       leave_critical_section(flags);
-      nxsem_wait(&priv->wait);
+      i2c_takesem(&priv->wait);
 
       if (priv->error != OK)
         {
@@ -584,7 +605,7 @@ static int cxd56_i2c_send(struct cxd56_i2cdev_s *priv, int last)
   i2c_reg_rmw(priv, CXD56_IC_INTR_MASK, INTR_TX_EMPTY, INTR_TX_EMPTY);
   leave_critical_section(flags);
 
-  nxsem_wait(&priv->wait);
+  i2c_takesem(&priv->wait);
 
   return 0;
 }
@@ -613,7 +634,7 @@ static int cxd56_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Get exclusive access to the I2C bus */
 
-  nxsem_wait(&priv->mutex);
+  i2c_takesem(&priv->mutex);
 
   /* Check wait semaphore value. If the value is not 0, the transfer can not
    * be performed normally.
@@ -691,7 +712,8 @@ static int cxd56_i2c_transfer(FAR struct i2c_master_s *dev,
 
   cxd56_i2c_clock_gate_enable(priv->port);
 
-  nxsem_post(&priv->mutex);
+  i2c_givesem(&priv->mutex);
+
   return ret;
 }
 
@@ -829,7 +851,7 @@ static int cxd56_i2c_transfer_scu(FAR struct i2c_master_s *dev,
 
   /* Get exclusive access to the I2C bus */
 
-  nxsem_wait(&priv->mutex);
+  i2c_takesem(&priv->mutex);
 
   /* Apply frequency for request msgs */
 
@@ -866,7 +888,7 @@ static int cxd56_i2c_transfer_scu(FAR struct i2c_master_s *dev,
         }
     }
 
-  nxsem_post(&priv->mutex);
+  i2c_givesem(&priv->mutex);
 
   return ret;
 }
@@ -1031,6 +1053,7 @@ struct i2c_master_s *cxd56_i2cbus_initialize(int port)
 
   nxsem_init(&priv->mutex, 0, 1);
   nxsem_init(&priv->wait, 0, 0);
+  nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
 
   priv->timeout = wd_create();
 

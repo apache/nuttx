@@ -192,7 +192,7 @@ struct sensor_device_s
 static struct sensor_device_s sensor_device[] =
 {
 #if defined(CONFIG_SENSORS_BMI160) || defined(CONFIG_SENSORS_BMI160_SCU)
-#  ifdef CONFIG_SENSORS_BMI160_I2C
+#  if defined(CONFIG_SENSORS_BMI160_I2C) || defined(CONFIG_SENSORS_BMI160_SCU_I2C)
   _I2C_DEVICE_WOPATH(bmi160), /* Accel + Gyro */
 #  else /* CONFIG_SENSORS_BMI160_SPI */
   _SPI_DEVICE_WOPATH(bmi160),

@@ -310,6 +310,22 @@ int cxd56_pmic_set_gpo_hiz(uint8_t chset);
 bool cxd56_pmic_get_gpo(uint8_t chset);
 
 /****************************************************************************
+ * Name: cxd56_pmic_get_gpo_hiz
+ *
+ * Description:
+ *   Get the tristate value from the specified GPO channel(s)
+ *
+ * Input Parameter:
+ *   chset : GPO Channel number(s)
+ *
+ * Returned Value:
+ *   Return 0(off), 1(on) or -1(HiZ)
+ *
+ ****************************************************************************/
+
+int cxd56_pmic_get_gpo_hiz(uint8_t chset);
+
+/****************************************************************************
  * Name: cxd56_pmic_set_loadswitch_reg
  *
  * Description:

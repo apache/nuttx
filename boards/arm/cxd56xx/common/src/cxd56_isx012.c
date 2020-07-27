@@ -71,8 +71,6 @@
 #define SLEEP_CANCEL_TIME            (13*1000) /* ms */
 #define POWER_CHECK_TIME             (1*1000)  /* ms */
 
-#define ALL_POWERON                 (7)
-#define ALL_POWEROFF                (0)
 #define POWER_CHECK_RETRY           (10)
 
 /****************************************************************************
@@ -88,10 +86,7 @@ FAR struct i2c_master_s *i2c;
 int board_isx012_power_on(void)
 {
   int ret;
-  uint32_t stat;
   int i;
-
-  /* 'POWER_IMAGE_SENSOR==PMIC_GPO(4/5/7)' */
 
   ret = board_power_control(POWER_IMAGE_SENSOR, true);
   if (ret)
@@ -103,17 +98,15 @@ int board_isx012_power_on(void)
   ret = -ETIMEDOUT;
   for (i = 0; i < POWER_CHECK_RETRY; i++)
     {
-      stat = 0;
-      stat |= (uint32_t)board_power_monitor(PMIC_GPO(4)) << 0;
-      stat |= (uint32_t)board_power_monitor(PMIC_GPO(5)) << 1;
-      stat |= (uint32_t)board_power_monitor(PMIC_GPO(7)) << 2;
-      if (stat == ALL_POWERON)
+      /* Need to wait for a while after power-on */
+
+      nxsig_usleep(POWER_CHECK_TIME);
+
+      if (true == board_power_monitor(POWER_IMAGE_SENSOR))
         {
           ret = OK;
           break;
         }
-
-      nxsig_usleep(POWER_CHECK_TIME);
     }
 
   return ret;
@@ -122,10 +115,7 @@ int board_isx012_power_on(void)
 int board_isx012_power_off(void)
 {
   int ret;
-  uint32_t stat;
   int i;
-
-  /* POWER_IMAGE_SENSOR==PMIC_GPO(4/5/7) */
 
   ret = board_power_control(POWER_IMAGE_SENSOR, false);
   if (ret)
@@ -137,11 +127,7 @@ int board_isx012_power_off(void)
   ret = -ETIMEDOUT;
   for (i = 0; i < POWER_CHECK_RETRY; i++)
     {
-      stat = 0;
-      stat |= (uint32_t)board_power_monitor(PMIC_GPO(4)) << 0;
-      stat |= (uint32_t)board_power_monitor(PMIC_GPO(5)) << 1;
-      stat |= (uint32_t)board_power_monitor(PMIC_GPO(7)) << 2;
-      if (stat == ALL_POWEROFF)
+      if (false == board_power_monitor(POWER_IMAGE_SENSOR))
         {
           ret = OK;
           break;

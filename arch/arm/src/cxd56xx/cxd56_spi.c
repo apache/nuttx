@@ -1316,6 +1316,7 @@ void cxd56_spi_dmaconfig(int port, int chtype, DMA_HANDLE handle,
           if (!priv->dmaenable)
             {
               nxsem_init(&priv->dmasem, 0, 0);
+              nxsem_set_protocol(&priv->dmasem, SEM_PRIO_NONE);
               priv->dmaenable = true;
             }
         }
@@ -1329,6 +1330,7 @@ void cxd56_spi_dmaconfig(int port, int chtype, DMA_HANDLE handle,
           if (!priv->dmaenable)
             {
               nxsem_init(&priv->dmasem, 0, 0);
+              nxsem_set_protocol(&priv->dmasem, SEM_PRIO_NONE);
               priv->dmaenable = true;
             }
         }
@@ -1420,7 +1422,6 @@ static void spi_dmaexchange(FAR struct spi_dev_s *dev,
   uint32_t regval                 = 0;
 
   DEBUGASSERT(priv && priv->spibase);
-  DEBUGASSERT(txbuffer || rxbuffer);
 
   /* Disable clock gating (clock enable) */
 
@@ -1593,12 +1594,12 @@ static void spi_dmatrxwait(FAR struct cxd56_spidev_s *priv)
 {
   uint32_t val;
 
-  if (nxsem_wait(&priv->dmasem) != OK)
+  if (nxsem_wait_uninterruptible(&priv->dmasem) != OK)
     {
       spierr("dma error\n");
     }
 
-  if (nxsem_wait(&priv->dmasem) != OK)
+  if (nxsem_wait_uninterruptible(&priv->dmasem) != OK)
     {
       spierr("dma error\n");
     }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/drivers/audio/cxd56_audio_dma.h
+ * boards/arm/cxd56xx/common/src/cxd56_bcm20706.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,51 +33,133 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_DMA_H
-#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_DMA_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <arch/chip/audio.h>
+#include <unistd.h>
+#include <stdbool.h>
+#include <string.h>
+#include <arch/board/board.h>
+
+#include "cxd56_gpio.h"
+#include "cxd56_sysctl.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define BCM20707_RST_N    PIN_SEN_IRQ_IN
+#define BCM20707_DEV_WAKE PIN_EMMC_DATA3
+
+#define BCM20707_RST_DELAY  (50 * 1000)  /* ms */
+
 /****************************************************************************
- * Public Types
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Inline Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Name: board_bluetooth_pin_cfg
+ *
+ * Description:
+ *   Setup pin configuration for bcm20706.
+ *
  ****************************************************************************/
 
-CXD56_AUDIO_ECODE cxd56_audio_dma_get_handle(cxd56_audio_dma_path_t path,
-                                             FAR cxd56_audio_dma_t *handle);
-CXD56_AUDIO_ECODE cxd56_audio_dma_free_handle(cxd56_audio_dma_t handle);
-CXD56_AUDIO_ECODE cxd56_audio_dma_init(cxd56_audio_dma_t handle,
-                                       cxd56_audio_samp_fmt_t fmt,
-                                       FAR uint8_t *ch_num);
-CXD56_AUDIO_ECODE cxd56_audio_dma_set_cb(cxd56_audio_dma_t handle,
-                                         FAR cxd56_audio_dma_cb_t cb);
-CXD56_AUDIO_ECODE cxd56_audio_dma_get_mstate(cxd56_audio_dma_t handle,
-                                      FAR cxd56_audio_dma_mstate_t *state);
-CXD56_AUDIO_ECODE cxd56_audio_dma_en_dmaint(void);
-CXD56_AUDIO_ECODE cxd56_audio_dma_dis_dmaint(void);
-CXD56_AUDIO_ECODE cxd56_audio_dma_start(cxd56_audio_dma_t handle,
-                                        uint32_t addr,
-                                        uint32_t sample);
-CXD56_AUDIO_ECODE cxd56_audio_dma_stop(cxd56_audio_dma_t handle);
-void cxd56_audio_dma_int_handler(void);
+int board_bluetooth_pin_cfg(void)
+{
+  int ret = 0;
 
-#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_DMA_H */
+  ret = cxd56_gpio_config(BCM20707_RST_N, false);
+
+  if (ret != 0)
+    {
+      return ret;
+    }
+
+  cxd56_gpio_write(BCM20707_RST_N, false);
+
+  ret = cxd56_gpio_config(BCM20707_DEV_WAKE, false);
+
+  if (ret != 0)
+    {
+      return ret;
+    }
+
+  cxd56_gpio_write(BCM20707_DEV_WAKE, true);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: board_bluetooth_uart_pin_cfg
+ *
+ * Description:
+ *   Setup UART pin configuration for bcm20706.
+ *
+ ****************************************************************************/
+
+int board_bluetooth_uart_pin_cfg(void)
+{
+  int ret = 0;
+
+  /* BCM20706 evaluation board might set pull-down.
+   * Set float for UART2 CTS
+   */
+
+  ret = board_gpio_config(PIN_UART2_CTS, 1, 1, 0, 0);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: board_bluetooth_reset
+ *
+ * Description:
+ *   Reset BCM20706.
+ *
+ ****************************************************************************/
+
+void board_bluetooth_reset(void)
+{
+  cxd56_gpio_write(BCM20707_RST_N, false);
+  usleep(BCM20707_RST_DELAY);
+  cxd56_gpio_write(BCM20707_RST_N, true);
+  usleep(BCM20707_RST_DELAY);
+}
+
+/****************************************************************************
+ * Name: board_bluetooth_power_control
+ *
+ * Description:
+ *   Power ON/OFF BCM20706.
+ *
+ ****************************************************************************/
+
+int board_bluetooth_power_control(bool en)
+{
+  int ret = 0;
+  ret = board_power_control(POWER_BTBLE, en);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: board_bluetooth_enable_sleep
+ *
+ * Description:
+ *   Sleep mode ON/OFF BCM20706.
+ *
+ ****************************************************************************/
+
+void board_bluetooth_enable_sleep(bool en)
+{
+  cxd56_gpio_write(BCM20707_DEV_WAKE, en);
+}

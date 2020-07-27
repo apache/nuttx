@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56xx/chip.h
+ * boards/arm/cxd56xx/spresense/include/cxd56_spisd.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_SPISD_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_SPISD_H
 
 /****************************************************************************
  * Included Files
@@ -42,12 +42,57 @@
 
 #include <nuttx/config.h>
 
-/* Include the chip capabilities file */
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-#include <arch/cxd56xx/chip.h>
+#ifndef __ASSEMBLY__
 
-#define  ARMV7M_PERIPHERAL_INTERRUPTS 128
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-#include "hardware/cxd5602_memorymap.h"
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_H */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_spisd_initialize
+ *
+ * Description:
+ *   Initialize the SPI-based SD card.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CXD56_SPISD
+int board_spisd_initialize(int minor, int bus);
+#endif
+
+/****************************************************************************
+ * Name: board_spisd_status
+ *
+ * Description:
+ *   Get the status whether SD Card is present or not.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CXD56_SPISD
+uint8_t board_spisd_status(FAR struct spi_dev_s *dev, uint32_t devid);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_SPISD_H */

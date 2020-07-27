@@ -377,8 +377,7 @@ int cxd56_pin_configs(uint32_t pinconfs[], size_t n)
 
       /* Set HostIF latch off */
 
-      if (((PIN_SPI2_CS_X <= pin) && (pin <= latch_endpin)) &&
-          (PINCONF_MODE0 == mode))
+      if ((PIN_SPI2_CS_X <= pin) && (pin <= latch_endpin))
         {
           modifyreg32(CXD56_TOPREG_DBG_HOSTIF_SEL,
                       LATCH_OFF_MASK,

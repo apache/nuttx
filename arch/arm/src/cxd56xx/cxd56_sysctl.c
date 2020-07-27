@@ -193,6 +193,7 @@ void cxd56_sysctlinitialize(void)
 
   nxsem_init(&g_exc, 0, 1);
   nxsem_init(&g_sync, 0, 0);
+  nxsem_set_protocol(&g_sync, SEM_PRIO_NONE);
 
   cxd56_iccregisterhandler(CXD56_PROTO_SYSCTL, sysctl_rxhandler, NULL);
 

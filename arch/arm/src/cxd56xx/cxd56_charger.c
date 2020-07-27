@@ -69,11 +69,9 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_CXD56_CHARGER_DEBUG
-#define baterr(fmt, ...) logerr(fmt, ## __VA_ARGS__)
-#define batdbg(fmt, ...) logdebug(fmt, ## __VA_ARGS__)
+#define baterr(fmt, ...) _err(fmt, ## __VA_ARGS__)
 #else
 #define baterr(fmt, ...)
-#define batdbg(fmt, ...)
 #endif
 
 /* Configuration */
@@ -81,7 +79,7 @@
 #undef USE_FLOAT_CONVERSION
 
 #ifdef CONFIG_CXD56_CHARGER_TEMP_PRECISE
-#if !defined(CONFIG_LIBM) && !defined(CONFIG_LIBM_NEWLIB)
+#if !defined(CONFIG_LIBM) && !defined(CONFIG_ARCH_MATH_H)
 #  error Temperature conversion in float requires math library.
 #endif
 #define USE_FLOAT_CONVERSION 1
@@ -370,7 +368,9 @@ static int charger_get_current(FAR int *current)
       return -EIO;
     }
 
-  /* (Register value - 800h) / Current detection resistor (0.1 ohm) * 0.02929 */
+  /* (Register value - 800h) / Current detection resistor (0.1 ohm)
+   *    x 0.02929
+   */
 
 #ifdef USE_FLOAT_CONVERSION
   *current = (gauge.current - 0x800) / 0.1f * 0.02929f;
@@ -508,7 +508,7 @@ static int charger_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct charger_dev_s *priv  = inode->i_private;
   int ret = -ENOTTY;
 
-  nxsem_wait(&priv->batsem);
+  nxsem_wait_uninterruptible(&priv->batsem);
 
   switch (cmd)
     {

@@ -63,16 +63,17 @@
 
 #define PWM_REG(ch) \
   ( \
-    (PWM_REG_t*)(PWM_REG_BASE + (sizeof(PWM_REG_t) * (ch))) \
+    (pwm_reg_t*)(PWM_REG_BASE + (sizeof(pwm_reg_t) * (ch))) \
   )
 
 #define PWM_PHASE_REG(ch) \
   ( \
-    (PWM_PHASE_REG_t*) \
-    (PWM_PHASE_REG_BASE + (sizeof(PWM_PHASE_REG_t) * (ch))) \
+    (pwm_phase_reg_t*) \
+    (PWM_PHASE_REG_BASE + (sizeof(pwm_phase_reg_t) * (ch))) \
   )
 
 #define PWM_PARAM_OFFPERIOD_SHIFT   (16)
+#define PWM_PHASE_PRESCALE_SHIFT    (16)
 
 #ifndef itemsof
 #  define itemsof(array) (sizeof(array)/sizeof(array[0]))
@@ -96,12 +97,12 @@ typedef struct
   volatile uint32_t PARAM;
   volatile uint32_t EN;
   volatile uint32_t UPDATE;
-} PWM_REG_t;
+} pwm_reg_t;
 
 typedef struct
 {
   volatile uint32_t PHASE;
-} PWM_PHASE_REG_t;
+} pwm_phase_reg_t;
 
 /****************************************************************************
  * Static Function Prototypes
@@ -218,19 +219,23 @@ static int pwm_pin_config(uint32_t channel)
  *
  * Output Parameters:
  *   param  - set value of PWM_PARAM register
+ *   phase  - set value of PWM_PHASE register
  *
  * Returned Value:
  *   OK on success; A negated errno value on failure.
  *
  ****************************************************************************/
 
-static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param)
+static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
+                               uint32_t *phase)
 {
   DEBUGASSERT(param);
+  DEBUGASSERT(phase);
 
   uint32_t pwmfreq = 0;
   uint32_t period = 0;
   uint32_t offperiod = 0;
+  uint32_t prescale = 0;
 
   /* Get frequency of pwm base clock */
 
@@ -243,10 +248,10 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param)
 
   /* check frequency range */
 
-  if ((freq > ((pwmfreq + 1) >> 1)) || (freq < (pwmfreq >> 16)))
+  if ((freq > ((pwmfreq + 1) >> 1)) || (freq <= 0))
     {
       pwmerr("Frequency out of range. %d [Effective range:%d - %d]\n",
-                freq, pwmfreq >> 16, (pwmfreq + 1) >> 1);
+                freq, 1, (pwmfreq + 1) >> 1);
       return -1;
     }
 
@@ -258,26 +263,65 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param)
       return -1;
     }
 
+  /* calcurate prescale */
+
+  if ((freq << 8) < (pwmfreq >> 8))
+    {
+      for (prescale = 1; prescale <= 8; prescale++)
+        {
+          if (freq > ((pwmfreq >> prescale) / 65535))
+            {
+              break;
+            }
+        }
+    }
+
   /* calculate period and offperiod */
 
-  period = (pwmfreq * 10 / freq - 5) / 10;
+  if (prescale > 0)
+    {
+      period = (((pwmfreq * 10) >> prescale) / freq + 5) / 10;
+    }
+  else
+    {
+      period = (pwmfreq * 10 / freq - 5) / 10;
+    }
+
   if (period > 0xffff)
     {
       period = 0xffff;
     }
 
-  offperiod = ((0x10000 - duty) * (period + 1) + 0x8000) >> 16;
-  if (offperiod == 0)
+  if (prescale > 0)
     {
-      offperiod = 0;
+      offperiod = ((0x10000 - duty) * period + (1 << (16 - prescale))) >> 16;
+      if (offperiod < 2)
+        {
+          pwmerr("Duty out of range. %d\n", duty);
+          return -1;
+        }
     }
-  else if (period < offperiod)
+  else
+    {
+      offperiod = ((0x10000 - duty) * (period + 1) + 0x8000) >> 16;
+    }
+
+  if (period < offperiod)
     {
       offperiod = period;
     }
 
+  pwminfo("Cycle = %d, Low = %d, High = %d, Clock = %d Hz\n",
+          (prescale) ? (period << prescale) : period + 1,
+          (prescale) ? (offperiod << prescale) - 1 : offperiod,
+          (prescale) ? (period << prescale) - (offperiod << prescale) + 1
+                     : period + 1 - offperiod, pwmfreq);
+  pwminfo("period/off/on = 0x%04x/0x%04x/0x%04x, prescale = %d\n",
+          period, offperiod, period - offperiod, prescale);
+
   *param = (period & 0xffff) |
            ((offperiod & 0xffff) << PWM_PARAM_OFFPERIOD_SHIFT);
+  *phase = prescale << PWM_PHASE_PRESCALE_SHIFT;
 
   return OK;
 }
@@ -306,7 +350,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
   ret = pwm_pin_config(priv->ch);
   if (ret < 0)
     {
-      pwmerr("Failed to pinconf():%d\n", channel);
+      pwmerr("Failed to pinconf() channel: %d\n", priv->ch);
       return -EINVAL;
     }
 
@@ -354,6 +398,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 {
   FAR struct cxd56_pwm_chan_s *priv = (FAR struct cxd56_pwm_chan_s *)dev;
   uint32_t param;
+  uint32_t phase;
   int ret;
 
   if (info->duty <= 0)
@@ -371,7 +416,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
     }
   else
     {
-      ret = convert_freq2period(info->frequency, info->duty, &param);
+      ret = convert_freq2period(info->frequency, info->duty, &param, &phase);
       if (ret < 0)
         {
           return -EINVAL;
@@ -387,10 +432,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
       PWM_REG(priv->ch)->EN = 0x0;
       PWM_REG(priv->ch)->PARAM = param;
-
-      /* Since prescale is not supported, always set to a fixed value '0' */
-
-      PWM_PHASE_REG(priv->ch)->PHASE = 0x0;
+      PWM_PHASE_REG(priv->ch)->PHASE = phase;
 
       PWM_REG(priv->ch)->EN = 0x1;
     }
@@ -465,6 +507,8 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
 FAR struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel)
 {
   FAR struct cxd56_pwm_chan_s *pwmch;
+
+  (void)g_pwmops;
 
   switch (channel)
     {

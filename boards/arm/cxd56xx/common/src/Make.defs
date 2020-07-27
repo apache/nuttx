@@ -150,12 +150,28 @@ ifeq ($(CONFIG_CXD56_I2C_DRIVER),y)
 CSRCS += cxd56_i2cdev.c
 endif
 
+ifeq ($(CONFIG_CXD56_SPI_DRIVER),y)
+CSRCS += cxd56_spidev.c
+endif
+
 ifeq ($(CONFIG_VIDEO_ISX012),y)
 CSRCS += cxd56_isx012.c
 endif
 
 ifeq ($(CONFIG_CXD56_IMAGEPROC),y)
   CSRCS += cxd56_imageproc.c
+endif
+
+ifeq ($(CONFIG_BCM20706),y)
+  CSRCS += cxd56_bcm20706.c
+endif
+
+ifeq ($(CONFIG_CXD56_EMMC),y)
+  CSRCS += cxd56_emmcdev.c
+endif
+
+ifeq ($(CONFIG_CXD56_SPISD),y)
+  CSRCS += cxd56_spisd.c
 endif
 
 DEPPATH += --dep-path src
