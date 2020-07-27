@@ -1499,6 +1499,8 @@ int video_initialize(FAR const char *devpath,
 
   video_handler = video_register(devpath);
 
+  g_video_devops = devops;
+
   is_initialized = true;
 
   return OK;
@@ -1512,6 +1514,8 @@ int video_uninitialize(void)
     }
 
   video_unregister(video_handler);
+
+  g_video_devops = NULL;
 
   is_initialized = false;
 
