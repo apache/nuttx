@@ -89,7 +89,8 @@ int altmdm_pm_uninit(FAR struct altmdm_dev_s *priv);
  *
  ****************************************************************************/
 
-int altmdm_pm_wakeup(FAR struct altmdm_dev_s *priv);
+int altmdm_pm_wakeup(FAR struct altmdm_dev_s *priv,
+  CODE int (*wait_fn)(FAR struct altmdm_dev_s *priv, uint32_t timeout_ms));
 
 /****************************************************************************
  * Name: altmdm_pm_notify_reset
@@ -100,19 +101,6 @@ int altmdm_pm_wakeup(FAR struct altmdm_dev_s *priv);
  ****************************************************************************/
 
 int altmdm_pm_notify_reset(FAR struct altmdm_dev_s *priv);
-
-#ifdef CONFIG_MODEM_ALTMDM_PROTCOL_V2_1
-
-/****************************************************************************
- * Name: altmdm_pm_callgpiohandler
- *
- * Description:
- *   Call Device to Host GPIO interrupt handler.
- *
- ****************************************************************************/
-
-int altmdm_pm_callgpiohandler(FAR struct altmdm_dev_s *priv);
-#endif
 
 /****************************************************************************
  * Name: altmdm_pm_registercb

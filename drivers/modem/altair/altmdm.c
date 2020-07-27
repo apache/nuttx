@@ -395,7 +395,8 @@ static int altmdm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-FAR void *altmdm_register(FAR const char *devpath, FAR struct spi_dev_s *dev)
+FAR void *altmdm_register(FAR const char *devpath, FAR struct spi_dev_s *dev,
+                          FAR const struct altmdm_lower_s *lower)
 {
   FAR struct altmdm_dev_s *priv;
   int ret;
@@ -410,6 +411,7 @@ FAR void *altmdm_register(FAR const char *devpath, FAR struct spi_dev_s *dev)
 
   priv->spi = dev;
   priv->path = strdup(devpath);
+  priv->lower = lower;
 
   ret = altmdm_initialize(priv);
   if (ret < 0)

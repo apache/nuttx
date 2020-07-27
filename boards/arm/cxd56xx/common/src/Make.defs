@@ -44,7 +44,6 @@ endif
 
 ifeq ($(CONFIG_MODEM_ALTMDM),y)
 CSRCS += cxd56_altmdm.c
-CSRCS += cxd56_altmdm_spi.c
 endif
 
 ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)

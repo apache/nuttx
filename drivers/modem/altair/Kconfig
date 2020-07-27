@@ -12,12 +12,10 @@ menuconfig MODEM_ALTMDM
 
 if MODEM_ALTMDM
 
-config MODEM_ALTMDM_PROTCOL_V2_1
-	bool "Enable SPI protocol version 2.1"
-	default y
-	depends on MODEM_ALTMDM
-	---help---
-		Support only this version.
+config MODEM_ALTMDM_XFER_TASK_PRIORITY
+	int "transfer task priority"
+	default 170
+	range 1 255
 
 config MODEM_ALTMDM_DEBUG
 	bool "Enable debug mode for Altair modem driver"

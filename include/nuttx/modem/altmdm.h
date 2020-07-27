@@ -45,6 +45,7 @@
 #include <nuttx/spi/spi.h>
 #include <queue.h>
 #include <debug.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -55,8 +56,8 @@
 /* Non-standard debug that may be enabled just for testing the modem driver */
 
 #ifdef CONFIG_MODEM_ALTMDM_DEBUG
-#  define m_err     logerr
-#  define m_info    loginfo
+#  define m_err     _err
+#  define m_info    _info
 #else
 #  define m_err(x...)
 #  define m_info(x...)
@@ -96,6 +97,18 @@ struct altmdm_pm_wakelock_s
     int count;
   };
 
+struct altmdm_lower_s
+{
+  void (*poweron)(void);
+  void (*poweroff)(void);
+  void (*sready_irqattach)(bool attach, xcpt_t handler);
+  void (*sready_irqenable)(bool enable);
+  bool (*sready)(void);
+  void (*master_request)(bool request);
+  void (*wakeup)(bool wakeup);
+  uint32_t (*spi_maxfreq)(void);
+};
+
 typedef void (*altmdm_pm_cbfunc_t) (uint32_t state);
 
 /****************************************************************************
@@ -120,13 +133,15 @@ extern "C"
  *   devpath - The full path to the driver to register. E.g., "/dev/altmdm".
  *   dev     - An instance of the SPI interface to use to communicate with
  *             ALTMDM.
+ *   lower   - An instance of the lower interface.
  *
  * Returned Value:
  *   Not NULL on success; NULL on failure.
  *
  ****************************************************************************/
 
-FAR void *altmdm_register(FAR const char *devpath, FAR struct spi_dev_s *dev);
+FAR void *altmdm_register(FAR const char *devpath, FAR struct spi_dev_s *dev,
+                          FAR const struct altmdm_lower_s *lower);
 
 /****************************************************************************
  * Name: altmdm_unregister

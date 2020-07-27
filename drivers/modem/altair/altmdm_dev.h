@@ -58,6 +58,7 @@ struct altmdm_dev_s
   struct altmdm_spi_dev_s spidev;
   struct altmdm_sys_lock_s lock;
   int poweron;
+  FAR const struct altmdm_lower_s *lower;
 };
 
 /****************************************************************************
@@ -146,8 +147,6 @@ int altmdm_spi_readabort(FAR struct altmdm_dev_s *priv);
 
 int altmdm_spi_sleepmodem(FAR struct altmdm_dev_s *priv);
 
-#ifdef CONFIG_MODEM_ALTMDM_PROTCOL_V2_1
-
 /****************************************************************************
  * Name: altmdm_spi_setreceiverready
  *
@@ -177,8 +176,6 @@ int altmdm_spi_isreceiverready(FAR struct altmdm_dev_s *priv);
  ****************************************************************************/
 
 int altmdm_spi_clearreceiverready(FAR struct altmdm_dev_s *priv);
-
-#endif
 
 /****************************************************************************
  * Name: altmdm_spi_gpioreadyisr
