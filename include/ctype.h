@@ -37,19 +37,48 @@
 #ifndef __INCLUDE_CTYPE_H
 #define __INCLUDE_CTYPE_H
 
-/* There is no consistent ctype implementation, just a smattering of
- * functions.  Individually, they are okay, but a more standard, data lookup
- * approach would make more sense if used extensively.
- */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/compiler.h>
+#include <nuttx/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The classification flags */
+
+#define _U          0x01      /* upper */
+#define _L          0x02      /* lower */
+#define _N          0x04      /* digit */
+#define _S          0x08      /* space */
+#define _P          0x10      /* punct */
+#define _C          0x20      /* cntrl */
+#define _X          0x40      /* a-f|A-F */
+#define _B          0x80      /* blank */
+
+#define __ctype_lookup(c) up_romgetc(__ctype_ + (c))
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+extern const IOBJ char _ctype_[];
+extern const IPTR char *const __ctype_;
+
+/****************************************************************************
+ * Public Inline Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,13 +94,10 @@
 #ifdef __cplusplus
 static inline int isspace(int c)
 {
-  return c == ' ' || c == '\t' || c == '\n' || c == '\r' ||
-         c == '\f' || c == '\v';
+  return __ctype_lookup(c) & _S;
 }
 #else
-#  define isspace(c) \
-    ((c) == ' '  || (c) == '\t' || (c) == '\n' || (c) == '\r' || \
-     (c) == '\f' || (c) == '\v')
+#  define isspace(c) (__ctype_lookup(c) & _S)
 #endif
 
 /****************************************************************************
@@ -86,10 +112,10 @@ static inline int isspace(int c)
 #ifdef __cplusplus
 static inline int isascii(int c)
 {
-  return c >= 0 && c <= 0x7f;
+  return (unsigned)c <= 0x7f;
 }
 #else
-#  define isascii(c)   ((c) >= 0 && (c) <= 0x7f)
+#  define isascii(c) ((unsigned)(c) <= 0x7f)
 #endif
 
 /****************************************************************************
@@ -103,10 +129,10 @@ static inline int isascii(int c)
 #ifdef __cplusplus
 static inline int isprint(int c)
 {
-  return c >= 0x20 && c < 0x7f;
+  return __ctype_lookup(c) & (_P | _U | _L | _N | _B);
 }
 #else
-#  define isprint(c)   ((c) >= 0x20 && (c) < 0x7f)
+#  define isprint(c) (__ctype_lookup(c) & (_P | _U | _L | _N | _B))
 #endif
 
 /****************************************************************************
@@ -120,10 +146,10 @@ static inline int isprint(int c)
 #ifdef __cplusplus
 static inline int isgraph(int c)
 {
-  return c > 0x20 && c < 0x7f;
+  return __ctype_lookup(c) & (_P | _U | _L | _N);
 }
 #else
-#  define isgraph(c)   ((c) > 0x20 && (c) < 0x7f)
+#  define isgraph(c) (__ctype_lookup(c) & (_P | _U | _L | _N))
 #endif
 
 /****************************************************************************
@@ -137,10 +163,10 @@ static inline int isgraph(int c)
 #ifdef __cplusplus
 static inline int iscntrl(int c)
 {
-  return !isprint(c);
+  return __ctype_lookup(c) & _C;
 }
 #else
-#  define iscntrl(c) (!isprint(c))
+#  define iscntrl(c) (__ctype_lookup(c) & _C)
 #endif
 
 /****************************************************************************
@@ -154,10 +180,10 @@ static inline int iscntrl(int c)
 #ifdef __cplusplus
 static inline int islower(int c)
 {
-  return c >= 'a' && c <= 'z';
+  return (__ctype_lookup(c) & (_U | _L)) == _L;
 }
 #else
-#  define islower(c)   ((c) >= 'a' && (c) <= 'z')
+#  define islower(c) ((__ctype_lookup(c) & (_U | _L)) == _L)
 #endif
 
 /****************************************************************************
@@ -171,10 +197,10 @@ static inline int islower(int c)
 #ifdef __cplusplus
 static inline int isupper(int c)
 {
-  return c >= 'A' && c <= 'Z';
+  return (__ctype_lookup(c) & (_U | _L)) == _U;
 }
 #else
-#  define isupper(c)   ((c) >= 'A' && (c) <= 'Z')
+#  define isupper(c) ((__ctype_lookup(c) & (_U | _L)) == _U)
 #endif
 
 /****************************************************************************
@@ -188,10 +214,10 @@ static inline int isupper(int c)
 #ifdef __cplusplus
 static inline int isalpha(int c)
 {
-  return islower(c) || isupper(c);
+  return __ctype_lookup(c) & (_U | _L);
 }
 #else
-#  define isalpha(c)   (islower(c) || isupper(c))
+#  define isalpha(c) (__ctype_lookup(c) & (_U | _L))
 #endif
 
 /****************************************************************************
@@ -205,10 +231,10 @@ static inline int isalpha(int c)
 #ifdef __cplusplus
 static inline int isblank(int c)
 {
-  return c == ' ' || c == '\t';
+  return (__ctype_lookup(c) & _B) || c == '\t';
 }
 #else
-#  define isblank(c)   ((c) == ' ' || (c) == '\t')
+int isblank(int c);
 #endif
 
 /****************************************************************************
@@ -222,10 +248,10 @@ static inline int isblank(int c)
 #ifdef __cplusplus
 static inline int isdigit(int c)
 {
-  return c >= '0' && c <= '9';
+  return __ctype_lookup(c) & _N;
 }
 #else
-#  define isdigit(c)   ((c) >= '0' && (c) <= '9')
+#  define isdigit(c) (__ctype_lookup(c) & _N)
 #endif
 
 /****************************************************************************
@@ -239,10 +265,10 @@ static inline int isdigit(int c)
 #ifdef __cplusplus
 static inline int isalnum(int c)
 {
-  return isalpha(c) || isdigit(c);
+  return __ctype_lookup(c) & (_U | _L | _N);
 }
 #else
-#  define isalnum(c)   (isalpha(c) || isdigit(c))
+#  define isalnum(c) (__ctype_lookup(c) & (_U | _L | _N))
 #endif
 
 /****************************************************************************
@@ -257,10 +283,10 @@ static inline int isalnum(int c)
 #ifdef __cplusplus
 static inline int ispunct(int c)
 {
-  return isgraph(c) && !isalnum(c);
+  return __ctype_lookup(c) & _P;
 }
 #else
-#  define ispunct(c)   (isgraph(c) && !isalnum(c))
+#  define ispunct(c) (__ctype_lookup(c) & _P)
 #endif
 
 /****************************************************************************
@@ -274,15 +300,10 @@ static inline int ispunct(int c)
 #ifdef __cplusplus
 static inline int isxdigit(int c)
 {
-  return (c >= '0' && c <= '9') ||
-         (c >= 'a' && c <= 'f') ||
-         (c >= 'A' && c <= 'F');
+  return __ctype_lookup(c) & (_X | _N);
 }
 #else
-#  define isxdigit(c) \
-    (((c) >= '0' && (c) <= '9') || \
-     ((c) >= 'a' && (c) <= 'f') || \
-     ((c) >= 'A' && (c) <= 'F'))
+#  define isxdigit(c) (__ctype_lookup(c) & (_X | _N))
 #endif
 
 /****************************************************************************
@@ -296,11 +317,10 @@ static inline int isxdigit(int c)
 #ifdef __cplusplus
 static inline int toupper(int c)
 {
-  return (c >= 'a' && c <= 'z') ? c - 'a' + 'A' : c;
+  return islower(c) ? (c - 'a' + 'A') : c;
 }
 #else
-#  define toupper(c) \
-    (((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : (c))
+int toupper(int c);
 #endif
 
 /****************************************************************************
@@ -314,23 +334,10 @@ static inline int toupper(int c)
 #ifdef __cplusplus
 static inline int tolower(int c)
 {
-  return (c >= 'A' && c <= 'Z') ? (c - 'A' + 'a') : c;
+  return isupper(c) ? (c - 'A' + 'a') : c;
 }
 #else
-#  define tolower(c) \
-    (((c) >= 'A' && (c) <= 'Z') ? ((c) - 'A' + 'a') : (c))
-#endif
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
+int tolower(int c);
 #endif
 
 #undef EXTERN
