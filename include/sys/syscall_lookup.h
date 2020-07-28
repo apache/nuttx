@@ -45,7 +45,7 @@ SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
   SYSCALL_LOOKUP(sched_setaffinity,        3)
 #endif
 
-SYSCALL_LOOKUP(uname,                      1)
+SYSCALL_LOOKUP(gethostname,                2)
 SYSCALL_LOOKUP(sethostname,                2)
 
 /* User identity */
