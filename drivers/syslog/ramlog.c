@@ -227,10 +227,20 @@ static ssize_t ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 
   if (nexthead == priv->rl_tail)
     {
+#ifdef CONFIG_RAMLOG_OVERWRITE
+      /* Yes... Overwrite with the latest log in the circular buffer */
+
+      priv->rl_tail += 1;
+      if (priv->rl_tail >= priv->rl_bufsize)
+        {
+          priv->rl_tail = 0;
+        }
+#else
       /* Yes... Return an indication that nothing was saved in the buffer. */
 
       leave_critical_section(flags);
       return -EBUSY;
+#endif
     }
 
   /* No... copy the byte and re-enable interrupts */
