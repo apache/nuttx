@@ -66,6 +66,12 @@ ifeq ($(CONFIG_NET_SENDFILE),y)
 CSRCS += fs_sendfile.c
 endif
 
+# Support for eventfd
+
+ifeq ($(CONFIG_EVENT_FD),y)
+CSRCS += fs_eventfd.c
+endif
+
 # Include vfs build support
 
 DEPPATH += --dep-path vfs
