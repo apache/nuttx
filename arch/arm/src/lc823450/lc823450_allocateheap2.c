@@ -115,7 +115,8 @@ static inline void up_heap_color(FAR void *start, size_t size)
  *
  *     Kernel .data region.  Size determined at link time.
  *     Kernel .bss  region  Size determined at link time.
- *     Kernel IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
+ *     Kernel IDLE thread stack.
+ *       Size determined by CONFIG_IDLETHREAD_STACKSIZE.
  *     Padding for alignment
  *     User .data region.  Size determined at link time.
  *     User .bss region  Size determined at link time.
@@ -132,7 +133,9 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+    CONFIG_MM_KERNEL_HEAPSIZE;
+
   size_t    usize = SRAM1_END - ubase;
   int       log2;
 
@@ -160,7 +163,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Allow user-mode access to the user heap memory */
 
-   lc823450_mpu_uheap((uintptr_t)ubase, usize);
+  lc823450_mpu_uheap((uintptr_t)ubase, usize);
 #else
 
   /* Return the heap settings */
@@ -197,7 +200,9 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+    CONFIG_MM_KERNEL_HEAPSIZE;
+
   size_t    usize = SRAM1_END - ubase;
   int       log2;
 

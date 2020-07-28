@@ -56,7 +56,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 void lc823450_dvfs_get_idletime(uint64_t idaletime[]);

@@ -134,7 +134,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 void lc823450_dmaconfigure(uint8_t dmarequest, bool alternate);

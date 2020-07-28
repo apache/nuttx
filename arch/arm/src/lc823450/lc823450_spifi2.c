@@ -34,6 +34,10 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
@@ -163,7 +167,7 @@ static void spiflash_quad_enable_winbond(void)
   putreg32(SF_SIZE_NOREAD | 3 << SF_SIZE_T_SHIFT, SF_SIZE);
   putreg32(0, SF_DUMMY);
   putreg8(SF_CMD_WRITE_STATUS, SF_T_FIFO);
-  putreg8(0, SF_T_FIFO);      /* status1 */
+  putreg8(0, SF_T_FIFO);              /* status1 */
   putreg8(SF_STATUS2_QE, SF_T_FIFO);  /* status2 */
 
   /* Start Transfer */

@@ -115,7 +115,8 @@ struct lc823450_wdt_lowerhalf_s
 /* Interrupt handling *******************************************************/
 
 #ifdef CONFIG_LC823450_WDT_INTERRUPT
-static int    lc823450_wdt_interrupt(int irq, FAR void *context, FAR void *arg);
+static int    lc823450_wdt_interrupt(int irq,
+                                     FAR void *context, FAR void *arg);
 #endif
 
 /* "Lower half" driver methods **********************************************/
@@ -156,7 +157,6 @@ static struct lc823450_wdt_lowerhalf_s g_wdtdev;
 #ifdef CONFIG_WATCHDOG_WORK
 static struct work_s    wdg_work;
 #endif
-
 
 /****************************************************************************
  * Private Functions
@@ -220,8 +220,8 @@ static int lc823450_wdt_interrupt(int irq, FAR void *context, FAR void *arg)
  *   Start the watchdog timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of
+ *           the "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -243,8 +243,8 @@ static int lc823450_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
  *   Stop the watchdog timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of
+ *           the "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -268,8 +268,8 @@ static int lc823450_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   the atchdog timer or "petting the dog".
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of
+ *           the "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -295,8 +295,8 @@ static int lc823450_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *   Get the current watchdog timer status
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of
+ *             the "lower-half" driver state structure.
  *   stawtus - The location to return the watchdog status information.
  *
  * Returned Value:
@@ -358,8 +358,8 @@ static int lc823450_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *   Set a new timeout value (and reset the watchdog timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of
+ *             the "lower-half" driver state structure.
  *   timeout - The new timeout value in millisecnds.
  *
  * Returned Value:
@@ -381,7 +381,8 @@ static int lc823450_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   /* ProgrammersModel_PTM0v0.1.pdf:p24 */
 
-  wt0pstst = 65536 - (uint64_t)timeout * wdt_freq / (2 * (256 - WT0BCGST) * 1000);
+  wt0pstst = 65536 - (uint64_t)timeout * wdt_freq /
+    (2 * (256 - WT0BCGST) * 1000);
 
   if (wt0pstst < 1 || wt0pstst > 0xffff)
     {
@@ -424,8 +425,8 @@ static int lc823450_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *   behavior.
  *
  * Input Parameters:
- *   lower      - A pointer the publicly visible representation of the "lower-half"
- *                driver state structure.
+ *   lower      - A pointer the publicly visible representation of
+ *                the "lower-half" driver state structure.
  *   newhandler - The new watchdog expiration function pointer.  If this
  *                function pointer is NULL, then the reset-on-expiration
  *                behavior is restored,
@@ -459,7 +460,7 @@ static xcpt_t lc823450_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Save the new handler */
 
-   priv->handler = handler;
+  priv->handler = handler;
 
   /* Are we attaching or detaching the handler? */
 
@@ -489,8 +490,8 @@ static xcpt_t lc823450_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
  *   are forwarded to the lower half driver through this method.
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of
+ *           the "lower-half" driver state structure.
  *   cmd   - The ioctol command value
  *   arg   - The optional argument that accompanies the 'cmd'.  The
  *           interpretation of this argument depends on the particular
@@ -501,8 +502,8 @@ static xcpt_t lc823450_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int lc823450_wdt_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
-                    unsigned long arg)
+static int lc823450_wdt_ioctl(FAR struct watchdog_lowerhalf_s *lower,
+                              int cmd, unsigned long arg)
 {
   wdinfo("cmd=%d arg=%ld\n", cmd, arg);
 
@@ -587,7 +588,8 @@ void lc823450_wdt_work_enable(int en)
           putreg32(LOCKUPR_LOCKUPR0, LOCKUPR);
         }
 
-      lc823450_wdt_settimeout(&g_wdtdev.wdt_lh, CONFIG_WATCHDOG_WORK_TIMEOUT);
+      lc823450_wdt_settimeout(&g_wdtdev.wdt_lh,
+                              CONFIG_WATCHDOG_WORK_TIMEOUT);
 
       work_queue(HPWORK, &wdg_work, wdg_work_func, NULL,
                  MSEC2TICK(CONFIG_WATCHDOG_WORK_TIMEOUT / 2));

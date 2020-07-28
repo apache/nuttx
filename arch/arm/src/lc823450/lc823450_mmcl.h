@@ -55,7 +55,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 int mmcl_initialize(int minor, FAR struct mtd_dev_s *mtd);

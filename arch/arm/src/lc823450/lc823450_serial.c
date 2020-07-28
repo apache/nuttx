@@ -314,7 +314,7 @@ static uart_dev_t g_uart1port =
   {
     .size   = CONFIG_UART1_TXBUFSIZE,
     .buffer = g_uart1txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart1priv,
 };
@@ -344,7 +344,7 @@ static uart_dev_t g_uart2port =
   {
     .size   = CONFIG_UART2_TXBUFSIZE,
     .buffer = g_uart2txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
 };
@@ -372,7 +372,8 @@ static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv,
+                                int offset, uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -449,7 +450,11 @@ static int up_setup(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t ctl;
-  int min_diff = INT_MAX, udiv = -1, tmp_reg, real_baud, i;
+  int min_diff = INT_MAX;
+  int udiv = -1;
+  int tmp_reg;
+  int real_baud;
+  int i;
 
   /* Note:  The logic here depends on the fact that that the UART module
    * was enabled and the GPIOs were configured in up_lowsetup().
@@ -605,14 +610,16 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the UART to operation in interrupt driven mode.
+ *   This method is called when the serial port is opened.
+ *   Normally, this is just after the the setup() method is called,
+ *   however, the serial console may operate in a non-interrupt driven mode
+ *   during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method
+ *   (unless the hardware supports multiple levels of interrupt enabling).
+ *   The RX and TX interrupts are not enabled until the txint() and rxint()
+ *   methods are called.
  *
  ****************************************************************************/
 
@@ -641,8 +648,8 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.
+ *   The exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -683,6 +690,7 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
   /* Handle incoming, receive bytes (with or without timeout) */
 
   /* Rx buffer not empty ... process incoming bytes */
+
   if (mis & UART_UISR_UARTRF)
     {
       uart_recvchars(dev);
@@ -781,7 +789,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
                               ((priv->iflow) ? CRTS_IFLOW : 0) |
 #endif
                               CS8;
-
         }
         break;
 
@@ -984,6 +991,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       priv->im &= ~UART_UIEN_UARTTF_IEN;
       up_serialout(priv, UART_UIEN, priv->im);
     }
+
   leave_critical_section(flags);
 }
 
@@ -1089,7 +1097,7 @@ static void uart_dma_callback(DMA_HANDLE hdma, void *arg, int result)
  * Name: uart_rxdma_callback
  ****************************************************************************/
 
- static void uart_rxdma_callback(DMA_HANDLE hdma, void *arg, int result)
+static void uart_rxdma_callback(DMA_HANDLE hdma, void *arg, int result)
 {
   if (hs_dmaact == HS_DMAACT_ACT1)
     {
@@ -1150,7 +1158,8 @@ static void  up_hs_dmasetup()
                           LC823450_DMA_DSTWIDTH_BYTE |
                           LC823450_DMA_DSTINC,
                           LC823450_UART1_REGBASE + UART_USRF,
-                          (uint32_t)(g_uart1rxbuffer + CONFIG_UART1_RXBUFSIZE / 2) ,
+                          (uint32_t)(g_uart1rxbuffer + CONFIG_UART1_RXBUFSIZE
+                                     / 2),
                           CONFIG_UART1_RXBUFSIZE / 2);
 
         lc823450_dmastart(g_uart1priv.hrxdma, uart_rxdma_callback, NULL);
@@ -1230,7 +1239,9 @@ retry:
                     LC823450_DMA_SRCWIDTH_BYTE |
                     LC823450_DMA_DSTWIDTH_BYTE |
                     LC823450_DMA_SRCINC,
-                    (uint32_t)dev->xmit.buffer, priv->uartbase + UART_USTF, len);
+                    (uint32_t)dev->xmit.buffer,
+                    priv->uartbase + UART_USTF,
+                    len);
   lc823450_dmastart(priv->htxdma, uart_dma_callback, dev);
 
   /* BT stack may not handle to short write */
@@ -1271,16 +1282,28 @@ void arm_earlyserialinit(void)
   /* workaround: force clock enable */
 
 #if defined(CONFIG_LC823450_UART0)
-  modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_UART0_CLKEN | MCLKCNTAPB_UART0IF_CLKEN);
-  modifyreg32(MRSTCNTAPB, 0, MRSTCNTAPB_UART0_RSTB);
+  modifyreg32(MCLKCNTAPB,
+              0,
+              MCLKCNTAPB_UART0_CLKEN | MCLKCNTAPB_UART0IF_CLKEN);
+  modifyreg32(MRSTCNTAPB,
+              0,
+              MRSTCNTAPB_UART0_RSTB);
 #endif
 #if defined(CONFIG_LC823450_UART1)
-  modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_UART1_CLKEN | MCLKCNTAPB_UART1IF_CLKEN);
-  modifyreg32(MRSTCNTAPB, 0, MRSTCNTAPB_UART1_RSTB);
+  modifyreg32(MCLKCNTAPB,
+              0,
+              MCLKCNTAPB_UART1_CLKEN | MCLKCNTAPB_UART1IF_CLKEN);
+  modifyreg32(MRSTCNTAPB,
+              0,
+              MRSTCNTAPB_UART1_RSTB);
 #endif
 #if defined(CONFIG_LC823450_UART2)
-  modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_UART2_CLKEN | MCLKCNTAPB_UART2IF_CLKEN);
-  modifyreg32(MRSTCNTAPB, 0, MRSTCNTAPB_UART2_RSTB);
+  modifyreg32(MCLKCNTAPB,
+              0,
+              MCLKCNTAPB_UART2_CLKEN | MCLKCNTAPB_UART2IF_CLKEN);
+  modifyreg32(MRSTCNTAPB,
+              0,
+              MRSTCNTAPB_UART2_RSTB);
 #endif
 
   /* Disable all UARTS */
@@ -1327,12 +1350,12 @@ void arm_serialinit(void)
   g_uart1priv.htxdma = lc823450_dmachannel(DMA_CHANNEL_UART1TX);
   lc823450_dmarequest(g_uart1priv.htxdma, DMA_REQUEST_UART1TX);
 
-
   nxsem_init(&g_uart1priv.rxdma_wait, 0, 0);
   g_uart1priv.hrxdma = lc823450_dmachannel(DMA_CHANNEL_UART1RX);
   lc823450_dmarequest(g_uart1priv.hrxdma, DMA_REQUEST_UART1RX);
 
-  up_serialout(&g_uart1priv, UART_UDMA, UART_UDMA_RREQ_EN | UART_UDMA_TREQ_EN);
+  up_serialout(&g_uart1priv, UART_UDMA,
+               UART_UDMA_RREQ_EN | UART_UDMA_TREQ_EN);
   hsuart_register("/dev/ttyHS1", &TTYS1_DEV);
 #endif /* CONFIG_HSUART */
 #endif
@@ -1356,7 +1379,9 @@ int up_putc(int ch)
 
 #ifdef CONFIG_DEV_CONSOLE_SWITCH
   if (g_console_disable)
-    return ch;
+    {
+      return ch;
+    }
 #endif /* CONFIG_DEV_CONSOLE_SWITCH */
 
   up_disableuartint(priv, &im);
@@ -1463,10 +1488,12 @@ void hsuart_wdtimer(void)
   switch (hs_dmaact)
     {
       case HS_DMAACT_ACT1:
-        newhead = CONFIG_UART1_RXBUFSIZE / 2 - lc823450_dmaremain(g_uart1priv.hrxdma);
+        newhead = CONFIG_UART1_RXBUFSIZE /
+          2 - lc823450_dmaremain(g_uart1priv.hrxdma);
         break;
       case HS_DMAACT_ACT2:
-        newhead = CONFIG_UART1_RXBUFSIZE  - lc823450_dmaremain(g_uart1priv.hrxdma);
+        newhead = CONFIG_UART1_RXBUFSIZE  -
+          lc823450_dmaremain(g_uart1priv.hrxdma);
         break;
       case HS_DMAACT_STOP1:
         newhead = 0;

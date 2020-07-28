@@ -668,7 +668,8 @@ static void lc823450_epfreebuffer(struct usbdev_ep_s *ep, void *buf)
  *
  ****************************************************************************/
 
-static int lc823450_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static int lc823450_epsubmit(struct usbdev_ep_s *ep,
+                             struct usbdev_req_s *req)
 {
   struct lc823450_req_s *privreq = (struct lc823450_req_s *)req;
   struct lc823450_ep_s *privep = (struct lc823450_ep_s *)ep;
@@ -728,7 +729,8 @@ static int lc823450_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
  *
  ****************************************************************************/
 
-static int lc823450_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
+static int lc823450_epcancel(struct usbdev_ep_s *ep,
+                             struct usbdev_req_s *req)
 {
   struct lc823450_req_s *privreq = (struct lc823450_req_s *)req;
   struct lc823450_ep_s *privep = (struct lc823450_ep_s *)ep;
@@ -797,12 +799,12 @@ void up_epignore_clear_stall(struct usbdev_ep_s *ep, bool ignore)
  * Input Parameters:
  *   eplog  - 7-bit logical endpoint number (direction bit ignored).  Zero
  *            means that any endpoint matching the other requirements will
- *            suffice.  The assigned endpoint can be found in the eplog field.
+ *            suffice. The assigned endpoint can be found in the eplog field.
  *   in     - true: IN (device-to-host) endpoint requested
  *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC,
  *            USB_EP_ATTR_XFER_BULK, USB_EP_ATTR_XFER_INT}
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static struct usbdev_ep_s *lc823450_allocep(struct usbdev_s *dev,
                                             uint8_t eplog, bool in,
@@ -1955,7 +1957,8 @@ int usbdev_is_usbcharger(void)
 #endif
 
 #ifdef CONFIG_PM
-static void usbdev_pmnotify(struct pm_callback_s *cb, enum pm_state_e pmstate)
+static void usbdev_pmnotify(struct pm_callback_s *cb,
+                            enum pm_state_e pmstate)
 {
   irqstate_t flags;
 

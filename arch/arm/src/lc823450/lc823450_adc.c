@@ -74,8 +74,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define LC823450_ADCHST(c)    (((c) & 0xf) << rADCCTL_fADCHST_SHIFT)
-#define LC823450_ADC0DT(d)    (rADC0DT + ((d) << 2))
+#define LC823450_ADCHST(c)    (((c) & 0xf) << ADCCTL_ADCHST_SHIFT)
+#define LC823450_ADC0DT(d)    (ADC0DT + ((d) << 2))
 
 #define LC823450_MAX_ADCCLK   (5 * 1000 * 1000)   /* Hz */
 
@@ -169,7 +169,7 @@ static const struct adc_ops_s lc823450_adc_ops =
 
 static inline void lc823450_adc_clearirq(void)
 {
-  putreg32(rADCSTS_fADCMPL, rADCSTS);
+  putreg32(ADCSTS_ADCMPL, ADCSTS);
 }
 
 /****************************************************************************
@@ -190,7 +190,7 @@ static void lc823450_adc_standby(int on)
 
       /* Enter standby mode */
 
-      modifyreg32(rADCSTBY, 0, rADCSTBY_STBY);
+      modifyreg32(ADCSTBY, 0, ADCSTBY_STBY);
 
       /* disable clock */
 
@@ -204,7 +204,7 @@ static void lc823450_adc_standby(int on)
 
       /* Exit standby mode */
 
-      modifyreg32(rADCSTBY, rADCSTBY_STBY, 0);
+      modifyreg32(ADCSTBY, ADCSTBY_STBY, 0);
 
       up_udelay(10);
 
@@ -250,18 +250,18 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
 
   /* Setup ADC channels */
 
-  putreg32((i << rADCCTL_fADCNVCK_SHIFT) |
+  putreg32((i << ADCCTL_ADCNVCK_SHIFT) |
            LC823450_ADCHST(CONFIG_LC823450_ADC_NCHANNELS - 1) |
-           rADCCTL_fADCHSCN, rADCCTL);
+           ADCCTL_ADCHSCN, ADCCTL);
 
   /* Start A/D conversion */
 
-  modifyreg32(rADCCTL, rADCCTL_fADACT, rADCCTL_fADACT);
+  modifyreg32(ADCCTL, ADCCTL_ADACT, ADCCTL_ADACT);
 
   /* Wait for completion */
 
 #ifdef CONFIG_ADC_POLLED
-  while ((getreg32(rADCSTS) & rADCSTS_fADCMPL) == 0)
+  while ((getreg32(ADCSTS) & ADCSTS_ADCMPL) == 0)
     ;
 #else
   ret = nxsem_wait_uninterruptible(&inst->sem_isr);
@@ -572,7 +572,7 @@ FAR struct adc_dev_s *lc823450_adcinitialize(void)
        * all ADCCLK between 2MHz and 5MHz. [PDFW15IS-1847]
        */
 
-      putreg32(53, rADCSMPL);
+      putreg32(53, ADCSMPL);
 
       /* Setup ADC interrupt */
 

@@ -55,7 +55,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 int lc823450_sdc_refversion(void);
@@ -69,12 +69,15 @@ int lc823450_sdc_setclock(uint32_t ch, uint32_t limitclk, uint32_t sysclk);
 int lc823450_sdc_refmediatype(uint32_t ch);
 int lc823450_sdc_getcardsize(uint32_t ch, unsigned long *psecnum,
                              unsigned long *psecsize);
-int lc823450_sdc_readsector(uint32_t ch, unsigned long addr, unsigned short cnt,
+int lc823450_sdc_readsector(uint32_t ch, unsigned long addr,
+                            unsigned short cnt,
                             void *pbuf, unsigned long type);
-int lc823450_sdc_writesector(uint32_t ch, unsigned long addr, unsigned short cnt,
+int lc823450_sdc_writesector(uint32_t ch, unsigned long addr,
+                             unsigned short cnt,
                              void *pbuf, unsigned long type);
 int lc823450_sdc_checktrim(uint32_t ch);
-int lc823450_sdc_trimsector(uint32_t ch, unsigned long addr, unsigned short cnt);
+int lc823450_sdc_trimsector(uint32_t ch, unsigned long addr,
+                            unsigned short cnt);
 int lc823450_sdc_cachectl(uint32_t ch, int ctrl);
 int lc823450_sdc_changespeedmode(uint32_t ch, int mode);
 int lc823450_sdc_getcid(uint32_t ch, char *cidstr, int length);

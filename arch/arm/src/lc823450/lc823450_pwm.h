@@ -101,7 +101,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 EXTERN FAR struct pwm_lowerhalf_s *lc823450_pwminitialize(int timer);
