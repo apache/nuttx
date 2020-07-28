@@ -49,9 +49,4 @@ endif
 DEPPATH += --dep-path procfs
 VPATH += :procfs
 
-# To ensure version information is newest,
-# add fs_procfsversion to phony target for force rebuild
-
-.PHONY: fs_procfsversion$(OBJEXT)
-
 endif
