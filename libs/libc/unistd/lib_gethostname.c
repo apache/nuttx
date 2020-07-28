@@ -41,11 +41,18 @@
 
 #include <nuttx/config.h>
 
-#include <sys/utsname.h>
 #include <string.h>
 #include <unistd.h>
 
 #include <nuttx/irq.h>
+
+/* Further, in the protected and kernel build modes where kernel and
+ * application code are separated, the hostname is a common system property
+ * and must reside only in the kernel.  In that case, this accessor
+ * function only be called from user space is only via a kernel system call.
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -96,17 +103,6 @@ char g_hostname[HOST_NAME_MAX + 1] = CONFIG_LIB_HOSTNAME;
 
 int gethostname(FAR char *name, size_t namelen)
 {
-/* In the protected and kernel build modes where kernel and application code
- * are separated, the hostname is a common system property and must reside
- * only in the kernel.  In that case, we need to do things differently.
- *
- * uname() is implemented as a system call and can be called from user space.
- * So, in these configurations we will get the hostname via the uname
- * function.
- */
-
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-
   irqstate_t flags;
 
   /* Return the host name, truncating to fit into the user provided buffer.
@@ -119,24 +115,6 @@ int gethostname(FAR char *name, size_t namelen)
   leave_critical_section(flags);
 
   return 0;
-
-#else
-
-  struct utsname info;
-  int ret;
-
-  /* Get uname data */
-
-  ret = uname(&info);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Return the nodename from the uname data */
-
-  strncpy(name, info.nodename, namelen);
-  return 0;
-
-#endif
 }
+
+#endif /* CONFIG_BUILD_FLAT || __KERNEL__ */
