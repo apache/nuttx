@@ -103,6 +103,7 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock)
     {
       *lock = SP_LOCKED;
     }
+
   SP_DMB();
 
   val = (up_cpu_index() << 16) | 0x0;

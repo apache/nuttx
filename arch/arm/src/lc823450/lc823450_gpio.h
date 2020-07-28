@@ -106,7 +106,6 @@
 #  define GPIO_MUX2                (2 << GPIO_MUX_SHIFT)     /* mux mode 2 */
 #  define GPIO_MUX3                (3 << GPIO_MUX_SHIFT)     /* mux mode 3 */
 
-
 /* GPIO pull-ups/downs
  *
  * 1111 1100 0000 0000
@@ -205,7 +204,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -273,7 +272,6 @@ int lc823450_gpio_dump(uint16_t gpiocfg, FAR const char *msg);
 #ifdef CONFIG_LC823450_VGPIO
 int lc823450_vgpio_register(unsigned int pin, FAR struct vgpio_ops_s *ops);
 #endif /* CONFIG_LC823450_VGPIO */
-
 
 #if defined(__cplusplus)
 }

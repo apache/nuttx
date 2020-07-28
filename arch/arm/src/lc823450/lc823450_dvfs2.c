@@ -220,7 +220,6 @@ static void lc832450_set_core_voltage(bool high)
 }
 #endif
 
-
 /****************************************************************************
  * Name: lc823450_dvfs_set_div
  * Set dividers in the OSC block
@@ -263,7 +262,7 @@ static void lc823450_dvfs_set_div(int idx, int tbl)
       modifyreg32(MEMEN4, 0, MEMEN4_HWAIT);
     }
 
-    /* adjust AHB */
+  /* adjust AHB */
 
   if (t_hdiv > _dvfs_cur_hdiv)
     {
@@ -276,8 +275,9 @@ static void lc823450_dvfs_set_div(int idx, int tbl)
 
   uint32_t regval = getreg32(OSCCNT);
 
-  /* NOTE: In LC823450, MCSEL is reflected first then MAINDIV */
-  /* To avoid spec violation, 2-step clock change is needed */
+  /* NOTE: In LC823450, MCSEL is reflected first then MAINDIV
+   * To avoid spec violation, 2-step clock change is needed
+   */
 
   /* step 1 : change MAINDIV if needed */
 
@@ -291,7 +291,7 @@ static void lc823450_dvfs_set_div(int idx, int tbl)
       putreg32(regval, OSCCNT);
     }
 
-    /* step 2 : change MCSEL and MAINDIV */
+  /* step 2 : change MCSEL and MAINDIV */
 
   regval = getreg32(OSCCNT);
   regval &= ~(OSCCNT_MCSEL | OSCCNT_MAINDIV_MASK);
@@ -338,7 +338,6 @@ static void lc823450_dvfs_set_div(int idx, int tbl)
   _dvfs_cur_mdiv  = t_mdiv;
   g_dvfs_cur_freq = target;
 
-
 #ifdef CONFIG_DVFS_CHANGE_VOLTAGE
   /* NOTE: check the index instead of the target freq */
 
@@ -356,7 +355,6 @@ static void lc823450_dvfs_set_div(int idx, int tbl)
 
       modifyreg32(MEMEN4, MEMEN4_HWAIT, 0);
     }
-
 }
 
 /****************************************************************************
@@ -396,7 +394,6 @@ static void lc823450_dvfs_change_idx(int up)
     {
       lc823450_dvfs_set_div(idx, 0);
     }
-
 }
 
 /****************************************************************************
@@ -505,8 +502,8 @@ void lc823450_dvfs_tick_callback(void)
 
       for (i = 0; i < CONFIG_SMP_NCPUS; i++)
         {
-          idle[i] = 100 * (tmp_idle_total[i] - g_idle_totaltime0[i])
-            / NSEC_PER_TICK;
+          idle[i] = 100 *
+            (tmp_idle_total[i] - g_idle_totaltime0[i]) / NSEC_PER_TICK;
         }
 
       /* Update g_idle_totaltime0 */
@@ -609,8 +606,9 @@ exit_with_error:
 
   if (0 == _dvfs_cpu_is_active[me])
     {
-      /* In case of idle to active transition */
-      /* Accumulate idle total time on this CPU */
+      /* In case of idle to active transition
+       * Accumulate idle total time on this CPU
+       */
 
       now = _get_current_time64();
       d = now - g_idle_starttime[me];
@@ -633,6 +631,7 @@ exit_with_error:
 int lc823450_dvfs_boost(int timeout)
 {
   /* TODO */
+
   return 0;
 }
 

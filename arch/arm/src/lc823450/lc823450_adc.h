@@ -52,42 +52,42 @@
 /* Register Addresses *******************************************************/
 
 #define ADC_REGBASE 0x40087000
-#define rADC0DT     (ADC_REGBASE + 0x00)
-#define rADC1DT     (ADC_REGBASE + 0x04)
-#define rADC2DT     (ADC_REGBASE + 0x08)
-#define rADC3DT     (ADC_REGBASE + 0x0C)
-#define rADC4DT     (ADC_REGBASE + 0x10)
-#define rADC5DT     (ADC_REGBASE + 0x14)
-#define rADCCTL     (ADC_REGBASE + 0x28)
-#define rADCSTS     (ADC_REGBASE + 0x2C)
-#define rADCSMPL    (ADC_REGBASE + 0x30)
-#define rADCSTBY    (ADC_REGBASE + 0x34)
+#define ADC0DT     (ADC_REGBASE + 0x00)
+#define ADC1DT     (ADC_REGBASE + 0x04)
+#define ADC2DT     (ADC_REGBASE + 0x08)
+#define ADC3DT     (ADC_REGBASE + 0x0C)
+#define ADC4DT     (ADC_REGBASE + 0x10)
+#define ADC5DT     (ADC_REGBASE + 0x14)
+#define ADCCTL     (ADC_REGBASE + 0x28)
+#define ADCSTS     (ADC_REGBASE + 0x2C)
+#define ADCSMPL    (ADC_REGBASE + 0x30)
+#define ADCSTBY    (ADC_REGBASE + 0x34)
 
 /* Register Bitfield Definitions ********************************************/
 
 /* ADC Control Register */
 
-#define rADCCTL_fADCNTNU        (1 << 9)  /* Bit 9: ADC continuous conversion enable */
-#define rADCCTL_fADACT          (1 << 8)  /* Bit 8: ADC activate enable */
-#define rADCCTL_fADCHSCN        (1 << 7)  /* Bit 7: ADC channel scan enable */
+#define ADCCTL_ADCNTNU        (1 << 9)  /* Bit 9: ADC continuous conversion enable */
+#define ADCCTL_ADACT          (1 << 8)  /* Bit 8: ADC activate enable */
+#define ADCCTL_ADCHSCN        (1 << 7)  /* Bit 7: ADC channel scan enable */
 
-#define rADCCTL_fADCNVCK_SHIFT  (4)
-#define rADCCTL_fADCNVCK_DIV2   (0 << rADCCTL_fADCNVCK_SHIFT)
-#define rADCCTL_fADCNVCK_DIV4   (1 << rADCCTL_fADCNVCK_SHIFT)
-#define rADCCTL_fADCNVCK_DIV8   (2 << rADCCTL_fADCNVCK_SHIFT)
-#define rADCCTL_fADCNVCK_DIV16  (3 << rADCCTL_fADCNVCK_SHIFT)
-#define rADCCTL_fADCNVCK_DIV32  (4 << rADCCTL_fADCNVCK_SHIFT)
-#define rADCCTL_fADCNVCK_DIV64  (5 << rADCCTL_fADCNVCK_SHIFT)
+#define ADCCTL_ADCNVCK_SHIFT  (4)
+#define ADCCTL_ADCNVCK_DIV2   (0 << ADCCTL_ADCNVCK_SHIFT)
+#define ADCCTL_ADCNVCK_DIV4   (1 << ADCCTL_ADCNVCK_SHIFT)
+#define ADCCTL_ADCNVCK_DIV8   (2 << ADCCTL_ADCNVCK_SHIFT)
+#define ADCCTL_ADCNVCK_DIV16  (3 << ADCCTL_ADCNVCK_SHIFT)
+#define ADCCTL_ADCNVCK_DIV32  (4 << ADCCTL_ADCNVCK_SHIFT)
+#define ADCCTL_ADCNVCK_DIV64  (5 << ADCCTL_ADCNVCK_SHIFT)
 
-#define rADCCTL_fADCHST_SHIFT   (0)
+#define ADCCTL_ADCHST_SHIFT   (0)
 
 /* ADC Status Register */
 
-#define rADCSTS_fADCMPL         (1 << 0)  /* Bit 0: ADC Conversion Completion Flag */
+#define ADCSTS_ADCMPL         (1 << 0)  /* Bit 0: ADC Conversion Completion Flag */
 
 /* ADC Standby Register */
 
-#define rADCSTBY_STBY           (1 << 0)    /* Bit 0: Standby enable */
+#define ADCSTBY_STBY          (1 << 0)    /* Bit 0: Standby enable */
 
 /****************************************************************************
  * Public Types
@@ -108,7 +108,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 FAR struct adc_dev_s *lc823450_adcinitialize(void);

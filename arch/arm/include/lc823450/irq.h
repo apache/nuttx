@@ -52,11 +52,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
- */
-
 /* Processor Exceptions (vectors 0-15) */
 
 #define LC823450_IRQ_RESERVED       (0) /* Reserved vector (only used with CONFIG_DEBUG) */
@@ -73,20 +68,11 @@
 #define LC823450_IRQ_PENDSV        (14) /* Vector 14: Pendable system service request */
 #define LC823450_IRQ_SYSTICK       (15) /* Vector 15: System tick */
 
-/* External interrupts (vectors >= 16).  These definitions are chip-specific */
+/* External interrupts (vectors >= 16).
+ * These definitions are chip-specific
+ */
 
 #define LC823450_IRQ_INTERRUPTS    (16) /* Vector number of the first external interrupt */
-
-
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
- *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found
- * in nuttx/arch/arm/include/lc823450/irq.h
- *
- * External interrupts (vectors >= 16)
- */
 
 #define LC823450_IRQ_CTXM3_00       (LC823450_IRQ_INTERRUPTS+0)   /* 16: CortexM3_00 interrupt */
 #define LC823450_IRQ_CTXM3_01       (LC823450_IRQ_INTERRUPTS+1)   /* 17: CortexM3_01 interrupt */
@@ -279,7 +265,8 @@ enum lc823450_srctype_e
   SRCTYPE_MAX,
 };
 #ifdef CONFIG_LC823450_VIRQ
-struct lc823450_irq_ops {
+struct lc823450_irq_ops
+{
   void (*enable)(int irq);
   void (*disable)(int irq);
   int (*srctype)(int irq, enum lc823450_srctype_e type);
@@ -295,13 +282,14 @@ struct lc823450_irq_ops {
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 EXTERN int lc823450_irq_srctype(int irq, enum lc823450_srctype_e srctype);

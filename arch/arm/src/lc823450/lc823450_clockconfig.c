@@ -84,7 +84,7 @@ unsigned int XT1OSC_CLK;
 
 uint32_t lc823450_get_systemfreq(void)
 {
-    return SYSCLK * 1000000;
+  return SYSCLK * 1000000;
 }
 
 /****************************************************************************
@@ -94,7 +94,7 @@ uint32_t lc823450_get_systemfreq(void)
 #ifndef CONFIG_DVFS
 uint32_t lc823450_get_apb(void)
 {
-    return SYSCLK * 1000000;
+  return SYSCLK * 1000000;
 }
 #endif
 
@@ -104,7 +104,7 @@ uint32_t lc823450_get_apb(void)
 
 uint32_t lc823450_get_ahb(void)
 {
-    return (SYSCLK * 1000000) / (HCLKDIV + 1);
+  return (SYSCLK * 1000000) / (HCLKDIV + 1);
 }
 
 /****************************************************************************
@@ -142,8 +142,9 @@ void lc823450_clockconfig()
   putreg32(val, OSCCNT);
 
 #ifdef CONFIG_LC823450_IPL2
-  /* set the common PLL values */
-  /* XTAL / XT1OSC_CLK = 1MHz */
+  /* Set the common PLL values
+   * XTAL / XT1OSC_CLK = 1MHz
+   */
 
   putreg32((XT1OSC_CLK / 1000000) - 1, PLL1MDIV);
 

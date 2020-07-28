@@ -95,6 +95,7 @@ uint32_t get_cpu_ver(void)
         sinfo("??? \n");
         break;
     }
+
   cpu_ver = ret;
   return ret;
 }
@@ -123,8 +124,9 @@ void mod_stby_regs(uint32_t enabits, uint32_t disbits)
 
   if (enabits)
     {
-      /* stand-by to active case */
-      /* assumption: the specified blocks are already isolated */
+      /* stand-by to active case
+       * assumption: the specified blocks are already isolated
+       */
 
       up_udelay(100); /* need to wait 100us */
 
@@ -133,7 +135,9 @@ void mod_stby_regs(uint32_t enabits, uint32_t disbits)
       modifyreg32(ISOCNT, 0, enabits);
     }
 
-  /* sinfo("ISOCNT=0x%x, LSISTBY=0x%x \n", getreg32(ISOCNT), getreg32(LSISTBY)); */
+  /* sinfo("ISOCNT=0x%x, LSISTBY=0x%x \n",
+   * getreg32(ISOCNT), getreg32(LSISTBY));
+   */
 }
 #endif /* CONFIG_LC823450_LSISTBY */
 

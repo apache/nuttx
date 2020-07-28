@@ -78,7 +78,7 @@
 #ifdef __ASSEMBLY__
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-	.globl	g_instack_alloc
+  .globl  g_instack_alloc
 #endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
 #endif /* __ASSEMBLY__ */
@@ -99,25 +99,25 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-	.macro	setintstack, tmp1, tmp2
+  .macro  setintstack, tmp1, tmp2
 #if CONFIG_SMP_NCPUS > 1
-	ldr		\tmp1, =CORE_COREID
-	ldr		\tmp1, [\tmp1, 0]     /* \tmp = getreg32(coreid_reg) */
-	and		\tmp1, \tmp1, 1       /* \tmp = COREID */
-	cmp		\tmp1, #0
-	bne		1f
-	ldr		\tmp1, =g_cpu0_instack_base
-	ldr		sp, [\tmp1, 0]        /* sp = getreg32(g_cpu0_instack_base) */
-	b		2f
+  ldr	 \tmp1, =CORE_COREID
+  ldr  \tmp1, [\tmp1, 0]     /* \tmp = getreg32(coreid_reg) */
+  and  \tmp1, \tmp1, 1       /* \tmp = COREID */
+  cmp  \tmp1, #0
+  bne  1f
+  ldr  \tmp1, =g_cpu0_instack_base
+  ldr  sp, [\tmp1, 0]        /* sp = getreg32(g_cpu0_instack_base) */
+  b    2f
 1:
-	ldr		\tmp1, =g_cpu1_instack_base
-	ldr		sp, [\tmp1, 0]        /* sp = getreg32(g_cpu1_instack_base) */
+  ldr  \tmp1, =g_cpu1_instack_base
+  ldr  sp, [\tmp1, 0]        /* sp = getreg32(g_cpu1_instack_base) */
 2:
 #else
-	ldr		\tmp1, =g_cpu0_instack_base
-	ldr		sp, [\tmp1, 0]        /* sp = getreg32(g_cpu0_instack_base) */
+  ldr  \tmp1, =g_cpu0_instack_base
+  ldr  sp, [\tmp1, 0]        /* sp = getreg32(g_cpu0_instack_base) */
 #endif
-	.endm
+  .endm
 #endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
 #endif /* __ASSEMBLY__  */

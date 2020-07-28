@@ -145,7 +145,9 @@ static inline void lc823450_configpull(uint16_t gpiocfg,
   switch (pull)
     {
       case GPIO_FLOAT:
+
         /* do nothing */
+
         break;
       case GPIO_PULLUP:
         regval |=  (1 << (2 * pin));
@@ -418,7 +420,7 @@ void lc823450_gpio_write(uint16_t gpiocfg, bool value)
       putreg32(regval, regaddr);
 
       spin_unlock_irqrestore(flags);
-  }
+    }
 #ifdef CONFIG_IOEX
   else if (port <= (GPIO_PORTEX >> GPIO_PORT_SHIFT))
     {
@@ -464,6 +466,7 @@ bool lc823450_gpio_read(uint16_t gpiocfg)
       DEBUGASSERT(pin < NUM_GPIO_PINS);
 
       /* Get the value of the pin from the pin data register */
+
       regaddr = lc823450_get_gpio_data(port);
       regval  = getreg32(regaddr);
       value = ((regval >> pin) & 0x01);
