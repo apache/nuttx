@@ -229,6 +229,10 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
                            FAR char *buf, size_t buflen);
 #endif
 
+#ifndef CONFIG_DISABLE_ENVIRON
+int lib_restoredir(void);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
