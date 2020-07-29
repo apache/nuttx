@@ -140,10 +140,14 @@
 
 #define SIOCSIWPMKSA        _WLIOC(0x0036)  /* PMKSA cache operation */
 
+/* Country code extension */
+
+#define SIOCSIWCOUNTRY      _WLIOC(0x0037)  /* Country code extension */
+
 /* Device-specific network IOCTL commands *******************************************/
 
 #define WL_NETFIRST         0x0000          /* First network command */
-#define WL_NNETCMDS         0x0037          /* Number of network commands */
+#define WL_NNETCMDS         0x0038          /* Number of network commands */
 
 /* Reserved for Bluetooth network devices (see bt_ioctls.h) */
 
