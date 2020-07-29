@@ -1425,14 +1425,14 @@ static enum pkt_type_e gs2200m_recv_pkt(FAR struct gs2200m_dev_s *dev,
   if (pkt_dat)
     {
       pkt_dat->type = t;
-    }
 
-  if (pkt_dat->type == TYPE_BULK_DATA_TCP ||
-      pkt_dat->type == TYPE_BULK_DATA_UDP)
-    {
-      /* Update total bulk data size */
+      if (t == TYPE_BULK_DATA_TCP ||
+          t == TYPE_BULK_DATA_UDP)
+        {
+          /* Update total bulk data size */
 
-      dev->total_bulk += pkt_dat->len;
+          dev->total_bulk += pkt_dat->len;
+        }
     }
 
 errout:
