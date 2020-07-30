@@ -60,7 +60,7 @@
 
 ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 {
-  FAR unsigned char *dest  = (FAR unsigned char*)ptr;
+  FAR unsigned char *dest = (FAR unsigned char *)ptr;
   ssize_t bytes_read;
   size_t remaining = count;
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
@@ -104,8 +104,8 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
       if (stream->fs_bufstart != NULL)
         {
           /* If the buffer is currently being used for write access, then
-           * flush all of the buffered write data.  We do not support concurrent
-           * buffered read/write access.
+           * flush all of the buffered write data.  We do not support
+           * concurrent buffered read/write access.
            */
 
           ret = lib_wrflush(stream);
@@ -129,8 +129,8 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                   remaining--;
                 }
 
-              /* The buffer is empty OR we have already supplied the number of
-               * bytes requested in the read.  Check if we need to read
+              /* The buffer is empty OR we have already supplied the number
+               * of bytes requested in the read.  Check if we need to read
                * more from the file.
                */
 
@@ -138,11 +138,14 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                 {
                   size_t buffer_available;
 
-                  /* We need to read more data into the buffer from the file */
+                  /* We need to read more data into the buffer from the
+                   * file
+                   */
 
                   /* Mark the buffer empty */
 
-                  stream->fs_bufpos = stream->fs_bufread = stream->fs_bufstart;
+                  stream->fs_bufpos = stream->fs_bufread =
+                                      stream->fs_bufstart;
 
                   /* How much space is available in the buffer? */
 
@@ -166,17 +169,17 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                         }
                       else if (bytes_read == 0)
                         {
-                          /* We are at the end of the file.  But we may already
-                           * have buffered data.  In that case, we will report
-                           * the EOF indication later.
+                          /* We are at the end of the file.  But we may
+                           * already have buffered data.  In that case,
+                           * we will report the EOF indication later.
                            */
 
                           goto shortread;
                         }
                       else
                         {
-                          /* Some (perhaps all) bytes were read. Adjust the dest
-                           * pointer and remaining bytes to be read.
+                          /* Some (perhaps all) bytes were read. Adjust the
+                           * dest pointer and remaining bytes to be read.
                            */
 
                           DEBUGASSERT(bytes_read <= remaining);
@@ -197,8 +200,8 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                                             buffer_available);
                       if (bytes_read < 0)
                         {
-                          /* An error occurred on the read.  The error code is
-                           * in the 'errno' variable.
+                          /* An error occurred on the read.  The error code
+                           * is in the 'errno' variable.
                            */
 
                           _NX_SETERRNO(bytes_read);
@@ -206,9 +209,9 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                         }
                       else if (bytes_read == 0)
                         {
-                          /* We are at the end of the file.  But we may already
-                           * have buffered data.  In that case, we will report
-                           * the EOF indication later.
+                          /* We are at the end of the file.  But we may
+                           * already have buffered data.  In that case,
+                           * we will report the EOF indication later.
                            */
 
                           goto shortread;
@@ -285,7 +288,7 @@ shortread:
 
   return count - remaining;
 
-/* Error exits */
+  /* Error exits */
 
 errout_with_errno:
   stream->fs_flags |= __FS_FLAG_ERROR;
