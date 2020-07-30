@@ -660,7 +660,7 @@ static int netprocfs_stat(FAR const char *relpath, FAR struct stat *buf)
 {
   /* Check for the directory "net" */
 
-  if (strcmp(relpath, "net") == 0)
+  if (strcmp(relpath, "net") == 0 || strcmp(relpath, "net/") == 0)
     {
       buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
     }
