@@ -428,7 +428,6 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
       offset     = rf->rf_startoffset + filep->f_pos;
       sector     = SEC_NSECTORS(rm, offset);
       sectorndx  = offset & SEC_NDXMASK(rm);
-      bytesread  = 0;
 
       /* Check if the user has provided a buffer large enough to
        * hold one or more complete sectors -AND- the read is
@@ -452,7 +451,6 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
               goto errout_with_semaphore;
             }
 
-          sector    += nsectors;
           bytesread  = nsectors * rm->rm_hwsectorsize;
         }
       else
@@ -478,12 +476,6 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
               /* We will not read to the end of the buffer */
 
               bytesread = buflen;
-            }
-          else
-            {
-              /* We will read to the end of the buffer (or beyond) */
-
-             sector++;
             }
 
           finfo("Return %d bytes from sector offset %d\n",
