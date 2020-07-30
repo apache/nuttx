@@ -700,7 +700,7 @@ uint64_t pci_bar_addr(FAR struct pci_dev_s *dev, uint8_t bar_id)
 void pci_dev_dump(FAR struct pci_dev_s *dev)
 {
   uint8_t bar_id;
-  uint8_t bar_mem_type;
+  uint8_t bar_mem_type = 0;
   uint32_t bar;
   uint64_t bar_size;
   uint64_t bar_addr;
