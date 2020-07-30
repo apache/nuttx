@@ -80,7 +80,8 @@ static void lc823450_st7565_cmddata(FAR struct st7565_lcd_s *lcd,
 static int lc823450_st7565_senddata(FAR struct st7565_lcd_s *lcd,
                                     FAR const uint8_t *data,
                                     int size);
-static int lc823450_st7565_backlight(FAR struct st7565_lcd_s *lcd, int level);
+static int lc823450_st7565_backlight(FAR struct st7565_lcd_s *lcd,
+                                     int level);
 
 static FAR struct spi_dev_s *g_spidev;
 static FAR struct lcd_dev_s *g_lcddev;
