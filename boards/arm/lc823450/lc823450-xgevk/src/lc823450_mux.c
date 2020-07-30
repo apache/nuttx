@@ -85,38 +85,38 @@ void up_init_default_mux(void)
   putreg32(PORT0_MUX, PMDCNT0);
   putreg32(PORT0_PUPD, PUDCNT0);
   putreg32(PORT0_DRV, PTDRVCNT0);
-  putreg32(PORT0_DAT, rP0DT);
-  putreg32(PORT0_DIR, rP0DRC);
+  putreg32(PORT0_DAT, P0DT);
+  putreg32(PORT0_DIR, P0DRC);
 
   putreg32(PORT1_MUX, PMDCNT1);
   putreg32(PORT1_PUPD, PUDCNT1);
   putreg32(PORT1_DRV, PTDRVCNT1);
-  putreg32(PORT1_DAT, rP1DT);
-  putreg32(PORT1_DIR, rP1DRC);
+  putreg32(PORT1_DAT, P1DT);
+  putreg32(PORT1_DIR, P1DRC);
 
   putreg32(PORT2_MUX, PMDCNT2);
   putreg32(PORT2_PUPD, PUDCNT2);
   putreg32(PORT2_DRV, PTDRVCNT2);
-  putreg32(PORT2_DAT, rP2DT);
-  putreg32(PORT2_DIR, rP2DRC);
+  putreg32(PORT2_DAT, P2DT);
+  putreg32(PORT2_DIR, P2DRC);
 
   putreg32(PORT3_MUX, PMDCNT3);
   putreg32(PORT3_PUPD, PUDCNT3);
   putreg32(PORT3_DRV, PTDRVCNT3);
-  putreg32(PORT3_DAT, rP3DT);
-  putreg32(PORT3_DIR, rP3DRC);
+  putreg32(PORT3_DAT, P3DT);
+  putreg32(PORT3_DIR, P3DRC);
 
   putreg32(PORT4_MUX, PMDCNT4);
   putreg32(PORT4_PUPD, PUDCNT4);
   putreg32(PORT4_DRV, PTDRVCNT4);
-  putreg32(PORT4_DAT, rP4DT);
-  putreg32(PORT4_DIR, rP4DRC);
+  putreg32(PORT4_DAT, P4DT);
+  putreg32(PORT4_DIR, P4DRC);
 
   putreg32(PORT5_MUX, PMDCNT5);
   putreg32(PORT5_PUPD, PUDCNT5);
   putreg32(PORT5_DRV, PTDRVCNT5);
-  putreg32(PORT5_DAT, rP5DT);
-  putreg32(PORT5_DIR, rP5DRC);
+  putreg32(PORT5_DAT, P5DT);
+  putreg32(PORT5_DIR, P5DRC);
 
   putreg32(PORT6_PUPD, PUDCNT6);
   putreg32(PORT6_DRV, PTDRVCNT6);

@@ -119,7 +119,10 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
 
 int icx_boot_reason;
 
-extern uint32_t _stext_sram, _etext_sram, _ftext, _svect;
+extern uint32_t _stext_sram;
+extern uint32_t _etext_sram;
+extern uint32_t _ftext;
+extern uint32_t _svect;
 
 /****************************************************************************
  * Private Function prototypes
@@ -285,8 +288,9 @@ void __start(void)
 
 #endif /* CONFIG_LC823450_SPIFI_BOOT */
 
-  /* Enable Mutex */
-  /* NOTE: modyfyreg32() can not be used because it might use spin_lock */
+  /* Enable Mutex
+   * NOTE: modyfyreg32() can not be used because it might use spin_lock.
+   */
 
   uint32_t val = getreg32(MRSTCNTBASIC);
   val |= MRSTCNTBASIC_MUTEX_RSTB;
@@ -307,8 +311,8 @@ void __start(void)
 
   modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_PORT2_CLKEN);
   modifyreg32(MRSTCNTAPB, 0, MRSTCNTAPB_PORT2_RSTB);
-  modifyreg32(rP2DT,  0, 1 << 15  /* GPIO2F */);
-  modifyreg32(rP2DRC, 0, 1 << 15  /* GPIO2F */);
+  modifyreg32(P2DT,  0, 1 << 15  /* GPIO2F */);
+  modifyreg32(P2DRC, 0, 1 << 15  /* GPIO2F */);
 #ifdef CONFIG_DEBUG_FEATURES
 
   /* enable TXD0 for debug */
@@ -411,6 +415,6 @@ void __start(void)
 
   /* Shouldn't get here */
 
-  for (;;);
+  for (; ; );
 #endif
 }

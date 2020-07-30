@@ -250,19 +250,19 @@
 /* GPIO */
 
 #define PORT0_BASE  0x40081000
-#define rP0DT  (PORT0_BASE + 0x0000 + 0x04)
-#define rP1DT  (PORT0_BASE + 0x1000 + 0x04)
-#define rP2DT  (PORT0_BASE + 0x2000 + 0x04)
-#define rP3DT  (PORT0_BASE + 0x3000 + 0x04)
-#define rP4DT  (PORT0_BASE + 0x4000 + 0x04)
-#define rP5DT  (PORT0_BASE + 0x5000 + 0x04)
+#define P0DT  (PORT0_BASE + 0x0000 + 0x04)
+#define P1DT  (PORT0_BASE + 0x1000 + 0x04)
+#define P2DT  (PORT0_BASE + 0x2000 + 0x04)
+#define P3DT  (PORT0_BASE + 0x3000 + 0x04)
+#define P4DT  (PORT0_BASE + 0x4000 + 0x04)
+#define P5DT  (PORT0_BASE + 0x5000 + 0x04)
 
-#define rP0DRC (PORT0_BASE + 0x0000 + 0x00)
-#define rP1DRC (PORT0_BASE + 0x1000 + 0x00)
-#define rP2DRC (PORT0_BASE + 0x2000 + 0x00)
-#define rP3DRC (PORT0_BASE + 0x3000 + 0x00)
-#define rP4DRC (PORT0_BASE + 0x4000 + 0x00)
-#define rP5DRC (PORT0_BASE + 0x5000 + 0x00)
+#define P0DRC (PORT0_BASE + 0x0000 + 0x00)
+#define P1DRC (PORT0_BASE + 0x1000 + 0x00)
+#define P2DRC (PORT0_BASE + 0x2000 + 0x00)
+#define P3DRC (PORT0_BASE + 0x3000 + 0x00)
+#define P4DRC (PORT0_BASE + 0x4000 + 0x00)
+#define P5DRC (PORT0_BASE + 0x5000 + 0x00)
 
 /****************************************************************************
  * Public Types
