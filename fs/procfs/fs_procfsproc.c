@@ -406,7 +406,12 @@ static FAR const struct proc_node_s *proc_findnode(FAR const char *relpath)
 
   for (i = 0; i < PROC_NNODES; i++)
     {
-      if (strcmp(g_nodeinfo[i]->relpath, relpath) == 0)
+      size_t len = strlen(g_nodeinfo[i]->relpath);
+
+      if (strncmp(g_nodeinfo[i]->relpath, relpath, len) == 0 &&
+          (relpath[len] == '\0' || (relpath[len] == '/' &&
+           relpath[len + 1] == '\0' &&
+           g_nodeinfo[i]->dtype == DTYPE_DIRECTORY)))
         {
           return g_nodeinfo[i];
         }
