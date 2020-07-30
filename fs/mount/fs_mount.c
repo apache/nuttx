@@ -284,7 +284,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
 #ifdef BDFS_SUPPORT
   if (source != NULL &&
-      (ret = find_blockdriver(source, mountflags, &drvr_inode)) >= 0)
+      find_blockdriver(source, mountflags, &drvr_inode) >= 0)
     {
       /* Find the block based file system */
 
