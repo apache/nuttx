@@ -72,7 +72,6 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
   if (!stream || (stream->fs_oflags & O_RDOK) == 0)
     {
       set_errno(EBADF);
-      bytes_read = -1;
     }
   else
     {
