@@ -1078,8 +1078,6 @@ static int hostfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   /* Check if there are sill any files opened on the filesystem. */
 
-  ret = OK; /* Assume success */
-
   ret = hostfs_semtake(fs);
   if (ret < 0)
     {
