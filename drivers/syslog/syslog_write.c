@@ -105,7 +105,7 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
         }
     }
 
-  return buflen;
+  return nwritten;
 }
 
 /****************************************************************************
