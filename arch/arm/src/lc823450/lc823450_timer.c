@@ -84,48 +84,48 @@
 /* #define CHECK_INTERVAL */
 
 #ifdef CONFIG_LC823450_MTM0_TICK
-#  define rMT00STS  (LC823450_MTM0_REGBASE + LC823450_MTM_0STS)
-#  define rMT00A    (LC823450_MTM0_REGBASE + LC823450_MTM_0A)
-#  define rMT00B    (LC823450_MTM0_REGBASE + LC823450_MTM_0B)
-#  define rMT00CTL  (LC823450_MTM0_REGBASE + LC823450_MTM_0CTL)
-#  define rMT00PSCL (LC823450_MTM0_REGBASE + LC823450_MTM_0PSCL)
-#  define rMT00TIER (LC823450_MTM0_REGBASE + LC823450_MTM_0TIER)
-#  define rMT00OPR  (LC823450_MTM0_REGBASE + LC823450_MTM_OPR)
-#  define rMT00CNT  (LC823450_MTM0_REGBASE + LC823450_MTM_0CNT)
+#  define MT00STS  (LC823450_MTM0_REGBASE + LC823450_MTM_0STS)
+#  define MT00A    (LC823450_MTM0_REGBASE + LC823450_MTM_0A)
+#  define MT00B    (LC823450_MTM0_REGBASE + LC823450_MTM_0B)
+#  define MT00CTL  (LC823450_MTM0_REGBASE + LC823450_MTM_0CTL)
+#  define MT00PSCL (LC823450_MTM0_REGBASE + LC823450_MTM_0PSCL)
+#  define MT00TIER (LC823450_MTM0_REGBASE + LC823450_MTM_0TIER)
+#  define MT00OPR  (LC823450_MTM0_REGBASE + LC823450_MTM_OPR)
+#  define MT00CNT  (LC823450_MTM0_REGBASE + LC823450_MTM_0CNT)
 #  define MTM_RELOAD (XT1OSC_CLK / (CLK_TCK * 10))
 #endif
 
 #ifdef CONFIG_HRT_TIMER
 #  define LC823450_MTM2_REGBASE 0x40045000
-#  define rMT20STS  (LC823450_MTM2_REGBASE + LC823450_MTM_0STS)
-#  define rMT20A    (LC823450_MTM2_REGBASE + LC823450_MTM_0A)
-#  define rMT20PSCL (LC823450_MTM2_REGBASE + LC823450_MTM_0PSCL)
-#  define rMT20TIER (LC823450_MTM2_REGBASE + LC823450_MTM_0TIER)
-#  define rMT2OPR   (LC823450_MTM2_REGBASE + LC823450_MTM_OPR)
-#  define rMT20CNT  (LC823450_MTM2_REGBASE + LC823450_MTM_0CNT)
+#  define MT20STS  (LC823450_MTM2_REGBASE + LC823450_MTM_0STS)
+#  define MT20A    (LC823450_MTM2_REGBASE + LC823450_MTM_0A)
+#  define MT20PSCL (LC823450_MTM2_REGBASE + LC823450_MTM_0PSCL)
+#  define MT20TIER (LC823450_MTM2_REGBASE + LC823450_MTM_0TIER)
+#  define MT2OPR   (LC823450_MTM2_REGBASE + LC823450_MTM_OPR)
+#  define MT20CNT  (LC823450_MTM2_REGBASE + LC823450_MTM_0CNT)
 #endif /* CONFIG_HRT_TIMER */
 
 #ifdef CONFIG_PROFILE
 #  define LC823450_MTM3_REGBASE 0x40046000
-#  define rMT30STS  (LC823450_MTM3_REGBASE + LC823450_MTM_0STS)
-#  define rMT30A    (LC823450_MTM3_REGBASE + LC823450_MTM_0A)
-#  define rMT30B    (LC823450_MTM3_REGBASE + LC823450_MTM_0B)
-#  define rMT30CTL  (LC823450_MTM3_REGBASE + LC823450_MTM_0CTL)
-#  define rMT30PSCL (LC823450_MTM3_REGBASE + LC823450_MTM_0PSCL)
-#  define rMT30TIER (LC823450_MTM3_REGBASE + LC823450_MTM_0TIER)
-#  define rMT30OPR  (LC823450_MTM3_REGBASE + LC823450_MTM_OPR)
-#  define rMT30CNT  (LC823450_MTM3_REGBASE + LC823450_MTM_0CNT)
+#  define MT30STS  (LC823450_MTM3_REGBASE + LC823450_MTM_0STS)
+#  define MT30A    (LC823450_MTM3_REGBASE + LC823450_MTM_0A)
+#  define MT30B    (LC823450_MTM3_REGBASE + LC823450_MTM_0B)
+#  define MT30CTL  (LC823450_MTM3_REGBASE + LC823450_MTM_0CTL)
+#  define MT30PSCL (LC823450_MTM3_REGBASE + LC823450_MTM_0PSCL)
+#  define MT30TIER (LC823450_MTM3_REGBASE + LC823450_MTM_0TIER)
+#  define MT30OPR  (LC823450_MTM3_REGBASE + LC823450_MTM_OPR)
+#  define MT30CNT  (LC823450_MTM3_REGBASE + LC823450_MTM_0CNT)
 #endif /* CONFIG_PROFILE */
 
 #ifdef CONFIG_DVFS
-#  define rMT01STS  (LC823450_MTM0_REGBASE + LC823450_MTM_1STS)
-#  define rMT01A    (LC823450_MTM0_REGBASE + LC823450_MTM_1A)
-#  define rMT01B    (LC823450_MTM0_REGBASE + LC823450_MTM_1B)
-#  define rMT01CTL  (LC823450_MTM0_REGBASE + LC823450_MTM_1CTL)
-#  define rMT01PSCL (LC823450_MTM0_REGBASE + LC823450_MTM_1PSCL)
-#  define rMT01TIER (LC823450_MTM0_REGBASE + LC823450_MTM_1TIER)
-#  define rMT01CNT  (LC823450_MTM0_REGBASE + LC823450_MTM_1CNT)
-#  define rMT0OPR   (LC823450_MTM0_REGBASE + LC823450_MTM_OPR)
+#  define MT01STS  (LC823450_MTM0_REGBASE + LC823450_MTM_1STS)
+#  define MT01A    (LC823450_MTM0_REGBASE + LC823450_MTM_1A)
+#  define MT01B    (LC823450_MTM0_REGBASE + LC823450_MTM_1B)
+#  define MT01CTL  (LC823450_MTM0_REGBASE + LC823450_MTM_1CTL)
+#  define MT01PSCL (LC823450_MTM0_REGBASE + LC823450_MTM_1PSCL)
+#  define MT01TIER (LC823450_MTM0_REGBASE + LC823450_MTM_1TIER)
+#  define MT01CNT  (LC823450_MTM0_REGBASE + LC823450_MTM_1CNT)
+#  define MT0OPR   (LC823450_MTM0_REGBASE + LC823450_MTM_OPR)
 #endif
 
 #ifndef container_of
@@ -200,7 +200,7 @@ static void hrt_queue_refresh(void)
   irqstate_t flags;
 
   flags = spin_lock_irqsave();
-  elapsed = (uint64_t)getreg32(rMT20CNT) * (1000 * 1000) * 10 / XT1OSC_CLK;
+  elapsed = (uint64_t)getreg32(MT20CNT) * (1000 * 1000) * 10 / XT1OSC_CLK;
 
   for (pent = hrt_timer_queue.head; pent; pent = dq_next(pent))
     {
@@ -209,6 +209,7 @@ static void hrt_queue_refresh(void)
     }
 
 cont:
+
   /* serch for expired */
 
   for (pent = hrt_timer_queue.head; pent; pent = dq_next(pent))
@@ -267,12 +268,12 @@ static void hrt_usleep_setup(void)
       count = 0x7fff;
     }
 
-  putreg32(0, rMT20CNT);   /* counter */
-  putreg32(count, rMT20A); /* AEVT counter */
+  putreg32(0, MT20CNT);   /* counter */
+  putreg32(count, MT20A); /* AEVT counter */
 
   /* Enable MTM2-Ch0 */
 
-  putreg32(1, rMT2OPR);
+  putreg32(1, MT2OPR);
   spin_unlock_irqrestore(flags);
 }
 #endif
@@ -286,11 +287,11 @@ static int hrt_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   /* Disable MTM2-Ch0 */
 
-  putreg32(0, rMT2OPR);
+  putreg32(0, MT2OPR);
 
   /* clear AEVT Interrupt */
 
-  putreg32(1 << 0, rMT20STS);
+  putreg32(1 << 0, MT20STS);
 
   hrt_queue_refresh();
   hrt_usleep_setup();
@@ -308,7 +309,7 @@ static void hrt_usleep_add(struct hrt_s *phrt)
 
   /* Disable MTM2-Ch0 */
 
-  putreg32(0, rMT2OPR);
+  putreg32(0, MT2OPR);
 
   hrt_queue_refresh();
 
@@ -324,6 +325,7 @@ static void hrt_usleep_add(struct hrt_s *phrt)
           break;
         }
     }
+
   if (pent)
     {
       dq_addbefore(pent, &phrt->ent, &hrt_timer_queue);
@@ -350,7 +352,7 @@ static void hrt_usleep_add(struct hrt_s *phrt)
 #ifdef CONFIG_PROFILE
 int up_proftimerisr(int irq, uint32_t *regs, FAR void *arg)
 {
-  putreg32(1 << 1, rMT30STS);
+  putreg32(1 << 1, MT30STS);
   if (profile_en)
     {
       if (profile_ptr != CONFIG_PROFILE_SAMPLES)
@@ -363,8 +365,8 @@ int up_proftimerisr(int irq, uint32_t *regs, FAR void *arg)
           profile_en = 0;
           tmrinfo("PROFILING DONE\n");
         }
-
     }
+
   return 0;
 }
 #endif /* CONFIG_PROFILE */
@@ -375,7 +377,7 @@ int up_proftimerisr(int irq, uint32_t *regs, FAR void *arg)
 
 int up_timerisr(int irq, uint32_t *regs, FAR void *arg)
 {
-   /* Process timer interrupt */
+  /* Process timer interrupt */
 
 #ifdef CONFIG_DVFS
   lc823450_dvfs_tick_callback();
@@ -384,7 +386,7 @@ int up_timerisr(int irq, uint32_t *regs, FAR void *arg)
 #ifdef CONFIG_LC823450_MTM0_TICK
   /* Clear the interrupt (BEVT) */
 
-  putreg32(1 << 1, rMT00STS);
+  putreg32(1 << 1, MT00STS);
 #endif
 
   nxsched_process_timer();
@@ -436,11 +438,11 @@ static uint64_t up_get_timer_fraction(void)
 
   /* read the counter */
 
-  regval  = getreg32(rMT00CNT);
+  regval  = getreg32(MT00CNT);
 
   /* check if the timer interrupt is underway */
 
-  if (getreg32(rMT00STS) & 0x2 && regval < (MTM_RELOAD/10))
+  if (getreg32(MT00STS) & 0x2 && regval < (MTM_RELOAD / 10))
     {
       return NSEC_PER_TICK;
     }
@@ -457,9 +459,9 @@ static uint64_t up_get_timer_fraction(void)
 
   /* check if the systick interrupt is pending or active */
 
-  if ((getreg32(0xE000ED04) & (1 << 26) ||
-       getreg32(0xE000ED24) & (1 << 11))
-      && (SYSTICK_RELOAD - cur) < (SYSTICK_RELOAD/10))
+  if ((getreg32(0xe000ed04) & (1 << 26) ||
+       getreg32(0xe000ed24) & (1 << 11))
+      && (SYSTICK_RELOAD - cur) < (SYSTICK_RELOAD / 10))
     {
       return NSEC_PER_TICK;
     }
@@ -491,11 +493,11 @@ void up_timer_initialize(void)
 
   /* Enable AEVT Interrupt */
 
-  putreg32(1 << 0, rMT20TIER);
+  putreg32(1 << 0, MT20TIER);
 
   /* Set prescaler to (1/10) */
 
-  putreg32(10 - 1, rMT20PSCL);
+  putreg32(10 - 1, MT20PSCL);
 
   modifyreg32(MCLKCNTEXT1, MCLKCNTEXT1_MTM2C_CLKEN, 0);
   modifyreg32(MCLKCNTEXT1, MCLKCNTEXT1_MTM2_CLKEN, 0);
@@ -515,28 +517,29 @@ void up_timer_initialize(void)
 
   modifyreg32(MRSTCNTEXT1, 0x0, MRSTCNTEXT1_MTM3_RSTB);
 
-  /* Input clock for the MTM3 is XT1 (i.e. 24M or 20M) */
-  /* then the clock will be set to 1/10 by the internal divider */
-  /* To implement 10ms timer, ADT=0, BDT=MTM_RELOAD */
+  /* Input clock for the MTM3 is XT1 (i.e. 24M or 20M)
+   * then the clock will be set to 1/10 by the internal divider
+   * To implement 10ms timer, ADT=0, BDT=MTM_RELOAD
+   */
 
-  putreg32(0, rMT30A); /* AEVT counter */
-  putreg32((XT1OSC_CLK / 1010) - 1, rMT30B); /* BEVT counter */
+  putreg32(0, MT30A);                       /* AEVT counter */
+  putreg32((XT1OSC_CLK / 1010) - 1, MT30B); /* BEVT counter */
 
   /* Clear the counter by BEVT */
 
-  putreg32(0x80, rMT30CTL);
+  putreg32(0x80, MT30CTL);
 
   /* Set prescaler to 9 : (1/10) */
 
-  putreg32(9, rMT30PSCL);
+  putreg32(9, MT30PSCL);
 
   /* Enable BEVT Interrupt */
 
-  putreg32(1 << 1, rMT30TIER);
+  putreg32(1 << 1, MT30TIER);
 
   /* Enable MTM3-Ch0 */
 
-  putreg32(1, rMT30OPR);
+  putreg32(1, MT30OPR);
 
   /* Attach the timer interrupt vector */
 
@@ -559,28 +562,29 @@ void up_timer_initialize(void)
 
   modifyreg32(MRSTCNTEXT1, 0x0, MRSTCNTEXT1_MTM0_RSTB);
 
-  /* Input clock for the MTM0 is XT1 (i.e. 24M or 20M) */
-  /* then the clock will be set to 1/10 by the internal divider */
-  /* To implement the tick timer, ADT=0, BDT=MTM_RELOAD-1 */
+  /* Input clock for the MTM0 is XT1 (i.e. 24M or 20M)
+   * then the clock will be set to 1/10 by the internal divider
+   * To implement the tick timer, ADT=0, BDT=MTM_RELOAD-1
+   */
 
-  putreg32(0, rMT00A); /* AEVT counter */
-  putreg32(MTM_RELOAD - 1, rMT00B); /* BEVT counter */
+  putreg32(0, MT00A);              /* AEVT counter */
+  putreg32(MTM_RELOAD - 1, MT00B); /* BEVT counter */
 
   /* Clear the counter by BEVT */
 
-  putreg32(0x80, rMT00CTL);
+  putreg32(0x80, MT00CTL);
 
   /* Set prescaler to 9 : (1/10) */
 
-  putreg32(9, rMT00PSCL);
+  putreg32(9, MT00PSCL);
 
   /* Enable BEVT Interrupt */
 
-  putreg32(1 << 1, rMT00TIER);
+  putreg32(1 << 1, MT00TIER);
 
   /* Enable MTM0-Ch0 */
 
-  putreg32(1, rMT00OPR);
+  putreg32(1, MT00OPR);
 
   /* Attach the timer interrupt vector */
 
@@ -655,25 +659,24 @@ void lc823450_mtm_start_oneshot(int msec)
   r /= 10;   /* 1ms */
   r *= msec;
 
-  putreg32(0, rMT01A); /* AEVT counter */
-  putreg32(r - 1, rMT01B); /* BEVT counter */
+  putreg32(0, MT01A);     /* AEVT counter */
+  putreg32(r - 1, MT01B); /* BEVT counter */
 
   /* Clear the counter by BEVT */
 
-  putreg32(0x80, rMT01CTL);
+  putreg32(0x80, MT01CTL);
 
   /* Set prescaler to 9 : (1/10) */
 
-  putreg32(9, rMT01PSCL);
+  putreg32(9, MT01PSCL);
 
   /* Enable BEVT Interrupt */
 
-  putreg32(1 << 1, rMT01TIER);
-
+  putreg32(1 << 1, MT01TIER);
 
   /* Enable MTM0-ch1 */
 
-  modifyreg32(rMT0OPR, 0, 1 << 1);
+  modifyreg32(MT0OPR, 0, 1 << 1);
 }
 #endif
 
@@ -686,11 +689,11 @@ void lc823450_mtm_stop_oneshot(void)
 {
   /* Clear the interrupt (BEVT) */
 
-  putreg32(1 << 1, rMT01STS);
+  putreg32(1 << 1, MT01STS);
 
   /* Disable MTM0-ch1 */
 
-  modifyreg32(rMT0OPR, 1 << 1, 0);
+  modifyreg32(MT0OPR, 1 << 1, 0);
 }
 #endif
 

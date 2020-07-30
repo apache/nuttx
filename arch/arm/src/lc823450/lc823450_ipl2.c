@@ -119,7 +119,8 @@ static struct
     uint32_t size;
     uint32_t enc;
     uint32_t offset;
-  } chunk[10];
+  }
+  chunk[10];
 } upg_image;
 
 /****************************************************************************
@@ -192,7 +193,10 @@ static int blk_write(const void *buf, int len, const char *path, int offset)
 
 static int install_recovery(const char *srcpath)
 {
-  int rfd, i, len, rem;
+  int rfd;
+  int i;
+  int len;
+  int rem;
   int ret = 0;
   void *handle = NULL;
 
@@ -223,7 +227,6 @@ static int install_recovery(const char *srcpath)
       sysreset();
 
       /* NOT REACHED */
-
     }
 #endif
 
@@ -308,7 +311,6 @@ static void load_kernel(const char *name, const char *devname)
      "ldr sp, [r1, #0]\n" /* set sp */
      "ldr pc, [r1, #4]"   /* set pc, start nuttx */
      );
-
 }
 
 /****************************************************************************
@@ -377,18 +379,18 @@ static int check_forceusbboot(void)
 
   /* start ADC0,1 */
 
-  putreg32(rADCCTL_fADCNVCK_DIV32 | rADCCTL_fADACT | rADCCTL_fADCHSCN |
-           1 /* 0,1 ch */, rADCCTL);
+  putreg32(ADCCTL_ADCNVCK_DIV32 | ADCCTL_ADACT | ADCCTL_ADCHSCN |
+           1 /* 0,1 ch */, ADCCTL);
 
-  putreg32(53, rADCSMPL);
+  putreg32(53, ADCSMPL);
 
   /* wait for adc done */
 
-  while ((getreg32(rADCSTS) & rADCSTS_fADCMPL) == 0)
+  while ((getreg32(ADCSTS) & ADCSTS_ADCMPL) == 0)
     ;
 
-  val = getreg32(rADC0DT);
-  val1 = getreg32(rADC1DT);
+  val = getreg32(ADC0DT);
+  val1 = getreg32(ADC1DT);
 
   _info("val = %d, val1 = %d\n", val, val1);
 
@@ -399,21 +401,21 @@ static int check_forceusbboot(void)
 
   /* check KEY0_AD_D key pressed */
 
-  if (val >= (0x3A << 2) && val < (0x57 << 2))
+  if (val >= (0x3a << 2) && val < (0x57 << 2))
     {
       return 1;
     }
 
   /* check KEY0_AD_B key pressed */
 
-  if (val >= (0x0B << 2) && val < (0x20 << 2))
+  if (val >= (0x0b << 2) && val < (0x20 << 2))
     {
       return 1;
     }
 
   /* check KEY1_AD_B key pressed */
 
-  if (val1 >= (0x0B << 2) && val1 < (0x20 << 2))
+  if (val1 >= (0x0b << 2) && val1 < (0x20 << 2))
     {
       return 1;
     }
@@ -495,11 +497,11 @@ static void chg_disable(void)
 
   /* I2C pinmux */
 
-  modifyreg32(PMDCNT0, 0x0003C000, 0x00014000);
+  modifyreg32(PMDCNT0, 0x0003c000, 0x00014000);
 
   /* I2C drv : 4mA */
 
-  modifyreg32(PTDRVCNT0, 0x0003C000, 0x0003C000);
+  modifyreg32(PTDRVCNT0, 0x0003c000, 0x0003c000);
 
   /* Enable I2C controller */
 
@@ -612,6 +614,7 @@ static int msc_enable(int forced)
       _info("Install recovery\n");
 
       /* clear old MBR */
+
       memset(copybuf, 0, sizeof(copybuf));
       set_config(0, copybuf);
     }
@@ -625,6 +628,7 @@ static int msc_enable(int forced)
   sysreset();
 
   /* not reached */
+
   return 0;
 }
 #endif
@@ -749,7 +753,6 @@ int ipl2_main(int argc, char *argv[])
 
       install_recovery("/mnt/sd0/UPG.IMG");
       load_kernel("recovery", CONFIG_MTD_RECOVERY_DEVPATH);
-
     }
   else
     {

@@ -304,7 +304,7 @@ static void lc823450_extint_clr(int irq)
   port = (irq & 0x70) >> 4;
   pin = irq & 0xf;
 
-  regaddr = INTC_REG(EXTINTnCLR_BASE, port);
+  regaddr = INTC_REG(EXTINTCLR_BASE, port);
   putreg32(1 << pin, regaddr);
 
   return;
@@ -330,12 +330,12 @@ static int lc823450_extint_isr(int irq, FAR void *context, FAR void *arg)
 
   /* Read irq factor */
 
-  regaddr = INTC_REG(EXTINTn_BASE, port);
+  regaddr = INTC_REG(EXTINT_BASE, port);
   pending = getreg32(regaddr);
 
   /* Clear irq factor */
 
-  regaddr = INTC_REG(EXTINTnCLR_BASE, port);
+  regaddr = INTC_REG(EXTINTCLR_BASE, port);
   putreg32(pending, regaddr);
 
   irq = LC823450_IRQ_GPIO00 + (port * 0x10);
@@ -412,7 +412,7 @@ static int lc823450_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
     {
       int port = ((irq - LC823450_IRQ_GPIO00) & 0x70) >> 4;
 
-      *regaddr = INTC_REG(EXTINTnM_BASE, port);
+      *regaddr = INTC_REG(EXTINTM_BASE, port);
       *bit = 1 << ((irq - LC823450_IRQ_GPIO00) & 0xf);
     }
   else if (irq >= LC823450_IRQ_INTERRUPTS)
@@ -846,7 +846,7 @@ int lc823450_irq_srctype(int irq, enum lc823450_srctype_e srctype)
 
   flags = spin_lock_irqsave();
 
-  regaddr = INTC_REG(EXTINTnCND_BASE, port);
+  regaddr = INTC_REG(EXTINTCND_BASE, port);
   regval = getreg32(regaddr);
 
   regval &= ~(3 << gpio * 2);
