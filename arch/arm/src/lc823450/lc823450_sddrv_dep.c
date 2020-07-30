@@ -95,7 +95,7 @@ extern void sdif_powerctrl(bool);
  * Name: _get_ch_from_cfg
  ****************************************************************************/
 
-static int _get_ch_from_cfg(struct SdDrCfg_s *cfg)
+static int _get_ch_from_cfg(struct sddrcfg_s *cfg)
 {
   int ch = -1;
   switch (cfg->regbase)
@@ -144,7 +144,7 @@ static int _sddep_semtake(FAR sem_t *sem)
  * Name: sddep0_hw_init
  ****************************************************************************/
 
-SINT_T sddep0_hw_init(struct SdDrCfg_s *cfg)
+SINT_T sddep0_hw_init(struct sddrcfg_s *cfg)
 {
   irqstate_t flags = enter_critical_section();
 
@@ -175,7 +175,7 @@ SINT_T sddep0_hw_init(struct SdDrCfg_s *cfg)
  ****************************************************************************/
 
 #ifdef CONFIG_LC823450_SDIF_SDC
-SINT_T sddep1_hw_init(struct SdDrCfg_s *cfg)
+SINT_T sddep1_hw_init(struct sddrcfg_s *cfg)
 {
   int i;
 
@@ -209,7 +209,7 @@ SINT_T sddep1_hw_init(struct SdDrCfg_s *cfg)
  * Name: sddep0_hw_exit
  ****************************************************************************/
 
-SINT_T sddep0_hw_exit(struct SdDrCfg_s *cfg)
+SINT_T sddep0_hw_exit(struct sddrcfg_s *cfg)
 {
   irqstate_t flags = enter_critical_section();
 
@@ -226,7 +226,7 @@ SINT_T sddep0_hw_exit(struct SdDrCfg_s *cfg)
  ****************************************************************************/
 
 #ifdef CONFIG_LC823450_SDIF_SDC
-SINT_T sddep1_hw_exit(struct SdDrCfg_s *cfg)
+SINT_T sddep1_hw_exit(struct sddrcfg_s *cfg)
 {
   irqstate_t flags = enter_critical_section();
 
@@ -268,7 +268,7 @@ SINT_T sddep1_hw_exit(struct SdDrCfg_s *cfg)
  * Name: sddep_voltage_switch
  ****************************************************************************/
 
-void sddep_voltage_switch(struct SdDrCfg_s *cfg)
+void sddep_voltage_switch(struct sddrcfg_s *cfg)
 {
 #ifdef CONFIG_LC823450_SDC_UHS1
   /* GPIO06=H 1.8v */
@@ -283,7 +283,7 @@ void sddep_voltage_switch(struct SdDrCfg_s *cfg)
  * Name: sddep_os_init
  ****************************************************************************/
 
-SINT_T sddep_os_init(struct SdDrCfg_s *cfg)
+SINT_T sddep_os_init(struct sddrcfg_s *cfg)
 {
   int ch = _get_ch_from_cfg(cfg);
 
@@ -300,7 +300,7 @@ SINT_T sddep_os_init(struct SdDrCfg_s *cfg)
  * Name: sddep_os_exit
  ****************************************************************************/
 
-SINT_T sddep_os_exit(struct SdDrCfg_s *cfg)
+SINT_T sddep_os_exit(struct sddrcfg_s *cfg)
 {
   return 0;
 }
@@ -309,7 +309,7 @@ SINT_T sddep_os_exit(struct SdDrCfg_s *cfg)
  * Name: sddep_set_clk
  ****************************************************************************/
 
-void sddep_set_clk(struct SdDrCfg_s *cfg)
+void sddep_set_clk(struct sddrcfg_s *cfg)
 {
   if (cfg->clkdiv == 1)
     {
@@ -323,7 +323,7 @@ void sddep_set_clk(struct SdDrCfg_s *cfg)
  * Name: sddep_wait
  ****************************************************************************/
 
-SINT_T sddep_wait(UI_32 ms, struct SdDrCfg_s *cfg)
+SINT_T sddep_wait(UI_32 ms, struct sddrcfg_s *cfg)
 {
 #ifdef CONFIG_HRT_TIMER
   up_hrttimer_usleep(ms * 1000);
@@ -357,7 +357,7 @@ uint64_t sddep_set_timeout(uint64_t t)
  ****************************************************************************/
 
 SINT_T sddep_wait_status(UI_32 req_status, UI_32 *status,
-                         struct SdDrCfg_s *cfg)
+                         struct sddrcfg_s *cfg)
 {
   clock_t tick0 = clock_systime_ticks();
   int ret = 0;
@@ -388,7 +388,7 @@ SINT_T sddep_wait_status(UI_32 req_status, UI_32 *status,
  ****************************************************************************/
 
 SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type,
-                  struct SdDrCfg_s *cfg)
+                  struct sddrcfg_s *cfg)
 {
 #ifdef CONFIG_LC823450_SDC_DMA
   int ch = _get_ch_from_cfg(cfg);
@@ -479,7 +479,7 @@ SINT_T sddep_read(void *src, void *dst, UI_32 size, SINT_T type,
  ****************************************************************************/
 
 SINT_T sddep_write(void *src, void *dst, UI_32 size, SINT_T type,
-                   struct SdDrCfg_s *cfg)
+                   struct sddrcfg_s *cfg)
 {
 #ifdef CONFIG_LC823450_SDC_DMA
   int ch = _get_ch_from_cfg(cfg);
