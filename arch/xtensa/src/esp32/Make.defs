@@ -111,6 +111,10 @@ CHIP_CSRCS += esp32_spi.c
   endif
 endif
 
+ifeq ($(CONFIG_ESP32_SPIFLASH),y)
+CHIP_CSRCS += esp32_spiflash.c
+endif
+
 # Configuration-dependent ESP32 files
 
 ifeq ($(CONFIG_SMP),y)

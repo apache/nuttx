@@ -58,6 +58,7 @@ SECTIONS
     *librtc.a:(.literal .text .literal.* .text.*)
     *libpp.a:(.literal .text .literal.* .text.*)
     *libhal.a:(.literal .text .literal.* .text.*)
+    *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
     _iram_text_end = ABSOLUTE(.);
 
     /* Module text area starts at the end of iram0_0_seg */
@@ -87,6 +88,7 @@ SECTIONS
     *(.share.mem)
     *(.gnu.linkonce.b.*)
     *(COMMON)
+    *libarch.a:esp32_spiflash.*(.bss  .bss.*  COMMON)
     . = ALIGN(8);
     _ebss = ABSOLUTE(.);
 
@@ -112,6 +114,7 @@ SECTIONS
     KEEP (*(.gnu.linkonce.s2.*))
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
+    *libarch.a:esp32_spiflash.*(.rodata  .rodata.*)
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
 
