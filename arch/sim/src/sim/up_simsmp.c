@@ -41,6 +41,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <signal.h>
+#include <sched.h>
 #include <errno.h>
 
 /****************************************************************************
@@ -183,7 +184,7 @@ static void *sim_idle_trampoline(void *arg)
 #else
       /* Give other pthreads/CPUs a shot */
 
-      pthread_yield();
+      sched_yield();
 #endif
     }
 
@@ -418,7 +419,7 @@ int up_cpu_pause(int cpu)
 
   while (g_cpu_paused[cpu] != 0)
     {
-      pthread_yield();
+      sched_yield();
     }
 
   return 0;
