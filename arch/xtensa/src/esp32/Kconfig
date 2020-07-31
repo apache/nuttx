@@ -82,6 +82,13 @@ config ESP32_SPI
 	bool
 	default n
 
+config ESP32_SPIFLASH
+	bool
+	default n
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+
 config ESP32_SPI2
 	bool "SPI 2"
 	default n
@@ -405,4 +412,28 @@ endif # ESP32_SPI3
 
 endmenu # ESP32_SPI
 
+menu "SPI Flash configuration"
+	depends on ESP32_SPIFLASH
+
+config ESP32_MTD_OFFSET
+	hex "MTD base address in SPI Flash"
+	default 0x180000
+	help
+		MTD base address in SPI Flash.
+
+config ESP32_MTD_SIZE
+	hex "MTD size in SPI Flash"
+	default 0x100000
+	help
+		MTD size in SPI Flash.
+
+config ESP32_SPIFLASH_DEBUG
+	bool "Debug SPI Flash"
+	default n
+	depends on DEBUG_FS_INFO
+	help
+		Enable this option, read and write of SPI Flash
+		will show input arguments and result.
+
+endmenu # ESP32_SPIFLASH
 endif # ARCH_CHIP_ESP32
