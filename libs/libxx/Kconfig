@@ -47,7 +47,6 @@ config LIBCXX
 	bool "Build LLVM libcxx (must be installed)"
 	default n
 	select CLOCK_MONOTONIC
-	select LIBC_WCHAR
 	select LIBC_LOCALE
 	---help---
 		If you have installed libcxx into the NuttX source tree, then it can
@@ -65,6 +64,10 @@ config UCLIBCXX
 		uClibc++ packet for information on installing uClibc++.
 
 if UCLIBCXX
+
+config UCLIBCXX_WCHAR
+	bool "Enable Wide Stream Support"
+	default n
 
 config UCLIBCXX_BUFSIZE
 	int "IO Stream/Container Buffer Size"

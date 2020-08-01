@@ -37,8 +37,6 @@
 #include <stdlib.h>
 #include <wchar.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -47,7 +45,7 @@
  * Name: wcstoull
  *
  * Description:
- *   The wcstoull() function is the wide-character equivalent of the strtoull()
+ *   The wcstoull function is the wide-character equivalent of the strtoull
  *   function. It converts a wchar string to unsigned long long value.
  *
  ****************************************************************************/
@@ -57,5 +55,3 @@ unsigned long long int wcstoull(FAR const wchar_t *nptr,
 {
   return strtoull((FAR const char *)nptr, (FAR char **)endptr, base);
 }
-
-#endif /* CONFIG_LIBC_WCHAR */

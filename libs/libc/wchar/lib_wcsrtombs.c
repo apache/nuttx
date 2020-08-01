@@ -24,8 +24,6 @@
 
 #include <wchar.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -42,5 +40,3 @@ size_t wcsrtombs(FAR char *dst, FAR const wchar_t **src,
 {
   return wcsnrtombs(dst, src, SIZE_MAX, len, ps);
 }
-
-#endif /* CONFIG_LIBC_WCHAR */

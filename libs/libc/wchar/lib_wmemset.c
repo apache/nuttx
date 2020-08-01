@@ -36,8 +36,6 @@
 #include <string.h>
 #include <wchar.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -66,4 +64,3 @@ FAR wchar_t *wmemset(FAR wchar_t *s, wchar_t c, size_t n)
 
   return s;
 }
-#endif

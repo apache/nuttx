@@ -36,8 +36,6 @@
 #include <string.h>
 #include <wchar.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -46,7 +44,7 @@
  * Name: wmemmove
  *
  * Description:
- *   The wmemmove() function is the wide-character equivalent of the memmove()
+ *   The wmemmove function is the wide-character equivalent of the memmove
  *   function. It copies n wide characters from the array starting at src to
  *   the array starting at dest.  The arrays may overlap.
  *
@@ -56,4 +54,3 @@ FAR wchar_t *wmemmove(FAR wchar_t *d, FAR const wchar_t *s, size_t n)
 {
   return (FAR wchar_t *) memmove(d, s, n * sizeof(wchar_t));
 }
-#endif

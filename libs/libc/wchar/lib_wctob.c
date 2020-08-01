@@ -42,8 +42,6 @@
 #include <wchar.h>
 #include <limits.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -59,4 +57,3 @@ int wctob(wint_t wc)
 
   return wctomb(pmb, wc) == 1 ? (int)pmb[0] : EOF;
 }
-#endif

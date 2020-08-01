@@ -36,8 +36,6 @@
 #include <stdlib.h>
 #include <wchar.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -69,4 +67,3 @@ int mbtowc(FAR wchar_t *pwc, FAR const char *s, size_t n)
 
   return (*s != '\0');
 }
-#endif

@@ -41,8 +41,6 @@
 #include <wchar.h>
 #include <errno.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -73,4 +71,3 @@ int wctomb(FAR char *s, wchar_t wc)
   *s = (char)wc;
   return 1;
 }
-#endif

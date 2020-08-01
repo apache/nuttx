@@ -38,8 +38,6 @@
 #include <string.h>
 #include <wchar.h>
 
-#ifdef CONFIG_LIBC_WCHAR
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -49,8 +47,8 @@
  *
  * Description:
  *   The wcscoll() compares the wide-character string pointed to by a to the
- *   wide-character string pointed to by b using an interpretation appropriate
- *   to the current LC_COLLATE state.
+ *   wide-character string pointed to by b using an interpretation
+ *   appropriate to the current LC_COLLATE state.
  *
  *   The current implementation of wcscoll() simply uses wcscmp() and does
  *   not support any language-specific sorting.
@@ -61,5 +59,3 @@ int wcscoll(FAR const wchar_t *a, FAR const wchar_t *b)
 {
   return wcscmp(a, b);
 }
-
-#endif /* CONFIG_LIBC_WCHAR */

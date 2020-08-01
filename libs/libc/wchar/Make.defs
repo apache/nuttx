@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBC_WCHAR),y)
-
 # Add the internal C files to the build
 
 CSRCS += lib_wcscmp.c lib_wcslen.c lib_wmemchr.c lib_wmemcmp.c lib_wmemcpy.c
@@ -49,5 +47,3 @@ CSRCS += lib_mbrlen.c lib_mbsrtowcs.c lib_wcsrtombs.c
 
 DEPPATH += --dep-path wchar
 VPATH += :wchar
-
-endif
