@@ -1,0 +1,29 @@
+From 20bf9ec2dbb40869c67a70232c2e604edfc0747f Mon Sep 17 00:00:00 2001
+From: spiriou <spiriou31@gmail.com>
+Date: Tue, 4 Aug 2020 09:22:28 +0200
+Subject: [PATCH 8/8] FIXME add trick to enable NuttX version for libuv
+
+---
+ include/uv.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/include/uv.h b/include/uv.h
+index b4e9700..d920c19 100644
+--- a/include/uv.h
++++ b/include/uv.h
+@@ -23,6 +23,12 @@
+ 
+ #ifndef UV_H
+ #define UV_H
++
++/* FIXME hack to enable NuttX build target */
++#ifndef __NUTTX__
++#define __NUTTX__ 1
++#endif
++
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+-- 
+2.17.1
+

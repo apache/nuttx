@@ -1,0 +1,128 @@
+From 7332f1d61024a0eecccd5e845927d2245a0c57c0 Mon Sep 17 00:00:00 2001
+From: spiriou <spiriou31@gmail.com>
+Date: Sat, 1 Aug 2020 21:45:11 +0200
+Subject: [PATCH 3/8] add config flag for libuv worker threads support
+
+---
+ include/uv/unix.h | 13 ++++++++++---
+ src/threadpool.c  |  2 +-
+ src/unix/loop.c   |  8 ++++++++
+ src/uv-common.c   |  4 ++++
+ 4 files changed, 23 insertions(+), 4 deletions(-)
+
+diff --git a/include/uv/unix.h b/include/uv/unix.h
+index e320ebb..df105bd 100644
+--- a/include/uv/unix.h
++++ b/include/uv/unix.h
+@@ -246,6 +246,15 @@ typedef struct {
+ #define UV_LOOP_PRIVATE_ASYNC_FIELDS
+ #endif
+ 
++#ifdef CONFIG_LIBUV_WQ
++#define UV_LOOP_PRIVATE_WQ_FIELDS                                             \
++  void* wq[2];                                                                \
++  uv_mutex_t wq_mutex;                                                        \
++  uv_async_t wq_async;
++#else
++#define UV_LOOP_PRIVATE_WQ_FIELDS
++#endif
++
+ #define UV_LOOP_PRIVATE_FIELDS                                                \
+   unsigned long flags;                                                        \
+   int backend_fd;                                                             \
+@@ -254,9 +263,7 @@ typedef struct {
+   uv__io_t** watchers;                                                        \
+   unsigned int nwatchers;                                                     \
+   unsigned int nfds;                                                          \
+-  void* wq[2];                                                                \
+-  uv_mutex_t wq_mutex;                                                        \
+-  uv_async_t wq_async;                                                        \
++  UV_LOOP_PRIVATE_WQ_FIELDS                                                   \
+   uv_rwlock_t cloexec_lock;                                                   \
+   uv_handle_t* closing_handles;                                               \
+   void* prepare_handles[2];                                                   \
+diff --git a/src/threadpool.c b/src/threadpool.c
+index b934595..5287b89 100644
+--- a/src/threadpool.c
++++ b/src/threadpool.c
+@@ -36,7 +36,7 @@ static unsigned int idle_threads;
+ static unsigned int slow_io_work_running;
+ static unsigned int nthreads;
+ static uv_thread_t* threads;
+-static uv_thread_t default_threads[4];
++static uv_thread_t default_threads[CONFIG_LIBUV_WQ_THREADS_COUNT];
+ static QUEUE exit_message;
+ static QUEUE wq;
+ static QUEUE run_slow_work_message;
+diff --git a/src/unix/loop.c b/src/unix/loop.c
+index 87420e4..cda3fc0 100644
+--- a/src/unix/loop.c
++++ b/src/unix/loop.c
+@@ -37,7 +37,9 @@ int uv_loop_init(uv_loop_t* loop) {
+   loop->data = saved_data;
+ 
+   heap_init((struct heap*) &loop->timer_heap);
++#ifdef CONFIG_LIBUV_WQ
+   QUEUE_INIT(&loop->wq);
++#endif
+   QUEUE_INIT(&loop->idle_handles);
+ #ifdef CONFIG_LIBUV_ASYNC
+   QUEUE_INIT(&loop->async_handles);
+@@ -94,6 +96,7 @@ int uv_loop_init(uv_loop_t* loop) {
+   if (err)
+     goto fail_rwlock_init;
+ 
++#ifdef CONFIG_LIBUV_WQ
+   err = uv_mutex_init(&loop->wq_mutex);
+   if (err)
+     goto fail_mutex_init;
+@@ -104,14 +107,17 @@ int uv_loop_init(uv_loop_t* loop) {
+ 
+   uv__handle_unref(&loop->wq_async);
+   loop->wq_async.flags |= UV_HANDLE_INTERNAL;
++#endif
+ 
+   return 0;
+ 
++#ifdef CONFIG_LIBUV_WQ
+ fail_async_init:
+   uv_mutex_destroy(&loop->wq_mutex);
+ 
+ fail_mutex_init:
+   uv_rwlock_destroy(&loop->cloexec_lock);
++#endif
+ 
+ fail_rwlock_init:
+ #ifdef CONFIG_LIBUV_PROCESS
+@@ -180,11 +186,13 @@ void uv__loop_close(uv_loop_t* loop) {
+     loop->backend_fd = -1;
+   }
+ 
++#ifdef CONFIG_LIBUV_WQ
+   uv_mutex_lock(&loop->wq_mutex);
+   assert(QUEUE_EMPTY(&loop->wq) && "thread pool work queue not empty!");
+   assert(!uv__has_active_reqs(loop));
+   uv_mutex_unlock(&loop->wq_mutex);
+   uv_mutex_destroy(&loop->wq_mutex);
++#endif
+ 
+   /*
+    * Note that all thread pool stuff is finished at this point and
+diff --git a/src/uv-common.c b/src/uv-common.c
+index 40034b9..47696ed 100644
+--- a/src/uv-common.c
++++ b/src/uv-common.c
+@@ -868,6 +868,10 @@ void uv_library_shutdown(void) {
+ #ifdef CONFIG_LIBUV_SIGNAL
+   uv__signal_cleanup();
+ #endif
++
++#ifdef CONFIG_LIBUV_WQ
+   uv__threadpool_cleanup();
++#endif
++
+   uv__store_relaxed(&was_shutdown, 1);
+ }
+-- 
+2.17.1
+

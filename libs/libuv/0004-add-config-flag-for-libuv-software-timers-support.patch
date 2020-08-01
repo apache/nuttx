@@ -1,0 +1,124 @@
+From eff891320deb2a7b013924836494ee3291d39baf Mon Sep 17 00:00:00 2001
+From: spiriou <spiriou31@gmail.com>
+Date: Sat, 1 Aug 2020 22:19:31 +0200
+Subject: [PATCH 4/8] add config flag for libuv software timers support
+
+---
+ include/uv/unix.h | 17 ++++++++++++-----
+ src/unix/core.c   | 13 +++++++++++++
+ src/unix/loop.c   |  4 ++++
+ 3 files changed, 29 insertions(+), 5 deletions(-)
+
+diff --git a/include/uv/unix.h b/include/uv/unix.h
+index df105bd..3292e2a 100644
+--- a/include/uv/unix.h
++++ b/include/uv/unix.h
+@@ -246,6 +246,17 @@ typedef struct {
+ #define UV_LOOP_PRIVATE_ASYNC_FIELDS
+ #endif
+ 
++#ifdef CONFIG_LIBUV_TIMER
++#define UV_LOOP_PRIVATE_TIMER_FIELDS                                          \
++  struct {                                                                    \
++    void* min;                                                                \
++    unsigned int nelts;                                                       \
++  } timer_heap;                                                               \
++  uint64_t timer_counter;
++#else
++#define UV_LOOP_PRIVATE_TIMER_FIELDS
++#endif
++
+ #ifdef CONFIG_LIBUV_WQ
+ #define UV_LOOP_PRIVATE_WQ_FIELDS                                             \
+   void* wq[2];                                                                \
+@@ -270,11 +281,7 @@ typedef struct {
+   void* check_handles[2];                                                     \
+   void* idle_handles[2];                                                      \
+   UV_LOOP_PRIVATE_ASYNC_FIELDS                                                \
+-  struct {                                                                    \
+-    void* min;                                                                \
+-    unsigned int nelts;                                                       \
+-  } timer_heap;                                                               \
+-  uint64_t timer_counter;                                                     \
++  UV_LOOP_PRIVATE_TIMER_FIELDS                                                \
+   uint64_t time;                                                              \
+   UV_LOOP_PRIVATE_SIGNAL_FIELDS                                               \
+   UV_LOOP_PRIVATE_PROCESS_FIELDS                                              \
+diff --git a/src/unix/core.c b/src/unix/core.c
+index 6154f75..a9d0a78 100644
+--- a/src/unix/core.c
++++ b/src/unix/core.c
+@@ -150,9 +150,11 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
+     break;
+ #endif
+ 
++#ifdef CONFIG_LIBUV_TIMER
+   case UV_TIMER:
+     uv__timer_close((uv_timer_t*)handle);
+     break;
++#endif
+ #if 0
+   case UV_PROCESS:
+     uv__process_close((uv_process_t*)handle);
+@@ -359,7 +361,11 @@ int uv_backend_timeout(const uv_loop_t* loop) {
+   if (loop->closing_handles)
+     return 0;
+ 
++#ifdef CONFIG_LIBUV_TIMER
+   return uv__next_timeout(loop);
++#else
++  return -1;
++#endif
+ }
+ 
+ 
+@@ -386,7 +392,11 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
+ 
+   while (r != 0 && loop->stop_flag == 0) {
+     uv__update_time(loop);
++
++#ifdef CONFIG_LIBUV_TIMER
+     uv__run_timers(loop);
++#endif
++
+     ran_pending = uv__run_pending(loop);
+     uv__run_idle(loop);
+     uv__run_prepare(loop);
+@@ -409,7 +419,10 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
+        * the check.
+        */
+       uv__update_time(loop);
++
++#ifdef CONFIG_LIBUV_TIMER
+       uv__run_timers(loop);
++#endif
+     }
+ 
+     r = uv__loop_alive(loop);
+diff --git a/src/unix/loop.c b/src/unix/loop.c
+index cda3fc0..fc33892 100644
+--- a/src/unix/loop.c
++++ b/src/unix/loop.c
+@@ -36,7 +36,9 @@ int uv_loop_init(uv_loop_t* loop) {
+   memset(loop, 0, sizeof(*loop));
+   loop->data = saved_data;
+ 
++#ifdef CONFIG_LIBUV_TIMER
+   heap_init((struct heap*) &loop->timer_heap);
++#endif
+ #ifdef CONFIG_LIBUV_WQ
+   QUEUE_INIT(&loop->wq);
+ #endif
+@@ -71,7 +73,9 @@ int uv_loop_init(uv_loop_t* loop) {
+   loop->backend_fd = -1;
+   loop->emfile_fd = -1;
+ 
++#ifdef CONFIG_LIBUV_TIMER
+   loop->timer_counter = 0;
++#endif
+   loop->stop_flag = 0;
+ 
+   err = uv__platform_loop_init(loop);
+-- 
+2.17.1
+

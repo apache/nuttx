@@ -1,0 +1,74 @@
+From 30873aee26addb013c732b139b425b5e5edc2f3f Mon Sep 17 00:00:00 2001
+From: spiriou <spiriou31@gmail.com>
+Date: Sun, 2 Aug 2020 13:51:15 +0200
+Subject: [PATCH 6/8] add config flag for uv_default_loop() API
+
+---
+ src/uv-common.c | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/src/uv-common.c b/src/uv-common.c
+index 47696ed..db62542 100644
+--- a/src/uv-common.c
++++ b/src/uv-common.c
+@@ -507,8 +507,10 @@ static void uv__print_handles(uv_loop_t* loop, int only_active, FILE* stream) {
+   QUEUE* q;
+   uv_handle_t* h;
+ 
++#ifdef CONFIG_LIBUV_DEFAULT_LOOP
+   if (loop == NULL)
+     loop = uv_default_loop();
++#endif
+ 
+   QUEUE_FOREACH(q, &loop->handle_queue) {
+     h = QUEUE_DATA(q, uv_handle_t, handle_queue);
+@@ -758,6 +760,7 @@ int uv_loop_configure(uv_loop_t* loop, uv_loop_option option, ...) {
+ }
+ #endif
+ 
++#ifdef CONFIG_LIBUV_DEFAULT_LOOP
+ static uv_loop_t default_loop_struct;
+ static uv_loop_t* default_loop_ptr;
+ 
+@@ -772,7 +775,7 @@ uv_loop_t* uv_default_loop(void) {
+   default_loop_ptr = &default_loop_struct;
+   return default_loop_ptr;
+ }
+-
++#endif
+ 
+ uv_loop_t* uv_loop_new(void) {
+   uv_loop_t* loop;
+@@ -813,14 +816,16 @@ int uv_loop_close(uv_loop_t* loop) {
+   memset(loop, -1, sizeof(*loop));
+   loop->data = saved_data;
+ #endif
++#ifdef CONFIG_LIBUV_DEFAULT_LOOP
+   if (loop == default_loop_ptr)
+     default_loop_ptr = NULL;
+-
++#endif
+   return 0;
+ }
+ 
+ 
+ void uv_loop_delete(uv_loop_t* loop) {
++#ifdef CONFIG_LIBUV_DEFAULT_LOOP
+   uv_loop_t* default_loop;
+   int err;
+ 
+@@ -831,6 +836,11 @@ void uv_loop_delete(uv_loop_t* loop) {
+   assert(err == 0);
+   if (loop != default_loop)
+     uv__free(loop);
++#else
++  int err = uv_loop_close(loop);
++  (void) err;    /* Squelch compiler warnings. */
++  assert(err == 0);
++#endif
+ }
+ 
+ 
+-- 
+2.17.1
+

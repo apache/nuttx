@@ -1,0 +1,100 @@
+From c30c24a8a4af33f0f2bfef13910794665f26e237 Mon Sep 17 00:00:00 2001
+From: spiriou <spiriou31@gmail.com>
+Date: Sat, 1 Aug 2020 21:34:59 +0200
+Subject: [PATCH 2/8] add config flag for libuv async support
+
+---
+ include/uv/unix.h | 15 +++++++++++----
+ src/unix/core.c   |  3 +++
+ src/unix/loop.c   |  7 +++++++
+ 3 files changed, 21 insertions(+), 4 deletions(-)
+
+diff --git a/include/uv/unix.h b/include/uv/unix.h
+index d2d39da..e320ebb 100644
+--- a/include/uv/unix.h
++++ b/include/uv/unix.h
+@@ -236,6 +236,16 @@ typedef struct {
+ #define UV_LOOP_PRIVATE_PROCESS_FIELDS
+ #endif
+ 
++#ifdef CONFIG_LIBUV_ASYNC
++#define UV_LOOP_PRIVATE_ASYNC_FIELDS                                          \
++  void* async_handles[2];                                                     \
++  void (*async_unused)(void);  /* TODO(bnoordhuis) Remove in libuv v2. */     \
++  uv__io_t async_io_watcher;                                                  \
++  int async_wfd;
++#else
++#define UV_LOOP_PRIVATE_ASYNC_FIELDS
++#endif
++
+ #define UV_LOOP_PRIVATE_FIELDS                                                \
+   unsigned long flags;                                                        \
+   int backend_fd;                                                             \
+@@ -252,10 +262,7 @@ typedef struct {
+   void* prepare_handles[2];                                                   \
+   void* check_handles[2];                                                     \
+   void* idle_handles[2];                                                      \
+-  void* async_handles[2];                                                     \
+-  void (*async_unused)(void);  /* TODO(bnoordhuis) Remove in libuv v2. */     \
+-  uv__io_t async_io_watcher;                                                  \
+-  int async_wfd;                                                              \
++  UV_LOOP_PRIVATE_ASYNC_FIELDS                                                \
+   struct {                                                                    \
+     void* min;                                                                \
+     unsigned int nelts;                                                       \
+diff --git a/src/unix/core.c b/src/unix/core.c
+index 4d53ed7..6154f75 100644
+--- a/src/unix/core.c
++++ b/src/unix/core.c
+@@ -143,9 +143,12 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
+     uv__idle_close((uv_idle_t*)handle);
+     break;
+ #endif
++
++#ifdef CONFIG_LIBUV_ASYNC
+   case UV_ASYNC:
+     uv__async_close((uv_async_t*)handle);
+     break;
++#endif
+ 
+   case UV_TIMER:
+     uv__timer_close((uv_timer_t*)handle);
+diff --git a/src/unix/loop.c b/src/unix/loop.c
+index 1bdbe8d..87420e4 100644
+--- a/src/unix/loop.c
++++ b/src/unix/loop.c
+@@ -39,7 +39,9 @@ int uv_loop_init(uv_loop_t* loop) {
+   heap_init((struct heap*) &loop->timer_heap);
+   QUEUE_INIT(&loop->wq);
+   QUEUE_INIT(&loop->idle_handles);
++#ifdef CONFIG_LIBUV_ASYNC
+   QUEUE_INIT(&loop->async_handles);
++#endif
+   QUEUE_INIT(&loop->check_handles);
+   QUEUE_INIT(&loop->prepare_handles);
+   QUEUE_INIT(&loop->handle_queue);
+@@ -54,8 +56,10 @@ int uv_loop_init(uv_loop_t* loop) {
+ 
+   loop->closing_handles = NULL;
+   uv__update_time(loop);
++#ifdef CONFIG_LIBUV_ASYNC
+   loop->async_io_watcher.fd = -1;
+   loop->async_wfd = -1;
++#endif
+ 
+ #ifdef CONFIG_LIBUV_SIGNAL
+   loop->signal_pipefd[0] = -1;
+@@ -161,7 +165,10 @@ void uv__loop_close(uv_loop_t* loop) {
+   uv__signal_loop_cleanup(loop);
+ #endif
+   uv__platform_loop_delete(loop);
++
++#ifdef CONFIG_LIBUV_ASYNC
+   uv__async_stop(loop);
++#endif
+ 
+   if (loop->emfile_fd != -1) {
+     uv__close(loop->emfile_fd);
+-- 
+2.17.1
+

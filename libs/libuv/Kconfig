@@ -1,0 +1,67 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig LIBUV
+	bool "libuv asynchronous I/O Library"
+	default n
+	---help---
+		Enable build for libuv asynchronous I/O Library
+
+if LIBUV
+
+config LIBUV_NPOLLWAITERS
+	int "Number of uv loop poll waiters"
+	default 8
+	---help---
+		Maximum number of events a loop can wait on.
+
+config LIBUV_ASYNC
+	bool "libuv async support"
+	default n
+	select EVENT_FD
+	select EVENT_FD_POLL
+	---help---
+		Enable async support in libuv.
+		Eventfd is required for this feature.
+
+config LIBUV_TIMER
+	bool "libuv software timers support"
+	default n
+	---help---
+		Enable software timers support in libuv.
+
+config LIBUV_WQ
+	bool "libuv workqueue support"
+	default n
+	select LIBUV_ASYNC
+	---help---
+		Enable workqueue support in libuv
+
+config LIBUV_WQ_THREADS_COUNT
+	int "libuv workqueue thread count"
+	depends on LIBUV_WQ
+	default 1
+	---help---
+		Specify worker thread count shared between all uv loops
+
+config LIBUV_LOOP_WATCHERS
+	bool "libuv loop watchers support"
+	default n
+	---help---
+		Enable loop watchers support in libuv (idle,prepare and check)
+
+config LIBUV_DEFAULT_LOOP
+	bool "uv_default_loop() API"
+	default n
+	---help---
+		Enable support for uv_default_loop() function
+
+config LIBUV_LOW_FOOTPRINT
+	bool "Reduce libuv memory usage"
+	default y
+	---help---
+		Enable optimizations to reduce libuv memory usage
+
+endif # LIBUV

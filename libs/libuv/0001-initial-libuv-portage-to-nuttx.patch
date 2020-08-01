@@ -1,0 +1,1124 @@
+From 7a43f8806325eea5bfbf66c221e208a1d57880f5 Mon Sep 17 00:00:00 2001
+From: spiriou <spiriou31@gmail.com>
+Date: Sat, 1 Aug 2020 18:10:07 +0200
+Subject: [PATCH 1/8] initial libuv portage to nuttx
+
+---
+ include/uv/nuttx.h |  33 +++++
+ include/uv/unix.h  |  26 +++-
+ src/threadpool.c   |  19 ++-
+ src/unix/async.c   |  10 +-
+ src/unix/core.c    |  58 +++++----
+ src/unix/loop.c    |  19 ++-
+ src/unix/nuttx.c   | 301 +++++++++++++++++++++++++++++++++++++++++++++
+ src/unix/poll.c    |   2 +
+ src/unix/process.c |  15 +--
+ src/unix/signal.c  |   5 +-
+ src/unix/thread.c  |  15 ++-
+ src/uv-common.c    |  12 +-
+ 12 files changed, 461 insertions(+), 54 deletions(-)
+ create mode 100644 include/uv/nuttx.h
+ create mode 100644 src/unix/nuttx.c
+
+diff --git a/include/uv/nuttx.h b/include/uv/nuttx.h
+new file mode 100644
+index 0000000..29858f3
+--- /dev/null
++++ b/include/uv/nuttx.h
+@@ -0,0 +1,33 @@
++/****************************************************************************
++ * libs/libuv/include/uv/nuttx.h
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++#ifndef UV_NUTTX_H
++#define UV_NUTTX_H
++
++#include <nuttx/config.h>
++#include <poll.h>
++
++#define UV_PLATFORM_LOOP_FIELDS                                               \
++  struct pollfd poll_fds[CONFIG_LIBUV_NPOLLWAITERS];                          \
++  size_t poll_fds_used;
++
++#define UV_PLATFORM_FS_EVENT_FIELDS
++
++#endif /* UV_NUTTX_H */
+diff --git a/include/uv/unix.h b/include/uv/unix.h
+index 3a13163..d2d39da 100644
+--- a/include/uv/unix.h
++++ b/include/uv/unix.h
+@@ -45,7 +45,9 @@
+ 
+ #include "uv/threadpool.h"
+ 
+-#if defined(__linux__)
++#if defined(__NUTTX__)
++# include "uv/nuttx.h"
++#elif defined(__linux__)
+ # include "uv/linux.h"
+ #elif defined (__MVS__)
+ # include "uv/os390.h"
+@@ -218,6 +220,22 @@ typedef struct {
+   char* errmsg;
+ } uv_lib_t;
+ 
++#ifdef CONFIG_LIBUV_SIGNAL
++#define UV_LOOP_PRIVATE_SIGNAL_FIELDS                                         \
++  int signal_pipefd[2];                                                       \
++  uv__io_t signal_io_watcher;
++#else
++#define UV_LOOP_PRIVATE_SIGNAL_FIELDS
++#endif
++
++#ifdef CONFIG_LIBUV_PROCESS
++#define UV_LOOP_PRIVATE_PROCESS_FIELDS                                        \
++  void* process_handles[2];                                                   \
++  uv_signal_t child_watcher;
++#else
++#define UV_LOOP_PRIVATE_PROCESS_FIELDS
++#endif
++
+ #define UV_LOOP_PRIVATE_FIELDS                                                \
+   unsigned long flags;                                                        \
+   int backend_fd;                                                             \
+@@ -231,7 +249,6 @@ typedef struct {
+   uv_async_t wq_async;                                                        \
+   uv_rwlock_t cloexec_lock;                                                   \
+   uv_handle_t* closing_handles;                                               \
+-  void* process_handles[2];                                                   \
+   void* prepare_handles[2];                                                   \
+   void* check_handles[2];                                                     \
+   void* idle_handles[2];                                                      \
+@@ -245,9 +262,8 @@ typedef struct {
+   } timer_heap;                                                               \
+   uint64_t timer_counter;                                                     \
+   uint64_t time;                                                              \
+-  int signal_pipefd[2];                                                       \
+-  uv__io_t signal_io_watcher;                                                 \
+-  uv_signal_t child_watcher;                                                  \
++  UV_LOOP_PRIVATE_SIGNAL_FIELDS                                               \
++  UV_LOOP_PRIVATE_PROCESS_FIELDS                                              \
+   int emfile_fd;                                                              \
+   UV_PLATFORM_LOOP_FIELDS                                                     \
+ 
+diff --git a/src/threadpool.c b/src/threadpool.c
+index 0998938..b934595 100644
+--- a/src/threadpool.c
++++ b/src/threadpool.c
+@@ -187,9 +187,15 @@ void uv__threadpool_cleanup(void) {
+ 
+ static void init_threads(void) {
+   unsigned int i;
++#ifndef __NUTTX__
+   const char* val;
++#endif
+   uv_sem_t sem;
+ 
++#ifdef __NUTTX__
++  threads = default_threads;
++  nthreads = ARRAY_SIZE(default_threads);
++#else
+   nthreads = ARRAY_SIZE(default_threads);
+   val = getenv("UV_THREADPOOL_SIZE");
+   if (val != NULL)
+@@ -207,6 +213,7 @@ static void init_threads(void) {
+       threads = default_threads;
+     }
+   }
++#endif
+ 
+   if (uv_cond_init(&cond))
+     abort();
+@@ -232,7 +239,7 @@ static void init_threads(void) {
+ }
+ 
+ 
+-#ifndef _WIN32
++#if !defined(_WIN32) && !defined(__NUTTX__)
+ static void reset_once(void) {
+   uv_once_t child_once = UV_ONCE_INIT;
+   memcpy(&once, &child_once, sizeof(child_once));
+@@ -241,7 +248,7 @@ static void reset_once(void) {
+ 
+ 
+ static void init_once(void) {
+-#ifndef _WIN32
++#if !defined(_WIN32) && !defined(__NUTTX__)
+   /* Re-initialize the threadpool after fork.
+    * Note that this discards the global mutex and condition as well
+    * as the work queue.
+@@ -296,16 +303,16 @@ void uv__work_done(uv_async_t* handle) {
+   struct uv__work* w;
+   uv_loop_t* loop;
+   QUEUE* q;
+-  QUEUE wq;
++  QUEUE wql;
+   int err;
+ 
+   loop = container_of(handle, uv_loop_t, wq_async);
+   uv_mutex_lock(&loop->wq_mutex);
+-  QUEUE_MOVE(&loop->wq, &wq);
++  QUEUE_MOVE(&loop->wq, &wql);
+   uv_mutex_unlock(&loop->wq_mutex);
+ 
+-  while (!QUEUE_EMPTY(&wq)) {
+-    q = QUEUE_HEAD(&wq);
++  while (!QUEUE_EMPTY(&wql)) {
++    q = QUEUE_HEAD(&wql);
+     QUEUE_REMOVE(q);
+ 
+     w = container_of(q, struct uv__work, wq);
+diff --git a/src/unix/async.c b/src/unix/async.c
+index 5f58fb8..f7c0de1 100644
+--- a/src/unix/async.c
++++ b/src/unix/async.c
+@@ -120,7 +120,11 @@ void uv__async_close(uv_async_t* handle) {
+ 
+ 
+ static void uv__async_io(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
++#ifdef __NUTTX__
++  char buf[sizeof(eventfd_t)];
++#else
+   char buf[1024];
++#endif
+   ssize_t r;
+   QUEUE queue;
+   QUEUE* q;
+@@ -175,9 +179,9 @@ static void uv__async_send(uv_loop_t* loop) {
+   len = 1;
+   fd = loop->async_wfd;
+ 
+-#if defined(__linux__)
++#if defined(__linux__) || defined(__NUTTX__)
+   if (fd == -1) {
+-    static const uint64_t val = 1;
++    static const eventfd_t val = 1;
+     buf = &val;
+     len = sizeof(val);
+     fd = loop->async_io_watcher.fd;  /* eventfd */
+@@ -206,7 +210,7 @@ static int uv__async_start(uv_loop_t* loop) {
+   if (loop->async_io_watcher.fd != -1)
+     return 0;
+ 
+-#ifdef __linux__
++#if defined(__linux__) || defined(__NUTTX__)
+   err = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
+   if (err < 0)
+     return UV__ERR(errno);
+diff --git a/src/unix/core.c b/src/unix/core.c
+index 5b0b64d..4d53ed7 100644
+--- a/src/unix/core.c
++++ b/src/unix/core.c
+@@ -58,6 +58,8 @@
+ # include <crt_externs.h>
+ # include <mach-o/dyld.h> /* _NSGetExecutablePath */
+ # define environ (*_NSGetEnviron())
++#elif defined(__NUTTX__)
++/* environ defined as function in stdlib in NuttX*/
+ #else /* defined(__APPLE__) && !TARGET_OS_IPHONE */
+ extern char** environ;
+ #endif /* !(defined(__APPLE__) && !TARGET_OS_IPHONE) */
+@@ -112,6 +114,7 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
+   handle->close_cb = close_cb;
+ 
+   switch (handle->type) {
++#if 0
+   case UV_NAMED_PIPE:
+     uv__pipe_close((uv_pipe_t*)handle);
+     break;
+@@ -139,7 +142,7 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
+   case UV_IDLE:
+     uv__idle_close((uv_idle_t*)handle);
+     break;
+-
++#endif
+   case UV_ASYNC:
+     uv__async_close((uv_async_t*)handle);
+     break;
+@@ -147,7 +150,7 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
+   case UV_TIMER:
+     uv__timer_close((uv_timer_t*)handle);
+     break;
+-
++#if 0
+   case UV_PROCESS:
+     uv__process_close((uv_process_t*)handle);
+     break;
+@@ -155,11 +158,11 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
+   case UV_FS_EVENT:
+     uv__fs_event_close((uv_fs_event_t*)handle);
+     break;
+-
++#endif
+   case UV_POLL:
+     uv__poll_close((uv_poll_t*)handle);
+     break;
+-
++#if 0
+   case UV_FS_POLL:
+     uv__fs_poll_close((uv_fs_poll_t*)handle);
+     /* Poll handles use file system requests, and one of them may still be
+@@ -169,7 +172,7 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
+   case UV_SIGNAL:
+     uv__signal_close((uv_signal_t*) handle);
+     break;
+-
++#endif
+   default:
+     assert(0);
+   }
+@@ -241,7 +244,9 @@ int uv__getiovmax(void) {
+ 
+ 
+ static void uv__finish_close(uv_handle_t* handle) {
++#ifdef CONFIG_LIBUV_SIGNAL
+   uv_signal_t* sh;
++#endif
+ 
+   /* Note: while the handle is in the UV_HANDLE_CLOSING state now, it's still
+    * possible for it to be active in the sense that uv__is_active() returns
+@@ -256,17 +261,21 @@ static void uv__finish_close(uv_handle_t* handle) {
+   handle->flags |= UV_HANDLE_CLOSED;
+ 
+   switch (handle->type) {
++#if 0
+     case UV_PREPARE:
+     case UV_CHECK:
+     case UV_IDLE:
++#endif
+     case UV_ASYNC:
+     case UV_TIMER:
++#if 0
+     case UV_PROCESS:
+     case UV_FS_EVENT:
+     case UV_FS_POLL:
++#endif
+     case UV_POLL:
+       break;
+-
++#ifdef CONFIG_LIBUV_SIGNAL
+     case UV_SIGNAL:
+       /* If there are any caught signals "trapped" in the signal pipe,
+        * we can't call the close callback yet. Reinserting the handle
+@@ -280,7 +289,8 @@ static void uv__finish_close(uv_handle_t* handle) {
+         return;
+       }
+       break;
+-
++#endif
++#if 0
+     case UV_NAMED_PIPE:
+     case UV_TCP:
+     case UV_TTY:
+@@ -290,7 +300,7 @@ static void uv__finish_close(uv_handle_t* handle) {
+     case UV_UDP:
+       uv__udp_finish_close((uv_udp_t*)handle);
+       break;
+-
++#endif
+     default:
+       assert(0);
+       break;
+@@ -423,7 +433,7 @@ int uv_is_active(const uv_handle_t* handle) {
+   return uv__is_active(handle);
+ }
+ 
+-
++#if 0
+ /* Open a socket in non-blocking close-on-exec mode, atomically if possible. */
+ int uv__socket(int domain, int type, int protocol) {
+   int sockfd;
+@@ -460,6 +470,7 @@ int uv__socket(int domain, int type, int protocol) {
+ 
+   return sockfd;
+ }
++#endif
+ 
+ /* get a file pointer to a file in read-only and close-on-exec mode */
+ FILE* uv__open_file(const char* path) {
+@@ -477,7 +488,7 @@ FILE* uv__open_file(const char* path) {
+    return fp;
+ }
+ 
+-
++#if 0
+ int uv__accept(int sockfd) {
+   int peerfd;
+   int err;
+@@ -509,7 +520,7 @@ int uv__accept(int sockfd) {
+ 
+   return peerfd;
+ }
+-
++#endif
+ 
+ /* close() on macos has the "interesting" quirk that it fails with EINTR
+  * without closing the file descriptor when a thread is in the cancel state.
+@@ -531,6 +542,8 @@ int uv__close_nocancel(int fd) {
+   return close$NOCANCEL$UNIX2003(fd);
+ #endif
+ #pragma GCC diagnostic pop
++#elif defined(__NUTTX__)
++  return close(fd);
+ #elif defined(__linux__)
+   return syscall(SYS_close, fd);
+ #else
+@@ -581,7 +594,8 @@ int uv__nonblock_ioctl(int fd, int set) {
+ }
+ 
+ 
+-#if !defined(__CYGWIN__) && !defined(__MSYS__) && !defined(__HAIKU__)
++#if !defined(__CYGWIN__) && !defined(__MSYS__) && \
++    !defined(__HAIKU__)  && !defined(__NUTTX__)
+ int uv__cloexec_ioctl(int fd, int set) {
+   int r;
+ 
+@@ -658,7 +672,7 @@ int uv__cloexec_fcntl(int fd, int set) {
+   return 0;
+ }
+ 
+-
++#if 0
+ ssize_t uv__recvmsg(int fd, struct msghdr* msg, int flags) {
+   struct cmsghdr* cmsg;
+   ssize_t rc;
+@@ -695,7 +709,7 @@ ssize_t uv__recvmsg(int fd, struct msghdr* msg, int flags) {
+         uv__cloexec(*pfd, 1);
+   return rc;
+ }
+-
++#endif
+ 
+ int uv_cwd(char* buffer, size_t* size) {
+   char scratch[1 + UV__PATH_MAX];
+@@ -743,7 +757,7 @@ int uv_chdir(const char* dir) {
+   return 0;
+ }
+ 
+-
++#if 0
+ void uv_disable_stdio_inheritance(void) {
+   int fd;
+ 
+@@ -754,7 +768,7 @@ void uv_disable_stdio_inheritance(void) {
+     if (uv__cloexec(fd, 1) && fd > 15)
+       break;
+ }
+-
++#endif
+ 
+ int uv_fileno(const uv_handle_t* handle, uv_os_fd_t* fd) {
+   int fd_out;
+@@ -958,7 +972,7 @@ int uv__fd_exists(uv_loop_t* loop, int fd) {
+   return (unsigned) fd < loop->nwatchers && loop->watchers[fd] != NULL;
+ }
+ 
+-
++#if 0
+ int uv_getrusage(uv_rusage_t* rusage) {
+   struct rusage usage;
+ 
+@@ -990,7 +1004,7 @@ int uv_getrusage(uv_rusage_t* rusage) {
+ 
+   return 0;
+ }
+-
++#endif
+ 
+ int uv__open_cloexec(const char* path, int flags) {
+ #if defined(O_CLOEXEC)
+@@ -1019,7 +1033,7 @@ int uv__open_cloexec(const char* path, int flags) {
+ #endif  /* O_CLOEXEC */
+ }
+ 
+-
++#if 0
+ int uv__dup2_cloexec(int oldfd, int newfd) {
+ #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__linux__)
+   int r;
+@@ -1046,7 +1060,7 @@ int uv__dup2_cloexec(int oldfd, int newfd) {
+   return r;
+ #endif
+ }
+-
++#endif
+ 
+ int uv_os_homedir(char* buffer, size_t* size) {
+   uv_passwd_t pwd;
+@@ -1390,11 +1404,11 @@ uv_pid_t uv_os_getpid(void) {
+   return getpid();
+ }
+ 
+-
++#if 0
+ uv_pid_t uv_os_getppid(void) {
+   return getppid();
+ }
+-
++#endif
+ 
+ int uv_os_getpriority(uv_pid_t pid, int* priority) {
+   int r;
+diff --git a/src/unix/loop.c b/src/unix/loop.c
+index e5b2889..1bdbe8d 100644
+--- a/src/unix/loop.c
++++ b/src/unix/loop.c
+@@ -56,8 +56,12 @@ int uv_loop_init(uv_loop_t* loop) {
+   uv__update_time(loop);
+   loop->async_io_watcher.fd = -1;
+   loop->async_wfd = -1;
++
++#ifdef CONFIG_LIBUV_SIGNAL
+   loop->signal_pipefd[0] = -1;
+   loop->signal_pipefd[1] = -1;
++#endif
++
+   loop->backend_fd = -1;
+   loop->emfile_fd = -1;
+ 
+@@ -68,7 +72,10 @@ int uv_loop_init(uv_loop_t* loop) {
+   if (err)
+     return err;
+ 
++#ifdef CONFIG_LIBUV_SIGNAL
+   uv__signal_global_once_init();
++
++#ifdef CONFIG_LIBUV_PROCESS
+   err = uv_signal_init(loop, &loop->child_watcher);
+   if (err)
+     goto fail_signal_init;
+@@ -76,6 +83,8 @@ int uv_loop_init(uv_loop_t* loop) {
+   uv__handle_unref(&loop->child_watcher);
+   loop->child_watcher.flags |= UV_HANDLE_INTERNAL;
+   QUEUE_INIT(&loop->process_handles);
++#endif
++#endif
+ 
+   err = uv_rwlock_init(&loop->cloexec_lock);
+   if (err)
+@@ -101,9 +110,11 @@ fail_mutex_init:
+   uv_rwlock_destroy(&loop->cloexec_lock);
+ 
+ fail_rwlock_init:
++#ifdef CONFIG_LIBUV_PROCESS
+   uv__signal_loop_cleanup(loop);
+ 
+ fail_signal_init:
++#endif
+   uv__platform_loop_delete(loop);
+ 
+   uv__free(loop->watchers);
+@@ -111,7 +122,7 @@ fail_signal_init:
+   return err;
+ }
+ 
+-
++#if 0
+ int uv_loop_fork(uv_loop_t* loop) {
+   int err;
+   unsigned int i;
+@@ -143,10 +154,12 @@ int uv_loop_fork(uv_loop_t* loop) {
+ 
+   return 0;
+ }
+-
++#endif
+ 
+ void uv__loop_close(uv_loop_t* loop) {
++#ifdef CONFIG_LIBUV_SIGNAL
+   uv__signal_loop_cleanup(loop);
++#endif
+   uv__platform_loop_delete(loop);
+   uv__async_stop(loop);
+ 
+@@ -185,6 +198,7 @@ void uv__loop_close(uv_loop_t* loop) {
+ 
+ 
+ int uv__loop_configure(uv_loop_t* loop, uv_loop_option option, va_list ap) {
++#ifndef __NUTTX__
+   if (option != UV_LOOP_BLOCK_SIGNAL)
+     return UV_ENOSYS;
+ 
+@@ -192,5 +206,6 @@ int uv__loop_configure(uv_loop_t* loop, uv_loop_option option, va_list ap) {
+     return UV_EINVAL;
+ 
+   loop->flags |= UV_LOOP_BLOCK_SIGPROF;
++#endif
+   return 0;
+ }
+diff --git a/src/unix/nuttx.c b/src/unix/nuttx.c
+new file mode 100644
+index 0000000..d35a649
+--- /dev/null
++++ b/src/unix/nuttx.c
+@@ -0,0 +1,301 @@
++/****************************************************************************
++ * libs/libuv/src/unix/nuttx.c
++ *
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.  The
++ * ASF licenses this file to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance with the
++ * License.  You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
++ * License for the specific language governing permissions and limitations
++ * under the License.
++ *
++ ****************************************************************************/
++
++/* Copyright libuv project contributors. All rights reserved.
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to
++ * deal in the Software without restriction, including without limitation the
++ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
++ * sell copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
++ * IN THE SOFTWARE.
++ */
++
++#include "uv.h"
++#include "unix/internal.h"
++
++#include <stdint.h>
++#include <time.h>
++#include <assert.h>
++
++#undef NANOSEC
++#define NANOSEC ((uint64_t) 1e9)
++
++int uv__platform_loop_init(uv_loop_t* loop) {
++  return 0;
++}
++
++void uv__platform_loop_delete(uv_loop_t* loop) {
++}
++
++/* From libuv/src/unix/posix-hrtime.c */
++
++uint64_t uv__hrtime(uv_clocktype_t type) {
++  struct timespec ts;
++  clock_gettime(CLOCK_MONOTONIC, &ts);
++  return (((uint64_t) ts.tv_sec) * NANOSEC + ts.tv_nsec);
++}
++
++/* From libuv/src/unix/posix-poll.c */
++
++/* Add a watcher's fd to our poll fds array with its pending events.  */
++static void uv__pollfds_add(uv_loop_t* loop, uv__io_t* w) {
++  size_t i;
++  struct pollfd* pe;
++  int available_slot = -1;
++
++  /* If the fd is already in the set just update its events.  */
++
++  for (i = 0; i < loop->poll_fds_used; ++i) {
++    if (loop->poll_fds[i].fd == w->fd) {
++      loop->poll_fds[i].events = w->pevents;
++      return;
++    }
++    /* Look for available slot to add pollfd */
++    if (available_slot < 0 && loop->poll_fds[i].fd < 0) {
++      available_slot = i;
++    }
++  }
++
++  /* Otherwise, allocate a new slot in the set for the fd.  */
++
++  if (available_slot >= 0) {
++    goto exit_setup_pollfd;
++  }
++
++  /* Try to extend array */
++
++  available_slot = loop->poll_fds_used++;
++  if (loop->poll_fds_used >= CONFIG_LIBUV_NPOLLWAITERS) {
++    /* Error no available pollfd for loop */
++    abort();
++  }
++
++exit_setup_pollfd:
++  pe = &loop->poll_fds[available_slot];
++  pe->fd = w->fd;
++  pe->events = w->pevents;
++}
++
++/* Remove a watcher's fd from our poll fds array.  */
++static void uv__pollfds_del(uv_loop_t* loop, int fd) {
++  size_t i;
++
++  for (i = 0; i < loop->poll_fds_used;) {
++    if (loop->poll_fds[i].fd == fd) {
++      /* swap to last position and remove */
++      --loop->poll_fds_used;
++
++      loop->poll_fds[i] = loop->poll_fds[loop->poll_fds_used];
++
++      if (-1 != fd)
++        return;
++    } else {
++      /* We must only increment the loop counter when the fds do not match.
++       * Otherwise, when we are purging an invalidated fd, the value just
++       * swapped here from the previous end of the array will be skipped.
++       */
++       ++i;
++    }
++  }
++}
++
++void uv__io_poll(uv_loop_t* loop, int timeout) {
++  uint64_t time_base;
++  uint64_t time_diff;
++  QUEUE* q;
++  uv__io_t* w;
++  size_t i;
++  unsigned int nevents;
++  int nfds;
++#ifdef CONFIG_LIBUV_SIGNAL
++  int have_signals;
++#endif
++  struct pollfd* pe;
++  int fd;
++
++  if (loop->nfds == 0) {
++    assert(QUEUE_EMPTY(&loop->watcher_queue));
++    if (timeout > 0) {
++      usleep(1000*timeout);
++    }
++    return;
++  }
++
++  /* Take queued watchers and add their fds to our poll fds array.  */
++  while (!QUEUE_EMPTY(&loop->watcher_queue)) {
++    q = QUEUE_HEAD(&loop->watcher_queue);
++    QUEUE_REMOVE(q);
++    QUEUE_INIT(q);
++
++    w = QUEUE_DATA(q, uv__io_t, watcher_queue);
++    assert(w->pevents != 0);
++    assert(w->fd >= 0);
++    assert(w->fd < (int) loop->nwatchers);
++
++    uv__pollfds_add(loop, w);
++
++    w->events = w->pevents;
++  }
++
++  assert(timeout >= -1);
++  time_base = loop->time;
++
++  /* Loop calls to poll() and processing of results.  If we get some
++   * results from poll() but they turn out not to be interesting to
++   * our caller then we need to loop around and poll() again.
++   */
++  for (;;) {
++    nfds = poll(loop->poll_fds, (nfds_t)loop->poll_fds_used, timeout);
++
++    /* Update loop->time unconditionally. It's tempting to skip the update when
++     * timeout == 0 (i.e. non-blocking poll) but there is no guarantee that the
++     * operating system didn't reschedule our process while in the syscall.
++     */
++    SAVE_ERRNO(uv__update_time(loop));
++
++    if (nfds == 0) {
++      assert(timeout != -1);
++      return;
++    }
++
++    if (nfds == -1) {
++      if (errno != EINTR)
++        abort();
++
++      if (timeout == -1)
++        continue;
++
++      if (timeout == 0)
++        return;
++
++      /* Interrupted by a signal. Update timeout and poll again. */
++      goto update_timeout;
++    }
++
++    /* Initialize a count of events that we care about.  */
++    nevents = 0;
++#ifdef CONFIG_LIBUV_SIGNAL
++    have_signals = 0;
++#endif
++
++    /* Loop over the entire poll fds array looking for returned events.  */
++    for (i = 0; i < loop->poll_fds_used; i++) {
++      pe = loop->poll_fds + i;
++      fd = pe->fd;
++
++      /* Skip invalidated events, see uv__platform_invalidate_fd.  */
++      if (fd == -1)
++        continue;
++
++      assert(fd >= 0);
++      assert((unsigned) fd < loop->nwatchers);
++
++      w = loop->watchers[fd];
++
++      if (w == NULL) {
++        /* File descriptor that we've stopped watching, ignore.  */
++        uv__platform_invalidate_fd(loop, fd);
++        continue;
++      }
++
++      /* Filter out events that user has not requested us to watch
++       * (e.g. POLLNVAL).
++       */
++      pe->revents &= w->pevents | POLLERR | POLLHUP;
++
++      if (pe->revents != 0) {
++#ifdef CONFIG_LIBUV_SIGNAL
++        /* Run signal watchers last.  */
++        if (w == &loop->signal_io_watcher) {
++          have_signals = 1;
++        } else
++#endif
++        {
++          w->cb(loop, w, pe->revents);
++        }
++
++        nevents++;
++      }
++    }
++
++#ifdef CONFIG_LIBUV_SIGNAL
++    if (have_signals != 0)
++      loop->signal_io_watcher.cb(loop, &loop->signal_io_watcher, POLLIN);
++#endif
++
++    /* Purge invalidated fds from our poll fds array.  */
++    uv__pollfds_del(loop, -1);
++
++#ifdef CONFIG_LIBUV_SIGNAL
++    if (have_signals != 0)
++      return;  /* Event loop should cycle now so don't poll again. */
++#endif
++
++    if (nevents != 0)
++      return;
++
++    if (timeout == 0)
++      return;
++
++    if (timeout == -1)
++      continue;
++
++update_timeout:
++    assert(timeout > 0);
++
++    time_diff = loop->time - time_base;
++    if (time_diff >= (uint64_t) timeout)
++      return;
++
++    timeout -= time_diff;
++  }
++}
++
++/* Remove the given fd from our poll fds array because no one
++ * is interested in its events anymore.
++ */
++void uv__platform_invalidate_fd(uv_loop_t* loop, int fd) {
++  size_t i;
++
++  assert(fd >= 0);
++
++  /* Just invalidate fd as allocated in loop structure.  */
++  for (i = 0; i < loop->poll_fds_used; i++)
++    if (loop->poll_fds[i].fd == fd) {
++      loop->poll_fds[i].fd = -1;
++    }
++}
++
++/* Check whether the given fd is supported by poll().  */
++int uv__io_check_fd(uv_loop_t* loop, int fd) {
++  return 0;
++}
+diff --git a/src/unix/poll.c b/src/unix/poll.c
+index 3d5022b..130fbd6 100644
+--- a/src/unix/poll.c
++++ b/src/unix/poll.c
+@@ -75,6 +75,7 @@ int uv_poll_init(uv_loop_t* loop, uv_poll_t* handle, int fd) {
+   if (err)
+     return err;
+ 
++#ifndef __NUTTX__
+   /* If ioctl(FIONBIO) reports ENOTTY, try fcntl(F_GETFL) + fcntl(F_SETFL).
+    * Workaround for e.g. kqueue fds not supporting ioctls.
+    */
+@@ -85,6 +86,7 @@ int uv_poll_init(uv_loop_t* loop, uv_poll_t* handle, int fd) {
+ 
+   if (err)
+     return err;
++#endif
+ 
+   uv__handle_init(loop, (uv_handle_t*) handle, UV_POLL);
+   uv__io_init(&handle->io_watcher, uv__poll_io, fd);
+diff --git a/src/unix/process.c b/src/unix/process.c
+index b021aae..47b5828 100644
+--- a/src/unix/process.c
++++ b/src/unix/process.c
+@@ -111,7 +111,7 @@ static void uv__chld(uv_signal_t* handle, int signum) {
+   assert(QUEUE_EMPTY(&pending));
+ }
+ 
+-
++#if 0
+ static int uv__make_socketpair(int fds[2]) {
+ #if defined(__FreeBSD__) || defined(__linux__)
+   if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, fds))
+@@ -137,7 +137,7 @@ static int uv__make_socketpair(int fds[2]) {
+   return 0;
+ #endif
+ }
+-
++#endif
+ 
+ int uv__make_pipe(int fds[2], int flags) {
+ #if defined(__FreeBSD__) || defined(__linux__)
+@@ -172,7 +172,7 @@ fail:
+ #endif
+ }
+ 
+-
++#if 0
+ /*
+  * Used for initializing stdio streams like options.stdin_stream. Returns
+  * zero on success. See also the cleanup section in uv_spawn().
+@@ -243,7 +243,7 @@ static void uv__process_close_stream(uv_stdio_container_t* container) {
+   if (!(container->flags & UV_CREATE_PIPE)) return;
+   uv__stream_close(container->data.stream);
+ }
+-
++#endif
+ 
+ static void uv__write_int(int fd, int val) {
+   ssize_t n;
+@@ -259,7 +259,8 @@ static void uv__write_int(int fd, int val) {
+ }
+ 
+ 
+-#if !(defined(__APPLE__) && (TARGET_OS_TV || TARGET_OS_WATCH))
++#if !(defined(__APPLE__) && (TARGET_OS_TV || TARGET_OS_WATCH)) \
++ && !defined(__NUTTX__)
+ /* execvp is marked __WATCHOS_PROHIBITED __TVOS_PROHIBITED, so must be
+  * avoided. Since this isn't called on those targets, the function
+  * doesn't even need to be defined for them.
+@@ -404,7 +405,7 @@ static void uv__process_child_init(const uv_process_options_t* options,
+ }
+ #endif
+ 
+-
++#if 0
+ int uv_spawn(uv_loop_t* loop,
+              uv_process_t* process,
+              const uv_process_options_t* options) {
+@@ -572,7 +573,7 @@ error:
+   return err;
+ #endif
+ }
+-
++#endif
+ 
+ int uv_process_kill(uv_process_t* process, int signum) {
+   return uv_kill(process->pid, signum);
+diff --git a/src/unix/signal.c b/src/unix/signal.c
+index 1c83e09..2ba5089 100644
+--- a/src/unix/signal.c
++++ b/src/unix/signal.c
+@@ -63,6 +63,7 @@ RB_GENERATE_STATIC(uv__signal_tree_s,
+ static void uv__signal_global_reinit(void);
+ 
+ static void uv__signal_global_init(void) {
++#ifndef __NUTTX__
+   if (uv__signal_lock_pipefd[0] == -1)
+     /* pthread_atfork can register before and after handlers, one
+      * for each child. This only registers one for the child. That
+@@ -72,7 +73,7 @@ static void uv__signal_global_init(void) {
+      */
+     if (pthread_atfork(NULL, NULL, &uv__signal_global_reinit))
+       abort();
+-
++#endif
+   uv__signal_global_reinit();
+ }
+ 
+@@ -229,8 +230,10 @@ static int uv__signal_register_handler(int signum, int oneshot) {
+     abort();
+   sa.sa_handler = uv__signal_handler;
+   sa.sa_flags = SA_RESTART;
++#ifndef __NUTTX__
+   if (oneshot)
+     sa.sa_flags |= SA_RESETHAND;
++#endif
+ 
+   /* XXX save old action so we can restore it later on? */
+   if (sigaction(signum, &sa, NULL))
+diff --git a/src/unix/thread.c b/src/unix/thread.c
+index 1a85d1d..1b962c1 100644
+--- a/src/unix/thread.c
++++ b/src/unix/thread.c
+@@ -161,7 +161,7 @@ void uv_barrier_destroy(uv_barrier_t* barrier) {
+ 
+ #endif
+ 
+-
++#if 0
+ /* On MacOS, threads other than the main thread are created with a reduced
+  * stack size by default.  Adjust to RLIMIT_STACK aligned to the page size.
+  *
+@@ -205,14 +205,19 @@ static size_t thread_stack_size(void) {
+   return 2 << 20;  /* glibc default. */
+ #endif
+ }
+-
++#endif
+ 
+ int uv_thread_create(uv_thread_t *tid, void (*entry)(void *arg), void *arg) {
++#ifdef __NUTTX__
++  return pthread_create(tid, NULL, (pthread_startroutine_t)entry, arg);
++#else
+   uv_thread_options_t params;
+   params.flags = UV_THREAD_NO_FLAGS;
+   return uv_thread_create_ex(tid, &params, entry, arg);
++#endif
+ }
+ 
++#if 0
+ int uv_thread_create_ex(uv_thread_t* tid,
+                         const uv_thread_options_t* params,
+                         void (*entry)(void *arg),
+@@ -263,7 +268,7 @@ int uv_thread_create_ex(uv_thread_t* tid,
+ 
+   return UV__ERR(err);
+ }
+-
++#endif
+ 
+ uv_thread_t uv_thread_self(void) {
+   return pthread_self();
+@@ -280,7 +285,7 @@ int uv_thread_equal(const uv_thread_t* t1, const uv_thread_t* t2) {
+ 
+ 
+ int uv_mutex_init(uv_mutex_t* mutex) {
+-#if defined(NDEBUG) || !defined(PTHREAD_MUTEX_ERRORCHECK)
++#if defined(NDEBUG) || !defined(PTHREAD_MUTEX_ERRORCHECK) || defined(__NUTTX__)
+   return UV__ERR(pthread_mutex_init(mutex, NULL));
+ #else
+   pthread_mutexattr_t attr;
+@@ -709,9 +714,11 @@ int uv_cond_init(uv_cond_t* cond) {
+   if (err)
+     return UV__ERR(err);
+ 
++#ifndef __NUTTX__
+   err = pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
+   if (err)
+     goto error2;
++#endif
+ 
+   err = pthread_cond_init(cond, &attr);
+   if (err)
+diff --git a/src/uv-common.c b/src/uv-common.c
+index 0cfb921..40034b9 100644
+--- a/src/uv-common.c
++++ b/src/uv-common.c
+@@ -217,7 +217,7 @@ const char* uv_strerror(int err) {
+ }
+ #undef UV_STRERROR_GEN
+ 
+-
++#if 0
+ int uv_ip4_addr(const char* ip, int port, struct sockaddr_in* addr) {
+   memset(addr, 0, sizeof(*addr));
+   addr->sin_family = AF_INET;
+@@ -481,7 +481,7 @@ int uv_udp_recv_stop(uv_udp_t* handle) {
+   else
+     return uv__udp_recv_stop(handle);
+ }
+-
++#endif
+ 
+ void uv_walk(uv_loop_t* loop, uv_walk_cb walk_cb, void* arg) {
+   QUEUE queue;
+@@ -581,6 +581,7 @@ size_t uv__count_bufs(const uv_buf_t bufs[], unsigned int nbufs) {
+   return bytes;
+ }
+ 
++#if 0
+ int uv_recv_buffer_size(uv_handle_t* handle, int* value) {
+   return uv__socket_sockopt(handle, SO_RCVBUF, value);
+ }
+@@ -588,6 +589,7 @@ int uv_recv_buffer_size(uv_handle_t* handle, int* value) {
+ int uv_send_buffer_size(uv_handle_t* handle, int *value) {
+   return uv__socket_sockopt(handle, SO_SNDBUF, value);
+ }
++#endif
+ 
+ int uv_fs_event_getpath(uv_fs_event_t* handle, char* buffer, size_t* size) {
+   size_t required_len;
+@@ -742,7 +744,7 @@ void uv__fs_readdir_cleanup(uv_fs_t* req) {
+   }
+ }
+ 
+-
++#if 0
+ int uv_loop_configure(uv_loop_t* loop, uv_loop_option option, ...) {
+   va_list ap;
+   int err;
+@@ -754,7 +756,7 @@ int uv_loop_configure(uv_loop_t* loop, uv_loop_option option, ...) {
+ 
+   return err;
+ }
+-
++#endif
+ 
+ static uv_loop_t default_loop_struct;
+ static uv_loop_t* default_loop_ptr;
+@@ -863,7 +865,9 @@ void uv_library_shutdown(void) {
+     return;
+ 
+   uv__process_title_cleanup();
++#ifdef CONFIG_LIBUV_SIGNAL
+   uv__signal_cleanup();
++#endif
+   uv__threadpool_cleanup();
+   uv__store_relaxed(&was_shutdown, 1);
+ }
+-- 
+2.17.1
+

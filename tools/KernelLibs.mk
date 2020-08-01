@@ -127,6 +127,10 @@ ifeq ($(CONFIG_OPENAMP),y)
 NUTTXLIBS += staging$(DELIM)libopenamp$(LIBEXT)
 endif
 
+ifeq ($(CONFIG_LIBUV),y)
+NUTTXLIBS += staging$(DELIM)libuv$(LIBEXT)
+endif
+
 # Export only the user libraries
 
 EXPORTLIBS = $(USERLIBS)

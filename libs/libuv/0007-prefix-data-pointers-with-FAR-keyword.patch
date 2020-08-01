@@ -1,0 +1,3965 @@
+From f2e1f73c92bd00837bfd02574fbf78867ac79cec Mon Sep 17 00:00:00 2001
+From: spiriou <spiriou31@gmail.com>
+Date: Mon, 3 Aug 2020 22:32:25 +0200
+Subject: [PATCH 7/8] prefix data pointers with FAR keyword
+
+---
+ include/uv.h            | 928 ++++++++++++++++++++--------------------
+ include/uv/threadpool.h |   8 +-
+ include/uv/unix.h       |  86 ++--
+ src/heap-inl.h          |  58 +--
+ src/queue.h             |   4 +-
+ src/strscpy.c           |   2 +-
+ src/strscpy.h           |   2 +-
+ src/threadpool.c        |  50 +--
+ src/timer.c             |  38 +-
+ src/unix/core.c         | 102 ++---
+ src/unix/internal.h     | 118 ++---
+ src/unix/loop-watcher.c |  14 +-
+ src/unix/loop.c         |   6 +-
+ src/unix/no-proctitle.c |   6 +-
+ src/unix/nuttx.c        |  22 +-
+ src/unix/poll.c         |  14 +-
+ src/unix/process.c      |  12 +-
+ src/unix/thread.c       | 122 +++---
+ src/uv-common.c         | 104 ++---
+ src/uv-common.h         |  90 ++--
+ 20 files changed, 893 insertions(+), 893 deletions(-)
+
+diff --git a/include/uv.h b/include/uv.h
+index fec6631..b4e9700 100644
+--- a/include/uv.h
++++ b/include/uv.h
+@@ -258,11 +258,11 @@ typedef enum {
+ 
+ 
+ UV_EXTERN unsigned int uv_version(void);
+-UV_EXTERN const char* uv_version_string(void);
++UV_EXTERN FAR const char* uv_version_string(void);
+ 
+-typedef void* (*uv_malloc_func)(size_t size);
+-typedef void* (*uv_realloc_func)(void* ptr, size_t size);
+-typedef void* (*uv_calloc_func)(size_t count, size_t size);
++typedef FAR void* (*uv_malloc_func)(size_t size);
++typedef FAR void* (*uv_realloc_func)(void* ptr, size_t size);
++typedef FAR void* (*uv_calloc_func)(size_t count, size_t size);
+ typedef void (*uv_free_func)(void* ptr);
+ 
+ UV_EXTERN void uv_library_shutdown(void);
+@@ -272,7 +272,7 @@ UV_EXTERN int uv_replace_allocator(uv_malloc_func malloc_func,
+                                    uv_calloc_func calloc_func,
+                                    uv_free_func free_func);
+ 
+-UV_EXTERN uv_loop_t* uv_default_loop(void);
++UV_EXTERN FAR uv_loop_t* uv_default_loop(void);
+ UV_EXTERN int uv_loop_init(uv_loop_t* loop);
+ UV_EXTERN int uv_loop_close(uv_loop_t* loop);
+ /*
+@@ -280,61 +280,61 @@ UV_EXTERN int uv_loop_close(uv_loop_t* loop);
+  *  This function is DEPRECATED (to be removed after 0.12), users should
+  *  allocate the loop manually and use uv_loop_init instead.
+  */
+-UV_EXTERN uv_loop_t* uv_loop_new(void);
++UV_EXTERN FAR uv_loop_t* uv_loop_new(void);
+ /*
+  * NOTE:
+  *  This function is DEPRECATED (to be removed after 0.12). Users should use
+  *  uv_loop_close and free the memory manually instead.
+  */
+-UV_EXTERN void uv_loop_delete(uv_loop_t*);
++UV_EXTERN void uv_loop_delete(FAR uv_loop_t*);
+ UV_EXTERN size_t uv_loop_size(void);
+-UV_EXTERN int uv_loop_alive(const uv_loop_t* loop);
+-UV_EXTERN int uv_loop_configure(uv_loop_t* loop, uv_loop_option option, ...);
+-UV_EXTERN int uv_loop_fork(uv_loop_t* loop);
++UV_EXTERN int uv_loop_alive(FAR const uv_loop_t* loop);
++UV_EXTERN int uv_loop_configure(FAR uv_loop_t* loop, uv_loop_option option, ...);
++UV_EXTERN int uv_loop_fork(FAR uv_loop_t* loop);
+ 
+-UV_EXTERN int uv_run(uv_loop_t*, uv_run_mode mode);
+-UV_EXTERN void uv_stop(uv_loop_t*);
++UV_EXTERN int uv_run(FAR uv_loop_t*, uv_run_mode mode);
++UV_EXTERN void uv_stop(FAR uv_loop_t*);
+ 
+-UV_EXTERN void uv_ref(uv_handle_t*);
+-UV_EXTERN void uv_unref(uv_handle_t*);
+-UV_EXTERN int uv_has_ref(const uv_handle_t*);
++UV_EXTERN void uv_ref(FAR uv_handle_t*);
++UV_EXTERN void uv_unref(FAR uv_handle_t*);
++UV_EXTERN int uv_has_ref(FAR const uv_handle_t*);
+ 
+-UV_EXTERN void uv_update_time(uv_loop_t*);
+-UV_EXTERN uint64_t uv_now(const uv_loop_t*);
++UV_EXTERN void uv_update_time(FAR uv_loop_t*);
++UV_EXTERN uint64_t uv_now(FAR const uv_loop_t*);
+ 
+-UV_EXTERN int uv_backend_fd(const uv_loop_t*);
+-UV_EXTERN int uv_backend_timeout(const uv_loop_t*);
++UV_EXTERN int uv_backend_fd(FAR const uv_loop_t*);
++UV_EXTERN int uv_backend_timeout(FAR const uv_loop_t*);
+ 
+-typedef void (*uv_alloc_cb)(uv_handle_t* handle,
++typedef void (*uv_alloc_cb)(FAR uv_handle_t* handle,
+                             size_t suggested_size,
+-                            uv_buf_t* buf);
+-typedef void (*uv_read_cb)(uv_stream_t* stream,
++                            FAR uv_buf_t* buf);
++typedef void (*uv_read_cb)(FAR uv_stream_t* stream,
+                            ssize_t nread,
+-                           const uv_buf_t* buf);
+-typedef void (*uv_write_cb)(uv_write_t* req, int status);
+-typedef void (*uv_connect_cb)(uv_connect_t* req, int status);
+-typedef void (*uv_shutdown_cb)(uv_shutdown_t* req, int status);
+-typedef void (*uv_connection_cb)(uv_stream_t* server, int status);
+-typedef void (*uv_close_cb)(uv_handle_t* handle);
+-typedef void (*uv_poll_cb)(uv_poll_t* handle, int status, int events);
+-typedef void (*uv_timer_cb)(uv_timer_t* handle);
+-typedef void (*uv_async_cb)(uv_async_t* handle);
+-typedef void (*uv_prepare_cb)(uv_prepare_t* handle);
+-typedef void (*uv_check_cb)(uv_check_t* handle);
+-typedef void (*uv_idle_cb)(uv_idle_t* handle);
+-typedef void (*uv_exit_cb)(uv_process_t*, int64_t exit_status, int term_signal);
+-typedef void (*uv_walk_cb)(uv_handle_t* handle, void* arg);
+-typedef void (*uv_fs_cb)(uv_fs_t* req);
+-typedef void (*uv_work_cb)(uv_work_t* req);
+-typedef void (*uv_after_work_cb)(uv_work_t* req, int status);
+-typedef void (*uv_getaddrinfo_cb)(uv_getaddrinfo_t* req,
++                           FAR const uv_buf_t* buf);
++typedef void (*uv_write_cb)(FAR uv_write_t* req, int status);
++typedef void (*uv_connect_cb)(FAR uv_connect_t* req, int status);
++typedef void (*uv_shutdown_cb)(FAR uv_shutdown_t* req, int status);
++typedef void (*uv_connection_cb)(FAR uv_stream_t* server, int status);
++typedef void (*uv_close_cb)(FAR uv_handle_t* handle);
++typedef void (*uv_poll_cb)(FAR uv_poll_t* handle, int status, int events);
++typedef void (*uv_timer_cb)(FAR uv_timer_t* handle);
++typedef void (*uv_async_cb)(FAR uv_async_t* handle);
++typedef void (*uv_prepare_cb)(FAR uv_prepare_t* handle);
++typedef void (*uv_check_cb)(FAR uv_check_t* handle);
++typedef void (*uv_idle_cb)(FAR uv_idle_t* handle);
++typedef void (*uv_exit_cb)(FAR uv_process_t*, int64_t exit_status, int term_signal);
++typedef void (*uv_walk_cb)(FAR uv_handle_t* handle, void* arg);
++typedef void (*uv_fs_cb)(FAR uv_fs_t* req);
++typedef void (*uv_work_cb)(FAR uv_work_t* req);
++typedef void (*uv_after_work_cb)(FAR uv_work_t* req, int status);
++typedef void (*uv_getaddrinfo_cb)(FAR uv_getaddrinfo_t* req,
+                                   int status,
+-                                  struct addrinfo* res);
+-typedef void (*uv_getnameinfo_cb)(uv_getnameinfo_t* req,
++                                  FAR struct addrinfo* res);
++typedef void (*uv_getnameinfo_cb)(FAR uv_getnameinfo_t* req,
+                                   int status,
+-                                  const char* hostname,
+-                                  const char* service);
+-typedef void (*uv_random_cb)(uv_random_t* req,
++                                  FAR const char* hostname,
++                                  FAR const char* service);
++typedef void (*uv_random_cb)(FAR uv_random_t* req,
+                              int status,
+                              void* buf,
+                              size_t buflen);
+@@ -365,17 +365,17 @@ typedef struct {
+ } uv_stat_t;
+ 
+ 
+-typedef void (*uv_fs_event_cb)(uv_fs_event_t* handle,
+-                               const char* filename,
++typedef void (*uv_fs_event_cb)(FAR uv_fs_event_t* handle,
++                               FAR const char* filename,
+                                int events,
+                                int status);
+ 
+-typedef void (*uv_fs_poll_cb)(uv_fs_poll_t* handle,
++typedef void (*uv_fs_poll_cb)(FAR uv_fs_poll_t* handle,
+                               int status,
+-                              const uv_stat_t* prev,
+-                              const uv_stat_t* curr);
++                              FAR const uv_stat_t* prev,
++                              FAR const uv_stat_t* curr);
+ 
+-typedef void (*uv_signal_cb)(uv_signal_t* handle, int signum);
++typedef void (*uv_signal_cb)(FAR uv_signal_t* handle, int signum);
+ 
+ 
+ typedef enum {
+@@ -386,16 +386,16 @@ typedef enum {
+ 
+ UV_EXTERN int uv_translate_sys_error(int sys_errno);
+ 
+-UV_EXTERN const char* uv_strerror(int err);
+-UV_EXTERN char* uv_strerror_r(int err, char* buf, size_t buflen);
++UV_EXTERN FAR const char* uv_strerror(int err);
++UV_EXTERN FAR char* uv_strerror_r(int err, FAR char* buf, size_t buflen);
+ 
+-UV_EXTERN const char* uv_err_name(int err);
+-UV_EXTERN char* uv_err_name_r(int err, char* buf, size_t buflen);
++UV_EXTERN FAR const char* uv_err_name(int err);
++UV_EXTERN FAR char* uv_err_name_r(int err, FAR char* buf, size_t buflen);
+ 
+ 
+ #define UV_REQ_FIELDS                                                         \
+   /* public */                                                                \
+-  void* data;                                                                 \
++  FAR void* data;                                                             \
+   /* read-only */                                                             \
+   uv_req_type type;                                                           \
+   /* private */                                                               \
+@@ -412,8 +412,8 @@ struct uv_req_s {
+ UV_PRIVATE_REQ_TYPES
+ 
+ 
+-UV_EXTERN int uv_shutdown(uv_shutdown_t* req,
+-                          uv_stream_t* handle,
++UV_EXTERN int uv_shutdown(FAR uv_shutdown_t* req,
++                          FAR uv_stream_t* handle,
+                           uv_shutdown_cb cb);
+ 
+ struct uv_shutdown_s {
+@@ -426,13 +426,13 @@ struct uv_shutdown_s {
+ 
+ #define UV_HANDLE_FIELDS                                                      \
+   /* public */                                                                \
+-  void* data;                                                                 \
++  FAR void* data;                                                             \
+   /* read-only */                                                             \
+-  uv_loop_t* loop;                                                            \
++  FAR uv_loop_t* loop;                                                        \
+   uv_handle_type type;                                                        \
+   /* private */                                                               \
+-  uv_close_cb close_cb;                                                       \
+-  void* handle_queue[2];                                                      \
++  FAR uv_close_cb close_cb;                                                   \
++  FAR void* handle_queue[2];                                                  \
+   union {                                                                     \
+     int fd;                                                                   \
+     void* reserved[4];                                                        \
+@@ -445,34 +445,34 @@ struct uv_handle_s {
+ };
+ 
+ UV_EXTERN size_t uv_handle_size(uv_handle_type type);
+-UV_EXTERN uv_handle_type uv_handle_get_type(const uv_handle_t* handle);
+-UV_EXTERN const char* uv_handle_type_name(uv_handle_type type);
+-UV_EXTERN void* uv_handle_get_data(const uv_handle_t* handle);
+-UV_EXTERN uv_loop_t* uv_handle_get_loop(const uv_handle_t* handle);
+-UV_EXTERN void uv_handle_set_data(uv_handle_t* handle, void* data);
++UV_EXTERN uv_handle_type uv_handle_get_type(FAR const uv_handle_t* handle);
++UV_EXTERN FAR const char* uv_handle_type_name(uv_handle_type type);
++UV_EXTERN FAR void* uv_handle_get_data(FAR const uv_handle_t* handle);
++UV_EXTERN FAR uv_loop_t* uv_handle_get_loop(FAR const uv_handle_t* handle);
++UV_EXTERN void uv_handle_set_data(FAR uv_handle_t* handle, void* data);
+ 
+ UV_EXTERN size_t uv_req_size(uv_req_type type);
+-UV_EXTERN void* uv_req_get_data(const uv_req_t* req);
+-UV_EXTERN void uv_req_set_data(uv_req_t* req, void* data);
+-UV_EXTERN uv_req_type uv_req_get_type(const uv_req_t* req);
+-UV_EXTERN const char* uv_req_type_name(uv_req_type type);
++UV_EXTERN FAR void* uv_req_get_data(FAR const uv_req_t* req);
++UV_EXTERN void uv_req_set_data(FAR uv_req_t* req, FAR void* data);
++UV_EXTERN uv_req_type uv_req_get_type(FAR const uv_req_t* req);
++UV_EXTERN FAR const char* uv_req_type_name(uv_req_type type);
+ 
+-UV_EXTERN int uv_is_active(const uv_handle_t* handle);
++UV_EXTERN int uv_is_active(FAR const uv_handle_t* handle);
+ 
+-UV_EXTERN void uv_walk(uv_loop_t* loop, uv_walk_cb walk_cb, void* arg);
++UV_EXTERN void uv_walk(FAR uv_loop_t* loop, uv_walk_cb walk_cb, FAR void* arg);
+ 
+ /* Helpers for ad hoc debugging, no API/ABI stability guaranteed. */
+-UV_EXTERN void uv_print_all_handles(uv_loop_t* loop, FILE* stream);
+-UV_EXTERN void uv_print_active_handles(uv_loop_t* loop, FILE* stream);
++UV_EXTERN void uv_print_all_handles(FAR uv_loop_t* loop, FAR FILE* stream);
++UV_EXTERN void uv_print_active_handles(FAR uv_loop_t* loop, FAR FILE* stream);
+ 
+-UV_EXTERN void uv_close(uv_handle_t* handle, uv_close_cb close_cb);
++UV_EXTERN void uv_close(FAR uv_handle_t* handle, uv_close_cb close_cb);
+ 
+-UV_EXTERN int uv_send_buffer_size(uv_handle_t* handle, int* value);
+-UV_EXTERN int uv_recv_buffer_size(uv_handle_t* handle, int* value);
++UV_EXTERN int uv_send_buffer_size(FAR uv_handle_t* handle, FAR int* value);
++UV_EXTERN int uv_recv_buffer_size(FAR uv_handle_t* handle, FAR int* value);
+ 
+-UV_EXTERN int uv_fileno(const uv_handle_t* handle, uv_os_fd_t* fd);
++UV_EXTERN int uv_fileno(FAR const uv_handle_t* handle, FAR uv_os_fd_t* fd);
+ 
+-UV_EXTERN uv_buf_t uv_buf_init(char* base, unsigned int len);
++UV_EXTERN uv_buf_t uv_buf_init(FAR char* base, unsigned int len);
+ 
+ 
+ #define UV_STREAM_FIELDS                                                      \
+@@ -495,47 +495,47 @@ struct uv_stream_s {
+   UV_STREAM_FIELDS
+ };
+ 
+-UV_EXTERN size_t uv_stream_get_write_queue_size(const uv_stream_t* stream);
++UV_EXTERN size_t uv_stream_get_write_queue_size(FAR const uv_stream_t* stream);
+ 
+-UV_EXTERN int uv_listen(uv_stream_t* stream, int backlog, uv_connection_cb cb);
+-UV_EXTERN int uv_accept(uv_stream_t* server, uv_stream_t* client);
++UV_EXTERN int uv_listen(FAR uv_stream_t* stream, int backlog, uv_connection_cb cb);
++UV_EXTERN int uv_accept(FAR uv_stream_t* server, FAR uv_stream_t* client);
+ 
+-UV_EXTERN int uv_read_start(uv_stream_t*,
++UV_EXTERN int uv_read_start(FAR uv_stream_t*,
+                             uv_alloc_cb alloc_cb,
+                             uv_read_cb read_cb);
+-UV_EXTERN int uv_read_stop(uv_stream_t*);
++UV_EXTERN int uv_read_stop(FAR uv_stream_t*);
+ 
+-UV_EXTERN int uv_write(uv_write_t* req,
+-                       uv_stream_t* handle,
++UV_EXTERN int uv_write(FAR uv_write_t* req,
++                       FAR uv_stream_t* handle,
+                        const uv_buf_t bufs[],
+                        unsigned int nbufs,
+                        uv_write_cb cb);
+-UV_EXTERN int uv_write2(uv_write_t* req,
+-                        uv_stream_t* handle,
+-                        const uv_buf_t bufs[],
++UV_EXTERN int uv_write2(FAR uv_write_t* req,
++                        FAR uv_stream_t* handle,
++                        FAR const uv_buf_t bufs[],
+                         unsigned int nbufs,
+-                        uv_stream_t* send_handle,
++                        FAR uv_stream_t* send_handle,
+                         uv_write_cb cb);
+-UV_EXTERN int uv_try_write(uv_stream_t* handle,
+-                           const uv_buf_t bufs[],
++UV_EXTERN int uv_try_write(FAR uv_stream_t* handle,
++                           FAR const uv_buf_t bufs[],
+                            unsigned int nbufs);
+ 
+ /* uv_write_t is a subclass of uv_req_t. */
+ struct uv_write_s {
+   UV_REQ_FIELDS
+   uv_write_cb cb;
+-  uv_stream_t* send_handle; /* TODO: make private and unix-only in v2.x. */
+-  uv_stream_t* handle;
++  FAR uv_stream_t* send_handle; /* TODO: make private and unix-only in v2.x. */
++  FAR uv_stream_t* handle;
+   UV_WRITE_PRIVATE_FIELDS
+ };
+ 
+ 
+-UV_EXTERN int uv_is_readable(const uv_stream_t* handle);
+-UV_EXTERN int uv_is_writable(const uv_stream_t* handle);
++UV_EXTERN int uv_is_readable(FAR const uv_stream_t* handle);
++UV_EXTERN int uv_is_writable(FAR const uv_stream_t* handle);
+ 
+-UV_EXTERN int uv_stream_set_blocking(uv_stream_t* handle, int blocking);
++UV_EXTERN int uv_stream_set_blocking(FAR uv_stream_t* handle, int blocking);
+ 
+-UV_EXTERN int uv_is_closing(const uv_handle_t* handle);
++UV_EXTERN int uv_is_closing(FAR const uv_handle_t* handle);
+ 
+ 
+ /*
+@@ -549,40 +549,40 @@ struct uv_tcp_s {
+   UV_TCP_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_tcp_init(uv_loop_t*, uv_tcp_t* handle);
+-UV_EXTERN int uv_tcp_init_ex(uv_loop_t*, uv_tcp_t* handle, unsigned int flags);
+-UV_EXTERN int uv_tcp_open(uv_tcp_t* handle, uv_os_sock_t sock);
+-UV_EXTERN int uv_tcp_nodelay(uv_tcp_t* handle, int enable);
+-UV_EXTERN int uv_tcp_keepalive(uv_tcp_t* handle,
++UV_EXTERN int uv_tcp_init(FAR uv_loop_t*, FAR uv_tcp_t* handle);
++UV_EXTERN int uv_tcp_init_ex(FAR uv_loop_t*, FAR uv_tcp_t* handle, unsigned int flags);
++UV_EXTERN int uv_tcp_open(FAR uv_tcp_t* handle, uv_os_sock_t sock);
++UV_EXTERN int uv_tcp_nodelay(FAR uv_tcp_t* handle, int enable);
++UV_EXTERN int uv_tcp_keepalive(FAR uv_tcp_t* handle,
+                                int enable,
+                                unsigned int delay);
+-UV_EXTERN int uv_tcp_simultaneous_accepts(uv_tcp_t* handle, int enable);
++UV_EXTERN int uv_tcp_simultaneous_accepts(FAR uv_tcp_t* handle, int enable);
+ 
+ enum uv_tcp_flags {
+   /* Used with uv_tcp_bind, when an IPv6 address is used. */
+   UV_TCP_IPV6ONLY = 1
+ };
+ 
+-UV_EXTERN int uv_tcp_bind(uv_tcp_t* handle,
+-                          const struct sockaddr* addr,
++UV_EXTERN int uv_tcp_bind(FAR uv_tcp_t* handle,
++                          FAR const struct sockaddr* addr,
+                           unsigned int flags);
+-UV_EXTERN int uv_tcp_getsockname(const uv_tcp_t* handle,
+-                                 struct sockaddr* name,
+-                                 int* namelen);
+-UV_EXTERN int uv_tcp_getpeername(const uv_tcp_t* handle,
+-                                 struct sockaddr* name,
+-                                 int* namelen);
+-UV_EXTERN int uv_tcp_close_reset(uv_tcp_t* handle, uv_close_cb close_cb);
+-UV_EXTERN int uv_tcp_connect(uv_connect_t* req,
+-                             uv_tcp_t* handle,
+-                             const struct sockaddr* addr,
++UV_EXTERN int uv_tcp_getsockname(FAR const uv_tcp_t* handle,
++                                 FAR struct sockaddr* name,
++                                 FAR int* namelen);
++UV_EXTERN int uv_tcp_getpeername(FAR const uv_tcp_t* handle,
++                                 FAR struct sockaddr* name,
++                                 FAR int* namelen);
++UV_EXTERN int uv_tcp_close_reset(FAR uv_tcp_t* handle, uv_close_cb close_cb);
++UV_EXTERN int uv_tcp_connect(FAR uv_connect_t* req,
++                             FAR uv_tcp_t* handle,
++                             FAR const struct sockaddr* addr,
+                              uv_connect_cb cb);
+ 
+ /* uv_connect_t is a subclass of uv_req_t. */
+ struct uv_connect_s {
+   UV_REQ_FIELDS
+   uv_connect_cb cb;
+-  uv_stream_t* handle;
++  FAR uv_stream_t* handle;
+   UV_CONNECT_PRIVATE_FIELDS
+ };
+ 
+@@ -620,11 +620,11 @@ enum uv_udp_flags {
+   UV_UDP_RECVMMSG = 256
+ };
+ 
+-typedef void (*uv_udp_send_cb)(uv_udp_send_t* req, int status);
+-typedef void (*uv_udp_recv_cb)(uv_udp_t* handle,
++typedef void (*uv_udp_send_cb)(FAR uv_udp_send_t* req, int status);
++typedef void (*uv_udp_recv_cb)(FAR uv_udp_t* handle,
+                                ssize_t nread,
+-                               const uv_buf_t* buf,
+-                               const struct sockaddr* addr,
++                               FAR const uv_buf_t* buf,
++                               FAR const struct sockaddr* addr,
+                                unsigned flags);
+ 
+ /* uv_udp_t is a subclass of uv_handle_t. */
+@@ -646,56 +646,56 @@ struct uv_udp_s {
+ /* uv_udp_send_t is a subclass of uv_req_t. */
+ struct uv_udp_send_s {
+   UV_REQ_FIELDS
+-  uv_udp_t* handle;
++  FAR uv_udp_t* handle;
+   uv_udp_send_cb cb;
+   UV_UDP_SEND_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_udp_init(uv_loop_t*, uv_udp_t* handle);
+-UV_EXTERN int uv_udp_init_ex(uv_loop_t*, uv_udp_t* handle, unsigned int flags);
+-UV_EXTERN int uv_udp_open(uv_udp_t* handle, uv_os_sock_t sock);
+-UV_EXTERN int uv_udp_bind(uv_udp_t* handle,
+-                          const struct sockaddr* addr,
++UV_EXTERN int uv_udp_init(FAR uv_loop_t*, FAR uv_udp_t* handle);
++UV_EXTERN int uv_udp_init_ex(FAR uv_loop_t*, FAR uv_udp_t* handle, unsigned int flags);
++UV_EXTERN int uv_udp_open(FAR uv_udp_t* handle, uv_os_sock_t sock);
++UV_EXTERN int uv_udp_bind(FAR uv_udp_t* handle,
++                          FAR const struct sockaddr* addr,
+                           unsigned int flags);
+-UV_EXTERN int uv_udp_connect(uv_udp_t* handle, const struct sockaddr* addr);
+-
+-UV_EXTERN int uv_udp_getpeername(const uv_udp_t* handle,
+-                                 struct sockaddr* name,
+-                                 int* namelen);
+-UV_EXTERN int uv_udp_getsockname(const uv_udp_t* handle,
+-                                 struct sockaddr* name,
+-                                 int* namelen);
+-UV_EXTERN int uv_udp_set_membership(uv_udp_t* handle,
+-                                    const char* multicast_addr,
+-                                    const char* interface_addr,
++UV_EXTERN int uv_udp_connect(FAR uv_udp_t* handle, FAR const struct sockaddr* addr);
++
++UV_EXTERN int uv_udp_getpeername(FAR const uv_udp_t* handle,
++                                 FAR struct sockaddr* name,
++                                 FAR int* namelen);
++UV_EXTERN int uv_udp_getsockname(FAR const uv_udp_t* handle,
++                                 FAR struct sockaddr* name,
++                                 FAR int* namelen);
++UV_EXTERN int uv_udp_set_membership(FAR uv_udp_t* handle,
++                                    FAR const char* multicast_addr,
++                                    FAR const char* interface_addr,
+                                     uv_membership membership);
+-UV_EXTERN int uv_udp_set_source_membership(uv_udp_t* handle,
+-                                           const char* multicast_addr,
+-                                           const char* interface_addr,
+-                                           const char* source_addr,
++UV_EXTERN int uv_udp_set_source_membership(FAR uv_udp_t* handle,
++                                           FAR const char* multicast_addr,
++                                           FAR const char* interface_addr,
++                                           FAR const char* source_addr,
+                                            uv_membership membership);
+-UV_EXTERN int uv_udp_set_multicast_loop(uv_udp_t* handle, int on);
+-UV_EXTERN int uv_udp_set_multicast_ttl(uv_udp_t* handle, int ttl);
+-UV_EXTERN int uv_udp_set_multicast_interface(uv_udp_t* handle,
+-                                             const char* interface_addr);
+-UV_EXTERN int uv_udp_set_broadcast(uv_udp_t* handle, int on);
+-UV_EXTERN int uv_udp_set_ttl(uv_udp_t* handle, int ttl);
+-UV_EXTERN int uv_udp_send(uv_udp_send_t* req,
+-                          uv_udp_t* handle,
+-                          const uv_buf_t bufs[],
++UV_EXTERN int uv_udp_set_multicast_loop(FAR uv_udp_t* handle, int on);
++UV_EXTERN int uv_udp_set_multicast_ttl(FAR uv_udp_t* handle, int ttl);
++UV_EXTERN int uv_udp_set_multicast_interface(FAR uv_udp_t* handle,
++                                             FAR const char* interface_addr);
++UV_EXTERN int uv_udp_set_broadcast(FAR uv_udp_t* handle, int on);
++UV_EXTERN int uv_udp_set_ttl(FAR uv_udp_t* handle, int ttl);
++UV_EXTERN int uv_udp_send(FAR uv_udp_send_t* req,
++                          FAR uv_udp_t* handle,
++                          FAR const uv_buf_t bufs[],
+                           unsigned int nbufs,
+-                          const struct sockaddr* addr,
++                          FAR const struct sockaddr* addr,
+                           uv_udp_send_cb send_cb);
+-UV_EXTERN int uv_udp_try_send(uv_udp_t* handle,
+-                              const uv_buf_t bufs[],
++UV_EXTERN int uv_udp_try_send(FAR uv_udp_t* handle,
++                              FAR const uv_buf_t bufs[],
+                               unsigned int nbufs,
+-                              const struct sockaddr* addr);
+-UV_EXTERN int uv_udp_recv_start(uv_udp_t* handle,
++                              FAR const struct sockaddr* addr);
++UV_EXTERN int uv_udp_recv_start(FAR uv_udp_t* handle,
+                                 uv_alloc_cb alloc_cb,
+                                 uv_udp_recv_cb recv_cb);
+-UV_EXTERN int uv_udp_recv_stop(uv_udp_t* handle);
+-UV_EXTERN size_t uv_udp_get_send_queue_size(const uv_udp_t* handle);
+-UV_EXTERN size_t uv_udp_get_send_queue_count(const uv_udp_t* handle);
++UV_EXTERN int uv_udp_recv_stop(FAR uv_udp_t* handle);
++UV_EXTERN size_t uv_udp_get_send_queue_size(FAR const uv_udp_t* handle);
++UV_EXTERN size_t uv_udp_get_send_queue_count(FAR const uv_udp_t* handle);
+ 
+ 
+ /*
+@@ -731,17 +731,17 @@ typedef enum {
+ } uv_tty_vtermstate_t;
+ 
+ 
+-UV_EXTERN int uv_tty_init(uv_loop_t*, uv_tty_t*, uv_file fd, int readable);
+-UV_EXTERN int uv_tty_set_mode(uv_tty_t*, uv_tty_mode_t mode);
++UV_EXTERN int uv_tty_init(FAR uv_loop_t*, FAR uv_tty_t*, uv_file fd, int readable);
++UV_EXTERN int uv_tty_set_mode(FAR uv_tty_t*, uv_tty_mode_t mode);
+ UV_EXTERN int uv_tty_reset_mode(void);
+-UV_EXTERN int uv_tty_get_winsize(uv_tty_t*, int* width, int* height);
++UV_EXTERN int uv_tty_get_winsize(FAR uv_tty_t*, FAR int* width, FAR int* height);
+ UV_EXTERN void uv_tty_set_vterm_state(uv_tty_vtermstate_t state);
+-UV_EXTERN int uv_tty_get_vterm_state(uv_tty_vtermstate_t* state);
++UV_EXTERN int uv_tty_get_vterm_state(FAR uv_tty_vtermstate_t* state);
+ 
+ #ifdef __cplusplus
+ extern "C++" {
+ 
+-inline int uv_tty_set_mode(uv_tty_t* handle, int mode) {
++inline int uv_tty_set_mode(FAR uv_tty_t* handle, int mode) {
+   return uv_tty_set_mode(handle, static_cast<uv_tty_mode_t>(mode));
+ }
+ 
+@@ -763,23 +763,23 @@ struct uv_pipe_s {
+   UV_PIPE_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_pipe_init(uv_loop_t*, uv_pipe_t* handle, int ipc);
+-UV_EXTERN int uv_pipe_open(uv_pipe_t*, uv_file file);
+-UV_EXTERN int uv_pipe_bind(uv_pipe_t* handle, const char* name);
+-UV_EXTERN void uv_pipe_connect(uv_connect_t* req,
+-                               uv_pipe_t* handle,
+-                               const char* name,
++UV_EXTERN int uv_pipe_init(FAR uv_loop_t*, FAR uv_pipe_t* handle, int ipc);
++UV_EXTERN int uv_pipe_open(FAR uv_pipe_t*, uv_file file);
++UV_EXTERN int uv_pipe_bind(FAR uv_pipe_t* handle, FAR const char* name);
++UV_EXTERN void uv_pipe_connect(FAR uv_connect_t* req,
++                               FAR uv_pipe_t* handle,
++                               FAR const char* name,
+                                uv_connect_cb cb);
+-UV_EXTERN int uv_pipe_getsockname(const uv_pipe_t* handle,
+-                                  char* buffer,
+-                                  size_t* size);
+-UV_EXTERN int uv_pipe_getpeername(const uv_pipe_t* handle,
+-                                  char* buffer,
+-                                  size_t* size);
+-UV_EXTERN void uv_pipe_pending_instances(uv_pipe_t* handle, int count);
+-UV_EXTERN int uv_pipe_pending_count(uv_pipe_t* handle);
+-UV_EXTERN uv_handle_type uv_pipe_pending_type(uv_pipe_t* handle);
+-UV_EXTERN int uv_pipe_chmod(uv_pipe_t* handle, int flags);
++UV_EXTERN int uv_pipe_getsockname(FAR const uv_pipe_t* handle,
++                                  FAR char* buffer,
++                                  FAR size_t* size);
++UV_EXTERN int uv_pipe_getpeername(FAR const uv_pipe_t* handle,
++                                  FAR char* buffer,
++                                  FAR size_t* size);
++UV_EXTERN void uv_pipe_pending_instances(FAR uv_pipe_t* handle, int count);
++UV_EXTERN int uv_pipe_pending_count(FAR uv_pipe_t* handle);
++UV_EXTERN uv_handle_type uv_pipe_pending_type(FAR uv_pipe_t* handle);
++UV_EXTERN int uv_pipe_chmod(FAR uv_pipe_t* handle, int flags);
+ 
+ 
+ struct uv_poll_s {
+@@ -795,12 +795,12 @@ enum uv_poll_event {
+   UV_PRIORITIZED = 8
+ };
+ 
+-UV_EXTERN int uv_poll_init(uv_loop_t* loop, uv_poll_t* handle, int fd);
+-UV_EXTERN int uv_poll_init_socket(uv_loop_t* loop,
+-                                  uv_poll_t* handle,
++UV_EXTERN int uv_poll_init(FAR uv_loop_t* loop, FAR uv_poll_t* handle, int fd);
++UV_EXTERN int uv_poll_init_socket(FAR uv_loop_t* loop,
++                                  FAR uv_poll_t* handle,
+                                   uv_os_sock_t socket);
+-UV_EXTERN int uv_poll_start(uv_poll_t* handle, int events, uv_poll_cb cb);
+-UV_EXTERN int uv_poll_stop(uv_poll_t* handle);
++UV_EXTERN int uv_poll_start(FAR uv_poll_t* handle, int events, uv_poll_cb cb);
++UV_EXTERN int uv_poll_stop(FAR uv_poll_t* handle);
+ 
+ 
+ struct uv_prepare_s {
+@@ -808,9 +808,9 @@ struct uv_prepare_s {
+   UV_PREPARE_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_prepare_init(uv_loop_t*, uv_prepare_t* prepare);
+-UV_EXTERN int uv_prepare_start(uv_prepare_t* prepare, uv_prepare_cb cb);
+-UV_EXTERN int uv_prepare_stop(uv_prepare_t* prepare);
++UV_EXTERN int uv_prepare_init(FAR uv_loop_t*, FAR uv_prepare_t* prepare);
++UV_EXTERN int uv_prepare_start(FAR uv_prepare_t* prepare, uv_prepare_cb cb);
++UV_EXTERN int uv_prepare_stop(FAR uv_prepare_t* prepare);
+ 
+ 
+ struct uv_check_s {
+@@ -818,9 +818,9 @@ struct uv_check_s {
+   UV_CHECK_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_check_init(uv_loop_t*, uv_check_t* check);
+-UV_EXTERN int uv_check_start(uv_check_t* check, uv_check_cb cb);
+-UV_EXTERN int uv_check_stop(uv_check_t* check);
++UV_EXTERN int uv_check_init(FAR uv_loop_t*, FAR uv_check_t* check);
++UV_EXTERN int uv_check_start(FAR uv_check_t* check, uv_check_cb cb);
++UV_EXTERN int uv_check_stop(FAR uv_check_t* check);
+ 
+ 
+ struct uv_idle_s {
+@@ -828,9 +828,9 @@ struct uv_idle_s {
+   UV_IDLE_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_idle_init(uv_loop_t*, uv_idle_t* idle);
+-UV_EXTERN int uv_idle_start(uv_idle_t* idle, uv_idle_cb cb);
+-UV_EXTERN int uv_idle_stop(uv_idle_t* idle);
++UV_EXTERN int uv_idle_init(FAR uv_loop_t*, FAR uv_idle_t* idle);
++UV_EXTERN int uv_idle_start(FAR uv_idle_t* idle, uv_idle_cb cb);
++UV_EXTERN int uv_idle_stop(FAR uv_idle_t* idle);
+ 
+ 
+ struct uv_async_s {
+@@ -838,10 +838,10 @@ struct uv_async_s {
+   UV_ASYNC_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_async_init(uv_loop_t*,
+-                            uv_async_t* async,
++UV_EXTERN int uv_async_init(FAR uv_loop_t*,
++                            FAR uv_async_t* async,
+                             uv_async_cb async_cb);
+-UV_EXTERN int uv_async_send(uv_async_t* async);
++UV_EXTERN int uv_async_send(FAR uv_async_t* async);
+ 
+ 
+ /*
+@@ -854,15 +854,15 @@ struct uv_timer_s {
+   UV_TIMER_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_timer_init(uv_loop_t*, uv_timer_t* handle);
+-UV_EXTERN int uv_timer_start(uv_timer_t* handle,
++UV_EXTERN int uv_timer_init(FAR uv_loop_t*, FAR uv_timer_t* handle);
++UV_EXTERN int uv_timer_start(FAR uv_timer_t* handle,
+                              uv_timer_cb cb,
+                              uint64_t timeout,
+                              uint64_t repeat);
+-UV_EXTERN int uv_timer_stop(uv_timer_t* handle);
+-UV_EXTERN int uv_timer_again(uv_timer_t* handle);
+-UV_EXTERN void uv_timer_set_repeat(uv_timer_t* handle, uint64_t repeat);
+-UV_EXTERN uint64_t uv_timer_get_repeat(const uv_timer_t* handle);
++UV_EXTERN int uv_timer_stop(FAR uv_timer_t* handle);
++UV_EXTERN int uv_timer_again(FAR uv_timer_t* handle);
++UV_EXTERN void uv_timer_set_repeat(FAR uv_timer_t* handle, uint64_t repeat);
++UV_EXTERN uint64_t uv_timer_get_repeat(FAR const uv_timer_t* handle);
+ 
+ 
+ /*
+@@ -879,13 +879,13 @@ struct uv_getaddrinfo_s {
+ };
+ 
+ 
+-UV_EXTERN int uv_getaddrinfo(uv_loop_t* loop,
+-                             uv_getaddrinfo_t* req,
++UV_EXTERN int uv_getaddrinfo(FAR uv_loop_t* loop,
++                             FAR uv_getaddrinfo_t* req,
+                              uv_getaddrinfo_cb getaddrinfo_cb,
+-                             const char* node,
+-                             const char* service,
+-                             const struct addrinfo* hints);
+-UV_EXTERN void uv_freeaddrinfo(struct addrinfo* ai);
++                             FAR const char* node,
++                             FAR const char* service,
++                             FAR const struct addrinfo* hints);
++UV_EXTERN void uv_freeaddrinfo(FAR struct addrinfo* ai);
+ 
+ 
+ /*
+@@ -896,15 +896,15 @@ UV_EXTERN void uv_freeaddrinfo(struct addrinfo* ai);
+ struct uv_getnameinfo_s {
+   UV_REQ_FIELDS
+   /* read-only */
+-  uv_loop_t* loop;
++  FAR uv_loop_t* loop;
+   /* host and service are marked as private, but they really aren't. */
+   UV_GETNAMEINFO_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_getnameinfo(uv_loop_t* loop,
+-                             uv_getnameinfo_t* req,
++UV_EXTERN int uv_getnameinfo(FAR uv_loop_t* loop,
++                             FAR uv_getnameinfo_t* req,
+                              uv_getnameinfo_cb getnameinfo_cb,
+-                             const struct sockaddr* addr,
++                             FAR const struct sockaddr* addr,
+                              int flags);
+ 
+ 
+@@ -934,31 +934,31 @@ typedef struct uv_stdio_container_s {
+   uv_stdio_flags flags;
+ 
+   union {
+-    uv_stream_t* stream;
++    FAR uv_stream_t* stream;
+     int fd;
+   } data;
+ } uv_stdio_container_t;
+ 
+ typedef struct uv_process_options_s {
+   uv_exit_cb exit_cb; /* Called after the process exits. */
+-  const char* file;   /* Path to program to execute. */
++  FAR const char* file;   /* Path to program to execute. */
+   /*
+    * Command line arguments. args[0] should be the path to the program. On
+    * Windows this uses CreateProcess which concatenates the arguments into a
+    * string this can cause some strange errors. See the note at
+    * windows_verbatim_arguments.
+    */
+-  char** args;
++  FAR char** args;
+   /*
+    * This will be set as the environ variable in the subprocess. If this is
+    * NULL then the parents environ will be used.
+    */
+-  char** env;
++  FAR char** env;
+   /*
+    * If non-null this represents a directory the subprocess should execute
+    * in. Stands for current working directory.
+    */
+-  const char* cwd;
++  FAR const char* cwd;
+   /*
+    * Various flags that control how uv_spawn() behaves. See the definition of
+    * `enum uv_process_flags` below.
+@@ -974,7 +974,7 @@ typedef struct uv_process_options_s {
+    * child process only if the child processes uses the MSVCRT runtime.
+    */
+   int stdio_count;
+-  uv_stdio_container_t* stdio;
++  FAR uv_stdio_container_t* stdio;
+   /*
+    * Libuv can change the child process' user/group id. This happens only when
+    * the appropriate bits are set in the flags fields. This is not supported on
+@@ -1043,12 +1043,12 @@ struct uv_process_s {
+   UV_PROCESS_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_spawn(uv_loop_t* loop,
+-                       uv_process_t* handle,
+-                       const uv_process_options_t* options);
+-UV_EXTERN int uv_process_kill(uv_process_t*, int signum);
++UV_EXTERN int uv_spawn(FAR uv_loop_t* loop,
++                       FAR uv_process_t* handle,
++                       FAR const uv_process_options_t* options);
++UV_EXTERN int uv_process_kill(FAR uv_process_t*, int signum);
+ UV_EXTERN int uv_kill(int pid, int signum);
+-UV_EXTERN uv_pid_t uv_process_get_pid(const uv_process_t*);
++UV_EXTERN uv_pid_t uv_process_get_pid(FAR const uv_process_t*);
+ 
+ 
+ /*
+@@ -1056,18 +1056,18 @@ UV_EXTERN uv_pid_t uv_process_get_pid(const uv_process_t*);
+  */
+ struct uv_work_s {
+   UV_REQ_FIELDS
+-  uv_loop_t* loop;
++  FAR uv_loop_t* loop;
+   uv_work_cb work_cb;
+   uv_after_work_cb after_work_cb;
+   UV_WORK_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_queue_work(uv_loop_t* loop,
+-                            uv_work_t* req,
++UV_EXTERN int uv_queue_work(FAR uv_loop_t* loop,
++                            FAR uv_work_t* req,
+                             uv_work_cb work_cb,
+                             uv_after_work_cb after_work_cb);
+ 
+-UV_EXTERN int uv_cancel(uv_req_t* req);
++UV_EXTERN int uv_cancel(FAR uv_req_t* req);
+ 
+ 
+ struct uv_cpu_times_s {
+@@ -1139,15 +1139,15 @@ typedef enum {
+ } uv_dirent_type_t;
+ 
+ struct uv_dirent_s {
+-  const char* name;
++  FAR const char* name;
+   uv_dirent_type_t type;
+ };
+ 
+-UV_EXTERN char** uv_setup_args(int argc, char** argv);
+-UV_EXTERN int uv_get_process_title(char* buffer, size_t size);
+-UV_EXTERN int uv_set_process_title(const char* title);
+-UV_EXTERN int uv_resident_set_memory(size_t* rss);
+-UV_EXTERN int uv_uptime(double* uptime);
++UV_EXTERN FAR char** uv_setup_args(int argc, FAR char** argv);
++UV_EXTERN int uv_get_process_title(FAR char* buffer, size_t size);
++UV_EXTERN int uv_set_process_title(FAR const char* title);
++UV_EXTERN int uv_resident_set_memory(FAR size_t* rss);
++UV_EXTERN int uv_uptime(FAR double* uptime);
+ UV_EXTERN uv_os_fd_t uv_get_osfhandle(int fd);
+ UV_EXTERN int uv_open_osfhandle(uv_os_fd_t os_fd);
+ 
+@@ -1180,12 +1180,12 @@ typedef struct {
+    uint64_t ru_nivcsw;    /* involuntary context switches */
+ } uv_rusage_t;
+ 
+-UV_EXTERN int uv_getrusage(uv_rusage_t* rusage);
++UV_EXTERN int uv_getrusage(FAR uv_rusage_t* rusage);
+ 
+-UV_EXTERN int uv_os_homedir(char* buffer, size_t* size);
+-UV_EXTERN int uv_os_tmpdir(char* buffer, size_t* size);
+-UV_EXTERN int uv_os_get_passwd(uv_passwd_t* pwd);
+-UV_EXTERN void uv_os_free_passwd(uv_passwd_t* pwd);
++UV_EXTERN int uv_os_homedir(FAR char* buffer, FAR size_t* size);
++UV_EXTERN int uv_os_tmpdir(FAR char* buffer, FAR size_t* size);
++UV_EXTERN int uv_os_get_passwd(FAR uv_passwd_t* pwd);
++UV_EXTERN void uv_os_free_passwd(FAR uv_passwd_t* pwd);
+ UV_EXTERN uv_pid_t uv_os_getpid(void);
+ UV_EXTERN uv_pid_t uv_os_getppid(void);
+ 
+@@ -1206,27 +1206,27 @@ UV_EXTERN uv_pid_t uv_os_getppid(void);
+ # define UV_PRIORITY_HIGHEST -20
+ #endif
+ 
+-UV_EXTERN int uv_os_getpriority(uv_pid_t pid, int* priority);
++UV_EXTERN int uv_os_getpriority(uv_pid_t pid, FAR int* priority);
+ UV_EXTERN int uv_os_setpriority(uv_pid_t pid, int priority);
+ 
+-UV_EXTERN int uv_cpu_info(uv_cpu_info_t** cpu_infos, int* count);
+-UV_EXTERN void uv_free_cpu_info(uv_cpu_info_t* cpu_infos, int count);
++UV_EXTERN int uv_cpu_info(FAR uv_cpu_info_t** cpu_infos, FAR int* count);
++UV_EXTERN void uv_free_cpu_info(FAR uv_cpu_info_t* cpu_infos, int count);
+ 
+-UV_EXTERN int uv_interface_addresses(uv_interface_address_t** addresses,
+-                                     int* count);
+-UV_EXTERN void uv_free_interface_addresses(uv_interface_address_t* addresses,
++UV_EXTERN int uv_interface_addresses(FAR uv_interface_address_t** addresses,
++                                     FAR int* count);
++UV_EXTERN void uv_free_interface_addresses(FAR uv_interface_address_t* addresses,
+                                            int count);
+ 
+ struct uv_env_item_s {
+-  char* name;
+-  char* value;
++  FAR char* name;
++  FAR char* value;
+ };
+ 
+-UV_EXTERN int uv_os_environ(uv_env_item_t** envitems, int* count);
+-UV_EXTERN void uv_os_free_environ(uv_env_item_t* envitems, int count);
+-UV_EXTERN int uv_os_getenv(const char* name, char* buffer, size_t* size);
+-UV_EXTERN int uv_os_setenv(const char* name, const char* value);
+-UV_EXTERN int uv_os_unsetenv(const char* name);
++UV_EXTERN int uv_os_environ(FAR uv_env_item_t** envitems, FAR int* count);
++UV_EXTERN void uv_os_free_environ(FAR uv_env_item_t* envitems, int count);
++UV_EXTERN int uv_os_getenv(FAR const char* name, FAR char* buffer, FAR size_t* size);
++UV_EXTERN int uv_os_setenv(FAR const char* name, FAR const char* value);
++UV_EXTERN int uv_os_unsetenv(FAR const char* name);
+ 
+ #ifdef MAXHOSTNAMELEN
+ # define UV_MAXHOSTNAMESIZE (MAXHOSTNAMELEN + 1)
+@@ -1239,9 +1239,9 @@ UV_EXTERN int uv_os_unsetenv(const char* name);
+ # define UV_MAXHOSTNAMESIZE 256
+ #endif
+ 
+-UV_EXTERN int uv_os_gethostname(char* buffer, size_t* size);
++UV_EXTERN int uv_os_gethostname(FAR char* buffer, FAR size_t* size);
+ 
+-UV_EXTERN int uv_os_uname(uv_utsname_t* buffer);
++UV_EXTERN int uv_os_uname(FAR uv_utsname_t* buffer);
+ 
+ 
+ typedef enum {
+@@ -1286,7 +1286,7 @@ typedef enum {
+ } uv_fs_type;
+ 
+ struct uv_dir_s {
+-  uv_dirent_t* dirents;
++  FAR uv_dirent_t* dirents;
+   size_t nentries;
+   void* reserved[4];
+   UV_DIR_PRIVATE_FIELDS
+@@ -1296,48 +1296,48 @@ struct uv_dir_s {
+ struct uv_fs_s {
+   UV_REQ_FIELDS
+   uv_fs_type fs_type;
+-  uv_loop_t* loop;
++  FAR uv_loop_t* loop;
+   uv_fs_cb cb;
+   ssize_t result;
+-  void* ptr;
+-  const char* path;
++  FAR void* ptr;
++  FAR const char* path;
+   uv_stat_t statbuf;  /* Stores the result of uv_fs_stat() and uv_fs_fstat(). */
+   UV_FS_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN uv_fs_type uv_fs_get_type(const uv_fs_t*);
+-UV_EXTERN ssize_t uv_fs_get_result(const uv_fs_t*);
+-UV_EXTERN int uv_fs_get_system_error(const uv_fs_t*);
+-UV_EXTERN void* uv_fs_get_ptr(const uv_fs_t*);
+-UV_EXTERN const char* uv_fs_get_path(const uv_fs_t*);
+-UV_EXTERN uv_stat_t* uv_fs_get_statbuf(uv_fs_t*);
++UV_EXTERN uv_fs_type uv_fs_get_type(FAR const uv_fs_t*);
++UV_EXTERN ssize_t uv_fs_get_result(FAR const uv_fs_t*);
++UV_EXTERN int uv_fs_get_system_error(FAR const uv_fs_t*);
++UV_EXTERN FAR void* uv_fs_get_ptr(FAR const uv_fs_t*);
++UV_EXTERN FAR const char* uv_fs_get_path(FAR const uv_fs_t*);
++UV_EXTERN FAR uv_stat_t* uv_fs_get_statbuf(FAR uv_fs_t*);
+ 
+-UV_EXTERN void uv_fs_req_cleanup(uv_fs_t* req);
+-UV_EXTERN int uv_fs_close(uv_loop_t* loop,
+-                          uv_fs_t* req,
++UV_EXTERN void uv_fs_req_cleanup(FAR uv_fs_t* req);
++UV_EXTERN int uv_fs_close(FAR uv_loop_t* loop,
++                          FAR uv_fs_t* req,
+                           uv_file file,
+                           uv_fs_cb cb);
+-UV_EXTERN int uv_fs_open(uv_loop_t* loop,
+-                         uv_fs_t* req,
+-                         const char* path,
++UV_EXTERN int uv_fs_open(FAR uv_loop_t* loop,
++                         FAR uv_fs_t* req,
++                         FAR const char* path,
+                          int flags,
+                          int mode,
+                          uv_fs_cb cb);
+-UV_EXTERN int uv_fs_read(uv_loop_t* loop,
+-                         uv_fs_t* req,
++UV_EXTERN int uv_fs_read(FAR uv_loop_t* loop,
++                         FAR uv_fs_t* req,
+                          uv_file file,
+-                         const uv_buf_t bufs[],
++                         FAR const uv_buf_t bufs[],
+                          unsigned int nbufs,
+                          int64_t offset,
+                          uv_fs_cb cb);
+-UV_EXTERN int uv_fs_unlink(uv_loop_t* loop,
+-                           uv_fs_t* req,
+-                           const char* path,
++UV_EXTERN int uv_fs_unlink(FAR uv_loop_t* loop,
++                           FAR uv_fs_t* req,
++                           FAR const char* path,
+                            uv_fs_cb cb);
+-UV_EXTERN int uv_fs_write(uv_loop_t* loop,
+-                          uv_fs_t* req,
++UV_EXTERN int uv_fs_write(FAR uv_loop_t* loop,
++                          FAR uv_fs_t* req,
+                           uv_file file,
+-                          const uv_buf_t bufs[],
++                          FAR const uv_buf_t bufs[],
+                           unsigned int nbufs,
+                           int64_t offset,
+                           uv_fs_cb cb);
+@@ -1359,117 +1359,117 @@ UV_EXTERN int uv_fs_write(uv_loop_t* loop,
+  */
+ #define UV_FS_COPYFILE_FICLONE_FORCE 0x0004
+ 
+-UV_EXTERN int uv_fs_copyfile(uv_loop_t* loop,
+-                             uv_fs_t* req,
+-                             const char* path,
+-                             const char* new_path,
++UV_EXTERN int uv_fs_copyfile(FAR uv_loop_t* loop,
++                             FAR uv_fs_t* req,
++                             FAR const char* path,
++                             FAR const char* new_path,
+                              int flags,
+                              uv_fs_cb cb);
+-UV_EXTERN int uv_fs_mkdir(uv_loop_t* loop,
+-                          uv_fs_t* req,
+-                          const char* path,
++UV_EXTERN int uv_fs_mkdir(FAR uv_loop_t* loop,
++                          FAR uv_fs_t* req,
++                          FAR const char* path,
+                           int mode,
+                           uv_fs_cb cb);
+-UV_EXTERN int uv_fs_mkdtemp(uv_loop_t* loop,
+-                            uv_fs_t* req,
+-                            const char* tpl,
++UV_EXTERN int uv_fs_mkdtemp(FAR uv_loop_t* loop,
++                            FAR uv_fs_t* req,
++                            FAR const char* tpl,
+                             uv_fs_cb cb);
+-UV_EXTERN int uv_fs_mkstemp(uv_loop_t* loop,
+-                            uv_fs_t* req,
+-                            const char* tpl,
++UV_EXTERN int uv_fs_mkstemp(FAR uv_loop_t* loop,
++                            FAR uv_fs_t* req,
++                            FAR const char* tpl,
+                             uv_fs_cb cb);
+-UV_EXTERN int uv_fs_rmdir(uv_loop_t* loop,
+-                          uv_fs_t* req,
+-                          const char* path,
++UV_EXTERN int uv_fs_rmdir(FAR uv_loop_t* loop,
++                          FAR uv_fs_t* req,
++                          FAR const char* path,
+                           uv_fs_cb cb);
+-UV_EXTERN int uv_fs_scandir(uv_loop_t* loop,
+-                            uv_fs_t* req,
+-                            const char* path,
++UV_EXTERN int uv_fs_scandir(FAR uv_loop_t* loop,
++                            FAR uv_fs_t* req,
++                            FAR const char* path,
+                             int flags,
+                             uv_fs_cb cb);
+-UV_EXTERN int uv_fs_scandir_next(uv_fs_t* req,
+-                                 uv_dirent_t* ent);
+-UV_EXTERN int uv_fs_opendir(uv_loop_t* loop,
+-                            uv_fs_t* req,
+-                            const char* path,
++UV_EXTERN int uv_fs_scandir_next(FAR uv_fs_t* req,
++                                 FAR uv_dirent_t* ent);
++UV_EXTERN int uv_fs_opendir(FAR uv_loop_t* loop,
++                            FAR uv_fs_t* req,
++                            FAR const char* path,
+                             uv_fs_cb cb);
+-UV_EXTERN int uv_fs_readdir(uv_loop_t* loop,
+-                            uv_fs_t* req,
+-                            uv_dir_t* dir,
++UV_EXTERN int uv_fs_readdir(FAR uv_loop_t* loop,
++                            FAR uv_fs_t* req,
++                            FAR uv_dir_t* dir,
+                             uv_fs_cb cb);
+-UV_EXTERN int uv_fs_closedir(uv_loop_t* loop,
+-                             uv_fs_t* req,
+-                             uv_dir_t* dir,
++UV_EXTERN int uv_fs_closedir(FAR uv_loop_t* loop,
++                             FAR uv_fs_t* req,
++                             FAR uv_dir_t* dir,
+                              uv_fs_cb cb);
+-UV_EXTERN int uv_fs_stat(uv_loop_t* loop,
+-                         uv_fs_t* req,
+-                         const char* path,
++UV_EXTERN int uv_fs_stat(FAR uv_loop_t* loop,
++                         FAR uv_fs_t* req,
++                         FAR const char* path,
+                          uv_fs_cb cb);
+-UV_EXTERN int uv_fs_fstat(uv_loop_t* loop,
+-                          uv_fs_t* req,
++UV_EXTERN int uv_fs_fstat(FAR uv_loop_t* loop,
++                          FAR uv_fs_t* req,
+                           uv_file file,
+                           uv_fs_cb cb);
+-UV_EXTERN int uv_fs_rename(uv_loop_t* loop,
+-                           uv_fs_t* req,
+-                           const char* path,
+-                           const char* new_path,
++UV_EXTERN int uv_fs_rename(FAR uv_loop_t* loop,
++                           FAR uv_fs_t* req,
++                           FAR const char* path,
++                           FAR const char* new_path,
+                            uv_fs_cb cb);
+-UV_EXTERN int uv_fs_fsync(uv_loop_t* loop,
+-                          uv_fs_t* req,
++UV_EXTERN int uv_fs_fsync(FAR uv_loop_t* loop,
++                          FAR uv_fs_t* req,
+                           uv_file file,
+                           uv_fs_cb cb);
+-UV_EXTERN int uv_fs_fdatasync(uv_loop_t* loop,
+-                              uv_fs_t* req,
++UV_EXTERN int uv_fs_fdatasync(FAR uv_loop_t* loop,
++                              FAR uv_fs_t* req,
+                               uv_file file,
+                               uv_fs_cb cb);
+-UV_EXTERN int uv_fs_ftruncate(uv_loop_t* loop,
+-                              uv_fs_t* req,
++UV_EXTERN int uv_fs_ftruncate(FAR uv_loop_t* loop,
++                              FAR uv_fs_t* req,
+                               uv_file file,
+                               int64_t offset,
+                               uv_fs_cb cb);
+-UV_EXTERN int uv_fs_sendfile(uv_loop_t* loop,
+-                             uv_fs_t* req,
++UV_EXTERN int uv_fs_sendfile(FAR uv_loop_t* loop,
++                             FAR uv_fs_t* req,
+                              uv_file out_fd,
+                              uv_file in_fd,
+                              int64_t in_offset,
+                              size_t length,
+                              uv_fs_cb cb);
+-UV_EXTERN int uv_fs_access(uv_loop_t* loop,
+-                           uv_fs_t* req,
+-                           const char* path,
++UV_EXTERN int uv_fs_access(FAR uv_loop_t* loop,
++                           FAR uv_fs_t* req,
++                           FAR const char* path,
+                            int mode,
+                            uv_fs_cb cb);
+-UV_EXTERN int uv_fs_chmod(uv_loop_t* loop,
+-                          uv_fs_t* req,
+-                          const char* path,
++UV_EXTERN int uv_fs_chmod(FAR uv_loop_t* loop,
++                          FAR uv_fs_t* req,
++                          FAR const char* path,
+                           int mode,
+                           uv_fs_cb cb);
+-UV_EXTERN int uv_fs_utime(uv_loop_t* loop,
+-                          uv_fs_t* req,
+-                          const char* path,
++UV_EXTERN int uv_fs_utime(FAR uv_loop_t* loop,
++                          FAR uv_fs_t* req,
++                          FAR const char* path,
+                           double atime,
+                           double mtime,
+                           uv_fs_cb cb);
+-UV_EXTERN int uv_fs_futime(uv_loop_t* loop,
+-                           uv_fs_t* req,
++UV_EXTERN int uv_fs_futime(FAR uv_loop_t* loop,
++                           FAR uv_fs_t* req,
+                            uv_file file,
+                            double atime,
+                            double mtime,
+                            uv_fs_cb cb);
+-UV_EXTERN int uv_fs_lutime(uv_loop_t* loop,
+-                           uv_fs_t* req,
+-                           const char* path,
++UV_EXTERN int uv_fs_lutime(FAR uv_loop_t* loop,
++                           FAR uv_fs_t* req,
++                           FAR const char* path,
+                            double atime,
+                            double mtime,
+                            uv_fs_cb cb);
+-UV_EXTERN int uv_fs_lstat(uv_loop_t* loop,
+-                          uv_fs_t* req,
+-                          const char* path,
++UV_EXTERN int uv_fs_lstat(FAR uv_loop_t* loop,
++                          FAR uv_fs_t* req,
++                          FAR const char* path,
+                           uv_fs_cb cb);
+-UV_EXTERN int uv_fs_link(uv_loop_t* loop,
+-                         uv_fs_t* req,
+-                         const char* path,
+-                         const char* new_path,
++UV_EXTERN int uv_fs_link(FAR uv_loop_t* loop,
++                         FAR uv_fs_t* req,
++                         FAR const char* path,
++                         FAR const char* new_path,
+                          uv_fs_cb cb);
+ 
+ /*
+@@ -1484,46 +1484,46 @@ UV_EXTERN int uv_fs_link(uv_loop_t* loop,
+  */
+ #define UV_FS_SYMLINK_JUNCTION     0x0002
+ 
+-UV_EXTERN int uv_fs_symlink(uv_loop_t* loop,
+-                            uv_fs_t* req,
+-                            const char* path,
+-                            const char* new_path,
++UV_EXTERN int uv_fs_symlink(FAR uv_loop_t* loop,
++                            FAR uv_fs_t* req,
++                            FAR const char* path,
++                            FAR const char* new_path,
+                             int flags,
+                             uv_fs_cb cb);
+-UV_EXTERN int uv_fs_readlink(uv_loop_t* loop,
+-                             uv_fs_t* req,
+-                             const char* path,
++UV_EXTERN int uv_fs_readlink(FAR uv_loop_t* loop,
++                             FAR uv_fs_t* req,
++                             FAR const char* path,
+                              uv_fs_cb cb);
+-UV_EXTERN int uv_fs_realpath(uv_loop_t* loop,
+-                             uv_fs_t* req,
+-                             const char* path,
++UV_EXTERN int uv_fs_realpath(FAR uv_loop_t* loop,
++                             FAR uv_fs_t* req,
++                             FAR const char* path,
+                              uv_fs_cb cb);
+-UV_EXTERN int uv_fs_fchmod(uv_loop_t* loop,
+-                           uv_fs_t* req,
++UV_EXTERN int uv_fs_fchmod(FAR uv_loop_t* loop,
++                           FAR uv_fs_t* req,
+                            uv_file file,
+                            int mode,
+                            uv_fs_cb cb);
+-UV_EXTERN int uv_fs_chown(uv_loop_t* loop,
+-                          uv_fs_t* req,
+-                          const char* path,
++UV_EXTERN int uv_fs_chown(FAR uv_loop_t* loop,
++                          FAR uv_fs_t* req,
++                          FAR const char* path,
+                           uv_uid_t uid,
+                           uv_gid_t gid,
+                           uv_fs_cb cb);
+-UV_EXTERN int uv_fs_fchown(uv_loop_t* loop,
+-                           uv_fs_t* req,
++UV_EXTERN int uv_fs_fchown(FAR uv_loop_t* loop,
++                           FAR uv_fs_t* req,
+                            uv_file file,
+                            uv_uid_t uid,
+                            uv_gid_t gid,
+                            uv_fs_cb cb);
+-UV_EXTERN int uv_fs_lchown(uv_loop_t* loop,
+-                           uv_fs_t* req,
+-                           const char* path,
++UV_EXTERN int uv_fs_lchown(FAR uv_loop_t* loop,
++                           FAR uv_fs_t* req,
++                           FAR const char* path,
+                            uv_uid_t uid,
+                            uv_gid_t gid,
+                            uv_fs_cb cb);
+-UV_EXTERN int uv_fs_statfs(uv_loop_t* loop,
+-                           uv_fs_t* req,
+-                           const char* path,
++UV_EXTERN int uv_fs_statfs(FAR uv_loop_t* loop,
++                           FAR uv_fs_t* req,
++                           FAR const char* path,
+                            uv_fs_cb cb);
+ 
+ 
+@@ -1550,15 +1550,15 @@ struct uv_fs_poll_s {
+   void* poll_ctx;
+ };
+ 
+-UV_EXTERN int uv_fs_poll_init(uv_loop_t* loop, uv_fs_poll_t* handle);
+-UV_EXTERN int uv_fs_poll_start(uv_fs_poll_t* handle,
++UV_EXTERN int uv_fs_poll_init(FAR uv_loop_t* loop, FAR uv_fs_poll_t* handle);
++UV_EXTERN int uv_fs_poll_start(FAR uv_fs_poll_t* handle,
+                                uv_fs_poll_cb poll_cb,
+-                               const char* path,
++                               FAR const char* path,
+                                unsigned int interval);
+-UV_EXTERN int uv_fs_poll_stop(uv_fs_poll_t* handle);
+-UV_EXTERN int uv_fs_poll_getpath(uv_fs_poll_t* handle,
+-                                 char* buffer,
+-                                 size_t* size);
++UV_EXTERN int uv_fs_poll_stop(FAR uv_fs_poll_t* handle);
++UV_EXTERN int uv_fs_poll_getpath(FAR uv_fs_poll_t* handle,
++                                 FAR char* buffer,
++                                 FAR size_t* size);
+ 
+ 
+ struct uv_signal_s {
+@@ -1568,16 +1568,16 @@ struct uv_signal_s {
+   UV_SIGNAL_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN int uv_signal_init(uv_loop_t* loop, uv_signal_t* handle);
+-UV_EXTERN int uv_signal_start(uv_signal_t* handle,
++UV_EXTERN int uv_signal_init(FAR uv_loop_t* loop, FAR uv_signal_t* handle);
++UV_EXTERN int uv_signal_start(FAR uv_signal_t* handle,
+                               uv_signal_cb signal_cb,
+                               int signum);
+-UV_EXTERN int uv_signal_start_oneshot(uv_signal_t* handle,
++UV_EXTERN int uv_signal_start_oneshot(FAR uv_signal_t* handle,
+                                       uv_signal_cb signal_cb,
+                                       int signum);
+ UV_EXTERN int uv_signal_stop(uv_signal_t* handle);
+ 
+-UV_EXTERN void uv_loadavg(double avg[3]);
++UV_EXTERN void uv_loadavg(FAR double avg[3]);
+ 
+ 
+ /*
+@@ -1611,41 +1611,41 @@ enum uv_fs_event_flags {
+ };
+ 
+ 
+-UV_EXTERN int uv_fs_event_init(uv_loop_t* loop, uv_fs_event_t* handle);
+-UV_EXTERN int uv_fs_event_start(uv_fs_event_t* handle,
++UV_EXTERN int uv_fs_event_init(FAR uv_loop_t* loop, FAR uv_fs_event_t* handle);
++UV_EXTERN int uv_fs_event_start(FAR uv_fs_event_t* handle,
+                                 uv_fs_event_cb cb,
+-                                const char* path,
++                                FAR const char* path,
+                                 unsigned int flags);
+-UV_EXTERN int uv_fs_event_stop(uv_fs_event_t* handle);
+-UV_EXTERN int uv_fs_event_getpath(uv_fs_event_t* handle,
+-                                  char* buffer,
+-                                  size_t* size);
++UV_EXTERN int uv_fs_event_stop(FAR uv_fs_event_t* handle);
++UV_EXTERN int uv_fs_event_getpath(FAR uv_fs_event_t* handle,
++                                  FAR char* buffer,
++                                  FAR size_t* size);
+ 
+-UV_EXTERN int uv_ip4_addr(const char* ip, int port, struct sockaddr_in* addr);
+-UV_EXTERN int uv_ip6_addr(const char* ip, int port, struct sockaddr_in6* addr);
++UV_EXTERN int uv_ip4_addr(FAR const char* ip, int port, FAR struct sockaddr_in* addr);
++UV_EXTERN int uv_ip6_addr(FAR const char* ip, int port, FAR struct sockaddr_in6* addr);
+ 
+-UV_EXTERN int uv_ip4_name(const struct sockaddr_in* src, char* dst, size_t size);
+-UV_EXTERN int uv_ip6_name(const struct sockaddr_in6* src, char* dst, size_t size);
++UV_EXTERN int uv_ip4_name(FAR const struct sockaddr_in* src, FAR char* dst, size_t size);
++UV_EXTERN int uv_ip6_name(FAR const struct sockaddr_in6* src, FAR char* dst, size_t size);
+ 
+-UV_EXTERN int uv_inet_ntop(int af, const void* src, char* dst, size_t size);
+-UV_EXTERN int uv_inet_pton(int af, const char* src, void* dst);
++UV_EXTERN int uv_inet_ntop(int af, FAR const void* src, FAR char* dst, size_t size);
++UV_EXTERN int uv_inet_pton(int af, FAR const char* src, FAR void* dst);
+ 
+ 
+ struct uv_random_s {
+   UV_REQ_FIELDS
+   /* read-only */
+-  uv_loop_t* loop;
++  FAR uv_loop_t* loop;
+   /* private */
+   int status;
+-  void* buf;
++  FAR void* buf;
+   size_t buflen;
+   uv_random_cb cb;
+   struct uv__work work_req;
+ };
+ 
+-UV_EXTERN int uv_random(uv_loop_t* loop,
+-                        uv_random_t* req,
+-                        void *buf,
++UV_EXTERN int uv_random(FAR uv_loop_t* loop,
++                        FAR uv_random_t* req,
++                        FAR void *buf,
+                         size_t buflen,
+                         unsigned flags,  /* For future extension; must be 0. */
+                         uv_random_cb cb);
+@@ -1659,17 +1659,17 @@ UV_EXTERN int uv_random(uv_loop_t* loop,
+ #endif
+ 
+ UV_EXTERN int uv_if_indextoname(unsigned int ifindex,
+-                                char* buffer,
+-                                size_t* size);
++                                FAR char* buffer,
++                                FAR size_t* size);
+ UV_EXTERN int uv_if_indextoiid(unsigned int ifindex,
+-                               char* buffer,
+-                               size_t* size);
++                               FAR char* buffer,
++                               FAR size_t* size);
+ 
+-UV_EXTERN int uv_exepath(char* buffer, size_t* size);
++UV_EXTERN int uv_exepath(FAR char* buffer, FAR size_t* size);
+ 
+-UV_EXTERN int uv_cwd(char* buffer, size_t* size);
++UV_EXTERN int uv_cwd(FAR char* buffer, FAR size_t* size);
+ 
+-UV_EXTERN int uv_chdir(const char* dir);
++UV_EXTERN int uv_chdir(FAR const char* dir);
+ 
+ UV_EXTERN uint64_t uv_get_free_memory(void);
+ UV_EXTERN uint64_t uv_get_total_memory(void);
+@@ -1680,59 +1680,59 @@ UV_EXTERN void uv_sleep(unsigned int msec);
+ 
+ UV_EXTERN void uv_disable_stdio_inheritance(void);
+ 
+-UV_EXTERN int uv_dlopen(const char* filename, uv_lib_t* lib);
+-UV_EXTERN void uv_dlclose(uv_lib_t* lib);
+-UV_EXTERN int uv_dlsym(uv_lib_t* lib, const char* name, void** ptr);
+-UV_EXTERN const char* uv_dlerror(const uv_lib_t* lib);
+-
+-UV_EXTERN int uv_mutex_init(uv_mutex_t* handle);
+-UV_EXTERN int uv_mutex_init_recursive(uv_mutex_t* handle);
+-UV_EXTERN void uv_mutex_destroy(uv_mutex_t* handle);
+-UV_EXTERN void uv_mutex_lock(uv_mutex_t* handle);
+-UV_EXTERN int uv_mutex_trylock(uv_mutex_t* handle);
+-UV_EXTERN void uv_mutex_unlock(uv_mutex_t* handle);
+-
+-UV_EXTERN int uv_rwlock_init(uv_rwlock_t* rwlock);
+-UV_EXTERN void uv_rwlock_destroy(uv_rwlock_t* rwlock);
+-UV_EXTERN void uv_rwlock_rdlock(uv_rwlock_t* rwlock);
+-UV_EXTERN int uv_rwlock_tryrdlock(uv_rwlock_t* rwlock);
+-UV_EXTERN void uv_rwlock_rdunlock(uv_rwlock_t* rwlock);
+-UV_EXTERN void uv_rwlock_wrlock(uv_rwlock_t* rwlock);
+-UV_EXTERN int uv_rwlock_trywrlock(uv_rwlock_t* rwlock);
+-UV_EXTERN void uv_rwlock_wrunlock(uv_rwlock_t* rwlock);
+-
+-UV_EXTERN int uv_sem_init(uv_sem_t* sem, unsigned int value);
+-UV_EXTERN void uv_sem_destroy(uv_sem_t* sem);
+-UV_EXTERN void uv_sem_post(uv_sem_t* sem);
+-UV_EXTERN void uv_sem_wait(uv_sem_t* sem);
+-UV_EXTERN int uv_sem_trywait(uv_sem_t* sem);
+-
+-UV_EXTERN int uv_cond_init(uv_cond_t* cond);
+-UV_EXTERN void uv_cond_destroy(uv_cond_t* cond);
+-UV_EXTERN void uv_cond_signal(uv_cond_t* cond);
+-UV_EXTERN void uv_cond_broadcast(uv_cond_t* cond);
+-
+-UV_EXTERN int uv_barrier_init(uv_barrier_t* barrier, unsigned int count);
+-UV_EXTERN void uv_barrier_destroy(uv_barrier_t* barrier);
+-UV_EXTERN int uv_barrier_wait(uv_barrier_t* barrier);
+-
+-UV_EXTERN void uv_cond_wait(uv_cond_t* cond, uv_mutex_t* mutex);
+-UV_EXTERN int uv_cond_timedwait(uv_cond_t* cond,
+-                                uv_mutex_t* mutex,
++UV_EXTERN int uv_dlopen(FAR const char* filename, FAR uv_lib_t* lib);
++UV_EXTERN void uv_dlclose(FAR uv_lib_t* lib);
++UV_EXTERN int uv_dlsym(FAR uv_lib_t* lib, FAR const char* name, FAR void** ptr);
++UV_EXTERN FAR const char* uv_dlerror(FAR const uv_lib_t* lib);
++
++UV_EXTERN int uv_mutex_init(FAR uv_mutex_t* handle);
++UV_EXTERN int uv_mutex_init_recursive(FAR uv_mutex_t* handle);
++UV_EXTERN void uv_mutex_destroy(FAR uv_mutex_t* handle);
++UV_EXTERN void uv_mutex_lock(FAR uv_mutex_t* handle);
++UV_EXTERN int uv_mutex_trylock(FAR uv_mutex_t* handle);
++UV_EXTERN void uv_mutex_unlock(FAR uv_mutex_t* handle);
++
++UV_EXTERN int uv_rwlock_init(FAR uv_rwlock_t* rwlock);
++UV_EXTERN void uv_rwlock_destroy(FAR uv_rwlock_t* rwlock);
++UV_EXTERN void uv_rwlock_rdlock(FAR uv_rwlock_t* rwlock);
++UV_EXTERN int uv_rwlock_tryrdlock(FAR uv_rwlock_t* rwlock);
++UV_EXTERN void uv_rwlock_rdunlock(FAR uv_rwlock_t* rwlock);
++UV_EXTERN void uv_rwlock_wrlock(FAR uv_rwlock_t* rwlock);
++UV_EXTERN int uv_rwlock_trywrlock(FAR uv_rwlock_t* rwlock);
++UV_EXTERN void uv_rwlock_wrunlock(FAR uv_rwlock_t* rwlock);
++
++UV_EXTERN int uv_sem_init(FAR uv_sem_t* sem, unsigned int value);
++UV_EXTERN void uv_sem_destroy(FAR uv_sem_t* sem);
++UV_EXTERN void uv_sem_post(FAR uv_sem_t* sem);
++UV_EXTERN void uv_sem_wait(FAR uv_sem_t* sem);
++UV_EXTERN int uv_sem_trywait(FAR uv_sem_t* sem);
++
++UV_EXTERN int uv_cond_init(FAR uv_cond_t* cond);
++UV_EXTERN void uv_cond_destroy(FAR uv_cond_t* cond);
++UV_EXTERN void uv_cond_signal(FAR uv_cond_t* cond);
++UV_EXTERN void uv_cond_broadcast(FAR uv_cond_t* cond);
++
++UV_EXTERN int uv_barrier_init(FAR uv_barrier_t* barrier, unsigned int count);
++UV_EXTERN void uv_barrier_destroy(FAR uv_barrier_t* barrier);
++UV_EXTERN int uv_barrier_wait(FAR uv_barrier_t* barrier);
++
++UV_EXTERN void uv_cond_wait(FAR uv_cond_t* cond, FAR uv_mutex_t* mutex);
++UV_EXTERN int uv_cond_timedwait(FAR uv_cond_t* cond,
++                                FAR uv_mutex_t* mutex,
+                                 uint64_t timeout);
+ 
+-UV_EXTERN void uv_once(uv_once_t* guard, void (*callback)(void));
++UV_EXTERN void uv_once(FAR uv_once_t* guard, void (*callback)(void));
+ 
+-UV_EXTERN int uv_key_create(uv_key_t* key);
+-UV_EXTERN void uv_key_delete(uv_key_t* key);
+-UV_EXTERN void* uv_key_get(uv_key_t* key);
+-UV_EXTERN void uv_key_set(uv_key_t* key, void* value);
++UV_EXTERN int uv_key_create(FAR uv_key_t* key);
++UV_EXTERN void uv_key_delete(FAR uv_key_t* key);
++UV_EXTERN void* uv_key_get(FAR uv_key_t* key);
++UV_EXTERN void uv_key_set(FAR uv_key_t* key, FAR void* value);
+ 
+-UV_EXTERN int uv_gettimeofday(uv_timeval64_t* tv);
++UV_EXTERN int uv_gettimeofday(FAR uv_timeval64_t* tv);
+ 
+-typedef void (*uv_thread_cb)(void* arg);
++typedef void (*uv_thread_cb)(FAR void* arg);
+ 
+-UV_EXTERN int uv_thread_create(uv_thread_t* tid, uv_thread_cb entry, void* arg);
++UV_EXTERN int uv_thread_create(FAR uv_thread_t* tid, uv_thread_cb entry, FAR void* arg);
+ 
+ typedef enum {
+   UV_THREAD_NO_FLAGS = 0x00,
+@@ -1747,13 +1747,13 @@ struct uv_thread_options_s {
+ 
+ typedef struct uv_thread_options_s uv_thread_options_t;
+ 
+-UV_EXTERN int uv_thread_create_ex(uv_thread_t* tid,
+-                                  const uv_thread_options_t* params,
++UV_EXTERN int uv_thread_create_ex(FAR uv_thread_t* tid,
++                                  FAR const uv_thread_options_t* params,
+                                   uv_thread_cb entry,
+-                                  void* arg);
++                                  FAR void* arg);
+ UV_EXTERN uv_thread_t uv_thread_self(void);
+-UV_EXTERN int uv_thread_join(uv_thread_t *tid);
+-UV_EXTERN int uv_thread_equal(const uv_thread_t* t1, const uv_thread_t* t2);
++UV_EXTERN int uv_thread_join(FAR uv_thread_t *tid);
++UV_EXTERN int uv_thread_equal(FAR const uv_thread_t* t1, FAR const uv_thread_t* t2);
+ 
+ /* The presence of these unions force similar struct layout. */
+ #define XX(_, name) uv_ ## name ## _t name;
+@@ -1769,12 +1769,12 @@ union uv_any_req {
+ 
+ struct uv_loop_s {
+   /* User data - use this for whatever. */
+-  void* data;
++  FAR void* data;
+   /* Loop reference counting. */
+   unsigned int active_handles;
+-  void* handle_queue[2];
++  FAR void* handle_queue[2];
+   union {
+-    void* unused[2];
++    FAR void* unused[2];
+     unsigned int count;
+   } active_reqs;
+   /* Internal flag to signal loop stop. */
+@@ -1782,8 +1782,8 @@ struct uv_loop_s {
+   UV_LOOP_PRIVATE_FIELDS
+ };
+ 
+-UV_EXTERN void* uv_loop_get_data(const uv_loop_t*);
+-UV_EXTERN void uv_loop_set_data(uv_loop_t*, void* data);
++UV_EXTERN FAR void* uv_loop_get_data(FAR const uv_loop_t*);
++UV_EXTERN void uv_loop_set_data(FAR uv_loop_t*, FAR void* data);
+ 
+ /* Don't export the private CPP symbols. */
+ #undef UV_HANDLE_TYPE_PRIVATE
+diff --git a/include/uv/threadpool.h b/include/uv/threadpool.h
+index 9708ebd..9af220f 100644
+--- a/include/uv/threadpool.h
++++ b/include/uv/threadpool.h
+@@ -28,10 +28,10 @@
+ #define UV_THREADPOOL_H_
+ 
+ struct uv__work {
+-  void (*work)(struct uv__work *w);
+-  void (*done)(struct uv__work *w, int status);
+-  struct uv_loop_s* loop;
+-  void* wq[2];
++  void (*work)(FAR struct uv__work *w);
++  void (*done)(FAR struct uv__work *w, int status);
++  FAR struct uv_loop_s* loop;
++  FAR void* wq[2];
+ };
+ 
+ #endif /* UV_THREADPOOL_H_ */
+diff --git a/include/uv/unix.h b/include/uv/unix.h
+index 201573c..9de6ea8 100644
+--- a/include/uv/unix.h
++++ b/include/uv/unix.h
+@@ -88,15 +88,15 @@
+ struct uv__io_s;
+ struct uv_loop_s;
+ 
+-typedef void (*uv__io_cb)(struct uv_loop_s* loop,
+-                          struct uv__io_s* w,
++typedef void (*uv__io_cb)(FAR struct uv_loop_s* loop,
++                          FAR struct uv__io_s* w,
+                           unsigned int events);
+ typedef struct uv__io_s uv__io_t;
+ 
+ struct uv__io_s {
+   uv__io_cb cb;
+-  void* pending_queue[2];
+-  void* watcher_queue[2];
++  FAR void* pending_queue[2];
++  FAR void* watcher_queue[2];
+   unsigned int pevents; /* Pending event mask i.e. mask at next tick. */
+   unsigned int events;  /* Current event mask. */
+   int fd;
+@@ -154,7 +154,7 @@ struct _uv_barrier {
+ };
+ 
+ typedef struct {
+-  struct _uv_barrier* b;
++  FAR struct _uv_barrier* b;
+ # if defined(PTHREAD_BARRIER_SERIAL_THREAD)
+   /* TODO(bnoordhuis) Remove padding in v2. */
+   char pad[sizeof(pthread_barrier_t) - sizeof(struct _uv_barrier*)];
+@@ -230,7 +230,7 @@ typedef struct {
+ 
+ #ifdef CONFIG_LIBUV_PROCESS
+ #define UV_LOOP_PRIVATE_PROCESS_FIELDS                                        \
+-  void* process_handles[2];                                                   \
++  FAR void* process_handles[2];                                               \
+   uv_signal_t child_watcher;
+ #else
+ #define UV_LOOP_PRIVATE_PROCESS_FIELDS
+@@ -239,13 +239,13 @@ typedef struct {
+ #ifdef CONFIG_LIBUV_ASYNC
+ #ifndef CONFIG_LIBUV_LOW_FOOTPRINT
+ #define UV_LOOP_PRIVATE_ASYNC_FIELDS                                          \
+-  void* async_handles[2];                                                     \
++  FAR void* async_handles[2];                                                 \
+   void (*async_unused)(void);  /* TODO(bnoordhuis) Remove in libuv v2. */     \
+   uv__io_t async_io_watcher;                                                  \
+   int async_wfd;
+ #else
+ #define UV_LOOP_PRIVATE_ASYNC_FIELDS                                          \
+-  void* async_handles[2];                                                     \
++  FAR void* async_handles[2];                                                 \
+   uv__io_t async_io_watcher;
+ #endif /* CONFIG_LIBUV_LOW_FOOTPRINT */
+ #else
+@@ -255,7 +255,7 @@ typedef struct {
+ #ifdef CONFIG_LIBUV_TIMER
+ #define UV_LOOP_PRIVATE_TIMER_FIELDS                                          \
+   struct {                                                                    \
+-    void* min;                                                                \
++    FAR void* min;                                                            \
+     unsigned int nelts;                                                       \
+   } timer_heap;                                                               \
+   uint64_t timer_counter;
+@@ -265,7 +265,7 @@ typedef struct {
+ 
+ #ifdef CONFIG_LIBUV_WQ
+ #define UV_LOOP_PRIVATE_WQ_FIELDS                                             \
+-  void* wq[2];                                                                \
++  FAR void* wq[2];                                                            \
+   uv_mutex_t wq_mutex;                                                        \
+   uv_async_t wq_async;
+ #else
+@@ -274,9 +274,9 @@ typedef struct {
+ 
+ #ifdef CONFIG_LIBUV_LOOP_WATCHERS
+ #define UV_LOOP_PRIVATE_WATCHERS_FIELDS                                       \
+-  void* prepare_handles[2];                                                   \
+-  void* check_handles[2];                                                     \
+-  void* idle_handles[2];
++  FAR void* prepare_handles[2];                                               \
++  FAR void* check_handles[2];                                                 \
++  FAR void* idle_handles[2];
+ #else
+ #define UV_LOOP_PRIVATE_WATCHERS_FIELDS
+ #endif
+@@ -299,12 +299,12 @@ typedef struct {
+ #endif
+ 
+ #define UV_LOOP_PRIVATE_FIELDS                                                \
+-  void* watcher_queue[2];                                                     \
+-  uv__io_t** watchers;                                                        \
++  FAR void* watcher_queue[2];                                                 \
++  FAR uv__io_t** watchers;                                                    \
+   unsigned int nwatchers;                                                     \
+   unsigned int nfds;                                                          \
+   UV_LOOP_PRIVATE_WQ_FIELDS                                                   \
+-  uv_handle_t* closing_handles;                                               \
++  FAR uv_handle_t* closing_handles;                                           \
+   UV_LOOP_PRIVATE_WATCHERS_FIELDS                                             \
+   UV_LOOP_PRIVATE_ASYNC_FIELDS                                                \
+   UV_LOOP_PRIVATE_TIMER_FIELDS                                                \
+@@ -321,41 +321,41 @@ typedef struct {
+ #define UV_PRIVATE_REQ_TYPES /* empty */
+ 
+ #define UV_WRITE_PRIVATE_FIELDS                                               \
+-  void* queue[2];                                                             \
++  FAR void* queue[2];                                                         \
+   unsigned int write_index;                                                   \
+-  uv_buf_t* bufs;                                                             \
++  FAR uv_buf_t* bufs;                                                         \
+   unsigned int nbufs;                                                         \
+   int error;                                                                  \
+   uv_buf_t bufsml[4];                                                         \
+ 
+ #define UV_CONNECT_PRIVATE_FIELDS                                             \
+-  void* queue[2];                                                             \
++  FAR void* queue[2];                                                         \
+ 
+ #define UV_SHUTDOWN_PRIVATE_FIELDS /* empty */
+ 
+ #define UV_UDP_SEND_PRIVATE_FIELDS                                            \
+-  void* queue[2];                                                             \
++  FAR void* queue[2];                                                         \
+   struct sockaddr_storage addr;                                               \
+   unsigned int nbufs;                                                         \
+-  uv_buf_t* bufs;                                                             \
++  FAR uv_buf_t* bufs;                                                         \
+   ssize_t status;                                                             \
+   uv_udp_send_cb send_cb;                                                     \
+   uv_buf_t bufsml[4];                                                         \
+ 
+ #define UV_HANDLE_PRIVATE_FIELDS                                              \
+-  uv_handle_t* next_closing;                                                  \
++  FAR uv_handle_t* next_closing;                                              \
+   unsigned int flags;                                                         \
+ 
+ #define UV_STREAM_PRIVATE_FIELDS                                              \
+-  uv_connect_t *connect_req;                                                  \
+-  uv_shutdown_t *shutdown_req;                                                \
++  FAR uv_connect_t *connect_req;                                              \
++  FAR uv_shutdown_t *shutdown_req;                                            \
+   uv__io_t io_watcher;                                                        \
+-  void* write_queue[2];                                                       \
+-  void* write_completed_queue[2];                                             \
++  FAR void* write_queue[2];                                                   \
++  FAR void* write_completed_queue[2];                                         \
+   uv_connection_cb connection_cb;                                             \
+   int delayed_error;                                                          \
+   int accepted_fd;                                                            \
+-  void* queued_fds;                                                           \
++  FAR void* queued_fds;                                                       \
+   UV_STREAM_PRIVATE_PLATFORM_FIELDS                                           \
+ 
+ #define UV_TCP_PRIVATE_FIELDS /* empty */
+@@ -364,35 +364,35 @@ typedef struct {
+   uv_alloc_cb alloc_cb;                                                       \
+   uv_udp_recv_cb recv_cb;                                                     \
+   uv__io_t io_watcher;                                                        \
+-  void* write_queue[2];                                                       \
+-  void* write_completed_queue[2];                                             \
++  FAR void* write_queue[2];                                                   \
++  FAR void* write_completed_queue[2];                                         \
+ 
+ #define UV_PIPE_PRIVATE_FIELDS                                                \
+-  const char* pipe_fname; /* strdup'ed */
++  FAR const char* pipe_fname; /* strdup'ed */
+ 
+ #define UV_POLL_PRIVATE_FIELDS                                                \
+   uv__io_t io_watcher;
+ 
+ #define UV_PREPARE_PRIVATE_FIELDS                                             \
+   uv_prepare_cb prepare_cb;                                                   \
+-  void* queue[2];                                                             \
++  FAR void* queue[2];                                                         \
+ 
+ #define UV_CHECK_PRIVATE_FIELDS                                               \
+   uv_check_cb check_cb;                                                       \
+-  void* queue[2];                                                             \
++  FAR void* queue[2];                                                         \
+ 
+ #define UV_IDLE_PRIVATE_FIELDS                                                \
+   uv_idle_cb idle_cb;                                                         \
+-  void* queue[2];                                                             \
++  FAR void* queue[2];                                                         \
+ 
+ #define UV_ASYNC_PRIVATE_FIELDS                                               \
+   uv_async_cb async_cb;                                                       \
+-  void* queue[2];                                                             \
++  FAR void* queue[2];                                                         \
+   int pending;                                                                \
+ 
+ #define UV_TIMER_PRIVATE_FIELDS                                               \
+   uv_timer_cb timer_cb;                                                       \
+-  void* heap_node[3];                                                         \
++  FAR void* heap_node[3];                                                     \
+   uint64_t timeout;                                                           \
+   uint64_t repeat;                                                            \
+   uint64_t start_id;
+@@ -400,10 +400,10 @@ typedef struct {
+ #define UV_GETADDRINFO_PRIVATE_FIELDS                                         \
+   struct uv__work work_req;                                                   \
+   uv_getaddrinfo_cb cb;                                                       \
+-  struct addrinfo* hints;                                                     \
++  FAR struct addrinfo* hints;                                                 \
+   char* hostname;                                                             \
+   char* service;                                                              \
+-  struct addrinfo* addrinfo;                                                  \
++  FAR struct addrinfo* addrinfo;                                              \
+   int retcode;
+ 
+ #define UV_GETNAMEINFO_PRIVATE_FIELDS                                         \
+@@ -416,16 +416,16 @@ typedef struct {
+   int retcode;
+ 
+ #define UV_PROCESS_PRIVATE_FIELDS                                             \
+-  void* queue[2];                                                             \
++  FAR void* queue[2];                                                         \
+   int status;                                                                 \
+ 
+ #define UV_FS_PRIVATE_FIELDS                                                  \
+-  const char *new_path;                                                       \
++  FAR const char *new_path;                                                   \
+   uv_file file;                                                               \
+   int flags;                                                                  \
+   mode_t mode;                                                                \
+   unsigned int nbufs;                                                         \
+-  uv_buf_t* bufs;                                                             \
++  FAR uv_buf_t* bufs;                                                         \
+   off_t off;                                                                  \
+   uv_uid_t uid;                                                               \
+   uv_gid_t gid;                                                               \
+@@ -444,9 +444,9 @@ typedef struct {
+ #define UV_SIGNAL_PRIVATE_FIELDS                                              \
+   /* RB_ENTRY(uv_signal_s) tree_entry; */                                     \
+   struct {                                                                    \
+-    struct uv_signal_s* rbe_left;                                             \
+-    struct uv_signal_s* rbe_right;                                            \
+-    struct uv_signal_s* rbe_parent;                                           \
++    FAR struct uv_signal_s* rbe_left;                                         \
++    FAR struct uv_signal_s* rbe_right;                                        \
++    FAR struct uv_signal_s* rbe_parent;                                       \
+     int rbe_color;                                                            \
+   } tree_entry;                                                               \
+   /* Use two counters here so we don have to fiddle with atomics. */          \
+diff --git a/src/heap-inl.h b/src/heap-inl.h
+index 1e2ed60..fad7f0b 100644
+--- a/src/heap-inl.h
++++ b/src/heap-inl.h
+@@ -25,9 +25,9 @@
+ #endif
+ 
+ struct heap_node {
+-  struct heap_node* left;
+-  struct heap_node* right;
+-  struct heap_node* parent;
++  FAR struct heap_node* left;
++  FAR struct heap_node* right;
++  FAR struct heap_node* parent;
+ };
+ 
+ /* A binary min heap.  The usual properties hold: the root is the lowest
+@@ -38,41 +38,41 @@ struct heap_node {
+  * of a minor reduction in performance.  Compile with -DNDEBUG to disable.
+  */
+ struct heap {
+-  struct heap_node* min;
++  FAR struct heap_node* min;
+   unsigned int nelts;
+ };
+ 
+ /* Return non-zero if a < b. */
+-typedef int (*heap_compare_fn)(const struct heap_node* a,
+-                               const struct heap_node* b);
++typedef int (*heap_compare_fn)(FAR const struct heap_node* a,
++                               FAR const struct heap_node* b);
+ 
+ /* Public functions. */
+-HEAP_EXPORT(void heap_init(struct heap* heap));
+-HEAP_EXPORT(struct heap_node* heap_min(const struct heap* heap));
+-HEAP_EXPORT(void heap_insert(struct heap* heap,
+-                             struct heap_node* newnode,
++HEAP_EXPORT(void heap_init(FAR struct heap* heap));
++HEAP_EXPORT(FAR struct heap_node* heap_min(FAR const struct heap* heap));
++HEAP_EXPORT(void heap_insert(FAR struct heap* heap,
++                             FAR struct heap_node* newnode,
+                              heap_compare_fn less_than));
+-HEAP_EXPORT(void heap_remove(struct heap* heap,
+-                             struct heap_node* node,
++HEAP_EXPORT(void heap_remove(FAR struct heap* heap,
++                             FAR struct heap_node* node,
+                              heap_compare_fn less_than));
+-HEAP_EXPORT(void heap_dequeue(struct heap* heap, heap_compare_fn less_than));
++HEAP_EXPORT(void heap_dequeue(FAR struct heap* heap, heap_compare_fn less_than));
+ 
+ /* Implementation follows. */
+ 
+-HEAP_EXPORT(void heap_init(struct heap* heap)) {
++HEAP_EXPORT(void heap_init(FAR struct heap* heap)) {
+   heap->min = NULL;
+   heap->nelts = 0;
+ }
+ 
+-HEAP_EXPORT(struct heap_node* heap_min(const struct heap* heap)) {
++HEAP_EXPORT(FAR struct heap_node* heap_min(FAR const struct heap* heap)) {
+   return heap->min;
+ }
+ 
+ /* Swap parent with child. Child moves closer to the root, parent moves away. */
+-static void heap_node_swap(struct heap* heap,
+-                           struct heap_node* parent,
+-                           struct heap_node* child) {
+-  struct heap_node* sibling;
++static void heap_node_swap(FAR struct heap* heap,
++                           FAR struct heap_node* parent,
++                           FAR struct heap_node* child) {
++  FAR struct heap_node* sibling;
+   struct heap_node t;
+ 
+   t = *parent;
+@@ -103,11 +103,11 @@ static void heap_node_swap(struct heap* heap,
+     child->parent->right = child;
+ }
+ 
+-HEAP_EXPORT(void heap_insert(struct heap* heap,
+-                             struct heap_node* newnode,
++HEAP_EXPORT(void heap_insert(FAR struct heap* heap,
++                             FAR struct heap_node* newnode,
+                              heap_compare_fn less_than)) {
+-  struct heap_node** parent;
+-  struct heap_node** child;
++  FAR struct heap_node** parent;
++  FAR struct heap_node** child;
+   unsigned int path;
+   unsigned int n;
+   unsigned int k;
+@@ -147,12 +147,12 @@ HEAP_EXPORT(void heap_insert(struct heap* heap,
+     heap_node_swap(heap, newnode->parent, newnode);
+ }
+ 
+-HEAP_EXPORT(void heap_remove(struct heap* heap,
+-                             struct heap_node* node,
++HEAP_EXPORT(void heap_remove(FAR struct heap* heap,
++                             FAR struct heap_node* node,
+                              heap_compare_fn less_than)) {
+-  struct heap_node* smallest;
+-  struct heap_node** max;
+-  struct heap_node* child;
++  FAR struct heap_node* smallest;
++  FAR struct heap_node** max;
++  FAR struct heap_node* child;
+   unsigned int path;
+   unsigned int k;
+   unsigned int n;
+@@ -236,7 +236,7 @@ HEAP_EXPORT(void heap_remove(struct heap* heap,
+     heap_node_swap(heap, child->parent, child);
+ }
+ 
+-HEAP_EXPORT(void heap_dequeue(struct heap* heap, heap_compare_fn less_than)) {
++HEAP_EXPORT(void heap_dequeue(FAR struct heap* heap, heap_compare_fn less_than)) {
+   heap_remove(heap, heap->min, less_than);
+ }
+ 
+diff --git a/src/queue.h b/src/queue.h
+index ff3540a..b805137 100644
+--- a/src/queue.h
++++ b/src/queue.h
+@@ -21,8 +21,8 @@
+ typedef void *QUEUE[2];
+ 
+ /* Private macros. */
+-#define QUEUE_NEXT(q)       (*(QUEUE **) &((*(q))[0]))
+-#define QUEUE_PREV(q)       (*(QUEUE **) &((*(q))[1]))
++#define QUEUE_NEXT(q)       (*(FAR QUEUE **) &((*(q))[0]) )
++#define QUEUE_PREV(q)       (*(FAR QUEUE **) &((*(q))[1]) )
+ #define QUEUE_PREV_NEXT(q)  (QUEUE_NEXT(QUEUE_PREV(q)))
+ #define QUEUE_NEXT_PREV(q)  (QUEUE_PREV(QUEUE_NEXT(q)))
+ 
+diff --git a/src/strscpy.c b/src/strscpy.c
+index 2a2bdce..646bc17 100644
+--- a/src/strscpy.c
++++ b/src/strscpy.c
+@@ -1,7 +1,7 @@
+ #include "strscpy.h"
+ #include <limits.h>  /* SSIZE_MAX */
+ 
+-ssize_t uv__strscpy(char* d, const char* s, size_t n) {
++ssize_t uv__strscpy(FAR char* d, FAR const char* s, size_t n) {
+   size_t i;
+ 
+   for (i = 0; i < n; i++)
+diff --git a/src/strscpy.h b/src/strscpy.h
+index fbe0a39..42773fa 100644
+--- a/src/strscpy.h
++++ b/src/strscpy.h
+@@ -13,6 +13,6 @@
+  *
+  * See https://www.kernel.org/doc/htmldocs/kernel-api/API-strscpy.html
+  */
+-ssize_t uv__strscpy(char* d, const char* s, size_t n);
++ssize_t uv__strscpy(FAR char* d, FAR const char* s, size_t n);
+ 
+ #endif  /* UV_STRSCPY_H_ */
+diff --git a/src/threadpool.c b/src/threadpool.c
+index 5287b89..46fb26c 100644
+--- a/src/threadpool.c
++++ b/src/threadpool.c
+@@ -35,7 +35,7 @@ static uv_mutex_t mutex;
+ static unsigned int idle_threads;
+ static unsigned int slow_io_work_running;
+ static unsigned int nthreads;
+-static uv_thread_t* threads;
++static FAR uv_thread_t* threads;
+ static uv_thread_t default_threads[CONFIG_LIBUV_WQ_THREADS_COUNT];
+ static QUEUE exit_message;
+ static QUEUE wq;
+@@ -46,7 +46,7 @@ static unsigned int slow_work_thread_threshold(void) {
+   return (nthreads + 1) / 2;
+ }
+ 
+-static void uv__cancelled(struct uv__work* w) {
++static void uv__cancelled(FAR struct uv__work* w) {
+   abort();
+ }
+ 
+@@ -54,12 +54,12 @@ static void uv__cancelled(struct uv__work* w) {
+ /* To avoid deadlock with uv_cancel() it's crucial that the worker
+  * never holds the global mutex and the loop-local mutex at the same time.
+  */
+-static void worker(void* arg) {
+-  struct uv__work* w;
+-  QUEUE* q;
++static void worker(FAR void* arg) {
++  FAR struct uv__work* w;
++  FAR QUEUE* q;
+   int is_slow_work;
+ 
+-  uv_sem_post((uv_sem_t*) arg);
++  uv_sem_post((FAR uv_sem_t*) arg);
+   arg = NULL;
+ 
+   uv_mutex_lock(&mutex);
+@@ -139,7 +139,7 @@ static void worker(void* arg) {
+ }
+ 
+ 
+-static void post(QUEUE* q, enum uv__work_kind kind) {
++static void post(FAR QUEUE* q, enum uv__work_kind kind) {
+   uv_mutex_lock(&mutex);
+   if (kind == UV__WORK_SLOW_IO) {
+     /* Insert into a separate queue. */
+@@ -260,11 +260,11 @@ static void init_once(void) {
+ }
+ 
+ 
+-void uv__work_submit(uv_loop_t* loop,
+-                     struct uv__work* w,
++void uv__work_submit(FAR uv_loop_t* loop,
++                     FAR struct uv__work* w,
+                      enum uv__work_kind kind,
+-                     void (*work)(struct uv__work* w),
+-                     void (*done)(struct uv__work* w, int status)) {
++                     void (*work)(FAR struct uv__work* w),
++                     void (*done)(FAR struct uv__work* w, int status)) {
+   uv_once(&once, init_once);
+   w->loop = loop;
+   w->work = work;
+@@ -273,7 +273,7 @@ void uv__work_submit(uv_loop_t* loop,
+ }
+ 
+ 
+-static int uv__work_cancel(uv_loop_t* loop, uv_req_t* req, struct uv__work* w) {
++static int uv__work_cancel(FAR uv_loop_t* loop, FAR uv_req_t* req, FAR struct uv__work* w) {
+   int cancelled;
+ 
+   uv_mutex_lock(&mutex);
+@@ -299,10 +299,10 @@ static int uv__work_cancel(uv_loop_t* loop, uv_req_t* req, struct uv__work* w) {
+ }
+ 
+ 
+-void uv__work_done(uv_async_t* handle) {
+-  struct uv__work* w;
+-  uv_loop_t* loop;
+-  QUEUE* q;
++void uv__work_done(FAR uv_async_t* handle) {
++  FAR struct uv__work* w;
++  FAR uv_loop_t* loop;
++  FAR QUEUE* q;
+   QUEUE wql;
+   int err;
+ 
+@@ -322,15 +322,15 @@ void uv__work_done(uv_async_t* handle) {
+ }
+ 
+ 
+-static void uv__queue_work(struct uv__work* w) {
+-  uv_work_t* req = container_of(w, uv_work_t, work_req);
++static void uv__queue_work(FAR struct uv__work* w) {
++  FAR uv_work_t* req = container_of(w, uv_work_t, work_req);
+ 
+   req->work_cb(req);
+ }
+ 
+ 
+-static void uv__queue_done(struct uv__work* w, int err) {
+-  uv_work_t* req;
++static void uv__queue_done(FAR struct uv__work* w, int err) {
++  FAR uv_work_t* req;
+ 
+   req = container_of(w, uv_work_t, work_req);
+   uv__req_unregister(req->loop, req);
+@@ -342,8 +342,8 @@ static void uv__queue_done(struct uv__work* w, int err) {
+ }
+ 
+ 
+-int uv_queue_work(uv_loop_t* loop,
+-                  uv_work_t* req,
++int uv_queue_work(FAR uv_loop_t* loop,
++                  FAR uv_work_t* req,
+                   uv_work_cb work_cb,
+                   uv_after_work_cb after_work_cb) {
+   if (work_cb == NULL)
+@@ -362,9 +362,9 @@ int uv_queue_work(uv_loop_t* loop,
+ }
+ 
+ 
+-int uv_cancel(uv_req_t* req) {
+-  struct uv__work* wreq;
+-  uv_loop_t* loop;
++int uv_cancel(FAR uv_req_t* req) {
++  FAR struct uv__work* wreq;
++  FAR uv_loop_t* loop;
+ 
+   switch (req->type) {
+   case UV_FS:
+diff --git a/src/timer.c b/src/timer.c
+index 4cf4ed4..b65063a 100644
+--- a/src/timer.c
++++ b/src/timer.c
+@@ -26,19 +26,19 @@
+ #include <limits.h>
+ 
+ 
+-static struct heap *timer_heap(const uv_loop_t* loop) {
++static struct heap *timer_heap(FAR const uv_loop_t* loop) {
+ #ifdef _WIN32
+   return (struct heap*) loop->timer_heap;
+ #else
+-  return (struct heap*) &loop->timer_heap;
++  return (FAR struct heap*) &loop->timer_heap;
+ #endif
+ }
+ 
+ 
+-static int timer_less_than(const struct heap_node* ha,
+-                           const struct heap_node* hb) {
+-  const uv_timer_t* a;
+-  const uv_timer_t* b;
++static int timer_less_than(FAR const struct heap_node* ha,
++                           FAR const struct heap_node* hb) {
++  FAR const uv_timer_t* a;
++  FAR const uv_timer_t* b;
+ 
+   a = container_of(ha, uv_timer_t, heap_node);
+   b = container_of(hb, uv_timer_t, heap_node);
+@@ -55,7 +55,7 @@ static int timer_less_than(const struct heap_node* ha,
+ }
+ 
+ 
+-int uv_timer_init(uv_loop_t* loop, uv_timer_t* handle) {
++int uv_timer_init(FAR uv_loop_t* loop, FAR uv_timer_t* handle) {
+   uv__handle_init(loop, (uv_handle_t*)handle, UV_TIMER);
+   handle->timer_cb = NULL;
+   handle->repeat = 0;
+@@ -63,7 +63,7 @@ int uv_timer_init(uv_loop_t* loop, uv_timer_t* handle) {
+ }
+ 
+ 
+-int uv_timer_start(uv_timer_t* handle,
++int uv_timer_start(FAR uv_timer_t* handle,
+                    uv_timer_cb cb,
+                    uint64_t timeout,
+                    uint64_t repeat) {
+@@ -94,7 +94,7 @@ int uv_timer_start(uv_timer_t* handle,
+ }
+ 
+ 
+-int uv_timer_stop(uv_timer_t* handle) {
++int uv_timer_stop(FAR uv_timer_t* handle) {
+   if (!uv__is_active(handle))
+     return 0;
+ 
+@@ -107,7 +107,7 @@ int uv_timer_stop(uv_timer_t* handle) {
+ }
+ 
+ 
+-int uv_timer_again(uv_timer_t* handle) {
++int uv_timer_again(FAR uv_timer_t* handle) {
+   if (handle->timer_cb == NULL)
+     return UV_EINVAL;
+ 
+@@ -120,19 +120,19 @@ int uv_timer_again(uv_timer_t* handle) {
+ }
+ 
+ 
+-void uv_timer_set_repeat(uv_timer_t* handle, uint64_t repeat) {
++void uv_timer_set_repeat(FAR uv_timer_t* handle, uint64_t repeat) {
+   handle->repeat = repeat;
+ }
+ 
+ 
+-uint64_t uv_timer_get_repeat(const uv_timer_t* handle) {
++uint64_t uv_timer_get_repeat(FAR const uv_timer_t* handle) {
+   return handle->repeat;
+ }
+ 
+ 
+-int uv__next_timeout(const uv_loop_t* loop) {
+-  const struct heap_node* heap_node;
+-  const uv_timer_t* handle;
++int uv__next_timeout(FAR const uv_loop_t* loop) {
++  FAR const struct heap_node* heap_node;
++  FAR const uv_timer_t* handle;
+   uint64_t diff;
+ 
+   heap_node = heap_min(timer_heap(loop));
+@@ -151,9 +151,9 @@ int uv__next_timeout(const uv_loop_t* loop) {
+ }
+ 
+ 
+-void uv__run_timers(uv_loop_t* loop) {
+-  struct heap_node* heap_node;
+-  uv_timer_t* handle;
++void uv__run_timers(FAR uv_loop_t* loop) {
++  FAR struct heap_node* heap_node;
++  FAR uv_timer_t* handle;
+ 
+   for (;;) {
+     heap_node = heap_min(timer_heap(loop));
+@@ -171,6 +171,6 @@ void uv__run_timers(uv_loop_t* loop) {
+ }
+ 
+ 
+-void uv__timer_close(uv_timer_t* handle) {
++void uv__timer_close(FAR uv_timer_t* handle) {
+   uv_timer_stop(handle);
+ }
+diff --git a/src/unix/core.c b/src/unix/core.c
+index 7f11370..2c38632 100644
+--- a/src/unix/core.c
++++ b/src/unix/core.c
+@@ -109,7 +109,7 @@ uint64_t uv_hrtime(void) {
+ }
+ 
+ 
+-void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
++void uv_close(FAR uv_handle_t* handle, uv_close_cb close_cb) {
+   assert(!uv__is_closing(handle));
+ 
+   handle->flags |= UV_HANDLE_CLOSING;
+@@ -187,7 +187,7 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
+   uv__make_close_pending(handle);
+ }
+ 
+-int uv__socket_sockopt(uv_handle_t* handle, int optname, int* value) {
++int uv__socket_sockopt(FAR uv_handle_t* handle, int optname, FAR int* value) {
+   int r;
+   int fd;
+   socklen_t len;
+@@ -215,7 +215,7 @@ int uv__socket_sockopt(uv_handle_t* handle, int optname, int* value) {
+   return 0;
+ }
+ 
+-void uv__make_close_pending(uv_handle_t* handle) {
++void uv__make_close_pending(FAR uv_handle_t* handle) {
+   assert(handle->flags & UV_HANDLE_CLOSING);
+   assert(!(handle->flags & UV_HANDLE_CLOSED));
+   handle->next_closing = handle->loop->closing_handles;
+@@ -250,9 +250,9 @@ int uv__getiovmax(void) {
+ }
+ 
+ 
+-static void uv__finish_close(uv_handle_t* handle) {
++static void uv__finish_close(FAR uv_handle_t* handle) {
+ #ifdef CONFIG_LIBUV_SIGNAL
+-  uv_signal_t* sh;
++  FAR uv_signal_t* sh;
+ #endif
+ 
+   /* Note: while the handle is in the UV_HANDLE_CLOSING state now, it's still
+@@ -289,7 +289,7 @@ static void uv__finish_close(uv_handle_t* handle) {
+        * into the closing queue makes the event loop spin but that's
+        * okay because we only need to deliver the pending events.
+        */
+-      sh = (uv_signal_t*) handle;
++      sh = (FAR uv_signal_t*) handle;
+       if (sh->caught_signals > sh->dispatched_signals) {
+         handle->flags ^= UV_HANDLE_CLOSED;
+         uv__make_close_pending(handle);  /* Back into the queue. */
+@@ -322,7 +322,7 @@ static void uv__finish_close(uv_handle_t* handle) {
+ }
+ 
+ 
+-static void uv__run_closing_handles(uv_loop_t* loop) {
++static void uv__run_closing_handles(FAR uv_loop_t* loop) {
+   uv_handle_t* p;
+   uv_handle_t* q;
+ 
+@@ -337,18 +337,18 @@ static void uv__run_closing_handles(uv_loop_t* loop) {
+ }
+ 
+ 
+-int uv_is_closing(const uv_handle_t* handle) {
++int uv_is_closing(FAR const uv_handle_t* handle) {
+   return uv__is_closing(handle);
+ }
+ 
+ #ifndef CONFIG_LIBUV_LOW_FOOTPRINT
+-int uv_backend_fd(const uv_loop_t* loop) {
++int uv_backend_fd(FAR const uv_loop_t* loop) {
+   return loop->backend_fd;
+ }
+ #endif
+ 
+ 
+-int uv_backend_timeout(const uv_loop_t* loop) {
++int uv_backend_timeout(FAR const uv_loop_t* loop) {
+   if (loop->stop_flag != 0)
+     return 0;
+ 
+@@ -376,19 +376,19 @@ int uv_backend_timeout(const uv_loop_t* loop) {
+ }
+ 
+ 
+-static int uv__loop_alive(const uv_loop_t* loop) {
++static int uv__loop_alive(FAR const uv_loop_t* loop) {
+   return uv__has_active_handles(loop) ||
+          uv__has_active_reqs(loop) ||
+          loop->closing_handles != NULL;
+ }
+ 
+ 
+-int uv_loop_alive(const uv_loop_t* loop) {
++int uv_loop_alive(FAR const uv_loop_t* loop) {
+     return uv__loop_alive(loop);
+ }
+ 
+ 
+-int uv_run(uv_loop_t* loop, uv_run_mode mode) {
++int uv_run(FAR uv_loop_t* loop, uv_run_mode mode) {
+   int timeout;
+   int r;
+   int ran_pending;
+@@ -456,12 +456,12 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
+ }
+ 
+ 
+-void uv_update_time(uv_loop_t* loop) {
++void uv_update_time(FAR uv_loop_t* loop) {
+   uv__update_time(loop);
+ }
+ 
+ 
+-int uv_is_active(const uv_handle_t* handle) {
++int uv_is_active(FAR const uv_handle_t* handle) {
+   return uv__is_active(handle);
+ }
+ 
+@@ -505,9 +505,9 @@ int uv__socket(int domain, int type, int protocol) {
+ #endif
+ 
+ /* get a file pointer to a file in read-only and close-on-exec mode */
+-FILE* uv__open_file(const char* path) {
++FAR FILE* uv__open_file(FAR const char* path) {
+   int fd;
+-  FILE* fp;
++  FAR FILE* fp;
+ 
+   fd = uv__open_cloexec(path, O_RDONLY);
+   if (fd < 0)
+@@ -743,7 +743,7 @@ ssize_t uv__recvmsg(int fd, struct msghdr* msg, int flags) {
+ }
+ #endif
+ 
+-int uv_cwd(char* buffer, size_t* size) {
++int uv_cwd(FAR char* buffer, FAR size_t* size) {
+   char scratch[1 + UV__PATH_MAX];
+ 
+   if (buffer == NULL || size == NULL)
+@@ -782,7 +782,7 @@ fixup:
+ }
+ 
+ 
+-int uv_chdir(const char* dir) {
++int uv_chdir(FAR const char* dir) {
+   if (chdir(dir))
+     return UV__ERR(errno);
+ 
+@@ -802,22 +802,22 @@ void uv_disable_stdio_inheritance(void) {
+ }
+ #endif
+ 
+-int uv_fileno(const uv_handle_t* handle, uv_os_fd_t* fd) {
++int uv_fileno(FAR const uv_handle_t* handle, FAR uv_os_fd_t* fd) {
+   int fd_out;
+ 
+   switch (handle->type) {
+   case UV_TCP:
+   case UV_NAMED_PIPE:
+   case UV_TTY:
+-    fd_out = uv__stream_fd((uv_stream_t*) handle);
++    fd_out = uv__stream_fd((FAR uv_stream_t*) handle);
+     break;
+ 
+   case UV_UDP:
+-    fd_out = ((uv_udp_t *) handle)->io_watcher.fd;
++    fd_out = ((FAR uv_udp_t *) handle)->io_watcher.fd;
+     break;
+ 
+   case UV_POLL:
+-    fd_out = ((uv_poll_t *) handle)->io_watcher.fd;
++    fd_out = ((FAR uv_poll_t *) handle)->io_watcher.fd;
+     break;
+ 
+   default:
+@@ -865,10 +865,10 @@ static unsigned int next_power_of_two(unsigned int val) {
+   return val;
+ }
+ 
+-static void maybe_resize(uv_loop_t* loop, unsigned int len) {
++static void maybe_resize(FAR uv_loop_t* loop, unsigned int len) {
+   uv__io_t** watchers;
+-  void* fake_watcher_list;
+-  void* fake_watcher_count;
++  FAR void* fake_watcher_list;
++  FAR void* fake_watcher_count;
+   unsigned int nwatchers;
+   unsigned int i;
+ 
+@@ -900,7 +900,7 @@ static void maybe_resize(uv_loop_t* loop, unsigned int len) {
+ }
+ 
+ 
+-void uv__io_init(uv__io_t* w, uv__io_cb cb, int fd) {
++void uv__io_init(FAR uv__io_t* w, uv__io_cb cb, int fd) {
+   assert(cb != NULL);
+   assert(fd >= -1);
+ #if 0
+@@ -919,7 +919,7 @@ void uv__io_init(uv__io_t* w, uv__io_cb cb, int fd) {
+ }
+ 
+ 
+-void uv__io_start(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
++void uv__io_start(FAR uv_loop_t* loop, FAR uv__io_t* w, unsigned int events) {
+   assert(0 == (events & ~(POLLIN | POLLOUT | UV__POLLRDHUP | UV__POLLPRI)));
+   assert(0 != events);
+   assert(w->fd >= 0);
+@@ -947,7 +947,7 @@ void uv__io_start(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
+ }
+ 
+ 
+-void uv__io_stop(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
++void uv__io_stop(FAR uv_loop_t* loop, FAR uv__io_t* w, unsigned int events) {
+   assert(0 == (events & ~(POLLIN | POLLOUT | UV__POLLRDHUP | UV__POLLPRI)));
+   assert(0 != events);
+ 
+@@ -1002,7 +1002,7 @@ int uv__io_active(const uv__io_t* w, unsigned int events) {
+ }
+ #endif
+ 
+-int uv__fd_exists(uv_loop_t* loop, int fd) {
++int uv__fd_exists(FAR uv_loop_t* loop, int fd) {
+   return (unsigned) fd < loop->nwatchers && loop->watchers[fd] != NULL;
+ }
+ 
+@@ -1040,7 +1040,7 @@ int uv_getrusage(uv_rusage_t* rusage) {
+ }
+ #endif
+ 
+-int uv__open_cloexec(const char* path, int flags) {
++int uv__open_cloexec(FAR const char* path, int flags) {
+ #if defined(O_CLOEXEC)
+   int fd;
+ 
+@@ -1096,7 +1096,7 @@ int uv__dup2_cloexec(int oldfd, int newfd) {
+ }
+ #endif
+ 
+-int uv_os_homedir(char* buffer, size_t* size) {
++int uv_os_homedir(FAR char* buffer, FAR size_t* size) {
+   uv_passwd_t pwd;
+   size_t len;
+   int r;
+@@ -1132,8 +1132,8 @@ int uv_os_homedir(char* buffer, size_t* size) {
+ }
+ 
+ 
+-int uv_os_tmpdir(char* buffer, size_t* size) {
+-  const char* buf;
++int uv_os_tmpdir(FAR char* buffer, FAR size_t* size) {
++  FAR const char* buf;
+   size_t len;
+ 
+   if (buffer == NULL || size == NULL || *size == 0)
+@@ -1183,10 +1183,10 @@ return_buffer:
+ }
+ 
+ 
+-int uv__getpwuid_r(uv_passwd_t* pwd) {
++int uv__getpwuid_r(FAR uv_passwd_t* pwd) {
+   struct passwd pw;
+-  struct passwd* result;
+-  char* buf;
++  FAR struct passwd* result;
++  FAR char* buf;
+   uid_t uid;
+   size_t bufsize;
+   size_t name_size;
+@@ -1265,7 +1265,7 @@ int uv__getpwuid_r(uv_passwd_t* pwd) {
+ }
+ 
+ 
+-void uv_os_free_passwd(uv_passwd_t* pwd) {
++void uv_os_free_passwd(FAR uv_passwd_t* pwd) {
+   if (pwd == NULL)
+     return;
+ 
+@@ -1281,7 +1281,7 @@ void uv_os_free_passwd(uv_passwd_t* pwd) {
+ }
+ 
+ 
+-int uv_os_get_passwd(uv_passwd_t* pwd) {
++int uv_os_get_passwd(FAR uv_passwd_t* pwd) {
+   return uv__getpwuid_r(pwd);
+ }
+ 
+@@ -1292,9 +1292,9 @@ int uv_translate_sys_error(int sys_errno) {
+ }
+ 
+ 
+-int uv_os_environ(uv_env_item_t** envitems, int* count) {
++int uv_os_environ(FAR uv_env_item_t** envitems, FAR int* count) {
+   int i, j, cnt;
+-  uv_env_item_t* envitem;
++  FAR uv_env_item_t* envitem;
+ 
+   *envitems = NULL;
+   *count = 0;
+@@ -1348,8 +1348,8 @@ fail:
+ }
+ 
+ 
+-int uv_os_getenv(const char* name, char* buffer, size_t* size) {
+-  char* var;
++int uv_os_getenv(FAR const char* name, FAR char* buffer, FAR size_t* size) {
++  FAR char* var;
+   size_t len;
+ 
+   if (name == NULL || buffer == NULL || size == NULL || *size == 0)
+@@ -1374,7 +1374,7 @@ int uv_os_getenv(const char* name, char* buffer, size_t* size) {
+ }
+ 
+ 
+-int uv_os_setenv(const char* name, const char* value) {
++int uv_os_setenv(FAR const char* name, FAR const char* value) {
+   if (name == NULL || value == NULL)
+     return UV_EINVAL;
+ 
+@@ -1385,7 +1385,7 @@ int uv_os_setenv(const char* name, const char* value) {
+ }
+ 
+ 
+-int uv_os_unsetenv(const char* name) {
++int uv_os_unsetenv(FAR const char* name) {
+   if (name == NULL)
+     return UV_EINVAL;
+ 
+@@ -1396,7 +1396,7 @@ int uv_os_unsetenv(const char* name) {
+ }
+ 
+ 
+-int uv_os_gethostname(char* buffer, size_t* size) {
++int uv_os_gethostname(FAR char* buffer, FAR size_t* size) {
+   /*
+     On some platforms, if the input buffer is not large enough, gethostname()
+     succeeds, but truncates the result. libuv can detect this and return ENOBUFS
+@@ -1444,7 +1444,7 @@ uv_pid_t uv_os_getppid(void) {
+ }
+ #endif
+ 
+-int uv_os_getpriority(uv_pid_t pid, int* priority) {
++int uv_os_getpriority(uv_pid_t pid, FAR int* priority) {
+   int r;
+ 
+   if (priority == NULL)
+@@ -1472,7 +1472,7 @@ int uv_os_setpriority(uv_pid_t pid, int priority) {
+ }
+ 
+ 
+-int uv_os_uname(uv_utsname_t* buffer) {
++int uv_os_uname(FAR uv_utsname_t* buffer) {
+   struct utsname buf;
+   int r;
+ 
+@@ -1527,9 +1527,9 @@ error:
+   return r;
+ }
+ 
+-int uv__getsockpeername(const uv_handle_t* handle,
++int uv__getsockpeername(FAR const uv_handle_t* handle,
+                         uv__peersockfunc func,
+-                        struct sockaddr* name,
++                        FAR struct sockaddr* name,
+                         int* namelen) {
+   socklen_t socklen;
+   uv_os_fd_t fd;
+@@ -1549,7 +1549,7 @@ int uv__getsockpeername(const uv_handle_t* handle,
+   return 0;
+ }
+ 
+-int uv_gettimeofday(uv_timeval64_t* tv) {
++int uv_gettimeofday(FAR uv_timeval64_t* tv) {
+   struct timeval time;
+ 
+   if (tv == NULL)
+diff --git a/src/unix/internal.h b/src/unix/internal.h
+index 402ee87..1fb8149 100644
+--- a/src/unix/internal.h
++++ b/src/unix/internal.h
+@@ -193,88 +193,88 @@ int uv__close(int fd); /* preserves errno */
+ int uv__close_nocheckstdio(int fd);
+ int uv__close_nocancel(int fd);
+ int uv__socket(int domain, int type, int protocol);
+-ssize_t uv__recvmsg(int fd, struct msghdr *msg, int flags);
+-void uv__make_close_pending(uv_handle_t* handle);
++ssize_t uv__recvmsg(int fd, FAR struct msghdr *msg, int flags);
++void uv__make_close_pending(FAR uv_handle_t* handle);
+ int uv__getiovmax(void);
+ 
+-void uv__io_init(uv__io_t* w, uv__io_cb cb, int fd);
+-void uv__io_start(uv_loop_t* loop, uv__io_t* w, unsigned int events);
+-void uv__io_stop(uv_loop_t* loop, uv__io_t* w, unsigned int events);
+-void uv__io_close(uv_loop_t* loop, uv__io_t* w);
+-void uv__io_feed(uv_loop_t* loop, uv__io_t* w);
+-int uv__io_active(const uv__io_t* w, unsigned int events);
+-int uv__io_check_fd(uv_loop_t* loop, int fd);
+-void uv__io_poll(uv_loop_t* loop, int timeout); /* in milliseconds or -1 */
+-int uv__io_fork(uv_loop_t* loop);
+-int uv__fd_exists(uv_loop_t* loop, int fd);
++void uv__io_init(FAR uv__io_t* w, uv__io_cb cb, int fd);
++void uv__io_start(FAR uv_loop_t* loop, FAR uv__io_t* w, unsigned int events);
++void uv__io_stop(FAR uv_loop_t* loop, FAR uv__io_t* w, unsigned int events);
++void uv__io_close(FAR uv_loop_t* loop, FAR uv__io_t* w);
++void uv__io_feed(FAR uv_loop_t* loop, FAR uv__io_t* w);
++int uv__io_active(FAR const uv__io_t* w, unsigned int events);
++int uv__io_check_fd(FAR uv_loop_t* loop, int fd);
++void uv__io_poll(FAR uv_loop_t* loop, int timeout); /* in milliseconds or -1 */
++int uv__io_fork(FAR uv_loop_t* loop);
++int uv__fd_exists(FAR uv_loop_t* loop, int fd);
+ 
+ /* async */
+-void uv__async_stop(uv_loop_t* loop);
+-int uv__async_fork(uv_loop_t* loop);
++void uv__async_stop(FAR uv_loop_t* loop);
++int uv__async_fork(FAR uv_loop_t* loop);
+ 
+ 
+ /* loop */
+-void uv__run_idle(uv_loop_t* loop);
+-void uv__run_check(uv_loop_t* loop);
+-void uv__run_prepare(uv_loop_t* loop);
++void uv__run_idle(FAR uv_loop_t* loop);
++void uv__run_check(FAR uv_loop_t* loop);
++void uv__run_prepare(FAR uv_loop_t* loop);
+ 
+ /* stream */
+-void uv__stream_init(uv_loop_t* loop, uv_stream_t* stream,
++void uv__stream_init(FAR uv_loop_t* loop, FAR uv_stream_t* stream,
+     uv_handle_type type);
+-int uv__stream_open(uv_stream_t*, int fd, int flags);
+-void uv__stream_destroy(uv_stream_t* stream);
++int uv__stream_open(FAR uv_stream_t*, int fd, int flags);
++void uv__stream_destroy(FAR uv_stream_t* stream);
+ #if defined(__APPLE__)
+ int uv__stream_try_select(uv_stream_t* stream, int* fd);
+ #endif /* defined(__APPLE__) */
+-void uv__server_io(uv_loop_t* loop, uv__io_t* w, unsigned int events);
++void uv__server_io(FAR uv_loop_t* loop, FAR uv__io_t* w, unsigned int events);
+ int uv__accept(int sockfd);
+ int uv__dup2_cloexec(int oldfd, int newfd);
+-int uv__open_cloexec(const char* path, int flags);
++int uv__open_cloexec(FAR const char* path, int flags);
+ 
+ /* tcp */
+-int uv_tcp_listen(uv_tcp_t* tcp, int backlog, uv_connection_cb cb);
++int uv_tcp_listen(FAR uv_tcp_t* tcp, int backlog, uv_connection_cb cb);
+ int uv__tcp_nodelay(int fd, int on);
+ int uv__tcp_keepalive(int fd, int on, unsigned int delay);
+ 
+ /* pipe */
+-int uv_pipe_listen(uv_pipe_t* handle, int backlog, uv_connection_cb cb);
++int uv_pipe_listen(FAR uv_pipe_t* handle, int backlog, uv_connection_cb cb);
+ 
+ /* signal */
+-void uv__signal_close(uv_signal_t* handle);
++void uv__signal_close(FAR uv_signal_t* handle);
+ void uv__signal_global_once_init(void);
+-void uv__signal_loop_cleanup(uv_loop_t* loop);
+-int uv__signal_loop_fork(uv_loop_t* loop);
++void uv__signal_loop_cleanup(FAR uv_loop_t* loop);
++int uv__signal_loop_fork(FAR uv_loop_t* loop);
+ 
+ /* platform specific */
+ uint64_t uv__hrtime(uv_clocktype_t type);
+-int uv__kqueue_init(uv_loop_t* loop);
+-int uv__platform_loop_init(uv_loop_t* loop);
+-void uv__platform_loop_delete(uv_loop_t* loop);
+-void uv__platform_invalidate_fd(uv_loop_t* loop, int fd);
++int uv__kqueue_init(FAR uv_loop_t* loop);
++int uv__platform_loop_init(FAR uv_loop_t* loop);
++void uv__platform_loop_delete(FAR uv_loop_t* loop);
++void uv__platform_invalidate_fd(FAR uv_loop_t* loop, int fd);
+ 
+ /* various */
+-void uv__async_close(uv_async_t* handle);
+-void uv__check_close(uv_check_t* handle);
+-void uv__fs_event_close(uv_fs_event_t* handle);
+-void uv__idle_close(uv_idle_t* handle);
+-void uv__pipe_close(uv_pipe_t* handle);
+-void uv__poll_close(uv_poll_t* handle);
+-void uv__prepare_close(uv_prepare_t* handle);
+-void uv__process_close(uv_process_t* handle);
+-void uv__stream_close(uv_stream_t* handle);
+-void uv__tcp_close(uv_tcp_t* handle);
+-void uv__udp_close(uv_udp_t* handle);
+-void uv__udp_finish_close(uv_udp_t* handle);
++void uv__async_close(FAR uv_async_t* handle);
++void uv__check_close(FAR uv_check_t* handle);
++void uv__fs_event_close(FAR uv_fs_event_t* handle);
++void uv__idle_close(FAR uv_idle_t* handle);
++void uv__pipe_close(FAR uv_pipe_t* handle);
++void uv__poll_close(FAR uv_poll_t* handle);
++void uv__prepare_close(FAR uv_prepare_t* handle);
++void uv__process_close(FAR uv_process_t* handle);
++void uv__stream_close(FAR uv_stream_t* handle);
++void uv__tcp_close(FAR uv_tcp_t* handle);
++void uv__udp_close(FAR uv_udp_t* handle);
++void uv__udp_finish_close(FAR uv_udp_t* handle);
+ uv_handle_type uv__handle_type(int fd);
+-FILE* uv__open_file(const char* path);
+-int uv__getpwuid_r(uv_passwd_t* pwd);
++FAR FILE* uv__open_file(FAR const char* path);
++int uv__getpwuid_r(FAR uv_passwd_t* pwd);
+ 
+ /* random */
+-int uv__random_devurandom(void* buf, size_t buflen);
+-int uv__random_getrandom(void* buf, size_t buflen);
+-int uv__random_getentropy(void* buf, size_t buflen);
+-int uv__random_readpath(const char* path, void* buf, size_t buflen);
+-int uv__random_sysctl(void* buf, size_t buflen);
++int uv__random_devurandom(FAR void* buf, size_t buflen);
++int uv__random_getrandom(FAR void* buf, size_t buflen);
++int uv__random_getentropy(FAR void* buf, size_t buflen);
++int uv__random_readpath(FAR const char* path, FAR void* buf, size_t buflen);
++int uv__random_sysctl(FAR void* buf, size_t buflen);
+ 
+ #if defined(__APPLE__)
+ int uv___stream_fd(const uv_stream_t* handle);
+@@ -299,13 +299,13 @@ void uv__fsevents_loop_delete(uv_loop_t* loop);
+ 
+ #endif /* defined(__APPLE__) */
+ 
+-UV_UNUSED(static void uv__update_time(uv_loop_t* loop)) {
++UV_UNUSED(static void uv__update_time(FAR uv_loop_t* loop)) {
+   /* Use a fast time source if available.  We only need millisecond precision.
+    */
+   loop->time = uv__hrtime(UV_CLOCK_FAST) / 1000000;
+ }
+ 
+-UV_UNUSED(static char* uv__basename_r(const char* path)) {
++UV_UNUSED(static FAR char* uv__basename_r(FAR const char* path)) {
+   char* s;
+ 
+   s = strrchr(path, '/');
+@@ -316,14 +316,14 @@ UV_UNUSED(static char* uv__basename_r(const char* path)) {
+ }
+ 
+ #if defined(__linux__)
+-int uv__inotify_fork(uv_loop_t* loop, void* old_watchers);
++int uv__inotify_fork(FAR uv_loop_t* loop, FAR void* old_watchers);
+ #endif
+ 
+-typedef int (*uv__peersockfunc)(int, struct sockaddr*, socklen_t*);
++typedef int (*uv__peersockfunc)(int, FAR struct sockaddr*, FAR socklen_t*);
+ 
+-int uv__getsockpeername(const uv_handle_t* handle,
++int uv__getsockpeername(FAR const uv_handle_t* handle,
+                         uv__peersockfunc func,
+-                        struct sockaddr* name,
++                        FAR struct sockaddr* name,
+                         int* namelen);
+ 
+ #if defined(__linux__)            ||                                      \
+@@ -336,12 +336,12 @@ struct uv__mmsghdr {
+ };
+ 
+ int uv__recvmmsg(int fd,
+-                 struct uv__mmsghdr* mmsg,
++                 FAR struct uv__mmsghdr* mmsg,
+                  unsigned int vlen,
+                  unsigned int flags,
+-                 struct timespec* timeout);
++                 FAR struct timespec* timeout);
+ int uv__sendmmsg(int fd,
+-                 struct uv__mmsghdr* mmsg,
++                 FAR struct uv__mmsghdr* mmsg,
+                  unsigned int vlen,
+                  unsigned int flags);
+ #else
+diff --git a/src/unix/loop-watcher.c b/src/unix/loop-watcher.c
+index b8c1c2a..aa9d508 100644
+--- a/src/unix/loop-watcher.c
++++ b/src/unix/loop-watcher.c
+@@ -23,13 +23,13 @@
+ #include "internal.h"
+ 
+ #define UV_LOOP_WATCHER_DEFINE(name, type)                                    \
+-  int uv_##name##_init(uv_loop_t* loop, uv_##name##_t* handle) {              \
+-    uv__handle_init(loop, (uv_handle_t*)handle, UV_##type);                   \
++  int uv_##name##_init(FAR uv_loop_t* loop, FAR uv_##name##_t* handle) {      \
++    uv__handle_init(loop, (FAR uv_handle_t*)handle, UV_##type);               \
+     handle->name##_cb = NULL;                                                 \
+     return 0;                                                                 \
+   }                                                                           \
+                                                                               \
+-  int uv_##name##_start(uv_##name##_t* handle, uv_##name##_cb cb) {           \
++  int uv_##name##_start(FAR uv_##name##_t* handle, uv_##name##_cb cb) {       \
+     if (uv__is_active(handle)) return 0;                                      \
+     if (cb == NULL) return UV_EINVAL;                                         \
+     QUEUE_INSERT_HEAD(&handle->loop->name##_handles, &handle->queue);         \
+@@ -38,17 +38,17 @@
+     return 0;                                                                 \
+   }                                                                           \
+                                                                               \
+-  int uv_##name##_stop(uv_##name##_t* handle) {                               \
++  int uv_##name##_stop(FAR uv_##name##_t* handle) {                           \
+     if (!uv__is_active(handle)) return 0;                                     \
+     QUEUE_REMOVE(&handle->queue);                                             \
+     uv__handle_stop(handle);                                                  \
+     return 0;                                                                 \
+   }                                                                           \
+                                                                               \
+-  void uv__run_##name(uv_loop_t* loop) {                                      \
++  void uv__run_##name(FAR uv_loop_t* loop) {                                  \
+     uv_##name##_t* h;                                                         \
+     QUEUE queue;                                                              \
+-    QUEUE* q;                                                                 \
++    FAR QUEUE* q;                                                             \
+     QUEUE_MOVE(&loop->name##_handles, &queue);                                \
+     while (!QUEUE_EMPTY(&queue)) {                                            \
+       q = QUEUE_HEAD(&queue);                                                 \
+@@ -59,7 +59,7 @@
+     }                                                                         \
+   }                                                                           \
+                                                                               \
+-  void uv__##name##_close(uv_##name##_t* handle) {                            \
++  void uv__##name##_close(FAR uv_##name##_t* handle) {                        \
+     uv_##name##_stop(handle);                                                 \
+   }
+ 
+diff --git a/src/unix/loop.c b/src/unix/loop.c
+index 1c60e31..a05a79b 100644
+--- a/src/unix/loop.c
++++ b/src/unix/loop.c
+@@ -27,7 +27,7 @@
+ #include <string.h>
+ #include <unistd.h>
+ 
+-int uv_loop_init(uv_loop_t* loop) {
++int uv_loop_init(FAR uv_loop_t* loop) {
+   void* saved_data;
+   int err;
+ 
+@@ -186,7 +186,7 @@ int uv_loop_fork(uv_loop_t* loop) {
+ }
+ #endif
+ 
+-void uv__loop_close(uv_loop_t* loop) {
++void uv__loop_close(FAR uv_loop_t* loop) {
+ #ifdef CONFIG_LIBUV_SIGNAL
+   uv__signal_loop_cleanup(loop);
+ #endif
+@@ -236,7 +236,7 @@ void uv__loop_close(uv_loop_t* loop) {
+ }
+ 
+ 
+-int uv__loop_configure(uv_loop_t* loop, uv_loop_option option, va_list ap) {
++int uv__loop_configure(FAR uv_loop_t* loop, uv_loop_option option, va_list ap) {
+ #ifndef __NUTTX__
+   if (option != UV_LOOP_BLOCK_SIGNAL)
+     return UV_ENOSYS;
+diff --git a/src/unix/no-proctitle.c b/src/unix/no-proctitle.c
+index 32aa0af..973d9e6 100644
+--- a/src/unix/no-proctitle.c
++++ b/src/unix/no-proctitle.c
+@@ -25,18 +25,18 @@
+ #include <errno.h>
+ #include <stddef.h>
+ 
+-char** uv_setup_args(int argc, char** argv) {
++FAR char** uv_setup_args(int argc, FAR char** argv) {
+   return argv;
+ }
+ 
+ void uv__process_title_cleanup(void) {
+ }
+ 
+-int uv_set_process_title(const char* title) {
++int uv_set_process_title(FAR const char* title) {
+   return 0;
+ }
+ 
+-int uv_get_process_title(char* buffer, size_t size) {
++int uv_get_process_title(FAR char* buffer, size_t size) {
+   if (buffer == NULL || size == 0)
+     return UV_EINVAL;
+ 
+diff --git a/src/unix/nuttx.c b/src/unix/nuttx.c
+index d35a649..2cda60e 100644
+--- a/src/unix/nuttx.c
++++ b/src/unix/nuttx.c
+@@ -49,11 +49,11 @@
+ #undef NANOSEC
+ #define NANOSEC ((uint64_t) 1e9)
+ 
+-int uv__platform_loop_init(uv_loop_t* loop) {
++int uv__platform_loop_init(FAR uv_loop_t* loop) {
+   return 0;
+ }
+ 
+-void uv__platform_loop_delete(uv_loop_t* loop) {
++void uv__platform_loop_delete(FAR uv_loop_t* loop) {
+ }
+ 
+ /* From libuv/src/unix/posix-hrtime.c */
+@@ -67,9 +67,9 @@ uint64_t uv__hrtime(uv_clocktype_t type) {
+ /* From libuv/src/unix/posix-poll.c */
+ 
+ /* Add a watcher's fd to our poll fds array with its pending events.  */
+-static void uv__pollfds_add(uv_loop_t* loop, uv__io_t* w) {
++static void uv__pollfds_add(FAR uv_loop_t* loop, FAR uv__io_t* w) {
+   size_t i;
+-  struct pollfd* pe;
++  FAR struct pollfd* pe;
+   int available_slot = -1;
+ 
+   /* If the fd is already in the set just update its events.  */
+@@ -106,7 +106,7 @@ exit_setup_pollfd:
+ }
+ 
+ /* Remove a watcher's fd from our poll fds array.  */
+-static void uv__pollfds_del(uv_loop_t* loop, int fd) {
++static void uv__pollfds_del(FAR uv_loop_t* loop, int fd) {
+   size_t i;
+ 
+   for (i = 0; i < loop->poll_fds_used;) {
+@@ -128,18 +128,18 @@ static void uv__pollfds_del(uv_loop_t* loop, int fd) {
+   }
+ }
+ 
+-void uv__io_poll(uv_loop_t* loop, int timeout) {
++void uv__io_poll(FAR uv_loop_t* loop, int timeout) {
+   uint64_t time_base;
+   uint64_t time_diff;
+-  QUEUE* q;
+-  uv__io_t* w;
++  FAR QUEUE* q;
++  FAR uv__io_t* w;
+   size_t i;
+   unsigned int nevents;
+   int nfds;
+ #ifdef CONFIG_LIBUV_SIGNAL
+   int have_signals;
+ #endif
+-  struct pollfd* pe;
++  FAR struct pollfd* pe;
+   int fd;
+ 
+   if (loop->nfds == 0) {
+@@ -283,7 +283,7 @@ update_timeout:
+ /* Remove the given fd from our poll fds array because no one
+  * is interested in its events anymore.
+  */
+-void uv__platform_invalidate_fd(uv_loop_t* loop, int fd) {
++void uv__platform_invalidate_fd(FAR uv_loop_t* loop, int fd) {
+   size_t i;
+ 
+   assert(fd >= 0);
+@@ -296,6 +296,6 @@ void uv__platform_invalidate_fd(uv_loop_t* loop, int fd) {
+ }
+ 
+ /* Check whether the given fd is supported by poll().  */
+-int uv__io_check_fd(uv_loop_t* loop, int fd) {
++int uv__io_check_fd(FAR uv_loop_t* loop, int fd) {
+   return 0;
+ }
+diff --git a/src/unix/poll.c b/src/unix/poll.c
+index 130fbd6..a80387d 100644
+--- a/src/unix/poll.c
++++ b/src/unix/poll.c
+@@ -27,8 +27,8 @@
+ #include <errno.h>
+ 
+ 
+-static void uv__poll_io(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
+-  uv_poll_t* handle;
++static void uv__poll_io(FAR uv_loop_t* loop, FAR uv__io_t* w, unsigned int events) {
++  FAR uv_poll_t* handle;
+   int pevents;
+ 
+   handle = container_of(w, uv_poll_t, io_watcher);
+@@ -65,7 +65,7 @@ static void uv__poll_io(uv_loop_t* loop, uv__io_t* w, unsigned int events) {
+ }
+ 
+ 
+-int uv_poll_init(uv_loop_t* loop, uv_poll_t* handle, int fd) {
++int uv_poll_init(FAR uv_loop_t* loop, FAR uv_poll_t* handle, int fd) {
+   int err;
+ 
+   if (uv__fd_exists(loop, fd))
+@@ -95,7 +95,7 @@ int uv_poll_init(uv_loop_t* loop, uv_poll_t* handle, int fd) {
+ }
+ 
+ 
+-int uv_poll_init_socket(uv_loop_t* loop, uv_poll_t* handle,
++int uv_poll_init_socket(FAR uv_loop_t* loop, FAR uv_poll_t* handle,
+     uv_os_sock_t socket) {
+   return uv_poll_init(loop, handle, socket);
+ }
+@@ -110,14 +110,14 @@ static void uv__poll_stop(uv_poll_t* handle) {
+ }
+ 
+ 
+-int uv_poll_stop(uv_poll_t* handle) {
++int uv_poll_stop(FAR uv_poll_t* handle) {
+   assert(!uv__is_closing(handle));
+   uv__poll_stop(handle);
+   return 0;
+ }
+ 
+ 
+-int uv_poll_start(uv_poll_t* handle, int pevents, uv_poll_cb poll_cb) {
++int uv_poll_start(FAR uv_poll_t* handle, int pevents, uv_poll_cb poll_cb) {
+   int events;
+ 
+   assert((pevents & ~(UV_READABLE | UV_WRITABLE | UV_DISCONNECT |
+@@ -147,6 +147,6 @@ int uv_poll_start(uv_poll_t* handle, int pevents, uv_poll_cb poll_cb) {
+ }
+ 
+ 
+-void uv__poll_close(uv_poll_t* handle) {
++void uv__poll_close(FAR uv_poll_t* handle) {
+   uv__poll_stop(handle);
+ }
+diff --git a/src/unix/process.c b/src/unix/process.c
+index 47b5828..bf89c1f 100644
+--- a/src/unix/process.c
++++ b/src/unix/process.c
+@@ -45,9 +45,9 @@ extern char **environ;
+ #endif
+ 
+ 
+-static void uv__chld(uv_signal_t* handle, int signum) {
+-  uv_process_t* process;
+-  uv_loop_t* loop;
++static void uv__chld(FAR uv_signal_t* handle, int signum) {
++  FAR uv_process_t* process;
++  FAR uv_loop_t* loop;
+   int exit_status;
+   int term_signal;
+   int status;
+@@ -265,7 +265,7 @@ static void uv__write_int(int fd, int val) {
+  * avoided. Since this isn't called on those targets, the function
+  * doesn't even need to be defined for them.
+  */
+-static void uv__process_child_init(const uv_process_options_t* options,
++static void uv__process_child_init(FAR const uv_process_options_t* options,
+                                    int stdio_count,
+                                    int (*pipes)[2],
+                                    int error_fd) {
+@@ -575,7 +575,7 @@ error:
+ }
+ #endif
+ 
+-int uv_process_kill(uv_process_t* process, int signum) {
++int uv_process_kill(FAR uv_process_t* process, int signum) {
+   return uv_kill(process->pid, signum);
+ }
+ 
+@@ -588,7 +588,7 @@ int uv_kill(int pid, int signum) {
+ }
+ 
+ 
+-void uv__process_close(uv_process_t* handle) {
++void uv__process_close(FAR uv_process_t* handle) {
+   QUEUE_REMOVE(&handle->queue);
+   uv__handle_stop(handle);
+   if (QUEUE_EMPTY(&handle->loop->process_handles))
+diff --git a/src/unix/thread.c b/src/unix/thread.c
+index 1b962c1..e2ba851 100644
+--- a/src/unix/thread.c
++++ b/src/unix/thread.c
+@@ -52,8 +52,8 @@ STATIC_ASSERT(sizeof(uv_barrier_t) == sizeof(pthread_barrier_t));
+ #if defined(_AIX) || \
+     defined(__OpenBSD__) || \
+     !defined(PTHREAD_BARRIER_SERIAL_THREAD)
+-int uv_barrier_init(uv_barrier_t* barrier, unsigned int count) {
+-  struct _uv_barrier* b;
++int uv_barrier_init(FAR uv_barrier_t* barrier, unsigned int count) {
++  FAR struct _uv_barrier* b;
+   int rc;
+ 
+   if (barrier == NULL || count == 0)
+@@ -86,8 +86,8 @@ error2:
+ }
+ 
+ 
+-int uv_barrier_wait(uv_barrier_t* barrier) {
+-  struct _uv_barrier* b;
++int uv_barrier_wait(FAR uv_barrier_t* barrier) {
++  FAR struct _uv_barrier* b;
+   int last;
+ 
+   if (barrier == NULL || barrier->b == NULL)
+@@ -115,8 +115,8 @@ int uv_barrier_wait(uv_barrier_t* barrier) {
+ }
+ 
+ 
+-void uv_barrier_destroy(uv_barrier_t* barrier) {
+-  struct _uv_barrier* b;
++void uv_barrier_destroy(FAR uv_barrier_t* barrier) {
++  FAR struct _uv_barrier* b;
+ 
+   b = barrier->b;
+   uv_mutex_lock(&b->mutex);
+@@ -137,12 +137,12 @@ void uv_barrier_destroy(uv_barrier_t* barrier) {
+ 
+ #else
+ 
+-int uv_barrier_init(uv_barrier_t* barrier, unsigned int count) {
++int uv_barrier_init(FAR uv_barrier_t* barrier, unsigned int count) {
+   return UV__ERR(pthread_barrier_init(barrier, NULL, count));
+ }
+ 
+ 
+-int uv_barrier_wait(uv_barrier_t* barrier) {
++int uv_barrier_wait(FAR uv_barrier_t* barrier) {
+   int rc;
+ 
+   rc = pthread_barrier_wait(barrier);
+@@ -154,7 +154,7 @@ int uv_barrier_wait(uv_barrier_t* barrier) {
+ }
+ 
+ 
+-void uv_barrier_destroy(uv_barrier_t* barrier) {
++void uv_barrier_destroy(FAR uv_barrier_t* barrier) {
+   if (pthread_barrier_destroy(barrier))
+     abort();
+ }
+@@ -207,7 +207,7 @@ static size_t thread_stack_size(void) {
+ }
+ #endif
+ 
+-int uv_thread_create(uv_thread_t *tid, void (*entry)(void *arg), void *arg) {
++int uv_thread_create(FAR uv_thread_t *tid, void (*entry)(FAR void *arg), FAR void *arg) {
+ #ifdef __NUTTX__
+   return pthread_create(tid, NULL, (pthread_startroutine_t)entry, arg);
+ #else
+@@ -274,17 +274,17 @@ uv_thread_t uv_thread_self(void) {
+   return pthread_self();
+ }
+ 
+-int uv_thread_join(uv_thread_t *tid) {
++int uv_thread_join(FAR uv_thread_t *tid) {
+   return UV__ERR(pthread_join(*tid, NULL));
+ }
+ 
+ 
+-int uv_thread_equal(const uv_thread_t* t1, const uv_thread_t* t2) {
++int uv_thread_equal(FAR const uv_thread_t* t1, FAR const uv_thread_t* t2) {
+   return pthread_equal(*t1, *t2);
+ }
+ 
+ 
+-int uv_mutex_init(uv_mutex_t* mutex) {
++int uv_mutex_init(FAR uv_mutex_t* mutex) {
+ #if defined(NDEBUG) || !defined(PTHREAD_MUTEX_ERRORCHECK) || defined(__NUTTX__)
+   return UV__ERR(pthread_mutex_init(mutex, NULL));
+ #else
+@@ -307,7 +307,7 @@ int uv_mutex_init(uv_mutex_t* mutex) {
+ }
+ 
+ 
+-int uv_mutex_init_recursive(uv_mutex_t* mutex) {
++int uv_mutex_init_recursive(FAR uv_mutex_t* mutex) {
+   pthread_mutexattr_t attr;
+   int err;
+ 
+@@ -326,19 +326,19 @@ int uv_mutex_init_recursive(uv_mutex_t* mutex) {
+ }
+ 
+ 
+-void uv_mutex_destroy(uv_mutex_t* mutex) {
++void uv_mutex_destroy(FAR uv_mutex_t* mutex) {
+   if (pthread_mutex_destroy(mutex))
+     abort();
+ }
+ 
+ 
+-void uv_mutex_lock(uv_mutex_t* mutex) {
++void uv_mutex_lock(FAR uv_mutex_t* mutex) {
+   if (pthread_mutex_lock(mutex))
+     abort();
+ }
+ 
+ 
+-int uv_mutex_trylock(uv_mutex_t* mutex) {
++int uv_mutex_trylock(FAR uv_mutex_t* mutex) {
+   int err;
+ 
+   err = pthread_mutex_trylock(mutex);
+@@ -352,30 +352,30 @@ int uv_mutex_trylock(uv_mutex_t* mutex) {
+ }
+ 
+ 
+-void uv_mutex_unlock(uv_mutex_t* mutex) {
++void uv_mutex_unlock(FAR uv_mutex_t* mutex) {
+   if (pthread_mutex_unlock(mutex))
+     abort();
+ }
+ 
+ 
+-int uv_rwlock_init(uv_rwlock_t* rwlock) {
++int uv_rwlock_init(FAR uv_rwlock_t* rwlock) {
+   return UV__ERR(pthread_rwlock_init(rwlock, NULL));
+ }
+ 
+ 
+-void uv_rwlock_destroy(uv_rwlock_t* rwlock) {
++void uv_rwlock_destroy(FAR uv_rwlock_t* rwlock) {
+   if (pthread_rwlock_destroy(rwlock))
+     abort();
+ }
+ 
+ 
+-void uv_rwlock_rdlock(uv_rwlock_t* rwlock) {
++void uv_rwlock_rdlock(FAR uv_rwlock_t* rwlock) {
+   if (pthread_rwlock_rdlock(rwlock))
+     abort();
+ }
+ 
+ 
+-int uv_rwlock_tryrdlock(uv_rwlock_t* rwlock) {
++int uv_rwlock_tryrdlock(FAR uv_rwlock_t* rwlock) {
+   int err;
+ 
+   err = pthread_rwlock_tryrdlock(rwlock);
+@@ -389,19 +389,19 @@ int uv_rwlock_tryrdlock(uv_rwlock_t* rwlock) {
+ }
+ 
+ 
+-void uv_rwlock_rdunlock(uv_rwlock_t* rwlock) {
++void uv_rwlock_rdunlock(FAR uv_rwlock_t* rwlock) {
+   if (pthread_rwlock_unlock(rwlock))
+     abort();
+ }
+ 
+ 
+-void uv_rwlock_wrlock(uv_rwlock_t* rwlock) {
++void uv_rwlock_wrlock(FAR uv_rwlock_t* rwlock) {
+   if (pthread_rwlock_wrlock(rwlock))
+     abort();
+ }
+ 
+ 
+-int uv_rwlock_trywrlock(uv_rwlock_t* rwlock) {
++int uv_rwlock_trywrlock(FAR uv_rwlock_t* rwlock) {
+   int err;
+ 
+   err = pthread_rwlock_trywrlock(rwlock);
+@@ -415,13 +415,13 @@ int uv_rwlock_trywrlock(uv_rwlock_t* rwlock) {
+ }
+ 
+ 
+-void uv_rwlock_wrunlock(uv_rwlock_t* rwlock) {
++void uv_rwlock_wrunlock(FAR uv_rwlock_t* rwlock) {
+   if (pthread_rwlock_unlock(rwlock))
+     abort();
+ }
+ 
+ 
+-void uv_once(uv_once_t* guard, void (*callback)(void)) {
++void uv_once(FAR uv_once_t* guard, void (*callback)(void)) {
+   if (pthread_once(guard, callback))
+     abort();
+ }
+@@ -528,9 +528,9 @@ typedef struct uv_semaphore_s {
+ STATIC_ASSERT(sizeof(uv_sem_t) >= sizeof(uv_semaphore_t*));
+ #endif
+ 
+-static int uv__custom_sem_init(uv_sem_t* sem_, unsigned int value) {
++static int uv__custom_sem_init(FAR uv_sem_t* sem_, unsigned int value) {
+   int err;
+-  uv_semaphore_t* sem;
++  FAR uv_semaphore_t* sem;
+ 
+   sem = uv__malloc(sizeof(*sem));
+   if (sem == NULL)
+@@ -553,20 +553,20 @@ static int uv__custom_sem_init(uv_sem_t* sem_, unsigned int value) {
+ }
+ 
+ 
+-static void uv__custom_sem_destroy(uv_sem_t* sem_) {
+-  uv_semaphore_t* sem;
++static void uv__custom_sem_destroy(FAR uv_sem_t* sem_) {
++  FAR uv_semaphore_t* sem;
+ 
+-  sem = *(uv_semaphore_t**)sem_;
++  sem = *(FAR uv_semaphore_t**)sem_;
+   uv_cond_destroy(&sem->cond);
+   uv_mutex_destroy(&sem->mutex);
+   uv__free(sem);
+ }
+ 
+ 
+-static void uv__custom_sem_post(uv_sem_t* sem_) {
+-  uv_semaphore_t* sem;
++static void uv__custom_sem_post(FAR uv_sem_t* sem_) {
++  FAR uv_semaphore_t* sem;
+ 
+-  sem = *(uv_semaphore_t**)sem_;
++  sem = *(FAR uv_semaphore_t**)sem_;
+   uv_mutex_lock(&sem->mutex);
+   sem->value++;
+   if (sem->value == 1)
+@@ -575,10 +575,10 @@ static void uv__custom_sem_post(uv_sem_t* sem_) {
+ }
+ 
+ 
+-static void uv__custom_sem_wait(uv_sem_t* sem_) {
+-  uv_semaphore_t* sem;
++static void uv__custom_sem_wait(FAR uv_sem_t* sem_) {
++  FAR uv_semaphore_t* sem;
+ 
+-  sem = *(uv_semaphore_t**)sem_;
++  sem = *(FAR uv_semaphore_t**)sem_;
+   uv_mutex_lock(&sem->mutex);
+   while (sem->value == 0)
+     uv_cond_wait(&sem->cond, &sem->mutex);
+@@ -587,10 +587,10 @@ static void uv__custom_sem_wait(uv_sem_t* sem_) {
+ }
+ 
+ 
+-static int uv__custom_sem_trywait(uv_sem_t* sem_) {
+-  uv_semaphore_t* sem;
++static int uv__custom_sem_trywait(FAR uv_sem_t* sem_) {
++  FAR uv_semaphore_t* sem;
+ 
+-  sem = *(uv_semaphore_t**)sem_;
++  sem = *(FAR uv_semaphore_t**)sem_;
+   if (uv_mutex_trylock(&sem->mutex) != 0)
+     return UV_EAGAIN;
+ 
+@@ -605,26 +605,26 @@ static int uv__custom_sem_trywait(uv_sem_t* sem_) {
+   return 0;
+ }
+ 
+-static int uv__sem_init(uv_sem_t* sem, unsigned int value) {
++static int uv__sem_init(FAR uv_sem_t* sem, unsigned int value) {
+   if (sem_init(sem, 0, value))
+     return UV__ERR(errno);
+   return 0;
+ }
+ 
+ 
+-static void uv__sem_destroy(uv_sem_t* sem) {
++static void uv__sem_destroy(FAR uv_sem_t* sem) {
+   if (sem_destroy(sem))
+     abort();
+ }
+ 
+ 
+-static void uv__sem_post(uv_sem_t* sem) {
++static void uv__sem_post(FAR uv_sem_t* sem) {
+   if (sem_post(sem))
+     abort();
+ }
+ 
+ 
+-static void uv__sem_wait(uv_sem_t* sem) {
++static void uv__sem_wait(FAR uv_sem_t* sem) {
+   int r;
+ 
+   do
+@@ -636,7 +636,7 @@ static void uv__sem_wait(uv_sem_t* sem) {
+ }
+ 
+ 
+-static int uv__sem_trywait(uv_sem_t* sem) {
++static int uv__sem_trywait(FAR uv_sem_t* sem) {
+   int r;
+ 
+   do
+@@ -652,7 +652,7 @@ static int uv__sem_trywait(uv_sem_t* sem) {
+   return 0;
+ }
+ 
+-int uv_sem_init(uv_sem_t* sem, unsigned int value) {
++int uv_sem_init(FAR uv_sem_t* sem, unsigned int value) {
+ #if defined(__GLIBC__) && !defined(__UCLIBC__)
+   uv_once(&glibc_version_check_once, glibc_version_check);
+ #endif
+@@ -664,7 +664,7 @@ int uv_sem_init(uv_sem_t* sem, unsigned int value) {
+ }
+ 
+ 
+-void uv_sem_destroy(uv_sem_t* sem) {
++void uv_sem_destroy(FAR uv_sem_t* sem) {
+   if (platform_needs_custom_semaphore)
+     uv__custom_sem_destroy(sem);
+   else
+@@ -672,7 +672,7 @@ void uv_sem_destroy(uv_sem_t* sem) {
+ }
+ 
+ 
+-void uv_sem_post(uv_sem_t* sem) {
++void uv_sem_post(FAR uv_sem_t* sem) {
+   if (platform_needs_custom_semaphore)
+     uv__custom_sem_post(sem);
+   else
+@@ -680,7 +680,7 @@ void uv_sem_post(uv_sem_t* sem) {
+ }
+ 
+ 
+-void uv_sem_wait(uv_sem_t* sem) {
++void uv_sem_wait(FAR uv_sem_t* sem) {
+   if (platform_needs_custom_semaphore)
+     uv__custom_sem_wait(sem);
+   else
+@@ -688,7 +688,7 @@ void uv_sem_wait(uv_sem_t* sem) {
+ }
+ 
+ 
+-int uv_sem_trywait(uv_sem_t* sem) {
++int uv_sem_trywait(FAR uv_sem_t* sem) {
+   if (platform_needs_custom_semaphore)
+     return uv__custom_sem_trywait(sem);
+   else
+@@ -706,7 +706,7 @@ int uv_cond_init(uv_cond_t* cond) {
+ 
+ #else /* !(defined(__APPLE__) && defined(__MACH__)) */
+ 
+-int uv_cond_init(uv_cond_t* cond) {
++int uv_cond_init(FAR uv_cond_t* cond) {
+   pthread_condattr_t attr;
+   int err;
+ 
+@@ -739,7 +739,7 @@ error2:
+ 
+ #endif /* defined(__APPLE__) && defined(__MACH__) */
+ 
+-void uv_cond_destroy(uv_cond_t* cond) {
++void uv_cond_destroy(FAR uv_cond_t* cond) {
+ #if defined(__APPLE__) && defined(__MACH__)
+   /* It has been reported that destroying condition variables that have been
+    * signalled but not waited on can sometimes result in application crashes.
+@@ -773,23 +773,23 @@ void uv_cond_destroy(uv_cond_t* cond) {
+     abort();
+ }
+ 
+-void uv_cond_signal(uv_cond_t* cond) {
++void uv_cond_signal(FAR uv_cond_t* cond) {
+   if (pthread_cond_signal(cond))
+     abort();
+ }
+ 
+-void uv_cond_broadcast(uv_cond_t* cond) {
++void uv_cond_broadcast(FAR uv_cond_t* cond) {
+   if (pthread_cond_broadcast(cond))
+     abort();
+ }
+ 
+-void uv_cond_wait(uv_cond_t* cond, uv_mutex_t* mutex) {
++void uv_cond_wait(FAR uv_cond_t* cond, FAR uv_mutex_t* mutex) {
+   if (pthread_cond_wait(cond, mutex))
+     abort();
+ }
+ 
+ 
+-int uv_cond_timedwait(uv_cond_t* cond, uv_mutex_t* mutex, uint64_t timeout) {
++int uv_cond_timedwait(FAR uv_cond_t* cond, FAR uv_mutex_t* mutex, uint64_t timeout) {
+   int r;
+   struct timespec ts;
+ #if defined(__MVS__)
+@@ -827,23 +827,23 @@ int uv_cond_timedwait(uv_cond_t* cond, uv_mutex_t* mutex, uint64_t timeout) {
+ }
+ 
+ 
+-int uv_key_create(uv_key_t* key) {
++int uv_key_create(FAR uv_key_t* key) {
+   return UV__ERR(pthread_key_create(key, NULL));
+ }
+ 
+ 
+-void uv_key_delete(uv_key_t* key) {
++void uv_key_delete(FAR uv_key_t* key) {
+   if (pthread_key_delete(*key))
+     abort();
+ }
+ 
+ 
+-void* uv_key_get(uv_key_t* key) {
++void* uv_key_get(FAR uv_key_t* key) {
+   return pthread_getspecific(*key);
+ }
+ 
+ 
+-void uv_key_set(uv_key_t* key, void* value) {
++void uv_key_set(FAR uv_key_t* key, FAR void* value) {
+   if (pthread_setspecific(*key, value))
+     abort();
+ }
+diff --git a/src/uv-common.c b/src/uv-common.c
+index db62542..8829ee1 100644
+--- a/src/uv-common.c
++++ b/src/uv-common.c
+@@ -52,16 +52,16 @@ static uv__allocator_t uv__allocator = {
+   free,
+ };
+ 
+-char* uv__strdup(const char* s) {
++char* uv__strdup(FAR const char* s) {
+   size_t len = strlen(s) + 1;
+-  char* m = uv__malloc(len);
++  FAR char* m = uv__malloc(len);
+   if (m == NULL)
+     return NULL;
+   return memcpy(m, s, len);
+ }
+ 
+-char* uv__strndup(const char* s, size_t n) {
+-  char* m;
++char* uv__strndup(FAR const char* s, size_t n) {
++  FAR char* m;
+   size_t len = strlen(s);
+   if (n < len)
+     len = n;
+@@ -72,13 +72,13 @@ char* uv__strndup(const char* s, size_t n) {
+   return memcpy(m, s, len);
+ }
+ 
+-void* uv__malloc(size_t size) {
++FAR void* uv__malloc(size_t size) {
+   if (size > 0)
+     return uv__allocator.local_malloc(size);
+   return NULL;
+ }
+ 
+-void uv__free(void* ptr) {
++void uv__free(FAR void* ptr) {
+   int saved_errno;
+ 
+   /* Libuv expects that free() does not clobber errno.  The system allocator
+@@ -89,18 +89,18 @@ void uv__free(void* ptr) {
+   errno = saved_errno;
+ }
+ 
+-void* uv__calloc(size_t count, size_t size) {
++FAR void* uv__calloc(size_t count, size_t size) {
+   return uv__allocator.local_calloc(count, size);
+ }
+ 
+-void* uv__realloc(void* ptr, size_t size) {
++FAR void* uv__realloc(FAR void* ptr, size_t size) {
+   if (size > 0)
+     return uv__allocator.local_realloc(ptr, size);
+   uv__free(ptr);
+   return NULL;
+ }
+ 
+-void* uv__reallocf(void* ptr, size_t size) {
++FAR void* uv__reallocf(FAR void* ptr, size_t size) {
+   void* newptr;
+ 
+   newptr = uv__realloc(ptr, size);
+@@ -154,7 +154,7 @@ size_t uv_loop_size(void) {
+ }
+ 
+ 
+-uv_buf_t uv_buf_init(char* base, unsigned int len) {
++uv_buf_t uv_buf_init(FAR char* base, unsigned int len) {
+   uv_buf_t buf;
+   buf.base = base;
+   buf.len = len;
+@@ -162,7 +162,7 @@ uv_buf_t uv_buf_init(char* base, unsigned int len) {
+ }
+ 
+ 
+-static const char* uv__unknown_err_code(int err) {
++static FAR const char* uv__unknown_err_code(int err) {
+   char buf[32];
+   char* copy;
+ 
+@@ -175,7 +175,7 @@ static const char* uv__unknown_err_code(int err) {
+ #define UV_ERR_NAME_GEN_R(name, _) \
+ case UV_## name: \
+   uv__strscpy(buf, #name, buflen); break;
+-char* uv_err_name_r(int err, char* buf, size_t buflen) {
++FAR char* uv_err_name_r(int err, FAR char* buf, size_t buflen) {
+   switch (err) {
+     UV_ERRNO_MAP(UV_ERR_NAME_GEN_R)
+     default: snprintf(buf, buflen, "Unknown system error %d", err);
+@@ -186,7 +186,7 @@ char* uv_err_name_r(int err, char* buf, size_t buflen) {
+ 
+ 
+ #define UV_ERR_NAME_GEN(name, _) case UV_ ## name: return #name;
+-const char* uv_err_name(int err) {
++const FAR char* uv_err_name(int err) {
+   switch (err) {
+     UV_ERRNO_MAP(UV_ERR_NAME_GEN)
+   }
+@@ -198,7 +198,7 @@ const char* uv_err_name(int err) {
+ #define UV_STRERROR_GEN_R(name, msg) \
+ case UV_ ## name: \
+   snprintf(buf, buflen, "%s", msg); break;
+-char* uv_strerror_r(int err, char* buf, size_t buflen) {
++FAR char* uv_strerror_r(int err, FAR char* buf, size_t buflen) {
+   switch (err) {
+     UV_ERRNO_MAP(UV_STRERROR_GEN_R)
+     default: snprintf(buf, buflen, "Unknown system error %d", err);
+@@ -209,7 +209,7 @@ char* uv_strerror_r(int err, char* buf, size_t buflen) {
+ 
+ 
+ #define UV_STRERROR_GEN(name, msg) case UV_ ## name: return msg;
+-const char* uv_strerror(int err) {
++FAR const char* uv_strerror(int err) {
+   switch (err) {
+     UV_ERRNO_MAP(UV_STRERROR_GEN)
+   }
+@@ -483,10 +483,10 @@ int uv_udp_recv_stop(uv_udp_t* handle) {
+ }
+ #endif
+ 
+-void uv_walk(uv_loop_t* loop, uv_walk_cb walk_cb, void* arg) {
++void uv_walk(FAR uv_loop_t* loop, uv_walk_cb walk_cb, FAR void* arg) {
+   QUEUE queue;
+-  QUEUE* q;
+-  uv_handle_t* h;
++  FAR QUEUE* q;
++  FAR uv_handle_t* h;
+ 
+   QUEUE_MOVE(&loop->handle_queue, &queue);
+   while (!QUEUE_EMPTY(&queue)) {
+@@ -502,10 +502,10 @@ void uv_walk(uv_loop_t* loop, uv_walk_cb walk_cb, void* arg) {
+ }
+ 
+ 
+-static void uv__print_handles(uv_loop_t* loop, int only_active, FILE* stream) {
++static void uv__print_handles(FAR uv_loop_t* loop, int only_active, FAR FILE* stream) {
+   const char* type;
+-  QUEUE* q;
+-  uv_handle_t* h;
++  FAR QUEUE* q;
++  FAR uv_handle_t* h;
+ 
+ #ifdef CONFIG_LIBUV_DEFAULT_LOOP
+   if (loop == NULL)
+@@ -536,43 +536,43 @@ static void uv__print_handles(uv_loop_t* loop, int only_active, FILE* stream) {
+ }
+ 
+ 
+-void uv_print_all_handles(uv_loop_t* loop, FILE* stream) {
++void uv_print_all_handles(FAR uv_loop_t* loop, FAR FILE* stream) {
+   uv__print_handles(loop, 0, stream);
+ }
+ 
+ 
+-void uv_print_active_handles(uv_loop_t* loop, FILE* stream) {
++void uv_print_active_handles(FAR uv_loop_t* loop, FAR FILE* stream) {
+   uv__print_handles(loop, 1, stream);
+ }
+ 
+ 
+-void uv_ref(uv_handle_t* handle) {
++void uv_ref(FAR uv_handle_t* handle) {
+   uv__handle_ref(handle);
+ }
+ 
+ 
+-void uv_unref(uv_handle_t* handle) {
++void uv_unref(FAR uv_handle_t* handle) {
+   uv__handle_unref(handle);
+ }
+ 
+ 
+-int uv_has_ref(const uv_handle_t* handle) {
++int uv_has_ref(FAR const uv_handle_t* handle) {
+   return uv__has_ref(handle);
+ }
+ 
+ 
+-void uv_stop(uv_loop_t* loop) {
++void uv_stop(FAR uv_loop_t* loop) {
+   loop->stop_flag = 1;
+ }
+ 
+ 
+-uint64_t uv_now(const uv_loop_t* loop) {
++uint64_t uv_now(FAR const uv_loop_t* loop) {
+   return loop->time;
+ }
+ 
+ 
+ 
+-size_t uv__count_bufs(const uv_buf_t bufs[], unsigned int nbufs) {
++size_t uv__count_bufs(FAR const uv_buf_t bufs[], unsigned int nbufs) {
+   unsigned int i;
+   size_t bytes;
+ 
+@@ -593,7 +593,7 @@ int uv_send_buffer_size(uv_handle_t* handle, int *value) {
+ }
+ #endif
+ 
+-int uv_fs_event_getpath(uv_fs_event_t* handle, char* buffer, size_t* size) {
++int uv_fs_event_getpath(FAR uv_fs_event_t* handle, FAR char* buffer, FAR size_t* size) {
+   size_t required_len;
+ 
+   if (!uv__is_active(handle)) {
+@@ -618,7 +618,7 @@ int uv_fs_event_getpath(uv_fs_event_t* handle, char* buffer, size_t* size) {
+  * the unix implementation (nbufs is not directly inside req but is
+  * contained in a nested union/struct) so this function locates it.
+ */
+-static unsigned int* uv__get_nbufs(uv_fs_t* req) {
++static FAR unsigned int* uv__get_nbufs(FAR uv_fs_t* req) {
+ #ifdef _WIN32
+   return &req->fs.info.nbufs;
+ #else
+@@ -636,10 +636,10 @@ static unsigned int* uv__get_nbufs(uv_fs_t* req) {
+ # define uv__fs_scandir_free free
+ #endif
+ 
+-void uv__fs_scandir_cleanup(uv_fs_t* req) {
+-  uv__dirent_t** dents;
++void uv__fs_scandir_cleanup(FAR uv_fs_t* req) {
++  FAR uv__dirent_t** dents;
+ 
+-  unsigned int* nbufs = uv__get_nbufs(req);
++  FAR unsigned int* nbufs = uv__get_nbufs(req);
+ 
+   dents = req->ptr;
+   if (*nbufs > 0 && *nbufs != (unsigned int) req->result)
+@@ -652,10 +652,10 @@ void uv__fs_scandir_cleanup(uv_fs_t* req) {
+ }
+ 
+ 
+-int uv_fs_scandir_next(uv_fs_t* req, uv_dirent_t* ent) {
+-  uv__dirent_t** dents;
+-  uv__dirent_t* dent;
+-  unsigned int* nbufs;
++int uv_fs_scandir_next(FAR uv_fs_t* req, FAR uv_dirent_t* ent) {
++  FAR uv__dirent_t** dents;
++  FAR uv__dirent_t* dent;
++  FAR unsigned int* nbufs;
+ 
+   /* Check to see if req passed */
+   if (req->result < 0)
+@@ -689,7 +689,7 @@ int uv_fs_scandir_next(uv_fs_t* req, uv_dirent_t* ent) {
+   return 0;
+ }
+ 
+-uv_dirent_type_t uv__fs_get_dirent_type(uv__dirent_t* dent) {
++uv_dirent_type_t uv__fs_get_dirent_type(FAR uv__dirent_t* dent) {
+   uv_dirent_type_t type;
+ 
+ #ifdef HAVE_DIRENT_TYPES
+@@ -725,9 +725,9 @@ uv_dirent_type_t uv__fs_get_dirent_type(uv__dirent_t* dent) {
+   return type;
+ }
+ 
+-void uv__fs_readdir_cleanup(uv_fs_t* req) {
+-  uv_dir_t* dir;
+-  uv_dirent_t* dirents;
++void uv__fs_readdir_cleanup(FAR uv_fs_t* req) {
++  FAR uv_dir_t* dir;
++  FAR uv_dirent_t* dirents;
+   int i;
+ 
+   if (req->ptr == NULL)
+@@ -762,10 +762,10 @@ int uv_loop_configure(uv_loop_t* loop, uv_loop_option option, ...) {
+ 
+ #ifdef CONFIG_LIBUV_DEFAULT_LOOP
+ static uv_loop_t default_loop_struct;
+-static uv_loop_t* default_loop_ptr;
++static FAR uv_loop_t* default_loop_ptr;
+ 
+ 
+-uv_loop_t* uv_default_loop(void) {
++FAR uv_loop_t* uv_default_loop(void) {
+   if (default_loop_ptr != NULL)
+     return default_loop_ptr;
+ 
+@@ -777,7 +777,7 @@ uv_loop_t* uv_default_loop(void) {
+ }
+ #endif
+ 
+-uv_loop_t* uv_loop_new(void) {
++FAR uv_loop_t* uv_loop_new(void) {
+   uv_loop_t* loop;
+ 
+   loop = uv__malloc(sizeof(*loop));
+@@ -793,9 +793,9 @@ uv_loop_t* uv_loop_new(void) {
+ }
+ 
+ 
+-int uv_loop_close(uv_loop_t* loop) {
+-  QUEUE* q;
+-  uv_handle_t* h;
++int uv_loop_close(FAR uv_loop_t* loop) {
++  FAR QUEUE* q;
++  FAR uv_handle_t* h;
+ #ifndef NDEBUG
+   void* saved_data;
+ #endif
+@@ -824,9 +824,9 @@ int uv_loop_close(uv_loop_t* loop) {
+ }
+ 
+ 
+-void uv_loop_delete(uv_loop_t* loop) {
++void uv_loop_delete(FAR uv_loop_t* loop) {
+ #ifdef CONFIG_LIBUV_DEFAULT_LOOP
+-  uv_loop_t* default_loop;
++  FAR uv_loop_t* default_loop;
+   int err;
+ 
+   default_loop = default_loop_ptr;
+@@ -844,7 +844,7 @@ void uv_loop_delete(uv_loop_t* loop) {
+ }
+ 
+ 
+-void uv_os_free_environ(uv_env_item_t* envitems, int count) {
++void uv_os_free_environ(FAR uv_env_item_t* envitems, int count) {
+   int i;
+ 
+   for (i = 0; i < count; i++) {
+@@ -855,7 +855,7 @@ void uv_os_free_environ(uv_env_item_t* envitems, int count) {
+ }
+ 
+ 
+-void uv_free_cpu_info(uv_cpu_info_t* cpu_infos, int count) {
++void uv_free_cpu_info(FAR uv_cpu_info_t* cpu_infos, int count) {
+   int i;
+ 
+   for (i = 0; i < count; i++)
+diff --git a/src/uv-common.h b/src/uv-common.h
+index 063588e..222a20a 100644
+--- a/src/uv-common.h
++++ b/src/uv-common.h
+@@ -49,7 +49,7 @@
+ #endif
+ 
+ #if !defined(snprintf) && defined(_MSC_VER) && _MSC_VER < 1900
+-extern int snprintf(char*, size_t, const char*, ...);
++extern int snprintf(FAR char*, size_t, FAR const IPTR char*, ...);
+ #endif
+ 
+ #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+@@ -132,59 +132,59 @@ enum {
+   UV_HANDLE_POLL_SLOW                   = 0x01000000
+ };
+ 
+-int uv__loop_configure(uv_loop_t* loop, uv_loop_option option, va_list ap);
++int uv__loop_configure(FAR uv_loop_t* loop, uv_loop_option option, va_list ap);
+ 
+-void uv__loop_close(uv_loop_t* loop);
++void uv__loop_close(FAR uv_loop_t* loop);
+ 
+-int uv__tcp_bind(uv_tcp_t* tcp,
+-                 const struct sockaddr* addr,
++int uv__tcp_bind(FAR uv_tcp_t* tcp,
++                 FAR const struct sockaddr* addr,
+                  unsigned int addrlen,
+                  unsigned int flags);
+ 
+-int uv__tcp_connect(uv_connect_t* req,
+-                   uv_tcp_t* handle,
+-                   const struct sockaddr* addr,
++int uv__tcp_connect(FAR uv_connect_t* req,
++                   FAR uv_tcp_t* handle,
++                   FAR const struct sockaddr* addr,
+                    unsigned int addrlen,
+                    uv_connect_cb cb);
+ 
+-int uv__udp_init_ex(uv_loop_t* loop,
+-                    uv_udp_t* handle,
++int uv__udp_init_ex(FAR uv_loop_t* loop,
++                    FAR uv_udp_t* handle,
+                     unsigned flags,
+                     int domain);
+ 
+-int uv__udp_bind(uv_udp_t* handle,
+-                 const struct sockaddr* addr,
++int uv__udp_bind(FAR uv_udp_t* handle,
++                 FAR const struct sockaddr* addr,
+                  unsigned int  addrlen,
+                  unsigned int flags);
+ 
+-int uv__udp_connect(uv_udp_t* handle,
+-                    const struct sockaddr* addr,
++int uv__udp_connect(FAR uv_udp_t* handle,
++                    FAR const struct sockaddr* addr,
+                     unsigned int addrlen);
+ 
+-int uv__udp_disconnect(uv_udp_t* handle);
++int uv__udp_disconnect(FAR uv_udp_t* handle);
+ 
+-int uv__udp_is_connected(uv_udp_t* handle);
++int uv__udp_is_connected(FAR uv_udp_t* handle);
+ 
+-int uv__udp_send(uv_udp_send_t* req,
+-                 uv_udp_t* handle,
+-                 const uv_buf_t bufs[],
++int uv__udp_send(FAR uv_udp_send_t* req,
++                 FAR uv_udp_t* handle,
++                 FAR const uv_buf_t bufs[],
+                  unsigned int nbufs,
+-                 const struct sockaddr* addr,
++                 FAR const struct sockaddr* addr,
+                  unsigned int addrlen,
+                  uv_udp_send_cb send_cb);
+ 
+-int uv__udp_try_send(uv_udp_t* handle,
++int uv__udp_try_send(FAR uv_udp_t* handle,
+                      const uv_buf_t bufs[],
+                      unsigned int nbufs,
+-                     const struct sockaddr* addr,
++                     FAR const struct sockaddr* addr,
+                      unsigned int addrlen);
+ 
+-int uv__udp_recv_start(uv_udp_t* handle, uv_alloc_cb alloccb,
++int uv__udp_recv_start(FAR uv_udp_t* handle, uv_alloc_cb alloccb,
+                        uv_udp_recv_cb recv_cb);
+ 
+-int uv__udp_recv_stop(uv_udp_t* handle);
++int uv__udp_recv_stop(FAR uv_udp_t* handle);
+ 
+-void uv__fs_poll_close(uv_fs_poll_t* handle);
++void uv__fs_poll_close(FAR uv_fs_poll_t* handle);
+ 
+ int uv__getaddrinfo_translate_error(int sys_err);    /* EAI_* error. */
+ 
+@@ -194,25 +194,25 @@ enum uv__work_kind {
+   UV__WORK_SLOW_IO
+ };
+ 
+-void uv__work_submit(uv_loop_t* loop,
+-                     struct uv__work *w,
++void uv__work_submit(FAR uv_loop_t* loop,
++                     FAR struct uv__work *w,
+                      enum uv__work_kind kind,
+-                     void (*work)(struct uv__work *w),
+-                     void (*done)(struct uv__work *w, int status));
++                     void (*work)(FAR struct uv__work *w),
++                     void (*done)(FAR struct uv__work *w, int status));
+ 
+-void uv__work_done(uv_async_t* handle);
++void uv__work_done(FAR uv_async_t* handle);
+ 
+-size_t uv__count_bufs(const uv_buf_t bufs[], unsigned int nbufs);
++size_t uv__count_bufs(FAR const uv_buf_t bufs[], unsigned int nbufs);
+ 
+-int uv__socket_sockopt(uv_handle_t* handle, int optname, int* value);
++int uv__socket_sockopt(FAR uv_handle_t* handle, int optname, FAR int* value);
+ 
+-void uv__fs_scandir_cleanup(uv_fs_t* req);
+-void uv__fs_readdir_cleanup(uv_fs_t* req);
+-uv_dirent_type_t uv__fs_get_dirent_type(uv__dirent_t* dent);
++void uv__fs_scandir_cleanup(FAR uv_fs_t* req);
++void uv__fs_readdir_cleanup(FAR uv_fs_t* req);
++uv_dirent_type_t uv__fs_get_dirent_type(FAR uv__dirent_t* dent);
+ 
+-int uv__next_timeout(const uv_loop_t* loop);
+-void uv__run_timers(uv_loop_t* loop);
+-void uv__timer_close(uv_timer_t* handle);
++int uv__next_timeout(FAR const uv_loop_t* loop);
++void uv__run_timers(FAR uv_loop_t* loop);
++void uv__timer_close(FAR uv_timer_t* handle);
+ 
+ void uv__process_title_cleanup(void);
+ void uv__signal_cleanup(void);
+@@ -334,12 +334,12 @@ void uv__threadpool_cleanup(void);
+   while (0)
+ 
+ /* Allocator prototypes */
+-void *uv__calloc(size_t count, size_t size);
+-char *uv__strdup(const char* s);
+-char *uv__strndup(const char* s, size_t n);
+-void* uv__malloc(size_t size);
+-void uv__free(void* ptr);
+-void* uv__realloc(void* ptr, size_t size);
+-void* uv__reallocf(void* ptr, size_t size);
++FAR void *uv__calloc(size_t count, size_t size);
++FAR char *uv__strdup(FAR const char* s);
++FAR char *uv__strndup(FAR const char* s, size_t n);
++FAR void* uv__malloc(size_t size);
++void uv__free(FAR void* ptr);
++FAR void* uv__realloc(FAR void* ptr, size_t size);
++FAR void* uv__reallocf(FAR void* ptr, size_t size);
+ 
+ #endif /* UV_COMMON_H_ */
+-- 
+2.17.1
+

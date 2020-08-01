@@ -1803,6 +1803,7 @@ menu "Library Routines"
 source libs/libc/Kconfig
 source libs/libxx/Kconfig
 source libs/libdsp/Kconfig
+source libs/libuv/Kconfig
 endmenu
 
 menu "Open Asymmetric Multi Processing"

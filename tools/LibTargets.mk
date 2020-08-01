@@ -211,6 +211,12 @@ libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT): pass2dep
 staging$(DELIM)libdsp$(LIBEXT): libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
+libs$(DELIM)libuv$(DELIM)libuv$(LIBEXT): pass2dep
+	$(Q) $(MAKE) -C libs$(DELIM)libuv TOPDIR="$(TOPDIR)" libuv$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+
+staging$(DELIM)libuv$(LIBEXT): libs$(DELIM)libuv$(DELIM)libuv$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
 ifeq ($(CONFIG_BUILD_FLAT),y)
 $(APPDIR)$(DELIM)libapps$(LIBEXT): pass2dep
 else
