@@ -164,6 +164,15 @@
 #define GPIO_SW2           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTA | PIN4)
 #define GPIO_SW3           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTD | PIN0)
 
+/* A micro Secure Digital (SD) card slot is available on the FRDM-K28F
+ * connected to the SD Host Controller (SDHC) signals of the MCU.
+ * This slot will accept micro format SD memory cards.
+ * The SD card detect pin (PTB5) is an open switch that shorts with VDD when
+ * card is inserted.
+ */
+
+#define GPIO_SD_CARDDETECT (GPIO_INPUT | PIN_INT_BOTH | PIN_PORTB | PIN5)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -233,6 +242,20 @@ void k28_i2cdev_initialize(void);
  ****************************************************************************/
 
 extern void weak_function k28_usbdev_initialize(void);
+
+/****************************************************************************
+ * Name: k28_usbhost_initialize
+ *
+ * Description:
+ *   Inititialize USB High Speed Host
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_KINETIS_USBHS) && defined(CONFIG_USBHOST)
+int k28_usbhost_initialize(void);
+#else
+#  define k28_usbhost_initialize() (OK)
+#endif
 
 /****************************************************************************
  * Name: k28_sdhc_initialize

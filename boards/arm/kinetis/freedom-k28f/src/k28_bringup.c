@@ -153,6 +153,11 @@ int k28_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_USBHOST) && defined(CONFIG_KINETIS_USBHS)
+  k28_usbhost_initialize();
+#endif
+
+
   UNUSED(ret);
   return OK;
 }

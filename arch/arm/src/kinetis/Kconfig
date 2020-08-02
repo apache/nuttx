@@ -713,6 +713,14 @@ config KINETIS_CMT
 	---help---
 		Support Carrier Modulator Transmitter
 
+config KINETIS_USBHS
+	bool "USB HS"
+	default n
+	select USBHOST_HAVE_ASYNCH if USBHOST
+	select USBHOST_ASYNCH
+	---help---
+		Support USB HIGH SPEED (see also USBHOST and USBDEV)
+
 config KINETIS_USBOTG
 	bool "USB OTG"
 	default n

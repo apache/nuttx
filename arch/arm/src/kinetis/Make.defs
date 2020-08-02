@@ -149,7 +149,15 @@ CHIP_CSRCS += kinetis_usbdev.c
 endif
 
 ifeq ($(CONFIG_USBHOST),y)
+ifneq ($(CONFIG_KINETIS_USBHS),y)
 CHIP_CSRCS += kinetis_usbhost.c
+endif
+endif
+
+ifeq ($(CONFIG_USBHOST),y)
+ifeq ($(CONFIG_KINETIS_USBHS),y)
+CHIP_CSRCS += kinetis_usbhshost.c
+endif
 endif
 
 ifeq ($(CONFIG_KINETIS_DMA),y)
