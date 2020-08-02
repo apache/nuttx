@@ -530,8 +530,8 @@
 
 #  define KINETIS_SIM_HAS_SCGC3                       1   /* SoC has SCGC3 Register */
 #  define KINETIS_SIM_HAS_SCGC3_RNGA                  1   /* SoC has SCGC3[TRNG/RNGA] */
-#  undef  KINETIS_SIM_HAS_SCGC3_USBHS                     /* SoC does not have SCGC3[USBHS] */
-#  undef  KINETIS_SIM_HAS_SCGC3_USBHSPHY                  /* SoC does not have SCGC3[USBHSPHY] */
+#  define KINETIS_SIM_HAS_SCGC3_USBHS                 1   /* SoC has SCGC3[USBHS] */
+#  define KINETIS_SIM_HAS_SCGC3_USBHSPHY              1   /* SoC has SCGC3[USBHSPHY] */
 #  undef  KINETIS_SIM_HAS_SCGC3_USBHSDCD                  /* SoC does not have SCGC3[USBHSDCD] */
 #  undef  KINETIS_SIM_HAS_SCGC3_FLEXCAN1                  /* SoC does not have SCGC3[FLEXCAN1] */
 #  undef  KINETIS_SIM_HAS_SCGC3_NFC                       /* SoC does not have SCGC3[NFC] */
