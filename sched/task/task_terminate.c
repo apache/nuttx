@@ -158,7 +158,6 @@ int nxtask_terminate(pid_t pid, bool nonblocking)
   /* Remove the task from the task list */
 
   dq_rem((FAR dq_entry_t *)dtcb, tasklist);
-  dtcb->task_state = TSTATE_TASK_INVALID;
 
   /* At this point, the TCB should no longer be accessible to the system */
 
