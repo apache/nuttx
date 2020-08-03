@@ -1,8 +1,9 @@
 /****************************************************************************
- * boards/arm/samd5e5/metro-m4/src/sam_bringup.c
+ * arch/arm/src/sama5/sam_wdt.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2020 Falker Automacao Agricola LTDA.
+ *   Author: Leomar Mateus Radke <leomar@falker.com.br>
+ *   Author: Ricardo Wartchow <wartchow@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,67 +34,64 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAMD5E5_SAM_WDT_H
+#define __ARCH_ARM_SRC_SAMD5E5_SAM_WDT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <debug.h>
-#include <errno.h>
+#include "chip.h"
+#include "hardware/sam_wdt.h"
 
-#include "metro-m4.h"
-
-#if defined(CONFIG_SAMD5E5_WDT) && defined(CONFIG_WATCHDOG)
-  #include "sam_wdt.h"
-#endif
+#ifdef CONFIG_SAMD5E5_WDT
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PROCFS_MOUNTPOINT "/proc"
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_bringup
+ * Name: sam_wdt_initialize()
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Perform architecture-specific initialization of the Watchdog hardware.
+ *   This interface should be provided by all configurations using
+ *   to avoid exposed platform-dependent logic.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ *   At a minimum, this function should call watchdog_register().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int sam_bringup(void)
-{
-  int ret = OK;
+void sam_wdt_initialize(FAR const char *devpath);
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, PROCFS_MOUNTPOINT, "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      syslot(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
-             PROCFS_MOUNTPOINT, ret);
-    }
-#endif
-
-#if defined(CONFIG_SAMD5E5_WDT) && defined(CONFIG_WATCHDOG)
-  (void)sam_wdt_initialize(CONFIG_WATCHDOG_DEVPATH);
-#endif
-
-  UNUSED(ret);
-  return OK;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_SAMD5E5_WDT */
+#endif /* __ARCH_ARM_SRC_SAMD5E5_SAM_WDT_H */

@@ -92,7 +92,7 @@
 #  define WDT_CONFIG_PER_1K        (7  << WDT_CONFIG_PER_SHIFT) /* 1024 clock cycles */
 #  define WDT_CONFIG_PER_2K        (8  << WDT_CONFIG_PER_SHIFT) /* 2048 clock cycles */
 #  define WDT_CONFIG_PER_4K        (9  << WDT_CONFIG_PER_SHIFT) /* 4096 clock cycles */
-#  define WDT_CONFIG_PER_8k        (10 << WDT_CONFIG_PER_SHIFT) /* 8192 clock cycles */
+#  define WDT_CONFIG_PER_8K        (10 << WDT_CONFIG_PER_SHIFT) /* 8192 clock cycles */
 #  define WDT_CONFIG_PER_16K       (11 << WDT_CONFIG_PER_SHIFT) /* 16384 clock cycles */
 #define WDT_CONFIG_WINDOW_SHIFT    (4)       /* Bits 4-7: Window Mode Time-Out Period */
 #define WDT_CONFIG_WINDOW_MASK     (15 << WDT_CONFIG_WINDOW_SHIFT)
