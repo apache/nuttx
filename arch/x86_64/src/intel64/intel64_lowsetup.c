@@ -26,6 +26,7 @@
 
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
+#include <arch/multiboot2.h>
 
 #include "x86_64_internal.h"
 
@@ -52,9 +53,47 @@ volatile uint64_t *pt;
 volatile struct ist_s *ist64;
 volatile struct gdt_entry_s *gdt64;
 
+/* This holds information passed by the multiboot2 bootloader */
+
+uint32_t mb_magic __attribute__((section(".loader.bss")));
+uint32_t mb_info_struct __attribute__((section(".loader.bss")));
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void x86_64_mb2_config(void)
+{
+  struct multiboot_tag *tag;
+
+  /* Check that we were actually booted by a mulitboot2 bootloader */
+
+  if (mb_magic != MULTIBOOT2_BOOTLOADER_MAGIC)
+    return;
+
+  for (tag = (struct multiboot_tag *)(uintptr_t)(mb_info_struct + 8);
+    tag->type != MULTIBOOT_TAG_TYPE_END;
+    tag = (struct multiboot_tag *)((uint8_t *)tag + ((tag->size + 7) & ~7)))
+    {
+      switch (tag->type)
+        {
+          case MULTIBOOT_TAG_TYPE_EFI64:
+            {
+              break;
+            }
+
+          case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
+            {
+              x86_64_mb2_fbinitialize(
+                (struct multiboot_tag_framebuffer *)tag);
+              break;
+            }
+
+          default:
+            break;
+        }
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -94,6 +133,10 @@ void up_lowsetup(void)
 
   x86_64_check_and_enable_capability();
 
+  /* Handle multiboot2 info */
+
+  x86_64_mb2_config();
+
   /* Revoke the lower memory */
 
   __revoke_low_memory();
@@ -102,9 +145,11 @@ void up_lowsetup(void)
 
   x86_64_boardinitialize();
 
+#ifdef USE_EARLYSERIALINIT
   /* Early serial driver initialization */
 
   x86_64_earlyserialinit();
+#endif
 
   x86_64_timer_calibrate_freq();
 
