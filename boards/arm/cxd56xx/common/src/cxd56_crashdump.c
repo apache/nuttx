@@ -47,6 +47,8 @@
 #include <debug.h>
 #include <time.h>
 
+#include <nuttx/kmalloc.h>
+
 #include <arch/chip/backuplog.h>
 #include <arch/chip/crashdump.h>
 #include "cxd56_wdt.h"
@@ -125,7 +127,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
 #ifdef CONFIG_CXD56_BACKUPLOG
   pdump = up_backuplog_alloc("crash", sizeof(fullcontext_t));
 #else
-  pdump = malloc(sizeof(fullcontext_t));
+  pdump = kmm_malloc(sizeof(fullcontext_t));
 #endif
   if (!pdump)
     {

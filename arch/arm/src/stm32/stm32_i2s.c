@@ -72,16 +72,14 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/spi/spi.h>
-
-#include <arch/board/board.h>
-
-#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
+
+#include <arch/board/board.h>
 
 #include "arm_internal.h"
 #include "arm_arch.h"
@@ -2632,7 +2630,7 @@ FAR struct i2s_dev_s *stm32_i2sbus_initialize(int port)
    * chip select structures.
    */
 
-  priv = (struct stm32_i2s_s *)zalloc(sizeof(struct stm32_i2s_s));
+  priv = (struct stm32_i2s_s *)kmm_zalloc(sizeof(struct stm32_i2s_s));
   if (!priv)
     {
       i2serr("ERROR: Failed to allocate a chip select structure\n");
@@ -2640,7 +2638,7 @@ FAR struct i2s_dev_s *stm32_i2sbus_initialize(int port)
     }
 
   /* Set up the initial state for this chip select structure.  Other fields
-   * were zeroed by zalloc().
+   * were zeroed by kmm_zalloc().
    */
 
   /* Initialize the common parts for the I2S device structure */
