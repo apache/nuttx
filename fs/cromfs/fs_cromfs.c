@@ -1080,10 +1080,6 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
         dir->fd_dir.d_type = DTYPE_BLK;
         break;
 
-      case S_IFSOCK: /* Socket */
-        dir->fd_dir.d_type = DTYPE_SOCK;
-        break;
-
       case S_IFMQ:   /* Message queue */
         dir->fd_dir.d_type = DTYPE_MQ;
         break;
