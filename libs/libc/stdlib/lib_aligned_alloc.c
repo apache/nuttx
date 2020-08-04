@@ -22,7 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdlib.h>
+#include <libc.h>
 
 /****************************************************************************
  * Public Functions
@@ -30,5 +30,5 @@
 
 FAR void *aligned_alloc(size_t align, size_t size)
 {
-  return memalign(align, size);
+  return lib_memalign(align, size);
 }
