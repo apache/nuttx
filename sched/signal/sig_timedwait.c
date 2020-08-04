@@ -247,7 +247,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   int32_t waitticks;
   int ret;
 
-  DEBUGASSERT(set != NULL && rtcb->waitdog == NULL);
+  DEBUGASSERT(set != NULL);
 
   /* Several operations must be performed below:  We must determine if any
    * signal is pending and, if not, wait for the signal.  Since signals can
@@ -340,43 +340,30 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           waitticks = MSEC2TICK(waitmsec);
 #endif
 
-          /* Create a watchdog */
-
-          rtcb->waitdog = wd_create();
-          DEBUGASSERT(rtcb->waitdog);
-
-          if (rtcb->waitdog)
-            {
-              /* This little bit of nonsense is necessary for some
-               * processors where sizeof(pointer) < sizeof(uint32_t).
-               * see wdog.h.
-               */
-
-              union wdparm_u wdparm;
-              wdparm.pvarg = (FAR void *)rtcb;
-
-              /* Start the watchdog */
-
-              wd_start(rtcb->waitdog, waitticks,
-                       nxsig_timeout, 1, wdparm.pvarg);
-
-              /* Now wait for either the signal or the watchdog, but
-               * first, make sure this is not the idle task,
-               * descheduling that isn't going to end well.
-               */
-
-              DEBUGASSERT(NULL != rtcb->flink);
-              up_block_task(rtcb, TSTATE_WAIT_SIG);
-
-              /* We no longer need the watchdog */
-
-              wd_delete(rtcb->waitdog);
-              rtcb->waitdog = NULL;
-            }
-
-          /* REVISIT: And do what if there are no watchdog timers?  The wait
-           * will fail and we will return something bogus.
+          /* This little bit of nonsense is necessary for some
+           * processors where sizeof(pointer) < sizeof(uint32_t).
+           * see wdog.h.
            */
+
+          union wdparm_u wdparm;
+          wdparm.pvarg = (FAR void *)rtcb;
+
+          /* Start the watchdog */
+
+          wd_start(&rtcb->waitdog, waitticks,
+                   nxsig_timeout, 1, wdparm.pvarg);
+
+          /* Now wait for either the signal or the watchdog, but
+           * first, make sure this is not the idle task,
+           * descheduling that isn't going to end well.
+           */
+
+          DEBUGASSERT(NULL != rtcb->flink);
+          up_block_task(rtcb, TSTATE_WAIT_SIG);
+
+          /* We no longer need the watchdog */
+
+          wd_cancel(&rtcb->waitdog);
         }
 
       /* No timeout, just wait */

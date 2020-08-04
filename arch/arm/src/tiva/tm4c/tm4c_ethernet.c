@@ -628,8 +628,8 @@ struct tiva_ethmac_s
   uint8_t              ifup    : 1; /* true:ifup false:ifdown */
   uint8_t              mbps100 : 1; /* 100MBps operation (vs 10 MBps) */
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
-  WDOG_ID              txpoll;      /* TX poll timer */
-  WDOG_ID              txtimeout;   /* TX timeout timer */
+  struct wdog_s        txpoll;      /* TX poll timer */
+  struct wdog_s        txtimeout;   /* TX timeout timer */
   struct work_s        irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s        pollwork;    /* For deferring poll work to the work queue */
 
@@ -1218,7 +1218,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, TIVA_TXTIMEOUT,
+  wd_start(&priv->txtimeout, TIVA_TXTIMEOUT,
            tiva_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
@@ -1983,7 +1983,7 @@ static void tiva_txdone(FAR struct tiva_ethmac_s *priv)
     {
       /* Cancel the TX timeout */
 
-      wd_cancel(priv->txtimeout);
+      wd_cancel(&priv->txtimeout);
 
       /* And disable further TX interrupts. */
 
@@ -2145,7 +2145,7 @@ static int tiva_interrupt(int irq, FAR void *context, FAR void *arg)
            * expiration and the deferred interrupt processing.
            */
 
-           wd_cancel(priv->txtimeout);
+           wd_cancel(&priv->txtimeout);
         }
 
       /* Schedule to perform the interrupt processing on the worker thread. */
@@ -2313,7 +2313,7 @@ static void tiva_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, TIVA_WDDELAY,
+  wd_start(&priv->txpoll, TIVA_WDDELAY,
            tiva_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
@@ -2390,7 +2390,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, TIVA_WDDELAY,
+  wd_start(&priv->txpoll, TIVA_WDDELAY,
            tiva_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
@@ -2433,8 +2433,8 @@ static int tiva_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the tiva_ifup() always
@@ -4092,12 +4092,7 @@ int tiva_ethinitialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = tiva_ioctl;    /* Support PHY ioctl() calls */
 #endif
-  priv->dev.d_private = (void *)g_tiva_ethmac; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll        = wd_create();   /* Create periodic poll timer */
-  priv->txtimeout     = wd_create();   /* Create TX timeout timer */
+  priv->dev.d_private = g_tiva_ethmac; /* Used to recover private state from dev */
 
 #ifdef CONFIG_TIVA_BOARDMAC
   /* If the board can provide us with a MAC address, get the address

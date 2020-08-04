@@ -894,16 +894,6 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   priv->threshx   = 0;
   priv->threshy   = 0;
 
-  /* Create a timer for catching missed pen up conditions */
-
-  priv->wdog      = wd_create();
-  if (!priv->wdog)
-    {
-      ierr("ERROR: Failed to create a watchdog\n", errno);
-      nxsem_post(&priv->exclsem);
-      return -ENOSPC;
-    }
-
   /* Register the character driver */
 
   snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
@@ -949,7 +939,7 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
 
   /* Cancel the missing pen up timer */
 
-  wd_cancel(priv->wdog);
+  wd_cancel(&priv->wdog);
 
   /* Check for pen up or down from the TSC_STA bit in STMPE811_TSC_CTRL. */
 
@@ -1092,7 +1082,7 @@ ignored:
   if (priv->sample.contact == CONTACT_DOWN ||
       priv->sample.contact == CONTACT_MOVE)
     {
-      wd_start(priv->wdog, STMPE811_PENUP_TICKS,
+      wd_start(&priv->wdog, STMPE811_PENUP_TICKS,
                stmpe811_timeout, 1, (wdparm_t)priv);
     }
 

@@ -336,7 +336,7 @@ struct stm32_dev_s
   sdio_eventset_t    waitevents;      /* Set of events to be waited for */
   uint32_t           waitmask;        /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  WDOG_ID            waitwdog;        /* Watchdog that handles event timeouts */
+  struct wdog_s      waitwdog;        /* Watchdog that handles event timeouts */
 
   /* Callback support */
 
@@ -1476,7 +1476,7 @@ static void stm32_endwait(struct stm32_dev_s *priv,
 {
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Disable event-related interrupts */
 
@@ -1952,7 +1952,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
   priv->waitmask   = 0;      /* Interrupt enables for event waiting */
   priv->wkupevent  = 0;      /* The event that caused the wakeup */
 
-  wd_cancel(priv->waitwdog); /* Cancel any timeouts */
+  wd_cancel(&priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
 
@@ -2453,7 +2453,7 @@ static int stm32_cancel(FAR struct sdio_dev_s *dev)
 
   /* Cancel any watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Mark no transfer in progress */
 
@@ -2891,7 +2891,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay,
+      ret   = wd_start(&priv->waitwdog, delay,
                        stm32_eventtimeout, 1, (wdparm_t)priv);
       if (ret < OK)
         {
@@ -2934,7 +2934,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
            * return an SDIO error.
            */
 
-          wd_cancel(priv->waitwdog);
+          wd_cancel(&priv->waitwdog);
           wkupevent = SDIOWAIT_ERROR;
           goto errout_with_waitints;
         }
@@ -3534,11 +3534,6 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
-  /* Create a watchdog timer */
-
-  priv->waitwdog = wd_create();
-  DEBUGASSERT(priv->waitwdog);
 
   /* Reset the card and assure that it is in the initial, unconfigured
    * state.

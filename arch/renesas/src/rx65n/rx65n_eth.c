@@ -4194,7 +4194,7 @@ int rx65n_ethinitialize(int intf)
 
   /* Used to recover private state from dev */
 
-  priv->dev.d_private = (void *)g_rx65nethmac;
+  priv->dev.d_private = g_rx65nethmac;
 
   /* Multi cast flag */
 

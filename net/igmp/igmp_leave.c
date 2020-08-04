@@ -144,7 +144,7 @@ int igmp_leavegroup(struct net_driver_s *dev,
        * Reports that could interfere with the Leave Group.
        */
 
-      wd_cancel(group->wdog);
+      wd_cancel(&group->wdog);
       CLR_SCHEDMSG(group->flags);
       CLR_WAITMSG(group->flags);
 

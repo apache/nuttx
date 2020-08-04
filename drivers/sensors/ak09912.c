@@ -165,7 +165,7 @@ struct ak09912_dev_s
   struct sensi_data_s asa_data; /* sensitivity data */
   uint8_t mode;                 /* power mode */
   uint8_t nsf;                  /* noise suppression filter setting */
-  WDOG_ID wd;
+  struct wdog_s wd;
   sem_t wait;
 };
 
@@ -421,7 +421,7 @@ static int ak09912_read_mag_uncomp_data(FAR struct ak09912_dev_s *priv,
   uint8_t state = 0;
   uint8_t buffer[8];  /* TMPS and ST2 is read, but the value is omitted. */
 
-  wd_start(priv->wd, AK09912_POLLING_TIMEOUT,
+  wd_start(&priv->wd, AK09912_POLLING_TIMEOUT,
            ak09912_wd_timeout, 1, (wdparm_t)priv);
   state = ak09912_getreg8(priv, AK09912_ST1);
   while (! (state & 0x1))
@@ -429,7 +429,7 @@ static int ak09912_read_mag_uncomp_data(FAR struct ak09912_dev_s *priv,
       nxsem_wait(&priv->wait);
     }
 
-  wd_cancel(priv->wd);
+  wd_cancel(&priv->wd);
   ret = ak09912_getreg(priv,  AK09912_HXL,  buffer, sizeof(buffer));
 
   mag_data->x = MERGE_BYTE(buffer[0], buffer[1]);
@@ -687,7 +687,6 @@ int ak09912_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   priv->addr = AK09912_ADDR;
   priv->freq = AK09912_FREQ;
   priv->compensated = ENABLE_COMPENSATED;
-  priv->wd = wd_create();
   nxsem_init(&priv->wait, 0, 0);
 
   /* set default noise suppression filter. */

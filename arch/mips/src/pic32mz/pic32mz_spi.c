@@ -154,7 +154,7 @@ struct pic32mz_dev_s
   DMA_HANDLE txdma;            /* SPI TX DMA handle */
   int result;                  /* DMA result */
   sem_t dmawait;               /* Used to wait for DMA completion */
-  WDOG_ID dmadog;              /* Watchdog that handles DMA timeouts */
+  struct wdog_s dmadog;        /* Watchdog that handles DMA timeouts */
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI_REGDEBUG
@@ -889,7 +889,7 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->dmadog);
+  wd_cancel(&priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -944,7 +944,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->dmadog);
+  wd_cancel(&priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -1774,7 +1774,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     {
       /* Start (or re-start) the watchdog timeout */
 
-      ret = wd_start(priv->dmadog, DMA_TIMEOUT_TICKS,
+      ret = wd_start(&priv->dmadog, DMA_TIMEOUT_TICKS,
                      spi_dmatimeout, 1, (wdparm_t)priv);
       if (ret < 0)
         {
@@ -1787,7 +1787,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* Cancel the watchdog timeout */
 
-      wd_cancel(priv->dmadog);
+      wd_cancel(&priv->dmadog);
 
       /* Check if we were awakened by an error of some kind. EINTR is not a
        * failure. It simply means that the wait was awakened by a signal.
@@ -2039,11 +2039,6 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
 
   nxsem_init(&priv->dmawait, 0, 0);
   nxsem_set_protocol(&priv->dmawait, SEM_PRIO_NONE);
-
-  /* Create a watchdog timer to catch DMA timeouts */
-
-  priv->dmadog = wd_create();
-  DEBUGASSERT(priv->dmadog);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI_INTERRUPTS

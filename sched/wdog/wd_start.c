@@ -168,7 +168,8 @@ static inline void wd_expiration(void)
  *
  ****************************************************************************/
 
-int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry, int argc, ...)
+int wd_start(FAR struct wdog_s *wdog, int32_t delay,
+             wdentry_t wdentry, int argc, ...)
 {
   va_list ap;
   FAR struct wdog_s *curr;

@@ -121,7 +121,7 @@ struct twi_dev_s
 
   sem_t               exclsem;    /* Only one thread can access at a time */
   sem_t               waitsem;    /* Wait for TWI transfer completion */
-  WDOG_ID             timeout;    /* Watchdog to recover from bus hangs */
+  struct wdog_s       timeout;    /* Watchdog to recover from bus hangs */
   volatile int        result;     /* The result of the transfer */
   volatile int        xfrd;       /* Number of bytes transfers */
 
@@ -376,7 +376,7 @@ static int twi_wait(struct twi_dev_s *priv)
 
   /* Start a timeout to avoid hangs */
 
-  wd_start(priv->timeout, TWI_TIMEOUT, twi_timeout, 1, (wdparm_t)priv);
+  wd_start(&priv->timeout, TWI_TIMEOUT, twi_timeout, 1, (wdparm_t)priv);
 
   /* Wait for either the TWI transfer or the timeout to complete */
 
@@ -388,7 +388,7 @@ static int twi_wait(struct twi_dev_s *priv)
 
       if (ret < 0)
         {
-          wd_cancel(priv->timeout);
+          wd_cancel(&priv->timeout);
           return ret;
         }
     }
@@ -413,7 +413,7 @@ static void twi_wakeup(struct twi_dev_s *priv, int result)
 {
   /* Cancel any pending timeout */
 
-  wd_cancel(priv->timeout);
+  wd_cancel(&priv->timeout);
 
   /* Disable any further TWI interrupts */
 
@@ -983,11 +983,6 @@ struct i2c_master_s *sam_i2cbus_initialize(int bus)
 
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
-  /* Allocate a watchdog timer */
-
-  priv->timeout = wd_create();
-  DEBUGASSERT(priv->timeout != 0);
-
   /* Configure and enable the TWI hardware */
 
   priv->pid = pid;
@@ -1027,10 +1022,9 @@ int sam_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
   nxsem_destroy(&priv->exclsem);
   nxsem_destroy(&priv->waitsem);
 
-  /* Free the watchdog timer */
+  /* Cancel the watchdog timer */
 
-  wd_delete(priv->timeout);
-  priv->timeout = NULL;
+  wd_cancel(&priv->timeout);
 
   /* Detach Interrupt Handler */
 

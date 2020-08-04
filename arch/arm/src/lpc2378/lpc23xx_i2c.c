@@ -118,7 +118,7 @@ struct lpc2378_i2cdev_s
   sem_t            mutex;      /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for state machine completion */
   volatile uint8_t state;      /* State of state machine */
-  WDOG_ID          timeout;    /* Watchdog to timeout when bus hung */
+  struct wdog_s    timeout;    /* Watchdog to timeout when bus hung */
   uint32_t         frequency;  /* Current I2C frequency */
 
   struct i2c_msg_s *msgs;      /* remaining transfers - first one is in progress */
@@ -220,11 +220,11 @@ static int lpc2378_i2c_start(struct lpc2378_i2cdev_s *priv)
            priv->base + I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + I2C_CONSET_OFFSET);
 
-  wd_start(priv->timeout, I2C_TIMEOUT,
+  wd_start(&priv->timeout, I2C_TIMEOUT,
            lpc2378_i2c_timeout, 1, (wdparm_t)priv);
   nxsem_wait(&priv->wait);
 
-  wd_cancel(priv->timeout);
+  wd_cancel(&priv->timeout);
 
   return priv->nmsg;
 }
@@ -590,11 +590,6 @@ struct i2c_master_s *lpc2378_i2cbus_initialize(int port)
 
   nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
 
-  /* Allocate a watchdog timer */
-
-  priv->timeout = wd_create();
-  DEBUGASSERT(priv->timeout != 0);
-
   /* Attach Interrupt Handler */
 
   irq_attach(priv->irqid, lpc2378_i2c_interrupt, priv);
@@ -630,10 +625,9 @@ int lpc2378_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
   nxsem_destroy(&priv->mutex);
   nxsem_destroy(&priv->wait);
 
-  /* Free the watchdog timer */
+  /* Cancel the watchdog timer */
 
-  wd_delete(priv->timeout);
-  priv->timeout = NULL;
+  wd_cancel(&priv->timeout);
 
   /* Disable interrupts */
 

@@ -309,8 +309,8 @@ struct lpc17_40_driver_s
   uint8_t  lp_phyaddr;          /* PHY device address */
 #endif
   uint32_t lp_inten;            /* Shadow copy of INTEN register */
-  WDOG_ID  lp_txpoll;           /* TX poll timer */
-  WDOG_ID  lp_txtimeout;        /* TX timeout timer */
+  struct wdog_s lp_txpoll;      /* TX poll timer */
+  struct wdog_s lp_txtimeout;   /* TX timeout timer */
 
   struct work_s lp_txwork;      /* TX work continuation */
   struct work_s lp_rxwork;      /* RX work continuation */
@@ -701,7 +701,7 @@ static int lpc17_40_transmit(struct lpc17_40_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->lp_txtimeout, LPC17_40_TXTIMEOUT,
+  wd_start(&priv->lp_txtimeout, LPC17_40_TXTIMEOUT,
            lpc17_40_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
@@ -1331,7 +1331,7 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
                * Cancel the pending Tx timeout
                */
 
-              wd_cancel(priv->lp_txtimeout);
+              wd_cancel(&priv->lp_txtimeout);
 
               /* Disable further Tx interrupts.  Tx interrupts may be
                * re-enabled again depending upon the actions of
@@ -1509,7 +1509,7 @@ static void lpc17_40_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->lp_txpoll, LPC17_40_WDDELAY,
+  wd_start(&priv->lp_txpoll, LPC17_40_WDDELAY,
            lpc17_40_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
@@ -1764,7 +1764,7 @@ static int lpc17_40_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->lp_txpoll, LPC17_40_WDDELAY,
+  wd_start(&priv->lp_txpoll, LPC17_40_WDDELAY,
            lpc17_40_poll_expiry, 1, (wdparm_t)priv);
 
   /* Finally, make the interface up and enable the Ethernet interrupt at
@@ -1809,8 +1809,8 @@ static int lpc17_40_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->lp_txpoll);
-  wd_cancel(priv->lp_txtimeout);
+  wd_cancel(&priv->lp_txpoll);
+  wd_cancel(&priv->lp_txtimeout);
 
   /* Reset the device and mark it as down. */
 
@@ -3307,18 +3307,13 @@ static inline int lpc17_40_ethinitialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->lp_dev.d_ioctl   = lpc17_40_eth_ioctl; /* Handle network IOCTL commands */
 #endif
-  priv->lp_dev.d_private = (void *)priv;       /* Used to recover private state from dev */
+  priv->lp_dev.d_private = priv;               /* Used to recover private state from dev */
 
 #if CONFIG_LPC17_40_NINTERFACES > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"
-  priv->lp_base          = ??;              /* Ethernet controller base address */
-  priv->lp_irq           = ??;              /* Ethernet controller IRQ number */
+  priv->lp_base          = ??;                 /* Ethernet controller base address */
+  priv->lp_irq           = ??;                 /* Ethernet controller IRQ number */
 #endif
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->lp_txpoll        = wd_create();     /* Create periodic poll timer */
-  priv->lp_txtimeout     = wd_create();     /* Create TX timeout timer */
 
   /* Reset the Ethernet controller and leave in the ifdown statue.  The
    * Ethernet controller will be properly re-initialized each time

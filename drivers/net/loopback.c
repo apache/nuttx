@@ -98,7 +98,7 @@ struct lo_driver_s
 {
   bool lo_bifup;               /* true:ifup false:ifdown */
   bool lo_txdone;              /* One RX packet was looped back */
-  WDOG_ID lo_polldog;          /* TX poll timer */
+  struct wdog_s lo_polldog;    /* TX poll timer */
   struct work_s lo_work;       /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
@@ -251,7 +251,7 @@ static void lo_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, (wdparm_t)priv);
+  wd_start(&priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -318,7 +318,7 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->lo_polldog, LO_WDDELAY,
+  wd_start(&priv->lo_polldog, LO_WDDELAY,
            lo_poll_expiry, 1, (wdparm_t)priv);
 
   priv->lo_bifup = true;
@@ -347,7 +347,7 @@ static int lo_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->lo_polldog);
+  wd_cancel(&priv->lo_polldog);
 
   /* Mark the device "down" */
 
@@ -524,10 +524,6 @@ int localhost_initialize(void)
 #endif
   priv->lo_dev.d_buf     = g_iobuffer;   /* Attach the IO buffer */
   priv->lo_dev.d_private = priv;         /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->lo_polldog       = wd_create();  /* Create periodic poll timer */
 
   /* Register the loopabck device with the OS so that socket IOCTLs can b
    * performed.

@@ -422,7 +422,7 @@ struct pic32mx_usbdev_s
   uint8_t                  rxbusy:1;      /* EP0 OUT data transfer in progress */
   uint16_t                 epavail;       /* Bitset of available endpoints */
   uint16_t                 epstalled;     /* Bitset of stalled endpoints */
-  WDOG_ID                  wdog;          /* Supports the restart delay */
+  struct wdog_s            wdog;          /* Supports the restart delay */
 
   /* The endpoint list */
 
@@ -1042,7 +1042,7 @@ static void pic32mx_delayedrestart(struct pic32mx_usbdev_s *priv,
 
   /* And start (or re-start) the watchdog timer */
 
-  wd_start(priv->wdog, RESTART_DELAY,
+  wd_start(&priv->wdog, RESTART_DELAY,
            pic32mx_rqrestart, 1, (wdparm_t)priv);
 }
 
@@ -4366,7 +4366,6 @@ void up_usbinitialize(void)
    */
 
   priv->epstalled = 0;
-  priv->wdog      = wd_create();
 
   /* Attach USB controller interrupt handler.  The hardware will not be
    * initialized and interrupts will not be enabled until the class device

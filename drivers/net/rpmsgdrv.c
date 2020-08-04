@@ -166,7 +166,7 @@ struct net_rpmsg_drv_s
   FAR const char        *cpuname;
   FAR const char        *devname;
   struct rpmsg_endpoint ept;
-  WDOG_ID               txpoll;   /* TX poll timer */
+  struct wdog_s         txpoll;   /* TX poll timer */
   struct work_s         pollwork; /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
@@ -843,7 +843,7 @@ static void net_rpmsg_drv_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, NET_RPMSG_DRV_WDDELAY,
+  wd_start(&priv->txpoll, NET_RPMSG_DRV_WDDELAY,
            net_rpmsg_drv_poll_expiry, 1, (wdparm_t)dev);
   net_unlock();
 }
@@ -968,7 +968,7 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, NET_RPMSG_DRV_WDDELAY,
+  wd_start(&priv->txpoll, NET_RPMSG_DRV_WDDELAY,
            net_rpmsg_drv_poll_expiry, 1, (wdparm_t)dev);
 
   net_unlock();
@@ -1039,7 +1039,7 @@ static int net_rpmsg_drv_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and work */
 
-  wd_cancel(priv->txpoll);
+  wd_cancel(&priv->txpoll);
   work_cancel(LPWORK, &priv->pollwork);
 
   leave_critical_section(flags);
@@ -1394,11 +1394,6 @@ int net_rpmsg_drv_init(FAR const char *cpuname,
   dev->d_ioctl   = net_rpmsg_drv_ioctl;   /* Handle network IOCTL commands */
 #endif
   dev->d_private = priv;                  /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for transmissions */
-
-  priv->txpoll   = wd_create();           /* Create periodic poll timer */
-  DEBUGASSERT(priv->txpoll != NULL);
 
   /* Register the device with the openamp */
 

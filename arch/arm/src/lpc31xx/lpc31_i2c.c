@@ -91,7 +91,7 @@ struct lpc31_i2cdev_s
     sem_t             mutex;      /* Only one thread can access at a time */
     sem_t             wait;       /* Place to wait for state machine completion */
     volatile uint8_t  state;      /* State of state machine */
-    WDOG_ID           timeout;    /* Watchdog to timeout when bus hung */
+    struct wdog_s     timeout;    /* Watchdog to timeout when bus hung */
     uint32_t          frequency;  /* Current I2C frequency */
 
     struct i2c_msg_s *msgs;       /* remaining transfers - first one is in progress */
@@ -515,7 +515,7 @@ static int i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Start a watchdog to timeout the transfer if the bus is locked up... */
 
-  wd_start(priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (wdparm_t)priv);
+  wd_start(&priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (wdparm_t)priv);
 
   /* Wait for the transfer to complete */
 
@@ -524,7 +524,7 @@ static int i2c_transfer(FAR struct i2c_master_s *dev,
       nxsem_wait(&priv->wait);
     }
 
-  wd_cancel(priv->timeout);
+  wd_cancel(&priv->timeout);
   ret = count - priv->nmsg;
 
   leave_critical_section(flags);
@@ -596,11 +596,6 @@ struct i2c_master_s *lpc31_i2cbus_initialize(int port)
   /* Soft reset the device */
 
   i2c_hwreset(priv);
-
-  /* Allocate a watchdog timer */
-
-  priv->timeout = wd_create();
-  DEBUGASSERT(priv->timeout != 0);
 
   /* Attach Interrupt Handler */
 

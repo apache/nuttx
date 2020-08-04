@@ -106,7 +106,7 @@ struct lan91c111_driver_s
   uintptr_t base;                         /* Base address */
   int       irq;                          /* IRQ number */
   uint16_t  bank;                         /* Current bank */
-  WDOG_ID txpoll;                         /* TX poll timer */
+  struct wdog_s txpoll;                   /* TX poll timer */
   struct work_s irqwork;                  /* For deferring interrupt work to the work queue */
   struct work_s pollwork;                 /* For deferring poll work to the work queue */
   uint8_t pktbuf[MAX_NETDEV_PKTSIZE + 4]; /* +4 due to getregs32/putregs32 */
@@ -1041,7 +1041,7 @@ static void lan91c111_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, LAN91C111_WDDELAY,
+  wd_start(&priv->txpoll, LAN91C111_WDDELAY,
            lan91c111_poll_expiry, 1, (wdparm_t)dev);
   net_unlock();
 }
@@ -1142,7 +1142,7 @@ static int lan91c111_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, LAN91C111_WDDELAY,
+  wd_start(&priv->txpoll, LAN91C111_WDDELAY,
            lan91c111_poll_expiry, 1, (wdparm_t)dev);
   net_unlock();
 
@@ -1181,7 +1181,7 @@ static int lan91c111_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and work */
 
-  wd_cancel(priv->txpoll);
+  wd_cancel(&priv->txpoll);
 
   work_cancel(LAN91C111_WORK, &priv->irqwork);
   work_cancel(LAN91C111_WORK, &priv->pollwork);
@@ -1623,11 +1623,6 @@ int lan91c111_initialize(uintptr_t base, int irq)
   dev->d_ioctl   = lan91c111_ioctl;   /* Handle network IOCTL commands */
 #endif
   dev->d_private = priv;              /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for transmissions */
-
-  priv->txpoll   = wd_create();       /* Create periodic poll timer */
-  DEBUGASSERT(priv->txpoll != NULL);
 
   /* Put the interface in the down state. This usually amounts to resetting
    * the device and/or calling lan91c111_ifdown().

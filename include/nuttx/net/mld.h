@@ -385,8 +385,8 @@ struct mld_mcast_listen_done_s
 struct mld_netdev_s
 {
   sq_queue_t grplist;                /* MLD group list */
-  WDOG_ID gendog;                    /* General query timer */
-  WDOG_ID v1dog;                     /* MLDv1 compatibility timer */
+  struct wdog_s gendog;              /* General query timer */
+  struct wdog_s v1dog;               /* MLDv1 compatibility timer */
   uint8_t flags;                     /* See MLD_ flags definitions */
 };
 

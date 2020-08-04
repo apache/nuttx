@@ -294,7 +294,7 @@ struct kinetis_driver_s
   uint32_t base;                /* FLEXCAN base address */
   bool bifup;                   /* true:ifup false:ifdown */
 #ifdef TX_TIMEOUT_WQ
-  WDOG_ID txtimeout[TXMBCOUNT]; /* TX timeout timer */
+  struct wdog_s txtimeout[TXMBCOUNT]; /* TX timeout timer */
 #endif
   struct work_s irqwork;        /* For deferring interrupt work to the wq */
   struct work_s pollwork;       /* For deferring poll work to the work wq */
@@ -751,7 +751,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   if (timeout > 0)
     {
-      wd_start(priv->txtimeout[mbi], timeout + 1,
+      wd_start(&priv->txtimeout[mbi], timeout + 1,
                kinetis_txtimeout_expiry, 1, (wdparm_t)priv);
     }
 #endif
@@ -1003,7 +1003,7 @@ static void kinetis_txdone(FAR void *arg)
            * corresponding watchdog can be canceled.
            */
 
-          wd_cancel(priv->txtimeout[mbi]);
+          wd_cancel(&priv->txtimeout[mbi]);
 #endif
         }
 
@@ -1867,15 +1867,7 @@ int kinetis_caninitialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = kinetis_ioctl;     /* Support CAN ioctl() calls */
 #endif
-  priv->dev.d_private = (void *)priv;      /* Used to recover private state from dev */
-
-#ifdef TX_TIMEOUT_WQ
-  for (i = 0; i < TXMBCOUNT; i++)
-    {
-      priv->txtimeout[i] = wd_create();    /* Create TX timeout timer */
-    }
-
-#endif
+  priv->dev.d_private = priv;              /* Used to recover private state from dev */
   priv->rx            = (struct mb_s *)(priv->base + KINETIS_CAN_MB_OFFSET);
   priv->tx            = (struct mb_s *)(priv->base + KINETIS_CAN_MB_OFFSET +
                           (sizeof(struct mb_s) * RXMBCOUNT));

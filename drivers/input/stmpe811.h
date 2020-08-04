@@ -160,7 +160,7 @@ struct stmpe811_dev_s
   sem_t waitsem;                       /* Used to wait for the availability of data */
 
   struct work_s timeout;               /* Supports tiemeout work */
-  WDOG_ID wdog;                        /* Timeout to detect missing pen down events */
+  struct wdog_s wdog;                  /* Timeout to detect missing pen down events */
   struct stmpe811_sample_s sample;     /* Last sampled touch point data */
 
   /* The following is a list if poll structures of threads waiting for

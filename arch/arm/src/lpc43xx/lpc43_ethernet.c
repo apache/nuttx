@@ -526,8 +526,8 @@ struct lpc43_ethmac_s
   uint8_t              ifup    : 1; /* true:ifup false:ifdown */
   uint8_t              mbps100 : 1; /* 100MBps operation (vs 10 MBps) */
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
-  WDOG_ID              txpoll;      /* TX poll timer */
-  WDOG_ID              txtimeout;   /* TX timeout timer */
+  struct wdog_s        txpoll;      /* TX poll timer */
+  struct wdog_s        txtimeout;   /* TX timeout timer */
   struct work_s        irqwork;     /* For deferring work to the work queue */
   struct work_s        pollwork;    /* For deferring work to the work queue */
 
@@ -1117,7 +1117,7 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, LPC43_TXTIMEOUT,
+  wd_start(&priv->txtimeout, LPC43_TXTIMEOUT,
            lpc43_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
@@ -1897,7 +1897,7 @@ static void lpc43_txdone(FAR struct lpc43_ethmac_s *priv)
     {
       /* Cancel the TX timeout */
 
-      wd_cancel(priv->txtimeout);
+      wd_cancel(&priv->txtimeout);
 
       /* And disable further TX interrupts. */
 
@@ -2055,7 +2055,7 @@ static int lpc43_interrupt(int irq, FAR void *context, FAR void *arg)
            * expiration and the deferred interrupt processing.
            */
 
-           wd_cancel(priv->txtimeout);
+           wd_cancel(&priv->txtimeout);
         }
 
       /* Schedule to perform the interrupt processing on the worker thread. */
@@ -2209,7 +2209,7 @@ static void lpc43_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, LPC43_WDDELAY,
+  wd_start(&priv->txpoll, LPC43_WDDELAY,
            lpc43_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
@@ -2286,7 +2286,7 @@ static int lpc43_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, LPC43_WDDELAY,
+  wd_start(&priv->txpoll, LPC43_WDDELAY,
            lpc43_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
@@ -2329,8 +2329,8 @@ static int lpc43_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the lpc43_ifup() always
@@ -3883,12 +3883,7 @@ static inline int lpc43_ethinitialize(void)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = lpc43_ioctl;    /* Support PHY ioctl() calls */
 #endif
-  priv->dev.d_private = (void *)&g_lpc43ethmac; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmission */
-
-  priv->txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->dev.d_private = &g_lpc43ethmac; /* Used to recover private state from dev */
 
   /* Configure GPIO pins to support Ethernet */
 

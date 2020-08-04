@@ -632,8 +632,8 @@ struct stm32_ethmac_s
   uint8_t              ifup    : 1; /* true:ifup false:ifdown */
   uint8_t              mbps100 : 1; /* 100MBps operation (vs 10 MBps) */
   uint8_t              fduplex : 1; /* Full (vs. half) duplex */
-  WDOG_ID              txpoll;      /* TX poll timer */
-  WDOG_ID              txtimeout;   /* TX timeout timer */
+  struct wdog_s        txpoll;      /* TX poll timer */
+  struct wdog_s        txtimeout;   /* TX timeout timer */
   struct work_s        irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s        pollwork;    /* For deferring poll work to the work queue */
 
@@ -1228,7 +1228,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, STM32_TXTIMEOUT,
+  wd_start(&priv->txtimeout, STM32_TXTIMEOUT,
            stm32_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
@@ -2003,7 +2003,7 @@ static void stm32_txdone(FAR struct stm32_ethmac_s *priv)
     {
       /* Cancel the TX timeout */
 
-      wd_cancel(priv->txtimeout);
+      wd_cancel(&priv->txtimeout);
 
       /* And disable further TX interrupts. */
 
@@ -2165,7 +2165,7 @@ static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
            * expiration and the deferred interrupt processing.
            */
 
-           wd_cancel(priv->txtimeout);
+           wd_cancel(&priv->txtimeout);
         }
 
       /* Schedule to perform the interrupt processing on the worker thread. */
@@ -2317,7 +2317,7 @@ static void stm32_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, STM32_WDDELAY,
+  wd_start(&priv->txpoll, STM32_WDDELAY,
            stm32_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
@@ -2395,7 +2395,7 @@ static int stm32_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, STM32_WDDELAY,
+  wd_start(&priv->txpoll, STM32_WDDELAY,
            stm32_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
@@ -2440,8 +2440,8 @@ static int stm32_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the stm32_ifup() always
@@ -4108,12 +4108,7 @@ int stm32_ethinitialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = stm32_ioctl;    /* Support PHY ioctl() calls */
 #endif
-  priv->dev.d_private = (void *)g_stm32ethmac; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->dev.d_private = g_stm32ethmac;  /* Used to recover private state from dev */
 
   /* Configure GPIO pins to support Ethernet */
 

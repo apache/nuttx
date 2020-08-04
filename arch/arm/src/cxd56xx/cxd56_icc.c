@@ -122,7 +122,7 @@ struct iccdev_s
 
   FAR void *userdata;
   sem_t rxwait;
-  WDOG_ID rxtimeout;
+  struct wdog_s rxtimeout;
 
   int flags;
 
@@ -338,11 +338,11 @@ static int icc_recv(FAR struct iccdev_s *priv, FAR iccmsg_t *msg, int32_t ms)
     {
       int32_t timo;
       timo = ms * 1000 / CONFIG_USEC_PER_TICK;
-      wd_start(priv->rxtimeout, timo, icc_rxtimeout, 1, (wdparm_t)priv);
+      wd_start(&priv->rxtimeout, timo, icc_rxtimeout, 1, (wdparm_t)priv);
 
       icc_semtake(&priv->rxwait);
 
-      wd_cancel(priv->rxtimeout);
+      wd_cancel(&priv->rxtimeout);
     }
 
   flags = enter_critical_section();
@@ -379,8 +379,6 @@ static FAR struct iccdev_s *icc_devnew(void)
 
   memset(priv, 0, sizeof(struct iccdev_s));
 
-  priv->rxtimeout = wd_create();
-
   nxsem_init(&priv->rxwait, 0, 0);
   nxsem_set_protocol(&priv->rxwait, SEM_PRIO_NONE);
 
@@ -401,7 +399,7 @@ static FAR struct iccdev_s *icc_devnew(void)
 
 static void icc_devfree(FAR struct iccdev_s *priv)
 {
-  wd_delete(priv->rxtimeout);
+  wd_cancel(&priv->rxtimeout);
   kmm_free(priv);
 }
 
