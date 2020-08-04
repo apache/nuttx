@@ -54,6 +54,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
@@ -1806,7 +1807,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
    * chip select structures.
    */
 
-  spics = (struct xmc4_spics_s *)zalloc(sizeof(struct xmc4_spics_s));
+  spics = (struct xmc4_spics_s *)kmm_zalloc(sizeof(struct xmc4_spics_s));
   if (!spics)
     {
       spierr("ERROR: Failed to allocate a chip select structure\n");
@@ -2104,7 +2105,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
   return &spics->spidev;
 
 errchannel:
-  free(spics);
+  kmm_free(spics);
   return NULL;
 }
 #endif /* CONFIG_XMC4_SPI0 || CONFIG_XMC4_SPI1 */

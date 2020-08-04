@@ -910,7 +910,7 @@ static int cxd56_gnss_save_backup_data(FAR struct file *filep,
   int       n = 0;
   int32_t   offset = 0;
 
-  buf = (char *)malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+  buf = (char *)kmm_malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
   if (buf == NULL)
     {
       return -ENOMEM;
@@ -919,7 +919,7 @@ static int cxd56_gnss_save_backup_data(FAR struct file *filep,
   fp = fopen(CONFIG_CXD56_GNSS_BACKUP_FILENAME, "wb");
   if (fp == NULL)
     {
-      free(buf);
+      kmm_free(buf);
       return -ENOENT;
     }
 
@@ -937,7 +937,7 @@ static int cxd56_gnss_save_backup_data(FAR struct file *filep,
     }
   while (n == CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
 
-  free(buf);
+  kmm_free(buf);
   fclose(fp);
 
   return n < 0 ? n : 0;
@@ -2168,7 +2168,7 @@ static FAR char *cxd56_gnss_read_cep_file(FAR FILE *fp, int32_t offset,
       goto _err0;
     }
 
-  buf = (char *)malloc(len);
+  buf = (char *)kmm_malloc(len);
   if (buf == NULL)
     {
       ret = -ENOMEM;
@@ -2199,7 +2199,7 @@ static FAR char *cxd56_gnss_read_cep_file(FAR FILE *fp, int32_t offset,
    */
 
   _err1:
-  free(buf);
+  kmm_free(buf);
   _err0:
   *retval = ret;
   cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_CEP, 0);
@@ -2229,7 +2229,7 @@ static void cxd56_gnss_read_backup_file(FAR int *retval)
   size_t      n;
   int         ret = 0;
 
-  buf = (char *)malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
+  buf = (char *)kmm_malloc(CONFIG_CXD56_GNSS_BACKUP_BUFFER_SIZE);
   if (buf == NULL)
     {
       ret = -ENOMEM;
@@ -2239,7 +2239,7 @@ static void cxd56_gnss_read_backup_file(FAR int *retval)
   fp = fopen(CONFIG_CXD56_GNSS_BACKUP_FILENAME, "rb");
   if (fp == NULL)
     {
-      free(buf);
+      kmm_free(buf);
       ret = -ENOENT;
       goto _err;
     }
@@ -2264,7 +2264,7 @@ static void cxd56_gnss_read_backup_file(FAR int *retval)
   while (n > 0);
 
   fclose(fp);
-  free(buf);
+  kmm_free(buf);
 
   /* Notify the termination of backup sequence by write zero length data */
 
@@ -2372,7 +2372,7 @@ static void cxd56_gnss_default_sighandler(uint32_t data, FAR void *userdata)
     case CXD56_GNSS_NOTIFY_TYPE_REQCEPBUFFREE:
       if (priv->cepbuf)
         {
-          free(priv->cepbuf);
+          kmm_free(priv->cepbuf);
         }
 
       return;
