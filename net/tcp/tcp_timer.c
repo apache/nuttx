@@ -182,7 +182,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
               /* Notify upper layers about the timeout */
 
-              result = tcp_callback(dev, conn, TCP_TIMEDOUT);
+              tcp_callback(dev, conn, TCP_TIMEDOUT);
 
               ninfo("TCP state: TCP_CLOSED\n");
             }
@@ -261,7 +261,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                        * connection has timed out.
                        */
 
-                      result = tcp_callback(dev, listener, TCP_TIMEDOUT);
+                      tcp_callback(dev, listener, TCP_TIMEDOUT);
                     }
 
                   /* We also send a reset packet to the remote host. */
@@ -297,7 +297,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                    * timed out.
                    */
 
-                  result = tcp_callback(dev, conn, TCP_TIMEDOUT);
+                  tcp_callback(dev, conn, TCP_TIMEDOUT);
 
                   /* We also send a reset packet to the remote host. */
 
