@@ -1550,7 +1550,7 @@ menu "POSIX Message Queue Options"
 
 config PREALLOC_MQ_MSGS
 	int "Number of pre-allocated messages"
-	default 32
+	default 4
 	---help---
 		The number of pre-allocated message structures.  The system manages
 		a pool of preallocated message structures to minimize dynamic allocations
