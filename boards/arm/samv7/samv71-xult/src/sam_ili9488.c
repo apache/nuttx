@@ -329,7 +329,7 @@ struct sam_dev_s
   /* Allocated DMA channel */
 
   DMA_HANDLE dmach;
-  WDOG_ID dmadog;         /* For DMA timeout detection */
+  struct wdog_s dmadog;   /* For DMA timeout detection */
   volatile int result;    /* Result of the DMA transfer */
   sem_t waitsem;          /* Used to way for DMA completion */
   volatile bool dmabusy;  /* True: DMA is in progress */
@@ -914,7 +914,7 @@ static void sam_lcd_endwait(struct sam_dev_s *priv, int result)
 {
   /* Save the result and cancel the watchdog timeout */
 
-  wd_cancel(priv->dmadog);
+  wd_cancel(&priv->dmadog);
   priv->result = result;
 
   /* Wake up the waiting thread */
@@ -983,7 +983,7 @@ static int sam_lcd_dmawait(FAR struct sam_dev_s *priv, uint32_t timeout)
 
   /* Started ... setup the timeout */
 
-  ret = wd_start(priv->dmadog, timeout,
+  ret = wd_start(&priv->dmadog, timeout,
                  sam_lcd_dmatimeout, 1, (wdparm_t)priv);
   if (ret < 0)
     {
@@ -1582,16 +1582,6 @@ int board_lcd_initialize(void)
       goto errout_with_waitsem;
     }
 
-  /* Allocate a watchdog timer to catch DMA timeouts */
-
-  priv->dmadog = wd_create();
-  if (!priv->dmadog)
-    {
-      lcderr("ERROR: Failed to allocate a timer\n");
-      ret = -EAGAIN;
-      goto errout_with_dmach;
-    }
-
   /* Identify and configure the LCD */
 
   up_mdelay(50);
@@ -1599,7 +1589,7 @@ int board_lcd_initialize(void)
   if (ret < 0)
     {
       lcderr("ERROR: sam_lcd_initialize failed: %d\n", ret);
-      goto errout_with_dmadog;
+      goto errout_with_dmach;
     }
 
   /* Clear the display (setting it to the color 0=black) */
@@ -1616,10 +1606,6 @@ int board_lcd_initialize(void)
     }
 
   return OK;
-
-errout_with_dmadog:
-  wd_delete(priv->dmadog);
-  priv->dmadog = NULL;
 
 errout_with_dmach:
   sam_dmafree(priv->dmach);
@@ -1667,9 +1653,7 @@ void board_lcd_uninitialize(void)
 
   /* Free other resources */
 
-  wd_delete(priv->dmadog);
-  priv->dmadog = NULL;
-
+  wd_cancel(&priv->dmadog);
   nxsem_destroy(&priv->waitsem);
 
   /* Put the LCD in the lowest possible power state */

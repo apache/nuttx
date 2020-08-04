@@ -149,7 +149,7 @@ struct ads7843e_dev_s
   FAR struct spi_dev_s *spi;            /* Saved SPI driver instance */
   struct work_s work;                   /* Supports the interrupt handling "bottom half" */
   struct ads7843e_sample_s sample;      /* Last sampled touch point data */
-  WDOG_ID wdog;                         /* Poll the position while the pen is down */
+  struct wdog_s wdog;                   /* Poll the position while the pen is down */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also

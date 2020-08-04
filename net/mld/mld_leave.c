@@ -192,7 +192,7 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
                * could interfere with freeing the group.
                */
 
-              wd_cancel(group->polldog);
+              wd_cancel(&group->polldog);
               CLR_MLD_SCHEDMSG(group->flags);
               CLR_MLD_WAITMSG(group->flags);
 

@@ -625,7 +625,7 @@ static void bcmf_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->bc_txpoll, BCMF_WDDELAY,
+  wd_start(&priv->bc_txpoll, BCMF_WDDELAY,
            bcmf_poll_expiry, 1, (wdparm_t)priv);
 exit_unlock:
   net_unlock();
@@ -701,7 +701,7 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->bc_txpoll, BCMF_WDDELAY,
+  wd_start(&priv->bc_txpoll, BCMF_WDDELAY,
            bcmf_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the hardware interrupt */
@@ -738,7 +738,7 @@ static int bcmf_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer */
 
-  wd_cancel(priv->bc_txpoll);
+  wd_cancel(&priv->bc_txpoll);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the bcmf_ifup() always
@@ -1125,13 +1125,7 @@ int bcmf_netdev_register(FAR struct bcmf_dev_s *priv)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->bc_dev.d_ioctl   = bcmf_ioctl;    /* Handle network IOCTL commands */
 #endif
-  priv->bc_dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling */
-
-  priv->bc_txpoll        = wd_create();   /* Create periodic poll timer */
-
-  DEBUGASSERT(priv->bc_txpoll != NULL);
+  priv->bc_dev.d_private = priv;          /* Used to recover private state from dev */
 
   /* Initialize network stack interface buffer */
 

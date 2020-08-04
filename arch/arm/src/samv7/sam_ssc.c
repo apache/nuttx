@@ -400,7 +400,7 @@ struct sam_buffer_s
 struct sam_transport_s
 {
   DMA_HANDLE dma;             /* SSC DMA handle */
-  WDOG_ID dog;                /* Watchdog that handles DMA timeouts */
+  struct wdog_s dog;          /* Watchdog that handles DMA timeouts */
   sq_queue_t pend;            /* A queue of pending transfers */
   sq_queue_t act;             /* A queue of active transfers */
   sq_queue_t done;            /* A queue of completed transfers */
@@ -1321,7 +1321,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
   if (!notimeout)
     {
-      ret = wd_start(priv->rx.dog, timeout,
+      ret = wd_start(&priv->rx.dog, timeout,
                      ssc_rxdma_timeout, 1, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
@@ -1552,7 +1552,7 @@ static void ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->rx.dog);
+  wd_cancel(&priv->rx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -1742,7 +1742,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
   if (!notimeout)
     {
-      ret = wd_start(priv->tx.dog, timeout,
+      ret = wd_start(&priv->tx.dog, timeout,
                      ssc_txdma_timeout, 1, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
@@ -1960,7 +1960,7 @@ static void ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->tx.dog);
+  wd_cancel(&priv->tx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -2990,15 +2990,6 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
           i2serr("ERROR: Failed to allocate the RX DMA channel\n");
           goto errout;
         }
-
-      /* Create a watchdog time to catch RX DMA timeouts */
-
-      priv->rx.dog = wd_create();
-      if (!priv->rx.dog)
-        {
-          i2serr("ERROR: Failed to create the RX DMA watchdog\n");
-          goto errout;
-        }
     }
 #endif
 
@@ -3011,15 +3002,6 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
       if (!priv->tx.dma)
         {
           i2serr("ERROR: Failed to allocate the TX DMA channel\n");
-          goto errout;
-        }
-
-      /* Create a watchdog time to catch TX DMA timeouts */
-
-      priv->tx.dog = wd_create();
-      if (!priv->tx.dog)
-        {
-          i2serr("ERROR: Failed to create the TX DMA watchdog\n");
           goto errout;
         }
     }
@@ -3053,11 +3035,7 @@ errout:
 static void ssc_dma_free(struct sam_ssc_s *priv)
 {
 #ifdef SSC_HAVE_TX
-  if (priv->tx.dog)
-    {
-       wd_delete(priv->tx.dog);
-    }
-
+  wd_cancel(&priv->tx.dog);
   if (priv->tx.dma)
     {
       sam_dmafree(priv->tx.dma);
@@ -3065,11 +3043,7 @@ static void ssc_dma_free(struct sam_ssc_s *priv)
 #endif
 
 #ifdef SSC_HAVE_RX
-  if (priv->rx.dog)
-    {
-       wd_delete(priv->rx.dog);
-    }
-
+  wd_cancel(&priv->rx.dog);
   if (priv->rx.dma)
     {
       sam_dmafree(priv->rx.dma);

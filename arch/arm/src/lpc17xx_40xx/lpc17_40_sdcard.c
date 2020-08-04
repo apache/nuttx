@@ -250,7 +250,7 @@ struct lpc17_40_dev_s
   sdio_eventset_t    waitevents;      /* Set of events to be waited for */
   uint32_t           waitmask;        /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  WDOG_ID            waitwdog;        /* Watchdog that handles event timeouts */
+  struct wdog_s      waitwdog;        /* Watchdog that handles event timeouts */
 
   /* Callback support */
 
@@ -1131,7 +1131,7 @@ static void lpc17_40_endwait(struct lpc17_40_dev_s *priv,
 {
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Disable event-related interrupts */
 
@@ -1495,7 +1495,7 @@ static void lpc17_40_reset(FAR struct sdio_dev_s *dev)
   priv->xfrflags   = 0;      /* Used to synchronize SD card and DMA completion events */
 #endif
 
-  wd_cancel(priv->waitwdog); /* Cancel any timeouts */
+  wd_cancel(&priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
 
@@ -1914,7 +1914,7 @@ static int lpc17_40_cancel(FAR struct sdio_dev_s *dev)
 
   /* Cancel any watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
@@ -2344,7 +2344,7 @@ static sdio_eventset_t lpc17_40_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay,
+      ret   = wd_start(&priv->waitwdog, delay,
                        lpc17_40_eventtimeout, 1, (wdparm_t)priv);
       if (ret < 0)
         {
@@ -2373,7 +2373,7 @@ static sdio_eventset_t lpc17_40_eventwait(FAR struct sdio_dev_s *dev,
            * return an SDIO error.
            */
 
-          wd_cancel(priv->waitwdog);
+          wd_cancel(&priv->waitwdog);
           leave_critical_section(flags);
           return SDIOWAIT_ERROR;
         }
@@ -2792,11 +2792,6 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
-  /* Create a watchdog timer */
-
-  priv->waitwdog = wd_create();
-  DEBUGASSERT(priv->waitwdog);
 
 #ifdef CONFIG_LPC17_40_SDCARD_DMA
   /* Configure the SDCARD DMA request */

@@ -125,7 +125,7 @@ struct cdcacm_dev_s
   FAR struct usbdev_ep_s *epbulkin;    /* Bulk IN endpoint structure */
   FAR struct usbdev_ep_s *epbulkout;   /* Bulk OUT endpoint structure */
   FAR struct usbdev_req_s *ctrlreq;    /* Allocated control request */
-  WDOG_ID rxfailsafe;                  /* Failsafe timer to prevent RX stalls */
+  struct wdog_s rxfailsafe;            /* Failsafe timer to prevent RX stalls */
   struct sq_queue_s txfree;            /* Available write request containers */
   struct sq_queue_s rxpending;         /* Pending read request containers */
 
@@ -679,7 +679,7 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
 
   /* Cancel any pending failsafe timer */
 
-  wd_cancel(priv->rxfailsafe);
+  wd_cancel(&priv->rxfailsafe);
 
   /* If RX "interrupts" are enabled and if input flow control is not in
    * effect, then pass the packet at the head of the pending RX packet list
@@ -746,7 +746,7 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
 
   if (!sq_empty(&priv->rxpending))
     {
-      wd_start(priv->rxfailsafe, CDCACM_RXDELAY,
+      wd_start(&priv->rxfailsafe, CDCACM_RXDELAY,
                cdcacm_rxtimeout, 1, (wdparm_t)priv);
     }
 
@@ -2933,13 +2933,6 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
   memcpy(&priv->devinfo, devinfo,
          sizeof(struct usbdev_devinfo_s));
 
-  /* Allocate a failsafe time so that we can be assured that RX data
-   * can never stall in the priv->rxpending queue.
-   */
-
-  priv->rxfailsafe          = wd_create();
-  DEBUGASSERT(priv->rxfailsafe != NULL);
-
 #ifdef CONFIG_CDCACM_IFLOWCONTROL
   /* SerialState */
 
@@ -3008,7 +3001,6 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
   return OK;
 
 errout_with_class:
-  wd_delete(priv->rxfailsafe);
   kmm_free(alloc);
   return ret;
 }
@@ -3142,7 +3134,7 @@ void cdcacm_uninitialize(FAR void *handle)
        * free the memory resources.
        */
 
-      wd_delete(priv->rxfailsafe);
+      wd_cancel(&priv->rxfailsafe);
       kmm_free(priv);
       return;
     }
@@ -3174,7 +3166,7 @@ void cdcacm_uninitialize(FAR void *handle)
 
   /* And free the memory resources. */
 
-  wd_delete(priv->rxfailsafe);
+  wd_cancel(&priv->rxfailsafe);
   kmm_free(priv);
 
 #else

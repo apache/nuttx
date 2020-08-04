@@ -96,8 +96,8 @@
 struct emac_driver_s
 {
   bool    d_bifup;            /* true:ifup false:ifdown */
-  WDOG_ID d_txpoll;           /* TX poll timer */
-  WDOG_ID d_txtimeout;        /* TX timeout timer */
+  struct wdog_s d_txpoll;     /* TX poll timer */
+  struct wdog_s d_txtimeout;  /* TX timeout timer */
 
   /* This holds the information visible to the NuttX network */
 
@@ -185,7 +185,7 @@ static int emac_transmit(FAR struct emac_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->d_txtimeout, HCS12_TXTIMEOUT,
+  wd_start(&priv->d_txtimeout, HCS12_TXTIMEOUT,
            emac_txtimeout, 1, (wdparm_t)priv);
   return OK;
 }
@@ -427,7 +427,7 @@ static void emac_txdone(FAR struct emac_driver_s *priv)
    * disable further Tx interrupts.
    */
 
-  wd_cancel(priv->d_txtimeout);
+  wd_cancel(&priv->d_txtimeout);
 
   /* Then poll the network for new XMIT data */
 
@@ -540,7 +540,7 @@ static void emac_polltimer(int argc, wdparm_t arg, ...)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, (wdparm_t)arg);
+  wd_start(&priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -573,7 +573,8 @@ static int emac_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, (wdparm_t)priv);
+  wd_start(&priv->d_txpoll, HCS12_WDDELAY,
+           emac_polltimer, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -611,8 +612,8 @@ static int emac_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->d_txpoll);
-  wd_cancel(priv->d_txtimeout);
+  wd_cancel(&priv->d_txpoll);
+  wd_cancel(&priv->d_txtimeout);
 
   /* Put the EMAC is its reset, non-operational state.  This should be
    * a known configuration that will guarantee the emac_ifup() always
@@ -785,11 +786,6 @@ int emac_initialize(int intf)
   priv->d_dev.d_rmmac   = emac_rmmac;    /* Remove multicast MAC address */
 #endif
   priv->d_dev.d_private = priv;          /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->d_txpoll       = wd_create();    /* Create periodic poll timer */
-  priv->d_txtimeout    = wd_create();    /* Create TX timeout timer */
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling emac_ifdown().

@@ -115,7 +115,7 @@ static struct usbhost_connection_s *g_ehciconn;
 #  ifdef HAVE_USB_AUTOMOUNTER
 /* Unmount retry timer */
 
-static WDOG_ID g_umount_tmr[CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV];
+static struct wdog_s g_umount_tmr[CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV];
 #  endif
 
 /*****************************************************************************

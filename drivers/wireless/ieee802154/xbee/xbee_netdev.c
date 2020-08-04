@@ -152,7 +152,7 @@ struct xbeenet_driver_s
   struct xbeenet_callback_s xd_cb;  /* Callback information */
   XBEEHANDLE xd_mac;                /* Contained XBee MAC interface */
   bool xd_bifup;                    /* true:ifup false:ifdown */
-  WDOG_ID xd_txpoll;                /* TX poll timer */
+  struct wdog_s xd_txpoll;          /* TX poll timer */
   struct work_s xd_pollwork;        /* Defer poll work to the work queue */
 
   /* Hold a list of events */
@@ -629,7 +629,7 @@ static void xbeenet_txpoll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->xd_txpoll, TXPOLL_WDDELAY,
+  wd_start(&priv->xd_txpoll, TXPOLL_WDDELAY,
            xbeenet_txpoll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
@@ -780,7 +780,7 @@ static int xbeenet_ifup(FAR struct net_driver_s *dev)
 #endif
       /* Set and activate a timer process */
 
-      wd_start(priv->xd_txpoll, TXPOLL_WDDELAY,
+      wd_start(&priv->xd_txpoll, TXPOLL_WDDELAY,
                xbeenet_txpoll_expiry, 1, (wdparm_t)priv);
 
       /* The interface is now up */
@@ -820,7 +820,7 @@ static int xbeenet_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->xd_txpoll);
+  wd_cancel(&priv->xd_txpoll);
 
   /* TODO: Put the xbee driver in its reset, non-operational state.  This
    * should be a known configuration that will guarantee the xbeenet_ifup()
@@ -1375,12 +1375,8 @@ int xbee_netdev_register(XBEEHANDLE xbee)
  #ifdef CONFIG_NETDEV_IOCTL
   dev->d_ioctl        = xbeenet_ioctl;      /* Handle network IOCTL commands */
 #endif
-  dev->d_private      = (FAR void *)priv;   /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
+  dev->d_private      = priv;               /* Used to recover private state from dev */
   priv->xd_mac        = xbee;               /* Save the MAC interface instance */
-  priv->xd_txpoll     = wd_create();        /* Create periodic poll timer */
 
   /* Setup a locking semaphore for exclusive device driver access */
 
@@ -1424,10 +1420,6 @@ int xbee_netdev_register(XBEEHANDLE xbee)
   if (ret < 0)
     {
       nerr("ERROR: Failed to bind the XBee MAC callbacks: %d\n", ret);
-
-      /* Release wdog timers */
-
-      wd_delete(priv->xd_txpoll);
 
       /* Free memory and return the error */
 

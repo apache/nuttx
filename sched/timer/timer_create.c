@@ -156,7 +156,6 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
                  FAR timer_t *timerid)
 {
   FAR struct posix_timer_s *ret;
-  WDOG_ID wdog;
 
   /* Sanity checks.  Also, we support only CLOCK_REALTIME */
 
@@ -166,21 +165,11 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
       return ERROR;
     }
 
-  /* Allocate a watchdog to provide the underling CLOCK_REALTIME timer */
-
-  wdog = wd_create();
-  if (!wdog)
-    {
-      set_errno(EAGAIN);
-      return ERROR;
-    }
-
   /* Allocate a timer instance to contain the watchdog */
 
   ret = timer_allocate();
   if (!ret)
     {
-      wd_delete(wdog);
       set_errno(EAGAIN);
       return ERROR;
     }
@@ -190,7 +179,6 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
   ret->pt_crefs = 1;
   ret->pt_owner = getpid();
   ret->pt_delay = 0;
-  ret->pt_wdog  = wdog;
 
   /* Was a struct sigevent provided? */
 

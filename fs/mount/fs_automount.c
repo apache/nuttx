@@ -72,7 +72,7 @@ struct automounter_state_s
 {
   FAR const struct automount_lower_s *lower; /* Board level interfaces */
   struct work_s work;                        /* Work queue support */
-  WDOG_ID wdog;                              /* Delay to retry un-mounts */
+  struct wdog_s wdog;                        /* Delay to retry un-mounts */
   bool mounted;                              /* True: Volume has been mounted */
   bool inserted;                             /* True: Media has been inserted */
 };
@@ -293,7 +293,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 
               /* Start a timer to retry the umount2 after a delay */
 
-              ret = wd_start(priv->wdog, lower->udelay,
+              ret = wd_start(&priv->wdog, lower->udelay,
                              automount_timeout, 1, (wdparm_t)priv);
               if (ret < 0)
                 {
@@ -493,7 +493,7 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
     {
       /* Cancel any retry delays */
 
-      wd_cancel(priv->wdog);
+      wd_cancel(&priv->wdog);
     }
 
   return OK;
@@ -540,16 +540,6 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   /* Initialize the automounter state structure */
 
   priv->lower = lower;
-
-  /* Get a timer to handle unmount retries */
-
-  priv->wdog  = wd_create();
-  if (!priv->wdog)
-    {
-      ferr("ERROR: Failed to create a timer\n");
-      automount_uninitialize(priv);
-      return NULL;
-    }
 
   /* Handle the initial state of the mount on the caller's thread */
 
@@ -611,9 +601,9 @@ void automount_uninitialize(FAR void *handle)
   AUTOMOUNT_DISABLE(lower);
   AUTOMOUNT_DETACH(lower);
 
-  /* Release resources */
+  /* Cancel the watchdog timer */
 
-  wd_delete(priv->wdog);
+  wd_cancel(&priv->wdog);
 
   /* And free the state structure */
 

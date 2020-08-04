@@ -271,8 +271,8 @@ struct s32k1xx_driver_s
   uint8_t txhead;              /* The next TX descriptor to use */
   uint8_t rxtail;              /* The next RX descriptor to use */
   uint8_t phyaddr;             /* Selected PHY address */
-  WDOG_ID txpoll;              /* TX poll timer */
-  WDOG_ID txtimeout;           /* TX timeout timer */
+  struct wdog_s txpoll;        /* TX poll timer */
+  struct wdog_s txtimeout;     /* TX timeout timer */
   struct work_s irqwork;       /* For deferring interrupt work to the work queue */
   struct work_s pollwork;      /* For deferring poll work to the work queue */
   struct enet_desc_s *txdesc;  /* A pointer to the list of TX descriptor */
@@ -572,7 +572,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, S32K1XX_TXTIMEOUT,
+  wd_start(&priv->txtimeout, S32K1XX_TXTIMEOUT,
            s32k1xx_txtimeout_expiry, 1, (wdparm_t)priv);
 
   /* Start the TX transfer (if it was not already waiting for buffers) */
@@ -921,7 +921,7 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv)
    * canceled.
    */
 
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txtimeout);
 
   /* Verify that the oldest descriptor descriptor completed */
 
@@ -963,7 +963,7 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv)
     {
       /* No.. Cancel the TX timeout and disable further Tx interrupts. */
 
-      wd_cancel(priv->txtimeout);
+      wd_cancel(&priv->txtimeout);
 
       regval  = getreg32(S32K1XX_ENET_EIMR);
       regval &= ~TX_INTERRUPTS;
@@ -1250,7 +1250,7 @@ static void s32k1xx_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again in any case */
 
-  wd_start(priv->txpoll, S32K1XX_WDDELAY,
+  wd_start(&priv->txpoll, S32K1XX_WDDELAY,
            s32k1xx_polltimer_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
@@ -1382,7 +1382,7 @@ static int s32k1xx_ifup_action(struct net_driver_s *dev, bool resetphy)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, S32K1XX_WDDELAY,
+  wd_start(&priv->txpoll, S32K1XX_WDDELAY,
            s32k1xx_polltimer_expiry, 1, (wdparm_t)priv);
 
   /* Clear all pending ENET interrupt */
@@ -1470,8 +1470,8 @@ static int s32k1xx_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the s32k1xx_ifup() always
@@ -2605,12 +2605,7 @@ int s32k1xx_netinitialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = s32k1xx_ioctl;    /* Support PHY ioctl() calls */
 #endif
-  priv->dev.d_private = (void *)g_enet;   /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll        = wd_create();      /* Create periodic poll timer */
-  priv->txtimeout     = wd_create();      /* Create TX timeout timer */
+  priv->dev.d_private = g_enet;           /* Used to recover private state from dev */
 
 #ifdef CONFIG_NET_ETHERNET
   /* Determine a semi-unique MAC address from MCU UID

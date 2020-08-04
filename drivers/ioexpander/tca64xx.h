@@ -221,7 +221,7 @@ struct tca64_dev_s
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 #ifdef CONFIG_TCA64XX_INT_POLL
-  WDOG_ID wdog;                      /* Timer used to poll for missed interrupts */
+  struct wdog_s wdog;                /* Timer used to poll for missed interrupts */
 #endif
 
   ioe_pinset_t input;                /* Last input registers */

@@ -116,8 +116,8 @@
 struct skel_driver_s
 {
   bool sk_bifup;               /* true:ifup false:ifdown */
-  WDOG_ID sk_txpoll;           /* TX poll timer */
-  WDOG_ID sk_txtimeout;        /* TX timeout timer */
+  struct wdog_s sk_txpoll;     /* TX poll timer */
+  struct wdog_s sk_txtimeout;  /* TX timeout timer */
   struct work_s sk_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s sk_pollwork;   /* For deferring poll work to the work queue */
 
@@ -241,7 +241,7 @@ static int skel_transmit(FAR struct skel_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->sk_txtimeout, SKELETON_TXTIMEOUT,
+  wd_start(&priv->sk_txtimeout, SKELETON_TXTIMEOUT,
            skel_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
@@ -519,7 +519,7 @@ static void skel_txdone(FAR struct skel_driver_s *priv)
    * disable further Tx interrupts.
    */
 
-  wd_cancel(priv->sk_txtimeout);
+  wd_cancel(&priv->sk_txtimeout);
 
   /* And disable further TX interrupts. */
 
@@ -620,7 +620,7 @@ static int skel_interrupt(int irq, FAR void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(priv->sk_txtimeout);
+       wd_cancel(&priv->sk_txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -747,7 +747,7 @@ static void skel_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->sk_txpoll, SKELETON_WDDELAY,
+  wd_start(&priv->sk_txpoll, SKELETON_WDDELAY,
            skel_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
@@ -827,7 +827,7 @@ static int skel_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->sk_txpoll, SKELETON_WDDELAY,
+  wd_start(&priv->sk_txpoll, SKELETON_WDDELAY,
            skel_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
@@ -867,8 +867,8 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->sk_txpoll);
-  wd_cancel(priv->sk_txtimeout);
+  wd_cancel(&priv->sk_txpoll);
+  wd_cancel(&priv->sk_txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the skel_ifup() always
@@ -1190,14 +1190,7 @@ int skel_initialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->sk_dev.d_ioctl   = skel_ioctl;    /* Handle network IOCTL commands */
 #endif
-  priv->sk_dev.d_private = (FAR void *)g_skel; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->sk_txpoll        = wd_create();   /* Create periodic poll timer */
-  priv->sk_txtimeout     = wd_create();   /* Create TX timeout timer */
-
-  DEBUGASSERT(priv->sk_txpoll != NULL && priv->sk_txtimeout != NULL);
+  priv->sk_dev.d_private = g_skel;        /* Used to recover private state from dev */
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling skel_ifdown().

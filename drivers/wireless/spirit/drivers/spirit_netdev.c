@@ -268,8 +268,8 @@ struct spirit_driver_s
   struct work_s                    txwork;    /* TX work queue support (HP) */
   struct work_s                    rxwork;    /* RX work queue support (LP) */
   struct work_s                    pollwork;  /* TX network poll work (LP) */
-  WDOG_ID                          txpoll;    /* TX poll timer */
-  WDOG_ID                          txtimeout; /* TX timeout timer */
+  struct wdog_s                    txpoll;    /* TX poll timer */
+  struct wdog_s                    txtimeout; /* TX timeout timer */
   sem_t                            rxsem;     /* Exclusive access to the RX queue */
   sem_t                            txsem;     /* Exclusive access to the TX queue */
   bool                             ifup;      /* Spirit is on and interface is up */
@@ -926,7 +926,7 @@ static void spirit_transmit_work(FAR void *arg)
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-      wd_start(priv->txtimeout, SPIRIT_TXTIMEOUT,
+      wd_start(&priv->txtimeout, SPIRIT_TXTIMEOUT,
                spirit_txtimeout_expiry, 1, (wdparm_t)priv);
     }
 
@@ -1221,7 +1221,7 @@ static void spirit_interrupt_work(FAR void *arg)
         {
           /* Yes.. Cancel the TX timeout */
 
-          wd_cancel(priv->txtimeout);
+          wd_cancel(&priv->txtimeout);
 
           /* Revert the sending state */
 
@@ -1251,7 +1251,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       /* Cancel the TX timeout */
 
-      wd_cancel(priv->txtimeout);
+      wd_cancel(&priv->txtimeout);
 
       /* Put the Spirit back in the receiving state */
 
@@ -1806,7 +1806,7 @@ static void spirit_txpoll_work(FAR void *arg)
 
       /* Setup the watchdog poll timer again */
 
-      wd_start(priv->txpoll, SPIRIT_WDDELAY,
+      wd_start(&priv->txpoll, SPIRIT_WDDELAY,
                spirit_txpoll_expiry, 1, (wdparm_t)priv);
     }
   else
@@ -1945,7 +1945,7 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      wd_start(priv->txpoll, SPIRIT_WDDELAY,
+      wd_start(&priv->txpoll, SPIRIT_WDDELAY,
                spirit_txpoll_expiry, 1, (wdparm_t)priv);
 
       /* Enables the interrupts from the SPIRIT1 */
@@ -2009,8 +2009,8 @@ static int spirit_ifdown(FAR struct net_driver_s *dev)
 
       /* Cancel the TX poll timer and TX timeout timers */
 
-      wd_cancel(priv->txpoll);
-      wd_cancel(priv->txtimeout);
+      wd_cancel(&priv->txpoll);
+      wd_cancel(&priv->txtimeout);
       leave_critical_section(flags);
 
       /* First stop Rx/Tx
@@ -2808,16 +2808,8 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
   /* Attach the interface, lower driver, and devops */
 
   priv->lower = lower;
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll        = wd_create();       /* Create periodic poll timer */
-  priv->txtimeout     = wd_create();       /* Create TX timeout timer */
-
-  DEBUGASSERT(priv->txpoll != NULL && priv->txtimeout != NULL);
-
-  nxsem_init(&priv->rxsem, 0, 1);            /* Access to RX packet queue */
-  nxsem_init(&priv->txsem, 0, 1);            /* Access to TX packet queue */
+  nxsem_init(&priv->rxsem, 0, 1);          /* Access to RX packet queue */
+  nxsem_init(&priv->txsem, 0, 1);          /* Access to TX packet queue */
 
   /* Initialize the IEEE 802.15.4 network device fields */
 
@@ -2839,7 +2831,7 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
 #ifdef CONFIG_NETDEV_IOCTL
   dev->d_ioctl        = spirit_ioctl;      /* Handle network IOCTL commands */
 #endif
-  dev->d_private      = (FAR void *)priv;  /* Used to recover private state from dev */
+  dev->d_private      = priv;              /* Used to recover private state from dev */
 
   /* Make sure that the PktRadio common logic has been initialized */
 

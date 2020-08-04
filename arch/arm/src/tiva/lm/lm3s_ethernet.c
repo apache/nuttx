@@ -205,8 +205,8 @@ struct tiva_driver_s
 #endif
 
   bool     ld_bifup;           /* true:ifup false:ifdown */
-  WDOG_ID  ld_txpoll;          /* TX poll timer */
-  WDOG_ID  ld_txtimeout;       /* TX timeout timer */
+  struct wdog_s ld_txpoll;     /* TX poll timer */
+  struct wdog_s ld_txtimeout;  /* TX timeout timer */
   struct work_s ld_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s ld_pollwork;   /* For deferring poll work to the work queue */
 
@@ -597,7 +597,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-      wd_start(priv->ld_txtimeout, TIVA_TXTIMEOUT,
+      wd_start(&priv->ld_txtimeout, TIVA_TXTIMEOUT,
                tiva_txtimeout_expiry, 1, (wdparm_t)priv);
       ret = OK;
     }
@@ -952,7 +952,7 @@ static void tiva_txdone(struct tiva_driver_s *priv)
 {
   /* Cancel the TX timeout */
 
-  wd_cancel(priv->ld_txtimeout);
+  wd_cancel(&priv->ld_txtimeout);
 
   /* Verify that the Tx FIFO is not in use.  The NEWTX bit initiates an
    * Ethernet transmission once the packet has been placed in the TX FIFO.
@@ -1116,7 +1116,7 @@ static int tiva_interrupt(int irq, void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(priv->ld_txtimeout);
+       wd_cancel(&priv->ld_txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -1243,7 +1243,7 @@ static void tiva_poll_work(void *arg)
 
       /* Setup the watchdog poll timer again */
 
-      wd_start(priv->ld_txpoll, TIVA_WDDELAY,
+      wd_start(&priv->ld_txpoll, TIVA_WDDELAY,
                tiva_poll_expiry, 1, (wdparm_t)priv);
     }
 
@@ -1430,7 +1430,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->ld_txpoll, TIVA_WDDELAY,
+  wd_start(&priv->ld_txpoll, TIVA_WDDELAY,
            tiva_poll_expiry, 1, (wdparm_t)priv);
 
   priv->ld_bifup = true;
@@ -1468,8 +1468,8 @@ static int tiva_ifdown(struct net_driver_s *dev)
   /* Cancel the TX poll timer and TX timeout timers */
 
   flags = enter_critical_section();
-  wd_cancel(priv->ld_txpoll);
-  wd_cancel(priv->ld_txtimeout);
+  wd_cancel(&priv->ld_txpoll);
+  wd_cancel(&priv->ld_txtimeout);
 
   /* Disable the Ethernet interrupt */
 
@@ -1715,17 +1715,13 @@ static inline int tiva_ethinitialize(int intf)
   priv->ld_dev.d_addmac  = tiva_addmac;   /* Add multicast MAC address */
   priv->ld_dev.d_rmmac   = tiva_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->ld_dev.d_private = (void *)priv;  /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
+  priv->ld_dev.d_private = priv;          /* Used to recover private state from dev */
 
 #if TIVA_NETHCONTROLLERS > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"
-  priv->ld_base          = ??;          /* Ethernet controller base address */
-  priv->ld_irq           = ??;          /* Ethernet controller IRQ number */
+  priv->ld_base          = ??;            /* Ethernet controller base address */
+  priv->ld_irq           = ??;            /* Ethernet controller IRQ number */
 #endif
-  priv->ld_txpoll        = wd_create(); /* Create periodic poll timer */
-  priv->ld_txtimeout     = wd_create(); /* Create TX timeout timer */
 
 #ifdef CONFIG_TIVA_BOARDMAC
   /* If the board can provide us with a MAC address, get the address

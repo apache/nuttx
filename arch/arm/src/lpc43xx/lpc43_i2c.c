@@ -107,7 +107,7 @@ struct lpc43_i2cdev_s
   sem_t            mutex;      /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for state machine completion */
   volatile uint8_t state;      /* State of state machine */
-  WDOG_ID          timeout;    /* watchdog to timeout when bus hung */
+  struct wdog_s    timeout;    /* watchdog to timeout when bus hung */
   uint32_t         frequency;  /* Current I2C frequency */
 
   struct i2c_msg_s *msgs;      /* remaining transfers - first one is in progress */
@@ -202,11 +202,11 @@ static int lpc43_i2c_start(struct lpc43_i2cdev_s *priv)
            priv->base + LPC43_I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + LPC43_I2C_CONSET_OFFSET);
 
-  wd_start(priv->timeout, I2C_TIMEOUT,
+  wd_start(&priv->timeout, I2C_TIMEOUT,
            lpc43_i2c_timeout, 1, (wdparm_t)priv);
   nxsem_wait(&priv->wait);
 
-  wd_cancel(priv->timeout);
+  wd_cancel(&priv->timeout);
   return priv->nmsg;
 }
 
@@ -537,11 +537,6 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
    */
 
   nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
-
-  /* Allocate a watchdog timer */
-
-  priv->timeout = wd_create();
-  DEBUGASSERT(priv->timeout != 0);
 
   /* Attach Interrupt Handler */
 

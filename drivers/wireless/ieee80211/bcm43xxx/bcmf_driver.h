@@ -67,7 +67,7 @@ struct bcmf_dev_s
   FAR struct bcmf_bus_dev_s *bus; /* Bus interface structure */
 
   bool bc_bifup;             /* true:ifup false:ifdown */
-  WDOG_ID bc_txpoll;         /* TX poll timer */
+  struct wdog_s bc_txpoll;   /* TX poll timer */
   struct work_s bc_irqwork;  /* For deferring interrupt work to the work queue */
   struct work_s bc_pollwork; /* For deferring poll work to the work queue */
 
@@ -92,7 +92,7 @@ struct bcmf_dev_s
    * During scan, control_mutex is locked to prevent control requests */
 
   int scan_status;                     /* Current scan status */
-  WDOG_ID scan_timeout;                /* Scan timeout timer */
+  struct wdog_s scan_timeout;          /* Scan timeout timer */
   FAR uint8_t *scan_result;            /* Temp buffer that holds results */
   unsigned int scan_result_size;       /* Current size of temp buffer */
 

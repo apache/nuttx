@@ -285,7 +285,7 @@ void igmp_input(struct net_driver_s *dev)
             {
               /* This is on a specific group we have already looked up */
 
-              wd_cancel(group->wdog);
+              wd_cancel(&group->wdog);
               SET_IDLEMEMBER(group->flags);
               CLR_LASTREPORT(group->flags);
             }

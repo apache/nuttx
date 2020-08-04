@@ -254,13 +254,8 @@ static void cxd56_rtc_initialize(int argc, ...)
 {
   struct timespec ts;
 #ifdef CONFIG_CXD56_RTC_LATEINIT
-  static WDOG_ID s_wdog = NULL;
-  static int     s_retry = 0;
-
-  if (s_wdog == NULL)
-    {
-      s_wdog = wd_create();
-    }
+  static struct wdog_s s_wdog;
+  static int s_retry = 0;
 
   /* Check whether RTC clock source selects the external RTC and the
    * synchronization from the external RTC is completed.
@@ -278,7 +273,7 @@ static void cxd56_rtc_initialize(int argc, ...)
         {
           rtcinfo("retry count: %d\n", s_retry);
 
-          if (OK == wd_start(s_wdog, MSEC2TICK(RTC_CLOCK_CHECK_INTERVAL),
+          if (OK == wd_start(&s_wdog, MSEC2TICK(RTC_CLOCK_CHECK_INTERVAL),
                              (wdentry_t)cxd56_rtc_initialize, 0))
             {
               /* Again, this function is called recursively */
@@ -292,10 +287,7 @@ static void cxd56_rtc_initialize(int argc, ...)
 
   /* RTC clock is stable, or give up using the external RTC */
 
-  if (s_wdog != NULL)
-    {
-      wd_delete(s_wdog);
-    }
+  wd_cancel(&s_wdog);
 #endif
 
 #ifdef CONFIG_RTC_ALARM

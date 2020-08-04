@@ -153,7 +153,7 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
   int result;
   int ret;
 
-  DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
+  DEBUGASSERT(up_interrupt_context() == false);
 
   /* Verify the input parameters on any failures to verify. */
 
@@ -215,18 +215,6 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
       goto errout_with_mqmsg;
     }
 
-  /* Create a watchdog.  We will not actually need this watchdog
-   * unless the queue is full, but we will reserve it up front
-   * before we enter the following critical section.
-   */
-
-  rtcb->waitdog = wd_create();
-  if (!rtcb->waitdog)
-    {
-      ret = -EINVAL;
-      goto errout_with_mqmsg;
-    }
-
   /* We are not in an interrupt handler and the message queue is full.
    * Set up a timed wait for the message queue to become non-full.
    *
@@ -256,7 +244,7 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
 
   /* Start the watchdog and begin the wait for MQ not full */
 
-  wd_start(rtcb->waitdog, ticks, nxmq_sndtimeout, 1, (wdparm_t)getpid());
+  wd_start(&rtcb->waitdog, ticks, nxmq_sndtimeout, 1, (wdparm_t)getpid());
 
   /* And wait for the message queue to be non-empty */
 
@@ -266,7 +254,7 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
    * or ETIMEOUT.  Cancel the watchdog timer in any event.
    */
 
-  wd_cancel(rtcb->waitdog);
+  wd_cancel(&rtcb->waitdog);
 
   /* Check if nxmq_wait_send() failed */
 
@@ -291,8 +279,6 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
   ret = nxmq_do_send(mqdes, mqmsg, msg, msglen, prio);
 
   sched_unlock();
-  wd_delete(rtcb->waitdog);
-  rtcb->waitdog = NULL;
   leave_cancellation_point();
   return ret;
 
@@ -302,8 +288,6 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
 
 errout_in_critical_section:
   leave_critical_section(flags);
-  wd_delete(rtcb->waitdog);
-  rtcb->waitdog = NULL;
 
   /* Exit here with (1) the scheduler locked and 2) a message allocated.  The
    * error code is in 'result'

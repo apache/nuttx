@@ -98,7 +98,7 @@ struct cxd56_i2cdev_s
 
   sem_t            mutex;      /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for transfer completion */
-  WDOG_ID          timeout;    /* watchdog to timeout when bus hung */
+  struct wdog_s    timeout;    /* watchdog to timeout when bus hung */
   uint32_t         frequency;  /* Current I2C frequency */
   ssize_t          reg_buff_offset;
   ssize_t          rw_size;
@@ -493,7 +493,7 @@ static int cxd56_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
        * Therefore, call nxsem_post() only when wd_cancel() succeeds.
        */
 
-      ret = wd_cancel(priv->timeout);
+      ret = wd_cancel(&priv->timeout);
       if (ret == OK)
         {
           i2c_givesem(&priv->wait);
@@ -550,7 +550,7 @@ static int cxd56_i2c_receive(struct cxd56_i2cdev_s *priv, int last)
         }
 
       flags = enter_critical_section();
-      wd_start(priv->timeout, I2C_TIMEOUT,
+      wd_start(&priv->timeout, I2C_TIMEOUT,
               cxd56_i2c_timeout, 1, (wdparm_t)priv);
 
       /* Set stop flag for indicate the last data */
@@ -596,7 +596,7 @@ static int cxd56_i2c_send(struct cxd56_i2cdev_s *priv, int last)
   while (!(i2c_reg_read(priv, CXD56_IC_STATUS) & STATUS_TFNF));
 
   flags = enter_critical_section();
-  wd_start(priv->timeout, I2C_TIMEOUT,
+  wd_start(&priv->timeout, I2C_TIMEOUT,
            cxd56_i2c_timeout, 1, (wdparm_t)priv);
   i2c_reg_write(priv, CXD56_IC_DATA_CMD,
                 (uint32_t)msg->buffer[i] | (last ? CMD_STOP : 0));
@@ -1056,8 +1056,6 @@ struct i2c_master_s *cxd56_i2cbus_initialize(int port)
   nxsem_init(&priv->wait, 0, 0);
   nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
 
-  priv->timeout = wd_create();
-
   /* Attach Interrupt Handler */
 
   irq_attach(priv->irqid, cxd56_i2c_interrupt, priv);
@@ -1119,8 +1117,7 @@ int cxd56_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   up_disable_irq(priv->irqid);
   irq_detach(priv->irqid);
 
-  wd_delete(priv->timeout);
-  priv->timeout = NULL;
+  wd_cancel(&priv->timeout);
   nxsem_destroy(&priv->mutex);
   nxsem_destroy(&priv->wait);
 
