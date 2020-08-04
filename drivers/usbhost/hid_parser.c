@@ -274,8 +274,8 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
             {
               collectionpath->usage.usage = usage[0];
 
-              for (i = 0; i < nusage; i++)
-                usage[i] = usage[i + 1];
+              for (i = 1; i < nusage; i++)
+                usage[i - 1] = usage[i];
 
               nusage--;
             }
@@ -316,9 +316,9 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
                   {
                     newitem.attrib.usage.usage = usage[0];
 
-                    for (i = 0; i < nusage; i++)
+                    for (i = 1; i < nusage; i++)
                       {
-                        usage[i] = usage[i + 1];
+                        usage[i - 1] = usage[i];
                       }
                     nusage--;
                   }
