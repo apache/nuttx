@@ -58,10 +58,10 @@
  * allocate in a block
  */
 
-#define NUM_SIGNAL_ACTIONS      16
-#define NUM_PENDING_ACTIONS     16
+#define NUM_SIGNAL_ACTIONS       4
+#define NUM_PENDING_ACTIONS      4
 #define NUM_PENDING_INT_ACTIONS  8
-#define NUM_SIGNALS_PENDING     16
+#define NUM_SIGNALS_PENDING      4
 #define NUM_INT_SIGNALS_PENDING  8
 
 /****************************************************************************
@@ -158,6 +158,7 @@ extern sq_queue_t  g_sigpendingirqsignal;
  ****************************************************************************/
 
 /* Internal signal-related interfaces ***************************************/
+
 /* Forward references */
 
 struct task_group_s;
@@ -187,7 +188,8 @@ sigset_t           nxsig_pendingset(FAR struct tcb_s *stcb);
 
 /* sig_dispatch.c */
 
-int                nxsig_tcbdispatch(FAR struct tcb_s *stcb, FAR siginfo_t *info);
+int                nxsig_tcbdispatch(FAR struct tcb_s *stcb,
+                                     FAR siginfo_t *info);
 int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info);
 
 /* sig_cleanup.c */
@@ -205,11 +207,13 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
 FAR sigq_t        *nxsig_alloc_pendingsigaction(void);
 void               nxsig_deliver(FAR struct tcb_s *stcb);
-FAR sigactq_t     *nxsig_find_action(FAR struct task_group_s *group, int signo);
+FAR sigactq_t     *nxsig_find_action(FAR struct task_group_s *group,
+                                     int signo);
 int                nxsig_lowest(FAR sigset_t *set);
 void               nxsig_release_pendingsigaction(FAR sigq_t *sigq);
 void               nxsig_release_pendingsignal(FAR sigpendq_t *sigpend);
-FAR sigpendq_t    *nxsig_remove_pendingsignal(FAR struct tcb_s *stcb, int signo);
+FAR sigpendq_t    *nxsig_remove_pendingsignal(FAR struct tcb_s *stcb,
+                                              int signo);
 bool               nxsig_unmask_pendingsignal(void);
 
 #endif /* __SCHED_SIGNAL_SIGNAL_H */
