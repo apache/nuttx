@@ -1,36 +1,24 @@
 /****************************************************************************
  * arch/arm/src/samd5e5/sam_wdt.c
  *
- *   Copyright (C) 2020 Falker Automacao Agricola LTDA.
+ *   Copyright 2020 Falker Automacao Agricola LTDA.
  *   Author: Leomar Mateus Radke <leomar@falker.com.br>
  *   Author: Ricardo Wartchow <wartchow@gmail.com>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -69,42 +57,34 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Clocking *****************************************************************/
 
-/** 8 clock cycles */
-#define WDT_CLK_8CYCLE 8
-/** 16 clock cycles */
-#define WDT_CLK_16CYCLE 16
-/** 32 clock cycles */
-#define WDT_CLK_32CYCLE 32
-/** 64 clock cycles */
-#define WDT_CLK_64CYCLE 64
-/** 128 clock cycles */
-#define WDT_CLK_128CYCLE 128
-/** 256 clock cycles */
-#define WDT_CLK_256CYCLE 256
-/** 512 clock cycles */
-#define WDT_CLK_512CYCLE 512
-/** 1024 clock cycles */
-#define WDT_CLK_1024CYCLE 1024
-/** 20488 clock cycles */
-#define WDT_CLK_2048CYCLE 2048
-/** 4096 clock cycles */
-#define WDT_CLK_4096CYCLE 4096
-/** 8192 clock cycles */
-#define WDT_CLK_8192CYCLE 8192
-/** 16384 clock cycles */
-#define WDT_CLK_16384CYCLE 16384
+/** N clock cycles */
+
+#define WDT_CLK_8CYCLE      8 
+#define WDT_CLK_16CYCLE     16
+#define WDT_CLK_32CYCLE     32
+#define WDT_CLK_64CYCLE     64
+#define WDT_CLK_128CYCLE    128
+#define WDT_CLK_256CYCLE    256
+#define WDT_CLK_512CYCLE    512
+#define WDT_CLK_1024CYCLE   1024
+#define WDT_CLK_2048CYCLE   2048
+#define WDT_CLK_4096CYCLE   4096
+#define WDT_CLK_8192CYCLE   8192
+#define WDT_CLK_16384CYCLE  16384
 
 /**
  * \brief Macro is used to indicate the rate of second/millisecond
  */
+
 #define WDT_PERIOD_RATE 1000
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This structure provides the private representation of the "lower-half"
+
+/**
+ * This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
  * well-known watchdog_lowerhalf_s structure.
  */
@@ -112,22 +92,18 @@
 struct sam_lowerhalf_s
 {
   FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
-  uint32_t timeout;   /* The (actual) selected timeout */
-  uint32_t lastreset; /* The last reset time */
-  bool     started;   /* true: The watchdog timer has been started */
-  uint8_t  prescaler; /* Clock prescaler value */
-  uint16_t reload;    /* Timer reload value */
+  uint32_t timeout;                       /* The (actual) selected timeout */
+  uint32_t lastreset;                     /* The last reset time */
+  bool     started;                       /* true: The watchdog timer has been started */
+  uint8_t  prescaler;                     /* Clock prescaler value */
+  uint16_t reload;                        /* Timer reload value */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 void sam_sync_wdt(int value);
-
-/* Register operations ******************************************************/
-
-
-/*static int      sam_interrupt(int irq, FAR void *context, FAR void *arg);*/
 
 /* "Lower half" driver methods **********************************************/
 
@@ -138,14 +114,11 @@ static int      sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
                   FAR struct watchdog_status_s *status);
 static int      sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
                   uint32_t timeout);
-/*static xcpt_t   sam_capture(FAR struct watchdog_lowerhalf_s *lower,
-                  xcpt_t handler);
-static int      sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
-                  unsigned long arg);*/
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* "Lower half" driver methods */
 
 static const struct watchdog_ops_s g_wdgops =
@@ -166,6 +139,7 @@ static struct sam_lowerhalf_s g_wdgdev;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 void sam_sync_wdt(int value)
 {
   while ((getreg32(SAM_WDT_SYNCBUSY) & value) != 0);
@@ -182,19 +156,6 @@ void sam_wdt_dumpregs(void)
   wdinfo("          EWC:  %02x\n", getreg8(SAM_WDT_EWCTRL));
   wdinfo("        CLEAR:  %02x\n", getreg8(SAM_WDT_CLEAR));
 }
-/****************************************************************************
- * Name: sam_interrupt
- *
- * Description:
- *   WDT interrupt
- *
- * Input Parameters:
- *   Usual interrupt handler arguments.
- *
- * Returned Value:
- *   Always returns OK.
- *
- ****************************************************************************/
 
 /****************************************************************************
  * Name: sam_start
@@ -203,8 +164,8 @@ void sam_wdt_dumpregs(void)
  *   Start the watchdog timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *  lower - A pointer the publicly visible representation
+ *  of the "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -227,22 +188,22 @@ static int sam_start(FAR struct watchdog_lowerhalf_s *lower)
        * starting the watchdog timer.
        */
 
-       /* Enable IWDG (the LSI oscillator will be enabled by hardware).  NOTE:
-       * If the "Hardware watchdog" feature is enabled through the device option
-       * bits, the watchdog is automatically enabled at power-on.
+      /* Enable IWDG (the LSI oscillator will be enabled by hardware).
+       * If the "Hardware watchdog" feature is enabled
+       * through the device option bits,
+       * the watchdog is automatically enabled at power-on.
        */
 
-      flags           = enter_critical_section();
-      
-      /*putreg8(WDT_CTRLA_ENABLE, SAM_WDT_CTRLA);
-      sam_sync_wdt(WDT_SYNCBUSY_ENABLE);*/
-      
+      flags = enter_critical_section();
+
+      putreg8(WDT_CTRLA_ENABLE, SAM_WDT_CTRLA);
+      sam_sync_wdt(WDT_SYNCBUSY_ENABLE);
       priv->lastreset = clock_systime_ticks();
-      
       priv->started   = true;
-      
+
       leave_critical_section(flags);
     }
+
   return OK;
 }
 
@@ -253,8 +214,8 @@ static int sam_start(FAR struct watchdog_lowerhalf_s *lower)
  *   Stop the watchdog timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of
+ *           the "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -280,12 +241,12 @@ static int sam_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   imminent watchdog timeouts.  This is sometimes referred as "pinging"
  *   the watchdog timer or "petting the dog".
  *
- *   The application program must write in the SAM_WDT_CLEAR register at regular
- *   intervals during normal operation to prevent an MCU reset.
+ *   The application program must write in the SAM_WDT_CLEAR register
+ *   at regular intervals during normal operation to prevent an MCU reset.
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation
+ *           of the "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -295,16 +256,15 @@ static int sam_stop(FAR struct watchdog_lowerhalf_s *lower)
 static int sam_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
   FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
- irqstate_t flags;
+  irqstate_t flags;
 
-  wdinfo("Entry\n");
   /* Reload the WDT timer */
 
   flags = enter_critical_section();
 
   putreg32(WDT_CLEAR_CLEAR, SAM_WDT_CLEAR);
   priv->lastreset = clock_systime_ticks();
-  
+
   leave_critical_section(flags);
   return OK;
 }
@@ -316,8 +276,8 @@ static int sam_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *   Get the current watchdog timer status
  *
  * Input Parameters:
- *   lower  - A pointer the publicly visible representation of the "lower-half"
- *            driver state structure.
+ *   lower  - A pointer the publicly visible representation of
+ *            the "lower-half" driver state structure.
  *   status - The location to return the watchdog status information.
  *
  * Returned Value:
@@ -375,8 +335,8 @@ static int sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *   Set a new timeout value (and reset the watchdog timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of
+ *             the "lower-half" driver state structure.
  *   timeout - The new timeout value in millisecnds.
  *
  * Returned Value:
@@ -392,80 +352,73 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   uint32_t            period_cycles;
   uint8_t             timeout_period = WDT_CONFIG_PER_16K;
   irqstate_t flags;
- 
+
   DEBUGASSERT(priv);
   wdinfo("Entry: timeout=%d\n", timeout);
 
   /* Can this timeout be represented? */
 
   flags = enter_critical_section();
-  
+
   /* calc the period cycles corresponding to timeout period */
+
   tmp = (uint64_t)timeout * WDT_PERIOD_RATE;
 
-  /* check whether overflow*/
+  /* check whether overflow */
+
   if (tmp >> 32)
-    return -ERANGE;
+  return -ERANGE;
 
   period_cycles = (uint32_t)tmp;
+
   /* calc the register value corresponding to period cysles */
-  switch (period_cycles) 
+
+  switch (period_cycles)
   {
     case WDT_CLK_8CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_8;
     break;
-    
     case WDT_CLK_16CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_16;
     break;
-    
     case WDT_CLK_32CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_32;
     break;
-    
     case WDT_CLK_64CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_64;
     break;
-    
     case WDT_CLK_128CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_128;
     break;
-    
     case WDT_CLK_256CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_256;
     break;
-    
     case WDT_CLK_512CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_512;
     break;
-    
     case WDT_CLK_1024CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_1K;
     break;
-    
     case WDT_CLK_2048CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_2K;
     break;
-    
     case WDT_CLK_4096CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_4K;
     break;
-    
     case WDT_CLK_8192CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_8K;
     break;
-    
     case WDT_CLK_16384CYCLE *WDT_PERIOD_RATE:
       timeout_period = WDT_CONFIG_PER_16K;
     break;
   }
 
-  if(!priv->started)
+  if (!priv->started)
     putreg8(WDT_CONFIG_PER_16K, SAM_WDT_CONFIG);
   else
     putreg8(timeout_period, SAM_WDT_CONFIG);
-  
-  priv->reload = timeout_period;  
+
+  priv->reload = timeout_period;
   wdinfo("fwdt=%d reload=%d timout=%d\n",
          WDT_FCLK, timeout_period, priv->timeout);
   leave_critical_section(flags);
@@ -481,8 +434,8 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  * Name: sam_wdt_initialize
  *
  * Description:
- *   Initialize the WDT watchdog timer.  The watchdog timer is initialized and
- *   registers as 'devpath'.
+ *   Initialize the WDT watchdog timer.  The watchdog timer
+ *   is initialized and registers as 'devpath'.
  *
  * Input Parameters:
  *   devpath - The full path to the watchdog.  This should be of the form
@@ -492,23 +445,20 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *   None
  *
  ****************************************************************************/
+
 void sam_wdt_initialize(FAR const char *devpath)
 {
   FAR struct sam_lowerhalf_s *priv = &g_wdgdev;
-  
   DEBUGASSERT((getreg8(SAM_WDT_CTRLA) & WDT_CTRLA_ENABLE) == 0);
-
   sam_apb_wdt_enableperiph();
-  
-  
+
   /* Initialize the driver state structure. */
-   priv->ops = &g_wdgops;
-   priv->started = false;  
 
-  sam_settimeout((FAR struct watchdog_lowerhalf_s *)priv, BOARD_SCLK_FREQUENCY/2);
-
+  priv->ops = &g_wdgops;
+  priv->started = false;
+  sam_settimeout((FAR struct watchdog_lowerhalf_s *)priv,
+                  BOARD_SCLK_FREQUENCY / 2);
   (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
-
 }
 
 #endif /* CONFIG_WATCHDOG && CONFIG__WDT */
