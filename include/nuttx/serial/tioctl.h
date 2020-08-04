@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ********************************************************************************************/
+
 /* This function should not be included directly.  Rather, it should be included indirectly
  * via include/nuttx/fs/ioctl.h.
  */
@@ -190,6 +191,7 @@
 #  define SER_SINGLEWIRE_PULL_DISABLE (0 << SER_SINGLEWIRE_PULL_SHIFT) /* Float RX/TX Line */
 #  define SER_SINGLEWIRE_PULLUP       (1 << SER_SINGLEWIRE_PULL_SHIFT) /* Enable Pull up the RX/TX Line */
 #  define SER_SINGLEWIRE_PULLDOWN     (2 << SER_SINGLEWIRE_PULL_SHIFT) /* Enable Pull down the RX/TX Line */
+#  define SER_SINGLEWIRE_PUSHPULL     (1 << 3)                         /* Use PUSH/PULL not Open Drain with Single wire */
 
 /* Debugging */
 
@@ -220,8 +222,10 @@ struct winsize
 {
   uint16_t ws_row;
   uint16_t ws_col;
-/* uint16_t ws_xpixel;    unused */
-/* uint16_t ws_ypixel;    unused */
+
+  /* uint16_t ws_xpixel;    unused */
+
+  /* uint16_t ws_ypixel;    unused */
 };
 
 /* Structure used with TIOCSRS485 and TIOCGRS485 (Linux compatible) */
