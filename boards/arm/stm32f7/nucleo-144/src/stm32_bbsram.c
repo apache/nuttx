@@ -393,7 +393,7 @@ int stm32_bbsram_int(void)
 
 #if defined(CONFIG_STM32F7_SAVE_CRASHDUMP)
 void board_crashdump(uintptr_t currentsp, FAR void *tcb,
-                     FAR const uint8_t *filename, int lineno)
+                     FAR const char *filename, int lineno)
 {
   fullcontext_t *pdump = (fullcontext_t *)&g_sdata;
   FAR struct tcb_s *rtcb;

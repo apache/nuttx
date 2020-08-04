@@ -114,7 +114,7 @@ static void copy_reverse(stack_word_t *dest, stack_word_t *src, int size)
  ****************************************************************************/
 
 void board_crashdump(uintptr_t currentsp, FAR void *tcb,
-                     FAR const uint8_t *filename, int lineno)
+                     FAR const char *filename, int lineno)
 {
   FAR struct tcb_s *rtcb;
   fullcontext_t *pdump;
