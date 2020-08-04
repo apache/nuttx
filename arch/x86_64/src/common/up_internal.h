@@ -31,6 +31,7 @@
 #  include <nuttx/compiler.h>
 #  include <nuttx/sched.h>
 #  include <stdint.h>
+#  include <arch/multiboot2.h>
 #endif
 
 /****************************************************************************
@@ -67,7 +68,7 @@
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #    undef  CONFIG_DEV_LOWCONSOLE
-#  else
+#  elif defined(CONFIG_16550_UART)
 #    define USE_SERIALDRIVER 1
 #    define USE_EARLYSERIALINIT 1
 #  endif
@@ -115,9 +116,9 @@ typedef void (*up_vector_t)(void);
 
 extern volatile uint64_t *g_current_regs;
 
-/* This is the beginning of heap as provided from up_head.S. This is the first
- * address in DRAM after the loaded program+bss+idle stack.  The end of the
- * heap is CONFIG_RAM_END
+/* This is the beginning of heap as provided from up_head.S. This is the
+ * first address in DRAM after the loaded program+bss+idle stack.  The end of
+ * the heap is CONFIG_RAM_END
  */
 
 extern uint64_t g_idle_topstack;
@@ -128,14 +129,14 @@ extern uint64_t g_idle_topstack;
 extern uint64_t g_intstackbase;
 #endif
 
-/* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32_t storage locations! They are only used meaningfully in the
- * following way:
+/* These 'addresses' of these values are setup by the linker script.  They
+ * are not actual uint32_t storage locations! They are only used meaningfully
+ * in the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
  *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data (it is
- *    not!).
+ *    that the value _sdata is the address of a uint32_t variable _data (it
+ *    is not!).
  *  - We can recoved the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
@@ -191,6 +192,11 @@ void up_checktasks(void);
 
 void up_syscall(uint64_t *regs);
 void up_registerdump(uint64_t *regs);
+
+#ifdef CONFIG_ARCH_MULTIBOOT2
+void x86_64_mb2_fbinitialize(struct multiboot_tag_framebuffer *tag);
+void fb_putc(char ch);
+#endif
 
 /* Defined in up_allocateheap.c */
 

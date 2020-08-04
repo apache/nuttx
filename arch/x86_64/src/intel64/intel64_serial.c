@@ -96,4 +96,8 @@ int up_putc(int ch)
   return ch;
 }
 
+void up_lowputc(char ch)
+{
+  fb_putc(ch);
+}
 #endif /* USE_SERIALDRIVER */
