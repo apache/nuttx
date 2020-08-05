@@ -369,7 +369,7 @@ void kinetis_usbhost_vbusdrive(int rhport, bool enable)
     }
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: kinetis_setup_overcurrent
  *
  * Description:
@@ -384,7 +384,7 @@ void kinetis_usbhost_vbusdrive(int rhport, bool enable)
  *   Zero (OK) returned on success; a negated errno value is returned on
  *   failure.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 #if 0 /* Not ready yet */
 int kinetis_setup_overcurrent(xcpt_t handler, void *arg)

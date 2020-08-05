@@ -1,4 +1,4 @@
-/****************************************************************************
+/************************************************************************************
  * arch/arm/src/kinetis/kinetis_usbhshost.c
  *
  *   Copyright (C) 2013-2017, 2020 Gregory Nutt. All rights reserved.
@@ -33,11 +33,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -71,14 +71,13 @@
 
 #include <arch/board/board.h>
 
-
 #if defined(CONFIG_KINETIS_USBHS) && defined(CONFIG_USBHOST)
 
-/****************************************************************************
+/************************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
+ ************************************************************************************/
 
-/* Configuration ************************************************************/
+/* Configuration ********************************************************************/
 
 /* Pre-requisites */
 
@@ -132,7 +131,7 @@
 #undef CONFIG_USBHOST_ISOC_DISABLE
 #define CONFIG_USBHOST_ISOC_DISABLE 1
 
-/* Registers ****************************************************************
+/* Registers ************************************************************************
  * Traditionally, NuttX specifies register locations using individual
  * register offsets from a base address.  That tradition is broken here and,
  * instead, register blocks are represented as structures.  This is done here
@@ -152,7 +151,7 @@
 
 #define HCOR ((volatile struct ehci_hcor_s *)KINETIS_USBHS_HCOR_BASE)
 
-/* Interrupts ***************************************************************
+/* Interrupts ***********************************************************************
  * This is the set of interrupts handled by this driver.
  */
 
@@ -170,7 +169,7 @@
 
 #define FRAME_LIST_SIZE 1024
 
-/* DMA **********************************************************************/
+/* DMA ******************************************************************************/
 
 /* For now, we are assuming an identity mapping between physical and virtual
  * address spaces.
@@ -179,7 +178,7 @@
 #define kinetis_physramaddr(a) (a)
 #define kinetis_virtramaddr(a) (a)
 
-/* USB trace ****************************************************************/
+/* USB trace ************************************************************************/
 
 #ifdef HAVE_USBHOST_TRACE
 #  define TR_FMT1 false
@@ -201,9 +200,9 @@
 #define RHPNDX(rh)            ((rh)->hport.hport.port)
 #define RHPORT(rh)            (RHPNDX(rh)+1)
 
-/****************************************************************************
+/************************************************************************************
  * Private Types
- ****************************************************************************/
+ ************************************************************************************/
 
 /* Internal representation of the EHCI Queue Head (QH) */
 
@@ -217,8 +216,8 @@ struct kinetis_qh_s
   /* Internal fields used by the EHCI driver */
 
   struct kinetis_epinfo_s *epinfo; /* Endpoint used for the transfer */
-  uint32_t fqp;                  /* First qTD in the list (physical address) */
-  uint8_t pad[8];                /* Padding to assure 32-byte alignment */
+  uint32_t fqp;                    /* First qTD in the list (physical address) */
+  uint8_t pad[8];                  /* Padding to assure 32-byte alignment */
 };
 
 /* Internal representation of the EHCI Queue Element Transfer Descriptor (qTD) */
@@ -286,8 +285,8 @@ struct kinetis_rhport_s
 
   /* Root hub port status */
 
-  volatile bool connected;     /* Connected to device */
-  volatile bool lowspeed;      /* Low speed device attached */
+  volatile bool connected;       /* Connected to device */
+  volatile bool lowspeed;        /* Low speed device attached */
   struct kinetis_epinfo_s ep0;   /* EP0 endpoint info */
 
   /* This is the hub port description understood by class drivers */
@@ -307,7 +306,7 @@ struct kinetis_ehci_s
   struct kinetis_epinfo_s ep0;    /* Endpoint 0 */
   struct kinetis_list_s *qhfree;  /* List of free Queue Head (QH) structures */
   struct kinetis_list_s *qtdfree; /* List of free Queue Element Transfer Descriptor (qTD) */
-  struct work_s work;           /* Supports interrupt bottom half */
+  struct work_s work;             /* Supports interrupt bottom half */
 
 #ifdef CONFIG_USBHOST_HUB
   /* Used to pass external hub port events */
@@ -407,11 +406,11 @@ struct kinetis_ehci_trace_s
 
 #endif /* HAVE_USBHOST_TRACE */
 
-/****************************************************************************
+/************************************************************************************
  * Private Function Prototypes
- ****************************************************************************/
+ ************************************************************************************/
 
-/* Register operations ******************************************************/
+/* Register operations **************************************************************/
 
 static uint16_t kinetis_read16(const uint8_t *addr);
 static uint32_t kinetis_read32(const uint8_t *addr);
@@ -442,20 +441,20 @@ static inline void kinetis_putreg(uint32_t regval, volatile uint32_t *regaddr);
 static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
          unsigned int delay);
 
-/* Semaphores ***************************************************************/
+/* Semaphores ***********************************************************************/
 
 static int kinetis_takesem(sem_t *sem);
 static int kinetis_takesem_noncancelable(sem_t *sem);
 #define kinetis_givesem(s) nxsem_post(s);
 
-/* Allocators ***************************************************************/
+/* Allocators ***********************************************************************/
 
 static struct kinetis_qh_s *kinetis_qh_alloc(void);
 static void kinetis_qh_free(struct kinetis_qh_s *qh);
 static struct kinetis_qtd_s *kinetis_qtd_alloc(void);
 static void kinetis_qtd_free(struct kinetis_qtd_s *qtd);
 
-/* List Management **********************************************************/
+/* List Management ******************************************************************/
 
 static int kinetis_qh_foreach(struct kinetis_qh_s *qh, uint32_t **bp,
          foreach_qh_t handler, void *arg);
@@ -465,7 +464,7 @@ static int kinetis_qtd_discard(struct kinetis_qtd_s *qtd, uint32_t **bp,
          void *arg);
 static int kinetis_qh_discard(struct kinetis_qh_s *qh);
 
-/* Cache Operations *********************************************************/
+/* Cache Operations *****************************************************************/
 
 #if 0 /* Not used */
 static int kinetis_qtd_invalidate(struct kinetis_qtd_s *qtd, uint32_t **bp,
@@ -476,7 +475,7 @@ static int kinetis_qtd_flush(struct kinetis_qtd_s *qtd, uint32_t **bp,
                            void *arg);
 static int kinetis_qh_flush(struct kinetis_qh_s *qh);
 
-/* Endpoint Transfer Handling ***********************************************/
+/* Endpoint Transfer Handling *******************************************************/
 
 #ifdef CONFIG_KINETIS_EHCI_REGDEBUG
 static void kinetis_qtd_print(struct kinetis_qtd_s *qtd);
@@ -520,7 +519,7 @@ static inline int kinetis_ioc_async_setup(struct kinetis_rhport_s *rhport,
 static void kinetis_asynch_completion(struct kinetis_epinfo_s *epinfo);
 #endif
 
-/* Interrupt Handling *******************************************************/
+/* Interrupt Handling ***************************************************************/
 
 static int kinetis_qtd_ioccheck(struct kinetis_qtd_s *qtd, uint32_t **bp,
          void *arg);
@@ -538,7 +537,7 @@ static inline void kinetis_async_advance_bottomhalf(void);
 static void kinetis_ehci_bottomhalf(FAR void *arg);
 static int kinetis_ehci_interrupt(int irq, FAR void *context, FAR void *arg);
 
-/* USB Host Controller Operations *******************************************/
+/* USB Host Controller Operations ***************************************************/
 
 static int kinetis_wait(FAR struct usbhost_connection_s *conn,
          FAR struct usbhost_hubport_s **hport);
@@ -580,13 +579,13 @@ static int kinetis_connect(FAR struct usbhost_driver_s *drvr,
 static void kinetis_disconnect(FAR struct usbhost_driver_s *drvr,
                              FAR struct usbhost_hubport_s *hport);
 
-/* Initialization ***********************************************************/
+/* Initialization *******************************************************************/
 
 static int kinetis_reset(void);
 
-/****************************************************************************
+/************************************************************************************
  * Private Data
- ****************************************************************************/
+ ************************************************************************************/
 
 /* In this driver implementation, support is provided for only a single a
  * single USB device.  All status information can be simply retained in a
@@ -776,17 +775,17 @@ static const struct kinetis_ehci_trace_s g_trace2[TRACE2_NSTRINGS] =
 };
 #endif /* HAVE_USBHOST_TRACE */
 
-/****************************************************************************
+/************************************************************************************
  * Private Functions
- ****************************************************************************/
+ ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_read16
  *
  * Description:
  *   Read 16-bit little endian data
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static uint16_t kinetis_read16(const uint8_t *addr)
 {
@@ -797,13 +796,13 @@ static uint16_t kinetis_read16(const uint8_t *addr)
 #endif
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_read32
  *
  * Description:
  *   Read 32-bit little endian data
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static inline uint32_t kinetis_read32(const uint8_t *addr)
 {
@@ -816,13 +815,13 @@ static inline uint32_t kinetis_read32(const uint8_t *addr)
 #endif
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_write16
  *
  * Description:
  *   Write 16-bit little endian data
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #if 0 /* Not used */
 static void kinetis_write16(uint16_t memval, uint8_t *addr)
@@ -837,13 +836,13 @@ static void kinetis_write16(uint16_t memval, uint8_t *addr)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_write32
  *
  * Description:
  *   Write 32-bit little endian data
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #if 0 /* Not used */
 static void kinetis_write32(uint32_t memval, uint8_t *addr)
@@ -858,13 +857,13 @@ static void kinetis_write32(uint32_t memval, uint8_t *addr)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_swap16
  *
  * Description:
  *   Swap bytes on a 16-bit value
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_ENDIAN_BIG
 static uint16_t kinetis_swap16(uint16_t value)
@@ -873,13 +872,13 @@ static uint16_t kinetis_swap16(uint16_t value)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_swap32
  *
  * Description:
  *   Swap bytes on a 32-bit value
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_ENDIAN_BIG
 static uint32_t kinetis_swap32(uint32_t value)
@@ -889,13 +888,13 @@ static uint32_t kinetis_swap32(uint32_t value)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_printreg
  *
  * Description:
  *   Print the contents of a KINETIS EHCI register
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_EHCI_REGDEBUG
 static void kinetis_printreg(volatile uint32_t *regaddr, uint32_t regval,
@@ -905,14 +904,14 @@ static void kinetis_printreg(volatile uint32_t *regaddr, uint32_t regval,
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_checkreg
  *
  * Description:
  *   Check if it is time to output debug information for accesses to a KINETIS
  *   EHCI register
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_EHCI_REGDEBUG
 static void kinetis_checkreg(volatile uint32_t *regaddr, uint32_t regval,
@@ -971,13 +970,13 @@ static void kinetis_checkreg(volatile uint32_t *regaddr, uint32_t regval,
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_getreg
  *
  * Description:
  *   Get the contents of an KINETIS register
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_EHCI_REGDEBUG
 static uint32_t kinetis_getreg(volatile uint32_t *regaddr)
@@ -998,13 +997,13 @@ static inline uint32_t kinetis_getreg(volatile uint32_t *regaddr)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_putreg
  *
  * Description:
  *   Set the contents of an KINETIS register to a value
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_EHCI_REGDEBUG
 static void kinetis_putreg(uint32_t regval, volatile uint32_t *regaddr)
@@ -1024,7 +1023,7 @@ static inline void kinetis_putreg(uint32_t regval, volatile uint32_t *regaddr)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: ehci_wait_usbsts
  *
  * Description:
@@ -1032,7 +1031,7 @@ static inline void kinetis_putreg(uint32_t regval, volatile uint32_t *regaddr)
  *   value, (2) for a timeout to occur, or (3) a error to occur.  Return
  *   a value to indicate which terminated the wait.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
                             unsigned int delay)
@@ -1074,21 +1073,21 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
   return (regval == donebits) ? OK : -ETIMEDOUT;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_takesem
  *
  * Description:
  *   This is just a wrapper to handle the annoying behavior of semaphore
  *   waits that return due to the receipt of a signal.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_takesem(sem_t *sem)
 {
   return nxsem_wait_uninterruptible(sem);
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_takesem_noncancelable
  *
  * Description:
@@ -1096,7 +1095,7 @@ static int kinetis_takesem(sem_t *sem)
  *   waits that return due to the receipt of a signal.  This version also
  *   ignores attempts to cancel the thread.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_takesem_noncancelable(sem_t *sem)
 {
@@ -1122,7 +1121,7 @@ static int kinetis_takesem_noncancelable(sem_t *sem)
   return ret;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_alloc
  *
  * Description:
@@ -1130,7 +1129,7 @@ static int kinetis_takesem_noncancelable(sem_t *sem)
  *
  * Assumption:  Caller holds the exclsem
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static struct kinetis_qh_s *kinetis_qh_alloc(void)
 {
@@ -1148,7 +1147,7 @@ static struct kinetis_qh_s *kinetis_qh_alloc(void)
   return qh;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_free
  *
  * Description:
@@ -1156,7 +1155,7 @@ static struct kinetis_qh_s *kinetis_qh_alloc(void)
  *
  * Assumption:  Caller holds the exclsem
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static void kinetis_qh_free(struct kinetis_qh_s *qh)
 {
@@ -1168,7 +1167,7 @@ static void kinetis_qh_free(struct kinetis_qh_s *qh)
   g_ehci.qhfree = entry;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_alloc
  *
  * Description:
@@ -1177,7 +1176,7 @@ static void kinetis_qh_free(struct kinetis_qh_s *qh)
  *
  * Assumption:  Caller holds the exclsem
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static struct kinetis_qtd_s *kinetis_qtd_alloc(void)
 {
@@ -1195,7 +1194,7 @@ static struct kinetis_qtd_s *kinetis_qtd_alloc(void)
   return qtd;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_free
  *
  * Description:
@@ -1205,7 +1204,7 @@ static struct kinetis_qtd_s *kinetis_qtd_alloc(void)
  * Assumption:
  *   Caller holds the exclsem
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static void kinetis_qtd_free(struct kinetis_qtd_s *qtd)
 {
@@ -1217,7 +1216,7 @@ static void kinetis_qtd_free(struct kinetis_qtd_s *qtd)
   g_ehci.qtdfree = entry;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_foreach
  *
  * Description:
@@ -1225,7 +1224,7 @@ static void kinetis_qtd_free(struct kinetis_qtd_s *qtd)
  *   handler for each QH structure in the list (including the one at the head
  *   of the list).
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_qh_foreach(struct kinetis_qh_s *qh, uint32_t **bp,
                             foreach_qh_t handler, void *arg)
@@ -1299,14 +1298,14 @@ static int kinetis_qh_foreach(struct kinetis_qh_s *qh, uint32_t **bp,
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_foreach
  *
  * Description:
  *   Give a Queue Head (QH) instance, call the handler for each qTD structure
  *   in the queue.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_qtd_foreach(struct kinetis_qh_s *qh, foreach_qtd_t handler,
                              void *arg)
@@ -1321,7 +1320,7 @@ static int kinetis_qtd_foreach(struct kinetis_qh_s *qh, foreach_qtd_t handler,
 
   /* Handle the special case where the queue is empty */
 
-  bp       = &qh->fqp;          /* Start of qTDs in original list */
+  bp       = &qh->fqp;            /* Start of qTDs in original list */
   physaddr = kinetis_swap32(*bp); /* Physical address of first qTD in CPU order */
 
   if ((physaddr & QTD_NQP_T) != 0)
@@ -1381,14 +1380,14 @@ static int kinetis_qtd_foreach(struct kinetis_qh_s *qh, foreach_qtd_t handler,
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_discard
  *
  * Description:
  *   This is a kinetis_qtd_foreach callback.  It simply unlinks the QTD,
  *   updates the back pointer, and frees the QTD structure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_qtd_discard(struct kinetis_qtd_s *qtd, uint32_t **bp,
                              void *arg)
@@ -1408,7 +1407,7 @@ static int kinetis_qtd_discard(struct kinetis_qtd_s *qtd, uint32_t **bp,
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_discard
  *
  * Description:
@@ -1418,7 +1417,7 @@ static int kinetis_qtd_discard(struct kinetis_qtd_s *qtd, uint32_t **bp,
  *   The QH structure itself has already been unlinked from whatever list it
  *   may have been in.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_qh_discard(struct kinetis_qh_s *qh)
 {
@@ -1440,14 +1439,14 @@ static int kinetis_qh_discard(struct kinetis_qh_s *qh)
   return ret;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_invalidate
  *
  * Description:
  *   This is a callback from kinetis_qtd_foreach.  It simply invalidates D-
  *   cache for address range of the qTD entry.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #if 0 /* Not used */
 static int kinetis_qtd_invalidate(struct kinetis_qtd_s *qtd, uint32_t **bp,
@@ -1463,13 +1462,13 @@ static int kinetis_qtd_invalidate(struct kinetis_qtd_s *qtd, uint32_t **bp,
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_invalidate
  *
  * Description:
  *   Invalidate the Queue Head and all qTD entries in the queue.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #if 0 /* Not used */
 static int kinetis_qh_invalidate(struct kinetis_qh_s *qh)
@@ -1485,14 +1484,14 @@ static int kinetis_qh_invalidate(struct kinetis_qh_s *qh)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_flush
  *
  * Description:
  *   This is a callback from kinetis_qtd_foreach.  It simply flushes D-cache
  *   for address range of the qTD entry.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_qtd_flush(struct kinetis_qtd_s *qtd, uint32_t **bp, void *arg)
 {
@@ -1507,13 +1506,13 @@ static int kinetis_qtd_flush(struct kinetis_qtd_s *qtd, uint32_t **bp, void *arg
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_flush
  *
  * Description:
  *   Invalidate the Queue Head and all qTD entries in the queue.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_qh_flush(struct kinetis_qh_s *qh)
 {
@@ -1530,13 +1529,13 @@ static int kinetis_qh_flush(struct kinetis_qh_s *qh)
   return kinetis_qtd_foreach(qh, kinetis_qtd_flush, NULL);
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_print
  *
  * Description:
  *   Print the context of one qTD
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_EHCI_REGDEBUG
 static void kinetis_qtd_print(struct kinetis_qtd_s *qtd)
@@ -1551,13 +1550,13 @@ static void kinetis_qtd_print(struct kinetis_qtd_s *qtd)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_print
  *
  * Description:
  *   Print the context of one QH
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_EHCI_REGDEBUG
 static void kinetis_qh_print(struct kinetis_qh_s *qh)
@@ -1593,14 +1592,14 @@ static void kinetis_qh_print(struct kinetis_qh_s *qh)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_dump
  *
  * Description:
  *   This is a kinetis_qtd_foreach callout function.  It dumps the context of
  *   one qTD
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_EHCI_REGDEBUG
 static int kinetis_qtd_dump(struct kinetis_qtd_s *qtd, uint32_t **bp, void *arg)
@@ -1610,14 +1609,14 @@ static int kinetis_qtd_dump(struct kinetis_qtd_s *qtd, uint32_t **bp, void *arg)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_dump
  *
  * Description:
  *   This is a kinetis_qh_foreach call-out function.  It dumps a QH structure
  *   and all of the qTD structures linked to the QH.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_KINETIS_EHCI_REGDEBUG
 static int kinetis_qh_dump(struct kinetis_qh_s *qh, uint32_t **bp, void *arg)
@@ -1627,14 +1626,14 @@ static int kinetis_qh_dump(struct kinetis_qh_s *qh, uint32_t **bp, void *arg)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_ehci_speed
  *
  * Description:
  *  Map a speed enumeration value per Chapter 9 of the USB specification to
  *  the speed enumeration required in the EHCI queue head.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static inline uint8_t kinetis_ehci_speed(uint8_t usbspeed)
 {
@@ -1642,7 +1641,7 @@ static inline uint8_t kinetis_ehci_speed(uint8_t usbspeed)
   return g_ehci_speed[usbspeed];
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_ioc_setup
  *
  * Description:
@@ -1653,7 +1652,7 @@ static inline uint8_t kinetis_ehci_speed(uint8_t usbspeed)
  *
  * Assumption:  The caller holds the EHCI exclsem
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_ioc_setup(struct kinetis_rhport_s *rhport,
                            struct kinetis_epinfo_s *epinfo)
@@ -1691,7 +1690,7 @@ static int kinetis_ioc_setup(struct kinetis_rhport_s *rhport,
   return ret;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_ioc_wait
  *
  * Description:
@@ -1701,7 +1700,7 @@ static int kinetis_ioc_setup(struct kinetis_rhport_s *rhport,
  * cause a deadlock when the bottom-half, worker thread needs to take the
  * semaphore.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_ioc_wait(struct kinetis_epinfo_s *epinfo)
 {
@@ -1723,7 +1722,7 @@ static int kinetis_ioc_wait(struct kinetis_epinfo_s *epinfo)
   return ret < 0 ? ret : epinfo->result;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_enqueue
  *
  * Description:
@@ -1731,7 +1730,7 @@ static int kinetis_ioc_wait(struct kinetis_epinfo_s *epinfo)
  *
  * Assumptions:  The caller holds the EHCI exclsem
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static void kinetis_qh_enqueue(struct kinetis_qh_s *qhead, struct kinetis_qh_s *qh)
 {
@@ -1765,13 +1764,13 @@ static void kinetis_qh_enqueue(struct kinetis_qh_s *qhead, struct kinetis_qh_s *
                   (uintptr_t)&qhead->hw + sizeof(struct ehci_qh_s));
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_create
  *
  * Description:
  *   Create a new Queue Head (QH)
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static struct kinetis_qh_s *kinetis_qh_create(struct kinetis_rhport_s *rhport,
                                           struct kinetis_epinfo_s *epinfo)
@@ -1903,13 +1902,13 @@ static struct kinetis_qh_s *kinetis_qh_create(struct kinetis_rhport_s *rhport,
   return qh;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_addbpl
  *
  * Description:
  *   Add a buffer pointer list to a qTD.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_qtd_addbpl(struct kinetis_qtd_s *qtd, const void *buffer,
                             size_t buflen)
@@ -1979,13 +1978,13 @@ static int kinetis_qtd_addbpl(struct kinetis_qtd_s *qtd, const void *buffer,
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_setupphase
  *
  * Description:
  *   Create a SETUP phase request qTD.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static struct kinetis_qtd_s *
   kinetis_qtd_setupphase(struct kinetis_epinfo_s *epinfo,
@@ -2047,13 +2046,13 @@ static struct kinetis_qtd_s *
   return qtd;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_dataphase
  *
  * Description:
  *   Create a data transfer or SET data phase qTD.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static struct kinetis_qtd_s *kinetis_qtd_dataphase(struct kinetis_epinfo_s *epinfo,
                                                void *buffer, int buflen,
@@ -2115,13 +2114,13 @@ static struct kinetis_qtd_s *kinetis_qtd_dataphase(struct kinetis_epinfo_s *epin
   return qtd;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_statusphase
  *
  * Description:
  *   Create a STATUS phase request qTD.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static struct kinetis_qtd_s *kinetis_qtd_statusphase(uint32_t tokenbits)
 {
@@ -2164,7 +2163,7 @@ static struct kinetis_qtd_s *kinetis_qtd_statusphase(uint32_t tokenbits)
   return qtd;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_async_setup
  *
  * Description:
@@ -2182,7 +2181,7 @@ static struct kinetis_qtd_s *kinetis_qtd_statusphase(uint32_t tokenbits)
  *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_async_setup(struct kinetis_rhport_s *rhport,
                              struct kinetis_epinfo_s *epinfo,
@@ -2416,7 +2415,7 @@ errout_with_qh:
   return ret;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_intr_setup
  *
  * Description:
@@ -2463,7 +2462,7 @@ errout_with_qh:
  *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
 static int kinetis_intr_setup(struct kinetis_rhport_s *rhport,
@@ -2555,7 +2554,7 @@ errout_with_qh:
 }
 #endif /* CONFIG_USBHOST_INT_DISABLE */
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_transfer_wait
  *
  * Description:
@@ -2573,7 +2572,7 @@ errout_with_qh:
  *   bulk transfers, this will be the number of data bytes transfers (which
  *   could be short).
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static ssize_t kinetis_transfer_wait(struct kinetis_epinfo_s *epinfo)
 {
@@ -2644,7 +2643,7 @@ static ssize_t kinetis_transfer_wait(struct kinetis_epinfo_s *epinfo)
   return epinfo->xfrd;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_ioc_async_setup
  *
  * Description:
@@ -2662,7 +2661,7 @@ static ssize_t kinetis_transfer_wait(struct kinetis_epinfo_s *epinfo)
  * Assumptions:
  *   - Called from the interrupt level
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static inline int kinetis_ioc_async_setup(struct kinetis_rhport_s *rhport,
@@ -2699,7 +2698,7 @@ static inline int kinetis_ioc_async_setup(struct kinetis_rhport_s *rhport,
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_asynch_completion
  *
  * Description:
@@ -2716,7 +2715,7 @@ static inline int kinetis_ioc_async_setup(struct kinetis_rhport_s *rhport,
  * Assumptions:
  *   - Called from the interrupt level
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static void kinetis_asynch_completion(struct kinetis_epinfo_s *epinfo)
@@ -2754,7 +2753,7 @@ static void kinetis_asynch_completion(struct kinetis_epinfo_s *epinfo)
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_ioccheck
  *
  * Description:
@@ -2762,7 +2761,7 @@ static void kinetis_asynch_completion(struct kinetis_epinfo_s *epinfo)
  *   one qTD in the asynchronous queue.  It removes all of the qTD
  *   structures that are no longer active.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_qtd_ioccheck(struct kinetis_qtd_s *qtd, uint32_t **bp,
                               void *arg)
@@ -2802,7 +2801,7 @@ static int kinetis_qtd_ioccheck(struct kinetis_qtd_s *qtd, uint32_t **bp,
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_ioccheck
  *
  * Description:
@@ -2811,7 +2810,7 @@ static int kinetis_qtd_ioccheck(struct kinetis_qtd_s *qtd, uint32_t **bp,
  *   and remove all of the structures that are no longer active.  if all of
  *   the qTD structures are removed, then QH itself will also be removed.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_qh_ioccheck(struct kinetis_qh_s *qh, uint32_t **bp, void *arg)
 {
@@ -2966,14 +2965,14 @@ static int kinetis_qh_ioccheck(struct kinetis_qh_s *qh, uint32_t **bp, void *arg
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qtd_cancel
  *
  * Description:
  *   This function is a kinetis_qtd_foreach() callback function.  It removes
  *   each qTD attached to a QH.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int kinetis_qtd_cancel(struct kinetis_qtd_s *qtd, uint32_t **bp,
@@ -3006,7 +3005,7 @@ static int kinetis_qtd_cancel(struct kinetis_qtd_s *qtd, uint32_t **bp,
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_qh_cancel
  *
  * Description:
@@ -3015,7 +3014,7 @@ static int kinetis_qtd_cancel(struct kinetis_qtd_s *qtd, uint32_t **bp,
  *   structures and remove all of the structures that are no longer active.
  *   Then QH itself will also be removed.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int kinetis_qh_cancel(struct kinetis_qh_s *qh, uint32_t **bp, void *arg)
@@ -3081,7 +3080,7 @@ static int kinetis_qh_cancel(struct kinetis_qh_s *qh, uint32_t **bp, void *arg)
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_ioc_bottomhalf
  *
  * Description:
@@ -3097,7 +3096,7 @@ static int kinetis_qh_cancel(struct kinetis_qh_s *qh, uint32_t **bp, void *arg)
  *
  * Assumptions:  The caller holds the EHCI exclsem
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static inline void kinetis_ioc_bottomhalf(void)
 {
@@ -3169,7 +3168,7 @@ static inline void kinetis_ioc_bottomhalf(void)
 #endif
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_portsc_bottomhalf
  *
  * Description:
@@ -3189,7 +3188,7 @@ static inline void kinetis_ioc_bottomhalf(void)
  *   change bits (including: Force port resume, over-current change,
  *   enable/disable change and connect status change)."
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static inline void kinetis_portsc_bottomhalf(void)
 {
@@ -3304,7 +3303,7 @@ static inline void kinetis_portsc_bottomhalf(void)
     }
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_syserr_bottomhalf
  *
  * Description:
@@ -3315,7 +3314,7 @@ static inline void kinetis_portsc_bottomhalf(void)
  *   When this error occurs, the Host Controller clears the Run/Stop bit in
  *   the Command register to prevent further execution of the scheduled TDs."
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static inline void kinetis_syserr_bottomhalf(void)
 {
@@ -3323,7 +3322,7 @@ static inline void kinetis_syserr_bottomhalf(void)
   DEBUGPANIC();
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_async_advance_bottomhalf
  *
  * Description:
@@ -3335,7 +3334,7 @@ static inline void kinetis_syserr_bottomhalf(void)
  *   USBCMD register. This status bit indicates the assertion of that
  *   interrupt source."
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static inline void kinetis_async_advance_bottomhalf(void)
 {
@@ -3344,13 +3343,13 @@ static inline void kinetis_async_advance_bottomhalf(void)
   /* REVISIT: Could remove all tagged QH entries here */
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_ehci_bottomhalf
  *
  * Description:
  *   EHCI "Bottom Half" interrupt handler.  Runs on a work queue thread.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static void kinetis_ehci_bottomhalf(FAR void *arg)
 {
@@ -3481,13 +3480,13 @@ static void kinetis_ehci_bottomhalf(FAR void *arg)
   kinetis_putreg(EHCI_HANDLED_INTS, &HCOR->usbintr);
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_ehci_interrupt
  *
  * Description:
  *   EHCI "Top Half" interrupt handler
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
 {
@@ -3539,7 +3538,7 @@ static int kinetis_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_wait
  *
  * Description:
@@ -3562,7 +3561,7 @@ static int kinetis_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_wait(FAR struct usbhost_connection_s *conn,
                       FAR struct usbhost_hubport_s **hport)
@@ -3639,7 +3638,7 @@ static int kinetis_wait(FAR struct usbhost_connection_s *conn,
     }
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_enumerate
  *
  * Description:
@@ -3665,7 +3664,7 @@ static int kinetis_wait(FAR struct usbhost_connection_s *conn,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_rh_enumerate(FAR struct usbhost_connection_s *conn,
                               FAR struct usbhost_hubport_s *hport)
@@ -3849,7 +3848,6 @@ static int kinetis_rh_enumerate(FAR struct usbhost_connection_s *conn,
       regval |= USBPHY_CTRLn_ENHOSTDISCONDETECT;
       putreg32(regval, KINETIS_USBHSPHY_CTRL);
 #endif
-
     }
   else if ((regval & USBHS_PORTSC1_PSPD_MASK) == USBHS_PORTSC1_PSPD_FS)
     {
@@ -3927,7 +3925,7 @@ static int kinetis_enumerate(FAR struct usbhost_connection_s *conn,
   return ret;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_ep0configure
  *
  * Description:
@@ -3952,7 +3950,7 @@ static int kinetis_enumerate(FAR struct usbhost_connection_s *conn,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_ep0configure(FAR struct usbhost_driver_s *drvr,
                               usbhost_ep_t ep0, uint8_t funcaddr,
@@ -3980,7 +3978,7 @@ static int kinetis_ep0configure(FAR struct usbhost_driver_s *drvr,
   return ret;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_epalloc
  *
  * Description:
@@ -4000,7 +3998,7 @@ static int kinetis_ep0configure(FAR struct usbhost_driver_s *drvr,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_epalloc(FAR struct usbhost_driver_s *drvr,
                          const FAR struct usbhost_epdesc_s *epdesc,
@@ -4068,7 +4066,7 @@ static int kinetis_epalloc(FAR struct usbhost_driver_s *drvr,
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_epfree
  *
  * Description:
@@ -4086,7 +4084,7 @@ static int kinetis_epalloc(FAR struct usbhost_driver_s *drvr,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
@@ -4102,7 +4100,7 @@ static int kinetis_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_alloc
  *
  * Description:
@@ -4133,7 +4131,7 @@ static int kinetis_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_alloc(FAR struct usbhost_driver_s *drvr,
                        FAR uint8_t **buffer, FAR size_t *maxlen)
@@ -4157,7 +4155,7 @@ static int kinetis_alloc(FAR struct usbhost_driver_s *drvr,
   return ret;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_free
  *
  * Description:
@@ -4179,7 +4177,7 @@ static int kinetis_alloc(FAR struct usbhost_driver_s *drvr,
  * Assumptions:
  *   - Never called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 {
@@ -4191,7 +4189,7 @@ static int kinetis_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_ioalloc
  *
  * Description:
@@ -4218,7 +4216,7 @@ static int kinetis_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_ioalloc(FAR struct usbhost_driver_s *drvr,
                          FAR uint8_t **buffer, size_t buflen)
@@ -4236,7 +4234,7 @@ static int kinetis_ioalloc(FAR struct usbhost_driver_s *drvr,
   return *buffer ? OK : -ENOMEM;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_iofree
  *
  * Description:
@@ -4257,7 +4255,7 @@ static int kinetis_ioalloc(FAR struct usbhost_driver_s *drvr,
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_iofree(FAR struct usbhost_driver_s *drvr,
                         FAR uint8_t *buffer)
@@ -4270,7 +4268,7 @@ static int kinetis_iofree(FAR struct usbhost_driver_s *drvr,
   return OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_ctrlin and kinetis_ctrlout
  *
  * Description:
@@ -4304,7 +4302,7 @@ static int kinetis_iofree(FAR struct usbhost_driver_s *drvr,
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                         FAR const struct usb_ctrlreq_s *req,
@@ -4381,7 +4379,7 @@ static int kinetis_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   return kinetis_ctrlin(drvr, ep0, req, (uint8_t *)buffer);
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_transfer
  *
  * Description:
@@ -4418,7 +4416,7 @@ static int kinetis_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static ssize_t kinetis_transfer(FAR struct usbhost_driver_s *drvr,
                               usbhost_ep_t ep, FAR uint8_t *buffer,
@@ -4494,7 +4492,7 @@ errout_with_sem:
   return (ssize_t)ret;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_asynch
  *
  * Description:
@@ -4528,7 +4526,7 @@ errout_with_sem:
  *   - Called from a single thread so no mutual exclusion is required.
  *   - Never called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int kinetis_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
@@ -4604,7 +4602,7 @@ errout_with_sem:
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_cancel
  *
  * Description:
@@ -4621,7 +4619,7 @@ errout_with_sem:
  *   On success, zero (OK) is returned. On a failure, a negated errno value
  *   is returned indicating the nature of the failure
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
@@ -4806,7 +4804,7 @@ errout_with_sem:
   return ret;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_connect
  *
  * Description:
@@ -4825,7 +4823,7 @@ errout_with_sem:
  *   On success, zero (OK) is returned. On a failure, a negated errno value
  *   is returned indicating the nature of the failure
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
 static int kinetis_connect(FAR struct usbhost_driver_s *drvr,
@@ -4857,7 +4855,7 @@ static int kinetis_connect(FAR struct usbhost_driver_s *drvr,
 }
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_disconnect
  *
  * Description:
@@ -4881,7 +4879,7 @@ static int kinetis_connect(FAR struct usbhost_driver_s *drvr,
  *   - Only a single class bound to a single device is supported.
  *   - Never called from an interrupt handler.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static void kinetis_disconnect(FAR struct usbhost_driver_s *drvr,
                              FAR struct usbhost_hubport_s *hport)
@@ -4890,7 +4888,7 @@ static void kinetis_disconnect(FAR struct usbhost_driver_s *drvr,
   hport->devclass = NULL;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_reset
  *
  * Description:
@@ -4932,7 +4930,7 @@ static void kinetis_disconnect(FAR struct usbhost_driver_s *drvr,
  * Assumptions:
  * - Called during the initialization of the EHCI.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 static int kinetis_reset(void)
 {
@@ -5007,11 +5005,11 @@ static int kinetis_reset(void)
   return (regval & EHCI_USBCMD_HCRESET) != 0 ? -ETIMEDOUT : OK;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Public Functions
- ****************************************************************************/
+ ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Name: kinetis_ehci_initialize
  *
  * Description:
@@ -5034,7 +5032,7 @@ static int kinetis_reset(void)
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 FAR struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
 {
@@ -5067,7 +5065,7 @@ FAR struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
 #    endif
 #  endif                               /* CONFIG_USBHOST_INT_DISABLE */
 
-  /* Software Configuration *************************************************/
+  /* Software Configuration *********************************************************/
 
   usbhost_vtrace1(EHCI_VTRACE1_INITIALIZING, 0);
 
@@ -5378,7 +5376,7 @@ FAR struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
       return NULL;
     }
 
-  /* Interrupt Configuration ************************************************/
+  /* Interrupt Configuration ********************************************************/
 
   ret = irq_attach(KINETIS_IRQ_USB1OTG, kinetis_ehci_interrupt, NULL);
   if (ret != 0)
@@ -5427,7 +5425,7 @@ FAR struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
   return &g_ehciconn;
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: usbhost_trformat1 and usbhost_trformat2
  *
  * Description:
@@ -5438,7 +5436,7 @@ FAR struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
  *   printf.  The returned format is expected to handle two unsigned integer
  *   values.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_USBHOST_TRACE
 FAR const char *usbhost_trformat1(uint16_t id)
