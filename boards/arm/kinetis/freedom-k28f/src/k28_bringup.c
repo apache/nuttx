@@ -157,7 +157,6 @@ int k28_bringup(void)
   k28_usbhost_initialize();
 #endif
 
-
   UNUSED(ret);
   return OK;
 }

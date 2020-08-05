@@ -871,8 +871,6 @@
 #  define USBPHY_PLL_SICn_PLL_DIV_SEL_16MHZ               (1 << USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT) /* 16Mhz XTAL */
 #  define USBPHY_PLL_SICn_PLL_DIV_SEL_12MHZ               (2 << USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT) /* 12Mhz XTAL */
 
-
-
 /* USB PHY VBUS Detect Control Register */
 
 #define USBPHY_USB1_VBUS_DETECTn_EN_CHARGER_RESISTOR      (1 << 31) /* Bit 31: Enables resistors used for an older method of resistive battery charger detection */
