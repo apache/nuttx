@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/syslog/note_driver.h
+ * include/nuttx/note/note_driver.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SYSLOG_NOTE_DRIVER_H
-#define __INCLUDE_NUTTX_SYSLOG_NOTE_DRIVER_H
+#ifndef __INCLUDE_NUTTX_NOTE_NOTE_DRIVER_H
+#define __INCLUDE_NUTTX_NOTE_NOTE_DRIVER_H
 
 /****************************************************************************
  * Included Files
@@ -66,4 +66,4 @@ int note_register(void);
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION */
 
-#endif /* __INCLUDE_NUTTX_SYSLOG_NOTE_DRIVER_H */
+#endif /* __INCLUDE_NUTTX_NOTE_NOTE_DRIVER_H */

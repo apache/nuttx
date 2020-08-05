@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/syslog/note_driver.c
+ * drivers/note/note_driver.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
