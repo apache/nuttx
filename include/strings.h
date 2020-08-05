@@ -59,8 +59,6 @@
 #define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
 #define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
 #define bzero(s,n)       (void)memset(s,0,n)
-#define index(s,c)       strchr(s,c)
-#define rindex(s,c)      strrchr(s,c)
 
 /****************************************************************************
  * Inline Functions
@@ -90,6 +88,9 @@ int flsl(long j);
 #ifdef CONFIG_HAVE_LONG_LONG
 int flsll(long long j);
 #endif
+
+FAR char *index(FAR const char *s, int c);
+FAR char *rindex(FAR const char *s, int c);
 
 int strcasecmp(FAR const char *, FAR const char *);
 int strncasecmp(FAR const char *, FAR const char *, size_t);
