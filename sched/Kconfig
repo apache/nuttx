@@ -219,7 +219,7 @@ config START_DAY
 
 config MAX_WDOGPARMS
 	int "Maximum number of watchdog parameters"
-	default 4
+	default 2
 	---help---
 		Maximum number of parameters that can be passed to a watchdog handler
 
