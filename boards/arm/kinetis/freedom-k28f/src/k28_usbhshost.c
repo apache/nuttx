@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <sched.h>
 #include <errno.h>
 #include <assert.h>
@@ -53,6 +54,8 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
 #include <nuttx/usb/ehci.h>
+
+#include <sys/mount.h>
 
 #include <kinetis_usbhshost.h>
 
@@ -89,12 +92,31 @@
 #endif
 
 /*****************************************************************************
+ * Private Function Prototypes
+ *****************************************************************************/
+
+static int ehci_waiter(int argc, char *argv[]);
+static void ehci_hwinit(void);
+
+#  ifdef HAVE_USB_AUTOMOUNTER
+static void usb_msc_connect(FAR void *arg);
+static void unmount_retry_timeout(int argc, uint32_t arg1, ...);
+static void usb_msc_disconnect(FAR void *arg);
+#  endif
+
+/*****************************************************************************
  * Private Data
  *****************************************************************************/
 
 /* Retained device driver handle */
 
 static struct usbhost_connection_s *g_ehciconn;
+
+#  ifdef HAVE_USB_AUTOMOUNTER
+/* Unmount retry timer */
+
+static WDOG_ID g_umount_tmr[CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV];
+#  endif
 
 /*****************************************************************************
  * Private Functions
@@ -232,6 +254,152 @@ static void ehci_hwinit(void)
   putreg32(regval, KINETIS_USBHSPHY_CTRL);
 }
 
+#  ifdef HAVE_USB_AUTOMOUNTER
+/*****************************************************************************
+ * Name: usb_msc_connect
+ *
+ * Description:
+ *   Mount the USB mass storage device
+ *
+ *****************************************************************************/
+
+static void usb_msc_connect(FAR void *arg)
+{
+  int  index  = (int)arg;
+  char sdchar = 'a' + index;
+  int  ret;
+
+  char blkdev[32];
+  char mntpnt[32];
+
+  DEBUGASSERT(index >= 0 && index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV);
+
+  wd_cancel(g_umount_tmr[index]);
+
+  /* Resetup the event. */
+
+  usbhost_msc_notifier_setup(usb_msc_connect, WORK_USB_MSC_CONNECT,
+      sdchar, arg);
+
+  snprintf(blkdev, sizeof(blkdev), "%s%c",
+      CONFIG_FRDMK28F_USB_AUTOMOUNT_BLKDEV, sdchar);
+  snprintf(mntpnt, sizeof(mntpnt), "%s%c",
+      CONFIG_FRDMK28F_USB_AUTOMOUNT_MOUNTPOINT, sdchar);
+
+  /* Mount */
+
+  ret = mount((FAR const char *)blkdev, (FAR const char *)mntpnt,
+      CONFIG_FRDMK28F_USB_AUTOMOUNT_FSTYPE, 0, NULL);
+  if (ret < 0)
+    {
+      int errcode = get_errno();
+      DEBUGASSERT(errcode > 0);
+
+      ferr("ERROR: Mount failed: %d\n", errcode);
+      UNUSED(errcode);
+    }
+}
+
+/*****************************************************************************
+ * Name: unmount_retry_timeout
+ *
+ * Description:
+ *   A previous unmount failed because the volume was busy... busy meaning
+ *   the volume could not be unmounted because there are open references
+ *   the files or directories in the volume.  When this failure occurred,
+ *   the unmount logic setup a delay and this function is called as a result
+ *   of that delay timeout.
+ *
+ *   This function will attempt the unmount again.
+ *
+ * Input Parameters:
+ *   Standard wdog timeout parameters
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+static void unmount_retry_timeout(int argc, uint32_t arg1, ...)
+{
+  int  index  = (int)arg1;
+  char sdchar = 'a' + index;
+
+  finfo("Timeout!\n");
+  DEBUGASSERT(argc == 1 && \
+      index >= 0 && index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV);
+
+  /* Resend the notification. */
+
+  usbhost_msc_notifier_signal(WORK_USB_MSC_DISCONNECT, sdchar);
+}
+
+/*****************************************************************************
+ * Name: usb_msc_disconnect
+ *
+ * Description:
+ *   Unmount the USB mass storage device
+ *
+ *****************************************************************************/
+
+static void usb_msc_disconnect(FAR void *arg)
+{
+  int  index  = (int)arg;
+  char sdchar = 'a' + index;
+  int  ret;
+
+  char mntpnt[32];
+
+  DEBUGASSERT(index >= 0 && index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV);
+
+  wd_cancel(g_umount_tmr[index]);
+
+  /* Resetup the event. */
+
+  usbhost_msc_notifier_setup(usb_msc_disconnect, WORK_USB_MSC_DISCONNECT,
+      sdchar, arg);
+
+  snprintf(mntpnt, sizeof(mntpnt), "%s%c",
+      CONFIG_FRDMK28F_USB_AUTOMOUNT_MOUNTPOINT, sdchar);
+
+  /* Unmount */
+
+  ret = umount2((FAR const char *)mntpnt, MNT_FORCE);
+  if (ret < 0)
+    {
+      int errcode = get_errno();
+      DEBUGASSERT(errcode > 0);
+
+      /* We expect the error to be EBUSY meaning that the volume could
+       * not be unmounted because there are currently reference via open
+       * files or directories.
+       */
+
+      if (errcode == EBUSY)
+        {
+          finfo("WARNING: Volume is busy, try again later\n");
+
+          /* Start a timer to retry the umount2 after a delay */
+
+          ret = wd_start(g_umount_tmr[index],
+                          MSEC2TICK(CONFIG_FRDMK28F_USB_AUTOMOUNT_UDELAY),
+                          unmount_retry_timeout, 1, (uint32_t)index);
+          if (ret < 0)
+            {
+              ferr("ERROR: wd_start failed: %d\n", ret);
+            }
+        }
+
+      /* Other errors are fatal */
+
+      else
+        {
+          ferr("ERROR: Unmount failed: %d\n", errcode);
+        }
+    }
+}
+#  endif /* HAVE_USB_AUTOMOUNTER */
+
 /*****************************************************************************
  * Public Functions
  *****************************************************************************/
@@ -251,6 +419,9 @@ int k28_usbhost_initialize(void)
 {
   pid_t    pid;
   int      ret;
+#  ifdef HAVE_USB_AUTOMOUNTER
+  int      index;
+#  endif
 
   /* First, register all of the class drivers needed to support the drivers
    * that we care about
@@ -268,6 +439,22 @@ int k28_usbhost_initialize(void)
 
 #ifdef CONFIG_USBHOST_MSC
   /* Register the USB host Mass Storage Class */
+
+#  ifdef HAVE_USB_AUTOMOUNTER
+  /* Initialize the notifier listener for automount */
+
+  for (index = 0; index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV; index++)
+    {
+      char sdchar = 'a' + index;
+
+      g_umount_tmr[index] = wd_create();
+
+      usbhost_msc_notifier_setup(usb_msc_connect,
+          WORK_USB_MSC_CONNECT, sdchar, (FAR void *)(intptr_t)index);
+      usbhost_msc_notifier_setup(usb_msc_disconnect,
+          WORK_USB_MSC_DISCONNECT, sdchar, (FAR void *)(intptr_t)index);
+    }
+#  endif
 
   ret = usbhost_msc_initialize();
   if (ret != OK)

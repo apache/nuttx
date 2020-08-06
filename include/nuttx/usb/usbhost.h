@@ -39,6 +39,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef CONFIG_USBHOST_MSC_NOTIFIER
+#  include <nuttx/wqueue.h>
+#endif
+
 #include <nuttx/usb/usbhost_devaddr.h>
 
 /************************************************************************************
@@ -1014,6 +1018,78 @@ int usbhost_hub_initialize(void);
  ************************************************************************************/
 
 int usbhost_msc_initialize(void);
+
+#  ifdef CONFIG_USBHOST_MSC_NOTIFIER
+/************************************************************************************
+ * Name: usbhost_msc_notifier_setup
+ *
+ * Description:
+ *   Set up to perform a callback to the worker function when a mass storage
+ *   device is attached.
+ *
+ * Input Parameters:
+ *   worker - The worker function to execute on the low priority work queue
+ *            when the event occurs.
+ *   event  - Only WORK_USB_MSC_CONNECT and WORK_USB_MSC_DISCONNECT
+ *   sdchar - sdchar of the connected or disconnected block device
+ *   arg    - A user-defined argument that will be available to the worker
+ *            function when it runs.
+ *
+ * Returned Value:
+ *   > 0   - The notification is in place. The returned value is a key that
+ *           may be used later in a call to
+ *           usbmsc_attach_notifier_teardown().
+ *   == 0  - Not used.
+ *   < 0   - An unexpected error occurred and no notification will occur. The
+ *           returned value is a negated errno value that indicates the
+ *           nature of the failure.
+ *
+ ************************************************************************************/
+
+int usbhost_msc_notifier_setup(worker_t worker, uint8_t event, char sdchar,
+    FAR void *arg);
+
+/************************************************************************************
+ * Name: usbhost_msc_notifier_teardown
+ *
+ * Description:
+ *   Eliminate an USB MSC notification previously setup by
+ *   usbhost_msc_notifier_setup().
+ *   This function should only be called if the notification should be
+ *   aborted prior to the notification.  The notification will automatically
+ *   be torn down after the notification.
+ *
+ * Input Parameters:
+ *   key - The key value returned from a previous call to
+ *         usbhost_msc_notifier_setup().
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ************************************************************************************/
+
+int usbhost_msc_notifier_teardown(int key);
+
+/************************************************************************************
+ * Name: usbhost_msc_notifier_signal
+ *
+ * Description:
+ *   An USB mass storage device has been connected or disconnected.
+ *   Signal all threads.
+ *
+ * Input Parameters:
+ *   event  - Currently only USBHOST_MSC_DISCONNECT and USBHOST_MSC_CONNECT
+ *   sdchar - sdchar of the connected or disconnected block device
+ *
+ * Returned Value:
+ *   None.
+ *
+ ************************************************************************************/
+
+void usbhost_msc_notifier_signal(uint8_t event, char sdchar);
+
+#  endif
 #endif
 
 #ifdef CONFIG_USBHOST_CDCACM

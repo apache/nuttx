@@ -273,15 +273,17 @@ struct work_s
 
 enum work_evtype_e
 {
-  WORK_IOB_AVAIL  = 1,   /* Notify availability of an IOB */
-  WORK_NET_DOWN,         /* Notify that the network is down */
-  WORK_TCP_READAHEAD,    /* Notify that TCP read-ahead data is available */
-  WORK_TCP_WRITEBUFFER,  /* Notify that TCP write buffer is empty */
-  WORK_TCP_DISCONNECT,   /* Notify loss of TCP connection */
-  WORK_UDP_READAHEAD,    /* Notify that UDP read-ahead data is available */
-  WORK_UDP_WRITEBUFFER,  /* Notify that UDP write buffer is empty */
-  WORK_NETLINK_RESPONSE, /* Notify that Netlink response is available */
-  WORK_CAN_READAHEAD     /* Notify that CAN read-ahead data is available */
+  WORK_IOB_AVAIL  = 1,     /* Notify availability of an IOB */
+  WORK_NET_DOWN,           /* Notify that the network is down */
+  WORK_TCP_READAHEAD,      /* Notify that TCP read-ahead data is available */
+  WORK_TCP_WRITEBUFFER,    /* Notify that TCP write buffer is empty */
+  WORK_TCP_DISCONNECT,     /* Notify loss of TCP connection */
+  WORK_UDP_READAHEAD,      /* Notify that UDP read-ahead data is available */
+  WORK_UDP_WRITEBUFFER,    /* Notify that UDP write buffer is empty */
+  WORK_NETLINK_RESPONSE,   /* Notify that Netlink response is available */
+  WORK_CAN_READAHEAD,      /* Notify that CAN read-ahead data is available */
+  WORK_USB_MSC_CONNECT,    /* Notify that an USB MSC connect occured */
+  WORK_USB_MSC_DISCONNECT  /* Notify that an USB MSC connect occured */
 };
 
 /* This structure describes one notification and is provided as input to
