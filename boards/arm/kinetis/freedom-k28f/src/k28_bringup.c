@@ -118,12 +118,6 @@ int k28_bringup(void)
 #endif /* CONFIG_FRDMK28F_SDHC_MOUNT */
 #endif /* HAVE_MMCSD */
 
-#ifdef HAVE_AUTOMOUNTER
-  /* Initialize the auto-mounter */
-
-  k28_automount_initialize();
-#endif
-
 #if defined(CONFIG_USBDEV) && defined(CONFIG_KINETIS_USBOTG)
   if (k28_usbdev_initialize)
     {
@@ -154,7 +148,15 @@ int k28_bringup(void)
 #endif
 
 #if defined(CONFIG_USBHOST) && defined(CONFIG_KINETIS_USBHS)
+  /* Initialize the USB highspeed host */
+
   k28_usbhost_initialize();
+#endif
+
+#ifdef HAVE_SDHC_AUTOMOUNTER
+  /* Initialize the auto-mounter */
+
+  k28_automount_initialize();
 #endif
 
   UNUSED(ret);

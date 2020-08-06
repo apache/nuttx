@@ -52,7 +52,13 @@
 /* Assume we have everything */
 
 #define HAVE_MMCSD       1
-#define HAVE_AUTOMOUNTER 1
+#define HAVE_USB_MSC     1
+#ifdef CONFIG_FRDMK28F_SDHC_AUTOMOUNT
+#  define HAVE_SDHC_AUTOMOUNTER 1
+#endif
+#ifdef CONFIG_FRDMK28F_USB_AUTOMOUNT
+#  define HAVE_USB_AUTOMOUNTER 1
+#endif
 
 /* SD card support */
 
@@ -77,6 +83,12 @@
 #    define MMSCD_MINOR 0
 #  endif
 
+/* Check for USB_HOST and USB_MSC */
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || \
+  !defined(CONFIG_KINETIS_USBHS) || !defined(CONFIG_USBHOST_MSC)
+#  undef HAVE_USB_MSC
+#endif
+
 /* We expect to receive GPIO interrupts for card insertion events */
 
 #  ifndef CONFIG_KINETIS_GPIOIRQ
@@ -92,17 +104,16 @@
 /* Automounter */
 
 #if !defined(CONFIG_FS_AUTOMOUNTER) || !defined(HAVE_MMCSD)
-#  undef HAVE_AUTOMOUNTER
-#  undef CONFIG_FRDMK28F_SDHC_AUTOMOUNT
+#  undef HAVE_SDHC_AUTOMOUNTER
 #endif
 
-#ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT
-#  undef HAVE_AUTOMOUNTER
+#if !defined(HAVE_USB_MSC) || !defined(CONFIG_USBHOST_MSC_NOTIFIER)
+#  undef HAVE_USB_AUTOMOUNTER
 #endif
 
 /* Automounter defaults */
 
-#ifdef HAVE_AUTOMOUNTER
+#ifdef HAVE_SDHC_AUTOMOUNTER
 
 #  ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT_FSTYPE
 #    define CONFIG_FRDMK28F_SDHC_AUTOMOUNT_FSTYPE "vfat"
@@ -123,7 +134,30 @@
 #  ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT_UDELAY
 #    define CONFIG_FRDMK28F_SDHC_AUTOMOUNT_UDELAY 2000
 #  endif
-#endif /* HAVE_AUTOMOUNTER */
+#endif /* HAVE_SDHC_AUTOMOUNTER */
+
+#ifdef HAVE_USB_AUTOMOUNTER
+
+#  ifndef CONFIG_FRDMK28F_USB_AUTOMOUNT_FSTYPE
+#    define CONFIG_FRDMK28F_USB_AUTOMOUNT_FSTYPE "vfat"
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_USB_AUTOMOUNT_BLKDEV
+#    define CONFIG_FRDMK28F_USB_AUTOMOUNT_BLKDEV "/dev/sd"
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_USB_AUTOMOUNT_MOUNTPOINT
+#    define CONFIG_FRDMK28F_USB_AUTOMOUNT_MOUNTPOINT "/mnt/usb"
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV
+#    define CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV 4
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_USB_AUTOMOUNT_UDELAY
+#    define CONFIG_FRDMK28F_USB_AUTOMOUNT_UDELAY 2000
+#  endif
+#endif /* HAVE_USB_AUTOMOUNTER */
 
 /* Freedom-K28F GPIOs *******************************************************/
 
@@ -279,7 +313,7 @@ int k28_sdhc_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef HAVE_AUTOMOUNTER
+#ifdef HAVE_SDHC_AUTOMOUNTER
 bool k28_cardinserted(void);
 #else
 #  define k28_cardinserted() (false)
@@ -293,32 +327,14 @@ bool k28_cardinserted(void);
  *
  ****************************************************************************/
 
-#ifdef HAVE_AUTOMOUNTER
+#ifdef HAVE_SDHC_AUTOMOUNTER
 bool k28_writeprotected(void);
 #else
 #  define k28_writeprotected() (false)
 #endif
 
 /****************************************************************************
- * Name:  k28_automount_initialize
- *
- * Description:
- *   Configure auto-mounter for the configured SDHC slot
- *
- * Input Parameters:
- *   None
- *
- *  Returned Value:
- *    None
- *
- ****************************************************************************/
-
-#ifdef HAVE_AUTOMOUNTER
-void k28_automount_initialize(void);
-#endif
-
-/****************************************************************************
- * Name:  k28_automount_event
+ * Name:  k28_sdhc_automount_event
  *
  * Description:
  *   The SDHC card detection logic has detected an insertion or removal
@@ -338,8 +354,26 @@ void k28_automount_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef HAVE_AUTOMOUNTER
-void k28_automount_event(bool inserted);
+#ifdef HAVE_SDHC_AUTOMOUNTER
+void k28_sdhc_automount_event(bool inserted);
+#endif
+
+/****************************************************************************
+ * Name:  k28_automount_initialize
+ *
+ * Description:
+ *   Configure auto-mounter for the configured SDHC slot
+ *
+ * Input Parameters:
+ *   None
+ *
+ *  Returned Value:
+ *    None
+ *
+ ****************************************************************************/
+
+#if defined(HAVE_SDHC_AUTOMOUNTER) || defined(HAVE_USB_AUTOMOUNTER)
+void k28_automount_initialize(void);
 #endif
 
 /****************************************************************************
