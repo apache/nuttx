@@ -465,7 +465,7 @@ static void pic32mx_epwrite(struct pic32mx_ep_s *privep,
                 const uint8_t *src, uint32_t nbytes);
 static void pic32mx_wrcomplete(struct pic32mx_usbdev_s *priv,
                 struct pic32mx_ep_s *privep);
-static void pic32mx_rqrestart(int argc, uint32_t arg1, ...);
+static void pic32mx_rqrestart(int argc, wdparm_t arg1, ...);
 static void pic32mx_delayedrestart(struct pic32mx_usbdev_s *priv,
                 uint8_t epno);
 static void pic32mx_rqstop(struct pic32mx_ep_s *privep);
@@ -971,7 +971,7 @@ static void pic32mx_wrcomplete(struct pic32mx_usbdev_s *priv,
  * Name: pic32mx_rqrestart
  ****************************************************************************/
 
-static void pic32mx_rqrestart(int argc, uint32_t arg1, ...)
+static void pic32mx_rqrestart(int argc, wdparm_t arg1, ...)
 {
   struct pic32mx_usbdev_s *priv;
   struct pic32mx_ep_s *privep;
@@ -1042,8 +1042,8 @@ static void pic32mx_delayedrestart(struct pic32mx_usbdev_s *priv,
 
   /* And start (or re-start) the watchdog timer */
 
-  wd_start(priv->wdog, RESTART_DELAY, pic32mx_rqrestart, 1,
-           (uint32_t)priv);
+  wd_start(priv->wdog, RESTART_DELAY,
+           pic32mx_rqrestart, 1, (wdparm_t)priv);
 }
 
 /****************************************************************************

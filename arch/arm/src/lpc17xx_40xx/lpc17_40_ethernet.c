@@ -380,10 +380,10 @@ static int  lpc17_40_interrupt(int irq, void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void lpc17_40_txtimeout_work(FAR void *arg);
-static void lpc17_40_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void lpc17_40_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void lpc17_40_poll_work(FAR void *arg);
-static void lpc17_40_poll_expiry(int argc, uint32_t arg, ...);
+static void lpc17_40_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -700,7 +700,7 @@ static int lpc17_40_transmit(struct lpc17_40_driver_s *priv)
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   wd_start(priv->lp_txtimeout, LPC17_40_TXTIMEOUT,
-           lpc17_40_txtimeout_expiry, 1, (uint32_t)priv);
+           lpc17_40_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
 
@@ -1424,7 +1424,7 @@ static void lpc17_40_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void lpc17_40_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void lpc17_40_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   struct lpc17_40_driver_s *priv = (struct lpc17_40_driver_s *)arg;
 
@@ -1503,8 +1503,8 @@ static void lpc17_40_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->lp_txpoll, LPC17_40_WDDELAY, lpc17_40_poll_expiry,
-           1, priv);
+  wd_start(priv->lp_txpoll, LPC17_40_WDDELAY,
+           lpc17_40_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1526,7 +1526,7 @@ static void lpc17_40_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void lpc17_40_poll_expiry(int argc, uint32_t arg, ...)
+static void lpc17_40_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct lpc17_40_driver_s *priv = (FAR struct lpc17_40_driver_s *)arg;
 
@@ -1756,8 +1756,8 @@ static int lpc17_40_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->lp_txpoll, LPC17_40_WDDELAY, lpc17_40_poll_expiry, 1,
-           (uint32_t)priv);
+  wd_start(priv->lp_txpoll, LPC17_40_WDDELAY,
+           lpc17_40_poll_expiry, 1, (wdparm_t)priv);
 
   /* Finally, make the interface up and enable the Ethernet interrupt at
    * the interrupt controller

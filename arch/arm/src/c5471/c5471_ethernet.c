@@ -408,10 +408,10 @@ static int  c5471_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void c5471_txtimeout_work(FAR void *arg);
-static void c5471_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void c5471_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void c5471_poll_work(FAR void *arg);
-static void c5471_poll_expiry(int argc, uint32_t arg, ...);
+static void c5471_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 

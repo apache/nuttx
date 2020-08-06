@@ -343,10 +343,10 @@ static int  s32k1xx_enet_interrupt(int irq, FAR void *context,
 /* Watchdog timer expirations */
 
 static void s32k1xx_txtimeout_work(FAR void *arg);
-static void s32k1xx_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void s32k1xx_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void s32k1xx_poll_work(FAR void *arg);
-static void s32k1xx_polltimer_expiry(int argc, uint32_t arg, ...);
+static void s32k1xx_polltimer_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -572,8 +572,8 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, S32K1XX_TXTIMEOUT, s32k1xx_txtimeout_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->txtimeout, S32K1XX_TXTIMEOUT,
+           s32k1xx_txtimeout_expiry, 1, (wdparm_t)priv);
 
   /* Start the TX transfer (if it was not already waiting for buffers) */
 
@@ -1192,7 +1192,7 @@ static void s32k1xx_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void s32k1xx_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void s32k1xx_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct s32k1xx_driver_s *priv = (FAR struct s32k1xx_driver_s *)arg;
 
@@ -1250,8 +1250,8 @@ static void s32k1xx_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again in any case */
 
-  wd_start(priv->txpoll, S32K1XX_WDDELAY, s32k1xx_polltimer_expiry,
-           1, (wdparm_t)priv);
+  wd_start(priv->txpoll, S32K1XX_WDDELAY,
+           s32k1xx_polltimer_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1273,7 +1273,7 @@ static void s32k1xx_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void s32k1xx_polltimer_expiry(int argc, uint32_t arg, ...)
+static void s32k1xx_polltimer_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct s32k1xx_driver_s *priv = (FAR struct s32k1xx_driver_s *)arg;
 
@@ -1382,8 +1382,8 @@ static int s32k1xx_ifup_action(struct net_driver_s *dev, bool resetphy)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, S32K1XX_WDDELAY, s32k1xx_polltimer_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->txpoll, S32K1XX_WDDELAY,
+           s32k1xx_polltimer_expiry, 1, (wdparm_t)priv);
 
   /* Clear all pending ENET interrupt */
 

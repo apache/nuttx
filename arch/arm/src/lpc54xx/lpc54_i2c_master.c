@@ -156,7 +156,7 @@ static inline uint32_t lpc54_i2c_getreg(struct lpc54_i2cdev_s *priv,
 
 static void lpc54_i2c_setfrequency(struct lpc54_i2cdev_s *priv,
               uint32_t frequency);
-static void lpc54_i2c_timeout(int argc, uint32_t arg, ...);
+static void lpc54_i2c_timeout(int argc, wdparm_t arg, ...);
 static void lpc54_i2c_xfrsetup(struct lpc54_i2cdev_s *priv);
 static bool lpc54_i2c_nextmsg(struct lpc54_i2cdev_s *priv);
 static bool lpc54_i2c_statemachine(struct lpc54_i2cdev_s *priv);
@@ -336,7 +336,7 @@ static void lpc54_i2c_setfrequency(struct lpc54_i2cdev_s *priv,
  *
  ****************************************************************************/
 
-static void lpc54_i2c_timeout(int argc, uint32_t arg, ...)
+static void lpc54_i2c_timeout(int argc, wdparm_t arg, ...)
 {
   struct lpc54_i2cdev_s *priv = (struct lpc54_i2cdev_s *)arg;
 
@@ -767,7 +767,7 @@ static int lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
   /* Set up the transfer timeout */
 
   wd_start(priv->timeout, priv->nmsgs * I2C_WDOG_TIMEOUT,
-           lpc54_i2c_timeout, 1, (uint32_t)priv);
+           lpc54_i2c_timeout, 1, (wdparm_t)priv);
 
   /* Initiate the transfer */
 

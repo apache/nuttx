@@ -3042,7 +3042,7 @@ VxWorks provides the following comparable interface:
   When a watchdog expires, the callback function with this type is called:
 </p>
 <pre>
-    typedef void (*wdentry_t)(int argc, ...);
+    typedef void (*wdentry_t)(int argc, wdparm_t arg1, ...);
 </pre>
 <p>
   Where <code>argc</code> is the number of <code>wdparm_t</code> type arguments that follow.

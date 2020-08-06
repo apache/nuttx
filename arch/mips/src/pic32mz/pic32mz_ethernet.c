@@ -478,10 +478,10 @@ static int  pic32mz_interrupt(int irq, void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void pic32mz_txtimeout_work(void *arg);
-static void pic32mz_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void pic32mz_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void pic32mz_poll_work(void *arg);
-static void pic32mz_poll_expiry(int argc, uint32_t arg, ...);
+static void pic32mz_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -1218,7 +1218,7 @@ static int pic32mz_transmit(struct pic32mz_driver_s *priv)
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   wd_start(priv->pd_txtimeout, PIC32MZ_TXTIMEOUT,
-           pic32mz_txtimeout_expiry, 1, (uint32_t)priv);
+           pic32mz_txtimeout_expiry, 1, (wdparm_t)priv);
 
   return OK;
 }
@@ -2202,8 +2202,8 @@ static void pic32mz_poll_work(void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY, pic32mz_poll_expiry,
-           1, priv);
+  wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY,
+           pic32mz_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -2545,8 +2545,8 @@ static int pic32mz_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY, pic32mz_poll_expiry, 1,
-           (uint32_t)priv);
+  wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY,
+           pic32mz_poll_expiry, 1, (wdparm_t)priv);
 
   /* Finally, enable the Ethernet interrupt at the interrupt controller */
 

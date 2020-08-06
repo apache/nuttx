@@ -224,7 +224,7 @@ static int rndis_ifdown(FAR struct net_driver_s *dev);
 static int rndis_txavail(FAR struct net_driver_s *dev);
 static int rndis_transmit(FAR struct rndis_dev_s *priv);
 static int rndis_txpoll(FAR struct net_driver_s *dev);
-static void rndis_polltimer(int argc, uint32_t arg, ...);
+static void rndis_polltimer(int argc, wdparm_t arg, ...);
 
 /* usbclass callbacks */
 
@@ -1104,7 +1104,7 @@ static void rndis_pollworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void rndis_polltimer(int argc, uint32_t arg, ...)
+static void rndis_polltimer(int argc, wdparm_t arg, ...)
 {
   FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)arg;
   int ret;
@@ -1119,8 +1119,8 @@ static void rndis_polltimer(int argc, uint32_t arg, ...)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, RNDIS_WDDELAY, rndis_polltimer, 1,
-           (wdparm_t)arg);
+  wd_start(priv->txpoll, RNDIS_WDDELAY,
+           rndis_polltimer, 1, (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -1135,8 +1135,8 @@ static int rndis_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)dev->d_private;
 
-  wd_start(priv->txpoll, RNDIS_WDDELAY, rndis_polltimer,
-           1, (wdparm_t)priv);
+  wd_start(priv->txpoll, RNDIS_WDDELAY,
+           rndis_polltimer, 1, (wdparm_t)priv);
   return OK;
 }
 

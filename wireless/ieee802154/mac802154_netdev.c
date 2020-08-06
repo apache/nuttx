@@ -590,8 +590,8 @@ static void macnet_txpoll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->md_txpoll, TXPOLL_WDDELAY, macnet_txpoll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->md_txpoll, TXPOLL_WDDELAY,
+           macnet_txpoll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -778,8 +778,8 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      wd_start(priv->md_txpoll, TXPOLL_WDDELAY, macnet_txpoll_expiry,
-               1, (wdparm_t)priv);
+      wd_start(priv->md_txpoll, TXPOLL_WDDELAY,
+               macnet_txpoll_expiry, 1, (wdparm_t)priv);
 
       ret = OK;
     }

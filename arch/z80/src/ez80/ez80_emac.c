@@ -413,10 +413,10 @@ static int  ez80emac_sysinterrupt(int irq, FAR void *context,
 /* Watchdog timer expirations */
 
 static void ez80emac_txtimeout_work(FAR void *arg);
-static void ez80emac_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void ez80emac_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void ez80emac_poll_work(FAR void *arg);
-static void ez80emac_poll_expiry(int argc, uint32_t arg, ...);
+static void ez80emac_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -1131,7 +1131,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   wd_start(priv->txtimeout, EMAC_TXTIMEOUT,
-           ez80emac_txtimeout_expiry, 1, (uint32_t)priv);
+           ez80emac_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
 
@@ -1991,7 +1991,8 @@ static void ez80emac_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry, 1, priv);
+  wd_start(priv->txpoll, EMAC_WDDELAY,
+           ez80emac_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -2033,8 +2034,8 @@ static void ez80emac_poll_expiry(int argc, wdparm_t arg, ...)
        * cycle.
        */
 
-      wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry,
-               1, arg);
+      wd_start(priv->txpoll, EMAC_WDDELAY,
+               ez80emac_poll_expiry, 1, (wdparm_t)arg);
     }
 }
 
@@ -2125,8 +2126,8 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      wd_start(priv->txpoll, EMAC_WDDELAY, ez80emac_poll_expiry,
-               1, (uint32_t)priv);
+      wd_start(priv->txpoll, EMAC_WDDELAY,
+               ez80emac_poll_expiry, 1, (wdparm_t)priv);
 
       /* Enable the Ethernet interrupts */
 

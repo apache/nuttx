@@ -2073,7 +2073,7 @@ static void rx65n_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-void rx65n_txtimeout_expiry(int argc, uint32_t arg, ...)
+void rx65n_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)arg;
   nerr("ERROR: Timeout!\n");
@@ -2185,7 +2185,7 @@ static void rx65n_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-void rx65n_poll_expiry(int argc, uint32_t arg, ...)
+void rx65n_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)arg;
   rx65n_cmtw0_stop(rx65n_cmtw0_txpoll);

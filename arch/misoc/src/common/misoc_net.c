@@ -773,8 +773,8 @@ static void misoc_net_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY, misoc_net_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
+           misoc_net_poll_expiry, 1, (wdparm_t)priv);
 
   net_unlock();
 }

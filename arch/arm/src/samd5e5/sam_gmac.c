@@ -319,10 +319,10 @@ static int  sam_gmac_interrupt(int irq, void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void sam_txtimeout_work(FAR void *arg);
-static void sam_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void sam_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void sam_poll_work(FAR void *arg);
-static void sam_poll_expiry(int argc, uint32_t arg, ...);
+static void sam_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -752,8 +752,8 @@ static int sam_transmit(struct sam_gmac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, SAM_TXTIMEOUT, sam_txtimeout_expiry, 1,
-          (uint32_t)priv);
+  wd_start(priv->txtimeout, SAM_TXTIMEOUT,
+          sam_txtimeout_expiry, 1, (wdparm_t)priv);
 
   /* Set d_len to zero meaning that the d_buf[] packet buffer is again
    * available.
@@ -1717,7 +1717,7 @@ static void sam_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void sam_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void sam_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct sam_gmac_s *priv = (FAR struct sam_gmac_s *)arg;
 
@@ -1769,7 +1769,7 @@ static void sam_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
+  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1791,7 +1791,7 @@ static void sam_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void sam_poll_expiry(int argc, uint32_t arg, ...)
+static void sam_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct sam_gmac_s *priv = (FAR struct sam_gmac_s *)arg;
 
@@ -1871,7 +1871,7 @@ static int sam_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (uint32_t)priv);
+  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the GMAC interrupt */
 

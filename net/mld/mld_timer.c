@@ -196,7 +196,7 @@ static void mld_gendog_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void mld_gendog_timout(int argc, uint32_t arg, ...)
+static void mld_gendog_timout(int argc, wdparm_t arg, ...)
 {
   FAR struct work_s *work;
   int ret;
@@ -285,7 +285,7 @@ static void mld_v1dog_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void mld_v1dog_timout(int argc, uint32_t arg, ...)
+static void mld_v1dog_timout(int argc, wdparm_t arg, ...)
 {
   FAR struct work_s *work;
   int ret;
@@ -400,7 +400,7 @@ static void mld_polldog_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void mld_polldog_timout(int argc, uint32_t arg, ...)
+static void mld_polldog_timout(int argc, wdparm_t arg, ...)
 {
   FAR struct mld_group_s *group;
   int ret;
@@ -443,8 +443,8 @@ void mld_start_gentimer(FAR struct net_driver_s *dev, clock_t ticks)
 
   mldinfo("ticks: %lu\n", (unsigned long)ticks);
 
-  ret = wd_start(dev->d_mld.gendog, ticks, mld_gendog_timout, 1,
-                 dev->d_ifindex);
+  ret = wd_start(dev->d_mld.gendog, ticks,
+                 mld_gendog_timout, 1, (wdparm_t)dev->d_ifindex);
 
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
@@ -468,8 +468,8 @@ void mld_start_v1timer(FAR struct net_driver_s *dev, clock_t ticks)
 
   mldinfo("ticks: %lu\n", (unsigned long)ticks);
 
-  ret = wd_start(dev->d_mld.v1dog, ticks, mld_v1dog_timout, 1,
-                 dev->d_ifindex);
+  ret = wd_start(dev->d_mld.v1dog, ticks,
+                 mld_v1dog_timout, 1, (wdparm_t)dev->d_ifindex);
 
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
@@ -491,7 +491,7 @@ void mld_start_polltimer(FAR struct mld_group_s *group, clock_t ticks)
 
   mldinfo("ticks: %lu\n", (unsigned long)ticks);
 
-  ret = wd_start(group->polldog, ticks, mld_polldog_timout, 1, (uint32_t)group);
+  ret = wd_start(group->polldog, ticks, mld_polldog_timout, 1, (wdparm_t)group);
 
   DEBUGASSERT(ret == OK);
   UNUSED(ret);

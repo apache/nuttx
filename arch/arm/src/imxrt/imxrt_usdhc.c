@@ -288,7 +288,7 @@ static void imxrt_transmit(struct imxrt_dev_s *priv);
 static void imxrt_receive(struct imxrt_dev_s *priv);
 #endif
 
-static void imxrt_eventtimeout(int argc, uint32_t arg, ...);
+static void imxrt_eventtimeout(int argc, wdparm_t arg, ...);
 static void imxrt_endwait(struct imxrt_dev_s *priv,
               sdio_eventset_t wkupevent);
 static void imxrt_endtransfer(struct imxrt_dev_s *priv,
@@ -1017,7 +1017,7 @@ static void imxrt_receive(struct imxrt_dev_s *priv)
  *
  ****************************************************************************/
 
-static void imxrt_eventtimeout(int argc, uint32_t arg, ...)
+static void imxrt_eventtimeout(int argc, wdparm_t arg, ...)
 {
   struct imxrt_dev_s *priv = (struct imxrt_dev_s *)arg;
 
@@ -2708,8 +2708,8 @@ static sdio_eventset_t imxrt_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret = wd_start(priv->waitwdog, delay, imxrt_eventtimeout,
-                     1, (uint32_t) priv);
+      ret = wd_start(priv->waitwdog, delay,
+                     imxrt_eventtimeout, 1, (wdparm_t)priv);
 
       if (ret < 0)
         {

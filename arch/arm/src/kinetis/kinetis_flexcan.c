@@ -519,7 +519,7 @@ static int  kinetis_flexcan_interrupt(int irq, FAR void *context,
 /* Watchdog timer expirations */
 #ifdef TX_TIMEOUT_WQ
 static void kinetis_txtimeout_work(FAR void *arg);
-static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void kinetis_txtimeout_expiry(int argc, wdparm_t arg, ...);
 #endif
 
 /* NuttX callback functions */
@@ -751,8 +751,8 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   if (timeout > 0)
     {
-      wd_start(priv->txtimeout[mbi], timeout + 1, kinetis_txtimeout_expiry,
-                1, (wdparm_t)priv);
+      wd_start(priv->txtimeout[mbi], timeout + 1,
+               kinetis_txtimeout_expiry, 1, (wdparm_t)priv);
     }
 #endif
 
@@ -1142,7 +1142,7 @@ static void kinetis_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void kinetis_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 

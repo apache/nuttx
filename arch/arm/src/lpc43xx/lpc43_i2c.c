@@ -131,7 +131,7 @@ static struct lpc43_i2cdev_s g_i2c1dev;
 static int  lpc43_i2c_start(struct lpc43_i2cdev_s *priv);
 static void lpc43_i2c_stop(struct lpc43_i2cdev_s *priv);
 static int  lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
-static void lpc43_i2c_timeout(int argc, uint32_t arg, ...);
+static void lpc43_i2c_timeout(int argc, wdparm_t arg, ...);
 static void lpc43_i2c_setfrequency(struct lpc43_i2cdev_s *priv,
               uint32_t frequency);
 static int  lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
@@ -202,8 +202,8 @@ static int lpc43_i2c_start(struct lpc43_i2cdev_s *priv)
            priv->base + LPC43_I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + LPC43_I2C_CONSET_OFFSET);
 
-  wd_start(priv->timeout, I2C_TIMEOUT, lpc43_i2c_timeout, 1,
-           (uint32_t)priv);
+  wd_start(priv->timeout, I2C_TIMEOUT,
+           lpc43_i2c_timeout, 1, (wdparm_t)priv);
   nxsem_wait(&priv->wait);
 
   wd_cancel(priv->timeout);
@@ -237,7 +237,7 @@ static void lpc43_i2c_stop(struct lpc43_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static void lpc43_i2c_timeout(int argc, uint32_t arg, ...)
+static void lpc43_i2c_timeout(int argc, wdparm_t arg, ...)
 {
   struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)arg;
 

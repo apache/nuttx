@@ -5,7 +5,7 @@
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
- *   "STMPE811 S-Touch® advanced resistive touchscreen controller with 8-bit
+ *   "STMPE811 S-Touchï¿½ advanced resistive touchscreen controller with 8-bit
  *    GPIO expander," Doc ID 14489 Rev 6, CD00186725, STMicroelectronics"
  *
  * Redistribution and use in source and binary forms, with or without
@@ -734,9 +734,9 @@ static void stmpe811_timeoutworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void stmpe811_timeout(int argc, uint32_t arg1, ...)
+static void stmpe811_timeout(int argc, wdparm_t arg1, ...)
 {
-  FAR struct stmpe811_dev_s *priv = (FAR struct stmpe811_dev_s *)((uintptr_t)arg1);
+  FAR struct stmpe811_dev_s *priv = (FAR struct stmpe811_dev_s *)arg1;
   int ret;
 
   /* Are we still stuck in the pen down state? */
@@ -1093,8 +1093,8 @@ ignored:
   if (priv->sample.contact == CONTACT_DOWN ||
       priv->sample.contact == CONTACT_MOVE)
     {
-      wd_start(priv->wdog, STMPE811_PENUP_TICKS, stmpe811_timeout,
-               1, (uint32_t)((uintptr_t)priv));
+      wd_start(priv->wdog, STMPE811_PENUP_TICKS,
+               stmpe811_timeout, 1, (wdparm_t)priv);
     }
 
   /*  Reset and clear all data in the FIFO */

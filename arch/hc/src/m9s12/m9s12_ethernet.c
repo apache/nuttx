@@ -131,8 +131,8 @@ static int  emac_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Watchdog timer expirations */
 
-static void emac_polltimer(int argc, uint32_t arg, ...);
-static void emac_txtimeout(int argc, uint32_t arg, ...);
+static void emac_polltimer(int argc, wdparm_t arg, ...);
+static void emac_txtimeout(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -183,7 +183,8 @@ static int emac_transmit(FAR struct emac_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->d_txtimeout, HCS12_TXTIMEOUT, emac_txtimeout, 1, (uint32_t)priv);
+  wd_start(priv->d_txtimeout, HCS12_TXTIMEOUT,
+           emac_txtimeout, 1, (wdparm_t)priv);
   return OK;
 }
 
@@ -486,7 +487,7 @@ static int emac_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void emac_txtimeout(int argc, uint32_t arg, ...)
+static void emac_txtimeout(int argc, wdparm_t arg, ...)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)arg;
 
@@ -517,7 +518,7 @@ static void emac_txtimeout(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static void emac_polltimer(int argc, uint32_t arg, ...)
+static void emac_polltimer(int argc, wdparm_t arg, ...)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)arg;
 
@@ -534,7 +535,7 @@ static void emac_polltimer(int argc, uint32_t arg, ...)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, arg);
+  wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -566,7 +567,7 @@ static int emac_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, (uint32_t)priv);
+  wd_start(priv->d_txpoll, HCS12_WDDELAY, emac_polltimer, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 

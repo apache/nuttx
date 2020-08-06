@@ -306,10 +306,10 @@ static int  kinetis_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void kinetis_txtimeout_work(FAR void *arg);
-static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void kinetis_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void kinetis_poll_work(FAR void *arg);
-static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...);
+static void kinetis_polltimer_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -520,8 +520,8 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, KINETIS_TXTIMEOUT, kinetis_txtimeout_expiry,
-           1, (wdparm_t)priv);
+  wd_start(priv->txtimeout, KINETIS_TXTIMEOUT,
+           kinetis_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
 
@@ -1044,7 +1044,7 @@ static void kinetis_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void kinetis_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
@@ -1102,8 +1102,8 @@ static void kinetis_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again in any case */
 
-  wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry,
-           1, (wdparm_t)priv);
+  wd_start(priv->txpoll, KINETIS_WDDELAY,
+           kinetis_polltimer_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1125,7 +1125,7 @@ static void kinetis_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...)
+static void kinetis_polltimer_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
@@ -1245,8 +1245,8 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->txpoll, KINETIS_WDDELAY,
+           kinetis_polltimer_expiry, 1, (wdparm_t)priv);
 
   putreg32(0, KINETIS_ENET_EIMR);
 
