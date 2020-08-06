@@ -89,7 +89,7 @@ CSRCS += sched_tasklistlock.c
 CSRCS += sched_thistask.c
 endif
 
-ifeq ($(CONFIG_SCHED_INSTRUMENTATION_BUFFER),y)
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
 CSRCS += sched_note.c
 endif
 

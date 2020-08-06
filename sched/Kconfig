@@ -914,8 +914,6 @@ config SCHED_INSTRUMENTATION
 		done in these interfaces.  For example, normal devices may not be
 		used; syslog output cannot be performed.
 
-		An option is to use SCHED_INSTRUMENTATION_BUFFER below.
-
 if SCHED_INSTRUMENTATION
 
 config SCHED_INSTRUMENTATION_CPUSET
@@ -977,59 +975,6 @@ config SCHED_INSTRUMENTATION_IRQHANDLER
 
 			void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 
-config SCHED_INSTRUMENTATION_BUFFER
-	bool "Buffer instrumentation data in memory"
-	default n
-	---help---
-		If this option is selected, then in-memory buffering logic is
-		enabled to capture scheduler instrumentation data.  This has
-		the advantage that (1) the platform logic does not have to provide
-		the sched_note_* interfaces described for the previous settings.
-		Instead, the buffering logic catches all of these.  It encodes
-		timestamps the scheduler note and adds the note to an in-memory,
-		circular buffer.  And (2) buffering the scheduler instrumentation
-		data (versus performing some output operation) minimizes the impact
-		of the instrumentation on the behavior of the system.
-
-		If the in-memory buffer becomes full, then older notes are
-		overwritten by newer notes.  The following interface is provided:
-
-			ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
-
-		Platform specific information must call this function and dispose
-		of it quickly so that overwriting of the tail of the circular buffer
-		does not occur.  See include/nuttx/sched_note.h for additional
-		information.
-
-if SCHED_INSTRUMENTATION_BUFFER
-
-config SCHED_NOTE_BUFSIZE
-	int "Instrumentation buffer size"
-	default 2048
-	---help---
-		The size of the in-memory, circular instrumentation buffer (in
-		bytes).
-
-config SCHED_NOTE_GET
-	bool "Callable interface to get instrumentation data"
-	default n
-	depends on !SCHED_INSTRUMENTATION_CSECTION && (!SCHED_INSTRUMENTATION_SPINLOCK || !SMP)
-	---help---
-		Add support for interfaces to get the size of the next note and also
-		to extract the next note from the instrumentation buffer:
-
-			ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
-			ssize_t sched_note_size(void);
-
-		NOTE: This option is not available if critical sections are being
-		monitor (nor if spinlocks are being monitored in SMP configuration)
-		because there would be a logical error in the design in those cases.
-		That error is that these interfaces call enter_ and leave_critical_section
-		(and which us spinlocks in SMP mode).  That means that each call to
-		sched_note_get() causes several additional entries to be added from
-		the note buffer in order to remove one entry.
-
-endif # SCHED_INSTRUMENTATION_BUFFER
 endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring
 
