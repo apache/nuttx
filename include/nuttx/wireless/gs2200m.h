@@ -116,6 +116,7 @@ struct gs2200m_recv_msg
   FAR uint8_t *buf;
   uint16_t    len;    /* actual buffer length */
   uint16_t    reqlen; /* requested size */
+  int32_t     flags;  /* MSG_* flags */
 };
 
 struct gs2200m_close_msg
