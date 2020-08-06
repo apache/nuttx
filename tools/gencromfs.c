@@ -274,7 +274,8 @@ static FILE *open_tmpfile(void);
 static void unlink_tmpfiles(void);
 #endif
 static void append_tmpfile(FILE *dest, FILE *src);
-static void dump_hexbuffer(FILE *stream, const void *buffer, unsigned int nbytes);
+static void dump_hexbuffer(FILE *stream, const void *buffer,
+                           unsigned int nbytes);
 static void dump_nextline(FILE *stream);
 static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
                            union lzf_result_u *result);
@@ -319,9 +320,9 @@ static void verify_directory(void)
   /* Trim any trailing '/' characters from the directory path. */
 
   len = strlen(g_dirname);
-  while (len > 1 && g_dirname[len-1] == '/')
+  while (len > 1 && g_dirname[len - 1] == '/')
     {
-      g_dirname[len-1] = '\0';
+      g_dirname[len - 1] = '\0';
       len--;
     }
 
@@ -380,7 +381,9 @@ static void verify_outfile(void)
         }
     }
 
-  /* Something exists at this path.  Verify that the destination is a regular file */
+  /* Something exists at this path.  Verify that the destination is a regular
+   * file
+   */
 
   else if (!S_ISREG(buf.st_mode))
     {
@@ -399,34 +402,78 @@ static void init_outfile(void)
   fprintf(g_outstream, "/%s\n", g_delim);
   fprintf(g_outstream, " * %s\n", g_outname);
   fprintf(g_outstream, " *\n");
-  fprintf(g_outstream, " *   Copyright (C) 2018 Gregory Nutt. All rights reserved.\n");
-  fprintf(g_outstream, " *   Author: Gregory Nutt <gnutt@nuttx.org>\n");
+  fprintf(g_outstream,
+          " *   Copyright (C) 2018, 2020 Gregory Nutt. All rights "
+          "reserved.\n");
+  fprintf(g_outstream, " *   Authors: Gregory Nutt <gnutt@nuttx.org>\n");
+  fprintf(g_outstream, " *            David Sidrane <david.sidrane@nscdg."
+          "com>\n");
   fprintf(g_outstream, " *\n");
-  fprintf(g_outstream, " * Redistribution and use in source and binary forms, with or without\n");
-  fprintf(g_outstream, " * modification, are permitted provided that the following conditions\n");
+  fprintf(g_outstream,
+          " * Redistribution and use in source and binary forms, "
+          "with or without\n");
+  fprintf(g_outstream,
+          " * modification, are permitted provided that the following "
+          "conditions\n");
   fprintf(g_outstream, " * are met:\n");
   fprintf(g_outstream, " *\n");
-  fprintf(g_outstream, " * 1. Redistributions of source code must retain the above copyright\n");
-  fprintf(g_outstream, " *    notice, this list of conditions and the following disclaimer.\n");
-  fprintf(g_outstream, " * 2. Redistributions in binary form must reproduce the above copyright\n");
-  fprintf(g_outstream, " *    notice, this list of conditions and the following disclaimer in\n");
-  fprintf(g_outstream, " *    the documentation and/or other materials provided with the\n");
+  fprintf(g_outstream,
+          " * 1. Redistributions of source code must retain the above "
+          "copyright\n");
+  fprintf(g_outstream,
+          " *    notice, this list of conditions and the following "
+          "disclaimer.\n");
+  fprintf(g_outstream,
+          " * 2. Redistributions in binary form must reproduce the above "
+          "copyright\n");
+  fprintf(g_outstream,
+          " *    notice, this list of conditions and the following "
+          "disclaimer in\n");
+  fprintf(g_outstream,
+          " *    the documentation and/or other materials provided with "
+          "the\n");
   fprintf(g_outstream, " *    distribution.\n");
-  fprintf(g_outstream, " * 3. Neither the name NuttX nor the names of its contributors may be\n");
-  fprintf(g_outstream, " *    used to endorse or promote products derived from this software\n");
+  fprintf(g_outstream,
+          " * 3. Neither the name NuttX nor the names of its contributors "
+          "may be\n");
+  fprintf(g_outstream,
+          " *    used to endorse or promote products derived from this "
+          "software\n");
   fprintf(g_outstream, " *    without specific prior written permission.\n");
   fprintf(g_outstream, " *\n");
-  fprintf(g_outstream, " * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n");
-  fprintf(g_outstream, " * \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n");
-  fprintf(g_outstream, " * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS\n");
-  fprintf(g_outstream, " * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE\n");
-  fprintf(g_outstream, " * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,\n");
-  fprintf(g_outstream, " * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,\n");
-  fprintf(g_outstream, " * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS\n");
-  fprintf(g_outstream, " * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED\n");
-  fprintf(g_outstream, " * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT\n");
-  fprintf(g_outstream, " * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN\n");
-  fprintf(g_outstream, " * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\n");
+  fprintf(g_outstream,
+          " * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND "
+          "CONTRIBUTORS\n");
+  fprintf(g_outstream,
+          " * \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, "
+          "BUT NOT\n");
+  fprintf(g_outstream,
+          " * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND "
+          "FITNESS\n");
+  fprintf(g_outstream,
+          " * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL "
+          "THE\n");
+  fprintf(g_outstream,
+          " * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, "
+          "INDIRECT,\n");
+  fprintf(g_outstream,
+          " * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES "
+          "(INCLUDING,\n");
+  fprintf(g_outstream,
+          " * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR "
+          "SERVICES; LOSS\n");
+  fprintf(g_outstream,
+          " * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER "
+          "CAUSED\n");
+  fprintf(g_outstream,
+          " * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, "
+          "STRICT\n");
+  fprintf(g_outstream,
+          " * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) "
+          "ARISING IN\n");
+  fprintf(g_outstream,
+          " * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF "
+          "THE\n");
   fprintf(g_outstream, " * POSSIBILITY OF SUCH DAMAGE.\n");
   fprintf(g_outstream, " *\n");
   fprintf(g_outstream, " %s/\n\n", g_delim);
@@ -452,7 +499,8 @@ static FILE *open_tmpfile(void)
   fd = mkstemp(TMP_NAME);
   if (fd < 0)
     {
-      fprintf(stderr, "Failed to create temporary file: %s\n", strerror(errno));
+      fprintf(stderr, "Failed to create temporary file: %s\n",
+              strerror(errno));
       exit(1);
     }
 
@@ -618,7 +666,7 @@ static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
           outptr[- lit - 1] = lit - 1; /* Stop run */
           outptr -= !lit;              /* Undo run if length is zero */
 
-          for (;;)
+          for (; ; )
             {
               if (maxlen > 16)
                 {
@@ -737,7 +785,7 @@ static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
             }
           else
             {
-              *outptr++ = (off >> 8) + (  7 << 5);
+              *outptr++ = (off >> 8) + (7 << 5);
               *outptr++ = len - 7;
             }
 
@@ -778,7 +826,7 @@ static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
           if (lit == LZF_MAX_LIT)
             {
               outptr[- lit - 1] = lit - 1; /* Stop run */
-              lit = 0;;                /* Start run */
+              lit = 0;                     /* Start run */
               outptr++;
             }
         }
@@ -799,7 +847,7 @@ static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
       if (lit == LZF_MAX_LIT)
         {
           outptr[- lit - 1] = lit - 1; /* Stop run */
-          lit = 0;                 /* Start run */
+          lit = 0;                     /* Start run */
           outptr++;
         }
     }
@@ -825,7 +873,7 @@ genhdr:
     }
   else
     {
-      /* Write uncompressed header*/
+      /* Write uncompressed header */
 
       result->uncompressed.lzf_magic[0] = 'Z';
       result->uncompressed.lzf_magic[1] = 'V';
@@ -977,9 +1025,9 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
       traverse_directory(path, process_direntry, NULL);
     }
 
-  /* When traverse_directory() returns, all of the nodes in the sub-tree under
-   * 'name' will have been written to the new tmpfile.  g_offset is correct,
-   * but other settings are not.
+  /* When traverse_directory() returns, all of the nodes in the sub-tree
+   * under 'name' will have been written to the new tmpfile.  g_offset is
+   * correct, but other settings are not.
    *
    * Restore the state.
    */
@@ -1010,7 +1058,9 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
 
   g_nnodes++;
 
-  /* Now append the sub-tree nodes in the new tmpfile to the previous tmpfile */
+  /* Now append the sub-tree nodes in the new tmpfile to the previous
+   * tmpfile
+   */
 
   append_tmpfile(g_tmpstream, subtree_stream);
 }
@@ -1083,8 +1133,8 @@ static void gen_file(const char *path, const char *name, mode_t mode,
           dump_nextline(g_tmpstream);
           fprintf(g_tmpstream,
                   "\n  /* Offset %6lu:  "
-                  "Block %u blklen=%lu Uncompressed=%lu Compressed=%u */\n\n",
-                  (unsigned long)g_offset, blkno, (long)blklen,
+                  "Block %u blklen=%lu Uncompressed=%lu Compressed=%u "
+                  "*/\n\n",  (unsigned long)g_offset, blkno, (long)blklen,
                   (long)nread, clen);
           dump_hexbuffer(g_tmpstream, &result, blklen);
 
@@ -1130,7 +1180,9 @@ static void gen_file(const char *path, const char *name, mode_t mode,
 
   g_nnodes++;
 
-  /* Now append the sub-tree nodes in the new tmpfile to the previous tmpfile */
+  /* Now append the sub-tree nodes in the new tmpfile to the previous
+   * tmpfiles
+   */
 
   append_tmpfile(g_tmpstream, outstream);
 }
@@ -1181,7 +1233,8 @@ static int process_direntry(const char *dirpath, const char *name,
       int errcode = errno;
       if (errcode == ENOENT)
         {
-          fprintf(stderr, "ERROR: Directory entry %s does not exist\n", path);
+          fprintf(stderr, "ERROR: Directory entry %s does not exist\n",
+                  path);
         }
       else
         {
@@ -1290,7 +1343,7 @@ int main(int argc, char **argv, char **envp)
   g_outname  = argv[2];
 
   verify_directory();
-  verify_outfile();;
+  verify_outfile();
 
   g_outstream = fopen(g_outname, "w");
   if (!g_outstream)
@@ -1352,7 +1405,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Finally append the nodes to the output file */
 
-  append_tmpfile(g_outstream,g_tmpstream);
+  append_tmpfile(g_outstream, g_tmpstream);
   fprintf(g_outstream, "\n};\n");
 
   fclose(g_outstream);
