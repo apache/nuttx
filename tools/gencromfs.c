@@ -1,8 +1,9 @@
 /****************************************************************************
  * tools/gencromfs.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018, 2020 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            David Sidrane <david.sidrane@nscdg.com>
  *
  * The function lzf_compress() comes from the file lzf_c.c (which substantial
  * modification):
@@ -86,28 +87,27 @@
 #  define TMP_NAME         "/tmp/gencromfs-%06u"
 #endif
 
-#define NUTTX_IXOTH        (1 << 0)   /* Bits 0-2: Permissions for others: RWX */
-#define NUTTX_IWOTH        (1 << 1)
-#define NUTTX_IROTH        (1 << 2)
+#define NUTTX_IXOTH        (1 << 0)   /* Must match NuttX's S_IXOTH */
+#define NUTTX_IWOTH        (1 << 1)   /* Must match NuttX's S_IWOTH */
+#define NUTTX_IROTH        (1 << 2)   /* Must match NuttX's S_IROTH */
 
 #define NUTTX_IRXOTH       (NUTTX_IROTH | NUTTX_IXOTH)
 
-#define NUTTX_IXGRP        (1 << 3)   /* Bits 3-5: Group permissions: RWX */
-#define NUTTX_IWGRP        (1 << 4)
-#define NUTTX_IRGRP        (1 << 5)
+#define NUTTX_IXGRP        (1 << 3)   /* Must match NuttX's S_IXGRP */
+#define NUTTX_IWGRP        (1 << 4)   /* Must match NuttX's S_IWGRP */
+#define NUTTX_IRGRP        (1 << 5)   /* Must match NuttX's S_IRGRP */
 
 #define NUTTX_IRXGRP       (NUTTX_IRGRP | NUTTX_IXGRP)
 
-#define NUTTX_IXUSR        (1 << 6)   /* Bits 6-8: Owner permissions: RWX */
-#define NUTTX_IWUSR        (1 << 7)
-#define NUTTX_IRUSR        (1 << 8)
+#define NUTTX_IXUSR        (1 << 6)   /* Must match NuttX's S_IXUSR */
+#define NUTTX_IWUSR        (1 << 7)   /* Must match NuttX's S_IWUSR */
+#define NUTTX_IRUSR        (1 << 8)   /* Must match NuttX's S_IRUSR */
 
 #define NUTTX_IRXUSR       (NUTTX_IRUSR | NUTTX_IXUSR)
 
-#define NUTTX_IFDIR        (2 << 11)
-#define NUTTX_IFREG        (4 << 11)
-
-#define NUTTX_IFLNK        (1 << 15)  /* Bit 15: Symbolic link */
+#define NUTTX_IFDIR        (4 << 12)   /* Must match NuttX's S_IFDIR */
+#define NUTTX_IFREG        (8 << 12)   /* Must match NuttX's S_IFREG */
+#define NUTTX_IFLNK        (10 << 12)  /* Must match NuttX's S_IFLNK */
 
 #define DIR_MODEFLAGS      (NUTTX_IFDIR | NUTTX_IRXUSR | NUTTX_IRXGRP | NUTTX_IRXOTH)
 #define DIRLINK_MODEFLAGS  (NUTTX_IFLNK | DIR_MODEFLAGS)
