@@ -36,18 +36,9 @@
 
 #include "sched/sched.h"
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_BUFFER
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-struct note_info_s
-{
-  volatile unsigned int ni_head;
-  volatile unsigned int ni_tail;
-  uint8_t ni_buffer[CONFIG_SCHED_NOTE_BUFSIZE];
-};
 
 struct note_startalloc_s
 {
@@ -64,50 +55,8 @@ struct note_startalloc_s
 #endif
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static void note_add(FAR const uint8_t *note, uint8_t notelen);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static struct note_info_s g_note_info;
-
-#ifdef CONFIG_SMP
-static volatile spinlock_t g_note_lock;
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: note_next
- *
- * Description:
- *   Return the circular buffer index at offset from the specified index
- *   value, handling wraparound
- *
- * Input Parameters:
- *   ndx - Old circular buffer index
- *
- * Returned Value:
- *   New circular buffer index
- *
- ****************************************************************************/
-
-static inline unsigned int note_next(unsigned int ndx, unsigned int offset)
-{
-  ndx += offset;
-  if (ndx >= CONFIG_SCHED_NOTE_BUFSIZE)
-    {
-      ndx -= CONFIG_SCHED_NOTE_BUFSIZE;
-    }
-
-  return ndx;
-}
 
 /****************************************************************************
  * Name: note_common
@@ -167,115 +116,11 @@ static void note_common(FAR struct tcb_s *tcb,
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void note_spincommon(FAR struct tcb_s *tcb,
-                     FAR volatile spinlock_t *spinlock,
-                     int type)
+static void note_spincommon(FAR struct tcb_s *tcb,
+                            FAR volatile spinlock_t *spinlock,
+                            int type)
 {
   struct note_spinlock_s note;
-
-  /* Format the note */
-
-  note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
-  note.nsp_spinlock = (FAR void *)spinlock;
-  note.nsp_value    = (uint8_t)*spinlock;
-
-  /* Add the note to circular buffer */
-
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_spinlock_s));
-}
-#endif
-
-/****************************************************************************
- * Name: note_length
- *
- * Description:
- *   Length of data currently in circular buffer.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Length of data currently in circular buffer.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_NOTE_GET) || defined(CONFIG_DEBUG_ASSERTIONS)
-static unsigned int note_length(void)
-{
-  unsigned int head = g_note_info.ni_head;
-  unsigned int tail = g_note_info.ni_tail;
-
-  if (tail > head)
-    {
-      head += CONFIG_SCHED_NOTE_BUFSIZE;
-    }
-
-  return head - tail;
-}
-#endif
-
-/****************************************************************************
- * Name: note_remove
- *
- * Description:
- *   Remove the variable length note from the tail of the circular buffer
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   We are within a critical section.
- *
- ****************************************************************************/
-
-static void note_remove(void)
-{
-  FAR struct note_common_s *note;
-  unsigned int tail;
-  unsigned int length;
-
-  /* Get the tail index of the circular buffer */
-
-  tail = g_note_info.ni_tail;
-  DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
-
-  /* Get the length of the note at the tail index */
-
-  note   = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
-  length = note->nc_length;
-  DEBUGASSERT(length <= note_length());
-
-  /* Increment the tail index to remove the entire note from the circular
-   * buffer.
-   */
-
-  g_note_info.ni_tail = note_next(tail, length);
-}
-
-/****************************************************************************
- * Name: note_add
- *
- * Description:
- *   Add the variable length note to the head of the circular buffer
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   We are within a critical section.
- *
- ****************************************************************************/
-
-static void note_add(FAR const uint8_t *note, uint8_t notelen)
-{
-  unsigned int head;
-  unsigned int next;
 
 #ifdef CONFIG_SMP
   /* Ignore notes that are not in the set of monitored CPUs */
@@ -288,47 +133,17 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
     }
 #endif
 
-#ifdef CONFIG_SMP
-  irqstate_t flags = up_irq_save();
-  spin_lock_wo_note(&g_note_lock);
-#endif
+  /* Format the note */
 
-  /* Get the index to the head of the circular buffer */
+  note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
+  note.nsp_spinlock = (FAR void *)spinlock;
+  note.nsp_value    = (uint8_t)*spinlock;
 
-  DEBUGASSERT(note != NULL && notelen < CONFIG_SCHED_NOTE_BUFSIZE);
-  head = g_note_info.ni_head;
+  /* Add the note to circular buffer */
 
-  /* Loop until all bytes have been transferred to the circular buffer */
-
-  while (notelen > 0)
-    {
-      /* Get the next head index.  Would it collide with the current tail
-       * index?
-       */
-
-      next = note_next(head, 1);
-      if (next == g_note_info.ni_tail)
-        {
-          /* Yes, then remove the note at the tail index */
-
-          note_remove();
-        }
-
-      /* Save the next byte at the head index */
-
-      g_note_info.ni_buffer[head] = *note++;
-
-      head = next;
-      notelen--;
-    }
-
-  g_note_info.ni_head = head;
-
-#ifdef CONFIG_SMP
-  spin_unlock_wo_note(&g_note_lock);
-  up_irq_restore(flags);
-#endif
+  note_add((FAR const uint8_t *)&note, sizeof(struct note_spinlock_s));
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -361,6 +176,17 @@ void sched_note_start(FAR struct tcb_s *tcb)
   int namelen;
 #endif
 
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
+
   /* Copy the task name (if possible) and get the length of the note */
 
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -387,6 +213,17 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 {
   struct note_stop_s note;
 
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
+
   /* Format the note */
 
   note_common(tcb, &note.nsp_cmn, sizeof(struct note_stop_s), NOTE_STOP);
@@ -399,6 +236,17 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 void sched_note_suspend(FAR struct tcb_s *tcb)
 {
   struct note_suspend_s note;
+
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
 
   /* Format the note */
 
@@ -415,6 +263,17 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 {
   struct note_resume_s note;
 
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
+
   /* Format the note */
 
   note_common(tcb, &note.nre_cmn, sizeof(struct note_resume_s), NOTE_RESUME);
@@ -428,6 +287,17 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_start_s note;
+
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
 
   /* Format the note */
 
@@ -444,6 +314,17 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
 {
   struct note_cpu_started_s note;
 
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
+
   /* Format the note */
 
   note_common(tcb, &note.ncs_cmn, sizeof(struct note_cpu_started_s),
@@ -457,6 +338,17 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_pause_s note;
+
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
 
   /* Format the note */
 
@@ -473,6 +365,17 @@ void sched_note_cpu_paused(FAR struct tcb_s *tcb)
 {
   struct note_cpu_paused_s note;
 
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
+
   /* Format the note */
 
   note_common(tcb, &note.ncp_cmn, sizeof(struct note_cpu_paused_s),
@@ -486,6 +389,17 @@ void sched_note_cpu_paused(FAR struct tcb_s *tcb)
 void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_resume_s note;
+
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
 
   /* Format the note */
 
@@ -502,6 +416,17 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 {
   struct note_cpu_resumed_s note;
 
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
+
   /* Format the note */
 
   note_common(tcb, &note.ncr_cmn, sizeof(struct note_cpu_resumed_s),
@@ -517,6 +442,17 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 {
   struct note_preempt_s note;
+
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
 
   /* Format the note */
 
@@ -535,6 +471,17 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 {
   struct note_csection_s note;
+
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
 
   /* Format the note */
 
@@ -581,6 +528,17 @@ void sched_note_syscall_enter(int nr, int argc, ...)
   struct note_syscall_enter_s note;
   FAR struct tcb_s *tcb = this_task();
 
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
+
   /* Format the note */
 
   note_common(tcb, &note.nsc_cmn, sizeof(struct note_syscall_enter_s),
@@ -597,6 +555,17 @@ void sched_note_syscall_leave(int nr, uintptr_t result)
 {
   struct note_syscall_leave_s note;
   FAR struct tcb_s *tcb = this_task();
+
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
 
   /* Format the note */
 
@@ -618,6 +587,17 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
   struct note_irqhandler_s note;
   FAR struct tcb_s *tcb = this_task();
 
+#ifdef CONFIG_SMP
+  /* Ignore notes that are not in the set of monitored CPUs */
+
+  if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
+    {
+      /* Not in the set of monitored CPUs.  Do not log the note. */
+
+      return;
+    }
+#endif
+
   /* Format the note */
 
   note_common(tcb, &note.nih_cmn, sizeof(struct note_irqhandler_s),
@@ -630,145 +610,3 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
   note_add((FAR const uint8_t *)&note, sizeof(struct note_irqhandler_s));
 }
 #endif
-
-/****************************************************************************
- * Name: sched_note_get
- *
- * Description:
- *   Remove the next note from the tail of the circular buffer.  The note
- *   is also removed from the circular buffer to make room for further notes.
- *
- * Input Parameters:
- *   buffer - Location to return the next note
- *   buflen - The length of the user provided buffer.
- *
- * Returned Value:
- *   On success, the positive, non-zero length of the return note is
- *   provided.  Zero is returned only if the circular buffer is empty.  A
- *   negated errno value is returned in the event of any failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_NOTE_GET
-ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
-{
-  FAR struct note_common_s *note;
-  irqstate_t flags;
-  unsigned int remaining;
-  unsigned int tail;
-  ssize_t notelen;
-  size_t circlen;
-
-  DEBUGASSERT(buffer != NULL);
-  flags = enter_critical_section();
-
-  /* Verify that the circular buffer is not empty */
-
-  circlen = note_length();
-  if (circlen <= 0)
-    {
-      notelen = 0;
-      goto errout_with_csection;
-    }
-
-  /* Get the index to the tail of the circular buffer */
-
-  tail    = g_note_info.ni_tail;
-  DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
-
-  /* Get the length of the note at the tail index */
-
-  note    = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
-  notelen = note->nc_length;
-  DEBUGASSERT(notelen <= circlen);
-
-  /* Is the user buffer large enough to hold the note? */
-
-  if (buflen < notelen)
-    {
-      /* Remove the large note so that we do not get constipated. */
-
-      note_remove();
-
-      /* and return an error */
-
-      notelen = -EFBIG;
-      goto errout_with_csection;
-    }
-
-  /* Loop until the note has been transferred to the user buffer */
-
-  remaining = (unsigned int)notelen;
-  while (remaining > 0)
-    {
-      /* Copy the next byte at the tail index */
-
-      *buffer++ = g_note_info.ni_buffer[tail];
-
-      /* Adjust indices and counts */
-
-      tail = note_next(tail, 1);
-      remaining--;
-    }
-
-  g_note_info.ni_tail = tail;
-
-errout_with_csection:
-  leave_critical_section(flags);
-  return notelen;
-}
-#endif
-
-/****************************************************************************
- * Name: sched_note_size
- *
- * Description:
- *   Return the size of the next note at the tail of the circular buffer.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero is returned if the circular buffer is empty.  Otherwise, the size
- *   of the next note is returned.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_NOTE_GET
-ssize_t sched_note_size(void)
-{
-  FAR struct note_common_s *note;
-  irqstate_t flags;
-  unsigned int tail;
-  ssize_t notelen;
-  size_t circlen;
-
-  flags = enter_critical_section();
-
-  /* Verify that the circular buffer is not empty */
-
-  circlen = note_length();
-  if (circlen <= 0)
-    {
-      notelen = 0;
-      goto errout_with_csection;
-    }
-
-  /* Get the index to the tail of the circular buffer */
-
-  tail = g_note_info.ni_tail;
-  DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
-
-  /* Get the length of the note at the tail index */
-
-  note    = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
-  notelen = note->nc_length;
-  DEBUGASSERT(notelen <= circlen);
-
-errout_with_csection:
-  leave_critical_section(flags);
-  return notelen;
-}
-#endif
-
-#endif /* CONFIG_SCHED_INSTRUMENTATION_BUFFER */

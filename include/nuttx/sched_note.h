@@ -48,15 +48,9 @@
 #  define CONFIG_SCHED_INSTRUMENTATION_CPUSET 0xffff
 #endif
 
-#ifndef CONFIG_SCHED_NOTE_BUFSIZE
-#  define CONFIG_SCHED_NOTE_BUFSIZE 2048
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_BUFFER
 
 /* This type identifies a note structure */
 
@@ -259,7 +253,6 @@ struct note_irqhandler_s
   uint8_t nih_irq;              /* IRQ number */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER */
-#endif /* CONFIG_SCHED_INSTRUMENTATION_BUFFER */
 
 /****************************************************************************
  * Public Function Prototypes
@@ -272,10 +265,6 @@ struct note_irqhandler_s
  *   If instrumentation of the scheduler is enabled, then some outboard
  *   logic must provide the following interfaces.  These interfaces are not
  *   available to application code.
- *
- *   NOTE: if CONFIG_SCHED_INSTRUMENTATION_BUFFER, then these interfaces are
- *   *not* available to the platform-specific logic.  Rather, they provided
- *   by the note buffering logic.  See sched_note_get() below.
  *
  * Input Parameters:
  *   tcb - The TCB of the thread.
@@ -349,47 +338,24 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 #endif
 
 /****************************************************************************
- * Name: sched_note_get
+ * Name: note_add
  *
  * Description:
- *   Remove the next note from the tail of the circular buffer.  The note
- *   is also removed from the circular buffer to make room for further notes.
+ *   Add the variable length note to the transport layer
  *
  * Input Parameters:
- *   buffer - Location to return the next note
- *   buflen - The length of the user provided buffer.
+ *   note    - The note buffer
+ *   notelen - The buffer length
  *
  * Returned Value:
- *   On success, the positive, non-zero length of the return note is
- *   provided.  Zero is returned only if the circular buffer is empty.  A
- *   negated errno value is returned in the event of any failure.
+ *   None
+ *
+ * Assumptions:
+ *   We are within a critical section.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_SCHED_NOTE_GET)
-ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen);
-#endif
-
-/****************************************************************************
- * Name: sched_note_size
- *
- * Description:
- *   Return the size of the next note at the tail of the circular buffer.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero is returned if the circular buffer is empty.  Otherwise, the size
- *   of the next note is returned.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_SCHED_NOTE_GET)
-ssize_t sched_note_size(void);
-#endif
+void note_add(FAR const uint8_t *note, uint8_t notelen);
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 

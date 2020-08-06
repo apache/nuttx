@@ -44,11 +44,20 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 #include <nuttx/fs/fs.h>
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_DRIVER_NOTE)
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct note_info_s
+{
+  volatile unsigned int ni_head;
+  volatile unsigned int ni_tail;
+  uint8_t ni_buffer[CONFIG_SCHED_NOTE_BUFSIZE];
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -75,9 +84,245 @@ static const struct file_operations note_fops =
 #endif
 };
 
+static struct note_info_s g_note_info;
+
+#ifdef CONFIG_SMP
+static volatile spinlock_t g_note_lock;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: note_next
+ *
+ * Description:
+ *   Return the circular buffer index at offset from the specified index
+ *   value, handling wraparound
+ *
+ * Input Parameters:
+ *   ndx - Old circular buffer index
+ *
+ * Returned Value:
+ *   New circular buffer index
+ *
+ ****************************************************************************/
+
+static inline unsigned int note_next(unsigned int ndx, unsigned int offset)
+{
+  ndx += offset;
+  if (ndx >= CONFIG_SCHED_NOTE_BUFSIZE)
+    {
+      ndx -= CONFIG_SCHED_NOTE_BUFSIZE;
+    }
+
+  return ndx;
+}
+
+/****************************************************************************
+ * Name: note_length
+ *
+ * Description:
+ *   Length of data currently in circular buffer.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Length of data currently in circular buffer.
+ *
+ ****************************************************************************/
+
+static unsigned int note_length(void)
+{
+  unsigned int head = g_note_info.ni_head;
+  unsigned int tail = g_note_info.ni_tail;
+
+  if (tail > head)
+    {
+      head += CONFIG_SCHED_NOTE_BUFSIZE;
+    }
+
+  return head - tail;
+}
+
+/****************************************************************************
+ * Name: note_remove
+ *
+ * Description:
+ *   Remove the variable length note from the tail of the circular buffer
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   We are within a critical section.
+ *
+ ****************************************************************************/
+
+static void note_remove(void)
+{
+  FAR struct note_common_s *note;
+  unsigned int tail;
+  unsigned int length;
+
+  /* Get the tail index of the circular buffer */
+
+  tail = g_note_info.ni_tail;
+  DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
+
+  /* Get the length of the note at the tail index */
+
+  note   = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
+  length = note->nc_length;
+  DEBUGASSERT(length <= note_length());
+
+  /* Increment the tail index to remove the entire note from the circular
+   * buffer.
+   */
+
+  g_note_info.ni_tail = note_next(tail, length);
+}
+
+/****************************************************************************
+ * Name: sched_note_get
+ *
+ * Description:
+ *   Remove the next note from the tail of the circular buffer.  The note
+ *   is also removed from the circular buffer to make room for further notes.
+ *
+ * Input Parameters:
+ *   buffer - Location to return the next note
+ *   buflen - The length of the user provided buffer.
+ *
+ * Returned Value:
+ *   On success, the positive, non-zero length of the return note is
+ *   provided.  Zero is returned only if the circular buffer is empty.  A
+ *   negated errno value is returned in the event of any failure.
+ *
+ ****************************************************************************/
+
+static ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
+{
+  FAR struct note_common_s *note;
+  irqstate_t flags;
+  unsigned int remaining;
+  unsigned int tail;
+  ssize_t notelen;
+  size_t circlen;
+
+  DEBUGASSERT(buffer != NULL);
+  flags = enter_critical_section();
+
+  /* Verify that the circular buffer is not empty */
+
+  circlen = note_length();
+  if (circlen <= 0)
+    {
+      notelen = 0;
+      goto errout_with_csection;
+    }
+
+  /* Get the index to the tail of the circular buffer */
+
+  tail    = g_note_info.ni_tail;
+  DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
+
+  /* Get the length of the note at the tail index */
+
+  note    = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
+  notelen = note->nc_length;
+  DEBUGASSERT(notelen <= circlen);
+
+  /* Is the user buffer large enough to hold the note? */
+
+  if (buflen < notelen)
+    {
+      /* Remove the large note so that we do not get constipated. */
+
+      note_remove();
+
+      /* and return an error */
+
+      notelen = -EFBIG;
+      goto errout_with_csection;
+    }
+
+  /* Loop until the note has been transferred to the user buffer */
+
+  remaining = (unsigned int)notelen;
+  while (remaining > 0)
+    {
+      /* Copy the next byte at the tail index */
+
+      *buffer++ = g_note_info.ni_buffer[tail];
+
+      /* Adjust indices and counts */
+
+      tail = note_next(tail, 1);
+      remaining--;
+    }
+
+  g_note_info.ni_tail = tail;
+
+errout_with_csection:
+  leave_critical_section(flags);
+  return notelen;
+}
+
+/****************************************************************************
+ * Name: sched_note_size
+ *
+ * Description:
+ *   Return the size of the next note at the tail of the circular buffer.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero is returned if the circular buffer is empty.  Otherwise, the size
+ *   of the next note is returned.
+ *
+ ****************************************************************************/
+
+static ssize_t sched_note_size(void)
+{
+  FAR struct note_common_s *note;
+  irqstate_t flags;
+  unsigned int tail;
+  ssize_t notelen;
+  size_t circlen;
+
+  flags = enter_critical_section();
+
+  /* Verify that the circular buffer is not empty */
+
+  circlen = note_length();
+  if (circlen <= 0)
+    {
+      notelen = 0;
+      goto errout_with_csection;
+    }
+
+  /* Get the index to the tail of the circular buffer */
+
+  tail = g_note_info.ni_tail;
+  DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
+
+  /* Get the length of the note at the tail index */
+
+  note    = (FAR struct note_common_s *)&g_note_info.ni_buffer[tail];
+  notelen = note->nc_length;
+  DEBUGASSERT(notelen <= circlen);
+
+errout_with_csection:
+  leave_critical_section(flags);
+  return notelen;
+}
 
 /****************************************************************************
  * Name: note_read
@@ -144,6 +389,71 @@ static ssize_t note_read(FAR struct file *filep, FAR char *buffer,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: note_add
+ *
+ * Description:
+ *   Add the variable length note to the transport layer
+ *
+ * Input Parameters:
+ *   note    - The note buffer
+ *   notelen - The buffer length
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   We are within a critical section.
+ *
+ ****************************************************************************/
+
+void note_add(FAR const uint8_t *note, uint8_t notelen)
+{
+  unsigned int head;
+  unsigned int next;
+
+#ifdef CONFIG_SMP
+  irqstate_t flags = up_irq_save();
+  spin_lock_wo_note(&g_note_lock);
+#endif
+
+  /* Get the index to the head of the circular buffer */
+
+  DEBUGASSERT(note != NULL && notelen < CONFIG_SCHED_NOTE_BUFSIZE);
+  head = g_note_info.ni_head;
+
+  /* Loop until all bytes have been transferred to the circular buffer */
+
+  while (notelen > 0)
+    {
+      /* Get the next head index.  Would it collide with the current tail
+       * index?
+       */
+
+      next = note_next(head, 1);
+      if (next == g_note_info.ni_tail)
+        {
+          /* Yes, then remove the note at the tail index */
+
+          note_remove();
+        }
+
+      /* Save the next byte at the head index */
+
+      g_note_info.ni_buffer[head] = *note++;
+
+      head = next;
+      notelen--;
+    }
+
+  g_note_info.ni_head = head;
+
+#ifdef CONFIG_SMP
+  spin_unlock_wo_note(&g_note_lock);
+  up_irq_restore(flags);
+#endif
+}
+
+/****************************************************************************
  * Name: note_register
  *
  * Description:
@@ -163,5 +473,3 @@ int note_register(void)
 {
   return register_driver("/dev/note", &note_fops, 0666, NULL);
 }
-
-#endif /* CONFIG_SCHED_INSTRUMENTATION_BUFFER && CONFIG_DRIVER_NOTE */
