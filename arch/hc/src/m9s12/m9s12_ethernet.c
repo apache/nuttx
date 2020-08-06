@@ -71,7 +71,9 @@
 # define CONFIG_HCS12_NINTERFACES 1
 #endif
 
-/* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll deley = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
+ */
 
 #define HCS12_WDDELAY   (1*CLK_TCK)
 
@@ -79,7 +81,7 @@
 
 #define HCS12_TXTIMEOUT (60*CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define BUF ((struct eth_hdr_s *)priv->d_dev.d_buf)
 
@@ -215,7 +217,8 @@ static int emac_transmit(FAR struct emac_driver_s *priv)
 
 static int emac_txpoll(struct net_driver_s *dev)
 {
-  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv =
+    (FAR struct emac_driver_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -251,14 +254,14 @@ static int emac_txpoll(struct net_driver_s *dev)
 
           emac_transmit(priv);
 
-          /* Check if there is room in the device to hold another packet. If not,
-           * return a non-zero value to terminate the poll.
+          /* Check if there is room in the device to hold another packet.
+           * If not, return a non-zero value to terminate the poll.
            */
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -287,14 +290,16 @@ static void emac_receive(FAR struct emac_driver_s *priv)
     {
       /* Check for errors and update statistics */
 
-      /* Check if the packet is a valid size for the network buffer configuration */
+      /* Check if the packet is a valid size for the network buffer
+       * configuration
+       */
 
       /* Copy the data data from the hardware to priv->d_dev.d_buf.  Set
        * amount of data in priv->d_dev.d_len
        */
 
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the tap */
 
       pkt_input(&priv->d_dev);
 #endif
@@ -314,7 +319,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
           ipv4_input(&priv->d_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->d_dev.d_len > 0)
@@ -351,11 +356,11 @@ static void emac_receive(FAR struct emac_driver_s *priv)
           ipv6_input(&priv->d_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->d_dev.d_len > 0)
-           {
+            {
               /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
@@ -384,7 +389,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
           arp_arpin(&priv->d_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->d_dev.d_len > 0)
@@ -526,9 +531,9 @@ static void emac_polltimer(int argc, wdparm_t arg, ...)
    * the TX poll if he are unable to accept another packet for transmission.
    */
 
-  /* If so, update TCP timing states and poll the network for new XMIT data. Hmmm..
-   * might be bug here.  Does this mean if there is a transmit in progress,
-   * we will missing TCP time state updates?
+  /* If so, update TCP timing states and poll the network for new XMIT data.
+   * Hmmm.. might be bug here.  Does this mean if there is a transmit in
+   * progress, we will missing TCP time state updates?
    */
 
   devif_timer(&priv->d_dev, HCS12_WDDELAY, emac_txpoll);
@@ -557,13 +562,14 @@ static void emac_polltimer(int argc, wdparm_t arg, ...)
 
 static int emac_ifup(struct net_driver_s *dev)
 {
-  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv =
+    (FAR struct emac_driver_s *)dev->d_private;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24 );
+        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
-  /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
+  /* Initialize PHYs, Ethernet interface, and setup up Ethernet interrupts */
 
   /* Set and activate a timer process */
 
@@ -594,7 +600,8 @@ static int emac_ifup(struct net_driver_s *dev)
 
 static int emac_ifdown(struct net_driver_s *dev)
 {
-  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv =
+    (FAR struct emac_driver_s *)dev->d_private;
   irqstate_t flags;
 
   /* Disable the Ethernet interrupt */
@@ -640,7 +647,8 @@ static int emac_ifdown(struct net_driver_s *dev)
 
 static int emac_txavail(struct net_driver_s *dev)
 {
-  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv =
+    (FAR struct emac_driver_s *)dev->d_private;
   irqstate_t flags;
 
   /* Disable interrupts because this function may be called from interrupt
@@ -653,7 +661,7 @@ static int emac_txavail(struct net_driver_s *dev)
 
   if (priv->d_bifup)
     {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
+      /* Check if there is room in the hardware to hold another packet. */
 
       /* If so, then poll the network for new XMIT data */
 
@@ -685,7 +693,8 @@ static int emac_txavail(struct net_driver_s *dev)
 #ifdef CONFIG_NET_MCASTGROUP
 static int emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv =
+    (FAR struct emac_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -697,8 +706,8 @@ static int emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  * Function: emac_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -714,7 +723,8 @@ static int emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_MCASTGROUP
 static int emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
+  FAR struct emac_driver_s *priv =
+    (FAR struct emac_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -752,7 +762,7 @@ int emac_initialize(int intf)
   DEBUGASSERT(inf <  CONFIG_HCS12_NINTERFACES);
   priv = &g_emac[intf];
 
-   /* Check if a Ethernet chip is recognized at its I/O base */
+  /* Check if a Ethernet chip is recognized at its I/O base */
 
   /* Attach the IRQ to the driver */
 
@@ -785,7 +795,9 @@ int emac_initialize(int intf)
    * the device and/or calling emac_ifdown().
    */
 
-  /* Read the MAC address from the hardware into priv->d_dev.d_mac.ether.ether_addr_octet */
+  /* Read the MAC address from the hardware into
+   * priv->d_dev.d_mac.ether.ether_addr_octet
+   */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

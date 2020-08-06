@@ -114,8 +114,8 @@
 #endif
 
 /* The logic here has a few hooks for support for multiple interfaces, but
- * that capability is not yet in place (and I won't worry about it until I get
- * the first multi-interface PIC32MX).
+ * that capability is not yet in place (and I won't worry about it until I
+ * get the first multi-interface PIC32MX).
  */
 
 #if CONFIG_PIC32MX_NINTERFACES > 1
@@ -159,7 +159,7 @@
 #define PIC32MX_NBUFFERS (CONFIG_PIC32MX_ETH_NRXDESC + \
                           CONFIG_PIC32MX_ETH_NTXDESC + 1)
 
-/* Debug Configuration *****************************************************/
+/* Debug Configuration ******************************************************/
 
 /* CONFIG_NET_DUMPPACKET will dump the contents of each packet to the
  * console.
@@ -225,7 +225,7 @@
 #define ETH_RXINTS             (ETH_INT_RXOVFLW | ETH_INT_RXBUFNA | ETH_INT_RXDONE | ETH_INT_RXBUSE)
 #define ETH_TXINTS             (ETH_INT_TXABORT | ETH_INT_TXDONE | ETH_INT_TXBUSE)
 
-/* Misc. Helpers ***********************************************************/
+/* Misc. Helpers ************************************************************/
 
 /* This is a helper pointer for accessing the contents of the Ethernet
  * header
@@ -395,7 +395,8 @@ static inline struct pic32mx_txdesc_s *
   pic32mx_txdesc(struct pic32mx_driver_s *priv);
 static inline void pic32mx_txnext(struct pic32mx_driver_s *priv);
 static inline void pic32mx_rxreturn(struct pic32mx_rxdesc_s *rxdesc);
-static struct pic32mx_rxdesc_s *pic32mx_rxdesc(struct pic32mx_driver_s *priv);
+static struct pic32mx_rxdesc_s *
+pic32mx_rxdesc(struct pic32mx_driver_s *priv);
 
 /* Common TX logic */
 
@@ -714,7 +715,8 @@ static uint8_t *pic32mx_allocbuffer(struct pic32mx_driver_s *priv)
  *
  ****************************************************************************/
 
-static void pic32mx_freebuffer(struct pic32mx_driver_s *priv, uint8_t *buffer)
+static void pic32mx_freebuffer(struct pic32mx_driver_s *priv,
+                               uint8_t *buffer)
 {
   /* Add the buffer to the end of the free buffer list */
 
@@ -989,8 +991,8 @@ static struct pic32mx_rxdesc_s *pic32mx_rxdesc(struct pic32mx_driver_s *priv)
   int i;
 
   /* Inspect the list of RX descriptors to see if the EOWN bit is cleared.
-   * If it is, this descriptor is now under software control and a message was
-   * received. Use SOP and EOP to extract the message, use BYTE_COUNT,
+   * If it is, this descriptor is now under software control and a message
+   * was received. Use SOP and EOP to extract the message, use BYTE_COUNT,
    * RXF_RSV, RSV and PKT_CHECKSUM to get the message characteristics.
    */
 
@@ -1055,9 +1057,9 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
    *
    * The SOP, EOP, DATA_BUFFER_ADDRESS and BYTE_COUNT will be updated when a
    * particular message has to be transmitted. The DATA_BUFFER_ADDRESS will
-   * contain the physical address of the message, the BYTE_COUNT message size.
-   * SOP and EOP are set depending on how many packets are needed to transmit
-   * the message.
+   * contain the physical address of the message, the BYTE_COUNT message
+   * size. SOP and EOP are set depending on how many packets are needed to
+   * transmit the message.
    */
 
   /* Find the next available TX descriptor.  We are guaranteed that is will
@@ -1083,9 +1085,9 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
   status = ((uint32_t)priv->pd_dev.d_len << TXDESC_STATUS_BYTECOUNT_SHIFT);
   priv->pd_dev.d_len = 0;
 
-  /* Set EOWN = 1 to indicate that the packet belongs to Ethernet and set both
-   * SOP and EOP to indicate that the packet both begins and ends with this
-   * frame.
+  /* Set EOWN = 1 to indicate that the packet belongs to Ethernet and set
+   * both SOP and EOP to indicate that the packet both begins and ends with
+   * this frame.
    */
 
   status        |= (TXDESC_STATUS_EOWN | TXDESC_STATUS_NPV |
@@ -1188,7 +1190,9 @@ static int pic32mx_txpoll(struct net_driver_s *dev)
 
           if (pic32mx_txdesc(priv) == NULL)
             {
-              /* There are no more TX descriptors/buffers available.. stop the poll */
+              /* There are no more TX descriptors/buffers available..
+               * stop the poll
+               */
 
               return -EAGAIN;
             }
@@ -1207,8 +1211,8 @@ static int pic32mx_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return ret;
@@ -1313,7 +1317,7 @@ static void pic32mx_timerpoll(struct pic32mx_driver_s *priv)
  *
  * Description:
  *   While processing an RxDone event, higher logic decides to send a packet,
- *   possibly a response to the incoming packet (but probably not, in reality)
+ *   possibly a response to the incoming packet(but probably not, in reality)
  *   However, since the Rx and Tx operations are decoupled, there is no
  *   guarantee that there will be a Tx descriptor available at that time.
  *   This function will perform that check and, if no Tx descriptor is
@@ -1499,7 +1503,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
               if (priv->pd_dev.d_len > 0)
                 {
-                  /* Update the Ethernet header with the correct MAC address */
+                  /* Update Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
                   if (IFF_IS_IPv4(priv->pd_dev.d_flags))
@@ -1538,7 +1542,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
               if (priv->pd_dev.d_len > 0)
                 {
-                  /* Update the Ethernet header with the correct MAC address */
+                  /* Update Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
                   if (IFF_IS_IPv4(priv->pd_dev.d_flags))
@@ -1660,7 +1664,8 @@ static void pic32mx_txdone(struct pic32mx_driver_s *priv)
 
               /* Free the TX buffer */
 
-              pic32mx_freebuffer(priv, (uint8_t *)VIRT_ADDR(txdesc->address));
+              pic32mx_freebuffer(priv,
+                                 (uint8_t *)VIRT_ADDR(txdesc->address));
               txdesc->address = 0;
 
               /* Reset status */
@@ -1759,7 +1764,8 @@ static void pic32mx_interrupt_work(void *arg)
 
       if ((status & ETH_INT_RXBUFNA) != 0)
         {
-          nerr("ERROR: RX buffer descriptor overrun. status: %08x\n", status);
+          nerr("ERROR: RX buffer descriptor overrun. status: %08x\n",
+               status);
           NETDEV_RXERRORS(&priv->pd_dev);
         }
 
@@ -1851,15 +1857,15 @@ static void pic32mx_interrupt_work(void *arg)
       /* EWMARK: Empty Watermark Interrupt.  This bit is set when the RX
        * Descriptor Buffer Count is less than or equal to the value in the
        * RXEWM bit (ETHRXWM:0-7) value. It is cleared by BUFCNT bit
-       * (ETHSTAT:16-23) being incremented by hardware. Writing a ‘0’ or a ‘1’
-       * has no effect.
+       * (ETHSTAT:16-23) being incremented by hardware. Writing a ‘0’ or
+       * a ‘1’ has no effect.
        */
 
       /* FWMARK: Full Watermark Interrupt.  This bit is set when the RX
        * escriptor Buffer Count is greater than or equal to the value in the
-       * RXFWM bit (ETHRXWM:16-23) field. It is cleared by writing the BUFCDEC
-       * (ETHCON1:0) bit to decrement the BUFCNT counter. Writing a ‘0’ or a
-       * ‘1’ has no effect.
+       * RXFWM bit (ETHRXWM:16-23) field. It is cleared by writing the
+       * BUFCDEC (ETHCON1:0) bit to decrement the BUFCNT counter. Writing a
+       * ‘0’ or a ‘1’ has no effect.
        */
     }
 
@@ -2138,8 +2144,9 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   /* Pin Configuration:
    *
    * No GPIO pin configuration is required.  Enabling the Ethernet Controller
-   * will configure the IO pin direction as defined by the Ethernet Controller
-   * control bits. The port TRIS and LATCH registers will be overridden.
+   * will configure the IO pin direction as defined by the Ethernet
+   * Controller control bits. The port TRIS and LATCH registers will be
+   * overridden.
    *
    * I/O Pin    MII     RMII   Pin  Description
    *   Name   Required Required Type
@@ -2155,7 +2162,8 @@ static int pic32mx_ifup(struct net_driver_s *dev)
    * ERXCLK   Yes      No       I    Ethernet MII RX Clock
    * EREF_CLK No       Yes      I    Ethernet RMII Ref Clock
    * ERXDV    Yes      No       I    Ethernet MII Receive Data Valid
-   * ECRS_DV  No       Yes      I    Ethernet RMII Carrier Sense/Receive Data Valid
+   * ECRS_DV  No       Yes      I    Ethernet RMII Carrier Sense/
+   *                                          Receive Data Valid
    * ERXD0    Yes      Yes      I    Ethernet Data Receive 0
    * ERXD1    Yes      Yes      I    Ethernet Data Receive 1
    * ERXD2    Yes      No       I    Ethernet Data Receive 2
@@ -2200,7 +2208,8 @@ static int pic32mx_ifup(struct net_driver_s *dev)
    * preamble, no scan increment.
    */
 
-  regval &= ~(EMAC1_MCFG_CLKSEL_MASK | EMAC1_MCFG_NOPRE | EMAC1_MCFG_SCANINC);
+  regval &= ~(EMAC1_MCFG_CLKSEL_MASK |
+              EMAC1_MCFG_NOPRE | EMAC1_MCFG_SCANINC);
   regval |= EMAC1_MCFG_CLKSEL_DIV;
   pic32mx_putreg(regval, PIC32MX_EMAC1_MCFG);
 
@@ -2281,16 +2290,16 @@ static int pic32mx_ifup(struct net_driver_s *dev)
   pic32mx_putreg(regval, PIC32MX_EMAC1_SA2);
 #else
   regval = pic32mx_getreg(PIC32MX_EMAC1_SA0);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[4] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[5] = (uint32_t)((regval >> 8) & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[4] = regval & 0xff;
+  priv->pd_dev.d_mac.ether.ether_addr_octet[5] = (regval >> 8) & 0xff;
 
   regval = pic32mx_getreg(PIC32MX_EMAC1_SA1);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[2] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[3] = (uint32_t)((regval >> 8) & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[2] = regval & 0xff;
+  priv->pd_dev.d_mac.ether.ether_addr_octet[3] = (regval >> 8) & 0xff;
 
   regval = pic32mx_getreg(PIC32MX_EMAC1_SA2);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[0] = (uint32_t)(regval & 0xff);
-  priv->pd_dev.d_mac.ether.ether_addr_octet[1] = (uint32_t)((regval >> 8) & 0xff);
+  priv->pd_dev.d_mac.ether.ether_addr_octet[0] = regval & 0xff;
+  priv->pd_dev.d_mac.ether.ether_addr_octet[1] = (regval >> 8) & 0xff;
 #endif
 
   /* Continue Ethernet Controller Initialization ****************************/
@@ -2950,8 +2959,8 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
 #endif
 
 #else
-  /* Set the MII/ operation mode. This usually requires access to a vendor-
-   * specific control register.
+  /* Set the MII/ operation mode. This usually requires access to a vendor
+   * -specific control register.
    */
 
 #ifdef CONFIG_ETH0_PHY_DP83848C
@@ -3080,8 +3089,8 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
   /* Set up the fixed PHY configuration
    *
    * If auto-negotiation is not supported/selected, update the PHY Duplex and
-   * Speed settings directly (use Control Register 0 and possibly some vendor-
-   * pecific registers).
+   * Speed settings directly (use Control Register 0 and possibly some vendor
+   * -pecific registers).
    */
 
   ret = pic32mx_phymode(phyaddr, PIC32MX_MODE_DEFLT);

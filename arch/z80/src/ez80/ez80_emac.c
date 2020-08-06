@@ -243,7 +243,9 @@ extern uintptr_t __RAM_ADDR_U_INIT_PARAM;
 #define EMAC_EIN_HANDLED \
   (EMAC_ISTAT_RXEVENTS | EMAC_ISTAT_TXEVENTS | EMAC_ISTAT_SYSEVENTS)
 
-/* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll deley = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
+ */
 
 #define EMAC_WDDELAY           (1*CLK_TCK)
 
@@ -251,7 +253,7 @@ extern uintptr_t __RAM_ADDR_U_INIT_PARAM;
 
 #define EMAC_TXTIMEOUT         (60*CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define ETHBUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
@@ -1081,7 +1083,9 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   txnext->pktsize = 0;
   txnext->stat    = 0; /* Bit 15: 0=Host (eZ80 CPU) owns, 1=EMAC owns. */
 
-  /* Copy the data to the next packet in the Tx buffer (handling wraparound) */
+  /* Copy the data to the next packet in the Tx buffer
+   * (handling wraparound)
+   */
 
   psrc            = priv->dev.d_buf;
   pdest           = (uint8_t *)txdesc + SIZEOF_EMACSDESC;
@@ -1388,9 +1392,9 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
             inp(EZ80_EMAC_BLKSLFT_H), inp(EZ80_EMAC_BLKSLFT_L));
 
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the tap */
 
-       pkt_input(&priv->dev);
+      pkt_input(&priv->dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -1556,7 +1560,7 @@ static void ez80emac_txinterrupt_work(FAR void *arg)
         txhead, txhead->np, txhead->pktsize, txhead->stat,
         inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L), istat);
 
-  /* Handle all packets in the list that are no longer owned by the hardware */
+  /* Handle all packets in the list that are no longer owned by hardware */
 
   while (txhead && (txhead->stat & EMAC_TXDESC_OWNER) == 0)
     {
@@ -2217,7 +2221,7 @@ static void ez80emac_txavail_work(FAR void *arg)
   net_lock();
   if (priv->bifup)
     {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
+      /* Check if there is room in the hardware to hold another packet. */
 
       /* If so, then poll the network for new XMIT data */
 
@@ -2623,7 +2627,9 @@ int up_netinitialize(void)
   priv->txpoll        = wd_create();         /* Create periodic poll timer */
   priv->txtimeout     = wd_create();         /* Create TX timeout timer */
 
-  /* Read the MAC address from the hardware into priv->dev.d_mac.ether.ether_addr_octet */
+  /* Read the MAC address from the hardware into
+   * priv->dev.d_mac.ether.ether_addr_octet
+   */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

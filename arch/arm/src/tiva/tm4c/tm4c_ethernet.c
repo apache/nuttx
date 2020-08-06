@@ -73,6 +73,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #if TIVA_NETHCONTROLLERS > 1
@@ -240,6 +241,7 @@
 #endif
 
 /* Clocking *****************************************************************/
+
 /* Set MIIADDR CR bits depending on SysClk frequency */
 
 #if SYSCLK_FREQUENCY >= 20000000 && SYSCLK_FREQUENCY < 35000000
@@ -257,8 +259,9 @@
 #endif
 
 /* Timing *******************************************************************/
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
- * second
+
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
  */
 
 #define TIVA_WDDELAY     (1*CLK_TCK)
@@ -303,7 +306,7 @@
  * EMAC_CFG_WDDIS    Bit 23: Watchdog disable
  * EMAC_CFG_CST      Bit 25: CRC stripping for Type frames
  * EMAC_CFG_TWOKPEN  Bit 27: IEEE 802
- * EMAC_CFG_SADDR    Bits 28-30: Source Address Insertion or Replacement Control
+ * EMAC_CFG_SADDR    Bits 28-30: Source Address Insertion/Replacement Control
  */
 
 #define MACCR_CLEAR_BITS \
@@ -314,23 +317,24 @@
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- * EMAC_CFG_RE       Receiver enable                0 (disabled)
- * EMAC_CFG_TE       Transmitter enable             0 (disabled)
- * EMAC_CFG_DC       Deferral check                 0 (disabled)
- * EMAC_CFG_BL       Back-off limit                 0 (10)
- * EMAC_CFG_ACS      Automatic pad/CRC stripping    0 (disabled)
- * EMAC_CFG_DR       Retry disable                  1 (disabled)
- * EMAC_CFG_IPC      IPv4 checksum offload          Depends on CONFIG_TIVA_EMAC_HWCHECKSUM
- * EMAC_CFG_LOOPBM   Loopback mode                  0 (disabled)
- * EMAC_CFG_DRO      Receive own disable            0 (enabled)
- * EMAC_CFG_PS       Port Select                      (read-only)
- * EMAC_CFG_DISCRS   Carrier sense disable          0 (enabled)
- * EMAC_CFG_IFG      Interframe gap                 0 (96 bits)
- * EMAC_CFG_JFEN     Jumbo Frame Enable             0 (jumbo frame creates error)
- * EMAC_CFG_JD       Jabber disable                 0 (enabled)
- * EMAC_CFG_WDDIS    Watchdog disable               0 (enabled)
- * EMAC_CFG_CST      CRC stripping for Type frames  0 (disabled, F2/F4 only)
- * EMAC_CFG_TWOKPEN  IEEE 802                       0 (>1518 == giant frame)
+ * EMAC_CFG_RE       Receiver enable             0 (disabled)
+ * EMAC_CFG_TE       Transmitter enable          0 (disabled)
+ * EMAC_CFG_DC       Deferral check              0 (disabled)
+ * EMAC_CFG_BL       Back-off limit              0 (10)
+ * EMAC_CFG_ACS      Automatic pad/CRC stripping 0 (disabled)
+ * EMAC_CFG_DR       Retry disable               1 (disabled)
+ * EMAC_CFG_IPC      IPv4 checksum offload       Depends on
+ *                                               CONFIG_TIVA_EMAC_HWCHECKSUM
+ * EMAC_CFG_LOOPBM   Loopback mode               0 (disabled)
+ * EMAC_CFG_DRO      Receive own disable         0 (enabled)
+ * EMAC_CFG_PS       Port Select                   (read-only)
+ * EMAC_CFG_DISCRS   Carrier sense disable       0 (enabled)
+ * EMAC_CFG_IFG      Interframe gap              0 (96 bits)
+ * EMAC_CFG_JFEN     Jumbo Frame Enable          0 (jumbo frame create error)
+ * EMAC_CFG_JD       Jabber disable              0 (enabled)
+ * EMAC_CFG_WDDIS    Watchdog disable            0 (enabled)
+ * EMAC_CFG_CST      Type frames CRC stripping   0 (disabled, F2/F4 only)
+ * EMAC_CFG_TWOKPEN  IEEE 802                    0 (>1518 == giant frame)
  * EMAC_CFG_SADDR    Source Address Insertion or
  *                   Replacement Control
  *
@@ -373,25 +377,28 @@
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- * EMAC_FRAMEFLTR_PR     Promiscuous mode                       0 (disabled)
- * EMAC_FRAMEFLTR_HUC    Hash unicast                           0 (perfect dest filtering)
- * EMAC_FRAMEFLTR_HMC    Hash multicast                         0 (perfect dest filtering)
- * EMAC_FRAMEFLTR_DAIF   Destination address inverse filtering  0 (normal)
- * EMAC_FRAMEFLTR_PM     Pass all multicast                     0 (Depends on HM bit)
- * EMAC_FRAMEFLTR_DBF    Broadcast frames disable               0 (enabled)
- * EMAC_FRAMEFLTR_PCF    Pass control frames                    1 (block all but PAUSE)
- * EMAC_FRAMEFLTR_SAIF   Source address inverse filtering       0 (not used)
- * EMAC_FRAMEFLTR_SAF    Source address filter                  0 (disabled)
- * EMAC_FRAMEFLTR_HPF    Hash or perfect filter                 0 (Only matching frames passed)
- * EMAC_FRAMEFLTR_VTFE   VLAN Tag Filter Enable                 0 (VLAN tag ignored)
- * EMAC_FRAMEFLTR_RA     Receive all                            0 (disabled)
+ * EMAC_FRAMEFLTR_PR   Promiscuous mode       0 (disabled)
+ * EMAC_FRAMEFLTR_HUC  Hash unicast           0 (perfect dest filtering)
+ * EMAC_FRAMEFLTR_HMC  Hash multicast         0 (perfect dest filtering)
+ * EMAC_FRAMEFLTR_DAIF Destination address    0 (normal)
+ *                     inverse filtering
+ * EMAC_FRAMEFLTR_PM   Pass all multicast     0 (Depends on HM bit)
+ * EMAC_FRAMEFLTR_DBF  Broadcast frames       0 (enabled)
+ *                     disable
+ * EMAC_FRAMEFLTR_PCF  Pass control frames    1 (block all but PAUSE)
+ * EMAC_FRAMEFLTR_SAIF Source address         0 (not used)
+ *                     inverse filtering
+ * EMAC_FRAMEFLTR_SAF  Source address filter  0 (disabled)
+ * EMAC_FRAMEFLTR_HPF  Hash or perfect filter 0 (Only matching frames passed)
+ * EMAC_FRAMEFLTR_VTFE VLAN Tag Filter Enable 0 (VLAN tag ignored)
+ * EMAC_FRAMEFLTR_RA   Receive all            0 (disabled)
  */
 
 #define FRAMEFLTR_SET_BITS (EMAC_FRAMEFLTR_PCF_PAUSE)
 
-/* Clear the FLOWCTL bits that will be setup during MAC initialization (or that
- * are cleared unconditionally).  Per the reference manual, all reserved bits
- * must be retained at their reset value.
+/* Clear the FLOWCTL bits that will be setup during MAC initialization (or
+ * that are cleared unconditionally).  Per the reference manual, all reserved
+ * bits must be retained at their reset value.
  *
  * EMAC_FLOWCTL_FCBBPA   Bit 0: Flow control busy/back pressure activate
  * EMAC_FLOWCTL_TFE      Bit 1: Transmit flow control enable
@@ -408,20 +415,21 @@
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- * EMAC_FLOWCTL_FCBBPA   Flow control busy/back pressure activate   0 (no pause control frame)
- * EMAC_FLOWCTL_TFE      Transmit flow control enable               0 (disabled)
- * EMAC_FLOWCTL_RFE      Receive flow control enable                0 (disabled)
- * EMAC_FLOWCTL_UP       Unicast pause frame detect                 0 (disabled)
- * EMAC_FLOWCTL_PLT      Pause low threshold                        0 (pause time - 4)
- * EMAC_FLOWCTL_DZQP     Zero-quanta pause disable                  1 (disabled)
- * EMAC_FLOWCTL_PT       Pause time                                 0
+ * EMAC_FLOWCTL_FCBBPA Flow control busy/back 0     (no pause control frame)
+ *                     pressure activate
+ * EMAC_FLOWCTL_TFE    Transmit flow control enable 0 (disabled)
+ * EMAC_FLOWCTL_RFE    Receive flow control enable  0 (disabled)
+ * EMAC_FLOWCTL_UP     Unicast pause frame detect   0 (disabled)
+ * EMAC_FLOWCTL_PLT    Pause low threshold          0 (pause time - 4)
+ * EMAC_FLOWCTL_DZQP   Zero-quanta pause disable    1 (disabled)
+ * EMAC_FLOWCTL_PT     Pause time                   0
  */
 
 #define FLOWCTL_SET_MASK (EMAC_FLOWCTL_PLT_M4 | EMAC_FLOWCTL_DZQP)
 
-/* Clear the DMAOPMODE bits that will be setup during MAC initialization (or that
- * are cleared unconditionally).  Per the reference manual, all reserved bits
- * must be retained at their reset value.
+/* Clear the DMAOPMODE bits that will be setup during MAC initialization (or
+ * that are cleared unconditionally).  Per the reference manual, all reserved
+ * bits must be retained at their reset value.
  *
  * EMAC_DMAOPMODE_SR     Bit 1:  Start/stop receive
  * EMAC_DMAOPMODE_OSF    Bit 2:  Operate on second frame
@@ -435,7 +443,8 @@
  * EMAC_DMAOPMODE_TSF    Bit 21: Transmit store and forward
  * EMAC_DMAOPMODE_DFF    Bit 24: Disable flushing of received frames
  * EMAC_DMAOPMODE_RSF    Bit 25: Receive store and forward
- * EMAC_DMAOPMODE_DT     Bit 26: Dropping of TCP/IP checksum error frames disable
+ * EMAC_DMAOPMODE_DT     Bit 26: Dropping of TCP/IP checksum error
+ *                               frames disable
  */
 
 #define DMAOPMODE_CLEAR_MASK \
@@ -446,19 +455,23 @@
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- * EMAC_DMAOPMODE_SR     Start/stop receive                   0 (not running)
- * EMAC_DMAOPMODE_OSF    Operate on second frame              1 (enabled)
- * EMAC_DMAOPMODE_RTC    Receive threshold control            0 (64 bytes)
- * EMAC_DMAOPMODE_FUF    Forward undersized good frames       0 (disabled)
- * EMAC_DMAOPMODE_FEF    Forward error frames                 0 (disabled)
- * EMAC_DMAOPMODE_ST     Start/stop transmission              0 (not running)
- * EMAC_DMAOPMODE_TTC    Transmit threshold control           0 (64 bytes)
- * EMAC_DMAOPMODE_FTF    Flush transmit FIFO                  0 (no flush)
- * EMAC_DMAOPMODE_TSF    Transmit store and forward           Depends on CONFIG_TIVA_EMAC_HWCHECKSUM
- * EMAC_DMAOPMODE_DFF    Disable flushing of received frames  0 (enabled)
- * EMAC_DMAOPMODE_RSF    Receive store and forward            Depends on CONFIG_TIVA_EMAC_HWCHECKSUM
- * EMAC_DMAOPMODE_DT     Dropping of TCP/IP checksum error    Depends on CONFIG_TIVA_EMAC_HWCHECKSUM
- *                       frames disable
+ * EMAC_DMAOPMODE_SR  Start/stop receive          0 (not running)
+ * EMAC_DMAOPMODE_OSF Operate on second frame     1 (enabled)
+ * EMAC_DMAOPMODE_RTC Receive threshold control   0 (64 bytes)
+ * EMAC_DMAOPMODE_FUF Forward undersized          0 (disabled)
+ *                    good frames
+ * EMAC_DMAOPMODE_FEF Forward error frames        0 (disabled)
+ * EMAC_DMAOPMODE_ST  Start/stop transmission     0 (not running)
+ * EMAC_DMAOPMODE_TTC Transmit threshold control  0 (64 bytes)
+ * EMAC_DMAOPMODE_FTF Flush transmit FIFO         0 (no flush)
+ * EMAC_DMAOPMODE_TSF Transmit store and forward  Depends on
+ *                                                CONFIG_TIVA_EMAC_HWCHECKSUM
+ * EMAC_DMAOPMODE_DFF Disable flushing ofs        0 (enabled)
+ *                    received frame
+ * EMAC_DMAOPMODE_RSF Receive store and forward   Depends on
+ *                                                CONFIG_TIVA_EMAC_HWCHECKSUM
+ * EMAC_DMAOPMODE_DT  Dropping of TCP/IP checksum Depends on
+ *                    error frames disable        CONFIG_TIVA_EMAC_HWCHECKSUM
  *
  * When the checksum offload feature is enabled, we need to enable the Store
  * and Forward mode: the store and forward guarantee that a whole frame is
@@ -476,9 +489,9 @@
      EMAC_DMAOPMODE_DT)
 #endif
 
-/* Clear the DMABUSMOD bits that will be setup during MAC initialization (or that
- * are cleared unconditionally).  Per the reference manual, all reserved bits
- * must be retained at their reset value.
+/* Clear the DMABUSMOD bits that will be setup during MAC initialization (or
+ * that are cleared unconditionally).  Per the reference manual, all reserved
+ * bits must be retained at their reset value.
  *
  * EMAC_DMABUSMOD_SWR    Bit 0: Software reset
  * EMAC_DMABUSMOD_DA     Bit 1: DMA Arbitration
@@ -505,20 +518,24 @@
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- * EMAC_DMABUSMOD_SWR    Software reset                     0 (no reset)
- * EMAC_DMABUSMOD_DA     DMA Arbitration                    1 (fixed priority)
- * EMAC_DMABUSMOD_DSL    Descriptor skip length             0
- * EMAC_DMABUSMOD_ATDS   Enhanced descriptor format enable  Depends on CONFIG_TIVA_EMAC_ENHANCEDDESC
- * EMAC_DMABUSMOD_PBL    Programmable burst length          Depends on EMAC_DMA_RXBURST
- * EMAC_DMABUSMOD_PR     RX TX priority ratio               0 1:1
- * EMAC_DMABUSMOD_FB     Fixed burst                        0 (disabled)
- * EMAC_DMABUSMOD_RPBL   RX DMA programmable burst length   Depends on EMAC_DMA_TXBURST
- * EMAC_DMABUSMOD_USP    Use separate PBL                   Depends on EMAC_DMA_RX/TXBURST
- * EMAC_DMABUSMOD_8XPBL  8x programmable burst length mode  Depends on EMAC_DMA_RX/TXBURST
- * EMAC_DMABUSMOD_AAL    Address-aligned beats              0 (disabled)
- * EMAC_DMABUSMOD_MB     Mixed burst                        1 (enabled)
- * EMAC_DMABUSMOD_TXPR   Transmit Priority                  0 (RX DMA has priority over TX)
- * EMAC_DMABUSMOD_RIB    Rebuild Burst                      0
+ * EMAC_DMABUSMOD_SWR   Software reset         0 (no reset)
+ * EMAC_DMABUSMOD_DA    DMA Arbitration        1 (fixed priority)
+ * EMAC_DMABUSMOD_DSL   Descriptor skip length 0
+ * EMAC_DMABUSMOD_ATDS  Enhanced descriptor    Depends on
+ *                      format enable          CONFIG_TIVA_EMAC_ENHANCEDDESC
+ * EMAC_DMABUSMOD_PBL   Programmable burst     Depends on EMAC_DMA_RXBURST
+ *                      length
+ * EMAC_DMABUSMOD_PR    RX TX priority ratio   0 1:1
+ * EMAC_DMABUSMOD_FB    Fixed burst            0 (disabled)
+ * EMAC_DMABUSMOD_RPBL  RX DMA programmable    Depends on EMAC_DMA_TXBURST
+ *                      burst length
+ * EMAC_DMABUSMOD_USP   Use separate PBL       Depends on EMAC_DMA_RX/TXBURST
+ * EMAC_DMABUSMOD_8XPBL 8x programmable burst  Depends on EMAC_DMA_RX/TXBURST
+ *                      length mode
+ * EMAC_DMABUSMOD_AAL   Address-aligned beats  0(disabled)
+ * EMAC_DMABUSMOD_MB    Mixed burst            1(enabled)
+ * EMAC_DMABUSMOD_TXPR  Transmit Priority      0(RX DMA has priority over TX)
+ * EMAC_DMABUSMOD_RIB   Rebuild Burst          0
  */
 
 #define EMAC_DMA_RXBURST          4
@@ -564,9 +581,10 @@
     __EMAC_DMABUSMOD_8XPBL | EMAC_DMABUSMOD_MB)
 
 /* Interrupt bit sets *******************************************************/
-/* All interrupts in the normal and abnormal interrupt summary.  Early transmit
- * interrupt (ETI) is excluded from the abnormal set because it causes too
- * many interrupts and is not interesting.
+
+/* All interrupts in the normal and abnormal interrupt summary. Early
+ * transmit interrupt (ETI) is excluded from the abnormal set because it
+ * causes too many interrupts and is not interesting.
  */
 
 #define EMAC_DMAINT_NORMAL \
@@ -590,6 +608,7 @@
 #endif
 
 /* Helpers ******************************************************************/
+
 /* This is a helper pointer for accessing the contents of the Ethernet
  * header
  */
@@ -654,6 +673,7 @@ static struct tiva_ethmac_s g_tiva_ethmac[TIVA_NETHCONTROLLERS];
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Register operations ******************************************************/
 
 #if defined(CONFIG_TIVA_ETHERNET_REGDEBUG) && defined(CONFIG_DEBUG_INFO)
@@ -811,7 +831,7 @@ static uint32_t tiva_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          _info("[repeats %d more times]\n", count-3);
+          _info("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -961,7 +981,8 @@ static inline uint8_t *tiva_allocbuffer(FAR struct tiva_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static inline void tiva_freebuffer(FAR struct tiva_ethmac_s *priv, uint8_t *buffer)
+static inline void tiva_freebuffer(FAR struct tiva_ethmac_s *priv,
+                                   uint8_t *buffer)
 {
   /* Free the buffer by adding it to the end of the free buffer list */
 
@@ -1018,8 +1039,8 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
   struct emac_txdesc_s *txdesc;
   struct emac_txdesc_s *txfirst;
 
-  /* The internal (optimal) network buffer size may be configured to be larger
-   * than the Ethernet buffer size.
+  /* The internal (optimal) network buffer size may be configured to be
+   * larger than the Ethernet buffer size.
    */
 
 #if OPTIMAL_EMAC_BUFSIZE > OPTIMAL_EMAC_BUFSIZE
@@ -1051,7 +1072,8 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
     {
       /* Yes... how many buffers will be need to send the packet? */
 
-      bufcount = (priv->dev.d_len + (OPTIMAL_EMAC_BUFSIZE-1)) / OPTIMAL_EMAC_BUFSIZE;
+      bufcount = (priv->dev.d_len + (OPTIMAL_EMAC_BUFSIZE - 1)) /
+                 OPTIMAL_EMAC_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * OPTIMAL_EMAC_BUFSIZE;
 
       ninfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
@@ -1076,7 +1098,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
 
           /* Set the buffer size in all TX descriptors */
 
-          if (i == (bufcount-1))
+          if (i == (bufcount - 1))
             {
               /* This is the last segment.  Set the last segment bit in the
                * last TX descriptor and ask for an interrupt when this
@@ -1167,9 +1189,9 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
   ninfo("txhead: %p txtail: %p inflight: %d\n",
         priv->txhead, priv->txtail, priv->inflight);
 
-  /* If all TX descriptors are in-flight, then we have to disable receive interrupts
-   * too.  This is because receive events can trigger more un-stoppable transmit
-   * events.
+  /* If all TX descriptors are in-flight, then we have to disable receive
+   * interrupts too. This is because receive events can trigger more un-
+   * stoppable transmit events.
    */
 
   if (priv->inflight >= CONFIG_TIVA_EMAC_NTXDESC)
@@ -1205,8 +1227,9 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
  * Function: tiva_txpoll
  *
  * Description:
- *   The transmitter is available, check if the network has any outgoing packets ready
- *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send. This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -1227,7 +1250,8 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
 
 static int tiva_txpoll(struct net_driver_s *dev)
 {
-  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
+  FAR struct tiva_ethmac_s *priv =
+    (FAR struct tiva_ethmac_s *)dev->d_private;
 
   DEBUGASSERT(priv->dev.d_buf != NULL);
 
@@ -1266,14 +1290,14 @@ static int tiva_txpoll(struct net_driver_s *dev)
           tiva_transmit(priv);
           DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
 
-          /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
-           * cannot perform the TX poll if we are unable to accept another packet for
-           * transmission.
+          /* Check if the next TX descriptor is owned by the Ethernet DMA or
+           * CPU. We cannot perform the TX poll if we are unable to accept
+           * another packet for transmission.
            *
-           * In a race condition, EMAC_TDES0_OWN may be cleared BUT still not available
-           * because tiva_freeframe() has not yet run.  If tiva_freeframe() has run,
-           * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
-           * CONFIG_TIVA_EMAC_NTXDESC).
+           * In a race condition, EMAC_TDES0_OWN may be cleared BUT still
+           * not available because tiva_freeframe() has not yet run. If
+           * tiva_freeframe() has run, the buffer1 pointer (tdes2) will be
+           * nullified (and inflight should be < CONFIG_TIVA_EMAC_NTXDESC).
            */
 
           if ((priv->txhead->tdes0 & EMAC_TDES0_OWN) != 0 ||
@@ -1303,8 +1327,8 @@ static int tiva_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -1341,10 +1365,10 @@ static void tiva_dopoll(FAR struct tiva_ethmac_s *priv)
    * CPU.  We cannot perform the TX poll if we are unable to accept
    * another packet for transmission.
    *
-   * In a race condition, EMAC_TDES0_OWN may be cleared BUT still not available
-   * because tiva_freeframe() has not yet run.  If tiva_freeframe() has run,
-   * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
-   * CONFIG_TIVA_EMAC_NTXDESC).
+   * In a race condition, EMAC_TDES0_OWN may be cleared BUT still
+   * not available because tiva_freeframe() has not yet run. If
+   * tiva_freeframe() has run, the buffer1 pointer (tdes2) will be
+   * nullified (and inflight should be < CONFIG_TIVA_EMAC_NTXDESC).
    */
 
   if ((priv->txhead->tdes0 & EMAC_TDES0_OWN) == 0 &&
@@ -1462,7 +1486,7 @@ static void tiva_disableint(FAR struct tiva_ethmac_s *priv, uint32_t ierbit)
  ****************************************************************************/
 
 static void tiva_freesegment(FAR struct tiva_ethmac_s *priv,
-                              FAR struct emac_rxdesc_s *rxfirst, int segments)
+                             FAR struct emac_rxdesc_s *rxfirst, int segments)
 {
   struct emac_rxdesc_s *rxdesc;
   int i;
@@ -1604,7 +1628,8 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
                * bytes of the CRC
                */
 
-              dev->d_len = ((rxdesc->rdes0 & EMAC_RDES0_FL_MASK) >> EMAC_RDES0_FL_SHIFT) - 4;
+              dev->d_len = ((rxdesc->rdes0 & EMAC_RDES0_FL_MASK) >>
+                            EMAC_RDES0_FL_SHIFT) - 4;
 
               /* Get a buffer from the free list.  We don't even check if
                * this is successful because we already assure the free
@@ -1614,17 +1639,17 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
               buffer = tiva_allocbuffer(priv);
 
               /* Take the buffer from the RX descriptor of the first free
-               * segment, put it into the network device structure, then replace
-               * the buffer in the RX descriptor with the newly allocated
-               * buffer.
+               * segment, put it into the network device structure, then
+               * replace the buffer in the RX descriptor with the newly
+               * allocated buffer.
                */
 
               DEBUGASSERT(dev->d_buf == NULL);
               dev->d_buf    = (uint8_t *)rxcurr->rdes2;
               rxcurr->rdes2 = (uint32_t)buffer;
 
-              /* Return success, remembering where we should re-start scanning
-               * and resetting the segment scanning logic
+              /* Return success, remembering where we should re-start
+               * scanning and resetting the segment scanning logic
                */
 
               priv->rxhead   = (struct emac_rxdesc_s *)rxdesc->rdes3;
@@ -1651,8 +1676,9 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
       rxdesc = (struct emac_rxdesc_s *)rxdesc->rdes3;
     }
 
-  /* We get here after all of the descriptors have been scanned or when rxdesc points
-   * to the first descriptor owned by the DMA.  Remember where we left off.
+  /* We get here after all of the descriptors have been scanned or when
+   * rxdesc points to the first descriptor owned by the DMA. Remember
+   * where we left off.
    */
 
   priv->rxhead = rxdesc;
@@ -1691,13 +1717,13 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
   while (tiva_recvframe(priv) == OK)
     {
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the tap */
 
-      pkt_input(&priv->dev);
+     pkt_input(&priv->dev);
 #endif
 
-      /* Check if the packet is a valid size for the network buffer configuration
-       * (this should not happen)
+      /* Check if the packet is a valid size for the network buffer
+       * configuration (this should not happen)
        */
 
       if (dev->d_len > CONFIG_NET_ETH_PKTSIZE)
@@ -1721,7 +1747,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
           ipv4_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -1740,6 +1766,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
                   neighbor_out(&priv->dev);
                 }
 #endif
+
               /* And send the packet */
 
               tiva_transmit(priv);
@@ -1757,7 +1784,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
           ipv6_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -1794,7 +1821,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
           arp_arpin(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -1828,7 +1855,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
  * Function: tiva_freeframe
  *
  * Description:
- *   Scans the TX descriptors and frees the buffers of completed TX transfers.
+ *   Scans the TX descriptors and frees the buffers of completed transfers.
  *
  * Input Parameters:
  *   priv  - Reference to the driver state structure
@@ -1888,8 +1915,9 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
 
               priv->inflight--;
 
-              /* If all of the TX descriptors were in-flight, then RX interrupts
-               * may have been disabled... we can re-enable them now.
+              /* If all of the TX descriptors were in-flight,
+               * then RX interrupts may have been disabled...
+               * we can re-enable them now.
                */
 
               tiva_enableint(priv, EMAC_DMAINT_RI);
@@ -1999,8 +2027,8 @@ static void tiva_interrupt_work(FAR void *arg)
 
   dmaris = tiva_getreg(TIVA_EMAC_DMARIS);
 
-  /* Mask only enabled interrupts.  This depends on the fact that the interrupt
-   * related bits (0-16) correspond in these two registers.
+  /* Mask only enabled interrupts.  This depends on the fact that the
+   * interrupt related bits (0-16) correspond in these two registers.
    */
 
   dmaris &= tiva_getreg(TIVA_EMAC_DMAIM);
@@ -2240,15 +2268,14 @@ static void tiva_poll_work(FAR void *arg)
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
   FAR struct net_driver_s *dev  = &priv->dev;
 
-  /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
-   * cannot perform the timer poll if we are unable to accept another packet
-   * for transmission.  Hmmm.. might be bug here.  Does this mean if there is
-   * a transmit in progress, we will miss TCP time state updates?
+  /* Check if the next TX descriptor is owned by the Ethernet DMA or
+   * CPU.  We cannot perform the TX poll if we are unable to accept
+   * another packet for transmission.
    *
-   * In a race condition, EMAC_TDES0_OWN may be cleared BUT still not available
-   * because tiva_freeframe() has not yet run.  If tiva_freeframe() has run,
-   * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
-   * CONFIG_TIVA_EMAC_NTXDESC).
+   * In a race condition, EMAC_TDES0_OWN may be cleared BUT still
+   * not available because tiva_freeframe() has not yet run. If
+   * tiva_freeframe() has run, the buffer1 pointer (tdes2) will be
+   * nullified (and inflight should be < CONFIG_TIVA_EMAC_NTXDESC).
    */
 
   net_lock();
@@ -2337,7 +2364,8 @@ static void tiva_poll_expiry(int argc, wdparm_t arg, ...)
 
 static int tiva_ifup(struct net_driver_s *dev)
 {
-  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
+  FAR struct tiva_ethmac_s *priv =
+    (FAR struct tiva_ethmac_s *)dev->d_private;
   int ret;
 
 #ifdef CONFIG_NET_IPv4
@@ -2392,7 +2420,8 @@ static int tiva_ifup(struct net_driver_s *dev)
 
 static int tiva_ifdown(struct net_driver_s *dev)
 {
-  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
+  FAR struct tiva_ethmac_s *priv =
+    (FAR struct tiva_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
   ninfo("Taking the network down\n");
@@ -2478,7 +2507,8 @@ static void tiva_txavail_work(FAR void *arg)
 
 static int tiva_txavail(struct net_driver_s *dev)
 {
-  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
+  FAR struct tiva_ethmac_s *priv =
+    (FAR struct tiva_ethmac_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -2526,6 +2556,7 @@ static uint32_t tiva_calcethcrc(const uint8_t *data, size_t length)
           if (((crc >> 31) ^ (data[i] >> j)) & 0x01)
             {
               /* x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1 */
+
               crc = (crc << 1) ^ 0x04c11db7;
             }
           else
@@ -2572,7 +2603,7 @@ static int tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   crc = tiva_calcethcrc(mac, 6);
 
-  hashindex = (crc >> 26) & 0x3F;
+  hashindex = (crc >> 26) & 0x3f;
 
   if (hashindex > 31)
     {
@@ -2600,8 +2631,8 @@ static int tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  * Function: tiva_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -2629,7 +2660,7 @@ static int tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 
   crc = tiva_calcethcrc(mac, 6);
 
-  hashindex = (crc >> 26) & 0x3F;
+  hashindex = (crc >> 26) & 0x3f;
 
   if (hashindex > 31)
     {
@@ -2680,8 +2711,9 @@ static void tiva_txdescinit(FAR struct tiva_ethmac_s *priv)
   struct emac_txdesc_s *txdesc;
   int i;
 
-  /* priv->txhead will point to the first, available TX descriptor in the chain.
-   * Set the priv->txhead pointer to the first descriptor in the table.
+  /* priv->txhead will point to the first, available TX descriptor in the
+   * chain. Set the priv->txhead pointer to the first descriptor in the
+   * table.
    */
 
   priv->txhead = priv->txtable;
@@ -2691,8 +2723,8 @@ static void tiva_txdescinit(FAR struct tiva_ethmac_s *priv)
    * transfers.
    */
 
-   priv->txtail   = NULL;
-   priv->inflight = 0;
+  priv->txtail   = NULL;
+  priv->inflight = 0;
 
   /* Initialize each TX descriptor */
 
@@ -2716,15 +2748,17 @@ static void tiva_txdescinit(FAR struct tiva_ethmac_s *priv)
 
       txdesc->tdes2 = 0;
 
-      /* Initialize the next descriptor with the Next Descriptor Polling Enable */
+      /* Initialize the next descriptor with
+       * the Next Descriptor Polling Enable
+       */
 
-      if (i < (CONFIG_TIVA_EMAC_NTXDESC-1))
+      if (i < (CONFIG_TIVA_EMAC_NTXDESC - 1))
         {
           /* Set next descriptor address register with next descriptor base
            * address
            */
 
-          txdesc->tdes3 = (uint32_t)&priv->txtable[i+1];
+          txdesc->tdes3 = (uint32_t)&priv->txtable[i + 1];
         }
       else
         {
@@ -2793,17 +2827,19 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv)
 
       /* Set Buffer1 address pointer */
 
-      rxdesc->rdes2 = (uint32_t)&priv->rxbuffer[i*OPTIMAL_EMAC_BUFSIZE];
+      rxdesc->rdes2 = (uint32_t)&priv->rxbuffer[i * OPTIMAL_EMAC_BUFSIZE];
 
-      /* Initialize the next descriptor with the Next Descriptor Polling Enable */
+      /* Initialize the next descriptor with
+       * the Next Descriptor Polling Enable
+       */
 
-      if (i < (CONFIG_TIVA_EMAC_NRXDESC-1))
+      if (i < (CONFIG_TIVA_EMAC_NRXDESC - 1))
         {
           /* Set next descriptor address register with next descriptor base
            * address
            */
 
-          rxdesc->rdes3 = (uint32_t)&priv->rxtable[i+1];
+          rxdesc->rdes3 = (uint32_t)&priv->rxtable[i + 1];
         }
       else
         {
@@ -2860,7 +2896,8 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 #ifdef CONFIG_TIVA_PHY_INTERRUPTS
       case SIOCMIINOTIFY: /* Set up for PHY event notifications */
         {
-          struct mii_ioctl_notify_s *req = (struct mii_ioctl_notify_s *)((uintptr_t)arg);
+          struct mii_ioctl_notify_s *req =
+            (struct mii_ioctl_notify_s *)((uintptr_t)arg);
 
           ret = phy_notify_subscribe(dev->d_ifname, req->pid, &req->event);
           if (ret == OK)
@@ -2875,7 +2912,8 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 
       case SIOCGMIIPHY: /* Get MII PHY address */
         {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
           req->phy_id = CONFIG_TIVA_PHYADDR;
           ret = OK;
         }
@@ -2883,14 +2921,16 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 
       case SIOCGMIIREG: /* Get register from MII PHY */
         {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
           ret = tiva_phyread(req->phy_id, req->reg_num, &req->val_out);
         }
         break;
 
       case SIOCSMIIREG: /* Set register in MII PHY */
        {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+            (struct mii_ioctl_data_s *)((uintptr_t)arg);
           ret = tiva_phywrite(req->phy_id, req->reg_num, req->val_in);
         }
         break;
@@ -2936,6 +2976,7 @@ static void tiva_phy_intenable(bool enable)
   tiva_putreg(0, TIVA_EPHY_IM);
 
   /* Enable/disable event based PHY interrupts */
+
   /* REVISIT:  There is an issue here:  The PHY interrupt handler is called
    * from the interrupt level and it, in turn, will call this function to
    * disabled further interrupts.  Subsequent link status processing will
@@ -2960,7 +3001,8 @@ static void tiva_phy_intenable(bool enable)
           if (ret == OK)
             {
               phyval |= EPHY_SCR_INTEN;
-              ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, phyval);
+              ret = tiva_phywrite(CONFIG_TIVA_PHYADDR,
+                                  TIVA_EPHY_SCR, phyval);
               if (ret == OK)
                 {
                   /* Enable PHY interrupts */
@@ -3019,12 +3061,15 @@ static void tiva_phy_intenable(bool enable)
  *
  ****************************************************************************/
 
-static int tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value)
+static int tiva_phyread(uint16_t phydevaddr,
+                        uint16_t phyregaddr, uint16_t *value)
 {
   volatile uint32_t timeout;
   uint32_t regval;
 
-  /* Configure the MIIADDR register, preserving CSR Clock Range CR[2:0] bits */
+  /* Configure the MIIADDR register,
+   * preserving CSR Clock Range CR[2:0] bits
+   */
 
   regval  = tiva_getreg(TIVA_EMAC_MIIADDR);
   regval &= EMAC_MIIADDR_CR_MASK;
@@ -3033,8 +3078,8 @@ static int tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *valu
    * the EMAC_MIIADDR_MIIW is clear, indicating a read operation.
    */
 
-  regval |= (((uint32_t)phydevaddr << EMAC_MIIADDR_PLA_SHIFT) & EMAC_MIIADDR_PLA_MASK);
-  regval |= (((uint32_t)phyregaddr << EMAC_MIIADDR_MII_SHIFT) & EMAC_MIIADDR_MII_MASK);
+  regval |= (phydevaddr << EMAC_MIIADDR_PLA_SHIFT) & EMAC_MIIADDR_PLA_MASK;
+  regval |= (phyregaddr << EMAC_MIIADDR_MII_SHIFT) & EMAC_MIIADDR_MII_MASK;
   regval |= EMAC_MIIADDR_MIIB;
 
   tiva_putreg(regval, TIVA_EMAC_MIIADDR);
@@ -3074,12 +3119,15 @@ static int tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *valu
  *
  ****************************************************************************/
 
-static int tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value)
+static int tiva_phywrite(uint16_t phydevaddr,
+                         uint16_t phyregaddr, uint16_t value)
 {
   volatile uint32_t timeout;
   uint32_t regval;
 
-  /* Configure the MIIADDR register, preserving CSR Clock Range CR[2:0] bits */
+  /* Configure the MIIADDR register,
+   * preserving CSR Clock Range CR[2:0] bits
+   */
 
   regval  = tiva_getreg(TIVA_EMAC_MIIADDR);
   regval &= EMAC_MIIADDR_CR_MASK;
@@ -3088,8 +3136,8 @@ static int tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t valu
    * the EMAC_MIIADDR_MIIW is set, indicating a write operation.
    */
 
-  regval |= (((uint32_t)phydevaddr << EMAC_MIIADDR_PLA_SHIFT) & EMAC_MIIADDR_PLA_MASK);
-  regval |= (((uint32_t)phyregaddr << EMAC_MIIADDR_MII_SHIFT) & EMAC_MIIADDR_MII_MASK);
+  regval |= (phydevaddr << EMAC_MIIADDR_PLA_SHIFT) & EMAC_MIIADDR_PLA_MASK;
+  regval |= (phyregaddr << EMAC_MIIADDR_MII_SHIFT) & EMAC_MIIADDR_MII_MASK;
   regval |= (EMAC_MIIADDR_MIIB | EMAC_MIIADDR_MIIW);
 
   /* Write the value into the MACIIDR register before setting the new MIIADDR
@@ -3109,7 +3157,8 @@ static int tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t valu
         }
     }
 
-  nerr("ERROR: MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
+  nerr("ERROR: MII transfer timed out: "
+       "phydevaddr: %04x phyregaddr: %04x value: %04x\n",
        phydevaddr, phyregaddr, value);
 
   return -ETIMEDOUT;
@@ -3232,10 +3281,10 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 
   ninfo("PHYSR[%d]: %04x\n", CONFIG_TIVA_PHYSR, phyval);
 
-  /* Different PHYs present speed and mode information in different ways.  IF
-   * This CONFIG_TIVA_PHYSR_ALTCONFIG is selected, this indicates that the PHY
-   * represents speed and mode information are combined, for example, with
-   * separate bits for 10HD, 100HD, 10FD and 100FD.
+  /* Different PHYs present speed and mode information in different ways.
+   * IF This CONFIG_TIVA_PHYSR_ALTCONFIG is selected, this indicates that
+   * the PHY represents speed and mode information are combined, for
+   * example, with separate bits for 10HD, 100HD, 10FD and 100FD.
    */
 
 #ifdef CONFIG_TIVA_PHYSR_ALTCONFIG
@@ -3263,10 +3312,10 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
         break;
     }
 
-  /* Different PHYs present speed and mode information in different ways.  Some
-   * will present separate information for speed and mode (this is the default).
-   * Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
-   * full/half duplex indication.
+  /* Different PHYs present speed and mode information in different ways.
+   * Some will present separate information for speed and mode (this is the
+   * default). Those PHYs, for example, may provide a 10/100 Mbps indication
+   * and a separate full/half duplex indication.
    */
 
 #else
@@ -3429,8 +3478,8 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
   ninfo("Enable EPHY power\n");
   tiva_ephy_enablepwr();
 
-  /* What until the PREPHY register indicates that the PHY registers are ready
-   * to be accessed.
+  /* What until the PREPHY register indicates that the PHY registers are
+   * ready to be accessed.
    */
 
   while (!tiva_ephy_periphrdy());
@@ -3445,16 +3494,18 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
 #ifdef CONFIG_TIVA_PHY_INTERNAL
   /* Integrated PHY:
    *
-   *   "The Ethernet Controller Module and Integrated PHY receive two clock inputs:
-   *    - A gated system clock acts as the clock source to the Control and Status
-   *      registers (CSR) of the Ethernet MAC. The SYSCLK frequency for Run, Sleep
-   *      and Deep Sleep mode is programmed in the System Control module. ...
-   *    - The PHY receives the main oscillator (MOSC) which must be 25 MHz ± 50 ppm
-   *      for proper operation. The MOSC source can be a single-ended source or a
-   *      crystal."
+   *   "The Ethernet Controller Module and Integrated PHY receive two clock
+   *    inputs:
+   *    - A gated system clock acts as the clock source to the Control and
+   *      Status registers (CSR) of the Ethernet MAC. The SYSCLK frequency
+   *      for Run, Sleep and Deep Sleep mode is programmed in the System
+   *      Control module. ...
+   *    - The PHY receives the main oscillator (MOSC) which must be 25 MHz
+   *      ± 50 ppm for proper operation. The MOSC source can be a single-
+   *      ended source or a crystal."
    *
-   *   These are currently set up in tiva_clock_reconfigure() before this function
-   *   runs.
+   *   These are currently set up in tiva_clock_reconfigure() before this
+   *   function runs.
    *
    * MII/RMII Clocking:
    *
@@ -3483,6 +3534,7 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
   tiva_configgpio(GPIO_EN0_INTRN);
 
   /* Configure GPIO pins to support MII or RMII */
+
   /* MDC and MDIO are common to both modes */
 
   tiva_configgpio(GPIO_EN0_MDC);
@@ -3516,8 +3568,8 @@ static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
 
   /* MII interface pins (17):
    *
-   * MII_TX_CLK, MII_TXD[3:0], MII_TX_EN, MII_RX_CLK, MII_RXD[3:0], MII_RX_ER,
-   * MII_RX_DV, MII_CRS, MII_COL, MDC, MDIO
+   * MII_TX_CLK, MII_TXD[3:0], MII_TX_EN, MII_RX_CLK, MII_RXD[3:0],
+   * MII_RX_ER, MII_RX_DV, MII_CRS, MII_COL, MDC, MDIO
    */
 
   tiva_configgpio(GPIO_EN0_MII_COL);
@@ -3619,17 +3671,18 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
   up_udelay(250);
 #endif
 
-  /* Perform a software reset by setting the SWR bit in the DMABUSMOD register.
-   * This Resets all MAC subsystem internal registers and logic.  After this
-   * reset all the registers holds their reset values.
+  /* Perform a software reset by setting the SWR bit in the DMABUSMOD
+   * register. This Resets all MAC subsystem internal registers and logic.
+   * After this reset all the registers holds their reset values.
    */
 
   regval  = tiva_getreg(TIVA_EMAC_DMABUSMOD);
   regval |= EMAC_DMABUSMOD_SWR;
   tiva_putreg(regval, TIVA_EMAC_DMABUSMOD);
 
-  /* Wait for software reset to complete. The SWR bit is cleared automatically
-   * after the reset operation has completed in all of the core clock domains.
+  /* Wait for software reset to complete. The SWR bit is cleared
+   * automatically after the reset operation has completed in all
+   * core clock domains.
    */
 
   while ((tiva_getreg(TIVA_EMAC_DMABUSMOD) & EMAC_DMABUSMOD_SWR) != 0);
@@ -3708,6 +3761,7 @@ static int tiva_macconfig(FAR struct tiva_ethmac_s *priv)
   tiva_putreg(0, TIVA_EMAC_VLANTG);
 
   /* DMA Configuration */
+
   /* Set up the DMAOPMODE register */
 
   regval  = tiva_getreg(TIVA_EMAC_DMAOPMODE);
@@ -3748,9 +3802,12 @@ static void tiva_macaddress(FAR struct tiva_ethmac_s *priv)
 
   ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_ifname,
-        dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
-        dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],
-        dev->d_mac.ether.ether_addr_octet[4], dev->d_mac.ether.ether_addr_octet[5]);
+        dev->d_mac.ether.ether_addr_octet[0],
+        dev->d_mac.ether.ether_addr_octet[1],
+        dev->d_mac.ether.ether_addr_octet[2],
+        dev->d_mac.ether.ether_addr_octet[3],
+        dev->d_mac.ether.ether_addr_octet[4],
+        dev->d_mac.ether.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
 
@@ -4053,20 +4110,20 @@ int tiva_ethinitialize(int intf)
 
   /* Enable power and clocking to the Ethernet MAC
    *
-   * - Enable Power:  Applies power (only) to the EMAC peripheral.  This is not
+   * - Enable Power: Applies power (only) to the EMAC peripheral. This is not
    *   an essential step since enabling clocking will also apply power.  The
    *   only significance is that the EMAC state will be retained if the EMAC
    *   clocking is subsequently disabled.
-   * - Enable Clocking:  Applies both power and clocking to the EMAC peripheral,
-   *   bringing it a fully functional state.
+   * - Enable Clocking:  Applies both power and clocking to the EMAC
+   *   peripheral, bringing it a fully functional state.
    */
 
   ninfo("Enable EMAC clocking\n");
   tiva_emac_enablepwr();   /* Ethernet MAC Power Control */
   tiva_emac_enableclk();   /* Ethernet MAC Run Mode Clock Gating Control */
 
-  /* What until the PREMAC register indicates that the EMAC registers are ready
-   * to be accessed.
+  /* What until the PREMAC register indicates that the EMAC registers are
+   * ready to be accessed.
    */
 
   while (!tiva_emac_periphrdy());
@@ -4094,7 +4151,7 @@ int tiva_ethinitialize(int intf)
     }
 
   /* Wait for EMAC to come out of reset. The SWR bit is cleared automatically
-   * after the reset operation has completed in all of the core clock domains.
+   * after the reset operation has completed in all core clock domains.
    */
 
   while ((tiva_getreg(TIVA_EMAC_DMABUSMOD) & EMAC_DMABUSMOD_SWR) != 0);
@@ -4131,8 +4188,8 @@ int tiva_ethinitialize(int intf)
  * Function: arm_netinitialize
  *
  * Description:
- *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in arm_initialize.c.  If TIVA_NETHCONTROLLERS
+ *   This is the "standard" network initialization logic called from the low
+ *   -level initialization logic in arm_initialize.c. If TIVA_NETHCONTROLLERS
  *   greater than one, then board specific logic will have to supply a
  *   version of arm_netinitialize() that calls tiva_ethinitialize() with
  *   the appropriate interface number.
@@ -4231,7 +4288,7 @@ int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
 #if TIVA_NETHCONTROLLERS > 1
   /* REVISIT: Additional logic needed if there are multiple EMACs */
 
-  warning Missing logic
+#  warning Missing logic
 #endif
   priv = g_tiva_ethmac;
 

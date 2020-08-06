@@ -284,7 +284,9 @@
 #   define CONFIG_DM9X_MODE_AUTO 1
 #endif
 
-/* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll deley = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
+ */
 
 #define DM9X_WDDELAY   (1*CLK_TCK)
 
@@ -292,7 +294,7 @@
 
 #define DM6X_TXTIMEOUT (60*CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define BUF ((struct eth_hdr_s *)priv->dm_dev.d_buf)
 
@@ -798,7 +800,8 @@ static int dm9x_transmit(FAR struct dm9x_driver_s *priv)
 
 static int dm9x_txpoll(FAR struct net_driver_s *dev)
 {
-  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
+  FAR struct dm9x_driver_s *priv =
+    (FAR struct dm9x_driver_s *)dev->d_private;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -841,15 +844,15 @@ static int dm9x_txpoll(FAR struct net_driver_s *dev)
 
           if (priv->dm_ntxpending > 1 || !priv->dm_b100m)
             {
-              /* Returning a non-zero value will terminate the poll operation */
+              /* Returning a non-zero value terminate the poll operation */
 
               return 1;
             }
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -920,7 +923,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
           priv->dm_discard(rx.desc.rx_len);
         }
 
-      /* Also check if the packet is a valid size for the network configuration */
+      /* Also check if the packet is a valid size for the configuration */
 
       else if (rx.desc.rx_len < ETH_HDRLEN ||
                rx.desc.rx_len > (CONFIG_NET_ETH_PKTSIZE + 2))
@@ -934,18 +937,20 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
         }
       else
         {
-          /* Good packet... Copy the packet data out of SRAM and pass it one to the network */
+          /* Good packet...
+           * Copy the packet data out of SRAM and pass it one to the network
+           */
 
           priv->dm_dev.d_len = rx.desc.rx_len;
           priv->dm_read(priv->dm_dev.d_buf, rx.desc.rx_len);
 
 #ifdef CONFIG_NET_PKT
-          /* When packet sockets are enabled, feed the frame into the packet tap */
+          /* When packet sockets are enabled, feed the frame into the tap */
 
           pkt_input(&priv->dm_dev);
 #endif
 
-          /* We only accept IP packets of the configured type and ARP packets */
+          /* We accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
           if (BUF->type == HTONS(ETHTYPE_IP))
@@ -960,14 +965,14 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
               arp_ipin(&priv->dm_dev);
               ipv4_input(&priv->dm_dev);
 
-              /* If the above function invocation resulted in data that should
-               * be sent out on the network, the field  d_len will set to a
-               * value > 0.
+              /* If the above function invocation resulted in data that
+               * should be sent out on the network, the field  d_len will
+               * set to a value > 0.
                */
 
               if (priv->dm_dev.d_len > 0)
                 {
-                  /* Update the Ethernet header with the correct MAC address */
+                  /* Update Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv6
                   if (IFF_IS_IPv4(priv->dm_dev.d_flags))
@@ -999,14 +1004,14 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
 
               ipv6_input(&priv->dm_dev);
 
-              /* If the above function invocation resulted in data that should
-               * be sent out on the network, the field  d_len will set to a
-               * value > 0.
+              /* If the above function invocation resulted in data that
+               * should be sent out on the network, the field  d_len will
+               * set to a value > 0.
                */
 
               if (priv->dm_dev.d_len > 0)
                 {
-                  /* Update the Ethernet header with the correct MAC address */
+                  /* Update Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_NET_IPv4
                   if (IFF_IS_IPv4(priv->dm_dev.d_flags))
@@ -1034,9 +1039,9 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
               arp_arpin(&priv->dm_dev);
               NETDEV_RXARP(&priv->dm_dev);
 
-              /* If the above function invocation resulted in data that should
-               * be sent out on the network, the field  d_len will set to a
-               * value > 0.
+              /* If the above function invocation resulted in data that
+               * should be sent out on the network, the field  d_len will set
+               * to a value > 0.
                */
 
               if (priv->dm_dev.d_len > 0)
@@ -1054,7 +1059,8 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
       NETDEV_RXPACKETS(&priv->dm_dev);
       priv->ncrxpackets++;
     }
-  while ((rxbyte & 0x01) == DM9X_PKTRDY && priv->ncrxpackets < DM9X_CRXTHRES);
+  while ((rxbyte & 0x01) == DM9X_PKTRDY &&
+         priv->ncrxpackets < DM9X_CRXTHRES);
   ninfo("All RX packets processed\n");
 }
 
@@ -1414,7 +1420,7 @@ static void dm9x_poll_work(FAR void *arg)
 
   if (priv->dm_ntxpending < 1 || (priv->dm_b100m && priv->dm_ntxpending < 2))
     {
-      /* If so, update TCP timing states and poll the network for new XMIT data */
+      /* Update TCP timing states and poll the network for new XMIT data */
 
       devif_timer(&priv->dm_dev, DM9X_WDDELAY, dm9x_txpoll);
     }
@@ -1516,7 +1522,8 @@ static inline void dm9x_phymode(FAR struct dm9x_driver_s *priv)
 
 static int dm9x_ifup(FAR struct net_driver_s *dev)
 {
-  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
+  FAR struct dm9x_driver_s *priv =
+    (FAR struct dm9x_driver_s *)dev->d_private;
   uint8_t netstatus;
   int i;
 
@@ -1584,7 +1591,8 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
 
 static int dm9x_ifdown(FAR struct net_driver_s *dev)
 {
-  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
+  FAR struct dm9x_driver_s *priv =
+    (FAR struct dm9x_driver_s *)dev->d_private;
   irqstate_t flags;
 
   ninfo("Stopping\n");
@@ -1631,7 +1639,8 @@ static int dm9x_ifdown(FAR struct net_driver_s *dev)
 
 static void dm9x_txavail_work(FAR void *arg)
 {
-  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
+  FAR struct dm9x_driver_s *priv =
+    (FAR struct dm9x_driver_s *)arg;
 
   ninfo("Polling\n");
 
@@ -1640,7 +1649,7 @@ static void dm9x_txavail_work(FAR void *arg)
   net_lock();
   if (priv->dm_bifup)
     {
-      /* Check if there is room in the DM90x0 to hold another packet.  In 100M
+      /* Check if there is room in the DM90x0 to hold another packet. In 100M
        * mode, that can be 2 packets, otherwise it is a single packet.
        */
 
@@ -1677,7 +1686,8 @@ static void dm9x_txavail_work(FAR void *arg)
 
 static int dm9x_txavail(FAR struct net_driver_s *dev)
 {
-  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
+  FAR struct dm9x_driver_s *priv =
+    (FAR struct dm9x_driver_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -1715,7 +1725,8 @@ static int dm9x_txavail(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_MCASTGROUP
 static int dm9x_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
+  FAR struct dm9x_driver_s *priv =
+    (FAR struct dm9x_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -1745,7 +1756,8 @@ static int dm9x_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_MCASTGROUP
 static int dm9x_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
+  FAR struct dm9x_driver_s *priv =
+    (FAR struct dm9x_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -1826,7 +1838,8 @@ static void dm9x_bringup(FAR struct dm9x_driver_s *priv)
   putreg(DM9X_TXC, 0x00);         /* Clear TX Polling */
   putreg(DM9X_BPTHRES, 0x3f);     /* Less 3kb, 600us */
   putreg(DM9X_SMODEC, 0x00);      /* Special mode */
-  putreg(DM9X_NETS, (DM9X_NETS_WAKEST | DM9X_NETS_TX1END | DM9X_NETS_TX2END)); /* Clear TX status */
+                                  /* Clear TX status */
+  putreg(DM9X_NETS, DM9X_NETS_WAKEST | DM9X_NETS_TX1END | DM9X_NETS_TX2END);
   putreg(DM9X_ISR, DM9X_INT_ALL); /* Clear interrupt status */
 
 #if defined(CONFIG_DM9X_CHECKSUM)
@@ -1947,7 +1960,7 @@ int dm9x_initialize(void)
   if (vid != DM9X_DAVICOMVID ||
       (pid != DM9X_DM9000PID && pid != DM9X_DM9010PID))
     {
-      nerr("ERROR: DM90x0 vendor/product ID not found at this base address\n");
+      nerr("ERROR: vendor/product ID not found at this base address\n");
       return -ENODEV;
     }
 

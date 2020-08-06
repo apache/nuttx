@@ -158,12 +158,12 @@ struct sam_dev_s
 
   /* Event support */
 
-  uint32_t base;                 /* SDMMC register base address */
-  sem_t waitsem;                 /* Implements event waiting */
-  sdio_eventset_t waitevents;    /* Set of events to be waited for */
-  uint32_t waitints;             /* Interrupt enables for event waiting */
+  uint32_t base;                       /* SDMMC register base address */
+  sem_t waitsem;                       /* Implements event waiting */
+  sdio_eventset_t waitevents;          /* Set of events to be waited for */
+  uint32_t waitints;                   /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent;  /* The event that caused the wakeup */
-  WDOG_ID waitwdog;              /* Watchdog that handles event timeouts */
+  WDOG_ID waitwdog;                    /* Watchdog that handles event timeouts */
 
   /* Callback support */
 

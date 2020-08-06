@@ -60,7 +60,7 @@
  *
  * Description:
  *   Check if the timer for the watchdog at the head of list is ready to
- *   run.  If so, remove the watchdog from the list and execute it.
+ *   run. If so, remove the watchdog from the list and execute it.
  *
  * Input Parameters:
  *   None

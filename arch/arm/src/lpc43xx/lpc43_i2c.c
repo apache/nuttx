@@ -102,7 +102,7 @@ struct lpc43_i2cdev_s
   struct i2c_master_s dev;     /* Generic I2C device */
   unsigned int     base;       /* Base address of registers */
   uint16_t         irqid;      /* IRQ for this device */
-  uint32_t         base_freq;   /* branch frequency */
+  uint32_t         base_freq;  /* branch frequency */
 
   sem_t            mutex;      /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for state machine completion */
@@ -295,8 +295,9 @@ static int lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
   state &= 0xf8;  /* state mask, only 0xX8 is possible */
   switch (state)
     {
-    case 0x08:     /* A START condition has been transmitted. */
-    case 0x10:     /* A Repeated START condition has been transmitted. */
+    case 0x08:    /* A START condition has been transmitted. */
+    case 0x10:    /* A Repeated START condition has been transmitted. */
+
       /* Set address */
 
       putreg32(((I2C_M_READ & msg->flags) == I2C_M_READ) ?
@@ -344,7 +345,8 @@ static int lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 
     case 0x50:  /* Data byte has been received; ACK has been returned. */
       priv->rdcnt++;
-      msg->buffer[priv->rdcnt - 1] = getreg32(priv->base + LPC43_I2C_BUFR_OFFSET);
+      msg->buffer[priv->rdcnt - 1] =
+        getreg32(priv->base + LPC43_I2C_BUFR_OFFSET);
 
       if (priv->rdcnt >= (msg->length - 1))
         {
@@ -353,7 +355,8 @@ static int lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
       break;
 
     case 0x58:  /* Data byte has been received; NACK has been returned. */
-      msg->buffer[priv->rdcnt] = getreg32(priv->base + LPC43_I2C_BUFR_OFFSET);
+      msg->buffer[priv->rdcnt] =
+        getreg32(priv->base + LPC43_I2C_BUFR_OFFSET);
       lpc32_i2c_nextmsg(priv);
       break;
 
@@ -410,7 +413,7 @@ static int lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc43_i2c_reset
  *
  * Description:
@@ -422,7 +425,7 @@ static int lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 static int lpc43_i2c_reset(FAR struct i2c_master_s * dev)

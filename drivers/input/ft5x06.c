@@ -363,7 +363,8 @@ static void ft5x06_data_worker(FAR void *arg)
 #ifdef CONFIG_FT5X06_POLLMODE
   /* Exit, re-starting the poll. */
 
-  wd_start(priv->polltimer, priv->delay, ft5x06_poll_timeout, 1, (wdparm_t)priv);
+  wd_start(priv->polltimer, priv->delay,
+           ft5x06_poll_timeout, 1, (wdparm_t)priv);
 
 #else
   /* Exit, re-enabling FT5x06 interrupts */

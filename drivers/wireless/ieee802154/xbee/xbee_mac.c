@@ -89,10 +89,10 @@ static void xbee_assocworker(FAR void *arg);
  * Name: xbee_assoctimer
  *
  * Description:
- *   This function is used to schedule *   an associatioin indication poll. When
- *   association first gets triggered, a watchdog timer is started. This function
- *   is called when it expires. The watchdog timer is scheduled again until
- *   the association is either successful or fails.
+ *   This function is used to schedule *   an associatioin indication poll.
+ *   When association first gets triggered, a watchdog timer is started. This
+ *   function is called when it expires. The watchdog timer is scheduled
+ *   again until the association is either successful or fails.
  *
  * Input Parameters:
  *   argc - The number of available arguments
@@ -123,7 +123,8 @@ static void xbee_assoctimer(int argc, wdparm_t arg, ...)
    * occur until we restart the poll timeout watchdog.
    */
 
-  ret = work_queue(HPWORK, &priv->assocwork, xbee_assocworker, (FAR void *)priv, 0);
+  ret = work_queue(HPWORK, &priv->assocwork,
+                   xbee_assocworker, (FAR void *)priv, 0);
   UNUSED(ret);
   DEBUGASSERT(ret == OK);
 }
@@ -132,9 +133,9 @@ static void xbee_assoctimer(int argc, wdparm_t arg, ...)
  * Name: xbee_assocworker
  *
  * Description:
- *   Poll the device for the assosciation status.  This function is indirectly
- *   scheduled rom xbee_req_associate in order to poll the device for association
- *   progress.
+ *   Poll the device for the assosciation status. This function is indirectly
+ *   scheduled rom xbee_req_associate in order to poll the device for
+ *   association progress.
  *
  * Input Parameters:
  *   arg     - The reference to the driver structure (cast to void*)
@@ -163,11 +164,11 @@ static void xbee_assocworker(FAR void *arg)
  * Name: xbee_reqdata_timeout
  *
  * Description:
- *   This function runs when a send request has timed out waiting for a response
- *   from the XBee module. This really should never happen, but if it does,
- *   handle it gracefully by retrying the query. Although I still think this
- *   should not happen, it does seem to happen. The XBee seemingly randomly drops
- *   the request and never sends a response.
+ *   This function runs when a send request has timed out waiting for a
+ *   response from the XBee module. This really should never happen, but if
+ *   it does, handle it gracefully by retrying the query. Although I still
+ *   think this should not happen, it does seem to happen. The XBee seemingly
+ *   randomly drops the request and never sends a response.
  *
  * Parameters:
  *   argc - The number of available arguments
@@ -263,12 +264,13 @@ int xbee_bind(XBEEHANDLE xbee, FAR struct xbee_maccb_s *cb)
  * Description:
  *   Calculate the MAC header length given the frame meta-data. For the XBee,
  *   we use the header to store the entire API frame for the TX request. The
- *   size we need is fixed based on the address mode we are using as it changes
- *   which API frame we need to issue.
+ *   size we need is fixed based on the address mode we are using as it
+ *   changes which API frame we need to issue.
  *
  ****************************************************************************/
 
-int xbee_get_mhrlen(XBEEHANDLE xbee, FAR const struct ieee802154_frame_meta_s *meta)
+int xbee_get_mhrlen(XBEEHANDLE xbee,
+                    FAR const struct ieee802154_frame_meta_s *meta)
 {
   int ret = 9; /* Smallest possible header size */
 
@@ -388,15 +390,17 @@ int xbee_req_data(XBEEHANDLE xbee,
       xbee_send_apiframe(priv, &frame->io_data[frame->io_offset],
                          (frame->io_len - frame->io_offset));
 
-      /* Wait for a transmit status to be received. Does not necessarily mean success */
+      /* Wait for a transmit status to be received. Does not necessarily mean
+       * success
+       */
 
       while (nxsem_wait(&priv->txdone_sem) < 0);
 
-      /* If the transmit timeout has occurred, and there are no IOBs available,
-       * we may be blocking the context needed to free the IOBs. We cannot receive
-       * the Tx status because it requires an IOB. Therefore, if we have hit the
-       * timeout, and there are no IOBs, let's move on assuming the transmit was
-       * a success
+      /* If the transmit timeout has occurred, and there are no IOBs
+       * available, we may be blocking the context needed to free the IOBs.
+       * We cannot receive the Tx status because it requires an IOB.
+       * Therefore, if we have hit the timeout, and there are no IOBs, let's
+       * move on assuming the transmit was a success
        */
 
       if (!priv->txdone && iob_navail(false) <= 0)
@@ -430,8 +434,8 @@ int xbee_req_data(XBEEHANDLE xbee,
  *
  *   NOTE: The standard specifies that the attribute value should be returned
  *   via the asynchronous MLME-GET.confirm primitive.  However, in our
- *   implementation, we synchronously return the value immediately.Therefore, we
- *   merge the functionality of the MLME-GET.request and MLME-GET.confirm
+ *   implementation, we synchronously return the value immediately.Therefore,
+ *   we merge the functionality of the MLME-GET.request and MLME-GET.confirm
  *   primitives together.
  *
  ****************************************************************************/
@@ -494,8 +498,9 @@ int xbee_req_get(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
 
       case IEEE802154_ATTR_PHY_TX_POWER:
         {
-          /* TODO: Convert pwrlvl and boost mode settings to int32_t dbm. This
-           * depends on whether device is XBee or XBee Pro to do this look-up.
+          /* TODO: Convert pwrlvl and boost mode settings to int32_t dbm.
+           * This depends on whether device is XBee or XBee Pro to do this
+           * look-up.
            */
 
           xbee_query_powerlevel(priv);
@@ -535,10 +540,10 @@ int xbee_req_get(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
  *   indicated MAC PIB attribute.
  *
  *   NOTE: The standard specifies that confirmation should be indicated via
- *   the asynchronous MLME-SET.confirm primitive.  However, in our implementation
- *   we synchronously return the status from the request. Therefore, we do merge
- *   the functionality of the MLME-SET.request and MLME-SET.confirm primitives
- *   together.
+ *   the asynchronous MLME-SET.confirm primitive.  However, in our
+ *   implementation we synchronously return the status from the request.
+ *   Therefore, we do merge the functionality of the MLME-SET.request and
+ *   MLME-SET.confirm primitives together.
  *
  ****************************************************************************/
 
@@ -578,7 +583,8 @@ int xbee_req_set(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
         {
           if (attrval->mac.assocpermit)
             {
-              xbee_set_coordassocflags(priv, XBEE_COORDASSOCFLAGS_ALLOWASSOC);
+              xbee_set_coordassocflags(priv,
+                XBEE_COORDASSOCFLAGS_ALLOWASSOC);
             }
           else
             {
@@ -589,8 +595,8 @@ int xbee_req_set(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
 
       case IEEE802154_ATTR_PHY_TX_POWER:
         {
-          /* TODO: Convert int32_t dbm input to closest PM/PL settings. Need to
-           * know whether device is XBee or XBee Pro to do this look-up.
+          /* TODO: Convert int32_t dbm input to closest PM/PL settings. Need
+           * to know whether device is XBee or XBee Pro to do this look-up.
            */
 
           xbee_set_powerlevel(priv, attrval->phy.txpwr);
@@ -676,7 +682,8 @@ int xbee_req_start(XBEEHANDLE xbee, FAR struct ieee802154_start_req_s *req)
  *
  ****************************************************************************/
 
-int xbee_req_associate(XBEEHANDLE xbee, FAR struct ieee802154_assoc_req_s *req)
+int xbee_req_associate(XBEEHANDLE xbee,
+                       FAR struct ieee802154_assoc_req_s *req)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)xbee;
 
@@ -710,8 +717,8 @@ int xbee_req_associate(XBEEHANDLE xbee, FAR struct ieee802154_assoc_req_s *req)
  *   that the MLME performs a reset operation.
  *
  * Input Parameters:
- *   xbee         - Handle to the XBee instance
- *   resetattr    - Whether or not to reset the MAC PIB attributes to defaults
+ *   xbee      - Handle to the XBee instance
+ *   resetattr - Whether or not to reset the MAC PIB attributes to defaults
  *
  ****************************************************************************/
 
