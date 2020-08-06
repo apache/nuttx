@@ -250,7 +250,7 @@
 
 #define CRITICAL_ERROR    (ENET_INT_UN | ENET_INT_RL | ENET_INT_EBERR )
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
@@ -646,8 +646,8 @@ static int s32k1xx_txpoll(struct net_driver_s *dev)
           /* Send the packet */
 
           s32k1xx_transmit(priv);
-          priv->dev.d_buf =
-            (uint8_t *)s32k1xx_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+          priv->dev.d_buf = (uint8_t *)
+            s32k1xx_swap32((uint32_t)priv->txdesc[priv->txhead].data);
 
           /* Check if there is room in the device to hold another packet. If
            * not, return a non-zero value to terminate the poll.
@@ -692,7 +692,7 @@ static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
   NETDEV_RXPACKETS(&priv->dev);
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(&priv->dev);
 #endif
@@ -713,7 +713,7 @@ static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
       ipv4_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -753,7 +753,7 @@ static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
       ipv6_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -873,8 +873,8 @@ static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv)
            * queue is not full.
            */
 
-          priv->dev.d_buf =
-            (uint8_t *)s32k1xx_swap32((uint32_t)priv->txdesc[priv->txhead].data);
+          priv->dev.d_buf = (uint8_t *)
+            s32k1xx_swap32((uint32_t)priv->txdesc[priv->txhead].data);
           rxdesc->status1 |= RXDESC_E;
 
           /* Update the index to the next descriptor */
@@ -2404,7 +2404,8 @@ static void s32k1xx_initbuffers(struct s32k1xx_driver_s *priv)
 
   /* Get an aligned RX descriptor (array) address */
 
-  addr        +=  CONFIG_S32K1XX_ENET_NTXBUFFERS * sizeof(struct enet_desc_s);
+  addr        +=  CONFIG_S32K1XX_ENET_NTXBUFFERS *
+                  sizeof(struct enet_desc_s);
   priv->rxdesc = (struct enet_desc_s *)addr;
 
   /* Get the beginning of the first aligned buffer */

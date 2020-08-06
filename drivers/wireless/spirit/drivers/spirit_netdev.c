@@ -215,7 +215,9 @@
 #define SPIRIT_RXFIFO_ALMOSTFULL  (3 * SPIRIT_MAX_FIFO_LEN / 4)
 #define SPIRIT_TXFIFO_ALMOSTEMPTY (1 * SPIRIT_MAX_FIFO_LEN / 4)
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
+ */
 
 #define SPIRIT_WDDELAY      (1*CLK_TCK)
 
@@ -580,7 +582,7 @@ static void spirit_set_ipaddress(FAR struct net_driver_s *dev)
 {
   FAR struct netdev_varaddr_s *addr;
 
-  /* Get a convenient pointer to the PktRadio variable length address struct */
+  /* Get a convenient pointer to the variable length address struct */
 
   addr = (FAR struct netdev_varaddr_s *)&dev->d_mac.radio;
 
@@ -2861,7 +2863,7 @@ int spirit_netdev_initialize(FAR struct spi_dev_s *spi,
   priv->radio.r_dev.d_buf = g_iobuffer.rb_buf;
 #endif
 
-  /* Register the device with the OS so that socket IOCTLs can be performed. */
+  /* Register the device with the OS so that IOCTLs can be performed. */
 
   ret = netdev_register(dev, NET_LL_PKTRADIO);
   if (ret < 0)

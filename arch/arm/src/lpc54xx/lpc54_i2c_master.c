@@ -308,8 +308,8 @@ static void lpc54_i2c_setfrequency(struct lpc54_i2cdev_s *priv,
 
           if (err == 0 || divider >= 0x10000)
             {
-              /* Break out of the loop early ifeither exact value was found or
-               * the divider is at its maximum value.
+              /* Break out of the loop early ifeither exact value was found
+               * or the divider is at its maximum value.
                */
 
               break;
@@ -472,8 +472,9 @@ static bool lpc54_i2c_nextmsg(struct lpc54_i2cdev_s *priv)
     }
   else
     {
-      /* That was the last message... we are done. */
-      /* Cancel any timeout */
+      /* That was the last message... we are done.
+       * Cancel any timeout
+       */
 
       wd_cancel(priv->timeout);
 
@@ -792,7 +793,7 @@ static int lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_i2c_reset
  *
  * Description:
@@ -804,7 +805,7 @@ static int lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 static int lpc54_i2c_reset(FAR struct i2c_master_s * dev)
@@ -837,6 +838,7 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
   flags = enter_critical_section();
 
   /* Configure the requestin I2C peripheral */
+
   /* NOTE:  The basic FLEXCOMM initialization was performed in
    * lpc54_lowputc.c.
    */

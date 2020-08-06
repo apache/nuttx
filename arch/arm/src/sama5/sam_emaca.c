@@ -92,6 +92,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* If processing is not done at the interrupt level, then work queue support
@@ -242,8 +243,9 @@
 #endif
 
 /* Timing *******************************************************************/
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
- * second
+
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
  */
 
 #define SAM_WDDELAY     (1*CLK_TCK)
@@ -257,6 +259,7 @@
 #define PHY_RETRY_MAX    1000000
 
 /* Helpers ******************************************************************/
+
 /* This is a helper pointer for accessing the contents of the EMAC
  * header
  */
@@ -267,7 +270,7 @@
  * Private Types
  ****************************************************************************/
 
-/* The sam_emac_s encapsulates all state information for the EMAC peripheral */
+/* The sam_emac_s encapsulates all state information for EMAC peripheral */
 
 struct sam_emac_s
 {
@@ -324,6 +327,7 @@ static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 #ifdef CONFIG_SAMA5_EMACA_PREALLOCATE
 /* Preallocated data */
+
 /* TX descriptors list */
 
 static struct emac_txdesc_s g_txdesc[CONFIG_SAMA5_EMAC_NTXBUFFERS]
@@ -336,9 +340,9 @@ static struct emac_rxdesc_s g_rxdesc[CONFIG_SAMA5_EMAC_NRXBUFFERS]
 
 /* Transmit Buffers
  *
- * Section 3.6 of AMBA 2.0 spec states that burst should not cross 1K Boundaries.
- * Receive buffer manager writes are burst of 2 words => 3 lsb bits of the address
- * shall be set to 0
+ * Section 3.6 of AMBA 2.0 spec states that burst should not cross 1K
+ * Boundaries. Receive buffer manager writes are burst of 2 words => 3
+ * lsb bits of the address shall be set to 0
  */
 
 static uint8_t g_txbuffer[CONFIG_SAMA5_EMAC_NTXBUFFERS * EMAC_TX_UNITSIZE];
@@ -354,13 +358,15 @@ static uint8_t g_rxbuffer[CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE]
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Register operations ******************************************************/
 
 #ifdef CONFIG_SAMA5_EMACA_REGDEBUG
 static bool sam_checkreg(struct sam_emac_s *priv, bool wr,
                          uint32_t regval, uintptr_t address);
 static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t addr);
-static void sam_putreg(struct sam_emac_s *priv, uintptr_t addr, uint32_t val);
+static void sam_putreg(struct sam_emac_s *priv,
+                       uintptr_t addr, uint32_t val);
 #else
 # define sam_getreg(priv,addr)      getreg32(addr)
 # define sam_putreg(priv,addr,val)  putreg32(val,addr)
@@ -452,8 +458,8 @@ static int  sam_emac_configure(struct sam_emac_s *priv);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
- * Name: sam_checkreg
  *
  * Description:
  *   Check if the current register access is a duplicate of the preceding.
@@ -537,8 +543,8 @@ static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t address)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_EMACA_REGDEBUG
-static void sam_putreg(struct sam_emac_s *priv, uintptr_t address,
-                       uint32_t regval)
+static void sam_putreg(struct sam_emac_s *priv,
+                       uintptr_t address, uint32_t regval)
 {
   if (sam_checkreg(priv, true, regval, address))
     {
@@ -595,7 +601,7 @@ static uint16_t sam_txfree(struct sam_emac_s *priv)
    * the configured size minus 1.
    */
 
-  return (CONFIG_SAMA5_EMAC_NTXBUFFERS-1) - sam_txinuse(priv);
+  return (CONFIG_SAMA5_EMAC_NTXBUFFERS - 1) - sam_txinuse(priv);
 }
 
 /****************************************************************************
@@ -790,7 +796,7 @@ static int sam_transmit(struct sam_emac_s *priv)
   /* Update TX descriptor status. */
 
   status = dev->d_len | EMACTXD_STA_LAST;
-  if (priv->txhead == CONFIG_SAMA5_EMAC_NTXBUFFERS-1)
+  if (priv->txhead == CONFIG_SAMA5_EMAC_NTXBUFFERS - 1)
     {
       status |= EMACTXD_STA_WRAP;
     }
@@ -845,8 +851,9 @@ static int sam_transmit(struct sam_emac_s *priv)
  * Function: sam_txpoll
  *
  * Description:
- *   The transmitter is available, check if the network has any outgoing packets ready
- *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send. This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -918,8 +925,8 @@ static int sam_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -934,7 +941,8 @@ static int sam_txpoll(struct net_driver_s *dev)
  *
  *   1. After completion of a transmission (sam_txdone),
  *   2. When new TX data is available (sam_txavail), and
- *   3. After a TX timeout to restart the sending process (sam_txtimeout_expiry).
+ *   3. After a TX timeout to restart the sending process
+ *      (sam_txtimeout_expiry).
  *
  * Input Parameters:
  *   priv - Reference to the driver state structure
@@ -957,7 +965,9 @@ static void sam_dopoll(struct sam_emac_s *priv)
 
   if (sam_txfree(priv) > 0)
     {
-      /* If we have the descriptor, then poll the network for new XMIT data. */
+      /* If we have the descriptor,
+       * then poll the network for new XMIT data.
+       */
 
       devif_poll(dev, sam_txpoll);
     }
@@ -1163,7 +1173,8 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
               if (pktlen < dev->d_len)
                 {
-                  nerr("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
+                  nerr("ERROR: Buffer size %d; frame size %d\n",
+                       dev->d_len, pktlen);
                   return -E2BIG;
                 }
 
@@ -1251,8 +1262,8 @@ static void sam_receive(struct sam_emac_s *priv)
     {
       sam_dumppacket("Received packet", dev->d_buf, dev->d_len);
 
-      /* Check if the packet is a valid size for the network buffer configuration
-       * (this should not happen)
+      /* Check if the packet is a valid size for the network buffer
+       * configuration (this should not happen)
        */
 
       if (dev->d_len > CONFIG_NET_ETH_PKTSIZE)
@@ -1262,9 +1273,9 @@ static void sam_receive(struct sam_emac_s *priv)
         }
 
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the tap */
 
-       pkt_input(&priv->dev);
+      pkt_input(&priv->dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -1282,7 +1293,7 @@ static void sam_receive(struct sam_emac_s *priv)
           ipv4_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -1319,7 +1330,7 @@ static void sam_receive(struct sam_emac_s *priv)
           ipv6_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -1356,7 +1367,7 @@ static void sam_receive(struct sam_emac_s *priv)
           arp_arpin(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -1414,18 +1425,19 @@ static void sam_txdone(struct sam_emac_s *priv)
           /* Yes.. the descriptor is still in use.  However, I have seen a
            * case (only repeatable on start-up) where the USED bit is never
            * set.  Yikes!  If we have encountered the first still busy
-           * descriptor, then we should also have TQBD equal to the descriptor
-           * address.  If it is not, then treat is as used anyway.
+           * descriptor, then we should also have TQBD equal to the
+           * descriptor address. If it is not, then treat is as used anyway.
            */
 
 #if 0 /* The issue does not exist in the current configuration, but may return */
 #warning REVISIT
           if (priv->txtail == 0 &&
-              sam_physramaddr((uintptr_t)txdesc) != sam_getreg(priv, SAM_EMAC_TBQP))
+              sam_physramaddr((uintptr_t)txdesc) !=
+              sam_getreg(priv, SAM_EMAC_TBQP))
             {
               txdesc->status = (uint32_t)EMACTXD_STA_USED;
-              up_clean_dcache((uintptr_t)txdesc,
-                              (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
+             up_clean_dcache((uintptr_t)txdesc,
+                (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
             }
           else
 #endif
@@ -1500,8 +1512,8 @@ static void sam_interrupt_work(FAR void *arg)
   ninfo("isr: %08x pending: %08x\n", isr, pending);
 
   /* Check for the completion of a transmission.  This should be done before
-   * checking for received data (because receiving can cause another transmission
-   * before we had a chance to handle the last one).
+   * checking for received data (because receiving can cause another
+   * transmission before we had a chance to handle the last one).
    *
    * ISR:TCOMP is set when a frame has been transmitted. Cleared on read.
    * TSR:COMP is set when a frame has been transmitted. Cleared by writing a
@@ -1627,7 +1639,8 @@ static void sam_interrupt_work(FAR void *arg)
 #ifdef CONFIG_DEBUG_NET
   /* Check for PAUSE Frame received (PFRE).
    *
-   * ISR:PFRE indicates that a pause frame has been received.  Cleared on a read.
+   * ISR:PFRE indicates that a pause frame has been received.
+   * Cleared on a read.
    */
 
   if ((pending & EMAC_INT_PFR) != 0)
@@ -1686,8 +1699,8 @@ static int sam_emac_interrupt(int irq, void *context, FAR void *arg)
    *
    * ISR:TCOMP is set when a frame has been transmitted. Cleared on read (so
    *   we cannot read it here).
-   * TSR:TXCOMP is set when a frame has been transmitted. Cleared by writing a
-   *   one to this bit.
+   * TSR:TXCOMP is set when a frame has been transmitted. Cleared by writing
+   *   a one to this bit.
    */
 
   tsr = sam_getreg(priv, SAM_EMAC_TSR_OFFSET);
@@ -2077,7 +2090,8 @@ static unsigned int sam_hashindx(const uint8_t *mac)
   unsigned int ndx;
 
   /* Isolate: mac[0]
-  *           ... 05 04 03 02 01 00] */
+   *           ... 05 04 03 02 01 00]
+   */
 
   ndx = mac[0];
 
@@ -2248,8 +2262,8 @@ static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
  * Function: sam_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -2346,9 +2360,9 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  *    specified using the req->reg_no struct field and then write its output
  *    to the req->val_out field.
  *
- *    When called with SIOCSMIIREG it will write to a register of the PHY that
- *    is specified using the req->reg_no struct field and use req->val_in as
- *    its input.
+ *    When called with SIOCSMIIREG it will write to a register of the PHY
+ *    that is specified using the req->reg_no struct field and use req->
+ *    val_in as its input.
  *
  * Input Parameters:
  *   dev - Ethernet device structure
@@ -2375,7 +2389,8 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
       case SIOCMIINOTIFY: /* Set up for PHY event notifications */
         {
-          struct mii_ioctl_notify_s *req = (struct mii_ioctl_notify_s *)((uintptr_t)arg);
+          struct mii_ioctl_notify_s *req =
+        (struct mii_ioctl_notify_s *)((uintptr_t)arg);
 
           ret = phy_notify_subscribe(dev->d_ifname, req->pid, &req->event);
           if (ret == OK)
@@ -2390,7 +2405,8 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 
       case SIOCGMIIPHY: /* Get MII PHY address */
         {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
           req->phy_id = priv->phyaddr;
           ret = OK;
         }
@@ -2398,7 +2414,8 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 
       case SIOCGMIIREG: /* Get register from MII PHY */
         {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
           uint32_t regval;
 
           /* Enable management port */
@@ -2418,7 +2435,8 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 
       case SIOCSMIIREG: /* Set register in MII PHY */
         {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
           uint32_t regval;
 
           /* Enable management port */
@@ -3063,6 +3081,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   sam_putreg(priv, SAM_EMAC_USRIO, regval);
 
 errout:
+
   /* Disable management port */
 
   regval  = sam_getreg(priv, SAM_EMAC_NCR);
@@ -3159,6 +3178,7 @@ static bool sam_linkup(struct sam_emac_s *priv)
   linkup = true;
 
 errout:
+
   /* Disable management port */
 
   regval  = sam_getreg(priv, SAM_EMAC_NCR);
@@ -3194,20 +3214,20 @@ static int sam_phyinit(struct sam_emac_s *priv)
   regval &= ~EMAC_NCFGR_CLK_MASK;
 
   mck = BOARD_MCK_FREQUENCY;
-  if (mck > (160*1000*1000))
+  if (mck > (160 * 1000 * 1000))
     {
       nerr("ERROR: Cannot realize PHY clock\n");
       return -EINVAL;
     }
-  else if (mck > (80*1000*1000))
+  else if (mck > (80 * 1000 * 1000))
     {
       regval |= EMAC_NCFGR_CLK_DIV64; /* MCK divided by 64 (MCK up to 160 MHz) */
     }
-  else if (mck > (40*1000*1000))
+  else if (mck > (40 * 1000 * 1000))
     {
       regval |= EMAC_NCFGR_CLK_DIV32; /* MCK divided by 32 (MCK up to 80 MHz) */
     }
-  else if (mck > (20*1000*1000))
+  else if (mck > (20 * 1000 * 1000))
     {
       regval |= EMAC_NCFGR_CLK_DIV16; /* MCK divided by 16 (MCK up to 40 MHz) */
     }
@@ -3255,6 +3275,7 @@ static int sam_phyinit(struct sam_emac_s *priv)
 static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
 {
   /* Configure PIO pins to support EMAC */
+
   /* Configure EMAC PIO pins common to both MII and RMII */
 
   sam_configpio(PIO_EMAC_TX0);
@@ -3309,7 +3330,9 @@ static void sam_txreset(struct sam_emac_s *priv)
     {
       bufaddr = (uint32_t)(&(txbuffer[ndx * EMAC_TX_UNITSIZE]));
 
-      /* Set the buffer address and mark the descriptor as in used by firmware */
+      /* Set the buffer address and mark the descriptor
+       * as in used by firmware
+       */
 
       physaddr           = sam_physramaddr(bufaddr);
       txdesc[ndx].addr   = physaddr;
@@ -3323,9 +3346,8 @@ static void sam_txreset(struct sam_emac_s *priv)
 
   /* Flush the entire TX descriptor table to RAM */
 
-  up_clean_dcache((uintptr_t)txdesc,
-                  (uintptr_t)txdesc +
-                  CONFIG_SAMA5_EMAC_NTXBUFFERS * sizeof(struct emac_txdesc_s));
+  up_clean_dcache((uintptr_t)txdesc, (uintptr_t)txdesc +
+    CONFIG_SAMA5_EMAC_NTXBUFFERS * sizeof(struct emac_txdesc_s));
 
   /* Set the Transmit Buffer Queue Pointer Register */
 
@@ -3387,9 +3409,8 @@ static void sam_rxreset(struct sam_emac_s *priv)
 
   /* Flush the entire RX descriptor table to RAM */
 
-  up_clean_dcache((uintptr_t)rxdesc,
-                  (uintptr_t)rxdesc +
-                  CONFIG_SAMA5_EMAC_NRXBUFFERS * sizeof(struct emac_rxdesc_s));
+  up_clean_dcache((uintptr_t)rxdesc, (uintptr_t)rxdesc +
+    CONFIG_SAMA5_EMAC_NRXBUFFERS * sizeof(struct emac_rxdesc_s));
 
   /* Set the Receive Buffer Queue Pointer Register */
 
@@ -3478,9 +3499,12 @@ static void sam_macaddress(struct sam_emac_s *priv)
 
   ninfo("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         dev->d_ifname,
-        dev->d_mac.ether.ether_addr_octet[0], dev->d_mac.ether.ether_addr_octet[1],
-        dev->d_mac.ether.ether_addr_octet[2], dev->d_mac.ether.ether_addr_octet[3],
-        dev->d_mac.ether.ether_addr_octet[4], dev->d_mac.ether.ether_addr_octet[5]);
+        dev->d_mac.ether.ether_addr_octet[0],
+        dev->d_mac.ether.ether_addr_octet[1],
+        dev->d_mac.ether.ether_addr_octet[2],
+        dev->d_mac.ether.ether_addr_octet[3],
+        dev->d_mac.ether.ether_addr_octet[4],
+        dev->d_mac.ether.ether_addr_octet[5]);
 
   /* Set the MAC address */
 
@@ -3649,8 +3673,8 @@ static int sam_emac_configure(struct sam_emac_s *priv)
   /* Setup the interrupts for TX events, RX events, and error events */
 
   regval = (EMAC_INT_RCOMP | EMAC_INT_RXUBR | EMAC_INT_TUND | EMAC_INT_RLE |
-            EMAC_INT_TXERR | EMAC_INT_TCOMP | EMAC_INT_ROVR | EMAC_INT_HRESP |
-            EMAC_INT_PFR | EMAC_INT_PTZ);
+            EMAC_INT_TXERR | EMAC_INT_TCOMP | EMAC_INT_ROVR |
+            EMAC_INT_HRESP | EMAC_INT_PFR | EMAC_INT_PTZ);
   sam_putreg(priv, SAM_EMAC_IER, regval);
   return OK;
 }
@@ -3735,7 +3759,8 @@ int sam_emac_initialize(void)
   ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt, NULL);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);
+      nerr("ERROR: Failed to attach the handler to the IRQ%d\n",
+           SAM_IRQ_EMAC);
       goto errout_with_buffers;
     }
 
@@ -3748,7 +3773,8 @@ int sam_emac_initialize(void)
   ret = sam_ifdown(&priv->dev);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to put the interface in the down state: %d\n", ret);
+      nerr("ERROR: Failed to put the interface in the down state: %d\n",
+           ret);
       goto errout_with_buffers;
     }
 

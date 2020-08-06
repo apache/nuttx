@@ -1387,7 +1387,7 @@ static void enc_rxerif(FAR struct enc_driver_s *priv)
 static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 {
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(&priv->dev);
 #endif
@@ -1408,7 +1408,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       ipv4_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -1446,7 +1446,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       ipv6_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -1482,7 +1482,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       arp_arpin(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)

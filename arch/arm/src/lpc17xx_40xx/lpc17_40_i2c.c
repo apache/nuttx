@@ -403,6 +403,7 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
     {
     case 0x08:     /* A START condition has been transmitted. */
     case 0x10:     /* A Repeated START condition has been transmitted. */
+
       /* Set address */
 
       putreg32(((I2C_M_READ & msg->flags) == I2C_M_READ) ?

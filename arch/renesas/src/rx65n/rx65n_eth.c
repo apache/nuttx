@@ -1088,17 +1088,14 @@ static int rx65n_txpoll(struct net_driver_s *dev)
           rx65n_transmit(priv);
           DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
 
-          /* Check if the next TX descriptor is owned by the
-           * Ethernet DMA or CPU.
-           * We cannot perform the TX poll if we are unable to accept
+          /* Check if the next TX descriptor is owned by the Ethernet DMA or
+           * CPU. We cannot perform the TX poll if we are unable to accept
            * another packet fo transmission.
-           * In a race condition, TACT may be cleared
-           * BUT still not available
-           * because rx65n_freeframe() has not yet run.
-           * If rx65n_freeframe() has run,
-           * the buffer1 pointer (tdes2) will be nullified
-                   * (and inflight should
-           * be CONFIG_RX65N_ETH_NTXDESC).
+           *
+           * In a race condition, TACT may be cleared BUT still not available
+           * because rx65n_freeframe() has not yet run. If rx65n_freeframe()
+           * has run, the buffer1 pointer (tdes2) will be nullified (and
+           * inflight should be CONFIG_RX65N_ETH_NTXDESC).
            */
 
           if ((priv->txhead->tdes0 & TACT) != 0 ||
@@ -1167,9 +1164,9 @@ static void rx65n_dopoll(FAR struct rx65n_ethmac_s *priv)
    * another packet for transmission.
    *
    * In a race condition, TACT may be cleared BUT still not available
-   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has
-   * run, the buffer1 pointer (tdes2) will be nullified (and inflight
-   * should be < CONFIG_RX65N_ETH_NTXDESC).
+   * because rx65n_freeframe() has not yet run. If rx65n_freeframe()
+   * has run, the buffer1 pointer (tdes2) will be nullified (and
+   * inflight should be < CONFIG_RX65N_ETH_NTXDESC).
    */
 
   if ((priv->txhead->tdes0 & TACT) == 0 &&
@@ -1481,10 +1478,9 @@ static int rx65n_recvframe(FAR struct rx65n_ethmac_s *priv)
       rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
     }
 
-  /* We get here after all of the descriptors have been scanned or
-   * when rxdesc points
-   * to the first descriptor owned by the DMA.
-   * Remember where we left off.
+  /* We get here after all of the descriptors have been scanned or when
+   * rxdesc points to the first descriptor owned by the DMA. Remember
+   * where we left off.
    */
 
   priv->rxhead = rxdesc;
@@ -1528,7 +1524,7 @@ static void rx65n_receive(FAR struct rx65n_ethmac_s *priv)
        * tap
        */
 
-      pkt_input(&priv->dev);
+     pkt_input(&priv->dev);
 #endif
 
       /* Check if the packet is a valid size for the network
@@ -1755,8 +1751,8 @@ static void rx65n_freeframe(FAR struct rx65n_ethmac_s *priv)
               priv->inflight--;
 
               /* If all of the TX descriptors were in-flight,
-               * then RX interrupts may have been disabled... we
-               * can re-enable them now.
+               * then RX interrupts may have been disabled...
+               * we can re-enable them now.
                */
 
               /* Need to check this and update the arguments of the
@@ -2116,15 +2112,14 @@ static void rx65n_poll_work(FAR void *arg)
   FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)arg;
   FAR struct net_driver_s *dev  = &priv->dev;
 
-  /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
-   * cannot perform the timer poll if we are unable to accept another packet
-   * for transmission.  Hmmm.. might be bug here.  Does this mean if there is
-   * a transmit in progress, we will miss TCP time state updates?
+  /* Check if the next TX descriptor is owned by the Ethernet DMA or
+   * CPU.  We cannot perform the TX poll if we are unable to accept
+   * another packet for transmission.
    *
    * In a race condition, TACT may be cleared BUT still not available
-   * because rx65n_freeframe() has not yet run.  If rx65n_freeframe() has
-   * run, the buffer1 pointer (tdes2) will be nullified (and inflight
-   * should be < CONFIG_RX65N_ETH_NTXDESC).
+   * because rx65n_freeframe() has not yet run. If rx65n_freeframe()
+   * has run, the buffer1 pointer (tdes2) will be nullified (and
+   * inflight should be < CONFIG_RX65N_ETH_NTXDESC).
    */
 
   net_lock();

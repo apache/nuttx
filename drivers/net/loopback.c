@@ -75,7 +75,9 @@
 #  error Worker thread support is required (CONFIG_SCHED_WORKQUEUE)
 #endif
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
+ */
 
 #define LO_WDDELAY   (1*CLK_TCK)
 
@@ -172,7 +174,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
        NETDEV_RXPACKETS(&priv->lo_dev);
 
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the tap */
 
        pkt_input(&priv->lo_dev);
 #endif
@@ -521,7 +523,7 @@ int localhost_initialize(void)
   priv->lo_dev.d_rmmac   = lo_rmmac;     /* Remove multicast MAC address */
 #endif
   priv->lo_dev.d_buf     = g_iobuffer;   /* Attach the IO buffer */
-  priv->lo_dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
+  priv->lo_dev.d_private = priv;         /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 

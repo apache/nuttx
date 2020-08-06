@@ -170,8 +170,8 @@
 
 /* Timing *******************************************************************/
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
- * second
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
  */
 
 #define SAM_WDDELAY     (1*CLK_TCK)
@@ -196,7 +196,7 @@
  * Private Types
  ****************************************************************************/
 
-/* The sam_gmac_s encapsulates all state information for the GMAC peripheral */
+/* The sam_gmac_s encapsulates all state information for GMAC peripheral */
 
 struct sam_gmac_s
 {
@@ -475,8 +475,8 @@ static uint32_t sam_getreg(struct sam_gmac_s *priv, uintptr_t address)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_GMAC_REGDEBUG
-static void sam_putreg(struct sam_gmac_s *priv, uintptr_t address,
-                       uint32_t regval)
+static void sam_putreg(struct sam_gmac_s *priv,
+                       uintptr_t address, uint32_t regval)
 {
   if (sam_checkreg(priv, true, regval, address))
     {
@@ -907,7 +907,9 @@ static void sam_dopoll(struct sam_gmac_s *priv)
 
   if (sam_txfree(priv) > 0)
     {
-      /* If we have the descriptor, then poll the network for new XMIT data. */
+      /* If we have the descriptor,
+       * then poll the network for new XMIT data.
+       */
 
       devif_poll(dev, sam_txpoll);
     }
@@ -1217,7 +1219,7 @@ static void sam_receive(struct sam_gmac_s *priv)
        * tap
        */
 
-       pkt_input(&priv->dev);
+      pkt_input(&priv->dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -1362,7 +1364,7 @@ static void sam_txdone(struct sam_gmac_s *priv)
 
       txdesc = &priv->txdesc[priv->txtail];
       up_invalidate_dcache((uintptr_t)txdesc,
-                           (uintptr_t)txdesc + sizeof(struct gmac_txdesc_s));
+        (uintptr_t)txdesc + sizeof(struct gmac_txdesc_s));
 
       /* Is this TX descriptor done transmitting? (SAMA5D36 datasheet,
        * p. 934)
@@ -2524,13 +2526,13 @@ static int sam_phyintenable(struct sam_gmac_s *priv)
    * interrupts
    */
 
-  ret = sam_phyread(priv, priv->phyaddr, GMII_KSZ90x1_ICS, &phyval);
+  ret = sam_phyread(priv, priv->phyaddr, GMII_KSZ90X1_ICS, &phyval);
   if (ret == OK)
     {
       /* Enable link up/down interrupts */
 
-      ret = sam_phywrite(priv, priv->phyaddr, GMII_KSZ90x1_ICS,
-                        (GMII_KSZ90x1_INT_LDEN | GMII_KSZ90x1_INT_LUEN));
+      ret = sam_phywrite(priv, priv->phyaddr, GMII_KSZ90X1_ICS,
+                        (GMII_KSZ90X1_INT_LDEN | GMII_KSZ90X1_INT_LUEN));
     }
 
   /* Disable the management port */
@@ -2961,15 +2963,16 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 #ifdef SAMA5_GMAC_PHY_KSZ90x1
   /* Set up the KSZ9020/31 PHY */
 
-  phyval = GMII_KSZ90x1_RCCPSR | GMII_ERCR_WRITE;
+  phyval = GMII_KSZ90X1_RCCPSR | GMII_ERCR_WRITE;
   sam_phywrite(priv, priv->phyaddr, GMII_ERCR, phyval);
   sam_phywrite(priv, priv->phyaddr, GMII_ERDWR, 0xf2f4);
 
-  phyval = GMII_KSZ90x1_RRDPSR | GMII_ERCR_WRITE;
+  phyval = GMII_KSZ90X1_RRDPSR | GMII_ERCR_WRITE;
   sam_phywrite(priv, priv->phyaddr, GMII_ERCR, phyval);
   sam_phywrite(priv, priv->phyaddr, GMII_ERDWR, 0x2222);
 
-  ret = sam_phywrite(priv, priv->phyaddr, GMII_KSZ90x1_ICS, 0xff00);
+  ret = sam_phywrite(priv, priv->phyaddr,
+                     GMII_KSZ90X1_ICS, 0xff00);
 #endif
 
   /* Set the Auto_negotiation Advertisement Register, MII advertising for

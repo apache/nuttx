@@ -84,8 +84,8 @@
 #define AK09912_ASAX        0x60
 
 /* REGISTER: CNTL1
- * Enable or disable temparator measure or enable or disable Noise suppression
- * filter.
+ * Enable or disable temparator measure or enable or disable Noise
+ * suppression filter.
  */
 
 #define AK09912_CTRL1       0x30
@@ -676,7 +676,7 @@ int ak09912_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 
   /* Initialize the AK09912 device structure */
 
-  priv = (FAR struct ak09912_dev_s *)kmm_malloc(sizeof(struct ak09912_dev_s));
+  priv = kmm_malloc(sizeof(struct ak09912_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");
