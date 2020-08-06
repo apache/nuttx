@@ -222,10 +222,10 @@ static int  ftmac100_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void ftmac100_txtimeout_work(FAR void *arg);
-static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void ftmac100_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void ftmac100_poll_work(FAR void *arg);
-static void ftmac100_poll_expiry(int argc, uint32_t arg, ...);
+static void ftmac100_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -1090,7 +1090,7 @@ static void ftmac100_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void ftmac100_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
 
@@ -1144,8 +1144,8 @@ static void ftmac100_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->ft_txpoll, FTMAC100_WDDELAY,
+           ftmac100_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1167,7 +1167,7 @@ static void ftmac100_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void ftmac100_poll_expiry(int argc, uint32_t arg, ...)
+static void ftmac100_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
 
@@ -1230,8 +1230,8 @@ static int ftmac100_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->ft_txpoll, FTMAC100_WDDELAY,
+           ftmac100_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 

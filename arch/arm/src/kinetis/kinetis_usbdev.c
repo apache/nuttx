@@ -547,7 +547,7 @@ static void   khci_epwrite(struct khci_ep_s *privep,
                 const uint8_t *src, uint32_t nbytes);
 static void   khci_wrcomplete(struct khci_usbdev_s *priv,
                 struct khci_ep_s *privep);
-static void   khci_rqrestart(int argc, uint32_t arg1, ...);
+static void   khci_rqrestart(int argc, wdparm_t arg1, ...);
 static void   khci_delayedrestart(struct khci_usbdev_s *priv,
                 uint8_t epno);
 static void   khci_rqstop(struct khci_ep_s *privep);
@@ -1050,7 +1050,7 @@ static void khci_wrcomplete(struct khci_usbdev_s *priv,
  * Name: khci_rqrestart
  ******************************************************************************************/
 
-static void khci_rqrestart(int argc, uint32_t arg1, ...)
+static void khci_rqrestart(int argc, wdparm_t arg1, ...)
 {
   struct khci_usbdev_s *priv;
   struct khci_ep_s *privep;
@@ -1118,8 +1118,8 @@ static void khci_delayedrestart(struct khci_usbdev_s *priv, uint8_t epno)
 
   /* And start (or re-start) the watchdog timer */
 
-  wd_start(priv->wdog, RESTART_DELAY, khci_rqrestart, 1,
-           (uint32_t)priv);
+  wd_start(priv->wdog, RESTART_DELAY,
+           khci_rqrestart, 1, (wdparm_t)priv);
 }
 
 /******************************************************************************************

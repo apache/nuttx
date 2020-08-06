@@ -70,7 +70,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void xbee_assoctimer(int argc, uint32_t arg, ...);
+static void xbee_assoctimer(int argc, wdparm_t arg, ...);
 static void xbee_assocworker(FAR void *arg);
 
 /****************************************************************************
@@ -105,7 +105,7 @@ static void xbee_assocworker(FAR void *arg);
  *
  ****************************************************************************/
 
-static void xbee_assoctimer(int argc, uint32_t arg, ...)
+static void xbee_assoctimer(int argc, wdparm_t arg, ...)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
   int ret;
@@ -154,8 +154,8 @@ static void xbee_assocworker(FAR void *arg)
     {
       xbee_send_atquery(priv, "AI");
 
-      wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer,
-               1, (wdparm_t)arg);
+      wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY,
+               xbee_assoctimer, 1, (wdparm_t)arg);
     }
 }
 
@@ -180,7 +180,7 @@ static void xbee_assocworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void xbee_reqdata_timeout(int argc, uint32_t arg, ...)
+static void xbee_reqdata_timeout(int argc, wdparm_t arg, ...)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
 
@@ -380,8 +380,8 @@ int xbee_req_data(XBEEHANDLE xbee,
     {
       /* Setup a timeout in case the XBee never responds with a tx status */
 
-      wd_start(priv->reqdata_wd, XBEE_RESPONSE_TIMEOUT, xbee_reqdata_timeout,
-               1, (wdparm_t)priv);
+      wd_start(priv->reqdata_wd, XBEE_RESPONSE_TIMEOUT,
+               xbee_reqdata_timeout, 1, (wdparm_t)priv);
 
       /* Send the frame */
 
@@ -698,8 +698,8 @@ int xbee_req_associate(XBEEHANDLE xbee, FAR struct ieee802154_assoc_req_s *req)
    * an update.
    */
 
-  return wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY, xbee_assoctimer,
-                  1, (wdparm_t)priv);
+  return wd_start(priv->assocwd, XBEE_ASSOC_POLLDELAY,
+                  xbee_assoctimer, 1, (wdparm_t)priv);
 }
 
 /****************************************************************************

@@ -129,7 +129,7 @@ struct lpc17_40_i2cdev_s
 static int  lpc17_40_i2c_start(struct lpc17_40_i2cdev_s *priv);
 static void lpc17_40_i2c_stop(struct lpc17_40_i2cdev_s *priv);
 static int  lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg);
-static void lpc17_40_i2c_timeout(int argc, uint32_t arg, ...);
+static void lpc17_40_i2c_timeout(int argc, wdparm_t arg, ...);
 static void lpc17_40_i2c_setfrequency(struct lpc17_40_i2cdev_s *priv,
               uint32_t frequency);
 static void lpc17_40_stopnext(struct lpc17_40_i2cdev_s *priv);
@@ -238,8 +238,8 @@ static int lpc17_40_i2c_start(struct lpc17_40_i2cdev_s *priv)
 
   priv->state = 0x00;
 
-  wd_start(priv->timeout, timeout, lpc17_40_i2c_timeout, 1,
-           (uint32_t)priv);
+  wd_start(priv->timeout, timeout,
+           lpc17_40_i2c_timeout, 1, (wdparm_t)priv);
   nxsem_wait(&priv->wait);
 
   return priv->nmsg;
@@ -273,7 +273,7 @@ static void lpc17_40_i2c_stop(struct lpc17_40_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static void lpc17_40_i2c_timeout(int argc, uint32_t arg, ...)
+static void lpc17_40_i2c_timeout(int argc, wdparm_t arg, ...)
 {
   struct lpc17_40_i2cdev_s *priv = (struct lpc17_40_i2cdev_s *)arg;
 

@@ -26,7 +26,6 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
-#include <stdarg.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <signal.h>
@@ -68,17 +67,10 @@
  *
  ****************************************************************************/
 
-static void pthread_condtimedout(int argc, wdparm_t arg1, ...)
+static void pthread_condtimedout(int argc, wdparm_t arg1, wdparm_t arg2, ...)
 {
   pid_t pid = (pid_t)arg1;
-  int signo;
-  va_list ap;
-
-  /* Retrieve the variadic argument */
-
-  va_start(ap, arg1);
-  signo = (int)va_arg(ap, wdparm_t);
-  va_end(ap);
+  int signo = (int)arg2;
 
 #ifdef HAVE_GROUP_MEMBERS
     {
@@ -287,9 +279,8 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
                       /* Start the watchdog */
 
                       wd_start(rtcb->waitdog, ticks,
-                               pthread_condtimedout,
-                               2, (wdparm_t)mypid,
-                               (wdparm_t)SIGCONDTIMEDOUT);
+                               (wdentry_t)pthread_condtimedout, 2,
+                               (wdparm_t)mypid, (wdparm_t)SIGCONDTIMEDOUT);
 
                       /* Take the condition semaphore.  Do not restore
                        * interrupts until we return from the wait.  This is

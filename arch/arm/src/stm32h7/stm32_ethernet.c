@@ -717,10 +717,10 @@ static int  stm32_interrupt(int irq, void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void stm32_txtimeout_work(void *arg);
-static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void stm32_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void stm32_poll_work(void *arg);
-static void stm32_poll_expiry(int argc, uint32_t arg, ...);
+static void stm32_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -1277,8 +1277,8 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, STM32_TXTIMEOUT, stm32_txtimeout_expiry,
-           1, (uint32_t)priv);
+  wd_start(priv->txtimeout, STM32_TXTIMEOUT,
+           stm32_txtimeout_expiry, 1, (wdparm_t)priv);
 
   /* Update the tx descriptor tail pointer register to start the DMA */
 
@@ -2410,7 +2410,7 @@ static void stm32_txtimeout_work(void *arg)
  *
  ****************************************************************************/
 
-static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void stm32_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
@@ -2501,7 +2501,8 @@ static void stm32_poll_work(void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
+  wd_start(priv->txpoll, STM32_WDDELAY,
+           stm32_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -2523,7 +2524,7 @@ static void stm32_poll_work(void *arg)
  *
  ****************************************************************************/
 
-static void stm32_poll_expiry(int argc, uint32_t arg, ...)
+static void stm32_poll_expiry(int argc, wdparm_t arg, ...)
 {
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
@@ -2535,7 +2536,8 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...)
     }
   else
     {
-      wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
+      wd_start(priv->txpoll, STM32_WDDELAY,
+               stm32_poll_expiry, 1, (wdparm_t)priv);
     }
 }
 
@@ -2583,8 +2585,8 @@ static int stm32_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1,
-           (uint32_t)priv);
+  wd_start(priv->txpoll, STM32_WDDELAY,
+           stm32_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 

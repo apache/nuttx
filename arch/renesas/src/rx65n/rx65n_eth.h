@@ -87,7 +87,7 @@ int rx65n_ethinitialize(int intf);
  *
  ****************************************************************************/
 
-void rx65n_poll_expiry(int argc, uint32_t arg, ...);
+void rx65n_poll_expiry(int argc, wdparm_t arg, ...);
 
 /****************************************************************************
  * Function: rx65n_txtimeout_expiry
@@ -104,7 +104,7 @@ void rx65n_poll_expiry(int argc, uint32_t arg, ...);
  *
  ****************************************************************************/
 
-void rx65n_txtimeout_expiry(int argc, uint32_t arg, ...);
+void rx65n_txtimeout_expiry(int argc, wdparm_t arg, ...);
 #endif
 
 #undef EXTERN

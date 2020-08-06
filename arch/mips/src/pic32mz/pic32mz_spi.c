@@ -218,7 +218,7 @@ static void spi_dma_sampledone(FAR struct pic32mz_dev_s *priv);
 #  endif
 static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
 static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
-static void spi_dmatimeout(int argc, uint32_t arg, ...);
+static void spi_dmatimeout(int argc, wdparm_t arg, ...);
 #endif
 
 /* SPI methods */
@@ -995,7 +995,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_SPI_DMA
-static void spi_dmatimeout(int argc, uint32_t arg, ...)
+static void spi_dmatimeout(int argc, wdparm_t arg, ...)
 {
   struct pic32mz_dev_s *priv = (struct pic32mz_dev_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1775,7 +1775,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       /* Start (or re-start) the watchdog timeout */
 
       ret = wd_start(priv->dmadog, DMA_TIMEOUT_TICKS,
-                     spi_dmatimeout, 1, (uint32_t)priv);
+                     spi_dmatimeout, 1, (wdparm_t)priv);
       if (ret < 0)
         {
           spierr("ERROR: wd_start failed: %d\n", ret);

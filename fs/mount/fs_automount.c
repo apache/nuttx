@@ -84,7 +84,7 @@ struct automounter_state_s
 static int  automount_findinode(FAR const char *path);
 static void automount_mount(FAR struct automounter_state_s *priv);
 static int  automount_unmount(FAR struct automounter_state_s *priv);
-static void automount_timeout(int argc, uint32_t arg1, ...);
+static void automount_timeout(int argc, wdparm_t arg1, ...);
 static void automount_worker(FAR void *arg);
 static int  automount_interrupt(FAR const struct automount_lower_s *lower,
               FAR void *arg, bool inserted);
@@ -293,8 +293,8 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 
               /* Start a timer to retry the umount2 after a delay */
 
-              ret = wd_start(priv->wdog, lower->udelay, automount_timeout, 1,
-                             (uint32_t)((uintptr_t)priv));
+              ret = wd_start(priv->wdog, lower->udelay,
+                             automount_timeout, 1, (wdparm_t)priv);
               if (ret < 0)
                 {
                   ferr("ERROR: wd_start failed: %d\n", ret);
@@ -349,10 +349,10 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
  *
  ****************************************************************************/
 
-static void automount_timeout(int argc, uint32_t arg1, ...)
+static void automount_timeout(int argc, wdparm_t arg1, ...)
 {
   FAR struct automounter_state_s *priv =
-    (FAR struct automounter_state_s *)((uintptr_t)arg1);
+    (FAR struct automounter_state_s *)arg1;
   int ret;
 
   finfo("Timeout!\n");

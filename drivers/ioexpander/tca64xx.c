@@ -1261,8 +1261,8 @@ errout_with_restart:
   /* Re-start the poll timer */
 
   sched_lock();
-  ret = wd_start(priv->wdog, TCA64XX_POLLDELAY, tca64_poll_expiry,
-                 1, (wdparm_t)priv);
+  ret = wd_start(priv->wdog, TCA64XX_POLLDELAY,
+                 tca64_poll_expiry, 1, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");
@@ -1434,8 +1434,8 @@ FAR struct ioexpander_dev_s *tca64_initialize(FAR struct i2c_master_s *i2c,
   priv->wdog    = wd_create();
   DEBUGASSERT(priv->wdog != NULL);
 
-  ret = wd_start(priv->wdog, TCA64XX_POLLDELAY, tca64_poll_expiry,
-                 1, (wdparm_t)priv);
+  ret = wd_start(priv->wdog, TCA64XX_POLLDELAY,
+                 tca64_poll_expiry, 1, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");

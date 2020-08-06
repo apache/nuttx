@@ -1032,8 +1032,8 @@ static void lan91c111_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, LAN91C111_WDDELAY, lan91c111_poll_expiry, 1,
-           (wdparm_t)dev);
+  wd_start(priv->txpoll, LAN91C111_WDDELAY,
+           lan91c111_poll_expiry, 1, (wdparm_t)dev);
   net_unlock();
 }
 
@@ -1133,8 +1133,8 @@ static int lan91c111_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, LAN91C111_WDDELAY, lan91c111_poll_expiry, 1,
-           (wdparm_t)dev);
+  wd_start(priv->txpoll, LAN91C111_WDDELAY,
+           lan91c111_poll_expiry, 1, (wdparm_t)dev);
   net_unlock();
 
   /* Enable the Ethernet interrupt */

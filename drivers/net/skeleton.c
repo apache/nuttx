@@ -744,8 +744,8 @@ static void skel_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->sk_txpoll, skeleton_WDDELAY,
+           skel_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -823,8 +823,8 @@ static int skel_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->sk_txpoll, skeleton_WDDELAY, skel_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->sk_txpoll, skeleton_WDDELAY,
+           skel_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 

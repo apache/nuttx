@@ -135,7 +135,7 @@ struct lpc2378_i2cdev_s
 static int  lpc2378_i2c_start(struct lpc2378_i2cdev_s *priv);
 static void lpc2378_i2c_stop(struct lpc2378_i2cdev_s *priv);
 static int  lpc2378_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
-static void lpc2378_i2c_timeout(int argc, uint32_t arg, ...);
+static void lpc2378_i2c_timeout(int argc, wdparm_t arg, ...);
 static void lpc2378_i2c_setfrequency(struct lpc2378_i2cdev_s *priv,
               uint32_t frequency);
 static void lpc2378_stopnext(struct lpc2378_i2cdev_s *priv);
@@ -220,8 +220,8 @@ static int lpc2378_i2c_start(struct lpc2378_i2cdev_s *priv)
            priv->base + I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + I2C_CONSET_OFFSET);
 
-  wd_start(priv->timeout, I2C_TIMEOUT, lpc2378_i2c_timeout, 1,
-           (uint32_t)priv);
+  wd_start(priv->timeout, I2C_TIMEOUT,
+           lpc2378_i2c_timeout, 1, (wdparm_t)priv);
   nxsem_wait(&priv->wait);
 
   wd_cancel(priv->timeout);
@@ -256,7 +256,7 @@ static void lpc2378_i2c_stop(struct lpc2378_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static void lpc2378_i2c_timeout(int argc, uint32_t arg, ...)
+static void lpc2378_i2c_timeout(int argc, wdparm_t arg, ...)
 {
   struct lpc2378_i2cdev_s *priv = (struct lpc2378_i2cdev_s *)arg;
 

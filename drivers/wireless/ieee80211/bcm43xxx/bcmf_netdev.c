@@ -622,8 +622,8 @@ static void bcmf_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->bc_txpoll, BCMF_WDDELAY, bcmf_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->bc_txpoll, BCMF_WDDELAY,
+           bcmf_poll_expiry, 1, (wdparm_t)priv);
 exit_unlock:
   net_unlock();
 }
@@ -698,8 +698,8 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->bc_txpoll, BCMF_WDDELAY, bcmf_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->bc_txpoll, BCMF_WDDELAY,
+           bcmf_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the hardware interrupt */
 

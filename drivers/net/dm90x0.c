@@ -396,10 +396,10 @@ static int  dm9x_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void dm9x_txtimeout_work(FAR void *arg);
-static void dm9x_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void dm9x_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void dm9x_poll_work(FAR void *arg);
-static void dm9x_poll_expiry(int argc, uint32_t arg, ...);
+static void dm9x_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -1421,8 +1421,8 @@ static void dm9x_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->dm_txpoll, DM9X_WDDELAY,
+           dm9x_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1556,8 +1556,8 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->dm_txpoll, DM9X_WDDELAY, dm9x_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->dm_txpoll, DM9X_WDDELAY,
+           dm9x_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the DM9X interrupt */
 

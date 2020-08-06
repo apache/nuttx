@@ -152,7 +152,7 @@ static void watchdog_automonitor_timer(int argc, wdparm_t arg1, ...)
     {
       lower->ops->keepalive(lower);
       wd_start(upper->wdog, WATCHDOG_AUTOMONITOR_TIMEOUT_TICK / 2,
-               watchdog_automonitor_timer, 1, upper);
+               watchdog_automonitor_timer, 1, (wdparm_t)upper);
     }
 }
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
@@ -196,7 +196,7 @@ static void watchdog_automonitor_start(FAR struct watchdog_upperhalf_s
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
       upper->wdog = wd_create();
       wd_start(upper->wdog, WATCHDOG_AUTOMONITOR_TIMEOUT_TICK / 2,
-               watchdog_automonitor_timer, 1, upper);
+               watchdog_automonitor_timer, 1, (wdparm_t)upper);
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
       work_queue(LPWORK, &upper->work, watchdog_automonitor_worker,
                  upper, WATCHDOG_AUTOMONITOR_TIMEOUT_TICK / 2);

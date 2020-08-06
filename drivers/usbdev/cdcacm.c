@@ -746,8 +746,8 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
 
   if (!sq_empty(&priv->rxpending))
     {
-      wd_start(priv->rxfailsafe, CDCACM_RXDELAY, cdcacm_rxtimeout,
-               1, priv);
+      wd_start(priv->rxfailsafe, CDCACM_RXDELAY,
+               cdcacm_rxtimeout, 1, (wdparm_t)priv);
     }
 
   leave_critical_section(flags);

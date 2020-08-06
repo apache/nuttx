@@ -1804,8 +1804,8 @@ static void spirit_txpoll_work(FAR void *arg)
 
       /* Setup the watchdog poll timer again */
 
-      wd_start(priv->txpoll, SPIRIT_WDDELAY, spirit_txpoll_expiry, 1,
-               (wdparm_t)priv);
+      wd_start(priv->txpoll, SPIRIT_WDDELAY,
+               spirit_txpoll_expiry, 1, (wdparm_t)priv);
     }
   else
     {
@@ -1943,8 +1943,8 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      wd_start(priv->txpoll, SPIRIT_WDDELAY, spirit_txpoll_expiry, 1,
-               (wdparm_t)priv);
+      wd_start(priv->txpoll, SPIRIT_WDDELAY,
+               spirit_txpoll_expiry, 1, (wdparm_t)priv);
 
       /* Enables the interrupts from the SPIRIT1 */
 

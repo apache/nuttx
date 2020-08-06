@@ -549,8 +549,8 @@ static void btnet_txpoll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->bd_txpoll, TXPOLL_WDDELAY, btnet_txpoll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->bd_txpoll, TXPOLL_WDDELAY,
+           btnet_txpoll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -629,8 +629,8 @@ static int btnet_ifup(FAR struct net_driver_s *netdev)
 
       /* Set and activate a timer process */
 
-      wd_start(priv->bd_txpoll, TXPOLL_WDDELAY, btnet_txpoll_expiry,
-               1, (wdparm_t)priv);
+      wd_start(priv->bd_txpoll, TXPOLL_WDDELAY,
+               btnet_txpoll_expiry, 1, (wdparm_t)priv);
 
       /* The interface is now up */
 

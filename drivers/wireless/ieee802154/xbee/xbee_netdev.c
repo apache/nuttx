@@ -629,8 +629,8 @@ static void xbeenet_txpoll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->xd_txpoll, TXPOLL_WDDELAY, xbeenet_txpoll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->xd_txpoll, TXPOLL_WDDELAY,
+           xbeenet_txpoll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -780,8 +780,8 @@ static int xbeenet_ifup(FAR struct net_driver_s *dev)
 #endif
       /* Set and activate a timer process */
 
-      wd_start(priv->xd_txpoll, TXPOLL_WDDELAY, xbeenet_txpoll_expiry,
-               1, (wdparm_t)priv);
+      wd_start(priv->xd_txpoll, TXPOLL_WDDELAY,
+               xbeenet_txpoll_expiry, 1, (wdparm_t)priv);
 
       /* The interface is now up */
 

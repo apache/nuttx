@@ -416,7 +416,7 @@ static void stm32_dataconfig(uint32_t timeout, uint32_t dlen,
 static void stm32_datadisable(void);
 static void stm32_sendfifo(struct stm32_dev_s *priv);
 static void stm32_recvfifo(struct stm32_dev_s *priv);
-static void stm32_eventtimeout(int argc, uint32_t arg, ...);
+static void stm32_eventtimeout(int argc, wdparm_t arg, ...);
 static void stm32_endwait(struct stm32_dev_s *priv,
                           sdio_eventset_t wkupevent);
 static void stm32_endtransfer(struct stm32_dev_s *priv,
@@ -1201,7 +1201,7 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
  *
  ****************************************************************************/
 
-static void stm32_eventtimeout(int argc, uint32_t arg, ...)
+static void stm32_eventtimeout(int argc, wdparm_t arg, ...)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
 
@@ -2545,8 +2545,8 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay, stm32_eventtimeout,
-                       1, (uint32_t)priv);
+      ret   = wd_start(priv->waitwdog, delay,
+                       stm32_eventtimeout, 1, (wdparm_t)priv);
       if (ret < 0)
         {
           mcerr("ERROR: wd_start failed: %d\n", ret);
