@@ -988,7 +988,7 @@ static int cromfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Verify that the node is a directory */
 
-  if (!S_ISDIR(node->cn_mode))
+  if (!S_ISDIR(node->cn_mode) && !S_ISLNK(node->cn_mode))
     {
       return -ENOTDIR;
     }
