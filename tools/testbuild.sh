@@ -46,6 +46,7 @@ unset HOPTION
 unset JOPTION
 PRINTLISTONLY=0
 GITCLEAN=0
+FORCESYMBOLS=0
 
 function showusage {
   echo ""
@@ -62,6 +63,7 @@ function showusage {
   echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
   echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx"
   echo "  -p only print the list of configs without running any builds"
+  echo "  -S force including debug symbols in the build"
   echo "  -G Use \"git clean -xfdq\" instead of \"make distclean\" to clean the tree."
   echo "     This option may speed up the builds. However, note that:"
   echo "       * This assumes that your trees are git based."
@@ -109,6 +111,9 @@ while [ ! -z "$1" ]; do
     ;;
   -p )
     PRINTLISTONLY=1
+    ;;
+  -S )
+    FORCESYMBOLS=1
     ;;
   -G )
     GITCLEAN=1
@@ -237,6 +242,14 @@ function build {
 
   if ! ./tools/refresh.sh --silent $config; then
     fail=1
+  fi
+
+  # Enable debug symbols if requested. We do this after refresh
+  # to not trigger a failure by including this feature
+
+  if [ ${FORCESYMBOLS} -eq 1 ]; then
+    kconfig-tweak --file $nuttx/.config --enable CONFIG_DEBUG_SYMBOLS
+    makefunc olddefconfig
   fi
 
   # Ensure nuttx and apps directory in clean state

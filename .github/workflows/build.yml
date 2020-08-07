@@ -181,7 +181,7 @@ jobs:
           run: |
             echo "::add-matcher::sources/nuttx/.github/gcc.json"
             cd sources/testing
-            ./cibuild.sh -x testlist/${{matrix.boards}}.dat
+            ./cibuild.sh -S -x testlist/${{matrix.boards}}.dat
 
   macOS:
     runs-on: macos-10.15
@@ -233,4 +233,4 @@ jobs:
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
           cd sources/testing
-          ./cibuild.sh -i -x testlist/${{matrix.boards}}.dat
+          ./cibuild.sh -i -S -x testlist/${{matrix.boards}}.dat
