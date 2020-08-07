@@ -52,6 +52,7 @@
 
 #include <arch/board/board.h>
 
+#include "clock/clock.h"
 #include "arm_arch.h"
 #include "cxd56_rtc.h"
 
