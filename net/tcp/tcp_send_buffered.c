@@ -205,7 +205,8 @@ static void psock_writebuffer_notify(FAR struct tcp_conn_s *conn)
  ****************************************************************************/
 
 static inline void psock_lost_connection(FAR struct socket *psock,
-                                         FAR struct tcp_conn_s *conn)
+                                         FAR struct tcp_conn_s *conn,
+                                         bool abort)
 {
   FAR sq_entry_t *entry;
   FAR sq_entry_t *next;
@@ -245,6 +246,14 @@ static inline void psock_lost_connection(FAR struct socket *psock,
 
       conn->sent       = 0;
       conn->sndseq_max = 0;
+
+      /* Force abort the connection. */
+
+      if (abort)
+        {
+          conn->tx_unacked = 0;
+          conn->tcpstateflags = TCP_CLOSED;
+        }
     }
 }
 
@@ -503,7 +512,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
       /* Free write buffers and terminate polling */
 
-      psock_lost_connection(psock, conn);
+      psock_lost_connection(psock, conn, !!(flags & NETDEV_DOWN));
       return flags;
     }
 
