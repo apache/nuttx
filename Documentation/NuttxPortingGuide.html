@@ -211,6 +211,7 @@
        <a href="#sdiodrivers">6.3.7 SDIO Device Drivers</a><br>
        <a href="#usbhostdrivers">6.3.8 USB Host-Side Drivers</a><br>
        <a href="#usbdevdrivers">6.3.9 USB Device-Side Drivers</a><br>
+       <a href="#usbdevdrivers">6.3.10 SocketCAN Device Drivers</a><br>
     </ul>
     <a href="#syslog">6.4 SYSLOG</a>
     <ul>
@@ -6470,6 +6471,77 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
             completing the initialization.
           </p>
         </li>
+      </ol>
+    </p>
+  </li>
+</ul>
+
+<h3><a name="usbdevdrivers">6.3.10 SocketCAN Device Drivers</a></h3>
+
+<ul>
+  <li>
+    <p>
+      <b><code>include/nuttx/net/netdev.h</code></b>.
+      All structures and APIs needed to work with drivers are provided in this header file. The structure struct net_driver_s defines the interface and is passed to the network via netdev_register().
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>include/nuttx/can.h</code></b>.
+      CAN & CAN FD frame data structures.
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)'</code></b>.
+      Each driver registers itself by calling netdev_register().
+    </p>
+  </li>
+    <li>
+    <p>
+      <b><code>Include/nuttx/net/can.h</code></b>.
+      contains lookup tables for CAN dlc to CAN FD len sizes named
+    </p>
+    <code>
+	extern const uint8_t can_dlc_to_len[16];
+    </code></br>
+    <code>
+	extern const uint8_t len_to_can_dlc[65];
+    </code>
+  </li>
+  <li>
+    <p>
+      <b>Initialization sequence is as follows</b>.
+      <ol>
+        <li>up_netinitialize(void) is called on startup of NuttX in this function you call your own init function to initialize your CAN driver</li>
+        <li>In your own init function you create the net_driver_s structure set required init values and register the required callbacks for SocketCAN</li>
+        <li>Then you ensure that the CAN interface is in down mode (usually done by calling the d_ifdown function)</li>
+        <li>Register the net_driver_s using netdev_register</li>
+      </ol>
+    </p>
+  </li>
+  <li>
+    <p>
+      <b>Receive sequence is as follows</b>.
+      <ol>
+        <li>Device generates interrupt</li>
+        <li>Process this interrupt in your interrupt handler</li>
+        <li>When a new CAN frame has been received you process this frame</li>
+        <li>When the CAN frame is a normal CAN frame you allocate the can_frame struct, when it's a CAN FD frame you allocate a canfd_frame struct (note you can of course preallocate and just use the pointer).</li>
+        <li>Copy the frame from the driver to the struct you've allocated in the previous step.</li>
+        <li>Point the net_driver_s d_buf pointer to the allocated can_frame</li>
+        <li>Call the <code>can_input(FAR struct net_driver_s *dev)</code> function <code>include/nuttx/net/can.h</code></li>
+      </ol>
+    </p>
+  </li>
+  <li>
+    <p>
+      <b>Transmit sequence is as follows</b>.
+      <ol>
+        <li>Socket layer executes d_txavail callback</li>
+        <li>An example of the txavail function can be found in <code>arch/arm/src/s32k1xx/s32k1xx_flexcan.c</code></li>
+        <li>An example of the txpoll function can be found in <code>arch/arm/src/s32k1xx/s32k1xx_flexcan.c</code></li>
+        <li>In your <code>transmit(struct driver_s *priv)</code> function you check the length of <code>net_driver_s.d_len</code> whether it matches the size of a <code>struct can_frame</code> or <code>struct canfd_frame</code> then you cast the content of the <code>net_driver_s.d_buf</code> pointer to the correct CAN frame struct</li>
       </ol>
     </p>
   </li>
