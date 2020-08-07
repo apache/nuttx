@@ -948,7 +948,7 @@ endif # IMXRT_GPIO_IRQ
 menu "Ethernet Configuration"
 	depends on IMXRT_ENET
 
-config MXRT_ENET_NRXBUFFERS
+config IMXRT_ENET_NRXBUFFERS
 	int "Number Rx buffers"
 	default 6
 
