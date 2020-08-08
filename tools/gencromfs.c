@@ -110,7 +110,7 @@
 #define NUTTX_IFLNK        (10 << 12)  /* Must match NuttX's S_IFLNK */
 
 #define DIR_MODEFLAGS      (NUTTX_IFDIR | NUTTX_IRXUSR | NUTTX_IRXGRP | NUTTX_IRXOTH)
-#define DIRLINK_MODEFLAGS  (NUTTX_IFLNK | DIR_MODEFLAGS)
+#define LINK_MODEFLAGS     (NUTTX_IFLNK | NUTTX_IRXUSR | NUTTX_IRXGRP | NUTTX_IRXOTH)
 #define FILE_MODEFLAGS     (NUTTX_IFREG | NUTTX_IRUSR | NUTTX_IRGRP | NUTTX_IROTH)
 
 #define CROMFS_MAGIC       0x4d4f5243
@@ -251,8 +251,6 @@ static const char g_delim[] =
   "***********************";
 
 static uint32_t g_offset;        /* Current image offset */
-static uint32_t g_diroffset;     /* Offset for '.' */
-static uint32_t g_parent_offset; /* Offset for '..' */
 
 static unsigned int g_nnodes;  /* Number of nodes generated */
 static unsigned int g_nblocks; /* Number of blocks of data generated */
@@ -289,7 +287,6 @@ static inline uint32_t tgt_uint32(uint32_t a);
 #  define TGT_UINT16(a) (a)
 #  define TGT_UINT32(a) (a)
 #endif
-static void gen_dirlink(const char *name, uint32_t tgtoffs, bool dirempty);
 static void gen_directory(const char *path, const char *name, mode_t mode,
                           bool lastentry);
 static void gen_file(const char *path, const char *name, mode_t mode,
@@ -946,44 +943,12 @@ static inline uint32_t tgt_uint32(uint32_t a)
 }
 #endif
 
-static void gen_dirlink(const char *name, uint32_t tgtoffs, bool dirempty)
-{
-  struct cromfs_node_s node;
-  int namlen;
-
-  namlen          = strlen(name) + 1;
-
-  /* Generate the hardlink node */
-
-  fprintf(g_tmpstream, "\n  /* Offset %6lu:  Hard link %s */\n\n",
-          (unsigned long)g_offset, name);
-
-  node.cn_mode    = TGT_UINT16(DIRLINK_MODEFLAGS);
-  node.cn_pad     = 0;
-
-  g_offset       += sizeof(struct cromfs_node_s);
-  node.cn_name    = TGT_UINT32(g_offset);
-  node.cn_size    = 0;
-
-  g_offset       += namlen;
-  node.cn_peer    = TGT_UINT32(dirempty ? 0 : g_offset);
-  node.u.cn_link  = TGT_UINT32(tgtoffs);
-
-  dump_hexbuffer(g_tmpstream, &node, sizeof(struct cromfs_node_s));
-  dump_hexbuffer(g_tmpstream, name, namlen);
-  dump_nextline(g_tmpstream);
-
-  g_nnodes++;
-}
-
 static void gen_directory(const char *path, const char *name, mode_t mode,
                           bool lastentry)
 {
   struct cromfs_node_s node;
-  uint32_t save_offset        = g_offset;
-  uint32_t save_diroffset     = g_diroffset;
-  uint32_t save_parent_offset = g_parent_offset;
-  FILE *save_tmpstream      = g_tmpstream;
+  uint32_t save_offset = g_offset;
+  FILE *save_tmpstream = g_tmpstream;
   FILE *subtree_stream;
   int namlen;
   int result;
@@ -1001,23 +966,11 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
 
   g_offset       += sizeof(struct cromfs_node_s) + namlen;
 
-  /* Update offsets for the subdirectory */
-
-  g_parent_offset = g_diroffset;  /* New offset for '..' */
-  g_diroffset     = g_offset;     /* New offset for '.' */
-
   /* We are going to traverse the new directory twice; the first time just
    * see if the directory is empty.  The second time is the real thing.
    */
 
   result = traverse_directory(path, dir_notempty, NULL);
-
-  /* Generate the '.' and '..' links for the directory (in the new temporary
-   * file).
-   */
-
-  gen_dirlink(".", g_diroffset, false);
-  gen_dirlink("..", g_parent_offset, result == 0);
   if (result != 0)
     {
       /* Then recurse to generate all of the nodes for the subtree */
@@ -1033,8 +986,6 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
    */
 
   g_tmpstream     = save_tmpstream;
-  g_diroffset     = save_diroffset;
-  g_parent_offset = save_parent_offset;
 
   /* Generate the directory node */
 
@@ -1359,19 +1310,13 @@ int main(int argc, char **argv, char **envp)
 
   /* Set up some initial offsets */
 
-  g_offset        = sizeof(struct cromfs_volume_s);  /* Current image offset */
-  g_diroffset     = sizeof(struct cromfs_volume_s);  /* Offset for '.' */
-  g_parent_offset = sizeof(struct cromfs_volume_s);  /* Offset for '..' */
+  g_offset = sizeof(struct cromfs_volume_s);  /* Current image offset */
 
   /* We are going to traverse the new directory twice; the first time just
    * see if the directory is empty.  The second time is the real thing.
    */
 
   result = traverse_directory(g_dirname, dir_notempty, NULL);
-
-  /* Generate the '.' link for the root directory (it can't have a '..') */
-
-  gen_dirlink(".", g_diroffset, result == 0);
   if (result != 0)
     {
       /* Then traverse each entry in the directory, generating node data for
@@ -1397,8 +1342,6 @@ int main(int argc, char **argv, char **envp)
 
   dump_hexbuffer(g_outstream, &vol, sizeof(struct cromfs_volume_s));
   dump_nextline(g_outstream);
-  fprintf(g_outstream, "\n  /* Offset %6lu:  Root directory */\n",
-          (unsigned long)sizeof(struct cromfs_volume_s));
 
   /* Finally append the nodes to the output file */
 
