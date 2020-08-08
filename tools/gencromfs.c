@@ -47,6 +47,7 @@
  ****************************************************************************/
 
 #define _GNU_SOURCE 1
+
 #include <sys/stat.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -133,8 +134,7 @@
 #define LZF_MAX_OFF        (1 << LZF_HLOG)
 #define LZF_MAX_REF        ((1 << 8) + (1 << 3))
 
-#define HEX_PER_BREAK      8
-#define HEX_PER_LINE       16
+#define HEX_PER_LINE       8
 
 /****************************************************************************
  * Private Types
@@ -247,8 +247,26 @@ static FILE *g_outstream;      /* Main output stream */
 static FILE *g_tmpstream;      /* Temporary file output stream */
 
 static const char g_delim[] =
-  "*************************************************************************"
-  "***********************";
+  "**************************************"
+  "**************************************";
+
+static const char g_license[] =
+  " *\n"
+  " * Licensed to the Apache Software Foundation (ASF) under one or more\n"
+  " * contributor license agreements. See the NOTICE file distributed with\n"
+  " * this work for additional information regarding copyright ownership.\n"
+  " * The ASF licenses this file to you under the Apache License, Version\n"
+  " * 2.0 (the \"License\"); you mayn`t use this file except in compliance\n"
+  " * with the License. You may obtain a copy of the License at\n"
+  " *\n"
+  " *   http://www.apache.org/licenses/LICENSE-2.0\n"
+  " *\n"
+  " * Unless required by applicable law or agreed to in writing, software\n"
+  " * distributed under the License is distributed on an \"AS IS\" BASIS,\n"
+  " * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or\n"
+  " * implied. See the License for the specific language governing\n"
+  " * permissions and limitations under the License.\n"
+  " *\n";
 
 static uint32_t g_offset;        /* Current image offset */
 
@@ -344,7 +362,7 @@ static void verify_directory(void)
       else
         {
           fprintf(stderr, "ERROR: stat(%s) failed: %s\n",
-                 g_dirname, strerror(errcode));
+                  g_dirname, strerror(errcode));
         }
 
       show_usage();
@@ -373,7 +391,7 @@ static void verify_outfile(void)
       if (errcode != ENOENT)
         {
           fprintf(stderr, "ERROR: stat(%s) failed: %s\n",
-                 g_outname, strerror(errcode));
+                  g_outname, strerror(errcode));
           show_usage();
         }
     }
@@ -398,88 +416,12 @@ static void init_outfile(void)
 {
   fprintf(g_outstream, "/%s\n", g_delim);
   fprintf(g_outstream, " * %s\n", g_outname);
-  fprintf(g_outstream, " *\n");
-  fprintf(g_outstream,
-          " *   Copyright (C) 2018, 2020 Gregory Nutt. All rights "
-          "reserved.\n");
-  fprintf(g_outstream, " *   Authors: Gregory Nutt <gnutt@nuttx.org>\n");
-  fprintf(g_outstream, " *            David Sidrane <david.sidrane@nscdg."
-          "com>\n");
-  fprintf(g_outstream, " *\n");
-  fprintf(g_outstream,
-          " * Redistribution and use in source and binary forms, "
-          "with or without\n");
-  fprintf(g_outstream,
-          " * modification, are permitted provided that the following "
-          "conditions\n");
-  fprintf(g_outstream, " * are met:\n");
-  fprintf(g_outstream, " *\n");
-  fprintf(g_outstream,
-          " * 1. Redistributions of source code must retain the above "
-          "copyright\n");
-  fprintf(g_outstream,
-          " *    notice, this list of conditions and the following "
-          "disclaimer.\n");
-  fprintf(g_outstream,
-          " * 2. Redistributions in binary form must reproduce the above "
-          "copyright\n");
-  fprintf(g_outstream,
-          " *    notice, this list of conditions and the following "
-          "disclaimer in\n");
-  fprintf(g_outstream,
-          " *    the documentation and/or other materials provided with "
-          "the\n");
-  fprintf(g_outstream, " *    distribution.\n");
-  fprintf(g_outstream,
-          " * 3. Neither the name NuttX nor the names of its contributors "
-          "may be\n");
-  fprintf(g_outstream,
-          " *    used to endorse or promote products derived from this "
-          "software\n");
-  fprintf(g_outstream, " *    without specific prior written permission.\n");
-  fprintf(g_outstream, " *\n");
-  fprintf(g_outstream,
-          " * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND "
-          "CONTRIBUTORS\n");
-  fprintf(g_outstream,
-          " * \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, "
-          "BUT NOT\n");
-  fprintf(g_outstream,
-          " * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND "
-          "FITNESS\n");
-  fprintf(g_outstream,
-          " * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL "
-          "THE\n");
-  fprintf(g_outstream,
-          " * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, "
-          "INDIRECT,\n");
-  fprintf(g_outstream,
-          " * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES "
-          "(INCLUDING,\n");
-  fprintf(g_outstream,
-          " * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR "
-          "SERVICES; LOSS\n");
-  fprintf(g_outstream,
-          " * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER "
-          "CAUSED\n");
-  fprintf(g_outstream,
-          " * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, "
-          "STRICT\n");
-  fprintf(g_outstream,
-          " * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) "
-          "ARISING IN\n");
-  fprintf(g_outstream,
-          " * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF "
-          "THE\n");
-  fprintf(g_outstream, " * POSSIBILITY OF SUCH DAMAGE.\n");
-  fprintf(g_outstream, " *\n");
+  fprintf(g_outstream, "%s", g_license);
   fprintf(g_outstream, " %s/\n\n", g_delim);
 
   fprintf(g_outstream, "/%s\n", g_delim);
   fprintf(g_outstream, " * Included Files\n");
   fprintf(g_outstream, " %s/\n\n", g_delim);
-
-  fprintf(g_outstream, "#include <nuttx/config.h>\n\n");
   fprintf(g_outstream, "#include <stdint.h>\n\n");
 
   fprintf(g_outstream, "/%s\n", g_delim);
@@ -575,7 +517,7 @@ static void dump_hexbuffer(FILE *stream, const void *buffer,
 
   while (nbytes > 0)
     {
-      if (g_nhex == 0 || g_nhex == HEX_PER_BREAK)
+      if (g_nhex == 0)
         {
           fprintf(stream, " ");
         }
@@ -660,8 +602,8 @@ static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
                 }
             }
 
-          outptr[- lit - 1] = lit - 1; /* Stop run */
-          outptr -= !lit;              /* Undo run if length is zero */
+          outptr[(-lit) - 1] = lit - 1; /* Stop run */
+          outptr -= !lit;               /* Undo run if length is zero */
 
           for (; ; )
             {
@@ -822,8 +764,8 @@ static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
 
           if (lit == LZF_MAX_LIT)
             {
-              outptr[- lit - 1] = lit - 1; /* Stop run */
-              lit = 0;                     /* Start run */
+              outptr[(-lit) - 1] = lit - 1; /* Stop run */
+              lit = 0;                      /* Start run */
               outptr++;
             }
         }
@@ -843,14 +785,14 @@ static size_t lzf_compress(const uint8_t *inbuffer, unsigned int inlen,
 
       if (lit == LZF_MAX_LIT)
         {
-          outptr[- lit - 1] = lit - 1; /* Stop run */
-          lit = 0;                     /* Start run */
+          outptr[(-lit) - 1] = lit - 1; /* Stop run */
+          lit = 0;                      /* Start run */
           outptr++;
         }
     }
 
-  outptr[- lit - 1] = lit - 1; /* End run */
-  outptr -= !lit;              /* Undo run if length is zero */
+  outptr[(-lit) - 1] = lit - 1; /* End run */
+  outptr -= !lit;               /* Undo run if length is zero */
 
   cs = outptr - (uint8_t *)result->compressed.lzf_buffer;
 
@@ -1331,7 +1273,7 @@ int main(int argc, char **argv, char **envp)
   fprintf(g_outstream, "/* CROMFS image */\n\n");
   fprintf(g_outstream, "const uint8_t g_cromfs_image[] =\n");
   fprintf(g_outstream, "{\n");
-  fprintf(g_outstream, "\n  /* Offset %6lu:  Volume header */\n\n", 0ul);
+  fprintf(g_outstream, "  /* Offset %6lu:  Volume header */\n\n", 0ul);
 
   vol.cv_magic    = TGT_UINT32(CROMFS_MAGIC);
   vol.cv_nnodes   = TGT_UINT16(g_nnodes);
