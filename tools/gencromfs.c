@@ -955,7 +955,6 @@ static void gen_dirlink(const char *name, uint32_t tgtoffs, bool dirempty)
 
   /* Generate the hardlink node */
 
-  dump_nextline(g_tmpstream);
   fprintf(g_tmpstream, "\n  /* Offset %6lu:  Hard link %s */\n\n",
           (unsigned long)g_offset, name);
 
@@ -972,6 +971,7 @@ static void gen_dirlink(const char *name, uint32_t tgtoffs, bool dirempty)
 
   dump_hexbuffer(g_tmpstream, &node, sizeof(struct cromfs_node_s));
   dump_hexbuffer(g_tmpstream, name, namlen);
+  dump_nextline(g_tmpstream);
 
   g_nnodes++;
 }
@@ -1038,7 +1038,6 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
 
   /* Generate the directory node */
 
-  dump_nextline(g_tmpstream);
   fprintf(g_tmpstream, "\n  /* Offset %6lu:  Directory %s */\n\n",
           (unsigned long)save_offset, path);
 
@@ -1055,6 +1054,7 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
 
   dump_hexbuffer(g_tmpstream, &node, sizeof(struct cromfs_node_s));
   dump_hexbuffer(g_tmpstream, name, namlen);
+  dump_nextline(g_tmpstream);
 
   g_nnodes++;
 
@@ -1130,13 +1130,13 @@ static void gen_file(const char *path, const char *name, mode_t mode,
                      (uint16_t)result.compressed.lzf_clen[1];
             }
 
-          dump_nextline(g_tmpstream);
           fprintf(g_tmpstream,
                   "\n  /* Offset %6lu:  "
                   "Block %u blklen=%lu Uncompressed=%lu Compressed=%u "
                   "*/\n\n",  (unsigned long)g_offset, blkno, (long)blklen,
                   (long)nread, clen);
           dump_hexbuffer(g_tmpstream, &result, blklen);
+          dump_nextline(g_tmpstream);
 
           ntotal   += nread;
           blktotal += blklen;
@@ -1153,8 +1153,6 @@ static void gen_file(const char *path, const char *name, mode_t mode,
   g_tmpstream        = save_tmpstream;
 
   /* Now we have enough information to generate the file node */
-
-  dump_nextline(g_tmpstream);
 
   fprintf(g_tmpstream, "\n  /* Offset %6lu:  File %s:  "
           "Uncompressed=%lu Compressed=%lu */\n\n",
@@ -1177,6 +1175,7 @@ static void gen_file(const char *path, const char *name, mode_t mode,
 
   dump_hexbuffer(g_tmpstream, &node, sizeof(struct cromfs_node_s));
   dump_hexbuffer(g_tmpstream, name, namlen);
+  dump_nextline(g_tmpstream);
 
   g_nnodes++;
 
@@ -1396,9 +1395,7 @@ int main(int argc, char **argv, char **envp)
   vol.cv_fsize    = TGT_UINT32(g_offset);
   vol.cv_bsize    = TGT_UINT32(CROMFS_BLOCKSIZE);
 
-  g_nhex          = 0;
   dump_hexbuffer(g_outstream, &vol, sizeof(struct cromfs_volume_s));
-
   dump_nextline(g_outstream);
   fprintf(g_outstream, "\n  /* Offset %6lu:  Root directory */\n",
           (unsigned long)sizeof(struct cromfs_volume_s));
@@ -1406,7 +1403,7 @@ int main(int argc, char **argv, char **envp)
   /* Finally append the nodes to the output file */
 
   append_tmpfile(g_outstream, g_tmpstream);
-  fprintf(g_outstream, "\n};\n");
+  fprintf(g_outstream, "};\n");
 
   fclose(g_outstream);
 #ifndef USE_MKSTEMP
