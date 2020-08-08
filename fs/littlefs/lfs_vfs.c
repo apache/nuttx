@@ -716,9 +716,18 @@ static int littlefs_readdir(FAR struct inode *mountpt,
       return ret;
     }
 
+retry:
   ret = lfs_dir_read(&fs->lfs, priv, &info);
   if (ret > 0)
     {
+      /* Skip '.' and '..' */
+
+      if (info.name[0] == '.' && (info.name[1] == '\0' ||
+          (info.name[1] == '.' && info.name[2] == '\0')))
+        {
+          goto retry;
+        }
+
       dir->fd_position = lfs_dir_tell(&fs->lfs, priv);
       if (info.type == LFS_TYPE_REG)
         {
