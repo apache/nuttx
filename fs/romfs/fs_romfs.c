@@ -923,6 +923,14 @@ static int romfs_readdir(FAR struct inode *mountpt,
 
       dir->u.romfs.fr_curroffset = next & RFNEXT_OFFSETMASK;
 
+      /* Skip '.' and '..' */
+
+      if (dir->fd_dir.d_name[0] == '.' && (dir->fd_dir.d_name[1] == '\0' ||
+          (dir->fd_dir.d_name[1] == '.' && dir->fd_dir.d_name[2] == '\0')))
+        {
+          continue;
+        }
+
       /* Check the file type */
 
       if (IS_DIRECTORY(next))
