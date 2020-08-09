@@ -160,7 +160,7 @@ struct ft5x06_dev_s
 static void ft5x06_notify(FAR struct ft5x06_dev_s *priv);
 static void ft5x06_data_worker(FAR void *arg);
 #ifdef CONFIG_FT5X06_POLLMODE
-static void ft5x06_poll_timeout(int argc, wdparm_t arg1, ...);
+static void ft5x06_poll_timeout(wdparm_t arg);
 #else
 static int  ft5x06_data_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
@@ -364,7 +364,7 @@ static void ft5x06_data_worker(FAR void *arg)
   /* Exit, re-starting the poll. */
 
   wd_start(&priv->polltimer, priv->delay,
-           ft5x06_poll_timeout, 1, (wdparm_t)priv);
+           ft5x06_poll_timeout, (wdparm_t)priv);
 
 #else
   /* Exit, re-enabling FT5x06 interrupts */
@@ -380,9 +380,9 @@ static void ft5x06_data_worker(FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_FT5X06_POLLMODE
-static void ft5x06_poll_timeout(int argc, wdparm_t arg1, ...)
+static void ft5x06_poll_timeout(wdparm_t arg)
 {
-  FAR struct ft5x06_dev_s *priv = (FAR struct ft5x06_dev_s *)arg1;
+  FAR struct ft5x06_dev_s *priv = (FAR struct ft5x06_dev_s *)arg;
   int ret;
 
   /* Transfer processing to the worker thread.  Since FT5x06 poll timer is

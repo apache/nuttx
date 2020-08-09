@@ -175,7 +175,7 @@ static int     cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
 static int     cdcacm_requeue_rdrequest(FAR struct cdcacm_dev_s *priv,
                  FAR struct cdcacm_rdreq_s *rdcontainer);
 static int     cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv);
-static void    cdcacm_rxtimeout(int argc, wdparm_t arg1, ...);
+static void    cdcacm_rxtimeout(wdparm_t arg);
 
 /* Request helpers **********************************************************/
 
@@ -747,7 +747,7 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
   if (!sq_empty(&priv->rxpending))
     {
       wd_start(&priv->rxfailsafe, CDCACM_RXDELAY,
-               cdcacm_rxtimeout, 1, (wdparm_t)priv);
+               cdcacm_rxtimeout, (wdparm_t)priv);
     }
 
   leave_critical_section(flags);
@@ -766,9 +766,9 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
  *
  ****************************************************************************/
 
-static void cdcacm_rxtimeout(int argc, wdparm_t arg1, ...)
+static void cdcacm_rxtimeout(wdparm_t arg)
 {
-  FAR struct cdcacm_dev_s *priv = (FAR struct cdcacm_dev_s *)arg1;
+  FAR struct cdcacm_dev_s *priv = (FAR struct cdcacm_dev_s *)arg;
 
   DEBUGASSERT(priv != NULL);
   cdcacm_release_rxpending(priv);
