@@ -65,12 +65,15 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
+
 /* Configuration ****************************************************************************/
+
 /* Reference counting is partially implemented, but not needed in the current design. */
 
 #undef CONFIG_ADS7843E_REFCNT
 
-/* ADS7843E Interfaces *********************************************************************/
+/* ADS7843E Interfaces **********************************************************************/
+
 /* ADS7843E command bit settings */
 
 #define ADS7843E_CMD_PD0          (1 << 0)  /* Bit 0: Power down mode select bit 0 */
@@ -90,7 +93,8 @@
 #define ADS7843_CMD_ENABPENIRQ \
   ((1 << ADS7843E_CMD_CHAN_SHIFT)| ADS7843E_CMD_START)
 
-/* Driver support **************************************************************************/
+/* Driver support ***************************************************************************/
+
 /* This format is used to construct the /dev/input[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
@@ -165,7 +169,8 @@ struct ads7843e_dev_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

@@ -61,7 +61,7 @@
  * Pre-processor Definitions
  ********************************************************************************************/
 
-/* MAX11802 Interfaces *********************************************************************/
+/* MAX11802 Interfaces **********************************************************************/
 
 /* LSB of register addresses specifies read (1) or write (0). */
 
@@ -85,7 +85,8 @@
 #define MAX11802_DELAY   0x55
 #define MAX11802_PULL    0x33
 
-/* Driver support **************************************************************************/
+/* Driver support ***************************************************************************/
+
 /* This format is used to construct the /dev/input[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
@@ -157,7 +158,8 @@ struct max11802_dev_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
