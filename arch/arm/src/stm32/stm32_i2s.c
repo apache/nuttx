@@ -409,7 +409,7 @@ static void     i2s_txdma_sampledone(struct stm32_i2s_s *priv, int result);
 #endif
 
 #ifdef I2S_HAVE_RX
-static void     i2s_rxdma_timeout(int argc, wdparm_t arg, ...);
+static void     i2s_rxdma_timeout(wdparm_t arg);
 static int      i2s_rxdma_setup(struct stm32_i2s_s *priv);
 static void     i2s_rx_worker(void *arg);
 static void     i2s_rx_schedule(struct stm32_i2s_s *priv, int result);
@@ -417,7 +417,7 @@ static void     i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result,
                                    void *arg);
 #endif
 #ifdef I2S_HAVE_TX
-static void     i2s_txdma_timeout(int argc, wdparm_t arg, ...);
+static void     i2s_txdma_timeout(wdparm_t arg);
 static int      i2s_txdma_setup(struct stm32_i2s_s *priv);
 static void     i2s_tx_worker(void *arg);
 static void     i2s_tx_schedule(struct stm32_i2s_s *priv, int result);
@@ -945,8 +945,7 @@ static void i2s_txdma_sampledone(struct stm32_i2s_s *priv, int result)
  *   The RX watchdog timeout without completion of the RX DMA.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -957,7 +956,7 @@ static void i2s_txdma_sampledone(struct stm32_i2s_s *priv, int result)
  ****************************************************************************/
 
 #ifdef I2S_HAVE_RX
-static void i2s_rxdma_timeout(int argc, wdparm_t arg, ...)
+static void i2s_rxdma_timeout(wdparm_t arg)
 {
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1096,7 +1095,7 @@ static int i2s_rxdma_setup(struct stm32_i2s_s *priv)
   if (!notimeout)
     {
       ret = wd_start(&priv->rx.dog, timeout,
-                     i2s_rxdma_timeout, 1, (wdparm_t)priv);
+                     i2s_rxdma_timeout, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
@@ -1345,8 +1344,7 @@ static void i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
  *   The RX watchdog timeout without completion of the RX DMA.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -1357,7 +1355,7 @@ static void i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
  ****************************************************************************/
 
 #ifdef I2S_HAVE_TX
-static void i2s_txdma_timeout(int argc, wdparm_t arg, ...)
+static void i2s_txdma_timeout(wdparm_t arg)
 {
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1496,7 +1494,7 @@ static int i2s_txdma_setup(struct stm32_i2s_s *priv)
   if (!notimeout)
     {
       ret = wd_start(&priv->tx.dog, timeout,
-                     i2s_txdma_timeout, 1, (wdparm_t)priv);
+                     i2s_txdma_timeout, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We

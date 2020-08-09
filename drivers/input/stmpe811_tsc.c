@@ -729,9 +729,9 @@ static void stmpe811_timeoutworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void stmpe811_timeout(int argc, wdparm_t arg1, ...)
+static void stmpe811_timeout(wdparm_t arg)
 {
-  FAR struct stmpe811_dev_s *priv = (FAR struct stmpe811_dev_s *)arg1;
+  FAR struct stmpe811_dev_s *priv = (FAR struct stmpe811_dev_s *)arg;
   int ret;
 
   /* Are we still stuck in the pen down state? */
@@ -1083,7 +1083,7 @@ ignored:
       priv->sample.contact == CONTACT_MOVE)
     {
       wd_start(&priv->wdog, STMPE811_PENUP_TICKS,
-               stmpe811_timeout, 1, (wdparm_t)priv);
+               stmpe811_timeout, (wdparm_t)priv);
     }
 
   /*  Reset and clear all data in the FIFO */

@@ -519,7 +519,7 @@ static int  kinetis_flexcan_interrupt(int irq, FAR void *context,
 /* Watchdog timer expirations */
 #ifdef TX_TIMEOUT_WQ
 static void kinetis_txtimeout_work(FAR void *arg);
-static void kinetis_txtimeout_expiry(int argc, wdparm_t arg, ...);
+static void kinetis_txtimeout_expiry(wdparm_t arg);
 #endif
 
 /* NuttX callback functions */
@@ -752,7 +752,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
   if (timeout > 0)
     {
       wd_start(&priv->txtimeout[mbi], timeout + 1,
-               kinetis_txtimeout_expiry, 1, (wdparm_t)priv);
+               kinetis_txtimeout_expiry, (wdparm_t)priv);
     }
 #endif
 
@@ -1131,8 +1131,7 @@ static void kinetis_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1142,12 +1141,11 @@ static void kinetis_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void kinetis_txtimeout_expiry(int argc, wdparm_t arg, ...)
+static void kinetis_txtimeout_expiry(wdparm_t arg)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
-  /* Schedule to perform the TX timeout processing on the worker thread
-   */
+  /* Schedule to perform the TX timeout processing on the worker thread */
 
   work_queue(CANWORK, &priv->irqwork, kinetis_txtimeout_work, priv, 0);
 }

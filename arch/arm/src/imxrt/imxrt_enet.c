@@ -336,10 +336,10 @@ static int  imxrt_enet_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void imxrt_txtimeout_work(FAR void *arg);
-static void imxrt_txtimeout_expiry(int argc, wdparm_t arg, ...);
+static void imxrt_txtimeout_expiry(wdparm_t arg);
 
 static void imxrt_poll_work(FAR void *arg);
-static void imxrt_polltimer_expiry(int argc, wdparm_t arg, ...);
+static void imxrt_polltimer_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -566,7 +566,7 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   wd_start(&priv->txtimeout, IMXRT_TXTIMEOUT,
-           imxrt_txtimeout_expiry, 1, (wdparm_t)priv);
+           imxrt_txtimeout_expiry, (wdparm_t)priv);
 
   /* Start the TX transfer (if it was not already waiting for buffers) */
 
@@ -1171,8 +1171,7 @@ static void imxrt_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1182,7 +1181,7 @@ static void imxrt_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void imxrt_txtimeout_expiry(int argc, wdparm_t arg, ...)
+static void imxrt_txtimeout_expiry(wdparm_t arg)
 {
   FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
 
@@ -1240,7 +1239,7 @@ static void imxrt_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again in any case */
 
   wd_start(&priv->txpoll, IMXRT_WDDELAY,
-           imxrt_polltimer_expiry, 1, (wdparm_t)priv);
+           imxrt_polltimer_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1251,8 +1250,7 @@ static void imxrt_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1262,7 +1260,7 @@ static void imxrt_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void imxrt_polltimer_expiry(int argc, wdparm_t arg, ...)
+static void imxrt_polltimer_expiry(wdparm_t arg)
 {
   FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
 
@@ -1372,7 +1370,7 @@ static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy)
   /* Set and activate a timer process */
 
   wd_start(&priv->txpoll, IMXRT_WDDELAY,
-           imxrt_polltimer_expiry, 1, (wdparm_t)priv);
+           imxrt_polltimer_expiry, (wdparm_t)priv);
 
   /* Clear all pending ENET interrupt */
 

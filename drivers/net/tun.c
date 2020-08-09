@@ -193,7 +193,7 @@ static void tun_txdone(FAR struct tun_device_s *priv);
 /* Watchdog timer expirations */
 
 static void tun_poll_work(FAR void *arg);
-static void tun_poll_expiry(int argc, wdparm_t arg, ...);
+static void tun_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -811,7 +811,7 @@ static void tun_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(&priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, (wdparm_t)priv);
+  wd_start(&priv->txpoll, TUN_WDDELAY, tun_poll_expiry, (wdparm_t)priv);
 
   net_unlock();
   tun_unlock(priv);
@@ -824,8 +824,7 @@ static void tun_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -835,7 +834,7 @@ static void tun_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void tun_poll_expiry(int argc, wdparm_t arg, ...)
+static void tun_poll_expiry(FAR void *arg)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)arg;
 
@@ -879,8 +878,7 @@ static int tun_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(&priv->txpoll, TUN_WDDELAY,
-           tun_poll_expiry, 1, (wdparm_t)priv);
+  wd_start(&priv->txpoll, TUN_WDDELAY, tun_poll_expiry, priv);
 
   priv->bifup = true;
   return OK;

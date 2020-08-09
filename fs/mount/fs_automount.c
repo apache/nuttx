@@ -84,7 +84,7 @@ struct automounter_state_s
 static int  automount_findinode(FAR const char *path);
 static void automount_mount(FAR struct automounter_state_s *priv);
 static int  automount_unmount(FAR struct automounter_state_s *priv);
-static void automount_timeout(int argc, wdparm_t arg1, ...);
+static void automount_timeout(wdparm_t arg);
 static void automount_worker(FAR void *arg);
 static int  automount_interrupt(FAR const struct automount_lower_s *lower,
               FAR void *arg, bool inserted);
@@ -294,7 +294,7 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
               /* Start a timer to retry the umount2 after a delay */
 
               ret = wd_start(&priv->wdog, lower->udelay,
-                             automount_timeout, 1, (wdparm_t)priv);
+                             automount_timeout, (wdparm_t)priv);
               if (ret < 0)
                 {
                   ferr("ERROR: wd_start failed: %d\n", ret);
@@ -349,14 +349,14 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
  *
  ****************************************************************************/
 
-static void automount_timeout(int argc, wdparm_t arg1, ...)
+static void automount_timeout(wdparm_t arg)
 {
   FAR struct automounter_state_s *priv =
-    (FAR struct automounter_state_s *)arg1;
+    (FAR struct automounter_state_s *)arg;
   int ret;
 
   finfo("Timeout!\n");
-  DEBUGASSERT(argc == 1 && priv);
+  DEBUGASSERT(priv);
 
   /* Check the state of things.  This timeout at the interrupt level and
    * will cancel the timeout if there is any change in the insertion

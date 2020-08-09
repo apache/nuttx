@@ -2302,7 +2302,7 @@ static void cdcmbim_receive(struct usbhost_cdcmbim_s *priv,
   net_unlock();
 }
 
-static void cdcmbim_txpoll_expiry(int argc, wdparm_t arg, ...)
+static void cdcmbim_txpoll_expiry(wdparm_t arg)
 {
   struct usbhost_cdcmbim_s *priv = (struct usbhost_cdcmbim_s *)arg;
 
@@ -2321,7 +2321,7 @@ static void cdcmbim_txpoll_work(void *arg)
   /* setup the watchdog poll timer again */
 
   wd_start(&priv->txpoll, (1 * CLK_TCK),
-           cdcmbim_txpoll_expiry, 1, (wdparm_t)priv);
+           cdcmbim_txpoll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -2428,7 +2428,7 @@ static int cdcmbim_ifup(struct net_driver_s *dev)
   /* Start network TX poll */
 
   wd_start(&priv->txpoll, (1 * CLK_TCK),
-           cdcmbim_txpoll_expiry, 1, (wdparm_t)priv);
+           cdcmbim_txpoll_expiry, (wdparm_t)priv);
   priv->bifup = true;
   return OK;
 }

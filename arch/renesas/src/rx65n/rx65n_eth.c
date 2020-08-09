@@ -2058,8 +2058,7 @@ static void rx65n_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2069,7 +2068,7 @@ static void rx65n_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-void rx65n_txtimeout_expiry(int argc, wdparm_t arg, ...)
+void rx65n_txtimeout_expiry(wdparm_t arg)
 {
   FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)arg;
   nerr("ERROR: Timeout!\n");
@@ -2169,8 +2168,7 @@ static void rx65n_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2180,7 +2178,7 @@ static void rx65n_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-void rx65n_poll_expiry(int argc, wdparm_t arg, ...)
+void rx65n_poll_expiry(wdparm_t arg)
 {
   FAR struct rx65n_ethmac_s *priv = (FAR struct rx65n_ethmac_s *)arg;
   rx65n_cmtw0_stop(rx65n_cmtw0_txpoll);

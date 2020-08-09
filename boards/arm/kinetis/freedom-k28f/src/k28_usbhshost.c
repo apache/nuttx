@@ -100,7 +100,7 @@ static void ehci_hwinit(void);
 
 #  ifdef HAVE_USB_AUTOMOUNTER
 static void usb_msc_connect(FAR void *arg);
-static void unmount_retry_timeout(int argc, uint32_t arg1, ...);
+static void unmount_retry_timeout(wdparm_t arg);
 static void usb_msc_disconnect(FAR void *arg);
 #  endif
 
@@ -198,37 +198,37 @@ static void ehci_hwinit(void)
   /* Release Softreset and ungate PHY Clock */
 
   regval  = getreg32(KINETIS_USBHSPHY_CTRL);
-  regval &= ~(USBPHY_CTRLn_SFTRST);
-  regval &= ~(USBPHY_CTRLn_CLKGATE);
+  regval &= ~(USBPHY_CTRLN_SFTRST);
+  regval &= ~(USBPHY_CTRLN_CLKGATE);
   putreg32(regval, KINETIS_USBHSPHY_CTRL);
 
   /* Set PHY PLL Clock */
 
   regval  = getreg32(KINETIS_USBHSPHY_PLL_SIC);
-  regval &= ~(USBPHY_PLL_SICn_PLL_BYPASS);
-  regval &= ~(USBPHY_PLL_SICn_PLL_DIV_SEL_MASK);
-  regval |= (USBPHY_PLL_SICn_PLL_POWER);
-  regval |= (USBPHY_PLL_SICn_PLL_EN_USB_CLKS);
+  regval &= ~(USBPHY_PLL_SICN_PLL_BYPASS);
+  regval &= ~(USBPHY_PLL_SICN_PLL_DIV_SEL_MASK);
+  regval |= (USBPHY_PLL_SICN_PLL_POWER);
+  regval |= (USBPHY_PLL_SICN_PLL_EN_USB_CLKS);
 #  if (BOARD_EXTAL_FREQ == 24000000)
-  regval |= USBPHY_PLL_SICn_PLL_DIV_SEL_24MHZ;
+  regval |= USBPHY_PLL_SICN_PLL_DIV_SEL_24MHZ;
 #  elif (BOARD_EXTAL_FREQ == 16000000)
-  regval |= USBPHY_PLL_SICn_PLL_DIV_SEL_16MHZ;
+  regval |= USBPHY_PLL_SICN_PLL_DIV_SEL_16MHZ;
 #  elif (BOARD_EXTAL_FREQ == 12000000)
-  regval |= USBPHY_PLL_SICn_PLL_DIV_SEL_12MHZ;
+  regval |= USBPHY_PLL_SICN_PLL_DIV_SEL_12MHZ;
 #  else
 #    warning Not supported.
 #  endif
   putreg32(regval, KINETIS_USBHSPHY_PLL_SIC);
 
   regval  = getreg32(KINETIS_USBHSPHY_TRIM_OVERRIDE_EN);
-  regval |= (USBPHY_TRIM_OVERRIDE_ENn_TRIM_DIV_SEL_OVERRIDE);
+  regval |= (USBPHY_TRIM_OVERRIDE_ENN_TRIM_DIV_SEL_OVERRIDE);
   putreg32(regval, KINETIS_USBHSPHY_TRIM_OVERRIDE_EN);
 
   do
     {
       regval = getreg32(KINETIS_USBHSPHY_PLL_SIC);
     }
-  while (!(regval & USBPHY_PLL_SICn_PLL_LOCK));
+  while (!(regval & USBPHY_PLL_SICN_PLL_LOCK));
 
   /* Enable USBHS Clock and Regulator */
 
@@ -249,8 +249,8 @@ static void ehci_hwinit(void)
   /* Misc */
 
   regval  = getreg32(KINETIS_USBHSPHY_CTRL);
-  regval |= USBPHY_CTRLn_ENUTMILEVEL2;
-  regval |= USBPHY_CTRLn_ENUTMILEVEL3;
+  regval |= USBPHY_CTRLN_ENUTMILEVEL2;
+  regval |= USBPHY_CTRLN_ENUTMILEVEL3;
   putreg32(regval, KINETIS_USBHSPHY_CTRL);
 }
 
@@ -320,14 +320,14 @@ static void usb_msc_connect(FAR void *arg)
  *
  *****************************************************************************/
 
-static void unmount_retry_timeout(int argc, wdparm_t arg1, ...)
+static void unmount_retry_timeout(wdparm_t arg)
 {
-  int  index  = (int)arg1;
+  int  index  = arg;
   char sdchar = 'a' + index;
 
   finfo("Timeout!\n");
-  DEBUGASSERT(argc == 1 && \
-      index >= 0 && index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV);
+  DEBUGASSERT(index >= 0 &&
+              index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV);
 
   /* Resend the notification. */
 
@@ -383,7 +383,7 @@ static void usb_msc_disconnect(FAR void *arg)
 
           ret = wd_start(&g_umount_tmr[index],
                           MSEC2TICK(CONFIG_FRDMK28F_USB_AUTOMOUNT_UDELAY),
-                          unmount_retry_timeout, 1, (uint32_t)index);
+                          unmount_retry_timeout, index);
           if (ret < 0)
             {
               ferr("ERROR: wd_start failed: %d\n", ret);
