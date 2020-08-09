@@ -398,7 +398,7 @@ static int ak09912_set_noise_suppr_flt(FAR struct ak09912_dev_s *priv,
  *
  ****************************************************************************/
 
-static void ak09912_wd_timeout(int argc, wdparm_t arg, ...)
+static void ak09912_wd_timeout(wdparm_t arg)
 {
   struct ak09912_dev_s *priv = (struct ak09912_dev_s *)arg;
   irqstate_t flags = enter_critical_section();
@@ -422,7 +422,7 @@ static int ak09912_read_mag_uncomp_data(FAR struct ak09912_dev_s *priv,
   uint8_t buffer[8];  /* TMPS and ST2 is read, but the value is omitted. */
 
   wd_start(&priv->wd, AK09912_POLLING_TIMEOUT,
-           ak09912_wd_timeout, 1, (wdparm_t)priv);
+           ak09912_wd_timeout, (wdparm_t)priv);
   state = ak09912_getreg8(priv, AK09912_ST1);
   while (! (state & 0x1))
     {

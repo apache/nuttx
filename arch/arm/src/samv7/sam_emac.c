@@ -604,10 +604,10 @@ static int  sam_emac_interrupt(int irq, void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void sam_txtimeout_work(FAR void *arg);
-static void sam_txtimeout_expiry(int argc, wdparm_t arg, ...);
+static void sam_txtimeout_expiry(wdparm_t arg);
 
 static void sam_poll_work(FAR void *arg);
-static void sam_poll_expiry(int argc, wdparm_t arg, ...);
+static void sam_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -1469,7 +1469,7 @@ static int sam_transmit(struct sam_emac_s *priv, int qid)
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   wd_start(&priv->txtimeout, SAM_TXTIMEOUT,
-           sam_txtimeout_expiry, 1, (wdparm_t)priv);
+           sam_txtimeout_expiry, (wdparm_t)priv);
 
   /* Set d_len to zero meaning that the d_buf[] packet buffer is again
    * available.
@@ -2590,8 +2590,7 @@ static void sam_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2601,7 +2600,7 @@ static void sam_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void sam_txtimeout_expiry(int argc, wdparm_t arg, ...)
+static void sam_txtimeout_expiry(wdparm_t arg)
 {
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
 
@@ -2653,7 +2652,7 @@ static void sam_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(&priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (wdparm_t)priv);
+  wd_start(&priv->txpoll, SAM_WDDELAY, sam_poll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -2664,8 +2663,7 @@ static void sam_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2675,7 +2673,7 @@ static void sam_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void sam_poll_expiry(int argc, wdparm_t arg, ...)
+static void sam_poll_expiry(wdparm_t arg)
 {
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
 
@@ -2771,7 +2769,7 @@ static int sam_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(&priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (wdparm_t)priv);
+  wd_start(&priv->txpoll, SAM_WDDELAY, sam_poll_expiry, (wdparm_t)priv);
 
   /* Enable the EMAC interrupt */
 

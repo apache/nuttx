@@ -462,7 +462,7 @@ static inline uintptr_t hsmci_regaddr(struct sam_dev_s *priv,
 
 /* Data Transfer Helpers ****************************************************/
 
-static void sam_eventtimeout(int argc, wdparm_t arg, ...);
+static void sam_eventtimeout(wdparm_t arg);
 static void sam_endwait(struct sam_dev_s *priv, sdio_eventset_t wkupevent);
 static void sam_endtransfer(struct sam_dev_s *priv,
               sdio_eventset_t wkupevent);
@@ -1235,8 +1235,7 @@ static inline uintptr_t hsmci_regaddr(struct sam_dev_s *priv,
  *   any other waited-for event occurring.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -1246,12 +1245,12 @@ static inline uintptr_t hsmci_regaddr(struct sam_dev_s *priv,
  *
  ****************************************************************************/
 
-static void sam_eventtimeout(int argc, wdparm_t arg, ...)
+static void sam_eventtimeout(wdparm_t arg)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)arg;
 
-  DEBUGASSERT(argc == 1 && priv != NULL);
-  sam_xfrsample((struct sam_dev_s *)arg, SAMPLENDX_TIMEOUT);
+  DEBUGASSERT(priv != NULL);
+  sam_xfrsample(priv, SAMPLENDX_TIMEOUT);
 
   /* Make sure that any hung DMA is stopped.  dmabusy == false is the cue
    * so the DMA callback is ignored.
@@ -2804,7 +2803,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
 
       delay = MSEC2TICK(timeout);
       ret   = wd_start(&priv->waitwdog, delay,
-                       sam_eventtimeout, 1, (wdparm_t)priv);
+                       sam_eventtimeout, (wdparm_t)priv);
       if (ret < 0)
         {
            mcerr("ERROR: wd_start failed: %d\n", ret);

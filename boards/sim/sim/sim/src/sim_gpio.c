@@ -144,9 +144,9 @@ static struct simgpint_dev_s g_gpint =
  * Private Functions
  ****************************************************************************/
 
-static int sim_interrupt(int argc, wdparm_t arg1, ...)
+static int sim_interrupt(wdparm_t arg)
 {
-  FAR struct simgpint_dev_s *simgpint = (FAR struct simgpint_dev_s *)arg1;
+  FAR struct simgpint_dev_s *simgpint = (FAR struct simgpint_dev_s *)arg;
 
   DEBUGASSERT(simgpint != NULL && simgpint->callback != NULL);
   gpioinfo("Interrupt! callback=%p\n", simgpint->callback);
@@ -202,7 +202,7 @@ static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
         {
           gpioinfo("Start 1 second timer\n");
           wd_start(&simgpint->wdog, SEC2TICK(1),
-                   sim_interrupt, 1, (wdparm_t)dev);
+                   sim_interrupt, (wdparm_t)dev);
         }
     }
   else

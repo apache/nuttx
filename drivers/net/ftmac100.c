@@ -222,10 +222,10 @@ static int  ftmac100_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void ftmac100_txtimeout_work(FAR void *arg);
-static void ftmac100_txtimeout_expiry(int argc, wdparm_t arg, ...);
+static void ftmac100_txtimeout_expiry(wdparm_t arg);
 
 static void ftmac100_poll_work(FAR void *arg);
-static void ftmac100_poll_expiry(int argc, wdparm_t arg, ...);
+static void ftmac100_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -330,7 +330,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   wd_start(&priv->ft_txtimeout, FTMAC100_TXTIMEOUT,
-           ftmac100_txtimeout_expiry, 1, (wdparm_t)priv);
+           ftmac100_txtimeout_expiry, (wdparm_t)priv);
 
   return OK;
 }
@@ -1079,8 +1079,7 @@ static void ftmac100_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1090,7 +1089,7 @@ static void ftmac100_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void ftmac100_txtimeout_expiry(int argc, wdparm_t arg, ...)
+static void ftmac100_txtimeout_expiry(wdparm_t arg)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
 
@@ -1145,7 +1144,7 @@ static void ftmac100_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   wd_start(&priv->ft_txpoll, FTMAC100_WDDELAY,
-           ftmac100_poll_expiry, 1, (wdparm_t)priv);
+           ftmac100_poll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1156,8 +1155,7 @@ static void ftmac100_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1167,7 +1165,7 @@ static void ftmac100_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void ftmac100_poll_expiry(int argc, wdparm_t arg, ...)
+static void ftmac100_poll_expiry(wdparm_t arg)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
 
@@ -1231,7 +1229,7 @@ static int ftmac100_ifup(struct net_driver_s *dev)
   /* Set and activate a timer process */
 
   wd_start(&priv->ft_txpoll, FTMAC100_WDDELAY,
-           ftmac100_poll_expiry, 1, (wdparm_t)priv);
+           ftmac100_poll_expiry, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 

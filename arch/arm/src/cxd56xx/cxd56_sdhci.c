@@ -359,7 +359,7 @@ static void cxd56_datadisable(void);
 static void cxd56_transmit(struct cxd56_sdiodev_s *priv);
 static void cxd56_receive(struct cxd56_sdiodev_s *priv);
 #endif
-static void cxd56_eventtimeout(int argc, wdparm_t arg, ...);
+static void cxd56_eventtimeout(wdparm_t arg);
 static void cxd56_endwait(struct cxd56_sdiodev_s *priv,
               sdio_eventset_t wkupevent);
 static void cxd56_endtransfer(struct cxd56_sdiodev_s *priv,
@@ -960,8 +960,7 @@ static void cxd56_receive(struct cxd56_sdiodev_s *priv)
  *   any other waited-for event occurring.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -971,11 +970,11 @@ static void cxd56_receive(struct cxd56_sdiodev_s *priv)
  *
  ****************************************************************************/
 
-static void cxd56_eventtimeout(int argc, wdparm_t arg, ...)
+static void cxd56_eventtimeout(wdparm_t arg)
 {
   struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)arg;
 
-  DEBUGASSERT(argc == 1 && priv != NULL);
+  DEBUGASSERT(priv != NULL);
   DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0);
 
   /* Is a data transfer complete event expected? */
@@ -2590,7 +2589,7 @@ static sdio_eventset_t cxd56_sdio_eventwait(FAR struct sdio_dev_s *dev,
 
       delay = MSEC2TICK(timeout);
       ret   = wd_start(&priv->waitwdog, delay,
-                       cxd56_eventtimeout, 1, (wdparm_t)priv);
+                       cxd56_eventtimeout, (wdparm_t)priv);
       if (ret != OK)
         {
           mcerr("ERROR: wd_start failed: %d\n", ret);

@@ -151,7 +151,7 @@ static void igmp_timeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void igmp_timeout(int argc, wdparm_t arg, ...)
+static void igmp_timeout(wdparm_t arg)
 {
   FAR struct igmp_group_s *group;
   int ret;
@@ -161,7 +161,7 @@ static void igmp_timeout(int argc, wdparm_t arg, ...)
   /* Recover the reference to the group */
 
   group = (FAR struct igmp_group_s *)arg;
-  DEBUGASSERT(argc == 1 && group != NULL);
+  DEBUGASSERT(group != NULL);
 
   /* Perform the timeout-related operations on (preferably) the low priority
    * work queue.
@@ -197,7 +197,7 @@ void igmp_startticks(FAR struct igmp_group_s *group, unsigned int ticks)
 
   gtmrinfo("ticks: %d\n", ticks);
 
-  ret = wd_start(&group->wdog, ticks, igmp_timeout, 1, (wdparm_t)group);
+  ret = wd_start(&group->wdog, ticks, igmp_timeout, (wdparm_t)group);
 
   DEBUGASSERT(ret == OK);
   UNUSED(ret);

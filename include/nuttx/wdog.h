@@ -56,13 +56,6 @@
  * We always have sizeof(pointer) <= sizeof(uintptr_t) by definition.
  */
 
-union wdparm_u
-{
-  FAR void     *pvarg; /* The size one generic point */
-  uint32_t      dwarg; /* Big enough for a 32-bit value in any case */
-  uintptr_t     uiarg; /* sizeof(uintptr_t) >= sizeof(pointer) */
-};
-
 #if UINTPTR_MAX >= UINT32_MAX
 typedef uintptr_t wdparm_t;
 #else
@@ -70,10 +63,10 @@ typedef uint32_t  wdparm_t;
 #endif
 
 /* This is the form of the function that is called when the
- * watchdog function expires.  Up to four parameters may be passed.
+ * watchdog function expires.
  */
 
-typedef CODE void (*wdentry_t)(int argc, wdparm_t arg1, ...);
+typedef CODE void (*wdentry_t)(wdparm_t arg);
 
 /* This is the internal representation of the watchdog timer structure. */
 
@@ -86,8 +79,7 @@ struct wdog_s
 #endif
   int                lag;        /* Timer associated with the delay */
   uint8_t            flags;      /* See WDOGF_* definitions above */
-  uint8_t            argc;       /* The number of parameters to pass */
-  wdparm_t           parm[CONFIG_MAX_WDOGPARMS];
+  wdparm_t           arg;        /* Callback argument */
 };
 
 /****************************************************************************
@@ -124,9 +116,9 @@ extern "C"
  *   wdog     - Watchdog ID
  *   delay    - Delay count in clock ticks
  *   wdentry  - Function to call on timeout
- *   parm1..4 - Parameters to pass to wdentry.
+ *   arg      - Parameter to pass to wdentry.
  *
- *   NOTE:  All parameters must be of type wdparm_t.
+ *   NOTE:  The parameter must be of type wdparm_t.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return to
@@ -139,7 +131,7 @@ extern "C"
  ****************************************************************************/
 
 int wd_start(FAR struct wdog_s *wdog, int32_t delay,
-             wdentry_t wdentry, int argc, ...);
+             wdentry_t wdentry, wdparm_t arg);
 
 /****************************************************************************
  * Name: wd_cancel
