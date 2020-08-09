@@ -482,7 +482,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
 
 static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 {
-  int devno = 'a' - priv->sdchar;
+  int devno = priv->sdchar - 'a';
 
   if (devno >= 0 && devno < 26)
     {
