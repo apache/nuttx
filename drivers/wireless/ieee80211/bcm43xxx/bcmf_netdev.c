@@ -90,15 +90,17 @@
 
 #define BCMFWORK LPWORK
 
-/* CONFIG_IEEE80211_BROADCOM_NINTERFACES determines the number of physical interfaces
- * that will be supported.
+/* CONFIG_IEEE80211_BROADCOM_NINTERFACES determines the number of physical
+ * interfaces that will be supported.
  */
 
 #ifndef CONFIG_IEEE80211_BROADCOM_NINTERFACES
 # define CONFIG_IEEE80211_BROADCOM_NINTERFACES 1
 #endif
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
+ */
 
 #define BCMF_WDDELAY   (1*CLK_TCK)
 
@@ -106,7 +108,7 @@
 
 #define BCMF_TXTIMEOUT (60*CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define BUF ((struct eth_hdr_s *)priv->bc_dev.d_buf)
 
@@ -166,7 +168,8 @@ int bcmf_netdev_alloc_tx_frame(FAR struct bcmf_dev_s *priv)
 
   /* Allocate frame for TX */
 
-  priv->cur_tx_frame = bcmf_bdc_allocate_frame(priv, MAX_NETDEV_PKTSIZE, true);
+  priv->cur_tx_frame = bcmf_bdc_allocate_frame(priv,
+                                               MAX_NETDEV_PKTSIZE, true);
   if (!priv->cur_tx_frame)
     {
       wlerr("ERROR: Cannot allocate TX frame\n");
@@ -259,12 +262,12 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
         }
 
       priv->bc_dev.d_buf = frame->data;
-      priv->bc_dev.d_len = frame->len - (uint32_t)(frame->data - frame->base);
+      priv->bc_dev.d_len = frame->len - (frame->data - frame->base);
 
       wlinfo("Got frame %p %d\n", frame, priv->bc_dev.d_len);
 
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the tap */
 
        pkt_input(&priv->bc_dev);
 #endif
@@ -303,7 +306,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
           ipv4_input(&priv->bc_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->bc_dev.d_len > 0)
@@ -347,7 +350,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
           ipv6_input(&priv->bc_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->bc_dev.d_len > 0)
@@ -387,7 +390,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
           NETDEV_RXARP(&priv->bc_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->bc_dev.d_len > 0)
@@ -479,8 +482,8 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
 
           bcmf_transmit(priv, priv->cur_tx_frame);
 
-          /* TODO: Check if there is room in the device to hold another packet.
-           * If not, return a non-zero value to terminate the poll.
+          /* TODO: Check if there is room in the device to hold another
+           * packet. If not, return a non-zero value to terminate the poll.
            */
 
           priv->cur_tx_frame = NULL;
@@ -488,8 +491,8 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -622,8 +625,8 @@ static void bcmf_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->bc_txpoll, BCMF_WDDELAY, bcmf_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->bc_txpoll, BCMF_WDDELAY,
+           bcmf_poll_expiry, 1, (wdparm_t)priv);
 exit_unlock:
   net_unlock();
 }
@@ -688,7 +691,7 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
-  /* Instantiate the MAC address from priv->bc_dev.d_mac.ether.ether_addr_octet */
+  /* Instantiate MAC address from priv->bc_dev.d_mac.ether.ether_addr_octet */
 
 #ifdef CONFIG_NET_ICMPv6
   /* Set up IPv6 multicast address filtering */
@@ -698,8 +701,8 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->bc_txpoll, BCMF_WDDELAY, bcmf_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->bc_txpoll, BCMF_WDDELAY,
+           bcmf_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the hardware interrupt */
 
@@ -782,7 +785,7 @@ static void bcmf_txavail_work(FAR void *arg)
 
   if (priv->bc_bifup)
     {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
+      /* Check if there is room in the hardware to hold another packet. */
 
       if (bcmf_netdev_alloc_tx_frame(priv))
         {
@@ -871,8 +874,8 @@ static int bcmf_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  * Name: bcmf_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure

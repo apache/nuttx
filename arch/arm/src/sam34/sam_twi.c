@@ -166,7 +166,7 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
 static int  twi_wait(struct twi_dev_s *priv);
 static void twi_wakeup(struct twi_dev_s *priv, int result);
 static int  twi_interrupt(int irq, FAR void *context, FAR void *arg);
-static void twi_timeout(int argc, uint32_t arg, ...);
+static void twi_timeout(int argc, wdparm_t arg, ...);
 
 static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg);
 static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg);
@@ -376,7 +376,7 @@ static int twi_wait(struct twi_dev_s *priv)
 
   /* Start a timeout to avoid hangs */
 
-  wd_start(priv->timeout, TWI_TIMEOUT, twi_timeout, 1, (uint32_t)priv);
+  wd_start(priv->timeout, TWI_TIMEOUT, twi_timeout, 1, (wdparm_t)priv);
 
   /* Wait for either the TWI transfer or the timeout to complete */
 
@@ -565,7 +565,7 @@ static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void twi_timeout(int argc, uint32_t arg, ...)
+static void twi_timeout(int argc, wdparm_t arg, ...)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)arg;
 

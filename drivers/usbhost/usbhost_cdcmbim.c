@@ -2321,8 +2321,8 @@ static void cdcmbim_txpoll_work(void *arg)
 
   /* setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, (1 * CLK_TCK),
-                 cdcmbim_txpoll_expiry, 1, priv);
+  wd_start(priv->txpoll, (1 * CLK_TCK),
+           cdcmbim_txpoll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -2428,8 +2428,8 @@ static int cdcmbim_ifup(struct net_driver_s *dev)
 
   /* Start network TX poll */
 
-  (void)wd_start(priv->txpoll, (1 * CLK_TCK), cdcmbim_txpoll_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(priv->txpoll, (1 * CLK_TCK),
+           cdcmbim_txpoll_expiry, 1, (wdparm_t)priv);
   priv->bifup = true;
   return OK;
 }

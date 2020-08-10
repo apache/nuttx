@@ -57,6 +57,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
@@ -723,7 +724,7 @@ static void spi_dma_sampledone(struct sam_spics_s *spics)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SPI_DMA
-static void spi_dmatimeout(int argc, uint32_t arg, ...)
+static void spi_dmatimeout(int argc, wdparm_t arg, ...)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)arg;
   DEBUGASSERT(spics != NULL);
@@ -1517,7 +1518,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       /* Start (or re-start) the watchdog timeout */
 
       ret = wd_start(spics->dmadog, DMA_TIMEOUT_TICKS,
-                     spi_dmatimeout, 1, (uint32_t)spics);
+                     spi_dmatimeout, 1, (wdparm_t)spics);
       if (ret < 0)
         {
            spierr("ERROR: wd_start failed: %d\n", ret);
@@ -1674,7 +1675,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
    * chip select structures.
    */
 
-  spics = (struct sam_spics_s *)zalloc(sizeof(struct sam_spics_s));
+  spics = (struct sam_spics_s *)kmm_zalloc(sizeof(struct sam_spics_s));
   if (!spics)
     {
       spierr("ERROR: Failed to allocate a chip select structure\n");
@@ -1682,7 +1683,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
     }
 
   /* Set up the initial state for this chip select structure.  Other fields
-   * were zeroed by zalloc().
+   * were zeroed by kmm_zalloc().
    */
 
 #ifdef CONFIG_SAMA5_SPI_DMA

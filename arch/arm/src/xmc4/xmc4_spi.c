@@ -54,6 +54,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
@@ -911,7 +912,7 @@ static void spi_dma_sampledone(struct xmc4_spics_s *spics)
  ****************************************************************************/
 
 #ifdef CONFIG_XMC4_SPI_DMA
-static void spi_dmatimeout(int argc, uint32_t arg, ...)
+static void spi_dmatimeout(int argc, wdparm_t arg, ...)
 {
   struct xmc4_spics_s *spics = (struct xmc4_spics_s *)arg;
 
@@ -1661,7 +1662,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       /* Start (or re-start) the watchdog timeout */
 
       ret = wd_start(spics->dmadog, DMA_TIMEOUT_TICKS,
-                     spi_dmatimeout, 1, (uint32_t)spics);
+                     spi_dmatimeout, 1, (wdparm_t)spics);
       if (ret != OK)
         {
            spierr("ERROR: wd_start failed: %d\n", ret);
@@ -1806,7 +1807,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
    * chip select structures.
    */
 
-  spics = (struct xmc4_spics_s *)zalloc(sizeof(struct xmc4_spics_s));
+  spics = (struct xmc4_spics_s *)kmm_zalloc(sizeof(struct xmc4_spics_s));
   if (!spics)
     {
       spierr("ERROR: Failed to allocate a chip select structure\n");
@@ -2104,7 +2105,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
   return &spics->spidev;
 
 errchannel:
-  free(spics);
+  kmm_free(spics);
   return NULL;
 }
 #endif /* CONFIG_XMC4_SPI0 || CONFIG_XMC4_SPI1 */

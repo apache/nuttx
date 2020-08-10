@@ -21,6 +21,7 @@ Contents
   o Memory Map
   o Serial Console
   o Buttons and LEDs
+  o Ethernet
   o SMP
   o OpenOCD for the ESP32
   o Executing and Debugging from FLASH and IRAM
@@ -214,6 +215,46 @@ Buttons and LEDs
   ----
   There are several on-board LEDs for that indicate the presence of power
   and USB activity.  None of these are available for use by software.
+
+Ethernet
+========
+
+  ESP32 has a 802.11 hardware MAC, so just connects to external PHY chip.
+  Due to ESP32's GPIOs are not enough, so recommanded users to use RMII
+  to connect ESP32 to PHY chip, current driver also only supports RMII option.
+
+  The RMII GPIO pins are fixed, but the SMI and functional GPIO pins are optional.
+  
+  RMII GPIO pins are as following:
+
+      ESP32 GPIO          PHY Chip GPIO
+        IO25       <-->       RXD[0]
+        IO26       <-->       RXD[1]
+        IO27       <-->       CRS_DV
+        IO0        <-->       REF_CLK
+        IO19       <-->       TXD[0]
+        IO21       <-->       TX_EN
+        IO22       <-->       TXD[1]
+
+  SMI GPIO pins (default option) are as following:
+
+      ESP32 GPIO          PHY Chip GPIO
+        IO18       <-->       MDIO
+        IO23       <-->       MDC
+
+  Functional GPIO pins(default option) are as following:
+
+      ESP32 GPIO          PHY Chip GPIO
+        IO5        <-->      Reset_N
+
+Espressif has an offcial Ethernet development board:
+
+  https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-ethernet-kit.html
+
+This driver has been tested according to this board and ESP32 core
+board + LAN8720 module. If users have some issue about using this driver,
+please refer the upper official document, specially the issue that GPIO0
+causes failing to bring the ESP32 chip up.
 
 SMP
 ===

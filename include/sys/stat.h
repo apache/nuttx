@@ -38,14 +38,13 @@
  * that the full size of a mode_t is 16-bits. (However, mode_t must be size
  * 'int' because it is promoted to size int when passed in varargs).
  *
- *   LTTT ...U UUGG GOOO
+ *   TTTT ...U UUGG GOOO
  *
  *   Bits 0-2:   Permissions for others
  *   Bits 3-5:   Group permissions
  *   Bits 6-8:   Owner permissions
- *   Bits 9-10:  Not used
- *   Bits 11-14: File type bits
- *   Bit 15:     Symbolic link
+ *   Bits 9-11:  Not used
+ *   Bits 12-15: File type bits
  */
 
 #define S_IXOTH     (1 << 0)   /* Bits 0-2: Permissions for others: RWX */

@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_composite.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -196,11 +181,11 @@ static void usbhost_disconnect_all(FAR struct usbhost_composite_s *priv)
  *   desclen - The length in bytes of the configuration descriptor.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
- *   NOTE that the class instance remains valid upon return with a failure.  It is
- *   the responsibility of the higher level enumeration logic to call
+ *   NOTE that the class instance remains valid upon return with a failure.
+ *   It is the responsibility of the higher level enumeration logic to call
  *   CLASS_DISCONNECTED to free up the class driver resources.
  *
  * Assumptions:
@@ -240,7 +225,8 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
 
 static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 {
-  FAR struct usbhost_composite_s *priv = (FAR struct usbhost_composite_s *)usbclass;
+  FAR struct usbhost_composite_s *priv =
+    (FAR struct usbhost_composite_s *)usbclass;
 
   DEBUGASSERT(priv != NULL);
 
@@ -287,7 +273,8 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
  ****************************************************************************/
 
 static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
-                                 int desclen, FAR uint8_t *buffer, int buflen)
+                                 int desclen, FAR uint8_t *buffer,
+                                 int buflen)
 {
   FAR struct usb_desc_s   *desc;
   FAR struct usb_ifdesc_s *ifdesc;
@@ -383,20 +370,25 @@ static int usbhost_copyinterface(uint8_t ifno, FAR const uint8_t *configdesc,
                       buflen  -= len;
                       retsize += len;
 
-                      /* And reduce the number of endpoints we are looking for */
+                      /* And reduce the number of endpoints we are looking
+                       * for.
+                       */
 
                       if (--neps <= 0)
                         {
-                          /* That is all of them!  Return the total size copied */
+                          /* That is all of them!  Return the total size
+                           * copied.
+                           */
 
                           return retsize;
                         }
                     }
 
-                  /* The endpoint descriptors following the interface descriptor
-                   * should all be contiguous.  But we will complain only if another
-                   * interface descriptor is encountered before all of the endpoint
-                   * descriptors have been found.
+                  /* The endpoint descriptors following the interface
+                   * descriptor should all be contiguous.  But we will
+                   * complain only if another interface descriptor is
+                   * encountered before all of the endpoint descriptors have
+                   * been found.
                    */
 
                   else if (desc->type == USB_DESC_TYPE_INTERFACE)
@@ -571,10 +563,10 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
    *   bDeviceProtocol 0x01
    */
 
-   if (id->base != USB_CLASS_PER_INTERFACE && id->base != USB_CLASS_MISC)
-     {
-       return -ENOENT;
-     }
+  if (id->base != USB_CLASS_PER_INTERFACE && id->base != USB_CLASS_MISC)
+    {
+      return -ENOENT;
+    }
 
   /* First, count the number of interface descriptors (nintfs) and the
    * number of interfaces that are associated to one device via IAD
@@ -612,9 +604,10 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
            * class driver.
            */
 
-         else if (desc->type == USB_DESC_TYPE_INTERFACEASSOCIATION)
-           {
-              FAR struct usb_iaddesc_s *iad = (FAR struct usb_iaddesc_s *)desc;
+          else if (desc->type == USB_DESC_TYPE_INTERFACEASSOCIATION)
+            {
+              FAR struct usb_iaddesc_s *iad =
+                (FAR struct usb_iaddesc_s *)desc;
               uint32_t mask;
 
               /* Keep count of the number of interfaces that will be merged */
@@ -626,7 +619,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
               DEBUGASSERT(iad->firstif + iad->nifs < 32);
               mask      = (1 << iad->nifs) - 1;
               mergeset |= mask << iad->firstif;
-           }
+            }
         }
 
       offset += len;
@@ -721,7 +714,8 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
                    * lookup information from the interface descriptor.
                    */
 
-                  member              = (FAR struct usbhost_member_s *)&priv->members[i];
+                  member              = (FAR struct usbhost_member_s *)
+                                         &priv->members[i];
                   member->id.base     = ifdesc->classid;
                   member->id.subclass = ifdesc->subclass;
                   member->id.proto    = ifdesc->protocol;
@@ -744,11 +738,13 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
           else if (desc->type == USB_DESC_TYPE_INTERFACEASSOCIATION)
             {
-              FAR struct usb_iaddesc_s *iad = (FAR struct usb_iaddesc_s *)desc;
+              FAR struct usb_iaddesc_s *iad =
+                (FAR struct usb_iaddesc_s *)desc;
 
               /* Yes.. Save the registry lookup information from the IAD. */
 
-              member              = (FAR struct usbhost_member_s *)&priv->members[i];
+              member              = (FAR struct usbhost_member_s *)
+                                    &priv->members[i];
               member->id.base     = iad->classid;
               member->id.subclass = iad->subclass;
               member->id.proto    = iad->protocol;
@@ -777,7 +773,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
    * configuration descriptor for each member class.
    */
 
-  cfgbuffer = (FAR uint8_t *)malloc(CUSTOM_CONFIG_BUFSIZE);
+  cfgbuffer = (FAR uint8_t *)kmm_malloc(CUSTOM_CONFIG_BUFSIZE);
   if (cfgbuffer == NULL)
     {
       uerr("ERROR: Failed to allocate configuration buffer");
@@ -877,6 +873,7 @@ errout_with_members:
     }
 
 errout_with_container:
+
   /* Then free the composite container itself */
 
   kmm_free(priv);

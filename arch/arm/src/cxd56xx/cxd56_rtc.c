@@ -52,6 +52,7 @@
 
 #include <arch/board/board.h>
 
+#include "clock/clock.h"
 #include "arm_arch.h"
 #include "cxd56_rtc.h"
 
@@ -249,7 +250,7 @@ static int cxd56_rtc_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void cxd56_rtc_initialize(int argc, uint32_t arg, ...)
+static void cxd56_rtc_initialize(int argc, ...)
 {
   struct timespec ts;
 #ifdef CONFIG_CXD56_RTC_LATEINIT
@@ -278,7 +279,7 @@ static void cxd56_rtc_initialize(int argc, uint32_t arg, ...)
           rtcinfo("retry count: %d\n", s_retry);
 
           if (OK == wd_start(s_wdog, MSEC2TICK(RTC_CLOCK_CHECK_INTERVAL),
-                             cxd56_rtc_initialize, 1, (wdparm_t)NULL))
+                             (wdentry_t)cxd56_rtc_initialize, 0))
             {
               /* Again, this function is called recursively */
 

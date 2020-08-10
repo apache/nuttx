@@ -102,7 +102,7 @@ struct lpc43_i2cdev_s
   struct i2c_master_s dev;     /* Generic I2C device */
   unsigned int     base;       /* Base address of registers */
   uint16_t         irqid;      /* IRQ for this device */
-  uint32_t         base_freq;   /* branch frequency */
+  uint32_t         base_freq;  /* branch frequency */
 
   sem_t            mutex;      /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for state machine completion */
@@ -131,7 +131,7 @@ static struct lpc43_i2cdev_s g_i2c1dev;
 static int  lpc43_i2c_start(struct lpc43_i2cdev_s *priv);
 static void lpc43_i2c_stop(struct lpc43_i2cdev_s *priv);
 static int  lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
-static void lpc43_i2c_timeout(int argc, uint32_t arg, ...);
+static void lpc43_i2c_timeout(int argc, wdparm_t arg, ...);
 static void lpc43_i2c_setfrequency(struct lpc43_i2cdev_s *priv,
               uint32_t frequency);
 static int  lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
@@ -202,8 +202,8 @@ static int lpc43_i2c_start(struct lpc43_i2cdev_s *priv)
            priv->base + LPC43_I2C_CONCLR_OFFSET);
   putreg32(I2C_CONSET_STA, priv->base + LPC43_I2C_CONSET_OFFSET);
 
-  wd_start(priv->timeout, I2C_TIMEOUT, lpc43_i2c_timeout, 1,
-           (uint32_t)priv);
+  wd_start(priv->timeout, I2C_TIMEOUT,
+           lpc43_i2c_timeout, 1, (wdparm_t)priv);
   nxsem_wait(&priv->wait);
 
   wd_cancel(priv->timeout);
@@ -237,7 +237,7 @@ static void lpc43_i2c_stop(struct lpc43_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static void lpc43_i2c_timeout(int argc, uint32_t arg, ...)
+static void lpc43_i2c_timeout(int argc, wdparm_t arg, ...)
 {
   struct lpc43_i2cdev_s *priv = (struct lpc43_i2cdev_s *)arg;
 
@@ -295,8 +295,9 @@ static int lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
   state &= 0xf8;  /* state mask, only 0xX8 is possible */
   switch (state)
     {
-    case 0x08:     /* A START condition has been transmitted. */
-    case 0x10:     /* A Repeated START condition has been transmitted. */
+    case 0x08:    /* A START condition has been transmitted. */
+    case 0x10:    /* A Repeated START condition has been transmitted. */
+
       /* Set address */
 
       putreg32(((I2C_M_READ & msg->flags) == I2C_M_READ) ?
@@ -344,7 +345,8 @@ static int lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 
     case 0x50:  /* Data byte has been received; ACK has been returned. */
       priv->rdcnt++;
-      msg->buffer[priv->rdcnt - 1] = getreg32(priv->base + LPC43_I2C_BUFR_OFFSET);
+      msg->buffer[priv->rdcnt - 1] =
+        getreg32(priv->base + LPC43_I2C_BUFR_OFFSET);
 
       if (priv->rdcnt >= (msg->length - 1))
         {
@@ -353,7 +355,8 @@ static int lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
       break;
 
     case 0x58:  /* Data byte has been received; NACK has been returned. */
-      msg->buffer[priv->rdcnt] = getreg32(priv->base + LPC43_I2C_BUFR_OFFSET);
+      msg->buffer[priv->rdcnt] =
+        getreg32(priv->base + LPC43_I2C_BUFR_OFFSET);
       lpc32_i2c_nextmsg(priv);
       break;
 
@@ -410,7 +413,7 @@ static int lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc43_i2c_reset
  *
  * Description:
@@ -422,7 +425,7 @@ static int lpc43_i2c_transfer(FAR struct i2c_master_s *dev,
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 static int lpc43_i2c_reset(FAR struct i2c_master_s * dev)

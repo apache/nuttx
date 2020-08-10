@@ -132,7 +132,9 @@
 
 #define ETHWORK LPWORK
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
+ */
 
 #define LPC54_WDDELAY   (1*CLK_TCK)
 
@@ -206,31 +208,31 @@
 
 #if CONFIG_LPC54_ETH_BURSTLEN < 2
 #  define LPC54_BURSTLEN        1
-#  define LPC54_PBLx8           0
+#  define LPC54_PBLX8           0
 #elif CONFIG_LPC54_ETH_BURSTLEN < 4
 #  define LPC54_BURSTLEN        2
-#  define LPC54_PBLx8           0
+#  define LPC54_PBLX8           0
 #elif CONFIG_LPC54_ETH_BURSTLEN < 8
 #  define LPC54_BURSTLEN        4
-#  define LPC54_PBLx8           0
+#  define LPC54_PBLX8           0
 #elif CONFIG_LPC54_ETH_BURSTLEN < 16
 #  define LPC54_BURSTLEN        8
-#  define LPC54_PBLx8           0
+#  define LPC54_PBLX8           0
 #elif CONFIG_LPC54_ETH_BURSTLEN < 32
 #  define LPC54_BURSTLEN        16
-#  define LPC54_PBLx8           0
+#  define LPC54_PBLX8           0
 #elif CONFIG_LPC54_ETH_BURSTLEN < 64
 #  define LPC54_BURSTLEN        32
-#  define LPC54_PBLx8           0
+#  define LPC54_PBLX8           0
 #elif CONFIG_LPC54_ETH_BURSTLEN < 128
 #  define LPC54_BURSTLEN        8
-#  define LPC54_PBLx8           ETH_DMACH_CTRL_PBLx8
+#  define LPC54_PBLX8           ETH_DMACH_CTRL_PBLx8
 #elif CONFIG_LPC54_ETH_BURSTLEN < 256
 #  define LPC54_BURSTLEN        16
-#  define LPC54_PBLx8           ETH_DMACH_CTRL_PBLx8
+#  define LPC54_PBLX8           ETH_DMACH_CTRL_PBLx8
 #else
 #  define LPC54_BURSTLEN        32
-#  define LPC54_PBLx8           ETH_DMACH_CTRL_PBLx8
+#  define LPC54_PBLX8           ETH_DMACH_CTRL_PBLx8
 #endif
 
 #ifdef CONFIG_LPC54_ETH_DYNAMICMAP
@@ -514,7 +516,7 @@ static uint32_t lpc54_getreg(uintptr_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          ninfo("[repeats %d more times]\n", count-3);
+          ninfo("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -811,15 +813,15 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
           txring1 = &priv->eth_txring[1];
 
-          /* We cannot perform the Tx poll now if all of the Tx descriptors for
-           * both channels are in-use.
+          /* We cannot perform the Tx poll now if all of the Tx descriptors
+           * for both channels are in-use.
            */
 
           if (txring0->tr_inuse >= txring0->tr_ndesc ||
               txring1->tr_inuse >= txring1->tr_ndesc)
 #else
-          /* We cannot continue the Tx poll now if all of the Tx descriptors for
-           * this channel 0 are in-use.
+          /* We cannot continue the Tx poll now if all of the Tx descriptors
+           * for this channel 0 are in-use.
            */
 
           if (txring0->tr_inuse >= txring0->tr_ndesc)
@@ -834,9 +836,9 @@ static int lpc54_eth_txpoll(struct net_driver_s *dev)
            * to perform the poll.
            */
 
-           priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
-           if (priv->eth_dev.d_buf == NULL)
-             {
+          priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
+          if (priv->eth_dev.d_buf == NULL)
+            {
               /* Stop the poll.. no more packet buffers */
 
               return 1;
@@ -885,7 +887,7 @@ static void lpc54_eth_reply(struct lpc54_ethdriver_s *priv)
       /* Update the Ethernet header with the correct MAC address */
 
 #ifdef CONFIG_LPC54_ETH_MULTIQUEUE
-       /* Check for an outgoing 802.1q VLAN packet */
+      /* Check for an outgoing 802.1q VLAN packet */
 #warning Missing Logic
 #endif
 
@@ -944,9 +946,9 @@ static void lpc54_eth_reply(struct lpc54_ethdriver_s *priv)
 static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
 {
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
-   pkt_input(&priv->eth_dev);
+  pkt_input(&priv->eth_dev);
 #endif
 
   /* We only accept IP packets of the configured type and ARP packets */
@@ -957,7 +959,9 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
       ninfo("IPv4 packet\n");
       NETDEV_RXIPV4(&priv->eth_dev);
 
-      /* Handle ARP on input, then dispatch IPv4 packet to the network layer */
+      /* Handle ARP on input,
+       * then dispatch IPv4 packet to the network layer
+       */
 
       arp_ipin(&priv->eth_dev);
       ipv4_input(&priv->eth_dev);
@@ -1012,7 +1016,7 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
       NETDEV_RXARP(&priv->eth_dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->eth_dev.d_len > 0)
@@ -1150,7 +1154,8 @@ static int lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
                    * this extra array of saved allocation addresses.
                    */
 
-                  priv->eth_dev.d_buf = (uint8_t *)(rxring->rr_buffers)[supply];
+                  priv->eth_dev.d_buf = (uint8_t *)
+                    (rxring->rr_buffers)[supply];
                   (rxring->rr_buffers)[supply] = NULL;
                   DEBUGASSERT(priv->eth_dev.d_buf != NULL);
 
@@ -1185,7 +1190,8 @@ static int lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
                    * owned by DMA.
                    */
 
-                  regval  = ETH_RXDES3_BUF1V | ETH_RXDES3_IOC | ETH_RXDES3_OWN;
+                  regval  = ETH_RXDES3_BUF1V | ETH_RXDES3_IOC |
+                            ETH_RXDES3_OWN;
 #if LPC54_BUFFER_SIZE > LPC54_BUFFER_MAX
                   regval |= ETH_RXDES3_BUF2V;
 #endif
@@ -1227,7 +1233,9 @@ static int lpc54_eth_receive(struct lpc54_ethdriver_s *priv,
 
       lpc54_putreg(ETH_DMACH_INT_RBU, LPC54_ETH_DMACH_STAT(chan));
 
-      /* Writing to the tail pointer register will restart the Rx processing */
+      /* Writing to the tail pointer register
+       * will restart the Rx processing
+       */
 
       regval = lpc54_getreg(regaddr);
       lpc54_putreg(regval, regaddr);
@@ -1415,7 +1423,9 @@ static void lpc54_eth_channel_work(struct lpc54_ethdriver_s *priv,
       lpc54_putreg(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI, regaddr);
       pending &= ~(ETH_DMACH_INT_RI | ETH_DMACH_INT_NI);
 
-      /* Loop until all available Rx packets in the ring have been processed */
+      /* Loop until all available Rx packets
+       * in the ring have been processed
+       */
 
       for (; ; )
         {
@@ -1848,8 +1858,8 @@ static void lpc54_eth_poll_work(void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->eth_txpoll, LPC54_WDDELAY, lpc54_eth_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->eth_txpoll, LPC54_WDDELAY,
+           lpc54_eth_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1901,7 +1911,8 @@ static void lpc54_eth_poll_expiry(int argc, wdparm_t arg, ...)
 
 static int lpc54_eth_ifup(struct net_driver_s *dev)
 {
-  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
+  struct lpc54_ethdriver_s *priv =
+    (struct lpc54_ethdriver_s *)dev->d_private;
   uint8_t *mptr;
   uintptr_t base;
   uint32_t regval;
@@ -1930,6 +1941,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
     }
 
   /* Initialize Ethernet DMA ************************************************/
+
   /* Reset DMA.  Resets the logic and all internal registers of the OMA, MTL,
    * and MAC.  This bit is automatically cleared after the reset operation
    * is complete in all Ethernet Block clock domains.
@@ -1950,16 +1962,16 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   for (i = 0; i < LPC54_NRINGS; i++)
     {
       base = LPC54_ETH_DMACH_BASE(i);
-      lpc54_putreg(LPC54_PBLx8, base + LPC54_ETH_DMACH_CTRL_OFFSET);
+      lpc54_putreg(LPC54_PBLX8, base + LPC54_ETH_DMACH_CTRL_OFFSET);
 
       regval  = lpc54_getreg(base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
-      regval &= ~ETH_DMACH_TX_CTRL_TxPBL_MASK;
-      regval |= ETH_DMACH_TX_CTRL_TxPBL(LPC54_BURSTLEN);
+      regval &= ~ETH_DMACH_TX_CTRL_TXPBL_MASK;
+      regval |= ETH_DMACH_TX_CTRL_TXPBL(LPC54_BURSTLEN);
       lpc54_putreg(regval, base + LPC54_ETH_DMACH_TX_CTRL_OFFSET);
 
       regval  = lpc54_getreg(base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
-      regval &= ~ETH_DMACH_RX_CTRL_RxPBL_MASK;
-      regval |= ETH_DMACH_RX_CTRL_RxPBL(LPC54_BURSTLEN);
+      regval &= ~ETH_DMACH_RX_CTRL_RXPBL_MASK;
+      regval |= ETH_DMACH_RX_CTRL_RXPBL(LPC54_BURSTLEN);
       lpc54_putreg(regval, base + LPC54_ETH_DMACH_RX_CTRL_OFFSET);
     }
 
@@ -2034,6 +2046,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 #endif
 
   /* Initialize the Ethernet MAC ********************************************/
+
   /* Instantiate the MAC address that application logic should have set in
    * the device structure.
    *
@@ -2077,7 +2090,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   lpc54_putreg(regval, LPC54_ETH_MAC_TX_FLOW_CTRL_Q1);
 #endif
 
-  /* Set the 1uS tick counter*/
+  /* Set the 1uS tick counter */
 
   regval = ETH_MAC_1US_TIC_COUNTR(BOARD_MAIN_CLK / USEC_PER_SEC);
   lpc54_putreg(regval, LPC54_ETH_MAC_1US_TIC_COUNTR);
@@ -2156,8 +2169,8 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->eth_txpoll, LPC54_WDDELAY, lpc54_eth_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->eth_txpoll, LPC54_WDDELAY,
+           lpc54_eth_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -2185,7 +2198,8 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
 static int lpc54_eth_ifdown(struct net_driver_s *dev)
 {
-  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
+  struct lpc54_ethdriver_s *priv =
+    (struct lpc54_ethdriver_s *)dev->d_private;
   irqstate_t flags;
   uint32_t regval;
   int ret;
@@ -2304,7 +2318,8 @@ static void lpc54_eth_txavail_work(void *arg)
 
 static int lpc54_eth_txavail(struct net_driver_s *dev)
 {
-  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
+  struct lpc54_ethdriver_s *priv =
+    (struct lpc54_ethdriver_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -2315,7 +2330,8 @@ static int lpc54_eth_txavail(struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->eth_pollwork, lpc54_eth_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->eth_pollwork,
+                 lpc54_eth_txavail_work, priv, 0);
     }
 
   return OK;
@@ -2353,8 +2369,8 @@ static int lpc54_eth_addmac(struct net_driver_s *dev, const uint8_t *mac)
  * Name: lpc54_eth_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -2401,7 +2417,8 @@ static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
                            unsigned long arg)
 {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-  struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)dev->d_private;
+  struct lpc54_ethdriver_s *priv =
+    (struct lpc54_ethdriver_s *)dev->d_private;
 #endif
   int ret;
 
@@ -2412,7 +2429,8 @@ static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
 #ifdef CONFIG_NETDEV_PHY_IOCTL
      case SIOCGMIIPHY: /* Get MII PHY address */
         {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
           req->phy_id = CONFIG_LPC54_ETH_PHYADDR;
           ret = OK;
         }
@@ -2420,7 +2438,8 @@ static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
 
       case SIOCGMIIREG: /* Get register from MII PHY */
         {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
           req->val_out = lpc54_phy_read(priv, req->reg_num);
           ret = OK
         }
@@ -2428,7 +2447,8 @@ static int lpc54_eth_ioctl(struct net_driver_s *dev, int cmd,
 
       case SIOCSMIIREG: /* Set register in MII PHY */
         {
-          struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          struct mii_ioctl_data_s *req =
+        (struct mii_ioctl_data_s *)((uintptr_t)arg);
           lpc54_phy_write(priv, req->reg_num, req->val_in);
           ret = OK
         }
@@ -2642,7 +2662,7 @@ static void lpc54_rxring_initialize(struct lpc54_ethdriver_s *priv,
       rxdesc->buffer2 = 0;
 #endif
 
-      /* Buffer1 (and maybe 2) valid, interrupt on completion, owned by DMA. */
+      /* Buffer1 and maybe 2 valid, interrupt on completion, owned by DMA. */
 
       rxdesc->ctrl = regval;
     }
@@ -2897,7 +2917,6 @@ static int lpc54_phy_autonegotiate(struct lpc54_ethdriver_s *priv)
         }
 
       phyval = lpc54_phy_read(priv, MII_LAN8720_SCSR);
-
     }
   while ((phyval & MII_LAN8720_SPSCR_ANEGDONE) == 0);
 #else
@@ -3076,6 +3095,7 @@ int arm_netinitialize(int intf)
   DEBUGASSERT(priv->eth_txpoll != NULL && priv->eth_txtimeout != NULL);
 
   /* Configure GPIO pins to support Ethernet */
+
   /* Common MIIM interface */
 
   lpc54_gpio_config(GPIO_ENET_MDIO);    /* Ethernet MIIM data input and output */

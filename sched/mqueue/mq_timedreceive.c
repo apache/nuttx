@@ -224,7 +224,7 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
       /* Start the watchdog */
 
-      wd_start(rtcb->waitdog, ticks, nxmq_rcvtimeout, 1, getpid());
+      wd_start(rtcb->waitdog, ticks, nxmq_rcvtimeout, 1, (wdparm_t)getpid());
     }
 
   /* Get the message from the message queue */

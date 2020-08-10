@@ -290,7 +290,7 @@ static int sporadic_budget_start(FAR struct replenishment_s *mrepl)
   /* And start the timer for the budget interval */
 
   DEBUGVERIFY(wd_start(&mrepl->timer, sporadic->budget,
-                       sporadic_budget_expire, 1, (wdentry_t)mrepl));
+                       sporadic_budget_expire, 1, (wdparm_t)mrepl));
 
   /* Then reprioritize to the higher priority */
 
@@ -348,8 +348,8 @@ static int sporadic_interval_start(FAR struct replenishment_s *mrepl)
    * be canceled if the thread exits.
    */
 
-  DEBUGVERIFY(wd_start(&mrepl->timer, remainder, sporadic_interval_expire,
-              1, (wdentry_t)mrepl));
+  DEBUGVERIFY(wd_start(&mrepl->timer, remainder,
+              sporadic_interval_expire, 1, (wdparm_t)mrepl));
 
   /* Drop the priority of thread, possible causing a context switch. */
 
@@ -390,8 +390,8 @@ static int sporadic_replenish_start(FAR struct replenishment_s *repl)
 
   /* And start the timer for the budget interval */
 
-  DEBUGVERIFY(wd_start(&repl->timer, repl->budget, sporadic_replenish_expire,
-                       1, (wdentry_t)repl));
+  DEBUGVERIFY(wd_start(&repl->timer, repl->budget,
+                       sporadic_replenish_expire, 1, (wdparm_t)repl));
 
   /* Then reprioritize to the higher priority */
 
@@ -426,8 +426,8 @@ static int sporadic_replenish_delay(FAR struct replenishment_s *repl,
 
   /* And start the timer for the delay prior to replenishing. */
 
-  DEBUGVERIFY(wd_start(&repl->timer, period, sporadic_delay_expire,
-                       1, (wdentry_t)repl));
+  DEBUGVERIFY(wd_start(&repl->timer, period,
+                       sporadic_delay_expire, 1, (wdparm_t)repl));
   return OK;
 }
 

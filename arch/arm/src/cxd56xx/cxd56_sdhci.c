@@ -359,7 +359,7 @@ static void cxd56_datadisable(void);
 static void cxd56_transmit(struct cxd56_sdiodev_s *priv);
 static void cxd56_receive(struct cxd56_sdiodev_s *priv);
 #endif
-static void cxd56_eventtimeout(int argc, uint32_t arg, ...);
+static void cxd56_eventtimeout(int argc, wdparm_t arg, ...);
 static void cxd56_endwait(struct cxd56_sdiodev_s *priv,
               sdio_eventset_t wkupevent);
 static void cxd56_endtransfer(struct cxd56_sdiodev_s *priv,
@@ -971,7 +971,7 @@ static void cxd56_receive(struct cxd56_sdiodev_s *priv)
  *
  ****************************************************************************/
 
-static void cxd56_eventtimeout(int argc, uint32_t arg, ...)
+static void cxd56_eventtimeout(int argc, wdparm_t arg, ...)
 {
   struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)arg;
 
@@ -2594,8 +2594,8 @@ static sdio_eventset_t cxd56_sdio_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay, cxd56_eventtimeout,
-                       1, (uint32_t)priv);
+      ret   = wd_start(priv->waitwdog, delay,
+                       cxd56_eventtimeout, 1, (wdparm_t)priv);
       if (ret != OK)
         {
           mcerr("ERROR: wd_start failed: %d\n", ret);

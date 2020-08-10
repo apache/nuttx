@@ -382,7 +382,7 @@ static void sam_lcd_dump(struct sam_dev_s *priv);
 #endif
 
 static void sam_lcd_endwait(struct sam_dev_s *priv, int result);
-static void sam_lcd_dmatimeout(int argc, uint32_t arg, ...);
+static void sam_lcd_dmatimeout(int argc, wdparm_t arg, ...);
 static int  sam_lcd_dmawait(FAR struct sam_dev_s *priv, uint32_t timeout);
 static void sam_lcd_dmacallback(DMA_HANDLE handle, void *arg, int result);
 static int  sam_lcd_txtransfer(FAR struct sam_dev_s *priv,
@@ -941,7 +941,7 @@ static void sam_lcd_endwait(struct sam_dev_s *priv, int result)
  *
  ****************************************************************************/
 
-static void sam_lcd_dmatimeout(int argc, uint32_t arg, ...)
+static void sam_lcd_dmatimeout(int argc, wdparm_t arg, ...)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)arg;
 
@@ -983,8 +983,8 @@ static int sam_lcd_dmawait(FAR struct sam_dev_s *priv, uint32_t timeout)
 
   /* Started ... setup the timeout */
 
-  ret = wd_start(priv->dmadog, timeout, sam_lcd_dmatimeout,
-                 1, (uint32_t)priv);
+  ret = wd_start(priv->dmadog, timeout,
+                 sam_lcd_dmatimeout, 1, (wdparm_t)priv);
   if (ret < 0)
     {
       lcderr("ERROR: wd_start failed: %d\n", errno);

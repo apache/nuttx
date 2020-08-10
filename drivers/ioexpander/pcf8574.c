@@ -988,8 +988,7 @@ static void pcf8574_irqworker(void *arg)
 
   sched_lock();
   ret = wd_start(priv->wdog, PCF8574_POLLDELAY,
-                 pcf8574_poll_expiry,
-                 1, (wdparm_t)priv);
+                 pcf8574_poll_expiry, 1, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");
@@ -1163,8 +1162,7 @@ FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
   DEBUGASSERT(priv->wdog != NULL);
 
   ret = wd_start(priv->wdog, PCF8574_POLLDELAY,
-                 pcf8574_poll_expiry,
-                 1, (wdparm_t)priv);
+                 pcf8574_poll_expiry, 1, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");

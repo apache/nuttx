@@ -744,7 +744,8 @@ if RNDIS
 
 config RNDIS_NWRREQS
 	int "The number of write requests that can be in flight"
-	default 2
+	default 4 if NET_TCP_WRITE_BUFFERS
+	default 2 if !NET_TCP_WRITE_BUFFERS
 	---help---
 		The number of write/read requests that can be in flight
 

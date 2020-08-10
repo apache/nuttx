@@ -55,6 +55,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
@@ -96,7 +97,9 @@
 # define CONFIG_FTMAC100_NINTERFACES 1
 #endif
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
+ * second.
+ */
 
 #define FTMAC100_WDDELAY   (1*CLK_TCK)
 
@@ -104,7 +107,9 @@
 
 #define FTMAC100_TXTIMEOUT (60*CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of the Ethernet
+ * header.
+ */
 
 #define BUF ((struct eth_hdr_s *)priv->ft_dev.d_buf)
 
@@ -217,10 +222,10 @@ static int  ftmac100_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void ftmac100_txtimeout_work(FAR void *arg);
-static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void ftmac100_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void ftmac100_poll_work(FAR void *arg);
-static void ftmac100_poll_expiry(int argc, uint32_t arg, ...);
+static void ftmac100_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -401,8 +406,8 @@ static int ftmac100_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -479,7 +484,7 @@ static void ftmac100_init(FAR struct ftmac100_driver_s *priv)
 
   rxdes[CONFIG_FTMAC100_RX_DESC - 1].rxdes1 = FTMAC100_RXDES1_EDORR;
 
-  kmem = memalign(RX_BUF_SIZE, CONFIG_FTMAC100_RX_DESC * RX_BUF_SIZE);
+  kmem = kmm_memalign(RX_BUF_SIZE, CONFIG_FTMAC100_RX_DESC * RX_BUF_SIZE);
 
   ninfo("KMEM=%08x\n", kmem);
 
@@ -689,7 +694,9 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
       priv->ft_dev.d_len = len;
 
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the packet
+       * tap.
+       */
 
       pkt_input(&priv->ft_dev);
 #endif
@@ -897,7 +904,8 @@ static void ftmac100_interrupt_work(FAR void *arg)
   status = priv->status;
 
   ninfo("status=%08x(%08x) BASE=%p ISR=%p PHYCR=%p\n",
-        status, getreg32(&iobase->isr), iobase, &iobase->isr, &iobase->phycr);
+        status, getreg32(&iobase->isr), iobase, &iobase->isr,
+        &iobase->phycr);
 
   if (!status)
     {
@@ -906,7 +914,9 @@ static void ftmac100_interrupt_work(FAR void *arg)
 
   /* Handle interrupts according to status bit settings */
 
-  /* Check if we received an incoming packet, if so, call ftmac100_receive() */
+  /* Check if we received an incoming packet, if so, call
+   * ftmac100_receive().
+   */
 
   if (status & FTMAC100_INT_RPKT_SAV)
     {
@@ -1080,7 +1090,7 @@ static void ftmac100_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void ftmac100_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
 
@@ -1134,8 +1144,8 @@ static void ftmac100_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->ft_txpoll, FTMAC100_WDDELAY,
+           ftmac100_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1157,7 +1167,7 @@ static void ftmac100_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void ftmac100_poll_expiry(int argc, uint32_t arg, ...)
+static void ftmac100_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
 
@@ -1206,7 +1216,9 @@ static int ftmac100_ifup(struct net_driver_s *dev)
 
   ftmac100_init(priv);
 
-  /* Instantiate the MAC address from priv->ft_dev.d_mac.ether.ether_addr_octet */
+  /* Instantiate the MAC address from
+   * priv->ft_dev.d_mac.ether.ether_addr_octet
+   */
 
   ftmac100_set_mac(priv, priv->ft_dev.d_mac.ether.ether_addr_octet);
 
@@ -1218,8 +1230,8 @@ static int ftmac100_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->ft_txpoll, FTMAC100_WDDELAY,
+           ftmac100_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -1305,7 +1317,9 @@ static void ftmac100_txavail_work(FAR void *arg)
 
   if (priv->ft_bifup)
     {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
+      /* Check if there is room in the hardware to hold another outgoing
+       * packet.
+       */
 
       /* If so, then poll the network for new XMIT data */
 
@@ -1600,7 +1614,9 @@ int ftmac100_initialize(int intf)
 
   ftmac100_reset(priv);
 
-  /* Read the MAC address from the hardware into priv->ft_dev.d_mac.ether.ether_addr_octet */
+  /* Read the MAC address from the hardware into
+   * priv->ft_dev.d_mac.ether.ether_addr_octet
+   */
 
   memcpy(priv->ft_dev.d_mac.ether.ether_addr_octet,
          (FAR void *)(CONFIG_FTMAC100_MAC0_ENV_ADDR), 6);
