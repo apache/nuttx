@@ -82,7 +82,7 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototype
  ****************************************************************************/
 
 /****************************************************************************
@@ -111,6 +111,16 @@ int sam_bringup(void);
 
 #ifdef CONFIG_PM
 void sam_led_pminitialize(void);
+#endif
+
+#ifdef CONFIG_METRO_M4_USB_AUTOMOUNT
+void sam_automount_initialize(void);
+void sam_automount_event(bool inserted);
+#endif
+
+#ifdef CONFIG_SAMD5E5_SERCOM5_ISI2C
+FAR struct i2c_master_s *g_i2c5_dev;
+int metro_m4_i2cdev_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

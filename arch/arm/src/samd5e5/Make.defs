@@ -153,6 +153,15 @@ endif
 
 ifeq ($(CONFIG_SAMD5E5_USB),y)
 CHIP_CSRCS += sam_usb.c
+ifeq ($(CONFIG_USBHOST),y)
+ifeq ($(CONFIG_USBHOST_TRACE),y)
+CHIP_CSRCS += sam_usbhost.c
+else
+ifeq ($(CONFIG_DEBUG_USB),y)
+CHIP_CSRCS += sam_usbhost.c
+endif
+endif
+endif
 endif
 
 ifeq ($(CONFIG_SAMD5E5_SDHC0),y)

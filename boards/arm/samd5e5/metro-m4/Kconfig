@@ -45,5 +45,34 @@ config METRO_M4_32KHZXTAL
 		slow clock source.  This option will select instead XOSC32 as the
 		slow clock source.
 
+if FS_AUTOMOUNTER
+config METRO_M4_USB_AUTOMOUNT
+	bool "USB automounter"
+	default n
+
+if METRO_M4_USB_AUTOMOUNT
+
+config METRO_M4_USB_AUTOMOUNT_FSTYPE
+	string "USB file system type"
+	default "vfat"
+
+config METRO_M4_USB_AUTOMOUNT_BLKDEV
+	string "USB block device"
+	default "/dev/sda"
+
+config METRO_M4_USB_AUTOMOUNT_MOUNTPOINT
+	string "USB mount point"
+	default "/mnt/usb"
+
+config METRO_M4_USB_AUTOMOUNT_DDELAY
+	int "USB debounce delay (milliseconds)"
+	default 1000
+
+config METRO_M4_USB_AUTOMOUNT_UDELAY
+	int "USB unmount retry delay (milliseconds)"
+	default 2000
+
+endif # METRO_M4_USB_AUTOMOUNT
+endif # FS_AUTOMOUNTER
 
 endif # ARCH_BOARD_METRO_M4

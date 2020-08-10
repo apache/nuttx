@@ -51,6 +51,19 @@
   #include "sam_wdt.h"
 #endif
 
+#ifdef CONFIG_SAMD5E5_SERCOM5_ISI2C
+  #include <nuttx/i2c/i2c_master.h>
+  #include "hardware/sam_i2c_master.h"
+#endif
+
+#ifdef CONFIG_USBHOST
+#  include "sam_usbhost.h"
+#endif
+
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -92,6 +105,42 @@ int sam_bringup(void)
 
 #if defined(CONFIG_SAMD5E5_WDT) && defined(CONFIG_WATCHDOG)
   (void)sam_wdt_initialize(CONFIG_WATCHDOG_DEVPATH);
+#endif
+
+#ifdef CONFIG_SAMD5E5_SERCOM5_ISI2C
+  /* Initialize I2C bus */
+
+  ret = metro_m4_i2cdev_initialize();
+#endif 
+
+#ifdef CONFIG_USBHOST
+  /* Initialize USB host operation. samd_usbhost_initialize() starts a
+   * thread will monitor for USB connection and disconnection events.
+   */
+
+  ret = samd_usbhost_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "samd_usbhost_initialize failed %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "usbmonitor_start failed %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_FS_AUTOMOUNTER
+  /* Initialize the auto-mounter */
+
+  sam_automount_initialize();
 #endif
 
   UNUSED(ret);
