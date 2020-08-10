@@ -1873,14 +1873,16 @@ static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
 
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
-            uint32_t gpio_val = GPIO_OPENDRAIN;
+            uint32_t gpio_val = (arg & SER_SINGLEWIRE_PUSHPULL) ==
+                                 SER_SINGLEWIRE_PUSHPULL ?
+                                 GPIO_PUSHPULL : GPIO_OPENDRAIN;
             gpio_val |=
-                (arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLUP ?
-                  GPIO_PULLUP : GPIO_FLOAT;
+              (arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLUP ?
+                                                  GPIO_PULLUP : GPIO_FLOAT;
 
             gpio_val |=
-                (arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLDOWN ?
-                  GPIO_PULLDOWN : GPIO_FLOAT;
+              (arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLDOWN ?
+                                                  GPIO_PULLDOWN : GPIO_FLOAT;
 
             stm32l4_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK |
                                                   GPIO_OPENDRAIN)) |

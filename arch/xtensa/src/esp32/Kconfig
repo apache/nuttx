@@ -21,9 +21,9 @@ config ESP32_BT
 config ESP32_EMAC
 	bool "Ethernet MAC"
 	default n
-	depends on EXPERIMENTAL
+	select NET
 	---help---
-		No yet implemented
+		Enable ESP32 ethernet support.
 
 config ESP32_I2C
 	bool
@@ -436,4 +436,39 @@ config ESP32_SPIFLASH_DEBUG
 		will show input arguments and result.
 
 endmenu # ESP32_SPIFLASH
+
+menu "Ethernet configuration"
+	depends on ESP32_EMAC
+
+config ESP32_ETH_NRXDESC
+	int "RX description number"
+	default 9
+	---help---
+		Descriptions of RX should be more than TX's.
+
+config ESP32_ETH_NTXDESC
+	int "TX description number"
+	default 8
+
+config ESP32_ETH_MDCPIN
+	int "MDC Pin"
+	default 23
+	range 0 39
+
+config ESP32_ETH_MDIOPIN
+	int "MDIO Pin"
+	default 18
+	range 0 39
+
+config ESP32_ETH_PHY_RSTPIN
+	int "Reset PHY Pin"
+	default 5
+	range 0 39
+
+config ESP32_ETH_PHY_ADDR
+	int "PHY address"
+	default 1
+
+endmenu # ESP32_EMAC
+
 endif # ARCH_CHIP_ESP32

@@ -269,8 +269,8 @@
 
 /* Timing *******************************************************************/
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
- * second
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
  */
 
 #define STM32_WDDELAY     (1*CLK_TCK)
@@ -717,10 +717,10 @@ static int  stm32_interrupt(int irq, void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void stm32_txtimeout_work(void *arg);
-static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void stm32_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void stm32_poll_work(void *arg);
-static void stm32_poll_expiry(int argc, uint32_t arg, ...);
+static void stm32_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -1277,8 +1277,8 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, STM32_TXTIMEOUT, stm32_txtimeout_expiry,
-           1, (uint32_t)priv);
+  wd_start(priv->txtimeout, STM32_TXTIMEOUT,
+           stm32_txtimeout_expiry, 1, (wdparm_t)priv);
 
   /* Update the tx descriptor tail pointer register to start the DMA */
 
@@ -1355,8 +1355,8 @@ static int stm32_txpoll(struct net_driver_s *dev)
        * CPU.  We cannot perform the TX poll if we are unable to accept
        * another packet for transmission.
        *
-       * In a race condition, ETH_TDES3_OWN may be cleared BUT still not
-       * available because stm32_freeframe() has not yet run.  If
+       * In a race condition, ETH_TDES3_OWN may be cleared BUT still
+       * not available because stm32_freeframe() has not yet run. If
        * stm32_freeframe() has run, the buffer1 pointer (tdes2) will be
        * nullified (and inflight should be < CONFIG_STM32H7_ETH_NTXDESC).
        */
@@ -1429,8 +1429,8 @@ static void stm32_dopoll(struct stm32_ethmac_s *priv)
    * CPU.  We cannot perform the TX poll if we are unable to accept
    * another packet for transmission.
    *
-   * In a race condition, ETH_TDES3_RD_OWN may be cleared BUT still not
-   * available because stm32_freeframe() has not yet run.  If
+   * In a race condition, ETH_TDES3_RD_OWN may be cleared BUT still
+   * not available because stm32_freeframe() has not yet run. If
    * stm32_freeframe() has run, the buffer1 pointer (des0) will be
    * nullified (and inflight should be < CONFIG_STM32H7_ETH_NTXDESC).
    */
@@ -1848,8 +1848,8 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
     }
 
   /* We get here after all of the descriptors have been scanned or when
-   * rxdesc points to the first descriptor owned by the DMA.  Remember where
-   * we left off.
+   * rxdesc points to the first descriptor owned by the DMA. Remember
+   * where we left off.
    */
 
   priv->rxhead = rxdesc;
@@ -1892,7 +1892,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
        * tap
        */
 
-      pkt_input(&priv->dev);
+     pkt_input(&priv->dev);
 #endif
 
       /* Check if the packet is a valid size for the network buffer
@@ -2114,9 +2114,9 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
 
               priv->inflight--;
 
-              /* If all of the TX descriptors were in-flight, then RX
-               * interrupts may have been disabled... we can re-enable them
-               * now.
+              /* If all of the TX descriptors were in-flight,
+               * then RX interrupts may have been disabled...
+               * we can re-enable them now.
                */
 
               stm32_enableint(priv, ETH_DMACIER_RIE);
@@ -2410,7 +2410,7 @@ static void stm32_txtimeout_work(void *arg)
  *
  ****************************************************************************/
 
-static void stm32_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void stm32_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
@@ -2454,15 +2454,16 @@ static void stm32_poll_work(void *arg)
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
   struct net_driver_s *dev  = &priv->dev;
 
-  /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.
-   * We cannot perform the timer poll if we are unable to accept another
-   * packet for transmission.  Hmmm.. might be bug here.  Does this mean if
-   * there is a transmit in progress, we will miss TCP time state updates?
+  /* Check if the next TX descriptor is owned by the Ethernet DMA or
+   * CPU. We cannot perform the timer poll if we are unable to accept
+   * another packet for transmission.  Hmmm.. might be bug here.
+   * Does this mean if there is a transmit in progress, we will miss
+   * TCP time state updates?
    *
-   * In a race condition, ETH_TDES3_OWN may be cleared BUT still not
-   * available because stm32_freeframe() has not yet run.  If
-   * stm32_freeframe() has run, the buffer1 pointer (des2) will be nullified
-   * (and inflight should be < CONFIG_STM32H7_ETH_NTXDESC).
+   * In a race condition, ETH_TDES3_OWN may be cleared BUT still
+   * not available because stm32_freeframe() has not yet run. If
+   * stm32_freeframe() has run, the buffer1 pointer (des2) will be
+   * nullified (and inflight should be < CONFIG_STM32H7_ETH_NTXDESC).
    */
 
   net_lock();
@@ -2501,7 +2502,8 @@ static void stm32_poll_work(void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
+  wd_start(priv->txpoll, STM32_WDDELAY,
+           stm32_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -2523,7 +2525,7 @@ static void stm32_poll_work(void *arg)
  *
  ****************************************************************************/
 
-static void stm32_poll_expiry(int argc, uint32_t arg, ...)
+static void stm32_poll_expiry(int argc, wdparm_t arg, ...)
 {
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
 
@@ -2535,7 +2537,8 @@ static void stm32_poll_expiry(int argc, uint32_t arg, ...)
     }
   else
     {
-      wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1, priv);
+      wd_start(priv->txpoll, STM32_WDDELAY,
+               stm32_poll_expiry, 1, (wdparm_t)priv);
     }
 }
 
@@ -2583,8 +2586,8 @@ static int stm32_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, STM32_WDDELAY, stm32_poll_expiry, 1,
-           (uint32_t)priv);
+  wd_start(priv->txpoll, STM32_WDDELAY,
+           stm32_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 

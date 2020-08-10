@@ -364,24 +364,11 @@ int host_readdir(void *dirp, struct nuttx_dirent_s *entry)
 {
   struct dirent *ent;
 
-  for (; ; )
+  /* Call the host's readdir routine */
+
+  ent = readdir(dirp);
+  if (ent != NULL)
     {
-      /* Call the host's readdir routine */
-
-      ent = readdir(dirp);
-      if (ent == NULL)
-        {
-          break;
-        }
-
-      /* Skip '.' and '..' */
-
-      if (ent->d_name[0] == '.' && (ent->d_name[1] == '\0' ||
-          (ent->d_name[1] == '.' && ent->d_name[2] == '\0')))
-        {
-          continue;
-        }
-
       /* Copy the entry name */
 
       strncpy(entry->d_name, ent->d_name, sizeof(entry->d_name) - 1);

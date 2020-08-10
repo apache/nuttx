@@ -336,10 +336,10 @@ static int  imxrt_enet_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void imxrt_txtimeout_work(FAR void *arg);
-static void imxrt_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void imxrt_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void imxrt_poll_work(FAR void *arg);
-static void imxrt_polltimer_expiry(int argc, uint32_t arg, ...);
+static void imxrt_polltimer_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -565,8 +565,8 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, IMXRT_TXTIMEOUT, imxrt_txtimeout_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->txtimeout, IMXRT_TXTIMEOUT,
+           imxrt_txtimeout_expiry, 1, (wdparm_t)priv);
 
   /* Start the TX transfer (if it was not already waiting for buffers) */
 
@@ -685,7 +685,7 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
   NETDEV_RXPACKETS(&priv->dev);
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(&priv->dev);
 #endif
@@ -706,7 +706,7 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
       ipv4_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -746,7 +746,7 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
       ipv6_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field  d_len will set to a value > 0.
+       * sent out on the network, d_len field will set to a value > 0.
        */
 
       if (priv->dev.d_len > 0)
@@ -1182,7 +1182,7 @@ static void imxrt_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void imxrt_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void imxrt_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
 
@@ -1239,8 +1239,8 @@ static void imxrt_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again in any case */
 
-  wd_start(priv->txpoll, IMXRT_WDDELAY, imxrt_polltimer_expiry,
-           1, (wdparm_t)priv);
+  wd_start(priv->txpoll, IMXRT_WDDELAY,
+           imxrt_polltimer_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1262,7 +1262,7 @@ static void imxrt_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void imxrt_polltimer_expiry(int argc, uint32_t arg, ...)
+static void imxrt_polltimer_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
 
@@ -1371,8 +1371,8 @@ static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, IMXRT_WDDELAY, imxrt_polltimer_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->txpoll, IMXRT_WDDELAY,
+           imxrt_polltimer_expiry, 1, (wdparm_t)priv);
 
   /* Clear all pending ENET interrupt */
 

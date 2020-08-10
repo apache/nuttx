@@ -637,7 +637,7 @@ static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
   dev->d_len = msg->length;
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(dev);
 #endif
@@ -843,8 +843,8 @@ static void net_rpmsg_drv_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, NET_RPMSG_DRV_WDDELAY, net_rpmsg_drv_poll_expiry, 1,
-           (wdparm_t)dev);
+  wd_start(priv->txpoll, NET_RPMSG_DRV_WDDELAY,
+           net_rpmsg_drv_poll_expiry, 1, (wdparm_t)dev);
   net_unlock();
 }
 
@@ -968,8 +968,8 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, NET_RPMSG_DRV_WDDELAY, net_rpmsg_drv_poll_expiry, 1,
-           (wdparm_t)dev);
+  wd_start(priv->txpoll, NET_RPMSG_DRV_WDDELAY,
+           net_rpmsg_drv_poll_expiry, 1, (wdparm_t)dev);
 
   net_unlock();
 

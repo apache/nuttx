@@ -88,9 +88,9 @@ static bool is_loopback(FAR struct net_driver_s *dev)
  *
  * Description:
  *   This function should be called before sending out a packet. The function
- *   checks the destination address of the packet to see whether the target of
- *   packet is ourself and then consume the packet directly by calling input
- *   process functions.
+ *   checks the destination address of the packet to see whether the target
+ *   of packet is ourself and then consume the packet directly by calling
+ *   input process functions.
  *
  * Returned Value:
  *   Zero is returned if the packet don't loop back to ourself, otherwise
@@ -115,7 +115,7 @@ int devif_loopback(FAR struct net_driver_s *dev)
        NETDEV_RXPACKETS(dev);
 
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the tap */
 
        pkt_input(dev);
 #endif

@@ -291,7 +291,7 @@ static void lpc43_config_dmaints(struct lpc43_dev_s *priv, uint32_t xfrmask,
 
 /* Data Transfer Helpers ****************************************************/
 
-static void lpc43_eventtimeout(int argc, uint32_t arg, ...);
+static void lpc43_eventtimeout(int argc, wdparm_t arg, ...);
 static void lpc43_endwait(struct lpc43_dev_s *priv,
               sdio_eventset_t wkupevent);
 static void lpc43_endtransfer(struct lpc43_dev_s *priv,
@@ -838,7 +838,7 @@ static void lpc43_config_dmaints(struct lpc43_dev_s *priv, uint32_t xfrmask,
  *
  ****************************************************************************/
 
-static void lpc43_eventtimeout(int argc, uint32_t arg, ...)
+static void lpc43_eventtimeout(int argc, wdparm_t arg, ...)
 {
   struct lpc43_dev_s *priv = (struct lpc43_dev_s *)arg;
 
@@ -2313,8 +2313,8 @@ static sdio_eventset_t lpc43_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay, lpc43_eventtimeout,
-                       1, (uint32_t)priv);
+      ret   = wd_start(priv->waitwdog, delay,
+                       lpc43_eventtimeout, 1, (wdparm_t)priv);
       if (ret < 0)
         {
           mcerr("ERROR: wd_start failed: %d\n", ret);

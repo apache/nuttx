@@ -99,7 +99,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
     {
       timer->pt_last = timer->pt_delay;
       wd_start(timer->pt_wdog, timer->pt_delay,
-               timer_timeout, 1, itimer);
+               timer_timeout, 1, (wdparm_t)itimer);
     }
 }
 
@@ -323,8 +323,8 @@ int timer_settime(timer_t timerid, int flags,
        */
 
       timer->pt_last = delay;
-      ret = wd_start(timer->pt_wdog, delay, timer_timeout,
-                     1, (wdparm_t)timer);
+      ret = wd_start(timer->pt_wdog, delay,
+                     timer_timeout, 1, (wdparm_t)timer);
       if (ret < 0)
         {
           set_errno(-ret);

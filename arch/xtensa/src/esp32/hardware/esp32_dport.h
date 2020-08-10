@@ -1181,6 +1181,8 @@
 
 #define DPORT_WIFI_CLK_EN_REG          (DR_REG_DPORT_BASE + 0x0CC)
 
+#define DPORT_EMAC_CLK_EN              (BIT(14))
+
 /* DPORT_WIFI_CLK_EN : R/W ;bitpos:[31:0] ;default: 32'hfffce030 ; */
 
 #define DPORT_WIFI_CLK_EN  0xFFFFFFFF
@@ -1191,6 +1193,8 @@
 #define DPORT_WIFI_RST_EN_REG          (DR_REG_DPORT_BASE + 0x0D0)
 
 /* DPORT_WIFI_RST : R/W ;bitpos:[31:0] ;default: 32'h0 ; */
+
+#define DPORT_EMAC_RST_EN              (BIT(7))
 
 #define DPORT_WIFI_RST  0xFFFFFFFF
 #define DPORT_WIFI_RST_M  ((DPORT_WIFI_RST_V)<<(DPORT_WIFI_RST_S))

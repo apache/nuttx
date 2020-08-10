@@ -105,8 +105,8 @@
 
 #define NET_TUN_PKTSIZE ((CONFIG_NET_TUN_PKTSIZE + CONFIG_NET_GUARDSIZE + 1) & ~1)
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
- * second
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
  */
 
 #define TUN_WDDELAY  (1 * CLK_TCK)
@@ -572,7 +572,7 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
   NETDEV_RXPACKETS(&priv->dev);
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(&priv->dev);
 #endif
@@ -684,7 +684,7 @@ static void tun_net_receive_tun(FAR struct tun_device_s *priv)
   NETDEV_RXPACKETS(&priv->dev);
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(&priv->dev);
 #endif
@@ -721,7 +721,7 @@ static void tun_net_receive_tun(FAR struct tun_device_s *priv)
     }
 
   /* If the above function invocation resulted in data that should be
-   * sent out on the network, the field  d_len will set to a value > 0.
+   * sent out on the network, d_len field will set to a value > 0.
    */
 
   if (priv->dev.d_len > 0)
@@ -811,7 +811,7 @@ static void tun_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, priv);
+  wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, (wdparm_t)priv);
 
   net_unlock();
   tun_unlock(priv);
@@ -879,8 +879,8 @@ static int tun_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry,
-           1, (wdparm_t)priv);
+  wd_start(priv->txpoll, TUN_WDDELAY,
+           tun_poll_expiry, 1, (wdparm_t)priv);
 
   priv->bifup = true;
   return OK;

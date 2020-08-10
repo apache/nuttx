@@ -3,7 +3,8 @@
  *
  *   Author: David Hewson
  *
- *   Copyright (C) 2010-2011, 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2014, 2016-2017 Gregory Nutt. All rights
+ *   reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,6 +79,7 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 struct lpc31_i2cdev_s
 {
     struct i2c_master_s dev;      /* Generic I2C device */
@@ -114,9 +116,10 @@ static struct lpc31_i2cdev_s i2cdevices[2];
 
 static int  i2c_interrupt(int irq, FAR void *context, FAR void *arg);
 static void i2c_progress(struct lpc31_i2cdev_s *priv);
-static void i2c_timeout(int argc, uint32_t arg, ...);
+static void i2c_timeout(int argc, wdparm_t arg, ...);
 static void i2c_hwreset(struct lpc31_i2cdev_s *priv);
-static void i2c_setfrequency(struct lpc31_i2cdev_s *priv, uint32_t frequency);
+static void i2c_setfrequency(struct lpc31_i2cdev_s *priv,
+                             uint32_t frequency);
 static int  i2c_transfer(FAR struct i2c_master_s *dev,
                          FAR struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
@@ -204,7 +207,8 @@ static int i2c_interrupt(int irq, FAR void *context, FAR void *arg)
 static void i2c_progress(struct lpc31_i2cdev_s *priv)
 {
   struct i2c_msg_s *msg;
-  uint32_t stat, ctrl;
+  uint32_t stat;
+  uint32_t ctrl;
 
   stat = getreg32(priv->base + LPC31_I2C_STAT_OFFSET);
 
@@ -233,8 +237,9 @@ static void i2c_progress(struct lpc31_i2cdev_s *priv)
         case I2C_STATE_START:
           if ((msg->flags & I2C_M_TEN) != 0)
             {
-              priv->header[0] = I2C_TX_START | 0xF0 | ((msg->addr & 0x300) >> 7);
-              priv->header[1] = msg->addr & 0xFF;
+              priv->header[0] = I2C_TX_START | 0xf0 |
+                                ((msg->addr & 0x300) >> 7);
+              priv->header[1] = msg->addr & 0xff;
               priv->hdrcnt = 2;
               if (msg->flags & I2C_M_READ)
                 {
@@ -244,7 +249,8 @@ static void i2c_progress(struct lpc31_i2cdev_s *priv)
             }
           else
             {
-              priv->header[0] = I2C_TX_START | (msg->addr << 1) | (msg->flags & I2C_M_READ);
+              priv->header[0] = I2C_TX_START | (msg->addr << 1) |
+                                (msg->flags & I2C_M_READ);
               priv->hdrcnt = 1;
             }
 
@@ -252,12 +258,14 @@ static void i2c_progress(struct lpc31_i2cdev_s *priv)
 
           priv->state = I2C_STATE_HEADER;
           priv->wrcnt = 0;
+
           /* DROP THROUGH */
 
         case I2C_STATE_HEADER:
           while ((priv->wrcnt != priv->hdrcnt) && (stat & I2C_STAT_TFF) == 0)
             {
-              putreg32(priv->header[priv->wrcnt], priv->base + LPC31_I2C_TX_OFFSET);
+              putreg32(priv->header[priv->wrcnt],
+                       priv->base + LPC31_I2C_TX_OFFSET);
               priv->wrcnt++;
 
               stat = getreg32(priv->base + LPC31_I2C_STAT_OFFSET);
@@ -267,21 +275,25 @@ static void i2c_progress(struct lpc31_i2cdev_s *priv)
             {
               /* Enable Tx FIFO Not Full Interrupt */
 
-              putreg32(ctrl | I2C_CTRL_TFFIE, priv->base + LPC31_I2C_CTRL_OFFSET);
+              putreg32(ctrl | I2C_CTRL_TFFIE,
+                       priv->base + LPC31_I2C_CTRL_OFFSET);
               goto out;
             }
 
           priv->state = I2C_STATE_TRANSFER;
           priv->wrcnt = 0;
           priv->rdcnt = 0;
+
           /* DROP THROUGH */
 
         case I2C_STATE_TRANSFER:
           if (msg->flags & I2C_M_READ)
             {
-              while ((priv->rdcnt != msg->length) && (stat & I2C_STAT_RFE) == 0)
+              while ((priv->rdcnt != msg->length) &&
+                     (stat & I2C_STAT_RFE) == 0)
                 {
-                  msg->buffer[priv->rdcnt] = getreg32 (priv->base + LPC31_I2C_RX_OFFSET);
+                  msg->buffer[priv->rdcnt] =
+                    getreg32(priv->base + LPC31_I2C_RX_OFFSET);
                   priv->rdcnt++;
 
                   stat = getreg32(priv->base + LPC31_I2C_STAT_OFFSET);
@@ -289,13 +301,17 @@ static void i2c_progress(struct lpc31_i2cdev_s *priv)
 
               if (priv->rdcnt < msg->length)
                 {
-                  /* Not all data received, fill the Tx FIFO with more dummies */
+                  /* Not all data received,
+                   * fill the Tx FIFO with more dummies
+                   */
 
-                  while ((priv->wrcnt != msg->length) && (stat & I2C_STAT_TFF) == 0)
+                  while ((priv->wrcnt != msg->length) &&
+                         (stat & I2C_STAT_TFF) == 0)
                     {
-                      if ((priv->wrcnt + 1) == msg->length && priv->nmsg == 1)
+                      if (priv->wrcnt + 1 == msg->length && priv->nmsg == 1)
                         {
-                          putreg32(I2C_TX_STOP, priv->base + LPC31_I2C_TX_OFFSET);
+                          putreg32(I2C_TX_STOP,
+                                   priv->base + LPC31_I2C_TX_OFFSET);
                         }
                       else
                         {
@@ -309,30 +325,37 @@ static void i2c_progress(struct lpc31_i2cdev_s *priv)
 
                   if (priv->wrcnt < msg->length)
                     {
-                      /* Enable Tx FIFO not full and Rx Fifo Avail Interrupts */
+                      /* Enable Tx FIFO not full and
+                       * Rx Fifo Avail Interrupts
+                       */
 
-                      putreg32(ctrl | I2C_CTRL_TFFIE | I2C_CTRL_RFDAIE, priv->base + LPC31_I2C_CTRL_OFFSET);
+                      putreg32(ctrl | I2C_CTRL_TFFIE | I2C_CTRL_RFDAIE,
+                               priv->base + LPC31_I2C_CTRL_OFFSET);
                     }
                   else
                     {
                       /* Enable Rx Fifo Avail Interrupts */
 
-                      putreg32(ctrl | I2C_CTRL_RFDAIE, priv->base + LPC31_I2C_CTRL_OFFSET);
+                      putreg32(ctrl | I2C_CTRL_RFDAIE,
+                               priv->base + LPC31_I2C_CTRL_OFFSET);
                     }
+
                   goto out;
                 }
             }
           else    /* WRITE */
             {
-              while ((priv->wrcnt != msg->length) && (stat & I2C_STAT_TFF) == 0)
+              while (!!(priv->wrcnt != msg->length) && (stat & I2C_STAT_TFF))
                 {
                   if ((priv->wrcnt + 1) == msg->length && priv->nmsg == 1)
                     {
-                      putreg32(I2C_TX_STOP | msg->buffer[priv->wrcnt], priv->base + LPC31_I2C_TX_OFFSET);
+                      putreg32(I2C_TX_STOP | msg->buffer[priv->wrcnt],
+                               priv->base + LPC31_I2C_TX_OFFSET);
                     }
                   else
                     {
-                      putreg32(msg->buffer[priv->wrcnt], priv->base + LPC31_I2C_TX_OFFSET);
+                      putreg32(msg->buffer[priv->wrcnt],
+                               priv->base + LPC31_I2C_TX_OFFSET);
                     }
 
                   priv->wrcnt++;
@@ -344,7 +367,8 @@ static void i2c_progress(struct lpc31_i2cdev_s *priv)
                 {
                   /* Enable Tx Fifo not full Interrupt */
 
-                  putreg32(ctrl | I2C_CTRL_TFFIE, priv->base + LPC31_I2C_CTRL_OFFSET);
+                  putreg32(ctrl | I2C_CTRL_TFFIE,
+                           priv->base + LPC31_I2C_CTRL_OFFSET);
                   goto out;
                 }
             }
@@ -400,7 +424,7 @@ out:
  *
  ****************************************************************************/
 
-static void i2c_timeout(int argc, uint32_t arg, ...)
+static void i2c_timeout(int argc, wdparm_t arg, ...)
 {
   struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) arg;
 
@@ -447,7 +471,7 @@ static void i2c_hwreset(struct lpc31_i2cdev_s *priv)
 
   /* Wait for Reset to complete */
 
-  while ((getreg32(priv->base + LPC31_I2C_CTRL_OFFSET) & I2C_CTRL_RESET) != 0)
+  while (!!(getreg32(priv->base + LPC31_I2C_CTRL_OFFSET) & I2C_CTRL_RESET))
       ;
 }
 
@@ -459,7 +483,8 @@ static void i2c_hwreset(struct lpc31_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs, int count)
+static int i2c_transfer(FAR struct i2c_master_s *dev,
+                        FAR struct i2c_msg_s *msgs, int count)
 {
   struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) dev;
   irqstate_t flags;
@@ -490,7 +515,7 @@ static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs
 
   /* Start a watchdog to timeout the transfer if the bus is locked up... */
 
-  wd_start(priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (uint32_t)priv);
+  wd_start(priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (wdparm_t)priv);
 
   /* Wait for the transfer to complete */
 
@@ -507,7 +532,7 @@ static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: i2c_reset
  *
  * Description:
@@ -519,7 +544,7 @@ static int i2c_transfer(FAR struct i2c_master_s *dev, FAR struct i2c_msg_s *msgs
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 static int i2c_reset(FAR struct i2c_master_s * dev)

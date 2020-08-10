@@ -79,7 +79,7 @@
  */
 
 #if !defined(CONFIG_SCHED_HPWORK)
-  /* REVISIT: The low priority work queue would be preferred if it is available */
+  /* REVISIT: The low priority work queue would be preferred if available */
 
 #  error High priority work queue support is required
 #endif
@@ -92,7 +92,9 @@
 # define CONFIG_MISOC_NET_NINTERFACES 1
 #endif
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
+ */
 
 #define MISOC_NET_WDDELAY   (1*CLK_TCK)
 
@@ -100,7 +102,7 @@
 
 #define MISOC_NET_TXTIMEOUT (60*CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define BUF ((struct eth_hdr_s *)priv->misoc_net_dev.d_buf)
 
@@ -108,8 +110,8 @@
  * Private Types
  ****************************************************************************/
 
-/* The misoc_net_driver_s encapsulates all state information for a single hardware
- * interface
+/* The misoc_net_driver_s encapsulates all state information for a single
+ * hardware interface
  */
 
 struct misoc_net_driver_s
@@ -177,9 +179,11 @@ static void misoc_net_txavail_work(FAR void *arg);
 static int misoc_net_txavail(FAR struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int misoc_net_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+static int misoc_net_addmac(FAR struct net_driver_s *dev,
+                            FAR const uint8_t *mac);
 #ifdef CONFIG_NET_MCASTGROUP
-static int misoc_net_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+static int misoc_net_rmmac(FAR struct net_driver_s *dev,
+                           FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NET_ICMPv6
 static void misoc_net_ipv6multicast(FAR struct misoc_net_driver_s *priv);
@@ -337,14 +341,14 @@ static int misoc_net_txpoll(FAR struct net_driver_s *dev)
 
           misoc_net_transmit(priv);
 
-          /* Check if there is room in the device to hold another packet. If not,
-           * return a non-zero value to terminate the poll.
+          /* Check if there is room in the device to hold another packet.
+           * If not, return a non-zero value to terminate the poll.
            */
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -388,11 +392,11 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv)
 
       rxlen = ethmac_sram_writer_length_read();
 
-      /* Copy the data data from the hardware to priv->misoc_net_dev.d_buf.  Set
-       * amount of data in priv->misoc_net_dev.d_len
+      /* Copy the data data from the hardware to priv->misoc_net_dev.d_buf.
+       * Set amount of data in priv->misoc_net_dev.d_len
        *
        * NOTE: These memcpy's could be avoided by simply setting the d_buf
-       * pointer to the rx*_buf containing the received data.  Some additional
+       * pointer to the rx*_buf containing the received data. Some additional
        * buffer management logic would also be required.
        */
 
@@ -414,7 +418,7 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv)
       priv->misoc_net_dev.d_len = rxlen;
 
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the tap */
 
        pkt_input(&priv->misoc_net_dev);
 #endif
@@ -435,7 +439,7 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv)
           ipv4_input(&priv->misoc_net_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->misoc_net_dev.d_len > 0)
@@ -473,7 +477,7 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv)
           ipv6_input(&priv->misoc_net_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->misoc_net_dev.d_len > 0)
@@ -507,7 +511,7 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv)
           NETDEV_RXARP(&priv->misoc_net_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->misoc_net_dev.d_len > 0)
@@ -589,16 +593,18 @@ static void misoc_net_interrupt_work(FAR void *arg)
 
   net_lock();
 
-  /* Check if we received an incoming packet, if so, call misoc_net_receive() */
+  /* Check if we received an incoming packet,
+   * if so, call misoc_net_receive()
+   */
 
   if (ethmac_sram_writer_ev_pending_read() & ETHMAC_EV_SRAM_WRITER)
     {
       misoc_net_receive(priv);
     }
 
-  /* Check if a packet transmission just completed.  If so, call misoc_net_txdone.
-   * This may disable further Tx interrupts if there are no pending
-   * transmissions.
+  /* Check if a packet transmission just completed.  If so, call
+   * misoc_net_txdone. This may disable further Tx interrupts if there are no
+   * pending transmissions.
    */
 
   if (ethmac_sram_reader_ev_pending_read() & ETHMAC_EV_SRAM_READER)
@@ -660,7 +666,8 @@ static int misoc_net_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->misoc_net_irqwork, misoc_net_interrupt_work, priv, 0);
+  work_queue(HPWORK, &priv->misoc_net_irqwork,
+             misoc_net_interrupt_work, priv, 0);
   return OK;
 }
 
@@ -732,7 +739,8 @@ static void misoc_net_txtimeout_expiry(int argc, wdparm_t arg, ...)
 
   /* Schedule to perform the TX timeout processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->misoc_net_irqwork, misoc_net_txtimeout_work, priv, 0);
+  work_queue(HPWORK, &priv->misoc_net_irqwork,
+             misoc_net_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
@@ -773,8 +781,8 @@ static void misoc_net_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY, misoc_net_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
+           misoc_net_poll_expiry, 1, (wdparm_t)priv);
 
   net_unlock();
 }
@@ -803,7 +811,8 @@ static void misoc_net_poll_expiry(int argc, wdparm_t arg, ...)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(HPWORK, &priv->misoc_net_pollwork, misoc_net_poll_work, priv, 0);
+  work_queue(HPWORK, &priv->misoc_net_pollwork,
+             misoc_net_poll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -841,9 +850,11 @@ static int misoc_net_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
-  /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
+  /* Initialize PHYs, Ethernet interface, and setup up Ethernet interrupts */
 
-  /* Instantiate the MAC address from priv->misoc_net_dev.d_mac.ether.ether_addr_octet */
+  /* Instantiate the MAC address from
+   * priv->misoc_net_dev.d_mac.ether.ether_addr_octet
+   */
 
 #ifdef CONFIG_NET_ICMPv6
   /* Set up IPv6 multicast address filtering */
@@ -942,7 +953,7 @@ static void misoc_net_txavail_work(FAR void *arg)
   net_lock();
   if (priv->misoc_net_bifup)
     {
-      /* Check if there is room in the hardware to hold another outgoing packet. */
+      /* Check if there is room in the hardware to hold another packet. */
 
       if (!ethmac_sram_reader_ready_read())
         {
@@ -988,7 +999,8 @@ static int misoc_net_txavail(FAR struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(HPWORK, &priv->misoc_net_pollwork, misoc_net_txavail_work, priv, 0);
+      work_queue(HPWORK, &priv->misoc_net_pollwork,
+                 misoc_net_txavail_work, priv, 0);
     }
 
   return OK;
@@ -1013,7 +1025,8 @@ static int misoc_net_txavail(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int misoc_net_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
+static int misoc_net_addmac(FAR struct net_driver_s *dev,
+                            FAR const uint8_t *mac)
 {
   FAR struct misoc_net_driver_s *priv =
     (FAR struct misoc_net_driver_s *)dev->d_private;
@@ -1028,8 +1041,8 @@ static int misoc_net_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac
  * Function: misoc_net_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -1043,7 +1056,8 @@ static int misoc_net_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int misoc_net_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
+static int misoc_net_rmmac(FAR struct net_driver_s *dev,
+                           FAR const uint8_t *mac)
 {
   FAR struct misoc_net_driver_s *priv =
     (FAR struct misoc_net_driver_s *)dev->d_private;

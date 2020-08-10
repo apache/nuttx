@@ -162,7 +162,7 @@ static int cxd56_i2c_disable(struct cxd56_i2cdev_s *priv);
 static void cxd56_i2c_enable(struct cxd56_i2cdev_s *priv);
 
 static int  cxd56_i2c_interrupt(int irq, FAR void *context, FAR void *arg);
-static void cxd56_i2c_timeout(int argc, uint32_t arg, ...);
+static void cxd56_i2c_timeout(int argc, wdparm_t arg, ...);
 static void cxd56_i2c_setfrequency(struct cxd56_i2cdev_s *priv,
                                    uint32_t frequency);
 static int  cxd56_i2c_transfer(FAR struct i2c_master_s *dev,
@@ -383,7 +383,7 @@ static void cxd56_i2c_setfrequency(struct cxd56_i2cdev_s *priv,
  *
  ****************************************************************************/
 
-static void cxd56_i2c_timeout(int argc, uint32_t arg, ...)
+static void cxd56_i2c_timeout(int argc, wdparm_t arg, ...)
 {
   struct cxd56_i2cdev_s *priv = (struct cxd56_i2cdev_s *)arg;
   irqstate_t flags            = enter_critical_section();
@@ -550,8 +550,8 @@ static int cxd56_i2c_receive(struct cxd56_i2cdev_s *priv, int last)
         }
 
       flags = enter_critical_section();
-      wd_start(priv->timeout, I2C_TIMEOUT, cxd56_i2c_timeout, 1,
-              (uint32_t)priv);
+      wd_start(priv->timeout, I2C_TIMEOUT,
+              cxd56_i2c_timeout, 1, (wdparm_t)priv);
 
       /* Set stop flag for indicate the last data */
 
@@ -596,7 +596,8 @@ static int cxd56_i2c_send(struct cxd56_i2cdev_s *priv, int last)
   while (!(i2c_reg_read(priv, CXD56_IC_STATUS) & STATUS_TFNF));
 
   flags = enter_critical_section();
-  wd_start(priv->timeout, I2C_TIMEOUT, cxd56_i2c_timeout, 1, (uint32_t)priv);
+  wd_start(priv->timeout, I2C_TIMEOUT,
+           cxd56_i2c_timeout, 1, (wdparm_t)priv);
   i2c_reg_write(priv, CXD56_IC_DATA_CMD,
                 (uint32_t)msg->buffer[i] | (last ? CMD_STOP : 0));
 

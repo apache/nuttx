@@ -751,6 +751,11 @@ int romfs_finddirentry(struct romfs_mountpt_s *rm,
           entrylen = terminator - entryname;
         }
 
+      if (entrylen == 0)
+        {
+          return OK;
+        }
+
       /* Long path segment names will be truncated to NAME_MAX */
 
       if (entrylen > NAME_MAX)

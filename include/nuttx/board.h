@@ -695,7 +695,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg);
 
 #ifdef CONFIG_BOARD_CRASHDUMP
 void board_crashdump(uintptr_t currentsp, FAR void *tcb,
-                     FAR const uint8_t *filename,
+                     FAR const char *filename,
                      int lineno);
 #endif
 

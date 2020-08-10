@@ -264,7 +264,7 @@ static void kinetis_datadisable(void);
 static void kinetis_transmit(struct kinetis_dev_s *priv);
 static void kinetis_receive(struct kinetis_dev_s *priv);
 #endif
-static void kinetis_eventtimeout(int argc, uint32_t arg, ...);
+static void kinetis_eventtimeout(int argc, wdparm_t arg, ...);
 static void kinetis_endwait(struct kinetis_dev_s *priv,
               sdio_eventset_t wkupevent);
 static void kinetis_endtransfer(struct kinetis_dev_s *priv,
@@ -934,7 +934,7 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
  *
  ****************************************************************************/
 
-static void kinetis_eventtimeout(int argc, uint32_t arg, ...)
+static void kinetis_eventtimeout(int argc, wdparm_t arg, ...)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)arg;
 
@@ -2507,8 +2507,7 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
 
       delay = MSEC2TICK(timeout);
       ret   = wd_start(priv->waitwdog, delay,
-                       kinetis_eventtimeout,
-                       1, (uint32_t)priv);
+                       kinetis_eventtimeout, 1, (wdparm_t)priv);
       if (ret < 0)
         {
           mcerr("ERROR: wd_start failed: %d\n", ret);

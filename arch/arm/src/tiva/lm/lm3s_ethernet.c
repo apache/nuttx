@@ -103,7 +103,9 @@
 #  define TIVA_DUPLEX_CLRBITS 0
 #endif
 
-/* Auto CRC generation can be suppressed if CONFIG_TIVA_ETHNOAUTOCRC is definde */
+/* Auto CRC generation can be suppressed
+ * if CONFIG_TIVA_ETHNOAUTOCRC is defined
+ */
 
 #ifdef CONFIG_TIVA_ETHNOAUTOCRC
 #  define TIVA_CRC_SETBITS 0
@@ -159,7 +161,7 @@
 #define TIVA_RCTCL_SETBITS (TIVA_AMUL_SETBITS|TIVA_PRMS_SETBITS|TIVA_BADCRC_SETBITS)
 #define TIVA_RCTCL_CLRBITS (TIVA_AMUL_CLRBITS|TIVA_PRMS_CLRBITS|TIVA_BADCRC_CLRBITS)
 
-/* CONFIG_TIVA_DUMPPACKET will dump the contents of each packet to the console. */
+/* CONFIG_TIVA_DUMPPACKET will dump the contents of each packet. */
 
 #ifdef CONFIG_TIVA_DUMPPACKET
 #  define tiva_dumppacket(m,a,n) lib_dumpbuffer(m,a,n)
@@ -167,7 +169,9 @@
 #  define tiva_dumppacket(m,a,n)
 #endif
 
-/* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll deley = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
+ */
 
 #define TIVA_WDDELAY   (1*CLK_TCK)
 
@@ -175,7 +179,7 @@
 
 #define TIVA_TXTIMEOUT (60*CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define ETHBUF ((struct eth_hdr_s *)priv->ld_dev.d_buf)
 
@@ -231,14 +235,17 @@ static struct tiva_driver_s g_lm3sdev[TIVA_NETHCONTROLLERS];
 
 #if TIVA_NETHCONTROLLERS > 1
 static uint32_t tiva_ethin(struct tiva_driver_s *priv, int offset);
-static void tiva_ethout(struct tiva_driver_s *priv, int offset, uint32_t value);
+static void tiva_ethout(struct tiva_driver_s *priv,
+                        int offset, uint32_t value);
 #else
 static inline uint32_t tiva_ethin(struct tiva_driver_s *priv, int offset);
-static inline void tiva_ethout(struct tiva_driver_s *priv, int offset, uint32_t value);
+static inline void tiva_ethout(struct tiva_driver_s *priv,
+                               int offset, uint32_t value);
 #endif
 static void tiva_ethreset(struct tiva_driver_s *priv);
 #if 0 /* Not used */
-static void tiva_phywrite(struct tiva_driver_s *priv, int regaddr, uint16_t value);
+static void tiva_phywrite(struct tiva_driver_s *priv,
+                          int regaddr, uint16_t value);
 #endif
 #ifndef CONFIG_TIVA_WITH_QEMU
 static uint16_t tiva_phyread(struct tiva_driver_s *priv, int regaddr);
@@ -260,10 +267,10 @@ static int  tiva_interrupt(int irq, void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void tiva_txtimeout_work(void *arg);
-static void tiva_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void tiva_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void tiva_poll_work(void *arg);
-static void tiva_poll_expiry(int argc, uint32_t arg, ...);
+static void tiva_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -326,12 +333,14 @@ static inline uint32_t tiva_ethin(struct tiva_driver_s *priv, int offset)
  ****************************************************************************/
 
 #if TIVA_NETHCONTROLLERS > 1
-static void tiva_ethout(struct tiva_driver_s *priv, int offset, uint32_t value)
+static void tiva_ethout(struct tiva_driver_s *priv,
+                        int offset, uint32_t value)
 {
   putreg32(value, priv->ld_base + offset);
 }
 #else
-static inline void tiva_ethout(struct tiva_driver_s *priv, int offset, uint32_t value)
+static inline void tiva_ethout(struct tiva_driver_s *priv,
+                               int offset, uint32_t value)
 {
   putreg32(value, TIVA_ETHCON_BASE + offset);
 }
@@ -362,7 +371,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 #  error "If multiple interfaces are supported, this function would have to be redesigned"
 #endif
 
-  /* Make sure that clocking is enabled for the Ethernet (and PHY) peripherals */
+  /* Make sure that clocking is enabled for the Ethernet&PHY peripherals */
 
   flags   = enter_critical_section();
   regval  = getreg32(TIVA_SYSCON_RCGC2);
@@ -386,7 +395,9 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
   putreg32(regval, TIVA_SYSCON_SRCR2);
   ninfo("SRCR2: %08x\n", regval);
 
-  /* Wait just a bit, again.  If we touch the ethernet too soon, we may busfault. */
+  /* Wait just a bit, again.
+   * If we touch the ethernet too soon, we may busfault.
+   */
 
   up_mdelay(2);
 
@@ -429,7 +440,8 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
  ****************************************************************************/
 
 #if 0 /* Not used */
-static void tiva_phywrite(struct tiva_driver_s *priv, int regaddr, uint16_t value)
+static void tiva_phywrite(struct tiva_driver_s *priv,
+                          int regaddr, uint16_t value)
 {
   /* Wait for any MII transactions in progress to complete */
 
@@ -444,7 +456,8 @@ static void tiva_phywrite(struct tiva_driver_s *priv, int regaddr, uint16_t valu
 
   regaddr <<= MAC_MCTL_REGADR_SHIFT;
   DEBUGASSERT((regaddr & MAC_MTXD_MASK) == regaddr);
-  tiva_ethout(priv, TIVA_MAC_MCTL_OFFSET, regaddr | MAC_MCTL_WRITE | MAC_MCTL_START);
+  tiva_ethout(priv, TIVA_MAC_MCTL_OFFSET,
+              regaddr | MAC_MCTL_WRITE | MAC_MCTL_START);
 
   /* Wait for the write transaction to complete */
 
@@ -523,7 +536,8 @@ static int tiva_transmit(struct tiva_driver_s *priv)
       /* Increment statistics */
 
       NETDEV_TXPACKETS(&priv->ld_dev);
-      tiva_dumppacket("Transmit packet", priv->ld_dev.d_buf, priv->ld_dev.d_len);
+      tiva_dumppacket("Transmit packet",
+                      priv->ld_dev.d_buf, priv->ld_dev.d_len);
 
       /* Transfer the packet into the Tx FIFO.  The LS 16-bits of the first
        * 32-bit word written to the Tx FIFO contains the Ethernet payload
@@ -584,7 +598,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
       wd_start(priv->ld_txtimeout, TIVA_TXTIMEOUT,
-               tiva_txtimeout_expiry, 1, (uint32_t)priv);
+               tiva_txtimeout_expiry, 1, (wdparm_t)priv);
       ret = OK;
     }
 
@@ -596,8 +610,9 @@ static int tiva_transmit(struct tiva_driver_s *priv)
  * Function: tiva_txpoll
  *
  * Description:
- *   The transmitter is available, check if the network has any outgoing packets ready
- *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
+ *   The transmitter is available, check if the network has any outgoing
+ *   packets ready to send.  This is a callback from devif_poll().
+ *   devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -625,7 +640,7 @@ static int tiva_txpoll(struct net_driver_s *dev)
   ninfo("Poll result: d_len=%d\n", priv->ld_dev.d_len);
   if (priv->ld_dev.d_len > 0)
     {
-      DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0);
+      DEBUGASSERT(!!(tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX));
 
       /* Look up the destination MAC address and add it to the Ethernet
        * header.
@@ -659,8 +674,8 @@ static int tiva_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return ret;
@@ -721,7 +736,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
        * and 4 byte FCS that are not copied into the network packet.
        */
 
-      if (pktlen > (CONFIG_NET_ETH_PKTSIZE + 6) || pktlen <= (ETH_HDRLEN + 6))
+      if (pktlen > CONFIG_NET_ETH_PKTSIZE + 6 || pktlen <= ETH_HDRLEN + 6)
         {
           int wordlen;
 
@@ -730,8 +745,9 @@ static void tiva_receive(struct tiva_driver_s *priv)
           nwarn("WARNING: Bad packet size dropped (%d)\n", pktlen);
           NETDEV_RXERRORS(&priv->ld_dev);
 
-          /* The number of bytes and words left to read is pktlen - 4 (including,
-           * the final, possibly partial word) because we've already read 4 bytes.
+          /* The number of bytes and words left to read is pktlen - 4
+           * (including, the final, possibly partial word) because we've
+           * already read 4 bytes.
            */
 
           wordlen = (pktlen - 1) >> 2;
@@ -793,15 +809,16 @@ static void tiva_receive(struct tiva_driver_s *priv)
             }
         }
 
-      /* Pass the packet length to the network MINUS 2 bytes for the length and
-       * 4 bytes for the FCS.
+      /* Pass the packet length to the network MINUS 2 bytes for the length
+       * and 4 bytes for the FCS.
        */
 
       priv->ld_dev.d_len = pktlen - 6;
-      tiva_dumppacket("Received packet", priv->ld_dev.d_buf, priv->ld_dev.d_len);
+      tiva_dumppacket("Received packet",
+                      priv->ld_dev.d_buf, priv->ld_dev.d_len);
 
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame into the tap */
 
        pkt_input(&priv->ld_dev);
 #endif
@@ -822,7 +839,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
           ipv4_input(&priv->ld_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->ld_dev.d_len > 0)
@@ -861,7 +878,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
           ipv6_input(&priv->ld_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -897,7 +914,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
           arp_arpin(&priv->ld_dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, d_len field will set to a value > 0.
            */
 
            if (priv->ld_dev.d_len > 0)
@@ -1226,8 +1243,8 @@ static void tiva_poll_work(void *arg)
 
       /* Setup the watchdog poll timer again */
 
-      wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
-               1, priv);
+      wd_start(priv->ld_txpoll, TIVA_WDDELAY,
+               tiva_poll_expiry, 1, (wdparm_t)priv);
     }
 
   net_unlock();
@@ -1312,8 +1329,8 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Then configure the Ethernet Controller for normal operation
    *
-   * Setup the transmit control register (Full duplex, TX CRC Auto Generation,
-   * TX Padding Enabled).
+   * Setup the transmit control register (Full duplex, TX CRC Auto
+   * Generation, TX Padding Enabled).
    */
 
   regval  = tiva_ethin(priv, TIVA_MAC_TCTL_OFFSET);
@@ -1413,8 +1430,8 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_poll_expiry,
-           1, (uint32_t)priv);
+  wd_start(priv->ld_txpoll, TIVA_WDDELAY,
+           tiva_poll_expiry, 1, (wdparm_t)priv);
 
   priv->ld_bifup = true;
   leave_critical_section(flags);
@@ -1534,10 +1551,11 @@ static void tiva_txavail_work(void *arg)
    */
 
   net_lock();
-  if (priv->ld_bifup && (tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+  if (priv->ld_bifup &&
+      (tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
-      /* If the interface is up and we can use the Tx FIFO, then poll the network
-       * for new Tx data
+      /* If the interface is up and we can use the Tx FIFO, then poll the
+       * network for new Tx data
        */
 
       devif_poll(&priv->ld_dev, tiva_txpoll);
@@ -1618,8 +1636,8 @@ static int tiva_addmac(struct net_driver_s *dev, const uint8_t *mac)
  * Function: tiva_rmmac
  *
  * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware multicast
- *   address filtering
+ *   NuttX Callback: Remove the specified MAC address from the hardware
+ *   multicast address filtering
  *
  * Input Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -1680,7 +1698,8 @@ static inline int tiva_ethinitialize(int intf)
 #if TIVA_NETHCONTROLLERS > 1
 # error "This debug check only works with one interface"
 #else
-  DEBUGASSERT((getreg32(TIVA_SYSCON_DC4) & (SYSCON_DC4_EMAC0 | SYSCON_DC4_EPHY0)) ==
+  DEBUGASSERT((getreg32(TIVA_SYSCON_DC4) &
+              (SYSCON_DC4_EMAC0 | SYSCON_DC4_EPHY0)) ==
               (SYSCON_DC4_EMAC0 | SYSCON_DC4_EPHY0));
 #endif
   DEBUGASSERT((unsigned)intf < TIVA_NETHCONTROLLERS);
@@ -1714,12 +1733,12 @@ static inline int tiva_ethinitialize(int intf)
    * is called (and the MAC can be overwritten with a netdev ioctl call).
    */
 
-   tiva_ethernetmac(&priv->ld_dev.d_mac.ether);
+  tiva_ethernetmac(&priv->ld_dev.d_mac.ether);
 #endif
 
-  /* Perform minimal, one-time initialization -- just reset the controller and
-   * leave it disabled.  The Ethernet controller will be reset and properly
-   * re-initialized each time tiva_ifup() is called.
+  /* Perform minimal, one-time initialization -- just reset the controller
+   * and leave it disabled.  The Ethernet controller will be reset and
+   * properly re-initialized each time tiva_ifup() is called.
    */
 
   tiva_ethreset(priv);
@@ -1745,16 +1764,16 @@ static inline int tiva_ethinitialize(int intf)
   return OK;
 }
 
-
-/************************************************************************************
+/****************************************************************************
  * Name: arm_netinitialize
  *
  * Description:
- *   Initialize the first network interface.  If there are more than one interface
- *   in the chip, then board-specific logic will have to provide this function to
- *   determine which, if any, Ethernet controllers should be initialized.
+ *   Initialize the first network interface.  If there are more than one
+ *   interface in the chip, then board-specific logic will have to provide
+ *   this function to determine which, if any, Ethernet controllers should
+ *   be initialized.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if TIVA_NETHCONTROLLERS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void arm_netinitialize(void)

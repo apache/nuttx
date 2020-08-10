@@ -47,6 +47,8 @@
 #include <debug.h>
 #include <time.h>
 
+#include <nuttx/kmalloc.h>
+
 #include <arch/chip/backuplog.h>
 #include <arch/chip/crashdump.h>
 #include "cxd56_wdt.h"
@@ -114,7 +116,7 @@ static void copy_reverse(stack_word_t *dest, stack_word_t *src, int size)
  ****************************************************************************/
 
 void board_crashdump(uintptr_t currentsp, FAR void *tcb,
-                     FAR const uint8_t *filename, int lineno)
+                     FAR const char *filename, int lineno)
 {
   FAR struct tcb_s *rtcb;
   fullcontext_t *pdump;
@@ -125,7 +127,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
 #ifdef CONFIG_CXD56_BACKUPLOG
   pdump = up_backuplog_alloc("crash", sizeof(fullcontext_t));
 #else
-  pdump = malloc(sizeof(fullcontext_t));
+  pdump = kmm_malloc(sizeof(fullcontext_t));
 #endif
   if (!pdump)
     {

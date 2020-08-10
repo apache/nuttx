@@ -2886,8 +2886,6 @@ static int adc_setup(FAR struct adc_dev_s *dev)
       return OK;
     }
 
-  priv->initialized += 1;
-
   /* Attach the ADC interrupt */
 
 #ifndef CONFIG_STM32_ADC_NOIRQ
@@ -2959,6 +2957,10 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   priv->cmn->initialized += 1;
   adccmn_lock(priv, false);
 #endif
+
+  /* The ADC device is ready */
+
+  priv->initialized += 1;
 
   return ret;
 }

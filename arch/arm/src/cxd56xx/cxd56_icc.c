@@ -307,7 +307,7 @@ static int icc_msghandler(int cpuid, int protoid, uint32_t pdata,
   return -1;
 }
 
-static void icc_rxtimeout(int argc, uint32_t arg, ...)
+static void icc_rxtimeout(int argc, wdparm_t arg, ...)
 {
   FAR struct iccdev_s *priv = (FAR struct iccdev_s *)arg;
   icc_semgive(&priv->rxwait);
@@ -338,7 +338,7 @@ static int icc_recv(FAR struct iccdev_s *priv, FAR iccmsg_t *msg, int32_t ms)
     {
       int32_t timo;
       timo = ms * 1000 / CONFIG_USEC_PER_TICK;
-      wd_start(priv->rxtimeout, timo, icc_rxtimeout, 1, (uint32_t)priv);
+      wd_start(priv->rxtimeout, timo, icc_rxtimeout, 1, (wdparm_t)priv);
 
       icc_semtake(&priv->rxwait);
 
