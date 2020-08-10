@@ -925,7 +925,7 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
   uint32_t save_offset        = g_offset;
   uint32_t save_diroffset     = g_diroffset;
   uint32_t save_parent_offset = g_parent_offset;
-  FILE *save_tmpstream      = g_tmpstream;
+  FILE *save_tmpstream        = g_tmpstream;
   FILE *subtree_stream;
   int namlen;
   int result;
