@@ -3181,10 +3181,6 @@ static void up_dma_send(struct uart_dev_s *dev)
 
   stm32_dmastop(priv->txdma);
 
-  /* Wait until TX UART is ready for new transfer it should be */
-
-  while (!up_txready(dev));
-
   /* Flush the contents of the TX buffer into physical memory */
 
   up_clean_dcache((uintptr_t)dev->dmatx.buffer,
