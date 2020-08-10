@@ -360,7 +360,7 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
            */
 
 #if 1 /* REVISIT:  This seems to work, but I don't fully follow the logic. */
-          if (S_ISDIR(node->cn_mode))
+          if (S_ISDIR(node->cn_mode) || S_ISLNK(node->cn_mode))
             {
               *cpnode->node = (FAR const struct cromfs_node_s *)
                               cromfs_offset2addr(fs, node->u.cn_child);
@@ -383,14 +383,15 @@ static int cromfs_comparenode(FAR const struct cromfs_volume_s *fs,
       if (segment[namlen] == '/' && segment[namlen = 1] == '\0')
         {
           *cpnode->node = node;
-          return S_ISDIR(node->cn_mode) ? 1 : -ENOENT;
+          return (S_ISDIR(node->cn_mode) || S_ISLNK(node->cn_mode)) ?
+                  1 : -ENOENT;
         }
 
       /* If this is a valid, non-terminal segment on the path, then it must
        * be a directory.
        */
 
-      if (!S_ISDIR(node->cn_mode))
+      if (!(S_ISDIR(node->cn_mode) || S_ISLNK(node->cn_mode)))
         {
           /* Terminate the traversal with an error */
 
@@ -988,7 +989,7 @@ static int cromfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Verify that the node is a directory */
 
-  if (!S_ISDIR(node->cn_mode))
+  if (!(S_ISDIR(node->cn_mode) || S_ISLNK(node->cn_mode)))
     {
       return -ENOTDIR;
     }
@@ -1060,7 +1061,8 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
   switch (node->cn_mode & S_IFMT)
     {
-      case S_IFDIR:  /* Directory */
+    case S_IFDIR:  /* Directory */
+    case S_IFLNK:  /* Directory */
         dir->fd_dir.d_type = DTYPE_DIRECTORY;
         break;
 
@@ -1237,7 +1239,8 @@ static int cromfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
       /* Return the struct stat info associate with this node */
 
-      buf->st_mode    = node->cn_mode;
+      buf->st_mode    = S_ISLNK(node->cn_mode) ?
+                       (~S_IFMT & node->cn_mode) | S_IFDIR  : node->cn_mode;
       buf->st_size    = node->cn_size;
       buf->st_blksize = fs->cv_bsize;
       buf->st_blocks  = (node->cn_size + (fs->cv_bsize - 1)) / fs->cv_bsize;
