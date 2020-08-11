@@ -50,7 +50,6 @@
 #include "arm_arch.h"
 
 #include "hardware/stm32_flash.h"
-#include "stm32_gpio.h"
 #include "stm32_rcc.h"
 #include "stm32_hsi48.h"
 
@@ -187,12 +186,6 @@ void stm32_clockconfig(void)
 
   stm32_stdclockconfig();
 
-#endif
-
-#ifdef CONFIG_STM32F0L0G0_SYSCFG_IOCOMPENSATION
-  /* Enable I/O Compensation */
-
-  stm32_iocompensation();
 #endif
 
   /* Enable peripheral clocking */
