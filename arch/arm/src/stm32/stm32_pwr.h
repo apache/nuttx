@@ -79,7 +79,7 @@ enum stm32_pwr_wupin_e
 };
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 /************************************************************************************
@@ -187,10 +187,10 @@ bool stm32_pwr_getwuf(void);
  * Description:
  *   Enables the Backup regulator, the Backup regulator (used to maintain backup
  *   SRAM content in Standby and VBAT modes) is enabled. If BRE is reset, the backup
- *   regulator is switched off. The backup SRAM can still be used but its content will
- *   be lost in the Standby and VBAT modes. Once set, the application must wait that
- *   the Backup Regulator Ready flag (BRR) is set to indicate that the data written
- *   into the RAM will be maintained in the Standby and VBAT modes.
+ *   regulator is switched off. The backup SRAM can still be used but its content
+ *   will be lost in the Standby and VBAT modes. Once set, the application must wait
+ *   that the Backup Regulator Ready flag (BRR) is set to indicate that the data
+ *   written into the RAM will be maintained in the Standby and VBAT modes.
  *
  * Input Parameters:
  *   region - state to set it to
@@ -278,8 +278,7 @@ void stm32_pwr_disablepvd(void);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429) || \
-    defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F469)
+#if defined(CONFIG_STM32_HAVE_OVERDRIVE)
 void stm32_pwr_enableoverdrive(bool state);
 #endif
 
