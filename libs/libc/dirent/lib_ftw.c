@@ -35,5 +35,12 @@ int ftw(FAR const char *path, ftw_cb_t fn, int fdlimit)
    * actually undefined, but works on all real-world machines.
    */
 
-  return nftw(path, (nftw_cb_t)fn, fdlimit, FTW_PHYS);
+  union
+  {
+    ftw_cb_t  ftw;
+    nftw_cb_t nftw;
+  } u;
+
+  u.ftw = fn;
+  return nftw(path, u.nftw, fdlimit, FTW_PHYS);
 }
