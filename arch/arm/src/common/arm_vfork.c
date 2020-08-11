@@ -126,12 +126,9 @@ pid_t up_vfork(const struct vfork_s *context)
 
   sinfo("TCBs: Parent=%p Child=%p\n", parent, child);
 
-  /* Get the size of the parent task's stack.  Due to alignment operations,
-   * the adjusted stack size may be smaller than the stack size originally
-   * requested.
-   */
+  /* Get the size of the parent task's stack. */
 
-  stacksize = parent->adj_stack_size + CONFIG_STACK_ALIGNMENT - 1;
+  stacksize = parent->adj_stack_size;
 
   /* Allocate the stack for the TCB */
 
