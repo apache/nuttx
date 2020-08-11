@@ -1713,6 +1713,7 @@ config STM32_STM32F407
 config STM32_STM32F427
 	bool
 	default n
+	select STM32_HAVE_OVERDRIVE
 	select STM32_HAVE_FMC
 	select STM32_HAVE_CCM
 	select STM32_HAVE_USART3
@@ -1756,6 +1757,7 @@ config STM32_STM32F427
 config STM32_STM32F429
 	bool
 	default n
+	select STM32_HAVE_OVERDRIVE
 	select STM32_HAVE_FMC
 	select STM32_HAVE_LTDC
 	select STM32_HAVE_CCM
@@ -1798,6 +1800,7 @@ config STM32_STM32F429
 config STM32_STM32F446
 	bool
 	default n
+	select STM32_HAVE_OVERDRIVE
 	select STM32_HAVE_USART3
 	select STM32_HAVE_UART4
 	select STM32_HAVE_UART5
@@ -1834,6 +1837,7 @@ config STM32_STM32F446
 config STM32_STM32F469
 	bool
 	default n
+	select STM32_HAVE_OVERDRIVE
 	select STM32_HAVE_FMC
 	select STM32_HAVE_LTDC
 	select STM32_HAVE_CCM
@@ -1987,6 +1991,10 @@ menu "STM32 Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available
 # for the selected MCU
+
+config STM32_HAVE_OVERDRIVE
+	bool
+	default n
 
 config STM32_HAVE_AES
 	bool
