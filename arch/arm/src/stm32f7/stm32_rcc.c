@@ -138,15 +138,15 @@ void stm32_clockconfig(void)
 
 #endif
 
+  /* Enable peripheral clocking */
+
+  rcc_enableperipherals();
+
 #ifdef CONFIG_STM32F7_SYSCFG_IOCOMPENSATION
   /* Enable I/O Compensation */
 
   stm32_iocompensation();
 #endif
-
-  /* Enable peripheral clocking */
-
-  rcc_enableperipherals();
 }
 
 /************************************************************************************
