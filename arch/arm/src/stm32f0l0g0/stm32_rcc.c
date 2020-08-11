@@ -77,7 +77,7 @@
 #define HSERDY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
 
 /****************************************************************************
- * Private Functions
+ * Included Files
  ****************************************************************************/
 
 /* Include chip-specific clocking initialization logic */
@@ -101,9 +101,9 @@
  *
  * Description:
  *   The RTC needs to reset the Backup Domain to change RTCSEL and resetting
- *   the Backup Domain renders to disabling the LSE as consequence.   In order
- *   to avoid resetting the Backup Domain when we already configured LSE we
- *   will reset the Backup Domain early (here).
+ *   the Backup Domain renders to disabling the LSE as consequence.
+ *   In order to avoid resetting the Backup Domain when we already configured
+ *   LSE we will reset the Backup Domain early (here).
  *
  * Input Parameters:
  *   None
@@ -155,8 +155,8 @@ static inline void rcc_resetbkp(void)
  *   configuration file.
  *
  *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then clocking
- *   will be enabled by an externally provided, board-specific function called
- *   stm32_board_clockconfig().
+ *   will be enabled by an externally provided, board-specific function
+ *   called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -182,7 +182,9 @@ void stm32_clockconfig(void)
   stm32_board_clockconfig();
 
 #else
-  /* Invoke standard, fixed clock configuration based on definitions in board.h */
+  /* Invoke standard, fixed clock configuration based on definitions
+   * in board.h
+   */
 
   stm32_stdclockconfig();
 
@@ -227,7 +229,9 @@ void stm32_clockenable(void)
   stm32_board_clockconfig();
 
 #else
-  /* Invoke standard, fixed clock configuration based on definitions in board.h */
+  /* Invoke standard, fixed clock configuration based on definitions
+   * in board.h
+   */
 
   stm32_stdclockconfig();
 
