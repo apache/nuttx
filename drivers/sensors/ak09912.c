@@ -676,7 +676,7 @@ int ak09912_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 
   /* Initialize the AK09912 device structure */
 
-  priv = kmm_malloc(sizeof(struct ak09912_dev_s));
+  priv = kmm_zalloc(sizeof(struct ak09912_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");
