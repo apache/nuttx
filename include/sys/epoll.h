@@ -78,6 +78,7 @@ enum EPOLL_EVENTS
 
 typedef union poll_data
 {
+  FAR void    *ptr;      /* For use by drivers */
   int          fd;       /* The descriptor being polled */
 } epoll_data_t;
 
@@ -87,7 +88,6 @@ struct epoll_event
   FAR sem_t   *sem;      /* Pointer to semaphore used to post output event */
   pollevent_t  events;   /* The input event flags */
   pollevent_t  revents;  /* The output event flags */
-  FAR void    *priv;     /* For use by drivers */
 };
 
 struct epoll_head
