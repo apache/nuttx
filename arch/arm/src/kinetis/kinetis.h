@@ -778,7 +778,7 @@ int kinetis_netinitialize(int intf);
  *
  ************************************************************************************/
 #ifdef CONFIG_KINETIS_FLEXCAN
-int kinetis_caninitialize(int intf)
+int kinetis_caninitialize(int intf);
 #endif
 
 #endif /* __ASSEMBLY__ */
