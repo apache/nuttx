@@ -49,6 +49,7 @@ CSRCS += pthread_testcancel.c
 CSRCS += pthread_rwlock.c pthread_rwlock_rdlock.c pthread_rwlock_wrlock.c
 CSRCS += pthread_once.c pthread_yield.c
 CSRCS += pthread_get_stackaddr_np.c pthread_get_stacksize_np.c
+CSRCS += pthread_condattr_setclock.c pthread_condattr_getclock.c
 
 ifeq ($(CONFIG_SMP),y)
 CSRCS += pthread_attr_getaffinity.c pthread_attr_setaffinity.c
