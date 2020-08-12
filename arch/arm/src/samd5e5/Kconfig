@@ -465,6 +465,9 @@ config SAMD5E5_TC7
 config SAMD5E5_USB
 	bool "USB"
 	default n
+	select USBHOST_HAVE_ASYNCH
+	---help---
+		Build support for the SAMD51 USB full speed USB host.
 
 config SAMD5E5_EIC
 	bool "External Interrupt Controller"
