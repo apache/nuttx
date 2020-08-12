@@ -1602,7 +1602,7 @@ int board_lcd_initialize(void)
   if (ret < 0)
     {
       lcderr("ERROR: sam_poweroff failed: %d\n", ret);
-      goto errout_with_dmadog;
+      goto errout_with_dmach;
     }
 
   return OK;
