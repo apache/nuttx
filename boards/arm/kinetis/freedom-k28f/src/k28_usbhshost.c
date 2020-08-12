@@ -274,7 +274,7 @@ static void usb_msc_connect(FAR void *arg)
 
   DEBUGASSERT(index >= 0 && index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV);
 
-  wd_cancel(g_umount_tmr[index]);
+  wd_cancel(&g_umount_tmr[index]);
 
   /* Resetup the event. */
 
@@ -320,7 +320,7 @@ static void usb_msc_connect(FAR void *arg)
  *
  *****************************************************************************/
 
-static void unmount_retry_timeout(int argc, uint32_t arg1, ...)
+static void unmount_retry_timeout(int argc, wdparm_t arg1, ...)
 {
   int  index  = (int)arg1;
   char sdchar = 'a' + index;
@@ -352,7 +352,7 @@ static void usb_msc_disconnect(FAR void *arg)
 
   DEBUGASSERT(index >= 0 && index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV);
 
-  wd_cancel(g_umount_tmr[index]);
+  wd_cancel(&g_umount_tmr[index]);
 
   /* Resetup the event. */
 
@@ -381,7 +381,7 @@ static void usb_msc_disconnect(FAR void *arg)
 
           /* Start a timer to retry the umount2 after a delay */
 
-          ret = wd_start(g_umount_tmr[index],
+          ret = wd_start(&g_umount_tmr[index],
                           MSEC2TICK(CONFIG_FRDMK28F_USB_AUTOMOUNT_UDELAY),
                           unmount_retry_timeout, 1, (uint32_t)index);
           if (ret < 0)
@@ -446,8 +446,6 @@ int k28_usbhost_initialize(void)
   for (index = 0; index < CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV; index++)
     {
       char sdchar = 'a' + index;
-
-      g_umount_tmr[index] = wd_create();
 
       usbhost_msc_notifier_setup(usb_msc_connect,
           WORK_USB_MSC_CONNECT, sdchar, (FAR void *)(intptr_t)index);
