@@ -201,6 +201,30 @@ void farapi_main(int id, void *arg, struct modulelist_s *mlist)
   struct farmsg_s msg;
   struct apimsg_s *api;
   int ret;
+
+#ifdef CONFIG_SMP
+  int cpu = up_cpu_index();
+  static cpu_set_t cpuset0;
+
+  if (0 != cpu)
+    {
+      /* Save the current cpuset */
+
+      sched_getaffinity(getpid(), sizeof(cpu_set_t), &cpuset0);
+
+      /* Assign the current task to cpu0 */
+
+      cpu_set_t cpuset1;
+      CPU_ZERO(&cpuset1);
+      CPU_SET(0, &cpuset1);
+      sched_setaffinity(getpid(), sizeof(cpu_set_t), &cpuset1);
+
+      /* NOTE: a workaround to finish rescheduling */
+
+      nxsig_usleep(10 * 1000);
+    }
+#endif
+
 #ifdef CONFIG_CXD56_GNSS_HOT_SLEEP
   uint32_t gnscken;
 
@@ -256,6 +280,19 @@ void farapi_main(int id, void *arg, struct modulelist_s *mlist)
 
 err:
   nxsem_post(&g_farlock);
+
+#ifdef CONFIG_SMP
+  if (0 != cpu)
+    {
+      /* Restore the cpu affinity */
+
+      sched_setaffinity(getpid(), sizeof(cpu_set_t), &cpuset0);
+
+      /* NOTE: a workaround to finish rescheduling */
+
+      nxsig_usleep(10 * 1000);
+    }
+#endif
 }
 
 void cxd56_farapiinitialize(void)
