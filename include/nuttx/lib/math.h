@@ -372,6 +372,10 @@ double      cosh  (double x);
 long double coshl (long double x);
 #endif
 
+#ifdef CONFIG_HAVE_DOUBLE
+double      cbrt  (double x);
+#endif
+
 float       tanhf (float x);
 #ifdef CONFIG_HAVE_DOUBLE
 double      tanh  (double x);
