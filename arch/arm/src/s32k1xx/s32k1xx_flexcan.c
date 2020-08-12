@@ -1718,9 +1718,6 @@ int s32k1xx_caninitialize(int intf)
 {
   struct s32k1xx_driver_s *priv;
   int ret;
-#ifdef TX_TIMEOUT_WQ
-  uint32_t i;
-#endif
 
   switch (intf)
     {
