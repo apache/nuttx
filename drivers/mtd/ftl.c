@@ -519,7 +519,7 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
         }
 #endif
 
-      /* Just change the BIOC_XIPBASE command to the MTDIOC_XIPBASE command. */
+      /* Change the BIOC_XIPBASE command to the MTDIOC_XIPBASE command. */
 
       cmd = MTDIOC_XIPBASE;
     }
@@ -638,18 +638,19 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
       /* Configure read-ahead/write buffering */
 
 #ifdef FTL_HAVE_RWBUFFER
-      dev->rwb.blocksize   = dev->geo.blocksize;
-      dev->rwb.nblocks     = dev->geo.neraseblocks * dev->blkper;
-      dev->rwb.dev         = (FAR void *)dev;
-      dev->rwb.wrflush     = ftl_flush;
-      dev->rwb.rhreload    = ftl_reload;
+      dev->rwb.blocksize     = dev->geo.blocksize;
+      dev->rwb.nblocks       = dev->geo.neraseblocks * dev->blkper;
+      dev->rwb.dev           = (FAR void *)dev;
+      dev->rwb.wrflush       = ftl_flush;
+      dev->rwb.rhreload      = ftl_reload;
 
 #if defined(CONFIG_FTL_WRITEBUFFER)
-      dev->rwb.wrmaxblocks = dev->blkper;
+      dev->rwb.wrmaxblocks   = dev->blkper;
+      dev->rwb.wralignblocks = dev->blkper;
 #endif
 
 #ifdef CONFIG_FTL_READAHEAD
-      dev->rwb.rhmaxblocks = dev->blkper;
+      dev->rwb.rhmaxblocks   = dev->blkper;
 #endif
 
       ret = rwb_initialize(&dev->rwb);

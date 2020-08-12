@@ -56,6 +56,13 @@
 #endif
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
+                         size_t nblocks, FAR uint8_t *rdbuffer);
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -134,8 +141,8 @@ static inline void rwb_resetwrbuffer(FAR struct rwbuffer_s *rwb)
 {
   /* We assume that the caller holds the wrsem */
 
-  rwb->wrnblocks       = 0;
-  rwb->wrblockstart    = (off_t)-1;
+  rwb->wrnblocks    = 0;
+  rwb->wrblockstart = -1;
 }
 #endif
 
@@ -154,8 +161,19 @@ static void rwb_wrflush(FAR struct rwbuffer_s *rwb)
 
   if (rwb->wrnblocks > 0)
     {
+      size_t padblocks;
+
       finfo("Flushing: blockstart=0x%08lx nblocks=%d from buffer=%p\n",
-      (long)rwb->wrblockstart, rwb->wrnblocks, rwb->wrbuffer);
+            (long)rwb->wrblockstart, rwb->wrnblocks, rwb->wrbuffer);
+
+      padblocks = rwb->wrnblocks % rwb->wralignblocks;
+      if (padblocks)
+        {
+          padblocks = rwb->wralignblocks - padblocks;
+          rwb_read_(rwb, rwb->wrblockstart + rwb->wrnblocks, padblocks,
+                    &rwb->wrbuffer[rwb->wrnblocks * rwb->blocksize]);
+          rwb->wrnblocks += padblocks;
+        }
 
       /* Flush cache.  On success, the flush method will return the number
        * of blocks written.  Anything other than the number requested is
@@ -370,15 +388,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
     {
       /* Flush the write buffer */
 
-      if (rwb->wrnblocks > 0)
-        {
-          ssize_t ret = rwb->wrflush(rwb->dev, rwb->wrbuffer,
-                                     rwb->wrblockstart, rwb->wrnblocks);
-          if (ret < 0)
-            {
-              return ret;
-            }
-        }
+      rwb_wrflush(rwb);
 
       /* Buffer the data in the write buffer */
 
@@ -406,7 +416,7 @@ static inline void rwb_resetrhbuffer(FAR struct rwbuffer_s *rwb)
   /* We assume that the caller holds the readAheadBufferSemphore */
 
   rwb->rhnblocks    = 0;
-  rwb->rhblockstart = (off_t)-1;
+  rwb->rhblockstart = -1;
 }
 #endif
 
@@ -800,6 +810,14 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
     {
       finfo("Initialize the write buffer\n");
 
+      if (rwb->wralignblocks == 0)
+        {
+          rwb->wralignblocks = 1;
+        }
+
+      DEBUGASSERT(rwb->wralignblocks <= rwb->wrmaxblocks &&
+                  rwb->wrmaxblocks % rwb->wralignblocks == 0);
+
       /* Initialize the write buffer access semaphore */
 
       nxsem_init(&rwb->wrsem, 0, 1);
@@ -907,7 +925,7 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
       ret = nxsem_wait(&rwb->rhsem);
       if (ret < 0)
         {
-          return (ssize_t)ret;
+          return ret;
         }
 
       /* Loop until we have read all of the requested blocks */
@@ -952,7 +970,7 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
                        ret);
 
                   rwb_semgive(&rwb->rhsem);
-                  return (ssize_t)ret;
+                  return ret;
                 }
             }
         }
@@ -975,7 +993,7 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
       ret = rwb->rhreload(rwb->dev, rdbuffer, startblock, nblocks);
     }
 
-  return (ssize_t)ret;
+  return ret;
 }
 
 /****************************************************************************
@@ -1001,7 +1019,7 @@ ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
       ret = nxsem_wait(&rwb->wrsem);
       if (ret < 0)
         {
-          return (ssize_t)ret;
+          return ret;
         }
 
       /* If the write buffer overlaps the block(s) requested */
@@ -1019,7 +1037,7 @@ ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
               if (ret < 0)
                 {
                   rwb_semgive(&rwb->wrsem);
-                  return (ssize_t)ret;
+                  return ret;
                 }
 
               startblock += ret;
@@ -1078,7 +1096,7 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
       ret = nxsem_wait(&rwb->rhsem);
       if (ret < 0)
         {
-          return (ssize_t)ret;
+          return ret;
         }
 
       if (rwb_overlap(rwb->rhblockstart, rwb->rhnblocks, startblock,
@@ -1092,7 +1110,7 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
             {
               ferr("ERROR: rwb_invalidate_readahead failed: %d\n", ret);
               rwb_semgive(&rwb->rhsem);
-              return (ssize_t)ret;
+              return ret;
             }
 #else
           rwb_resetrhbuffer(rwb);
@@ -1111,7 +1129,7 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
       ret = nxsem_wait(&rwb->wrsem);
       if (ret < 0)
         {
-          return (ssize_t)ret;
+          return ret;
         }
 
       ret = rwb_writebuffer(rwb, startblock, nblocks, wrbuffer);
@@ -1132,7 +1150,7 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
       ret = rwb->wrflush(rwb->dev, wrbuffer, startblock, nblocks);
     }
 
-  return (ssize_t)ret;
+  return ret;
 }
 
 /****************************************************************************
