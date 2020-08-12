@@ -1399,6 +1399,8 @@ config STM32_STM32F20XX
 	bool
 	default n
 	select ARCH_CORTEXM3
+	select STM32_HAVE_FLASH_ICACHE
+	select STM32_HAVE_FLASH_DCACHE
 	select STM32_HAVE_CRYP
 	select STM32_HAVE_OTGFS
 	select STM32_HAVE_OTGHS
@@ -1549,6 +1551,8 @@ config STM32_STM32F4XXX
 	default n
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
+	select STM32_HAVE_FLASH_ICACHE
+	select STM32_HAVE_FLASH_DCACHE
 	select STM32_HAVE_CRYP
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_I2C2
@@ -1991,6 +1995,14 @@ menu "STM32 Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available
 # for the selected MCU
+
+config STM32_HAVE_FLASH_ICACHE
+	bool
+	default n
+
+config STM32_HAVE_FLASH_DCACHE
+	bool
+	default n
 
 config STM32_HAVE_OVERDRIVE
 	bool
@@ -3344,24 +3356,38 @@ endchoice
 
 endmenu
 
+config STM32_FLASH_ICACHE
+	bool "Enable FLASH Instruction Cache"
+	default y
+	depends on STM32_HAVE_ICACHE
+	---help---
+		Enable the FLASH instruction cache.
+
+config STM32_FLASH_DCACHE
+	bool "Enable FLASH Data Cache"
+	default y
+	depends on STM32_HAVE_DCACHE
+	---help---
+		Enable the FLASH data cache.
+
+config STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW
+	bool "Workaround for FLASH data cache corruption"
+	default n
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX) && STM32_FLASH_DCACHE
+	---help---
+		Enable the workaround to fix flash data cache corruption when reading
+		from one flash bank while writing on other flash bank.  See your STM32
+		errata to check if your STM32 is affected by this problem.
+
 config STM32_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
 	default y if STM32_STM32F427 || STM32_STM32F429 || STM32_STM32F446
 	default n
 	depends on STM32_STM32F20XX || STM32_STM32F4XXX
 	---help---
-		Enable FLASH prefetch and F2 and F4 parts (FLASH pre-fetch is always enabled
+		Enable FLASH prefetch in F2 and F4 parts (FLASH pre-fetch is always enabled
 		on F1 parts).  Some early revisions of F4 parts do not support FLASH pre-fetch
 		properly and enabling this option may interfere with ADC accuracy.
-
-config STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW
-	bool "Workaround for FLASH data cache corruption"
-	default n
-	depends on STM32_STM32F20XX || STM32_STM32F4XXX
-	---help---
-		Enable the workaround to fix flash data cache corruption when reading
-		from one flash bank while writing on other flash bank.  See your STM32
-		errata to check if your STM32 is affected by this problem.
 
 choice
 	prompt "JTAG Configuration"
