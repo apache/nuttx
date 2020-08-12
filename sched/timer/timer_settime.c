@@ -98,7 +98,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
   if (timer->pt_delay)
     {
       timer->pt_last = timer->pt_delay;
-      wd_start(timer->pt_wdog, timer->pt_delay,
+      wd_start(&timer->pt_wdog, timer->pt_delay,
                timer_timeout, 1, (wdparm_t)itimer);
     }
 }
@@ -236,7 +236,7 @@ int timer_settime(timer_t timerid, int flags,
     {
       /* Get the number of ticks before the underlying watchdog expires */
 
-      delay = wd_gettime(timer->pt_wdog);
+      delay = wd_gettime(&timer->pt_wdog);
 
       /* Convert that to a struct timespec and return it */
 
@@ -248,7 +248,7 @@ int timer_settime(timer_t timerid, int flags,
    * timer_settime() is called).
    */
 
-  wd_cancel(timer->pt_wdog);
+  wd_cancel(&timer->pt_wdog);
 
   /* Cancel any pending notification */
 
@@ -323,7 +323,7 @@ int timer_settime(timer_t timerid, int flags,
        */
 
       timer->pt_last = delay;
-      ret = wd_start(timer->pt_wdog, delay,
+      ret = wd_start(&timer->pt_wdog, delay,
                      timer_timeout, 1, (wdparm_t)timer);
       if (ret < 0)
         {

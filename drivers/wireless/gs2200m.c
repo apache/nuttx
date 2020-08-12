@@ -1450,12 +1450,15 @@ static enum pkt_type_e gs2200m_send_cmd(FAR struct gs2200m_dev_s *dev,
 {
   enum spi_status_e s;
   enum pkt_type_e r = TYPE_SPI_ERROR;
+  int n = 1;
 
   /* Disable gs2200m irq to poll dready */
 
   dev->lower->disable();
 
   wlinfo("+++ cmd=%s", cmd);
+
+retry:
 
   s = gs2200m_hal_write(dev, cmd, strlen(cmd));
   r = _spi_err_to_pkt_type(s);
@@ -1466,6 +1469,22 @@ static enum pkt_type_e gs2200m_send_cmd(FAR struct gs2200m_dev_s *dev,
     }
 
   r = gs2200m_recv_pkt(dev, pkt_dat);
+
+  /* NOTE: retry in case of errors */
+
+  if ((TYPE_OK != r) && (0 <= --n))
+    {
+      if (pkt_dat)
+        {
+          /* release & initialize pkt_dat before retry */
+
+          _release_pkt_dat(dev, pkt_dat);
+          memset(pkt_dat, 0, sizeof(pkt_dat));
+        }
+
+      wlwarn("*** retry cmd=%s (n=%d) \n", cmd, n);
+      goto retry;
+    }
 
 errout:
 

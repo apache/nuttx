@@ -318,8 +318,8 @@ static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 struct c5471_driver_s
 {
   bool    c_bifup;           /* true:ifup false:ifdown */
-  WDOG_ID c_txpoll;          /* TX poll timer */
-  WDOG_ID c_txtimeout;       /* TX timeout timer */
+  struct wdog_s c_txpoll;    /* TX poll timer */
+  struct wdog_s c_txtimeout; /* TX timeout timer */
   struct work_s c_irqwork;   /* For deferring interrupt work to the work queue */
   struct work_s c_pollwork;  /* For deferring poll work to the work queue */
 
@@ -1011,7 +1011,7 @@ static int c5471_transmit(struct c5471_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->c_txtimeout, C5471_TXTIMEOUT,
+  wd_start(&priv->c_txtimeout, C5471_TXTIMEOUT,
            c5471_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
@@ -1575,7 +1575,7 @@ static void c5471_txdone(struct c5471_driver_s *priv)
 {
   /* If no further xmits are pending, then cancel the TX timeout */
 
-  wd_cancel(priv->c_txtimeout);
+  wd_cancel(&priv->c_txtimeout);
 
   /* Then poll the network for new XMIT data */
 
@@ -1705,7 +1705,7 @@ static int c5471_interrupt(int irq, FAR void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(priv->c_txtimeout);
+       wd_cancel(&priv->c_txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -1828,7 +1828,7 @@ static void c5471_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->c_txpoll, C5471_WDDELAY, c5471_poll_expiry, 1,
+  wd_start(&priv->c_txpoll, C5471_WDDELAY, c5471_poll_expiry, 1,
            (wdparm_t)priv);
   net_unlock();
 }
@@ -1915,7 +1915,7 @@ static int c5471_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->c_txpoll, C5471_WDDELAY, c5471_poll_expiry,
+  wd_start(&priv->c_txpoll, C5471_WDDELAY, c5471_poll_expiry,
            1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
@@ -1968,8 +1968,8 @@ static int c5471_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->c_txpoll);
-  wd_cancel(priv->c_txtimeout);
+  wd_cancel(&priv->c_txpoll);
+  wd_cancel(&priv->c_txtimeout);
 
   /* Reset the device */
 
@@ -2498,12 +2498,7 @@ void arm_netinitialize(void)
   g_c5471[0].c_dev.d_addmac  = c5471_addmac;    /* Add multicast MAC address */
   g_c5471[0].c_dev.d_rmmac   = c5471_rmmac;     /* Remove multicast MAC address */
 #endif
-  g_c5471[0].c_dev.d_private = (void *)g_c5471; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  g_c5471[0].c_txpoll        = wd_create();     /* Create periodic poll timer */
-  g_c5471[0].c_txtimeout     = wd_create();     /* Create TX timeout timer */
+  g_c5471[0].c_dev.d_private = g_c5471;         /* Used to recover private state from dev */
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

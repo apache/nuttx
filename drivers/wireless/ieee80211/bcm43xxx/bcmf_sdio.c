@@ -696,21 +696,12 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
       goto exit_free_bus;
     }
 
-  /* Init thread waitdog */
-
-  sbus->waitdog = wd_create();
-  if (!sbus->waitdog)
-    {
-      ret = -ENOMEM;
-      goto exit_free_bus;
-    }
-
   /* Initialize device hardware */
 
   ret = bcmf_hwinitialize(sbus);
   if (ret != OK)
     {
-      goto exit_free_waitdog;
+      goto exit_free_bus;
     }
 
   /* Probe device */
@@ -755,7 +746,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   /* Start the waitdog timer */
 
-  wd_start(sbus->waitdog, BCMF_WAITDOG_TIMEOUT_TICK,
+  wd_start(&sbus->waitdog, BCMF_WAITDOG_TIMEOUT_TICK,
            bcmf_sdio_waitdog_timeout, 1, (wdparm_t)priv);
 
   /* Spawn bcmf daemon thread */
@@ -779,9 +770,6 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
 exit_uninit_hw:
   bcmf_hwuninitialize(sbus);
-
-exit_free_waitdog:
-  wd_delete(sbus->waitdog);
 
 exit_free_bus:
   kmm_free(sbus);
@@ -864,7 +852,7 @@ int bcmf_sdio_thread(int argc, char **argv)
 
       /* Restart the waitdog timer */
 
-      wd_start(sbus->waitdog, BCMF_WAITDOG_TIMEOUT_TICK,
+      wd_start(&sbus->waitdog, BCMF_WAITDOG_TIMEOUT_TICK,
                bcmf_sdio_waitdog_timeout, 1, (wdparm_t)priv);
 
       /* Wake up device */

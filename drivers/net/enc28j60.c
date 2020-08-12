@@ -242,8 +242,8 @@ struct enc_driver_s
 
   /* Timing */
 
-  WDOG_ID               txpoll;        /* TX poll timer */
-  WDOG_ID               txtimeout;     /* TX timeout timer */
+  struct wdog_s         txpoll;        /* TX poll timer */
+  struct wdog_s         txtimeout;     /* TX timeout timer */
 
   /* If we don't own the SPI bus, then we cannot do SPI accesses from the
    * interrupt handler.
@@ -1158,7 +1158,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
    * the timer is started?
    */
 
-  wd_start(priv->txtimeout, ENC_TXTIMEOUT,
+  wd_start(&priv->txtimeout, ENC_TXTIMEOUT,
            enc_txtimeout, 1, (wdparm_t)priv);
   return OK;
 }
@@ -1295,7 +1295,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
   /* If no further xmits are pending, then cancel the TX timeout */
 
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txtimeout);
 
   /* Then poll the network for new XMIT data */
 
@@ -2016,7 +2016,7 @@ static void enc_pollworker(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, ENC_WDDELAY,
+  wd_start(&priv->txpoll, ENC_WDDELAY,
            enc_polltimer, 1, (wdparm_t)arg);
 }
 
@@ -2116,7 +2116,7 @@ static int enc_ifup(struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      wd_start(priv->txpoll, ENC_WDDELAY,
+      wd_start(&priv->txpoll, ENC_WDDELAY,
                enc_polltimer, 1, (wdparm_t)priv);
 
       /* Mark the interface up and enable the Ethernet interrupt at the
@@ -2170,8 +2170,8 @@ static int enc_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Reset the device and leave in the power save state */
 
@@ -2656,13 +2656,8 @@ int enc_initialize(FAR struct spi_dev_s *spi,
   priv->dev.d_rmmac   = enc_rmmac;    /* Remove multicast MAC address */
 #endif
   priv->dev.d_private = priv;         /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->txtimeout    = wd_create();   /* Create TX timeout timer */
-  priv->spi          = spi;           /* Save the SPI instance */
-  priv->lower        = lower;         /* Save the low-level MCU interface */
+  priv->spi           = spi;          /* Save the SPI instance */
+  priv->lower         = lower;        /* Save the low-level MCU interface */
 
   /* The interface should be in the down state.  However, this function is
    * called too early in initialization to perform the ENC28J60 reset in

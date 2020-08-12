@@ -338,8 +338,8 @@ struct ez80emac_driver_s
   bool    bfullduplex;      /* true:full duplex */
   bool    b100mbs;          /* true:100Mbp */
 
-  WDOG_ID txpoll;           /* TX poll timer */
-  WDOG_ID txtimeout;        /* TX timeout timer */
+  struct wdog_s txpoll;     /* TX poll timer */
+  struct wdog_s txtimeout;  /* TX timeout timer */
 
   struct work_s txwork;     /* For deferring Tx-related work to the work queue */
   struct work_s rxwork;     /* For deferring Rx-related work to the work queue */
@@ -1134,7 +1134,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, EMAC_TXTIMEOUT,
+  wd_start(&priv->txtimeout, EMAC_TXTIMEOUT,
            ez80emac_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
@@ -1617,7 +1617,7 @@ static void ez80emac_txinterrupt_work(FAR void *arg)
 
       /* Cancel any pending the TX timeout */
 
-      wd_cancel(priv->txtimeout);
+      wd_cancel(&priv->txtimeout);
     }
 
   net_unlock();
@@ -1666,7 +1666,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(priv->txtimeout);
+       wd_cancel(&priv->txtimeout);
     }
 
   /* Schedule to perform the Tx interrupt processing on the worker thread. */
@@ -1995,7 +1995,7 @@ static void ez80emac_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, EMAC_WDDELAY,
+  wd_start(&priv->txpoll, EMAC_WDDELAY,
            ez80emac_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
@@ -2038,7 +2038,7 @@ static void ez80emac_poll_expiry(int argc, wdparm_t arg, ...)
        * cycle.
        */
 
-      wd_start(priv->txpoll, EMAC_WDDELAY,
+      wd_start(&priv->txpoll, EMAC_WDDELAY,
                ez80emac_poll_expiry, 1, (wdparm_t)arg);
     }
 }
@@ -2130,7 +2130,7 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      wd_start(priv->txpoll, EMAC_WDDELAY,
+      wd_start(&priv->txpoll, EMAC_WDDELAY,
                ez80emac_poll_expiry, 1, (wdparm_t)priv);
 
       /* Enable the Ethernet interrupts */
@@ -2177,8 +2177,8 @@ static int ez80emac_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Disable Rx */
 
@@ -2620,12 +2620,7 @@ int up_netinitialize(void)
   priv->dev.d_addmac  = ez80emac_addmac;     /* Add multicast MAC address */
   priv->dev.d_rmmac   = ez80emac_rmmac;      /* Remove multicast MAC address */
 #endif
-  priv->dev.d_private = (FAR void *)&g_emac; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll        = wd_create();         /* Create periodic poll timer */
-  priv->txtimeout     = wd_create();         /* Create TX timeout timer */
+  priv->dev.d_private = &g_emac;             /* Used to recover private state from dev */
 
   /* Read the MAC address from the hardware into
    * priv->dev.d_mac.ether.ether_addr_octet

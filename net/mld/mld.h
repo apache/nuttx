@@ -113,6 +113,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/wdog.h>
 
 #include "devif/devif.h"
 #include "socket/socket.h"
@@ -201,13 +202,12 @@ enum mld_msgtype_e
  * for each device interface structure.
  */
 
-typedef FAR struct wdog_s *WDOG_ID;
 struct mld_group_s
 {
   struct mld_group_s *next;    /* Implements a singly-linked list */
   net_ipv6addr_t      grpaddr; /* Group IPv6 address */
   struct work_s       work;    /* For deferred timeout operations */
-  WDOG_ID             polldog; /* Timer used for periodic or delayed events */
+  struct wdog_s       polldog; /* Timer used for periodic or delayed events */
   sem_t               sem;     /* Used to wait for message transmission */
 #ifdef CONFIG_NET_MLD_ROUTER
   uint16_t            members; /* Number of members currently reporting (excludes us) */

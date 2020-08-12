@@ -333,7 +333,7 @@ struct sam_dev_s
   uint32_t           cmdrmask;        /* Interrupt enables for this
                                        * particular cmd/response */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  WDOG_ID            waitwdog;        /* Watchdog that handles event timeouts */
+  struct wdog_s      waitwdog;        /* Watchdog that handles event timeouts */
   uint8_t            hsmci;           /* HSMCI (0, 1, or 2) */
   volatile bool      dmabusy;         /* TRUE: DMA transfer is in progress */
   volatile bool      xfrbusy;         /* TRUE: Transfer is in progress */
@@ -1302,7 +1302,7 @@ static void sam_endwait(struct sam_dev_s *priv, sdio_eventset_t wkupevent)
 {
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Disable event-related interrupts and save wakeup event */
 
@@ -1709,19 +1709,19 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
 
   /* Reset data */
 
-  priv->waitevents = 0;      /* Set of events to be waited for */
-  priv->waitmask   = 0;      /* Interrupt enables for event waiting */
-  priv->wkupevent  = 0;      /* The event that caused the wakeup */
-  priv->dmabusy    = false;  /* No DMA in progress */
-  wd_cancel(priv->waitwdog); /* Cancel any timeouts */
+  priv->waitevents = 0;       /* Set of events to be waited for */
+  priv->waitmask   = 0;       /* Interrupt enables for event waiting */
+  priv->wkupevent  = 0;       /* The event that caused the wakeup */
+  priv->dmabusy    = false;   /* No DMA in progress */
+  wd_cancel(&priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
 
-  priv->xfrmask    = 0;      /* Interrupt enables for data transfer */
+  priv->xfrmask    = 0;       /* Interrupt enables for data transfer */
 
   /* DMA data transfer support */
 
-  priv->widebus    = false;  /* Required for DMA support */
+  priv->widebus    = false;   /* Required for DMA support */
   leave_critical_section(flags);
 }
 
@@ -2357,7 +2357,7 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
 
   /* Cancel any watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Make sure that the DMA is stopped (it will be stopped automatically
    * on normal transfers, but not necessarily when the transfer terminates
@@ -2803,7 +2803,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
         }
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay,
+      ret   = wd_start(&priv->waitwdog, delay,
                        sam_eventtimeout, 1, (wdparm_t)priv);
       if (ret < 0)
         {
@@ -2831,7 +2831,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
            * disable all event, and return an SDIO error.
            */
 
-          wd_cancel(priv->waitwdog);
+          wd_cancel(&priv->waitwdog);
           sam_disablexfrints(priv);
           sam_disablewaitints(priv, SDIOWAIT_ERROR);
           return SDIOWAIT_ERROR;
@@ -3379,11 +3379,6 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
-  /* Create a watchdog timer */
-
-  priv->waitwdog = wd_create();
-  DEBUGASSERT(priv->waitwdog);
 
   /* Initialize the callbacks */
 

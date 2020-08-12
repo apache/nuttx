@@ -271,8 +271,8 @@
 struct sam_emac_s
 {
   uint8_t               ifup    : 1; /* true:ifup false:ifdown */
-  WDOG_ID               txpoll;      /* TX poll timer */
-  WDOG_ID               txtimeout;   /* TX timeout timer */
+  struct wdog_s         txpoll;      /* TX poll timer */
+  struct wdog_s         txtimeout;   /* TX timeout timer */
   struct work_s         irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s         pollwork;    /* For deferring poll work to the work queue */
 
@@ -814,7 +814,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, SAM_TXTIMEOUT,
+  wd_start(&priv->txtimeout, SAM_TXTIMEOUT,
            sam_txtimeout_expiry, 1, (wdparm_t)priv);
 
   /* Set d_len to zero meaning that the d_buf[] packet buffer is again
@@ -1675,7 +1675,7 @@ static int sam_emac_interrupt(int irq, void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-      wd_cancel(priv->txtimeout);
+      wd_cancel(&priv->txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -1792,7 +1792,7 @@ static void sam_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (wdparm_t)priv);
+  wd_start(&priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1891,7 +1891,7 @@ static int sam_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (wdparm_t)priv);
+  wd_start(&priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the EMAC interrupt */
 
@@ -1930,8 +1930,8 @@ static int sam_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the sam_ifup() always
@@ -3682,23 +3682,7 @@ void arm_netinitialize(void)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = sam_ioctl;       /* Support PHY ioctl() calls */
 #endif
-  priv->dev.d_private = (void *)&g_emac; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll = wd_create();
-  if (!priv->txpoll)
-    {
-      nerr("ERROR: Failed to create periodic poll timer\n");
-      return;
-    }
-
-  priv->txtimeout = wd_create();         /* Create TX timeout timer */
-  if (!priv->txtimeout)
-    {
-      nerr("ERROR: Failed to create periodic poll timer\n");
-      goto errout_with_txpoll;
-    }
+  priv->dev.d_private = &g_emac;         /* Used to recover private state from dev */
 
   /* Configure PIO pins to support EMAC MII */
 
@@ -3710,7 +3694,7 @@ void arm_netinitialize(void)
   if (ret < 0)
     {
       nerr("ERROR: sam_buffer_initialize failed: %d\n", ret);
-      goto errout_with_txtimeout;
+      return;
     }
 
   /* Attach the IRQ to the driver.  It will not be enabled at the AIC until
@@ -3751,10 +3735,6 @@ void arm_netinitialize(void)
 
 errout_with_buffers:
   sam_buffer_free(priv);
-errout_with_txtimeout:
-  wd_delete(priv->txtimeout);
-errout_with_txpoll:
-  wd_delete(priv->txpoll);
 }
 
 #endif /* CONFIG_NET && CONFIG_SAM34_EMAC */

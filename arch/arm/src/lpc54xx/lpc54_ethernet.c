@@ -296,8 +296,8 @@ struct lpc54_ethdriver_s
   uint8_t eth_fullduplex : 1;    /* 1:Full duplex 0:Half duplex mode */
   uint8_t eth_100mbps : 1;       /* 1:100mbps 0:10mbps */
   uint8_t eth_rxdiscard : 1;     /* 1:Discarding Rx data */
-  WDOG_ID eth_txpoll;            /* TX poll timer */
-  WDOG_ID eth_txtimeout;         /* TX timeout timer */
+  struct wdog_s eth_txpoll;      /* TX poll timer */
+  struct wdog_s eth_txtimeout;   /* TX timeout timer */
   struct work_s eth_irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s eth_pollwork;    /* For deferring poll work to the work queue */
   struct work_s eth_timeoutwork; /* For deferring timeout work to the work queue */
@@ -686,7 +686,7 @@ static int lpc54_eth_transmit(struct lpc54_ethdriver_s *priv,
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->eth_txtimeout, LPC54_TXTIMEOUT,
+  wd_start(&priv->eth_txtimeout, LPC54_TXTIMEOUT,
            lpc54_eth_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
@@ -1322,7 +1322,7 @@ static void lpc54_eth_txdone(struct lpc54_ethdriver_s *priv,
   if (txring->tr_inuse == 0)
 #endif
     {
-      wd_cancel(priv->eth_txtimeout);
+      wd_cancel(&priv->eth_txtimeout);
       work_cancel(ETHWORK, &priv->eth_timeoutwork);
     }
 
@@ -1858,7 +1858,7 @@ static void lpc54_eth_poll_work(void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->eth_txpoll, LPC54_WDDELAY,
+  wd_start(&priv->eth_txpoll, LPC54_WDDELAY,
            lpc54_eth_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
@@ -2169,7 +2169,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->eth_txpoll, LPC54_WDDELAY,
+  wd_start(&priv->eth_txpoll, LPC54_WDDELAY,
            lpc54_eth_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
@@ -2211,8 +2211,8 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->eth_txpoll);
-  wd_cancel(priv->eth_txtimeout);
+  wd_cancel(&priv->eth_txpoll);
+  wd_cancel(&priv->eth_txtimeout);
 
   /* Put the EMAC in its post-reset, non-operational state.  This should be
    * a known configuration that will guarantee the lpc54_eth_ifup() always
@@ -3085,14 +3085,7 @@ int arm_netinitialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->eth_dev.d_ioctl   = lpc54_eth_ioctl;    /* Handle network IOCTL commands */
 #endif
-  priv->eth_dev.d_private = (void *)&g_ethdriver; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->eth_txpoll        = wd_create();        /* Create periodic poll timer */
-  priv->eth_txtimeout     = wd_create();        /* Create TX timeout timer */
-
-  DEBUGASSERT(priv->eth_txpoll != NULL && priv->eth_txtimeout != NULL);
+  priv->eth_dev.d_private = &g_ethdriver;       /* Used to recover private state from dev */
 
   /* Configure GPIO pins to support Ethernet */
 

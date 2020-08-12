@@ -84,10 +84,6 @@ void mld_devinit(struct net_driver_s *dev)
 
   memset(&dev->d_mld, 0, sizeof(struct mld_netdev_s));
 
-  dev->d_mld.gendog = wd_create();
-  dev->d_mld.v1dog  = wd_create();
-  DEBUGASSERT(dev->d_mld.gendog != NULL && dev->d_mld.v1dog != NULL);
-
   /* All routers start up as a Querier on each of their attached links. */
 
   SET_MLD_QUERIER(dev->d_mld.flags);

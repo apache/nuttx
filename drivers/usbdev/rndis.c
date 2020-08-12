@@ -152,7 +152,7 @@ struct rndis_dev_s
   struct rndis_req_s wrreqs[CONFIG_RNDIS_NWRREQS];
 
   struct work_s rxwork;                  /* Worker for dispatching RX packets */
-  WDOG_ID txpoll;                        /* TX poll watchdog */
+  struct wdog_s txpoll;                  /* TX poll watchdog */
   struct work_s pollwork;                /* TX poll worker */
 
   bool registered;                       /* Has netdev_register() been called */
@@ -1123,7 +1123,7 @@ static void rndis_polltimer(int argc, wdparm_t arg, ...)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, RNDIS_WDDELAY,
+  wd_start(&priv->txpoll, RNDIS_WDDELAY,
            rndis_polltimer, 1, (wdparm_t)arg);
 }
 
@@ -1139,7 +1139,7 @@ static int rndis_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)dev->d_private;
 
-  wd_start(priv->txpoll, RNDIS_WDDELAY,
+  wd_start(&priv->txpoll, RNDIS_WDDELAY,
            rndis_polltimer, 1, (wdparm_t)priv);
   return OK;
 }
@@ -1156,7 +1156,7 @@ static int rndis_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)dev->d_private;
 
-  wd_cancel(priv->txpoll);
+  wd_cancel(&priv->txpoll);
   return OK;
 }
 
@@ -2774,7 +2774,6 @@ static int usbclass_classobject(int minor,
 
   sq_init(&priv->reqlist);
   memcpy(priv->host_mac_address, g_rndis_default_mac_addr, 6);
-  priv->txpoll = wd_create();
   priv->netdev.d_private = priv;
   priv->netdev.d_ifup = &rndis_ifup;
   priv->netdev.d_ifdown = &rndis_ifdown;

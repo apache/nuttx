@@ -128,7 +128,7 @@ struct lpc54_i2cdev_s
   struct i2c_master_s dev;  /* Generic I2C device */
   uintptr_t base;           /* Base address of Flexcomm registers */
 
-  WDOG_ID timeout;          /* Watchdog to timeout when bus hung */
+  struct wdog_s timeout;    /* Watchdog to timeout when bus hung */
   uint32_t frequency;       /* Current I2C frequency */
   uint32_t fclock;          /* Flexcomm function clock frequency */
 
@@ -476,7 +476,7 @@ static bool lpc54_i2c_nextmsg(struct lpc54_i2cdev_s *priv)
        * Cancel any timeout
        */
 
-      wd_cancel(priv->timeout);
+      wd_cancel(&priv->timeout);
 
       /* Disable further I2C interrupts  and return to the IDLE state */
 
@@ -767,7 +767,7 @@ static int lpc54_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Set up the transfer timeout */
 
-  wd_start(priv->timeout, priv->nmsgs * I2C_WDOG_TIMEOUT,
+  wd_start(&priv->timeout, priv->nmsgs * I2C_WDOG_TIMEOUT,
            lpc54_i2c_timeout, 1, (wdparm_t)priv);
 
   /* Initiate the transfer */
@@ -1217,11 +1217,6 @@ struct i2c_master_s *lpc54_i2cbus_initialize(int port)
 
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 #endif
-
-  /* Allocate a watchdog timer */
-
-  priv->timeout = wd_create();
-  DEBUGASSERT(priv->timeout != 0);
 
 #ifndef CONFIG_I2C_POLLED
   /* Attach Interrupt Handler */

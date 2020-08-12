@@ -64,8 +64,8 @@ struct nxbe_setpixel_s
  * Name: nxbe_clipfill
  *
  * Description:
- *  Called from nxbe_clipper() to performed the fill operation on visible portions
- *  of the rectangle.
+ *  Called from nxbe_clipper() to performed the fill operation on visible
+ *  portions of the rectangle.
  *
  ****************************************************************************/
 
@@ -82,7 +82,7 @@ static void nxbe_clipfill(FAR struct nxbe_clipops_s *cops,
 #ifdef CONFIG_NX_UPDATE
   /* Notify external logic that the display has been updated */
 
-  nx_notify_rectangle(&plane->pinfo, rect);
+  nxbe_notify_rectangle(plane->driver, rect);
 #endif
 }
 
@@ -189,7 +189,8 @@ void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
 #ifdef CONFIG_NX_RAMBACKED
   /* If this window supports a pre-window frame buffer then shadow the full,
    * unclipped bitmap in that framebuffer.
-   * REVISIT:  The logic to set a pixel in the per-window frame buffer is missing
+   * REVISIT:  The logic to set a pixel in the per-window frame buffer is
+   * missing
    */
 
   DEBUGASSERT(!NXBE_ISRAMBACKED(wnd));

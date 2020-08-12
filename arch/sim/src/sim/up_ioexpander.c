@@ -108,7 +108,7 @@ struct sim_dev_s
   ioe_pinset_t level[2];             /* Bit encoded: 01=high/rising,
                                       * 10 low/falling, 11 both */
 
-  WDOG_ID wdog;                      /* Timer used to poll for interrupt
+  struct wdog_s wdog;                /* Timer used to poll for interrupt
                                       * simulation */
   struct work_s work;                /* Supports the interrupt handling
                                       * "bottom half" */
@@ -774,7 +774,7 @@ static void sim_interrupt_work(void *arg)
 
   /* Re-start the poll timer */
 
-  ret = wd_start(priv->wdog, SIM_POLLDELAY,
+  ret = wd_start(&priv->wdog, SIM_POLLDELAY,
                  sim_interrupt, 1, (wdparm_t)priv);
   if (ret < 0)
     {
@@ -858,12 +858,7 @@ FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void)
   priv->level[0] = PINSET_ALL;  /* All rising edge */
   priv->level[1] = PINSET_ALL;  /* All falling edge */
 
-  /* Set up a timer to poll for simulated interrupts */
-
-  priv->wdog = wd_create();
-  DEBUGASSERT(priv->wdog != NULL);
-
-  ret = wd_start(priv->wdog, SIM_POLLDELAY,
+  ret = wd_start(&priv->wdog, SIM_POLLDELAY,
                  sim_interrupt, 1, (wdparm_t)priv);
   if (ret < 0)
     {

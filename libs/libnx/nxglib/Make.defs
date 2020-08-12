@@ -44,11 +44,11 @@ CSRCS += nxglib_rgbblend.c
 # Files needed only by NX
 
 ifeq ($(CONFIG_NX),y)
-CSRCS += nxglib_circlepts.c nxglib_circletraps.c nxglib_intersecting.c
-CSRCS += nxglib_nonintersecting.c nxglib_nullrect.c nxglib_rectadd.c
-CSRCS += nxglib_rectcopy.c nxglib_rectinside.c nxglib_rectintersect.c
-CSRCS += nxglib_rectoffset.c nxglib_rectoverlap.c nxglib_rectsize.c
-CSRCS += nxglib_rectunion.c nxglib_rgb2yuv.c
+CSRCS += nxgl_area2rect.c nxglib_circlepts.c nxglib_circletraps.c
+CSRCS += nxglib_intersecting.c nxglib_nonintersecting.c nxglib_nullrect.c
+CSRCS += nxgl_rect2area.c nxglib_rectadd.c nxglib_rectcopy.c nxglib_rectinside.c
+CSRCS += nxglib_rectintersect.c nxglib_rectoffset.c nxglib_rectoverlap.c
+CSRCS += nxglib_rectsize.c nxglib_rectunion.c nxglib_rgb2yuv.c
 CSRCS += nxglib_runcopy.c nxglib_runoffset.c nxglib_splitline.c
 CSRCS += nxglib_trapcopy.c nxglib_trapoffset.c nxglib_vectoradd.c
 CSRCS += nxglib_vectsubtract.c nxglib_yuv2rgb.c

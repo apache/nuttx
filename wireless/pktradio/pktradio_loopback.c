@@ -118,7 +118,7 @@ struct lo_driver_s
   bool lo_bifup;               /* true:ifup false:ifdown */
   bool lo_pending;             /* True: TX poll pending */
   uint8_t lo_panid[2];         /* Fake PAN ID for testing */
-  WDOG_ID lo_polldog;          /* TX poll timer */
+  struct wdog_s lo_polldog;    /* TX poll timer */
   struct work_s lo_work;       /* For deferring poll work to the work queue */
   FAR struct iob_s *lo_head;   /* Head of IOBs queued for loopback */
   FAR struct iob_s *lo_tail;   /* Tail of IOBs queued for loopback */
@@ -449,7 +449,7 @@ static void lo_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, (wdparm_t)priv);
+  wd_start(&priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -533,7 +533,7 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->lo_polldog, LO_WDDELAY,
+  wd_start(&priv->lo_polldog, LO_WDDELAY,
            lo_poll_expiry, 1, (wdparm_t)priv);
 
   priv->lo_bifup = true;
@@ -564,7 +564,7 @@ static int lo_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->lo_polldog);
+  wd_cancel(&priv->lo_polldog);
 
   /* Mark the device "down" */
 
@@ -1045,7 +1045,7 @@ int pktradio_loopback(void)
 #ifdef CONFIG_NETDEV_IOCTL
   dev->d_ioctl        = lo_ioctl;         /* Handle network IOCTL commands */
 #endif
-  dev->d_private      = (FAR void *)priv; /* Used to recover private state from dev */
+  dev->d_private      = priv;             /* Used to recover private state from dev */
 
   /* Set the network mask and advertise our MAC-based IP address */
 
@@ -1057,10 +1057,6 @@ int pktradio_loopback(void)
   radio->r_get_mhrlen = lo_get_mhrlen;    /* Get MAC header length */
   radio->r_req_data   = lo_req_data;      /* Enqueue frame for transmission */
   radio->r_properties = lo_properties;    /* Returns radio properties */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->lo_polldog    = wd_create();      /* Create periodic poll timer */
 
 #ifdef CONFIG_NET_6LOWPAN
   /* Make sure the our single packet buffer is attached.

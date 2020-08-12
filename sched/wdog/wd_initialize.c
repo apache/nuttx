@@ -32,25 +32,12 @@
  * Public Data
  ****************************************************************************/
 
-/* The g_wdfreelist data structure is a singly linked list of watchdogs
- * available to the system for delayed function use.
- */
-
-sq_queue_t g_wdfreelist;
-
 /* The g_wdactivelist data structure is a singly linked list ordered by
  * watchdog expiration time. When watchdog timers expire,the functions on
  * this linked list are removed and the function is called.
  */
 
 sq_queue_t g_wdactivelist;
-
-/* This is the number of free, pre-allocated watchdog structures in the
- * g_wdfreelist.  This value is used to enforce a reserve for interrupt
- * handlers.
- */
-
-uint16_t g_wdnfree;
 
 /* This is wdog tickbase, for wd_gettime() may called many times
  * between 2 times of wd_timer(), we use it to update wd_gettime().
@@ -59,16 +46,6 @@ uint16_t g_wdnfree;
 #ifdef CONFIG_SCHED_TICKLESS
 clock_t g_wdtickbase;
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* g_wdpool is a list of pre-allocated watchdogs. The number of watchdogs
- * in the pool is a configuration item.
- */
-
-static struct wdog_s g_wdpool[CONFIG_PREALLOC_WDOGS];
 
 /****************************************************************************
  * Public Functions
@@ -95,24 +72,7 @@ static struct wdog_s g_wdpool[CONFIG_PREALLOC_WDOGS];
 
 void wd_initialize(void)
 {
-  FAR struct wdog_s *wdog = g_wdpool;
-  int i;
-
   /* Initialize watchdog lists */
 
-  sq_init(&g_wdfreelist);
   sq_init(&g_wdactivelist);
-
-  /* The g_wdfreelist must be loaded at initialization time to hold the
-   * configured number of watchdogs.
-   */
-
-  for (i = 0; i < CONFIG_PREALLOC_WDOGS; i++)
-    {
-      sq_addlast((FAR sq_entry_t *)wdog++, &g_wdfreelist);
-    }
-
-  /* All watchdogs are free */
-
-  g_wdnfree = CONFIG_PREALLOC_WDOGS;
 }

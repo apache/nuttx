@@ -252,7 +252,7 @@ struct cxd56_sdiodev_s
   sdio_eventset_t    waitevents;      /* Set of events to be waited for */
   uint32_t           waitints;        /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  WDOG_ID            waitwdog;        /* Watchdog that handles event timeouts */
+  struct wdog_s      waitwdog;        /* Watchdog that handles event timeouts */
 
   /* Callback support */
 
@@ -1016,7 +1016,7 @@ static void cxd56_endwait(struct cxd56_sdiodev_s *priv,
 {
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Disable event-related interrupts */
 
@@ -1364,11 +1364,6 @@ static void cxd56_sdio_sdhci_reset(FAR struct sdio_dev_s *dev)
 
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
-  /* Create a watchdog timer */
-
-  priv->waitwdog = wd_create();
-  DEBUGASSERT(priv->waitwdog);
-
   /* The next phase of the hardware reset would be to set the SYSCTRL INITA
    * bit to send 80 clock ticks for card to power up and then reset the card
    * with CMD0.  This is done elsewhere.
@@ -1383,7 +1378,7 @@ static void cxd56_sdio_sdhci_reset(FAR struct sdio_dev_s *dev)
   priv->xfrflags   = 0;      /* Used to synchronize SDIO and DMA completion events */
 #endif
 
-  wd_cancel(priv->waitwdog); /* Cancel any timeouts */
+  wd_cancel(&priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
 
@@ -2085,7 +2080,7 @@ static int cxd56_sdio_cancel(FAR struct sdio_dev_s *dev)
 
   /* Cancel any watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
@@ -2594,7 +2589,7 @@ static sdio_eventset_t cxd56_sdio_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay,
+      ret   = wd_start(&priv->waitwdog, delay,
                        cxd56_eventtimeout, 1, (wdparm_t)priv);
       if (ret != OK)
         {
@@ -2623,7 +2618,7 @@ static sdio_eventset_t cxd56_sdio_eventwait(FAR struct sdio_dev_s *dev,
            * return an SDIO error.
            */
 
-          wd_cancel(priv->waitwdog);
+          wd_cancel(&priv->waitwdog);
           return SDIOWAIT_ERROR;
         }
 

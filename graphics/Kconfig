@@ -143,7 +143,7 @@ config NX_WRITEONLY
 
 config NX_UPDATE
 	bool "Display update hooks"
-	default n
+	default FB_UPDATE && !NX_LCDDRIVER
 	---help---
 		Enable a callout to inform some external module that the display has
 		been updated.  This would be useful in a couple for cases.
@@ -158,8 +158,11 @@ config NX_UPDATE
 		When this feature is enabled, some external logic must provide this
 		interface:
 
-		  void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
-		                           FAR const struct nxgl_rect_s *rect);
+		  fb_vtable_s
+		  {
+		    int (*updatearea)(FAR struct fb_vtable_s *vtable,
+		                      FAR const struct fb_area_s *area);
+		  };
 
 		That is the function that will handle the notification.  It
 		receives the rectangular region that was updated in the provided
