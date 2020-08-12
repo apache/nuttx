@@ -1718,9 +1718,6 @@ int kinetis_caninitialize(int intf)
   struct kinetis_driver_s *priv;
   int ret;
   uint32_t regval;
-#ifdef TX_TIMEOUT_WQ
-  uint32_t i;
-#endif
 
   switch (intf)
     {
