@@ -78,16 +78,22 @@ enum EPOLL_EVENTS
 
 typedef union poll_data
 {
-  FAR void    *ptr;      /* For use by drivers */
-  int          fd;       /* The descriptor being polled */
+  void        *ptr;
+  int          fd;
+  uint32_t     u32;
 } epoll_data_t;
 
 struct epoll_event
 {
   epoll_data_t data;
-  FAR sem_t   *sem;      /* Pointer to semaphore used to post output event */
   pollevent_t  events;   /* The input event flags */
   pollevent_t  revents;  /* The output event flags */
+
+  /* Non-standard fields used internally by NuttX. */
+
+  void        *reserved; /* reserved feild sync with struct pollfd */
+  FAR sem_t   *sem;      /* Pointer to semaphore used to post output event */
+  FAR void    *priv;     /* For use by drivers */
 };
 
 struct epoll_head
