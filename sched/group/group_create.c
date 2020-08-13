@@ -225,7 +225,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
       return -ENOMEM;
     }
 
-#if CONFIG_NFILE_STREAMS > 0 && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_FILE_STREAM) && defined(CONFIG_MM_KERNEL_HEAP)
   /* If this group is being created for a privileged thread, then all
    * elements of the group must be created for privileged access.
    */
@@ -275,7 +275,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   ret = env_dup(group);
   if (ret < 0)
     {
-#if CONFIG_NFILE_STREAMS > 0 && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_FILE_STREAM) && defined(CONFIG_MM_KERNEL_HEAP)
       group_free(group, group->tg_streamlist);
 #endif
       kmm_free(group);

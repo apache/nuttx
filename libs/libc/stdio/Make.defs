@@ -48,7 +48,7 @@ endif
 
 # The remaining sources files depend upon C streams
 
-ifneq ($(CONFIG_NFILE_STREAMS),0)
+ifeq ($(CONFIG_FILE_STREAM),y)
 
 CSRCS += lib_fopen.c lib_freopen.c lib_fclose.c lib_fread.c lib_libfread.c
 CSRCS += lib_fseek.c lib_fseeko.c lib_ftell.c lib_ftello.c lib_fsetpos.c

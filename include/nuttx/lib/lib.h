@@ -2,7 +2,8 @@
  * include/nuttx/lib/lib.h
  * Non-standard, internal APIs available in lib/.
  *
- *   Copyright (C) 2007-2009, 2012-2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2014, 2016 Gregory Nutt. All rights
+ *   reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,16 +66,29 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /* Hook for library initialization.  No is needed now, however */
 
 #define lib_initialize()
 
 /* Functions contained in lib_streams.c *************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 struct task_group_s;
 void lib_stream_initialize(FAR struct task_group_s *group);
 void lib_stream_release(FAR struct task_group_s *group);
+#endif
+
+/* Functions defined in lib_filesem.c ***************************************/
+
+#ifdef CONFIG_STDIO_DISABLE_BUFFERING
+#  define lib_sem_initialize(s)
+#  define lib_take_semaphore(s)
+#  define lib_give_semaphore(s)
+#else
+void lib_sem_initialize(FAR struct file_struct *stream);
+void lib_take_semaphore(FAR struct file_struct *stream);
+void lib_give_semaphore(FAR struct file_struct *stream);
 #endif
 
 /* Functions defined in lib_srand.c *****************************************/

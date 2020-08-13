@@ -34,6 +34,7 @@
 #include <limits.h>
 #include <semaphore.h>
 
+#include <nuttx/lib/lib.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/streams.h>
 
@@ -49,16 +50,6 @@
 
 #ifndef CONFIG_LIB_HOMEDIR
 # define CONFIG_LIB_HOMEDIR "/"
-#endif
-
-/* If C std I/O buffering is not supported, then we don't need its semaphore
- * protection.
- */
-
-#ifdef CONFIG_STDIO_DISABLE_BUFFERING
-#  define lib_sem_initialize(s)
-#  define lib_take_semaphore(s)
-#  define lib_give_semaphore(s)
 #endif
 
 /* The NuttX C library an be build in two modes: (1) as a standard, C-library
@@ -131,7 +122,7 @@ extern "C"
 
 /* Defined in lib_streamsem.c */
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 void  stream_semtake(FAR struct streamlist *list);
 void  stream_semgive(FAR struct streamlist *list);
 #endif
@@ -171,14 +162,6 @@ int lib_rdflush(FAR FILE *stream);
 /* Defined in lib_wrflush.c */
 
 int lib_wrflush(FAR FILE *stream);
-
-/* Defined in lib_sem.c */
-
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
-void lib_sem_initialize(FAR struct file_struct *stream);
-void lib_take_semaphore(FAR struct file_struct *stream);
-void lib_give_semaphore(FAR struct file_struct *stream);
-#endif
 
 /* Defined in lib_libgetbase.c */
 

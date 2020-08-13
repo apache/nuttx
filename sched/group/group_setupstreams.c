@@ -37,7 +37,7 @@
  * that some number of streams have been configured.
  */
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 
 /****************************************************************************
  * Public Functions
@@ -75,4 +75,4 @@ int group_setupstreams(FAR struct task_tcb_s *tcb)
   return OK;
 }
 
-#endif /* CONFIG_NFILE_STREAMS > 0 */
+#endif /* CONFIG_FILE_STREAM */

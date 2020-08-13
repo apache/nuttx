@@ -580,7 +580,7 @@ struct task_group_s
 
   struct filelist tg_filelist;      /* Maps file descriptor to file             */
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
   /* FILE streams ***************************************************************/
 
   /* In a flat, single-heap build.  The stream list is allocated with this
@@ -913,9 +913,9 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype);
  */
 
 FAR struct filelist *nxsched_get_files(void);
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 FAR struct streamlist *nxsched_get_streams(void);
-#endif /* CONFIG_NFILE_STREAMS */
+#endif /* CONFIG_FILE_STREAM */
 
 #ifdef CONFIG_NET
 FAR struct socketlist *nxsched_get_sockets(void);

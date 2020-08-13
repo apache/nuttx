@@ -36,7 +36,7 @@
 
 int vprintf(FAR const IPTR char *fmt, va_list ap)
 {
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
   return vfprintf(stdout, fmt, ap);
 #else
   return vdprintf(STDOUT_FILENO, fmt, ap);

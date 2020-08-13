@@ -456,33 +456,35 @@ struct filelist
  *                                             buffer+1
  */
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 struct file_struct
 {
-  int                fs_fd;        /* File descriptor associated with stream */
+  FAR struct file_struct *fs_next;      /* Pointer to next file stream */
+  int                     fs_fd;        /* File descriptor associated with stream */
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
-  sem_t              fs_sem;       /* For thread safety */
-  pid_t              fs_holder;    /* Holder of sem */
-  int                fs_counts;    /* Number of times sem is held */
-  FAR unsigned char *fs_bufstart;  /* Pointer to start of buffer */
-  FAR unsigned char *fs_bufend;    /* Pointer to 1 past end of buffer */
-  FAR unsigned char *fs_bufpos;    /* Current position in buffer */
-  FAR unsigned char *fs_bufread;   /* Pointer to 1 past last buffered read char. */
+  sem_t                   fs_sem;       /* For thread safety */
+  pid_t                   fs_holder;    /* Holder of sem */
+  int                     fs_counts;    /* Number of times sem is held */
+  FAR unsigned char      *fs_bufstart;  /* Pointer to start of buffer */
+  FAR unsigned char      *fs_bufend;    /* Pointer to 1 past end of buffer */
+  FAR unsigned char      *fs_bufpos;    /* Current position in buffer */
+  FAR unsigned char      *fs_bufread;   /* Pointer to 1 past last buffered read char. */
 #endif
-  uint16_t           fs_oflags;    /* Open mode flags */
-  uint8_t            fs_flags;     /* Stream flags */
+  uint16_t                fs_oflags;    /* Open mode flags */
+  uint8_t                 fs_flags;     /* Stream flags */
 #if CONFIG_NUNGET_CHARS > 0
-  uint8_t            fs_nungotten; /* The number of characters buffered for ungetc */
-  unsigned char      fs_ungotten[CONFIG_NUNGET_CHARS];
+  uint8_t                 fs_nungotten; /* The number of characters buffered for ungetc */
+  unsigned char           fs_ungotten[CONFIG_NUNGET_CHARS];
 #endif
 };
 
 struct streamlist
 {
-  sem_t               sl_sem;   /* For thread safety */
-  struct file_struct sl_streams[CONFIG_NFILE_STREAMS];
+  sem_t                   sl_sem;   /* For thread safety */
+  FAR struct file_struct *sl_head;
+  FAR struct file_struct *sl_tail;
 };
-#endif /* CONFIG_NFILE_STREAMS */
+#endif /* CONFIG_FILE_STREAM */
 
 /****************************************************************************
  * Public Function Prototypes
@@ -1029,7 +1031,7 @@ int close_blockdriver(FAR struct inode *inode);
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 struct tcb_s; /* Forward reference */
 int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
               FAR struct file_struct **filep);
@@ -1044,7 +1046,7 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 int lib_flushall(FAR struct streamlist *list);
 #endif
 
