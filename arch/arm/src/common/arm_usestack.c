@@ -137,7 +137,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
       memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
 
-    #ifdef CONFIG_STACK_COLORATION
+#ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a
        * recognizable value that we can use later to test for high
        * water marks.
@@ -145,8 +145,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
       arm_stack_color((FAR void *)((uintptr_t)tcb->adj_stack_ptr -
           tcb->adj_stack_size), tcb->adj_stack_size);
-
-    #endif /* CONFIG_STACK_COLORATION */
+#endif /* CONFIG_STACK_COLORATION */
 
       return OK;
     }

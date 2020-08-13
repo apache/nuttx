@@ -218,7 +218,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       arm_stack_color((FAR void *)((uintptr_t)tcb->adj_stack_ptr -
           tcb->adj_stack_size), tcb->adj_stack_size);
-
 #endif /* CONFIG_STACK_COLORATION */
 
       board_autoled_on(LED_STACKCREATED);
