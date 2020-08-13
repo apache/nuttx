@@ -151,11 +151,11 @@ static inline void group_release(FAR struct task_group_s *group)
 
   files_releaselist(&group->tg_filelist);
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
   /* Free resource held by the stream list */
 
   lib_stream_release(group);
-#endif /* CONFIG_NFILE_STREAMS */
+#endif /* CONFIG_FILE_STREAM */
 
 #ifdef CONFIG_NET
   /* Free resource held by the socket list */
@@ -207,7 +207,7 @@ static inline void group_release(FAR struct task_group_s *group)
     }
 #endif
 
-#if CONFIG_NFILE_STREAMS > 0 && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_FILE_STREAM) && defined(CONFIG_MM_KERNEL_HEAP)
   /* In a flat, single-heap build.  The stream list is part of the
    * group structure and, hence will be freed when the group structure
    * is freed.  Otherwise, it is separately allocated an must be

@@ -78,9 +78,9 @@
 
 /* The first three _iob entries are reserved for standard I/O */
 
-#define stdin      (&nxsched_get_streams()->sl_streams[0])
-#define stdout     (&nxsched_get_streams()->sl_streams[1])
-#define stderr     (&nxsched_get_streams()->sl_streams[2])
+#define stdin      (nxsched_get_streams()->sl_head)
+#define stdout     (nxsched_get_streams()->sl_head->fs_next)
+#define stderr     (nxsched_get_streams()->sl_head->fs_next->fs_next)
 
 /* Path to the directory where temporary files can be created */
 

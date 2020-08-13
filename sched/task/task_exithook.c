@@ -533,7 +533,7 @@ static inline void nxtask_exitwakeup(FAR struct tcb_s *tcb, int status)
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 static inline void nxtask_flushstreams(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group = tcb->group;

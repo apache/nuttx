@@ -132,7 +132,7 @@ int daemon(int nochdir, int noclose)
           return -1;
         }
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
       /* Make sure the stdin, stdout, and stderr are closed */
 
       fclose(stdin);
@@ -164,9 +164,9 @@ int daemon(int nochdir, int noclose)
        */
 
       if (fd > 2)
-       {
-         close(fd);
-       }
+        {
+          close(fd);
+        }
     }
 
   return OK;

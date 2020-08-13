@@ -56,7 +56,7 @@ endif
 
 # Stream support
 
-ifneq ($(CONFIG_NFILE_STREAMS),0)
+ifeq ($(CONFIG_FILE_STREAM),y)
 CSRCS += fs_fdopen.c
 endif
 

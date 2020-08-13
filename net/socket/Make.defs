@@ -60,7 +60,7 @@ endif
 
 # Support for network access using streams
 
-ifneq ($(CONFIG_NFILE_STREAMS),0)
+ifeq ($(CONFIG_FILE_STREAM),y)
 SOCK_CSRCS += net_checksd.c
 endif
 

@@ -40,7 +40,7 @@ int printf(FAR const IPTR char *fmt, ...)
   int     ret;
 
   va_start(ap, fmt);
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
   ret = vfprintf(stdout, fmt, ap);
 #else
   ret = vdprintf(STDOUT_FILENO, fmt, ap);

@@ -64,8 +64,8 @@
 static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 {
   FAR struct filelist *filelist;
-#if CONFIG_NFILE_STREAMS > 0
-  FAR struct streamlist *streamlist;
+#ifdef CONFIG_FILE_STREAM
+  FAR struct file_struct *filep;
 #endif
   int i;
 
@@ -83,11 +83,10 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
         }
     }
 
-#if CONFIG_NFILE_STREAMS > 0
-  streamlist = tcb->group->tg_streamlist;
-  for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
+#ifdef CONFIG_FILE_STREAM
+  filep = tcb->group->tg_streamlist->sl_head;
+  for (; filep != NULL; filep = filep->fs_next)
     {
-      struct file_struct *filep = &streamlist->sl_streams[i];
       if (filep->fs_fd >= 0)
         {
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING

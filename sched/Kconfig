@@ -1086,11 +1086,11 @@ config NFILE_DESCRIPTORS
 	---help---
 		The maximum number of file descriptors per task (one for each open)
 
-config NFILE_STREAMS
-	int "Maximum number of FILE streams"
-	default 16
+config FILE_STREAM
+	bool "Enable FILE stream"
+	default y
 	---help---
-		The maximum number of streams that can be fopen'ed
+		Enable the standard buffered input/output support
 
 config NAME_MAX
 	int "Maximum size of a file name"

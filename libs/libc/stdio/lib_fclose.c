@@ -70,6 +70,9 @@
 
 int fclose(FAR FILE *stream)
 {
+  FAR struct streamlist *slist;
+  FAR FILE *prev = NULL;
+  FAR FILE *next;
   int errcode = EINVAL;
   int ret = ERROR;
   int status;
@@ -78,6 +81,35 @@ int fclose(FAR FILE *stream)
 
   if (stream)
     {
+      /* Remove FILE structure from the stream list */
+
+      slist = nxsched_get_streams();
+      stream_semtake(slist);
+
+      for (next = slist->sl_head; next; prev = next, next = next->fs_next)
+        {
+          if (next == stream)
+            {
+              if (next == slist->sl_head)
+                {
+                  slist->sl_head = next->fs_next;
+                }
+              else
+                {
+                  prev->fs_next = next->fs_next;
+                }
+
+              if (next == slist->sl_tail)
+                {
+                  slist->sl_tail = prev;
+                }
+
+              break;
+            }
+        }
+
+      stream_semgive(slist);
+
       /* Check that the underlying file descriptor corresponds to an an open
        * file.
        */
@@ -120,25 +152,9 @@ int fclose(FAR FILE *stream)
         {
           lib_free(stream->fs_bufstart);
         }
-
-      /* Clear the whole structure */
-
-      memset(stream, 0, sizeof(FILE));
-
-#else
-#if CONFIG_NUNGET_CHARS > 0
-      /* Reset the number of ungetc characters */
-
-      stream->fs_nungotten = 0;
-#endif
-      /* Reset the flags */
-
-      stream->fs_oflags = 0;
 #endif
 
-      /* Set file descriptor to -1 makes the stream available for reuse */
-
-      stream->fs_fd = -1;
+      lib_free(stream);
     }
 
   /* On an error, reset the errno to the first error encountered and return

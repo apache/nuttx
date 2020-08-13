@@ -67,11 +67,10 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 void lib_stream_initialize(FAR struct task_group_s *group)
 {
   FAR struct streamlist *list;
-  int i;
 
 #ifdef CONFIG_MM_KERNEL_HEAP
   DEBUGASSERT(group && group->tg_streamlist);
@@ -84,29 +83,10 @@ void lib_stream_initialize(FAR struct task_group_s *group)
   /* Initialize the list access mutex */
 
   _SEM_INIT(&list->sl_sem, 0, 1);
-
-  /* Initialize each FILE structure */
-
-  for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
-    {
-      FAR struct file_struct *stream = &list->sl_streams[i];
-
-      /* Clear the IOB */
-
-      memset(stream, 0, sizeof(FILE));
-
-      /* Indicate not opened */
-
-      stream->fs_fd = -1;
-
-      /* Initialize the stream semaphore to one to support one-at-
-       * a-time access to private data sets.
-       */
-
-      lib_sem_initialize(&list->sl_streams[i]);
-    }
+  list->sl_head = NULL;
+  list->sl_tail = NULL;
 }
-#endif /* CONFIG_NFILE_STREAMS > 0 */
+#endif /* CONFIG_FILE_STREAM */
 
 /****************************************************************************
  * Name: lib_stream_release
@@ -118,11 +98,10 @@ void lib_stream_initialize(FAR struct task_group_s *group)
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 void lib_stream_release(FAR struct task_group_s *group)
 {
   FAR struct streamlist *list;
-  int i;
 
 #ifdef CONFIG_MM_KERNEL_HEAP
   DEBUGASSERT(group && group->tg_streamlist);
@@ -136,42 +115,39 @@ void lib_stream_release(FAR struct task_group_s *group)
 
   _SEM_DESTROY(&list->sl_sem);
 
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   /* Release each stream in the list */
 
-  for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
+  list->sl_tail = NULL;
+  while (list->sl_head != NULL)
     {
-      FAR struct file_struct *stream = &list->sl_streams[i];
+      FAR struct file_struct *stream = list->sl_head;
 
+      list->sl_head = stream->fs_next;
+
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
       /* Destroy the semaphore that protects the IO buffer */
 
       _SEM_DESTROY(&stream->fs_sem);
-
-      /* Release the IO buffer */
-
-      if (stream->fs_bufstart != NULL &&
-          (stream->fs_flags & __FS_FLAG_UBF) == 0)
-        {
-#ifdef CONFIG_BUILD_KERNEL
-          /* If the exiting group is unprivileged, then it has an address
-           * environment.  Don't bother to release the memory in this case...
-           * There is no point since the memory lies in the user heap which
-           * will be destroyed anyway.  But if this is a privileged group,
-           * when we still have to release the memory using the kernel
-           * allocator.
-           */
-
-          if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)
 #endif
-            {
-              group_free(group, stream->fs_bufstart);
-            }
+
+      /* Release the stream */
+
+#ifdef CONFIG_BUILD_KERNEL
+      /* If the exiting group is unprivileged, then it has an address
+       * environment.  Don't bother to release the memory in this case...
+       * There is no point since the memory lies in the user heap which
+       * will be destroyed anyway.  But if this is a privileged group,
+       * when we still have to release the memory using the kernel
+       * allocator.
+       */
+
+      if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)
+#endif
+        {
+          group_free(group, stream);
         }
     }
-#endif
-
-  UNUSED(i);
 }
 
-#endif /* CONFIG_NFILE_STREAMS > 0 */
+#endif /* CONFIG_FILE_STREAM */
 #endif /* CONFIG_BUILD_FLAT || __KERNEL__ */

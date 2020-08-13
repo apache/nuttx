@@ -124,7 +124,7 @@ Command                Depends on Configuration                    Can Be Disabl
 ``shutdown``           ``CONFIG_BOARDCTL_POWEROFF`` \|\|           ``CONFIG_NSH_DISABLE_SHUTDOWN``
                        ``CONFIG_BOARD_RESET``
 ``sleep``              .                                           ``CONFIG_NSH_DISABLE_SLEEP``
-``source``             ``CONFIG_NFILE_STREAMS > 0`` &&             ``CONFIG_NSH_DISABLE_SOURCE``
+``source``             ``CONFIG_FILE_STREAM`` &&                   ``CONFIG_NSH_DISABLE_SOURCE``
                        ! ``CONFIG_NSH_DISABLESCRIPT`` 
 ``telnetd``            ``CONFIG_NSH_TELNET``                       ``CONFIG_NSH_DISABLE_TELNETD``           
 ``test``               !  ``CONFIG_NSH_DISABLESCRIPT``             ``CONFIG_NSH_DISABLE_TEST``

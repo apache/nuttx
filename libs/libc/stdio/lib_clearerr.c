@@ -44,7 +44,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#if CONFIG_NFILE_STREAMS > 0
+#ifdef CONFIG_FILE_STREAM
 
 /****************************************************************************
  * Public Functions
@@ -65,4 +65,4 @@ void clearerr(FAR FILE *stream)
 {
   stream->fs_flags = 0;
 }
-#endif /* CONFIG_NFILE_STREAMS */
+#endif /* CONFIG_FILE_STREAM */
