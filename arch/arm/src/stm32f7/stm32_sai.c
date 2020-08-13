@@ -217,7 +217,7 @@ struct stm32f7_sai_s
   uint32_t samplerate;         /* Data sample rate */
   uint8_t rxenab:1;            /* True: RX transfers enabled */
   uint8_t txenab:1;            /* True: TX transfers enabled */
-  WDOG_ID dog;                 /* Watchdog that handles timeouts */
+  struct wdog_s dog;           /* Watchdog that handles timeouts */
   sq_queue_t pend;             /* A queue of pending transfers */
   sq_queue_t act;              /* A queue of active transfers */
   sq_queue_t done;             /* A queue of completed transfers */
@@ -843,7 +843,7 @@ static void sai_mckdivider(struct stm32f7_sai_s *priv)
  *
  ****************************************************************************/
 
-static void sai_timeout(int argc, uint32_t arg, ...)
+static void sai_timeout(int argc, wdparm_t arg, ...)
 {
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -988,8 +988,8 @@ static int sai_dma_setup(struct stm32f7_sai_s *priv)
 
   if (bfcontainer->timeout > 0)
     {
-      ret = wd_start(priv->dog, bfcontainer->timeout, sai_timeout,
-                     1, (uint32_t)priv);
+      ret = wd_start(&priv->dog, bfcontainer->timeout,
+                     sai_timeout, 1, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
@@ -1170,7 +1170,7 @@ static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->dog);
+  wd_cancel(&priv->dog);
 
   /* Then schedule completion of the transfer to occur on the worker thread */
 
@@ -1623,11 +1623,6 @@ static void sai_portinitialize(struct stm32f7_sai_s *priv)
   sai_dump_regs(priv, "Before initialization");
 
   nxsem_init(&priv->exclsem, 0, 1);
-
-  /* Create a watchdog timer to catch transfer timeouts */
-
-  priv->dog = wd_create();
-  DEBUGASSERT(priv->dog);
 
   /* Initialize buffering */
 

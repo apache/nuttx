@@ -234,8 +234,6 @@ void nxsig_initialize(void)
                       SIG_ALLOC_IRQ);
   DEBUGASSERT(g_sigpendingirqactionalloc != NULL);
 
-  nxsig_alloc_actionblock();
-
   g_sigpendingsignalalloc =
     nxsig_alloc_pendingsignalblock(&g_sigpendingsignal,
                                    NUM_SIGNALS_PENDING,

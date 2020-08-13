@@ -56,22 +56,12 @@
 
 void wd_recover(FAR struct tcb_s *tcb)
 {
-  irqstate_t flags;
-
   /* The task is being deleted.  If it is waiting for any timed event, then
-   * tcb->waitdog will be non-NULL.  Cancel the watchdog now so that no
-   * events occur after the watchdog expires.  Obviously there are lots of
-   * race conditions here so this will most certainly have to be revisited in
-   * the future.
+   * cancel the watchdog now so that no events occur after the watchdog
+   * expires. Obviously there are lots of race conditions here so this will
+   * most certainly have to be revisited in the future.
+   *
    */
 
-  flags = enter_critical_section();
-  if (tcb->waitdog)
-    {
-      wd_cancel(tcb->waitdog);
-      wd_delete(tcb->waitdog);
-      tcb->waitdog = NULL;
-    }
-
-  leave_critical_section(flags);
+  wd_cancel(&tcb->waitdog);
 }

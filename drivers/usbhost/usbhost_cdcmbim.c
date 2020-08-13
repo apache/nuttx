@@ -228,7 +228,7 @@ struct usbhost_cdcmbim_s
 
   /* Network device members */
 
-  WDOG_ID                 txpoll;       /* TX poll timer */
+  struct wdog_s           txpoll;       /* TX poll timer */
   bool                    bifup;        /* true:ifup false:ifdown */
   struct net_driver_s     netdev;       /* Interface understood by the network */
   uint8_t                 txpktbuf[MAX_NETDEV_PKTSIZE];
@@ -1662,7 +1662,6 @@ static inline int usbhost_devinit(FAR struct usbhost_cdcmbim_s *priv)
   priv->netdev.d_ifdown  = cdcmbim_ifdown;
   priv->netdev.d_txavail = cdcmbim_txavail;
   priv->netdev.d_private = priv;
-  priv->txpoll           = wd_create();
 
   /* Register the network device */
 
@@ -2321,8 +2320,8 @@ static void cdcmbim_txpoll_work(void *arg)
 
   /* setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, (1 * CLK_TCK),
-                 cdcmbim_txpoll_expiry, 1, priv);
+  wd_start(&priv->txpoll, (1 * CLK_TCK),
+           cdcmbim_txpoll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -2428,8 +2427,8 @@ static int cdcmbim_ifup(struct net_driver_s *dev)
 
   /* Start network TX poll */
 
-  (void)wd_start(priv->txpoll, (1 * CLK_TCK), cdcmbim_txpoll_expiry, 1,
-                 (wdparm_t)priv);
+  wd_start(&priv->txpoll, (1 * CLK_TCK),
+           cdcmbim_txpoll_expiry, 1, (wdparm_t)priv);
   priv->bifup = true;
   return OK;
 }
@@ -2458,7 +2457,7 @@ static int cdcmbim_ifdown(struct net_driver_s *dev)
 
   flags = enter_critical_section();
 
-  wd_cancel(priv->txpoll);
+  wd_cancel(&priv->txpoll);
 
   /* Mark the device "down" */
 

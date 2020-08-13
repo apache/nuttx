@@ -480,7 +480,7 @@ static int ads7843e_schedule(FAR struct ads7843e_dev_s *priv)
    * while the pen remains down.
    */
 
-  wd_cancel(priv->wdog);
+  wd_cancel(&priv->wdog);
 
   /* Transfer processing to the worker thread.  Since ADS7843E interrupts are
    * disabled while the work is pending, no special action should be required
@@ -501,7 +501,7 @@ static int ads7843e_schedule(FAR struct ads7843e_dev_s *priv)
  * Name: ads7843e_wdog
  ****************************************************************************/
 
-static void ads7843e_wdog(int argc, uint32_t arg1, ...)
+static void ads7843e_wdog(int argc, wdparm_t arg1, ...)
 {
   FAR struct ads7843e_dev_s *priv =
     (FAR struct ads7843e_dev_s *)((uintptr_t)arg1);
@@ -537,7 +537,7 @@ static void ads7843e_worker(FAR void *arg)
    * by this function and this function is serialized on the worker thread.
    */
 
-  wd_cancel(priv->wdog);
+  wd_cancel(&priv->wdog);
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -602,8 +602,8 @@ static void ads7843e_worker(FAR void *arg)
        * later.
        */
 
-      wd_start(priv->wdog, ADS7843E_WDOG_DELAY, ads7843e_wdog, 1,
-               (uint32_t)priv);
+      wd_start(&priv->wdog, ADS7843E_WDOG_DELAY,
+               ads7843e_wdog, 1, (wdparm_t)priv);
       goto ignored;
     }
   else
@@ -637,8 +637,8 @@ static void ads7843e_worker(FAR void *arg)
 
       /* Continue to sample the position while the pen is down */
 
-      wd_start(priv->wdog, ADS7843E_WDOG_DELAY, ads7843e_wdog, 1,
-               (uint32_t)priv);
+      wd_start(&priv->wdog, ADS7843E_WDOG_DELAY,
+               ads7843e_wdog, 1, (wdparm_t)priv);
 
       /* Check the thresholds.  Bail if there is no significant difference */
 
@@ -1171,7 +1171,6 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   memset(priv, 0, sizeof(struct ads7843e_dev_s));
   priv->spi     = spi;               /* Save the SPI device handle */
   priv->config  = config;            /* Save the board configuration */
-  priv->wdog    = wd_create();       /* Create a watchdog timer */
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
   priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
 

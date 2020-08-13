@@ -237,8 +237,8 @@ struct kinetis_driver_s
   uint8_t txhead;              /* The next TX descriptor to use */
   uint8_t rxtail;              /* The next RX descriptor to use */
   uint8_t phyaddr;             /* Selected PHY address */
-  WDOG_ID txpoll;              /* TX poll timer */
-  WDOG_ID txtimeout;           /* TX timeout timer */
+  struct wdog_s txpoll;        /* TX poll timer */
+  struct wdog_s txtimeout;     /* TX timeout timer */
   uint32_t ints;               /* Enabled interrupts */
   struct work_s irqwork;       /* For deferring interrupt work to the work queue */
   struct work_s pollwork;      /* For deferring poll work to the work queue */
@@ -306,10 +306,10 @@ static int  kinetis_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void kinetis_txtimeout_work(FAR void *arg);
-static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void kinetis_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void kinetis_poll_work(FAR void *arg);
-static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...);
+static void kinetis_polltimer_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -520,8 +520,8 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, KINETIS_TXTIMEOUT, kinetis_txtimeout_expiry,
-           1, (wdparm_t)priv);
+  wd_start(&priv->txtimeout, KINETIS_TXTIMEOUT,
+           kinetis_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
 
@@ -645,11 +645,9 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
         (uint8_t *)kinesis_swap32((uint32_t)priv->rxdesc[priv->rxtail].data);
 
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet
-       * tap
-       */
+      /* When packet sockets are enabled, feed the frame into the tap */
 
-       pkt_input(&priv->dev);
+      pkt_input(&priv->dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -823,7 +821,7 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
     {
       /* No.. Cancel the TX timeout and disable further Tx interrupts. */
 
-      wd_cancel(priv->txtimeout);
+      wd_cancel(&priv->txtimeout);
       priv->ints &= ~TX_INTERRUPTS;
       modifyreg32(KINETIS_ENET_EIMR, TX_INTERRUPTS, priv->ints);
     }
@@ -977,7 +975,7 @@ static int kinetis_interrupt(int irq, FAR void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(priv->txtimeout);
+       wd_cancel(&priv->txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -1044,7 +1042,7 @@ static void kinetis_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void kinetis_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void kinetis_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
@@ -1102,8 +1100,8 @@ static void kinetis_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again in any case */
 
-  wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry,
-           1, (wdparm_t)priv);
+  wd_start(&priv->txpoll, KINETIS_WDDELAY,
+           kinetis_polltimer_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1125,7 +1123,7 @@ static void kinetis_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void kinetis_polltimer_expiry(int argc, uint32_t arg, ...)
+static void kinetis_polltimer_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
@@ -1245,8 +1243,8 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, KINETIS_WDDELAY, kinetis_polltimer_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(&priv->txpoll, KINETIS_WDDELAY,
+           kinetis_polltimer_expiry, 1, (wdparm_t)priv);
 
   putreg32(0, KINETIS_ENET_EIMR);
 
@@ -1311,8 +1309,8 @@ static int kinetis_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the kinetis_ifup() always
@@ -2233,12 +2231,7 @@ int kinetis_netinitialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = kinetis_ioctl;    /* Support PHY ioctl() calls */
 #endif
-  priv->dev.d_private = (void *)g_enet;   /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll        = wd_create();      /* Create periodic poll timer */
-  priv->txtimeout     = wd_create();      /* Create TX timeout timer */
+  priv->dev.d_private = g_enet;           /* Used to recover private state from dev */
 
 #ifdef CONFIG_NET_ETHERNET
   /* Determine a semi-unique MAC address from MCU UID

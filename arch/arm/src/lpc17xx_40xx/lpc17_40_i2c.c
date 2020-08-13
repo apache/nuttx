@@ -112,7 +112,7 @@ struct lpc17_40_i2cdev_s
   sem_t            mutex;      /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for state machine completion */
   volatile uint8_t state;      /* State of state machine */
-  WDOG_ID          timeout;    /* Watchdog to timeout when bus hung */
+  struct wdog_s    timeout;    /* Watchdog to timeout when bus hung */
   uint32_t         frequency;  /* Current I2C frequency */
 
   struct i2c_msg_s *msgs;      /* remaining transfers - first one is in progress */
@@ -129,7 +129,7 @@ struct lpc17_40_i2cdev_s
 static int  lpc17_40_i2c_start(struct lpc17_40_i2cdev_s *priv);
 static void lpc17_40_i2c_stop(struct lpc17_40_i2cdev_s *priv);
 static int  lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg);
-static void lpc17_40_i2c_timeout(int argc, uint32_t arg, ...);
+static void lpc17_40_i2c_timeout(int argc, wdparm_t arg, ...);
 static void lpc17_40_i2c_setfrequency(struct lpc17_40_i2cdev_s *priv,
               uint32_t frequency);
 static void lpc17_40_stopnext(struct lpc17_40_i2cdev_s *priv);
@@ -238,8 +238,8 @@ static int lpc17_40_i2c_start(struct lpc17_40_i2cdev_s *priv)
 
   priv->state = 0x00;
 
-  wd_start(priv->timeout, timeout, lpc17_40_i2c_timeout, 1,
-           (uint32_t)priv);
+  wd_start(&priv->timeout, timeout,
+           lpc17_40_i2c_timeout, 1, (wdparm_t)priv);
   nxsem_wait(&priv->wait);
 
   return priv->nmsg;
@@ -261,7 +261,7 @@ static void lpc17_40_i2c_stop(struct lpc17_40_i2cdev_s *priv)
                priv->base + LPC17_40_I2C_CONSET_OFFSET);
     }
 
-  wd_cancel(priv->timeout);
+  wd_cancel(&priv->timeout);
   nxsem_post(&priv->wait);
 }
 
@@ -273,7 +273,7 @@ static void lpc17_40_i2c_stop(struct lpc17_40_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static void lpc17_40_i2c_timeout(int argc, uint32_t arg, ...)
+static void lpc17_40_i2c_timeout(int argc, wdparm_t arg, ...)
 {
   struct lpc17_40_i2cdev_s *priv = (struct lpc17_40_i2cdev_s *)arg;
 
@@ -403,6 +403,7 @@ static int lpc17_40_i2c_interrupt(int irq, FAR void *context, void *arg)
     {
     case 0x08:     /* A START condition has been transmitted. */
     case 0x10:     /* A Repeated START condition has been transmitted. */
+
       /* Set address */
 
       putreg32(((I2C_M_READ & msg->flags) == I2C_M_READ) ?
@@ -629,11 +630,6 @@ struct i2c_master_s *lpc17_40_i2cbus_initialize(int port)
 
   nxsem_set_protocol(&priv->wait, SEM_PRIO_NONE);
 
-  /* Allocate a watchdog timer */
-
-  priv->timeout = wd_create();
-  DEBUGASSERT(priv->timeout != 0);
-
   /* Attach Interrupt Handler */
 
   irq_attach(priv->irqid, lpc17_40_i2c_interrupt, priv);
@@ -669,10 +665,9 @@ int lpc17_40_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
   nxsem_destroy(&priv->mutex);
   nxsem_destroy(&priv->wait);
 
-  /* Free the watchdog timer */
+  /* Cancel the watchdog timer */
 
-  wd_delete(priv->timeout);
-  priv->timeout = NULL;
+  wd_cancel(&priv->timeout);
 
   /* Disable interrupts */
 

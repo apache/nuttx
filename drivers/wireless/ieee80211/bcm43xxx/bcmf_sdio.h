@@ -105,7 +105,7 @@ struct bcmf_sdio_dev_s
 
   int thread_id;                   /* Processing thread id */
   sem_t thread_signal;             /* Semaphore for processing thread event */
-  struct wdog_s *waitdog;          /* Processing thread waitdog */
+  struct wdog_s waitdog;           /* Processing thread waitdog */
 
   uint32_t backplane_current_addr; /* Current function 1 backplane base addr */
 

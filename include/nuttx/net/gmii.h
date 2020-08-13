@@ -79,7 +79,7 @@
 #define GMII_KSZ90x1_LINKMD           18              /* LinkMD(c) cable diagnostic */
 #define GMII_KSZ90x1_PMAPCS           19              /* Digital PMA/PCS status */
 #define GMII_KSZ90x1_RXERR            21              /* RXER counter */
-#define GMII_KSZ90x1_ICS              27              /* Interrupt control/status */
+#define GMII_KSZ90X1_ICS              27              /* Interrupt control/status */
 #define GMII_KSZ90x1_DBGCTRL1         28              /* Digital debug control 1 */
 #define GMII_KSZ90x1_PHYCTRL          31              /* PHY control */
 
@@ -89,8 +89,8 @@
 #define GMII_KSZ90x1_SSR              257             /* Strap status */
 #define GMII_KSZ90x1_OMSOR            258             /* Operation mode strap override */
 #define GMII_KSZ90x1_OMSSR            259             /* Operation mode strap status */
-#define GMII_KSZ90x1_RCCPSR           260             /* RGMII clock and control pad skew */
-#define GMII_KSZ90x1_RRDPSR           261             /* RGMII RX data pad skew */
+#define GMII_KSZ90X1_RCCPSR           260             /* RGMII clock and control pad skew */
+#define GMII_KSZ90X1_RRDPSR           261             /* RGMII RX data pad skew */
 #define GMII_KSZ90x1_ATR              263             /* Analog test register */
 
 /* MII register bit settings *****************************************************************/
@@ -233,6 +233,7 @@
 #define GMII_ESTATUS_1000BASEXFULL    MII_ESTATUS_1000BASEXFULL
 
 /* 1000BASE-T Control Register */
+
                                                 /* Bits 0-7: Reserved */
 #define GMII_1000BTCR_1000BASETHALF   (1 << 8)  /* Bit 8:  1000Base-T half duplex able */
 #define GMII_1000BTCR_1000BASETFULL   (1 << 9)  /* Bit 9:  1000Base-T full duplex able */
@@ -267,6 +268,7 @@
 #define GMII_ERCR_WRITE               (1 << 15) /* Bit 15: 1=Write extended register */
 
 /* Extend Register - Data Write Register (16-bit data value) */
+
 /* Extend Register - Data Read Register (16-bit data value) */
 
 /* Micrel KSZ9021/31 Vendor Specific Register Bit Definitions ********************************/
@@ -278,9 +280,9 @@
 #define GMII_KSZ90x1_INT_PREN         (1 << 13) /* Page received interrupt enable */
 #define GMII_KSZ90x1_INT_PDFEN        (1 << 12) /* Parallel detect fault interrupt enable */
 #define GMII_KSZ90x1_INT_LPAEN        (1 << 11) /* Link partner acknowledge interrupt enable */
-#define GMII_KSZ90x1_INT_LDEN         (1 << 10) /* Link down fault interrupt enable */
+#define GMII_KSZ90X1_INT_LDEN         (1 << 10) /* Link down fault interrupt enable */
 #define GMII_KSZ90x1_INT_RFEN         (1 << 9)  /* Remote fault interrupt enable */
-#define GMII_KSZ90x1_INT_LUEN         (1 << 8)  /* Link up interrupt enable */
+#define GMII_KSZ90X1_INT_LUEN         (1 << 8)  /* Link up interrupt enable */
 
 #define GMII_KSZ90x1_INT_J            (1 << 7)  /* Jabber interrupt */
 #define GMII_KSZ90x1_INT_RE           (1 << 6)  /* Receive error interrupt */

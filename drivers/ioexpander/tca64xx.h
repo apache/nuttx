@@ -63,6 +63,7 @@
  ********************************************************************************************/
 
 /* Configuration ****************************************************************************/
+
 /* Prerequisites:
  *   CONFIG_I2C
  *     I2C support is required
@@ -201,10 +202,10 @@ struct tca64_part_s
 
 struct tca64_callback_s
 {
-   ioe_pinset_t pinset;              /* Set of pin interrupts that will generate
-                                      * the callback. */
-   ioe_callback_t cbfunc;            /* The saved callback function pointer */
-   FAR void *cbarg;                  /* Callback argument */
+  ioe_pinset_t pinset;              /* Set of pin interrupts that will generate
+                                     * the callback. */
+  ioe_callback_t cbfunc;            /* The saved callback function pointer */
+  FAR void *cbarg;                  /* Callback argument */
 };
 #endif
 
@@ -221,7 +222,7 @@ struct tca64_dev_s
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 #ifdef CONFIG_TCA64XX_INT_POLL
-  WDOG_ID wdog;                      /* Timer used to poll for missed interrupts */
+  struct wdog_s wdog;                /* Timer used to poll for missed interrupts */
 #endif
 
   ioe_pinset_t input;                /* Last input registers */

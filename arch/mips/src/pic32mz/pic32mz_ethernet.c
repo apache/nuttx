@@ -386,8 +386,8 @@ struct pic32mz_driver_s
 #endif
   uint8_t    pd_txnext;         /* Index to the next Tx descriptor */
   uint32_t   pd_inten;          /* Shadow copy of INTEN register */
-  WDOG_ID    pd_txpoll;         /* TX poll timer */
-  WDOG_ID    pd_txtimeout;      /* TX timeout timer */
+  struct wdog_s pd_txpoll;      /* TX poll timer */
+  struct wdog_s pd_txtimeout;   /* TX timeout timer */
   struct work_s pd_irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s pd_pollwork;    /* For deferring poll work to the work queue */
 
@@ -478,10 +478,10 @@ static int  pic32mz_interrupt(int irq, void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void pic32mz_txtimeout_work(void *arg);
-static void pic32mz_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void pic32mz_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void pic32mz_poll_work(void *arg);
-static void pic32mz_poll_expiry(int argc, uint32_t arg, ...);
+static void pic32mz_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -1217,8 +1217,8 @@ static int pic32mz_transmit(struct pic32mz_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->pd_txtimeout, PIC32MZ_TXTIMEOUT,
-           pic32mz_txtimeout_expiry, 1, (uint32_t)priv);
+  wd_start(&priv->pd_txtimeout, PIC32MZ_TXTIMEOUT,
+           pic32mz_txtimeout_expiry, 1, (wdparm_t)priv);
 
   return OK;
 }
@@ -1746,7 +1746,7 @@ static void pic32mz_txdone(struct pic32mz_driver_s *priv)
 
   /* Cancel the pending Tx timeout */
 
-  wd_cancel(priv->pd_txtimeout);
+  wd_cancel(&priv->pd_txtimeout);
 
   /* Disable further Tx interrupts.  Tx interrupts may be re-enabled again
    * depending upon the result of the poll.
@@ -2073,7 +2073,7 @@ static int pic32mz_interrupt(int irq, void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(priv->pd_txtimeout);
+       wd_cancel(&priv->pd_txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -2202,8 +2202,8 @@ static void pic32mz_poll_work(void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY, pic32mz_poll_expiry,
-           1, priv);
+  wd_start(&priv->pd_txpoll, PIC32MZ_WDDELAY,
+           pic32mz_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -2545,8 +2545,8 @@ static int pic32mz_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->pd_txpoll, PIC32MZ_WDDELAY, pic32mz_poll_expiry, 1,
-           (uint32_t)priv);
+  wd_start(&priv->pd_txpoll, PIC32MZ_WDDELAY,
+           pic32mz_poll_expiry, 1, (wdparm_t)priv);
 
   /* Finally, enable the Ethernet interrupt at the interrupt controller */
 
@@ -2593,8 +2593,8 @@ static int pic32mz_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->pd_txpoll);
-  wd_cancel(priv->pd_txtimeout);
+  wd_cancel(&priv->pd_txpoll);
+  wd_cancel(&priv->pd_txtimeout);
 
   /* Reset the device and mark it as down. */
 
@@ -3577,19 +3577,14 @@ static inline int pic32mz_ethinitialize(int intf)
   priv->pd_dev.d_addmac  = pic32mz_addmac;  /* Add multicast MAC address */
   priv->pd_dev.d_rmmac   = pic32mz_rmmac;   /* Remove multicast MAC address */
 #endif
-  priv->pd_dev.d_private = (void *)priv;    /* Used to recover private state from dev */
+  priv->pd_dev.d_private = priv;            /* Used to recover private state from dev */
 
 #if CONFIG_PIC32MZ_NINTERFACES > 1
 #  error "A mechanism to associate base address an IRQ with an interface is needed"
-  priv->pd_base          = ;            /* Ethernet controller base address */
-  priv->pd_irq           = ;            /* Ethernet controller IRQ vector number */
-  priv->pd_irqsrc        = ;            /* Ethernet controller IRQ source number */
+  priv->pd_base          = ;                /* Ethernet controller base address */
+  priv->pd_irq           = ;                /* Ethernet controller IRQ vector number */
+  priv->pd_irqsrc        = ;                /* Ethernet controller IRQ source number */
 #endif
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->pd_txpoll        = wd_create();   /* Create periodic poll timer */
-  priv->pd_txtimeout     = wd_create();   /* Create TX timeout timer */
 
   /* Configure Ethernet peripheral pin selections */
 

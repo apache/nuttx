@@ -58,8 +58,10 @@
 #define FTW_MOUNT  2  /* The walk does not cross a mount point. */
 #define FTW_DEPTH  4  /* All subdirectories are visited before the directory
                        * itself. */
+#ifndef CONFIG_DISABLE_ENVIRON
 #define FTW_CHDIR  8  /* The walk changes to each directory before reading
                        * it.  */
+#endif
 
 /****************************************************************************
  * Public Types
@@ -67,7 +69,7 @@
 
 /* The fourth argument of the ftw/nftw callback is a pointer to an FTW
  * structure.  The value of base is the offset of the object's filename in
- * the pathname passed as the first argument to the callbaqck.  The value of
+ * the pathname passed as the first argument to the callback.  The value of
  * level indicates depth relative to the root of the walk, where the root
  * level is 0.
  */
@@ -78,10 +80,15 @@ struct FTW
   int level;   /* Depth relative to the root of the walk */
 };
 
-/* This is the type of the ftw/nftw callback */
+/* This is the type of the ftw callback */
 
 typedef int (*ftw_cb_t)(FAR const char *path, FAR const struct stat *buf,
-                        int info, FAR struct FTW *pftw);
+                        int info);
+
+/* This is the type of the nftw callback */
+
+typedef int (*nftw_cb_t)(FAR const char *path, FAR const struct stat *buf,
+                         int info, FAR struct FTW *pftw);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -205,7 +212,7 @@ int ftw(FAR const char *path, ftw_cb_t fn, int fdlimit);
  *
  ****************************************************************************/
 
-int nftw(FAR const char *path, ftw_cb_t fn, int fdlimit, int flags);
+int nftw(FAR const char *path, nftw_cb_t fn, int fdlimit, int flags);
 
 #undef EXTERN
 #ifdef __cplusplus

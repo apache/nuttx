@@ -105,8 +105,8 @@
 
 #define NET_TUN_PKTSIZE ((CONFIG_NET_TUN_PKTSIZE + CONFIG_NET_GUARDSIZE + 1) & ~1)
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
- * second
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
  */
 
 #define TUN_WDDELAY  (1 * CLK_TCK)
@@ -137,7 +137,7 @@ struct tun_device_s
   bool              bifup;     /* true:ifup false:ifdown */
   bool              read_wait;
   bool              write_wait;
-  WDOG_ID           txpoll;    /* TX poll timer */
+  struct wdog_s     txpoll;    /* TX poll timer */
   struct work_s     work;      /* For deferring poll work to the work queue */
   FAR struct pollfd *poll_fds;
   sem_t             waitsem;
@@ -572,7 +572,7 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
   NETDEV_RXPACKETS(&priv->dev);
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(&priv->dev);
 #endif
@@ -684,7 +684,7 @@ static void tun_net_receive_tun(FAR struct tun_device_s *priv)
   NETDEV_RXPACKETS(&priv->dev);
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(&priv->dev);
 #endif
@@ -721,7 +721,7 @@ static void tun_net_receive_tun(FAR struct tun_device_s *priv)
     }
 
   /* If the above function invocation resulted in data that should be
-   * sent out on the network, the field  d_len will set to a value > 0.
+   * sent out on the network, d_len field will set to a value > 0.
    */
 
   if (priv->dev.d_len > 0)
@@ -811,7 +811,7 @@ static void tun_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, priv);
+  wd_start(&priv->txpoll, TUN_WDDELAY, tun_poll_expiry, 1, (wdparm_t)priv);
 
   net_unlock();
   tun_unlock(priv);
@@ -879,8 +879,8 @@ static int tun_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, TUN_WDDELAY, tun_poll_expiry,
-           1, (wdparm_t)priv);
+  wd_start(&priv->txpoll, TUN_WDDELAY,
+           tun_poll_expiry, 1, (wdparm_t)priv);
 
   priv->bifup = true;
   return OK;
@@ -911,7 +911,7 @@ static int tun_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer */
 
-  wd_cancel(priv->txpoll);
+  wd_cancel(&priv->txpoll);
 
   /* Mark the device "down" */
 
@@ -1092,7 +1092,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv,
   priv->dev.d_addmac  = tun_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = tun_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->dev.d_private = (FAR void *)priv; /* Used to recover private state from dev */
+  priv->dev.d_private = priv;         /* Used to recover private state from dev */
 
   /* Initialize the mutual exlcusion and wait semaphore */
 
@@ -1106,10 +1106,6 @@ static int tun_dev_init(FAR struct tun_device_s *priv,
 
   nxsem_set_protocol(&priv->read_wait_sem, SEM_PRIO_NONE);
   nxsem_set_protocol(&priv->write_wait_sem, SEM_PRIO_NONE);
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll = wd_create(); /* Create periodic poll timer */
 
   /* Assign d_ifname if specified. */
 

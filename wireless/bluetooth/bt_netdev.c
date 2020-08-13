@@ -123,7 +123,7 @@ struct btnet_driver_s
 
   sem_t bd_exclsem;                  /* Exclusive access to struct */
   bool bd_bifup;                     /* true:ifup false:ifdown */
-  WDOG_ID bd_txpoll;                 /* TX poll timer */
+  struct wdog_s bd_txpoll;           /* TX poll timer */
   struct work_s bd_pollwork;         /* Defer poll work to the work queue */
   struct bt_conn_cb_s bd_hcicb;      /* HCI connection status callbacks */
   struct bt_l2cap_chan_s bd_l2capcb; /* L2CAP status callbacks */
@@ -549,8 +549,8 @@ static void btnet_txpoll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->bd_txpoll, TXPOLL_WDDELAY, btnet_txpoll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(&priv->bd_txpoll, TXPOLL_WDDELAY,
+           btnet_txpoll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -629,8 +629,8 @@ static int btnet_ifup(FAR struct net_driver_s *netdev)
 
       /* Set and activate a timer process */
 
-      wd_start(priv->bd_txpoll, TXPOLL_WDDELAY, btnet_txpoll_expiry,
-               1, (wdparm_t)priv);
+      wd_start(&priv->bd_txpoll, TXPOLL_WDDELAY,
+               btnet_txpoll_expiry, 1, (wdparm_t)priv);
 
       /* The interface is now up */
 
@@ -669,7 +669,7 @@ static int btnet_ifdown(FAR struct net_driver_s *netdev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->bd_txpoll);
+  wd_cancel(&priv->bd_txpoll);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the btnet_ifup() always
@@ -1039,7 +1039,7 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev)
  #ifdef CONFIG_NETDEV_IOCTL
   netdev->d_ioctl     = btnet_ioctl;       /* Handle network IOCTL commands */
 #endif
-  netdev->d_private   = (FAR void *)priv;  /* Used to recover private state from netdev */
+  netdev->d_private   = priv;              /* Used to recover private state from netdev */
 
   /* Connection status change callbacks */
 
@@ -1060,10 +1060,6 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev)
   l2capcb->receive        = btnet_l2cap_receive;
 
   bt_l2cap_chan_default(l2capcb);
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->bd_txpoll     = wd_create();       /* Create periodic poll timer */
 
   /* Setup a locking semaphore for exclusive device driver access */
 
@@ -1136,10 +1132,6 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev)
   nerr("ERROR: netdev_register() failed: %d\n", ret);
 
 errout:
-
-  /* Release wdog timers */
-
-  wd_delete(priv->bd_txpoll);
 
   /* Un-initialize semaphores */
 

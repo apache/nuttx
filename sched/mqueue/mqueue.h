@@ -51,7 +51,7 @@
  * "gulp."
  */
 
-#define NUM_MSG_DESCRIPTORS 24
+#define NUM_MSG_DESCRIPTORS  4
 
 /* This defines the number of messages to set aside for exclusive use by
  * interrupt handlers

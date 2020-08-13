@@ -496,7 +496,7 @@ struct khci_usbdev_s
   uint8_t rxbusy:1;                    /* EP0 OUT data transfer in progress */
   uint16_t epavail;                    /* Bitset of available endpoints */
   uint16_t epstalled;                  /* Bitset of stalled endpoints */
-  WDOG_ID wdog;                        /* Supports the restart delay */
+  struct wdog_s wdog;                  /* Supports the restart delay */
 
   uint8_t out0data[2][CONFIG_USBDEV_EP0_MAXSIZE];
   uint8_t ep0data[CONFIG_USBDEV_SETUP_MAXDATASIZE];
@@ -547,7 +547,7 @@ static void   khci_epwrite(struct khci_ep_s *privep,
                 const uint8_t *src, uint32_t nbytes);
 static void   khci_wrcomplete(struct khci_usbdev_s *priv,
                 struct khci_ep_s *privep);
-static void   khci_rqrestart(int argc, uint32_t arg1, ...);
+static void   khci_rqrestart(int argc, wdparm_t arg1, ...);
 static void   khci_delayedrestart(struct khci_usbdev_s *priv,
                 uint8_t epno);
 static void   khci_rqstop(struct khci_ep_s *privep);
@@ -1050,7 +1050,7 @@ static void khci_wrcomplete(struct khci_usbdev_s *priv,
  * Name: khci_rqrestart
  ******************************************************************************************/
 
-static void khci_rqrestart(int argc, uint32_t arg1, ...)
+static void khci_rqrestart(int argc, wdparm_t arg1, ...)
 {
   struct khci_usbdev_s *priv;
   struct khci_ep_s *privep;
@@ -1118,8 +1118,8 @@ static void khci_delayedrestart(struct khci_usbdev_s *priv, uint8_t epno)
 
   /* And start (or re-start) the watchdog timer */
 
-  wd_start(priv->wdog, RESTART_DELAY, khci_rqrestart, 1,
-           (uint32_t)priv);
+  wd_start(&priv->wdog, RESTART_DELAY,
+           khci_rqrestart, 1, (wdparm_t)priv);
 }
 
 /******************************************************************************************
@@ -4356,12 +4356,6 @@ static void khci_swinitialize(struct khci_usbdev_s *priv)
   priv->epavail      = KHCI_ENDP_ALLSET & ~KHCI_ENDP_BIT(EP0);
   priv->rwakeup      = 1;
 
-  /* Initialize the watchdog timer that is used to perform a delayed
-   * queue restart after recovering from a stall.
-   */
-
-  priv->wdog      = wd_create();
-
   /* Initialize the endpoint list */
 
   for (epno = 0; epno < KHCI_NENDPOINTS; epno++)
@@ -4533,7 +4527,7 @@ void arm_usbuninitialize(void)
 
   kinetis_usbpullup(&priv->usbdev, false);
 
-  wd_delete(priv->wdog);
+  wd_cancel(&priv->wdog);
 
   /* Put the hardware in an inactive state */
 

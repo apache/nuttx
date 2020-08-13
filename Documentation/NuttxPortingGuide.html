@@ -211,6 +211,7 @@
        <a href="#sdiodrivers">6.3.7 SDIO Device Drivers</a><br>
        <a href="#usbhostdrivers">6.3.8 USB Host-Side Drivers</a><br>
        <a href="#usbdevdrivers">6.3.9 USB Device-Side Drivers</a><br>
+       <a href="#usbdevdrivers">6.3.10 SocketCAN Device Drivers</a><br>
     </ul>
     <a href="#syslog">6.4 SYSLOG</a>
     <ul>
@@ -2823,108 +2824,21 @@ int up_timer_start(FAR const struct timespec *ts);
   or <code>kill()</code> to communicate with NuttX tasks.
 </p>
 <ul>
-  <li><a href="#wdcreate">4.4.5.1 wd_create/wd_static</a></li>
-  <li><a href="#wddelete">4.4.5.2 wd_delete</a></li>
-  <li><a href="#wdstart">4.4.5.3 wd_start</a></li>
-  <li><a href="#wdcancel">4.4.5.4 wd_cancel</a></li>
-  <li><a href="#wdgettime">4.4.5.5 wd_gettime</a></li>
-  <li><a href="#wdcallback">4.4.5.6 Watchdog Timer Callback</a></li>
+  <li><a href="#wdstart">4.4.5.1 wd_start</a></li>
+  <li><a href="#wdcancel">4.4.5.2 wd_cancel</a></li>
+  <li><a href="#wdgettime">4.4.5.3 wd_gettime</a></li>
+  <li><a href="#wdcallback">4.4.5.4 Watchdog Timer Callback</a></li>
 
 </ul>
 
-<h4><a name="wdcreate">4.4.5.1 wd_create/wd_static</a></h4>
+<h4><a name="wdstart">4.4.5.1 wd_start</a></h4>
 
 <p>
 <b>Function Prototype:</b>
 <pre>
     #include &lt;nuttx/wdog.h&gt;
-    WDOG_ID wd_create(void);
-    void wd_static(FAR struct wdog_s *wdog);
-</pre>
-
-<p>
-<b>Description:</b> The <code>wd_create()</code> function will create a timer by allocating the appropriate resources for the watchdog.  The <code>wd_create()</code> function returns a pointer to a fully initialized, dynamically allocated <code>struct wdog_s</code> instance (which is <code>typedef</code>'ed as <code>WDOG_ID</code>);
-</p>
-<p>
-<code>wd_static()</code> performs the equivalent initialization of a statically allocated <code>struct wdog_s</code> instance.  No allocation is performed in this case.  The initializer definition, <code>WDOG_INITIALIZER</code> is also available for initialization of static instances of <code>struct wdog_s</code>.  NOTE: <code>wd_static()</code> is also implemented as a macro definition.
-</p>
-<p>
-<b>Input Parameters:</b> None.
-<p>
-<b>Returned Value:</b>
-<ul>
-<li>Pointer to watchdog that may be used as a handle in subsequent NuttX calls (i.e., the watchdog ID), or NULL if insufficient resources are available to create the watchdogs.
-</ul>
-
-<p>
-<b>Assumptions/Limitations:</b>
-<p>
-<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
-VxWorks provides the following comparable interface:
-<pre>
-    WDOG_ID wdCreate (void);
-</pre>
-
-<p>
-Differences from the VxWorks interface include:
-<ul>
-<li>The number of available watchdogs is fixed (configured at
-initialization time).
-</ul>
-
-<h4><a name="wddelete">4.4.5.2 wd_delete</a></h4>
-
-<p>
-<b>Function Prototype:</b>
-<pre>
-    #include &lt;nuttx/wdog.h&gt;
-    int wd_delete(WDOG_ID wdog);
-</pre>
-
-<p>
-<b>Description:</b> The wd_delete function will deallocate a watchdog timer previously allocated via <code>wd_create()</code>. The watchdog timer will be removed from the timer queue if has been started.
-<p>
-<p>
-This function need not be called for statically allocated timers (but it is not harmful to do so).
-</p>
-<b>Input Parameters:</b>
-<ul>
-<li><code>wdog</code>. The watchdog ID to delete. This is actually a
-pointer to a watchdog structure.
-</ul>
-
-<p>
-<b>Returned Value:</b>
-<ul>
-<li>Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is return to indicate the nature of any failure.
-</ul>
-
-<p>
-<b>Assumptions/Limitations:</b> It is the responsibility of the
-caller to assure that the watchdog is inactive before deleting
-it.
-<p>
-<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
-VxWorks provides the following comparable interface:
-<pre>
-    STATUS wdDelete (WDOG_ID wdog);
-</pre>
-
-<p>
-Differences from the VxWorks interface include:
-<ul>
-<li>Does not make any checks to see if the watchdog is being used
-before deallocating it (i.e., never returns ERROR).
-</ul>
-
-<h4><a name="wdstart">4.4.5.3 wd_start</a></h4>
-
-<p>
-<b>Function Prototype:</b>
-<pre>
-    #include &lt;nuttx/wdog.h&gt;
-    int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
-                 int argc, ....);
+    int wd_start(FAR struct wdog_s *wdog, int delay,
+                 wdentry_t wdentry, int argc, ....);
 </pre>
 
 <p>
@@ -2979,12 +2893,12 @@ to wdentry; VxWorks supports only a single parameter.  The maximum
 number of parameters is determined by
 </ul>
 
-<h4><a name="wdcancel">4.4.5.4 wd_cancel</a></h4>
+<h4><a name="wdcancel">4.4.5.2 wd_cancel</a></h4>
 <p>
 <b>Function Prototype:</b>
 <pre>
     #include &lt;nuttx/wdog.h&gt;
-    int wd_cancel(WDOG_ID wdog);
+    int wd_cancel(FAR struct wdog_s *wdog);
 </pre>
 
 <p>
@@ -3012,13 +2926,13 @@ VxWorks provides the following comparable interface:
     STATUS wdCancel (WDOG_ID wdog);
 </pre>
 
-<h3><a name="wdgettime">4.4.5.5 wd_gettime</a></h3>
+<h3><a name="wdgettime">4.4.5.3 wd_gettime</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
 <pre>
     #include &lt;nuttx/wdog.h&gt;
-    int wd_gettime(WDOG_ID wdog);
+    int wd_gettime(FAR struct wdog_s *wdog);
 </pre>
 <p>
   <b>Description:</b>
@@ -3036,12 +2950,12 @@ VxWorks provides the following comparable interface:
   means either that wdog is not valid or that the wdog has already expired.
 </p>
 
-<h4><a name="wdcallback">4.4.5.6 Watchdog Timer Callback</a></h4>
+<h4><a name="wdcallback">4.4.5.4 Watchdog Timer Callback</a></h4>
 <p>
   When a watchdog expires, the callback function with this type is called:
 </p>
 <pre>
-    typedef void (*wdentry_t)(int argc, ...);
+    typedef void (*wdentry_t)(int argc, wdparm_t arg1, ...);
 </pre>
 <p>
   Where <code>argc</code> is the number of <code>wdparm_t</code> type arguments that follow.
@@ -6470,6 +6384,77 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
             completing the initialization.
           </p>
         </li>
+      </ol>
+    </p>
+  </li>
+</ul>
+
+<h3><a name="usbdevdrivers">6.3.10 SocketCAN Device Drivers</a></h3>
+
+<ul>
+  <li>
+    <p>
+      <b><code>include/nuttx/net/netdev.h</code></b>.
+      All structures and APIs needed to work with drivers are provided in this header file. The structure struct net_driver_s defines the interface and is passed to the network via netdev_register().
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>include/nuttx/can.h</code></b>.
+      CAN & CAN FD frame data structures.
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)'</code></b>.
+      Each driver registers itself by calling netdev_register().
+    </p>
+  </li>
+    <li>
+    <p>
+      <b><code>Include/nuttx/net/can.h</code></b>.
+      contains lookup tables for CAN dlc to CAN FD len sizes named
+    </p>
+    <code>
+	extern const uint8_t can_dlc_to_len[16];
+    </code></br>
+    <code>
+	extern const uint8_t len_to_can_dlc[65];
+    </code>
+  </li>
+  <li>
+    <p>
+      <b>Initialization sequence is as follows</b>.
+      <ol>
+        <li>up_netinitialize(void) is called on startup of NuttX in this function you call your own init function to initialize your CAN driver</li>
+        <li>In your own init function you create the net_driver_s structure set required init values and register the required callbacks for SocketCAN</li>
+        <li>Then you ensure that the CAN interface is in down mode (usually done by calling the d_ifdown function)</li>
+        <li>Register the net_driver_s using netdev_register</li>
+      </ol>
+    </p>
+  </li>
+  <li>
+    <p>
+      <b>Receive sequence is as follows</b>.
+      <ol>
+        <li>Device generates interrupt</li>
+        <li>Process this interrupt in your interrupt handler</li>
+        <li>When a new CAN frame has been received you process this frame</li>
+        <li>When the CAN frame is a normal CAN frame you allocate the can_frame struct, when it's a CAN FD frame you allocate a canfd_frame struct (note you can of course preallocate and just use the pointer).</li>
+        <li>Copy the frame from the driver to the struct you've allocated in the previous step.</li>
+        <li>Point the net_driver_s d_buf pointer to the allocated can_frame</li>
+        <li>Call the <code>can_input(FAR struct net_driver_s *dev)</code> function <code>include/nuttx/net/can.h</code></li>
+      </ol>
+    </p>
+  </li>
+  <li>
+    <p>
+      <b>Transmit sequence is as follows</b>.
+      <ol>
+        <li>Socket layer executes d_txavail callback</li>
+        <li>An example of the txavail function can be found in <code>arch/arm/src/s32k1xx/s32k1xx_flexcan.c</code></li>
+        <li>An example of the txpoll function can be found in <code>arch/arm/src/s32k1xx/s32k1xx_flexcan.c</code></li>
+        <li>In your <code>transmit(struct driver_s *priv)</code> function you check the length of <code>net_driver_s.d_len</code> whether it matches the size of a <code>struct can_frame</code> or <code>struct canfd_frame</code> then you cast the content of the <code>net_driver_s.d_buf</code> pointer to the correct CAN frame struct</li>
       </ol>
     </p>
   </li>

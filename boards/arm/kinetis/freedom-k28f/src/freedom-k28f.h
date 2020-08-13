@@ -52,7 +52,13 @@
 /* Assume we have everything */
 
 #define HAVE_MMCSD       1
-#define HAVE_AUTOMOUNTER 1
+#define HAVE_USB_MSC     1
+#ifdef CONFIG_FRDMK28F_SDHC_AUTOMOUNT
+#  define HAVE_SDHC_AUTOMOUNTER 1
+#endif
+#ifdef CONFIG_FRDMK28F_USB_AUTOMOUNT
+#  define HAVE_USB_AUTOMOUNTER 1
+#endif
 
 /* SD card support */
 
@@ -77,6 +83,12 @@
 #    define MMSCD_MINOR 0
 #  endif
 
+/* Check for USB_HOST and USB_MSC */
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || \
+  !defined(CONFIG_KINETIS_USBHS) || !defined(CONFIG_USBHOST_MSC)
+#  undef HAVE_USB_MSC
+#endif
+
 /* We expect to receive GPIO interrupts for card insertion events */
 
 #  ifndef CONFIG_KINETIS_GPIOIRQ
@@ -92,17 +104,16 @@
 /* Automounter */
 
 #if !defined(CONFIG_FS_AUTOMOUNTER) || !defined(HAVE_MMCSD)
-#  undef HAVE_AUTOMOUNTER
-#  undef CONFIG_FRDMK28F_SDHC_AUTOMOUNT
+#  undef HAVE_SDHC_AUTOMOUNTER
 #endif
 
-#ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT
-#  undef HAVE_AUTOMOUNTER
+#if !defined(HAVE_USB_MSC) || !defined(CONFIG_USBHOST_MSC_NOTIFIER)
+#  undef HAVE_USB_AUTOMOUNTER
 #endif
 
 /* Automounter defaults */
 
-#ifdef HAVE_AUTOMOUNTER
+#ifdef HAVE_SDHC_AUTOMOUNTER
 
 #  ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT_FSTYPE
 #    define CONFIG_FRDMK28F_SDHC_AUTOMOUNT_FSTYPE "vfat"
@@ -123,7 +134,30 @@
 #  ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT_UDELAY
 #    define CONFIG_FRDMK28F_SDHC_AUTOMOUNT_UDELAY 2000
 #  endif
-#endif /* HAVE_AUTOMOUNTER */
+#endif /* HAVE_SDHC_AUTOMOUNTER */
+
+#ifdef HAVE_USB_AUTOMOUNTER
+
+#  ifndef CONFIG_FRDMK28F_USB_AUTOMOUNT_FSTYPE
+#    define CONFIG_FRDMK28F_USB_AUTOMOUNT_FSTYPE "vfat"
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_USB_AUTOMOUNT_BLKDEV
+#    define CONFIG_FRDMK28F_USB_AUTOMOUNT_BLKDEV "/dev/sd"
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_USB_AUTOMOUNT_MOUNTPOINT
+#    define CONFIG_FRDMK28F_USB_AUTOMOUNT_MOUNTPOINT "/mnt/usb"
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV
+#    define CONFIG_FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV 4
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_USB_AUTOMOUNT_UDELAY
+#    define CONFIG_FRDMK28F_USB_AUTOMOUNT_UDELAY 2000
+#  endif
+#endif /* HAVE_USB_AUTOMOUNTER */
 
 /* Freedom-K28F GPIOs *******************************************************/
 
@@ -145,9 +179,9 @@
  *   BLUE   PTE8
  */
 
-#define GPIO_LED_R         (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN6)
-#define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN7)
-#define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN8)
+#define GPIO_LED_R (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN6)
+#define GPIO_LED_G (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN7)
+#define GPIO_LED_B (GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTE | PIN8)
 
 /* Two push buttons, SW2 and SW3, are available on FRDM-K28F board, where SW2
  * is connected to PTA4 and SW3 is connected to PTD0.
@@ -156,13 +190,22 @@
  * Also, only SW3 can be a non-maskable interrupt.
  *
  *   Switch    GPIO Function
- *   --------- ---------------------------------------------------------------
+ *   --------- --------------------------------------------------------------
  *   SW2       PTA4/NMI_B
  *   SW3       PTD0/LLWU_P12
  */
 
 #define GPIO_SW2           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTA | PIN4)
 #define GPIO_SW3           (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTD | PIN0)
+
+/* A micro Secure Digital (SD) card slot is available on the FRDM-K28F
+ * connected to the SD Host Controller (SDHC) signals of the MCU.
+ * This slot will accept micro format SD memory cards.
+ * The SD card detect pin (PTB5) is an open switch that shorts with VDD when
+ * card is inserted.
+ */
+
+#define GPIO_SD_CARDDETECT (GPIO_INPUT | PIN_INT_BOTH | PIN_PORTB | PIN5)
 
 /****************************************************************************
  * Public Types
@@ -235,6 +278,20 @@ void k28_i2cdev_initialize(void);
 extern void weak_function k28_usbdev_initialize(void);
 
 /****************************************************************************
+ * Name: k28_usbhost_initialize
+ *
+ * Description:
+ *   Inititialize USB High Speed Host
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_KINETIS_USBHS) && defined(CONFIG_USBHOST)
+int k28_usbhost_initialize(void);
+#else
+#  define k28_usbhost_initialize() (OK)
+#endif
+
+/****************************************************************************
  * Name: k28_sdhc_initialize
  *
  * Description:
@@ -256,7 +313,7 @@ int k28_sdhc_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef HAVE_AUTOMOUNTER
+#ifdef HAVE_SDHC_AUTOMOUNTER
 bool k28_cardinserted(void);
 #else
 #  define k28_cardinserted() (false)
@@ -270,10 +327,35 @@ bool k28_cardinserted(void);
  *
  ****************************************************************************/
 
-#ifdef HAVE_AUTOMOUNTER
+#ifdef HAVE_SDHC_AUTOMOUNTER
 bool k28_writeprotected(void);
 #else
 #  define k28_writeprotected() (false)
+#endif
+
+/****************************************************************************
+ * Name:  k28_sdhc_automount_event
+ *
+ * Description:
+ *   The SDHC card detection logic has detected an insertion or removal
+ *   event.
+ *   It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
+ *
+ * Input Parameters:
+ *   inserted - True if the card is inserted in the slot.  False otherwise.
+ *
+ *  Returned Value:
+ *    None
+ *
+ *  Assumptions:
+ *    Interrupts are disabled.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_SDHC_AUTOMOUNTER
+void k28_sdhc_automount_event(bool inserted);
 #endif
 
 /****************************************************************************
@@ -290,32 +372,8 @@ bool k28_writeprotected(void);
  *
  ****************************************************************************/
 
-#ifdef HAVE_AUTOMOUNTER
+#ifdef HAVE_SDHC_AUTOMOUNTER
 void k28_automount_initialize(void);
-#endif
-
-/****************************************************************************
- * Name:  k28_automount_event
- *
- * Description:
- *   The SDHC card detection logic has detected an insertion or removal event.
- *   It has already scheduled the MMC/SD block driver operations.
- *   Now we need to schedule the auto-mount event which will occur with a
- *   substantial delay to make sure that everything has settle down.
- *
- * Input Parameters:
- *   inserted - True if the card is inserted in the slot.  False otherwise.
- *
- *  Returned Value:
- *    None
- *
- *  Assumptions:
- *    Interrupts are disabled.
- *
- ****************************************************************************/
-
-#ifdef HAVE_AUTOMOUNTER
-void k28_automount_event(bool inserted);
 #endif
 
 /****************************************************************************

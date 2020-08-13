@@ -170,8 +170,8 @@
 
 /* Timing *******************************************************************/
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
- * second
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
  */
 
 #define SAM_WDDELAY     (1*CLK_TCK)
@@ -196,13 +196,13 @@
  * Private Types
  ****************************************************************************/
 
-/* The sam_gmac_s encapsulates all state information for the GMAC peripheral */
+/* The sam_gmac_s encapsulates all state information for GMAC peripheral */
 
 struct sam_gmac_s
 {
   uint8_t               ifup    : 1; /* true:ifup false:ifdown */
-  WDOG_ID               txpoll;      /* TX poll timer */
-  WDOG_ID               txtimeout;   /* TX timeout timer */
+  struct wdog_s         txpoll;      /* TX poll timer */
+  struct wdog_s         txtimeout;   /* TX timeout timer */
   struct work_s         irqwork;     /* For deferring interrupt work to the work queue */
   struct work_s         pollwork;    /* For deferring poll work to the work queue */
 
@@ -322,10 +322,10 @@ static int  sam_gmac_interrupt(int irq, void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void sam_txtimeout_work(FAR void *arg);
-static void sam_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void sam_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void sam_poll_work(FAR void *arg);
-static void sam_poll_expiry(int argc, uint32_t arg, ...);
+static void sam_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -475,8 +475,8 @@ static uint32_t sam_getreg(struct sam_gmac_s *priv, uintptr_t address)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_GMAC_REGDEBUG
-static void sam_putreg(struct sam_gmac_s *priv, uintptr_t address,
-                       uint32_t regval)
+static void sam_putreg(struct sam_gmac_s *priv,
+                       uintptr_t address, uint32_t regval)
 {
   if (sam_checkreg(priv, true, regval, address))
     {
@@ -764,8 +764,8 @@ static int sam_transmit(struct sam_gmac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->txtimeout, SAM_TXTIMEOUT, sam_txtimeout_expiry, 1,
-           (uint32_t)priv);
+  wd_start(&priv->txtimeout, SAM_TXTIMEOUT,
+           sam_txtimeout_expiry, 1, (wdparm_t)priv);
 
   /* Set d_len to zero meaning that the d_buf[] packet buffer is again
    * available.
@@ -907,7 +907,9 @@ static void sam_dopoll(struct sam_gmac_s *priv)
 
   if (sam_txfree(priv) > 0)
     {
-      /* If we have the descriptor, then poll the network for new XMIT data. */
+      /* If we have the descriptor,
+       * then poll the network for new XMIT data.
+       */
 
       devif_poll(dev, sam_txpoll);
     }
@@ -1217,7 +1219,7 @@ static void sam_receive(struct sam_gmac_s *priv)
        * tap
        */
 
-       pkt_input(&priv->dev);
+      pkt_input(&priv->dev);
 #endif
 
       /* We only accept IP packets of the configured type and ARP packets */
@@ -1362,7 +1364,7 @@ static void sam_txdone(struct sam_gmac_s *priv)
 
       txdesc = &priv->txdesc[priv->txtail];
       up_invalidate_dcache((uintptr_t)txdesc,
-                           (uintptr_t)txdesc + sizeof(struct gmac_txdesc_s));
+        (uintptr_t)txdesc + sizeof(struct gmac_txdesc_s));
 
       /* Is this TX descriptor done transmitting? (SAMA5D36 datasheet,
        * p. 934)
@@ -1693,7 +1695,7 @@ static int sam_gmac_interrupt(int irq, void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-      wd_cancel(priv->txtimeout);
+      wd_cancel(&priv->txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -1756,7 +1758,7 @@ static void sam_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void sam_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void sam_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct sam_gmac_s *priv = (FAR struct sam_gmac_s *)arg;
 
@@ -1808,7 +1810,7 @@ static void sam_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
+  wd_start(&priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1830,7 +1832,7 @@ static void sam_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void sam_poll_expiry(int argc, uint32_t arg, ...)
+static void sam_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct sam_gmac_s *priv = (FAR struct sam_gmac_s *)arg;
 
@@ -1910,7 +1912,7 @@ static int sam_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (uint32_t)priv);
+  wd_start(&priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the GMAC interrupt */
 
@@ -1949,8 +1951,8 @@ static int sam_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Put the GMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the sam_ifup() always
@@ -2524,13 +2526,13 @@ static int sam_phyintenable(struct sam_gmac_s *priv)
    * interrupts
    */
 
-  ret = sam_phyread(priv, priv->phyaddr, GMII_KSZ90x1_ICS, &phyval);
+  ret = sam_phyread(priv, priv->phyaddr, GMII_KSZ90X1_ICS, &phyval);
   if (ret == OK)
     {
       /* Enable link up/down interrupts */
 
-      ret = sam_phywrite(priv, priv->phyaddr, GMII_KSZ90x1_ICS,
-                        (GMII_KSZ90x1_INT_LDEN | GMII_KSZ90x1_INT_LUEN));
+      ret = sam_phywrite(priv, priv->phyaddr, GMII_KSZ90X1_ICS,
+                        (GMII_KSZ90X1_INT_LDEN | GMII_KSZ90X1_INT_LUEN));
     }
 
   /* Disable the management port */
@@ -2961,15 +2963,16 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 #ifdef SAMA5_GMAC_PHY_KSZ90x1
   /* Set up the KSZ9020/31 PHY */
 
-  phyval = GMII_KSZ90x1_RCCPSR | GMII_ERCR_WRITE;
+  phyval = GMII_KSZ90X1_RCCPSR | GMII_ERCR_WRITE;
   sam_phywrite(priv, priv->phyaddr, GMII_ERCR, phyval);
   sam_phywrite(priv, priv->phyaddr, GMII_ERDWR, 0xf2f4);
 
-  phyval = GMII_KSZ90x1_RRDPSR | GMII_ERCR_WRITE;
+  phyval = GMII_KSZ90X1_RRDPSR | GMII_ERCR_WRITE;
   sam_phywrite(priv, priv->phyaddr, GMII_ERCR, phyval);
   sam_phywrite(priv, priv->phyaddr, GMII_ERDWR, 0x2222);
 
-  ret = sam_phywrite(priv, priv->phyaddr, GMII_KSZ90x1_ICS, 0xff00);
+  ret = sam_phywrite(priv, priv->phyaddr,
+                     GMII_KSZ90X1_ICS, 0xff00);
 #endif
 
   /* Set the Auto_negotiation Advertisement Register, MII advertising for
@@ -3822,25 +3825,7 @@ int sam_gmac_initialize(void)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = sam_ioctl;       /* Support PHY ioctl() calls */
 #endif
-  priv->dev.d_private = (void *)&g_gmac; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll = wd_create();
-  if (!priv->txpoll)
-    {
-      nerr("ERROR: Failed to create periodic poll timer\n");
-      ret = -EAGAIN;
-      goto errout;
-    }
-
-  priv->txtimeout = wd_create();         /* Create TX timeout timer */
-  if (!priv->txtimeout)
-    {
-      nerr("ERROR: Failed to create periodic poll timer\n");
-      ret = -EAGAIN;
-      goto errout_with_txpoll;
-    }
+  priv->dev.d_private = &g_gmac;         /* Used to recover private state from dev */
 
   /* Configure PIO pins to support GMAC */
 
@@ -3852,7 +3837,7 @@ int sam_gmac_initialize(void)
   if (ret < 0)
     {
       nerr("ERROR: sam_buffer_initialize failed: %d\n", ret);
-      goto errout_with_txtimeout;
+      return ret;
     }
 
   /* Attach the IRQ to the driver.  It will not be enabled at the AIC until
@@ -3893,11 +3878,6 @@ int sam_gmac_initialize(void)
 
 errout_with_buffers:
   sam_buffer_free(priv);
-errout_with_txtimeout:
-  wd_delete(priv->txtimeout);
-errout_with_txpoll:
-  wd_delete(priv->txpoll);
-errout:
   return ret;
 }
 

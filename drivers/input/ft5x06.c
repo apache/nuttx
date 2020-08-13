@@ -141,7 +141,7 @@ struct ft5x06_dev_s
   struct work_s work;                       /* Supports the interrupt
                                              * handling "bottom half" */
 #ifdef CONFIG_FT5X06_POLLMODE
-  WDOG_ID polltimer;                        /* Poll timer */
+  struct wdog_s polltimer;                  /* Poll timer */
 #endif
   uint8_t touchbuf[FT5X06_TOUCH_DATA_LEN];  /* Raw touch data */
 
@@ -363,7 +363,8 @@ static void ft5x06_data_worker(FAR void *arg)
 #ifdef CONFIG_FT5X06_POLLMODE
   /* Exit, re-starting the poll. */
 
-  wd_start(priv->polltimer, priv->delay, ft5x06_poll_timeout, 1, priv);
+  wd_start(&priv->polltimer, priv->delay,
+           ft5x06_poll_timeout, 1, (wdparm_t)priv);
 
 #else
   /* Exit, re-enabling FT5x06 interrupts */
@@ -763,7 +764,7 @@ static void ft5x06_shutdown(FAR struct ft5x06_dev_s *priv)
 #ifdef CONFIG_FT5X06_POLLMODE
   /* Stop the poll timer */
 
-  wd_cancel(priv->polltimer);
+  wd_cancel(&priv->polltimer);
 
 #else
   FAR const struct ft5x06_config_s *config = priv->config;
@@ -1175,13 +1176,6 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   /* Allocate a timer for polling the FT5x06 */
 
   priv->delay     = POLL_MAXDELAY;
-  priv->polltimer = wd_create();
-  if (priv->polltimer == NULL)
-    {
-      ierr("ERROR: Failed to allocate polltimer\n");
-      ret = -EBUSY;
-      goto errout_with_priv;
-    }
 #else
   /* Make sure that the FT5x06 interrupt interrupt is disabled */
 
@@ -1195,7 +1189,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   if (ret < 0)
     {
       ierr("ERROR: Failed to attach interrupt\n");
-      goto errout_with_timer;
+      goto errout_with_priv;
     }
 #endif
 
@@ -1208,7 +1202,7 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);
-      goto errout_with_timer;
+      goto errout_with_priv;
     }
 
   /* Schedule work to perform the initial sampling and to set the data
@@ -1219,19 +1213,14 @@ int ft5x06_register(FAR struct i2c_master_s *i2c,
   if (ret < 0)
     {
       ierr("ERROR: Failed to queue work: %d\n", ret);
-      goto errout_with_timer;
+      goto errout_with_priv;
     }
 
   /* And return success */
 
   return OK;
 
-errout_with_timer:
-#ifdef CONFIG_FT5X06_POLLMODE
-  wd_delete(priv->polltimer);
-
 errout_with_priv:
-#endif
   nxsem_destroy(&priv->devsem);
   kmm_free(priv);
   return ret;

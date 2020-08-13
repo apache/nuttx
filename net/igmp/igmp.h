@@ -80,6 +80,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/wdog.h>
 
 #ifdef CONFIG_NET_IGMP
 
@@ -121,13 +122,12 @@
  * from all the other groups
  */
 
-typedef FAR struct wdog_s *WDOG_ID;
 struct igmp_group_s
 {
   struct igmp_group_s *next;    /* Implements a singly-linked list */
   struct work_s        work;    /* For deferred timeout operations */
   in_addr_t            grpaddr; /* Group IPv4 address */
-  WDOG_ID              wdog;    /* WDOG used to detect timeouts */
+  struct wdog_s        wdog;    /* WDOG used to detect timeouts */
   sem_t                sem;     /* Used to wait for message transmission */
   uint8_t              ifindex; /* Interface index */
   uint8_t              flags;   /* See IGMP_ flags definitions */

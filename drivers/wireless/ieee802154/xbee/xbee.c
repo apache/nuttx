@@ -86,10 +86,10 @@ static void xbee_process_rxframe(FAR struct xbee_priv_s *priv,
 static void xbee_notify(FAR struct xbee_priv_s *priv,
                 FAR struct ieee802154_primitive_s *primitive);
 static void xbee_notify_worker(FAR void *arg);
-static void xbee_atquery_timeout(int argc, uint32_t arg, ...);
+static void xbee_atquery_timeout(int argc, wdparm_t arg, ...);
 
 #ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
-static void xbee_lockupcheck_timeout(int argc, uint32_t arg, ...);
+static void xbee_lockupcheck_timeout(int argc, wdparm_t arg, ...);
 static void xbee_lockupcheck_worker(FAR void *arg);
 static void xbee_backup_worker(FAR void *arg);
 static void xbee_lockupcheck_reschedule(FAR struct xbee_priv_s *priv);
@@ -659,7 +659,7 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                       if (frame->io_data[frame->io_offset] != 0xff &&
                           frame->io_data[frame->io_offset] != 0x13)
                         {
-                          wd_cancel(priv->assocwd);
+                          wd_cancel(&priv->assocwd);
                           priv->associating = false;
 
                           primitive = ieee802154_primitive_allocate();
@@ -752,7 +752,7 @@ static void xbee_process_apiframes(FAR struct xbee_priv_s *priv,
                   if ((priv->querycmd[0] == *command) &&
                       (priv->querycmd[1] == *(command + 1)))
                     {
-                      wd_cancel(priv->atquery_wd);
+                      wd_cancel(&priv->atquery_wd);
                       priv->querydone = true;
                       nxsem_post(&priv->atresp_sem);
                     }
@@ -956,7 +956,7 @@ static void xbee_process_txstatus(FAR struct xbee_priv_s *priv,
 
   if (priv->frameid == frameid)
     {
-      wd_cancel(priv->reqdata_wd);
+      wd_cancel(&priv->reqdata_wd);
       priv->txdone = true;
       nxsem_post(&priv->txdone_sem);
     }
@@ -1108,7 +1108,7 @@ static void xbee_notify_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void xbee_atquery_timeout(int argc, uint32_t arg, ...)
+static void xbee_atquery_timeout(int argc, wdparm_t arg, ...)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
 
@@ -1141,7 +1141,7 @@ static void xbee_atquery_timeout(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static void xbee_lockupcheck_timeout(int argc, uint32_t arg, ...)
+static void xbee_lockupcheck_timeout(int argc, wdparm_t arg, ...)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
 
@@ -1202,7 +1202,7 @@ static void xbee_backup_worker(FAR void *arg)
 
 static void xbee_lockupcheck_reschedule(FAR struct xbee_priv_s *priv)
 {
-  wd_cancel(priv->lockup_wd);
+  wd_cancel(&priv->lockup_wd);
 
   /* Kickoff the watchdog timer that will query the XBee periodically (if
    * naturally occurring queries do not occur). We query periodically to
@@ -1211,8 +1211,8 @@ static void xbee_lockupcheck_reschedule(FAR struct xbee_priv_s *priv)
    * it back in a working state
    */
 
-  wd_start(priv->lockup_wd, XBEE_LOCKUP_QUERYTIME, xbee_lockupcheck_timeout,
-           1, (wdparm_t)priv);
+  wd_start(&priv->lockup_wd, XBEE_LOCKUP_QUERYTIME,
+           xbee_lockupcheck_timeout, 1, (wdparm_t)priv);
 }
 
 #endif
@@ -1275,14 +1275,6 @@ XBEEHANDLE xbee_init(FAR struct spi_dev_s *spi,
   ieee802154_primitivepool_initialize();
 
   sq_init(&priv->primitive_queue);
-
-  priv->assocwd    = wd_create();
-  priv->atquery_wd = wd_create();
-  priv->reqdata_wd = wd_create();
-#ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
-  priv->lockup_wd = wd_create();
-#endif
-
   priv->frameid = 0; /* Frame ID should never be 0, but it is incremented
                       * in xbee_next_frameid before being used so it will be 1 */
   priv->querycmd[0] = 0;
@@ -1585,7 +1577,7 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
         {
           /* Setup a timeout */
 
-          wd_start(priv->atquery_wd, XBEE_ATQUERY_TIMEOUT,
+          wd_start(&priv->atquery_wd, XBEE_ATQUERY_TIMEOUT,
                    xbee_atquery_timeout, 1, (wdparm_t)priv);
         }
 
@@ -1600,7 +1592,7 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
       ret = nxsem_wait(&priv->atresp_sem);
       if (ret < 0)
         {
-          wd_cancel(priv->atquery_wd);
+          wd_cancel(&priv->atquery_wd);
           priv->querycmd[0] = 0;
           priv->querycmd[1] = 0;
           nxsem_post(&priv->atquery_sem);

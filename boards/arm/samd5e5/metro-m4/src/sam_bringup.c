@@ -47,6 +47,10 @@
 
 #include "metro-m4.h"
 
+#if defined(CONFIG_SAMD5E5_WDT) && defined(CONFIG_WATCHDOG)
+  #include "sam_wdt.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -84,6 +88,10 @@ int sam_bringup(void)
       syslot(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
              PROCFS_MOUNTPOINT, ret);
     }
+#endif
+
+#if defined(CONFIG_SAMD5E5_WDT) && defined(CONFIG_WATCHDOG)
+  (void)sam_wdt_initialize(CONFIG_WATCHDOG_DEVPATH);
 #endif
 
   UNUSED(ret);

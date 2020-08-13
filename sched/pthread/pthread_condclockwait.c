@@ -26,7 +26,6 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
-#include <stdarg.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <signal.h>
@@ -68,17 +67,10 @@
  *
  ****************************************************************************/
 
-static void pthread_condtimedout(int argc, wdparm_t arg1, ...)
+static void pthread_condtimedout(int argc, wdparm_t arg1, wdparm_t arg2, ...)
 {
   pid_t pid = (pid_t)arg1;
-  int signo;
-  va_list ap;
-
-  /* Retrieve the variadic argument */
-
-  va_start(ap, arg1);
-  signo = (int)va_arg(ap, wdparm_t);
-  va_end(ap);
+  int signo = (int)arg2;
 
 #ifdef HAVE_GROUP_MEMBERS
     {
@@ -173,8 +165,6 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
   sinfo("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
 
-  DEBUGASSERT(rtcb->waitdog == NULL);
-
   /* pthread_cond_clockwait() is a cancellation point */
 
   enter_cancellation_point();
@@ -204,165 +194,153 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
   else
     {
-      /* Create a watchdog */
+      sinfo("Give up mutex...\n");
 
-      rtcb->waitdog = wd_create();
-      if (!rtcb->waitdog)
+      /* We must disable pre-emption and interrupts here so that
+       * the time stays valid until the wait begins.   This adds
+       * complexity because we assure that interrupts and
+       * pre-emption are re-enabled correctly.
+       */
+
+      sched_lock();
+      flags = enter_critical_section();
+
+      /* Convert the timespec to clock ticks.  We must disable pre-
+       * emption here so that this time stays valid until the wait
+       * begins.
+       */
+
+      ret = clock_abstime2ticks(clockid, abstime, &ticks);
+      if (ret)
         {
-          ret = EINVAL;
+          /* Restore interrupts  (pre-emption will be enabled when
+           * we fall through the if/then/else)
+           */
+
+          leave_critical_section(flags);
         }
       else
         {
-          sinfo("Give up mutex...\n");
-
-          /* We must disable pre-emption and interrupts here so that
-           * the time stays valid until the wait begins.   This adds
-           * complexity because we assure that interrupts and
-           * pre-emption are re-enabled correctly.
+          /* Check the absolute time to wait.  If it is now or in the
+           * past, then just return with the timedout condition.
            */
 
-          sched_lock();
-          flags = enter_critical_section();
-
-          /* Convert the timespec to clock ticks.  We must disable pre-
-           * emption here so that this time stays valid until the wait
-           * begins.
-           */
-
-          ret = clock_abstime2ticks(clockid, abstime, &ticks);
-          if (ret)
+          if (ticks <= 0)
             {
-              /* Restore interrupts  (pre-emption will be enabled when
-               * we fall through the if/then/else)
+              /* Restore interrupts and indicate that we have already
+               * timed out. (pre-emption will be enabled when we fall
+               * through the if/then/else
                */
 
               leave_critical_section(flags);
+              ret = ETIMEDOUT;
             }
           else
             {
-              /* Check the absolute time to wait.  If it is now or in the
-               * past, then just return with the timedout condition.
-               */
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+              uint8_t mflags;
+#endif
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+              uint8_t type;
+              int16_t nlocks;
+#endif
+              /* Give up the mutex */
 
-              if (ticks <= 0)
+              mutex->pid = -1;
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+              mflags     = mutex->flags;
+#endif
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+              type       = mutex->type;
+              nlocks     = mutex->nlocks;
+#endif
+              ret        = pthread_mutex_give(mutex);
+              if (ret != 0)
                 {
-                  /* Restore interrupts and indicate that we have already
-                   * timed out. (pre-emption will be enabled when we fall
-                   * through the if/then/else
+                  /* Restore interrupts  (pre-emption will be enabled
+                   * when we fall through the if/then/else)
                    */
 
                   leave_critical_section(flags);
-                  ret = ETIMEDOUT;
                 }
               else
                 {
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-                  uint8_t mflags;
-#endif
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-                  uint8_t type;
-                  int16_t nlocks;
-#endif
-                  /* Give up the mutex */
+                  /* Start the watchdog */
 
-                  mutex->pid = -1;
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-                  mflags     = mutex->flags;
-#endif
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-                  type       = mutex->type;
-                  nlocks     = mutex->nlocks;
-#endif
-                  ret        = pthread_mutex_give(mutex);
-                  if (ret != 0)
+                  wd_start(&rtcb->waitdog, ticks,
+                           (wdentry_t)pthread_condtimedout, 2,
+                           (wdparm_t)mypid, (wdparm_t)SIGCONDTIMEDOUT);
+
+                  /* Take the condition semaphore.  Do not restore
+                   * interrupts until we return from the wait.  This is
+                   * necessary to make sure that the watchdog timer and
+                   * the condition wait are started atomically.
+                   */
+
+                  status = nxsem_wait((FAR sem_t *)&cond->sem);
+
+                  /* Did we get the condition semaphore. */
+
+                  if (status < 0)
                     {
-                      /* Restore interrupts  (pre-emption will be enabled
-                       * when we fall through the if/then/else)
+                      /* NO.. Handle the special case where the semaphore
+                       * wait was awakened by the receipt of a signal --
+                       * presumably the signal posted by
+                       * pthread_condtimedout().
                        */
 
-                      leave_critical_section(flags);
-                    }
-                  else
-                    {
-                      /* Start the watchdog */
-
-                      wd_start(rtcb->waitdog, ticks,
-                               pthread_condtimedout,
-                               2, (wdparm_t)mypid,
-                               (wdparm_t)SIGCONDTIMEDOUT);
-
-                      /* Take the condition semaphore.  Do not restore
-                       * interrupts until we return from the wait.  This is
-                       * necessary to make sure that the watchdog timer and
-                       * the condition wait are started atomically.
-                       */
-
-                      status = nxsem_wait((FAR sem_t *)&cond->sem);
-
-                      /* Did we get the condition semaphore. */
-
-                      if (status < 0)
+                      if (status == -EINTR)
                         {
-                          /* NO.. Handle the special case where the semaphore
-                           * wait was awakened by the receipt of a signal --
-                           * presumably the signal posted by
-                           * pthread_condtimedout().
-                           */
-
-                          if (status == -EINTR)
-                            {
-                              swarn("WARNING: Timedout!\n");
-                              ret = ETIMEDOUT;
-                            }
-                          else
-                            {
-                              ret = status;
-                            }
+                          swarn("WARNING: Timedout!\n");
+                          ret = ETIMEDOUT;
                         }
-
-                      /* The interrupts stay disabled until after we sample
-                       * the errno.  This is because when debug is enabled
-                       * and the console is used for debug output, then the
-                       * errno can be altered by interrupt handling! (bad)
-                       */
-
-                      leave_critical_section(flags);
+                      else
+                        {
+                          ret = status;
+                        }
                     }
 
-                  /* Reacquire the mutex (retaining the ret). */
+                  /* The interrupts stay disabled until after we sample
+                   * the errno.  This is because when debug is enabled
+                   * and the console is used for debug output, then the
+                   * errno can be altered by interrupt handling! (bad)
+                   */
 
-                  sinfo("Re-locking...\n");
-
-                  status = pthread_mutex_take(mutex, NULL, false);
-                  if (status == OK)
-                    {
-                      mutex->pid    = mypid;
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-                      mutex->flags  = mflags;
-#endif
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-                      mutex->type   = type;
-                      mutex->nlocks = nlocks;
-#endif
-                    }
-                  else if (ret == 0)
-                    {
-                      ret           = status;
-                    }
+                  leave_critical_section(flags);
                 }
 
-              /* Re-enable pre-emption (It is expected that interrupts
-               * have already been re-enabled in the above logic)
-               */
+              /* Reacquire the mutex (retaining the ret). */
 
-              sched_unlock();
+              sinfo("Re-locking...\n");
+
+              status = pthread_mutex_take(mutex, NULL, false);
+              if (status == OK)
+                {
+                  mutex->pid    = mypid;
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+                  mutex->flags  = mflags;
+#endif
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+                  mutex->type   = type;
+                  mutex->nlocks = nlocks;
+#endif
+                }
+              else if (ret == 0)
+                {
+                  ret           = status;
+                }
             }
 
-          /* We no longer need the watchdog */
+          /* Re-enable pre-emption (It is expected that interrupts
+           * have already been re-enabled in the above logic)
+           */
 
-          wd_delete(rtcb->waitdog);
-          rtcb->waitdog = NULL;
+          sched_unlock();
         }
+
+      /* We no longer need the watchdog */
+
+      wd_cancel(&rtcb->waitdog);
     }
 
   leave_cancellation_point();

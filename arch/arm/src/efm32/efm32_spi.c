@@ -126,7 +126,7 @@ struct efm32_spidev_s
   const struct efm32_spiconfig_s *config; /* Constant SPI hardware configuration */
 
 #ifdef CONFIG_EFM32_SPI_DMA
-  WDOG_ID wdog;              /* Timer to catch hung DMA */
+  struct wdog_s wdog;        /* Timer to catch hung DMA */
   volatile uint8_t rxresult; /* Result of the RX DMA */
   volatile uint8_t txresult; /* Result of the TX DMA */
   DMA_HANDLE rxdmach;        /* RX DMA channel handle */
@@ -161,7 +161,7 @@ static void      spi_wait_status(const struct efm32_spiconfig_s *config,
 /* DMA support */
 
 #ifdef CONFIG_EFM32_SPI_DMA
-static void      spi_dma_timeout(int argc, uint32_t arg1, ...);
+static void      spi_dma_timeout(int argc, wdparm_t arg1, ...);
 static void      spi_dmarxwait(struct efm32_spidev_s *priv);
 static void      spi_dmatxwait(struct efm32_spidev_s *priv);
 static inline void spi_dmarxwakeup(struct efm32_spidev_s *priv);
@@ -407,7 +407,7 @@ static void spi_wait_status(const struct efm32_spiconfig_s *config,
  ****************************************************************************/
 
 #ifdef CONFIG_EFM32_SPI_DMA
-static void spi_dma_timeout(int argc, uint32_t arg1, ...)
+static void spi_dma_timeout(int argc, wdparm_t arg1, ...)
 {
   struct efm32_spidev_s *priv = (struct efm32_spidev_s *)((uintptr_t)arg1);
 
@@ -452,7 +452,7 @@ static void spi_dmarxwait(struct efm32_spidev_s *priv)
   DEBUGASSERT(priv->rxresult != EINPROGRESS);
   if (priv->txresult != EINPROGRESS)
     {
-      wd_cancel(priv->wdog);
+      wd_cancel(&priv->wdog);
     }
 
   leave_critical_section(flags);
@@ -482,7 +482,7 @@ static void spi_dmatxwait(struct efm32_spidev_s *priv)
   DEBUGASSERT(priv->txresult != EINPROGRESS);
   if (priv->rxresult != EINPROGRESS)
     {
-      wd_cancel(priv->wdog);
+      wd_cancel(&priv->wdog);
     }
 
   leave_critical_section(flags);
@@ -1465,8 +1465,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
        * when both RX and TX transfers complete.
        */
 
-      ret = wd_start(priv->wdog, (int)ticks, spi_dma_timeout, 1,
-                     (uint32_t)priv);
+      ret = wd_start(&priv->wdog, (int)ticks,
+                     spi_dma_timeout, 1, (wdparm_t)priv);
       if (ret < 0)
         {
           spierr("ERROR: Failed to start timeout: %d\n", ret);
@@ -1618,15 +1618,6 @@ static int spi_portinitialize(struct efm32_spidev_s *priv)
       spierr("ERROR: Failed to allocate TX DMA channel for SPI port: %d\n",
              port);
       goto errout_with_rxdmach;
-    }
-
-  /* Allocate a timer to catch hung DMA transfers */
-
-  priv->wdog = wd_create();
-  if (!priv->wdog)
-    {
-      spierr("ERROR: Failed to create a timer for SPI port: %d\n", port);
-      goto errout_with_txdmach;
     }
 
   /* Initialized semaphores used to wait for DMA completion */

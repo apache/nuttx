@@ -83,7 +83,9 @@
 #  define lan91c111_dumppacket(m, b, l)
 #endif
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll delay = 1 seconds.
+ * CLK_TCK is the number of clock ticks per second
+ */
 
 #define LAN91C111_WDDELAY       (1*CLK_TCK)
 
@@ -101,12 +103,12 @@
 
 struct lan91c111_driver_s
 {
-  uintptr_t base;           /* Base address */
-  int       irq;            /* IRQ number */
-  uint16_t  bank;           /* Current bank */
-  WDOG_ID txpoll;           /* TX poll timer */
-  struct work_s irqwork;    /* For deferring interrupt work to the work queue */
-  struct work_s pollwork;   /* For deferring poll work to the work queue */
+  uintptr_t base;                         /* Base address */
+  int       irq;                          /* IRQ number */
+  uint16_t  bank;                         /* Current bank */
+  struct wdog_s txpoll;                   /* TX poll timer */
+  struct work_s irqwork;                  /* For deferring interrupt work to the work queue */
+  struct work_s pollwork;                 /* For deferring poll work to the work queue */
   uint8_t pktbuf[MAX_NETDEV_PKTSIZE + 4]; /* +4 due to getregs32/putregs32 */
 
   /* This holds the information visible to the NuttX network */
@@ -187,7 +189,8 @@ static uint8_t getreg8(FAR struct lan91c111_driver_s *priv, uint16_t offset)
   return *(FAR volatile uint8_t *)(priv->base + offset);
 }
 
-static uint16_t getreg16(FAR struct lan91c111_driver_s *priv, uint16_t offset)
+static uint16_t getreg16(FAR struct lan91c111_driver_s *priv,
+                         uint16_t offset)
 {
   offset = updatebank(priv, offset);
   return *(FAR volatile uint16_t *)(priv->base + offset);
@@ -559,8 +562,8 @@ static int lan91c111_txpoll(FAR struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -691,7 +694,7 @@ static void lan91c111_receive(FAR struct net_driver_s *dev)
   NETDEV_RXPACKETS(dev);
 
 #ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the packet tap */
+  /* When packet sockets are enabled, feed the frame into the tap */
 
   pkt_input(dev);
 #endif
@@ -904,7 +907,9 @@ static void lan91c111_interrupt_work(FAR void *arg)
 
       /* Handle interrupts according to status bit settings */
 
-      /* Check if we received an incoming packet, if so, call lan91c111_receive() */
+      /* Check if we received an incoming packet,
+       * if so, call lan91c111_receive()
+       */
 
       if (status & IM_RCV_INT)
         {
@@ -916,14 +921,18 @@ static void lan91c111_interrupt_work(FAR void *arg)
           NETDEV_RXERRORS(dev);
         }
 
-      /* Check if a packet transmission just completed.  If so, call lan91c111_txdone. */
+      /* Check if a packet transmission just completed.
+       * If so, call lan91c111_txdone.
+       */
 
       if (status & IM_TX_INT)
         {
           lan91c111_txdone(dev);
         }
 
-      /* Check if we have the phy interrupt, if so, call lan91c111_phy_notify() */
+      /* Check if we have the phy interrupt,
+       * if so, call lan91c111_phy_notify()
+       */
 
       if (status & IM_MDINT)
         {
@@ -1032,8 +1041,8 @@ static void lan91c111_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->txpoll, LAN91C111_WDDELAY, lan91c111_poll_expiry, 1,
-           (wdparm_t)dev);
+  wd_start(&priv->txpoll, LAN91C111_WDDELAY,
+           lan91c111_poll_expiry, 1, (wdparm_t)dev);
   net_unlock();
 }
 
@@ -1102,7 +1111,7 @@ static int lan91c111_ifup(FAR struct net_driver_s *dev)
 
   net_lock();
 
-  /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
+  /* Initialize PHYs, Ethernet interface, and setup up Ethernet interrupts */
 
   putreg16(priv, CONFIG_REG, CONFIG_DEFAULT);
   putreg16(priv, CTL_REG, CTL_DEFAULT);
@@ -1133,8 +1142,8 @@ static int lan91c111_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, LAN91C111_WDDELAY, lan91c111_poll_expiry, 1,
-           (wdparm_t)dev);
+  wd_start(&priv->txpoll, LAN91C111_WDDELAY,
+           lan91c111_poll_expiry, 1, (wdparm_t)dev);
   net_unlock();
 
   /* Enable the Ethernet interrupt */
@@ -1172,7 +1181,7 @@ static int lan91c111_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and work */
 
-  wd_cancel(priv->txpoll);
+  wd_cancel(&priv->txpoll);
 
   work_cancel(LAN91C111_WORK, &priv->irqwork);
   work_cancel(LAN91C111_WORK, &priv->pollwork);
@@ -1580,7 +1589,8 @@ int lan91c111_initialize(uintptr_t base, int irq)
   macrev = getreg16(priv, REV_REG);
   phyid  = getphy(priv, MII_PHYID1) << 16;
   phyid |= getphy(priv, MII_PHYID2);
-  ninfo("base: %08x irq: %d rev: %04x phy: %08x\n", base, irq, macrev, phyid);
+  ninfo("base: %08x irq: %d rev: %04x phy: %08x\n",
+        base, irq, macrev, phyid);
 
   if ((macrev >> 4 & 0x0f) != CHIP_91111FD || phyid != PHY_LAN83C183)
     {
@@ -1614,11 +1624,6 @@ int lan91c111_initialize(uintptr_t base, int irq)
 #endif
   dev->d_private = priv;              /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for transmissions */
-
-  priv->txpoll   = wd_create();       /* Create periodic poll timer */
-  DEBUGASSERT(priv->txpoll != NULL);
-
   /* Put the interface in the down state. This usually amounts to resetting
    * the device and/or calling lan91c111_ifdown().
    */
@@ -1636,7 +1641,7 @@ int lan91c111_initialize(uintptr_t base, int irq)
       /* Loop, reset don't finish yet */
     }
 
-  /* Read the MAC address from the hardware into dev->d_mac.ether.ether_addr_octet */
+  /* Read MAC address from the hardware into dev->d_mac.ether */
 
   copyfrom16(priv, ADDR0_REG, &dev->d_mac.ether, sizeof(dev->d_mac.ether));
 

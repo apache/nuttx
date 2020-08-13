@@ -245,11 +245,11 @@
                                                *           fb_setcursor_s */
 #endif
 
-#ifdef CONFIG_LCD_UPDATE
+#ifdef CONFIG_FB_UPDATE
 #  define FBIO_UPDATE         _FBIOC(0x0007)  /* Update a rectangular region in
                                                * the framebuffer
                                                * Argument: read-only struct
-                                               *           nxgl_rect_s */
+                                               *           fb_area_s */
 #endif
 
 #ifdef CONFIG_FB_SYNC
@@ -324,15 +324,6 @@ struct fb_planeinfo_s
   uint8_t    bpp;         /* Bits per pixel */
 };
 
-#ifdef CONFIG_FB_OVERLAY
-/* This structure describes the transparency. */
-
-struct fb_transp_s
-{
-  uint8_t    transp;      /* Transparency */
-  uint8_t    transp_mode; /* Transparency mode */
-};
-
 /* This structure describes an area. */
 
 struct fb_area_s
@@ -341,6 +332,15 @@ struct fb_area_s
   fb_coord_t y;           /* y-offset of the area */
   fb_coord_t w;           /* Width of the area */
   fb_coord_t h;           /* Height of the area */
+};
+
+#ifdef CONFIG_FB_OVERLAY
+/* This structure describes the transparency. */
+
+struct fb_transp_s
+{
+  uint8_t    transp;      /* Transparency */
+  uint8_t    transp_mode; /* Transparency mode */
 };
 
 /* This structure describes one overlay. */
@@ -509,6 +509,15 @@ struct fb_vtable_s
                    FAR struct fb_cursorattrib_s *attrib);
   int (*setcursor)(FAR struct fb_vtable_s *vtable,
                    FAR struct fb_setcursor_s *settings);
+#endif
+
+#ifdef CONFIG_FB_UPDATE
+  /* The following are provided only if the video hardware need extera
+   * notification to update display content.
+   */
+
+  int (*updatearea)(FAR struct fb_vtable_s *vtable,
+                    FAR const struct fb_area_s *area);
 #endif
 
 #ifdef CONFIG_FB_SYNC

@@ -156,7 +156,7 @@ struct macnet_driver_s
   struct macnet_callback_s md_cb; /* Callback information */
   MACHANDLE md_mac;               /* Contained MAC interface */
   bool md_bifup;                  /* true:ifup false:ifdown */
-  WDOG_ID md_txpoll;              /* TX poll timer */
+  struct wdog_s md_txpoll;        /* TX poll timer */
   struct work_s md_pollwork;      /* Defer poll work to the work queue */
 
   /* Hold a list of events */
@@ -590,8 +590,8 @@ static void macnet_txpoll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->md_txpoll, TXPOLL_WDDELAY, macnet_txpoll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(&priv->md_txpoll, TXPOLL_WDDELAY,
+           macnet_txpoll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -778,8 +778,8 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
 
       /* Set and activate a timer process */
 
-      wd_start(priv->md_txpoll, TXPOLL_WDDELAY, macnet_txpoll_expiry,
-               1, (wdparm_t)priv);
+      wd_start(&priv->md_txpoll, TXPOLL_WDDELAY,
+               macnet_txpoll_expiry, 1, (wdparm_t)priv);
 
       ret = OK;
     }
@@ -818,7 +818,7 @@ static int macnet_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->md_txpoll);
+  wd_cancel(&priv->md_txpoll);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the macnet_ifup() always
@@ -1370,12 +1370,8 @@ int mac802154netdev_register(MACHANDLE mac)
  #ifdef CONFIG_NETDEV_IOCTL
   dev->d_ioctl        = macnet_ioctl;      /* Handle network IOCTL commands */
 #endif
-  dev->d_private      = (FAR void *)priv;  /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
+  dev->d_private      = priv;              /* Used to recover private state from dev */
   priv->md_mac        = mac;               /* Save the MAC interface instance */
-  priv->md_txpoll     = wd_create();       /* Create periodic poll timer */
 
   /* Setup a locking semaphore for exclusive device driver access */
 
@@ -1451,10 +1447,6 @@ int mac802154netdev_register(MACHANDLE mac)
   return macnet_ifdown(&priv->md_dev.r_dev);
 
 errout:
-
-  /* Release wdog timers */
-
-  wd_delete(priv->md_txpoll);
 
   /* Free memory and return the error */
 

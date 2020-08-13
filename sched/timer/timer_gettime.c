@@ -81,7 +81,7 @@ int timer_gettime(timer_t timerid, FAR struct itimerspec *value)
 
   /* Get the number of ticks before the underlying watchdog expires */
 
-  ticks = wd_gettime(timer->pt_wdog);
+  ticks = wd_gettime(&timer->pt_wdog);
 
   /* Convert that to a struct timespec and return it */
 

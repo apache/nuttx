@@ -177,8 +177,8 @@ struct ftmac100_driver_s
   /* NuttX net data */
 
   bool ft_bifup;               /* true:ifup false:ifdown */
-  WDOG_ID ft_txpoll;           /* TX poll timer */
-  WDOG_ID ft_txtimeout;        /* TX timeout timer */
+  struct wdog_s ft_txpoll;     /* TX poll timer */
+  struct wdog_s ft_txtimeout;  /* TX timeout timer */
   unsigned int status;         /* Last ISR status */
   struct work_s ft_irqwork;    /* For deferring work to the work queue */
   struct work_s ft_pollwork;   /* For deferring work to the work queue */
@@ -222,10 +222,10 @@ static int  ftmac100_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void ftmac100_txtimeout_work(FAR void *arg);
-static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...);
+static void ftmac100_txtimeout_expiry(int argc, wdparm_t arg, ...);
 
 static void ftmac100_poll_work(FAR void *arg);
-static void ftmac100_poll_expiry(int argc, uint32_t arg, ...);
+static void ftmac100_poll_expiry(int argc, wdparm_t arg, ...);
 
 /* NuttX callback functions */
 
@@ -329,7 +329,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->ft_txtimeout, FTMAC100_TXTIMEOUT,
+  wd_start(&priv->ft_txtimeout, FTMAC100_TXTIMEOUT,
            ftmac100_txtimeout_expiry, 1, (wdparm_t)priv);
 
   return OK;
@@ -865,7 +865,7 @@ static void ftmac100_txdone(FAR struct ftmac100_driver_s *priv)
 
   /* Cancel the TX timeout */
 
-  wd_cancel(priv->ft_txtimeout);
+  wd_cancel(&priv->ft_txtimeout);
 
   /* Then poll the network for new XMIT data */
 
@@ -1027,7 +1027,7 @@ static int ftmac100_interrupt(int irq, FAR void *context, FAR void *arg)
        */
 
       ninfo("\n\nTXDONE 0\n\n");
-      wd_cancel(priv->ft_txtimeout);
+      wd_cancel(&priv->ft_txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -1090,7 +1090,7 @@ static void ftmac100_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void ftmac100_txtimeout_expiry(int argc, uint32_t arg, ...)
+static void ftmac100_txtimeout_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
 
@@ -1144,8 +1144,8 @@ static void ftmac100_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(&priv->ft_txpoll, FTMAC100_WDDELAY,
+           ftmac100_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1167,7 +1167,7 @@ static void ftmac100_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void ftmac100_poll_expiry(int argc, uint32_t arg, ...)
+static void ftmac100_poll_expiry(int argc, wdparm_t arg, ...)
 {
   FAR struct ftmac100_driver_s *priv = (FAR struct ftmac100_driver_s *)arg;
 
@@ -1230,8 +1230,8 @@ static int ftmac100_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->ft_txpoll, FTMAC100_WDDELAY, ftmac100_poll_expiry, 1,
-           (wdparm_t)priv);
+  wd_start(&priv->ft_txpoll, FTMAC100_WDDELAY,
+           ftmac100_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -1271,8 +1271,8 @@ static int ftmac100_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->ft_txpoll);
-  wd_cancel(priv->ft_txtimeout);
+  wd_cancel(&priv->ft_txpoll);
+  wd_cancel(&priv->ft_txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the ftmac100_ifup() always
@@ -1599,14 +1599,8 @@ int ftmac100_initialize(int intf)
   priv->ft_dev.d_addmac  = ftmac100_addmac;   /* Add multicast MAC address */
   priv->ft_dev.d_rmmac   = ftmac100_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->ft_dev.d_private = (FAR void *)g_ftmac100; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->ft_txpoll       = wd_create();        /* Create periodic poll timer */
-  priv->ft_txtimeout    = wd_create();        /* Create TX timeout timer */
-
-  priv->iobase          = CONFIG_FTMAC100_BASE;
+  priv->ft_dev.d_private = g_ftmac100;        /* Used to recover private state from dev */
+  priv->iobase           = CONFIG_FTMAC100_BASE;
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling ftmac100_ifdown().

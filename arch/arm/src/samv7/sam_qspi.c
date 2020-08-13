@@ -192,7 +192,7 @@ struct sam_qspidev_s
   uint8_t rxintf;              /* RX hardware interface number */
   uint8_t txintf;              /* TX hardware interface number */
   sem_t dmawait;               /* Used to wait for DMA completion */
-  WDOG_ID dmadog;              /* Watchdog that handles DMA timeouts */
+  struct wdog_s dmadog;        /* Watchdog that handles DMA timeouts */
   int result;                  /* DMA result */
   DMA_HANDLE dmach;            /* QSPI DMA handle */
 #endif
@@ -590,7 +590,7 @@ static void qspi_dma_sampledone(struct sam_qspidev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_QSPI_DMA
-static void qspi_dma_timeout(int argc, uint32_t arg, ...)
+static void qspi_dma_timeout(int argc, wdparm_t arg, ...)
 {
   struct sam_qspidev_s *priv = (struct sam_qspidev_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -635,7 +635,7 @@ static void qspi_dma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->dmadog);
+  wd_cancel(&priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -890,8 +890,8 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
     {
       /* Start (or re-start) the watchdog timeout */
 
-      ret = wd_start(priv->dmadog, DMA_TIMEOUT_TICKS,
-                     qspi_dma_timeout, 1, (uint32_t)priv);
+      ret = wd_start(&priv->dmadog, DMA_TIMEOUT_TICKS,
+                     qspi_dma_timeout, 1, (wdparm_t)priv);
       if (ret < 0)
         {
            spierr("ERROR: wd_start failed: %d\n", ret);
@@ -903,7 +903,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
 
       /* Cancel the watchdog timeout */
 
-      wd_cancel(priv->dmadog);
+      wd_cancel(&priv->dmadog);
 
       /* Check if we were awakened by an error of some kind. */
 
@@ -1798,15 +1798,6 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
 
       nxsem_init(&priv->dmawait, 0, 0);
       nxsem_set_protocol(&priv->dmawait, SEM_PRIO_NONE);
-
-      /* Create a watchdog time to catch DMA timeouts */
-
-      priv->dmadog = wd_create();
-      if (priv->dmadog == NULL)
-        {
-          spierr("ERROR: Failed to create wdog\n");
-          goto errout_with_dmahandles;
-        }
 #endif
 
 #ifdef QSPI_USE_INTERRUPTS
@@ -1816,7 +1807,7 @@ struct qspi_dev_s *sam_qspi_initialize(int intf)
       if (ret < 0)
         {
           spierr("ERROR: Failed to attach irq %d\n", priv->irq);
-          goto errout_with_dmadog;
+          goto errout_with_dmawait;
         }
 #endif
 
@@ -1845,14 +1836,10 @@ errout_with_irq:
 #ifdef QSPI_USE_INTERRUPTS
   irq_detach(priv->irq);
 
-errout_with_dmadog:
+errout_with_dmawait:
 #endif
 #ifdef CONFIG_SAMV7_QSPI_DMA
-  wd_delete(priv->dmadog);
-
-errout_with_dmahandles:
   nxsem_destroy(&priv->dmawait);
-
   if (priv->dmach)
     {
       sam_dmafree(priv->dmach);

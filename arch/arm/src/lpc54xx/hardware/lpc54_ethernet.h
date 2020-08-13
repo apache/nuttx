@@ -90,8 +90,8 @@
 #define LPC54_ETH_MAC_SYS_TIMESTMP_ADDEND_OFFSET         0x0b18  /* Timestamp addend */
 #define LPC54_ETH_MAC_SYS_TIME_HWORD_SCND_OFFSET         0x0b1c  /* System time-higher word seconds */
 #define LPC54_ETH_MAC_SYS_TIMESTMP_STAT_OFFSET           0x0b20  /* Timestamp status */
-#define LPC54_ETH_MAC_Tx_TIMESTAMP_STATUS_NSECS_OFFSET   0x0b30  /* Tx timestamp status nanoseconds */
-#define LPC54_ETH_MAC_Tx_TIMESTAMP_STATUS_SECS_OFFSET    0x0b34  /* Tx timestamp status seconds */
+#define LPC54_ETH_MAC_TX_TIMESTAMP_STATUS_NSECS_OFFSET   0x0b30  /* Tx timestamp status nanoseconds */
+#define LPC54_ETH_MAC_TX_TIMESTAMP_STATUS_SECS_OFFSET    0x0b34  /* Tx timestamp status seconds */
 #define LPC54_ETH_MAC_TIMESTAMP_INGRESS_CORR_NSEC_OFFSET 0x0b58  /* Timestamp ingress correction */
 #define LPC54_ETH_MAC_TIMESTAMP_EGRESS_CORR_NSEC_OFFSET  0x0b5c  /* Timestamp egress correction */
 
@@ -185,8 +185,8 @@
 #define LPC54_ETH_MAC_SYS_TIMESTMP_ADDEND                (LPC54_ETHERNET_BASE + LPC54_ETH_MAC_SYS_TIMESTMP_ADDEND_OFFSET)
 #define LPC54_ETH_MAC_SYS_TIME_HWORD_SCND                (LPC54_ETHERNET_BASE + LPC54_ETH_MAC_SYS_TIME_HWORD_SCND_OFFSET)
 #define LPC54_ETH_MAC_SYS_TIMESTMP_STAT                  (LPC54_ETHERNET_BASE + LPC54_ETH_MAC_SYS_TIMESTMP_STAT_OFFSET)
-#define LPC54_ETH_MAC_Tx_TIMESTAMP_STATUS_NSECS          (LPC54_ETHERNET_BASE + LPC54_ETH_MAC_Tx_TIMESTAMP_STATUS_NSECS_OFFSET)
-#define LPC54_ETH_MAC_Tx_TIMESTAMP_STATUS_SECS           (LPC54_ETHERNET_BASE + LPC54_ETH_MAC_Tx_TIMESTAMP_STATUS_SECS_OFFSET)
+#define LPC54_ETH_MAC_TX_TIMESTAMP_STATUS_NSECS          (LPC54_ETHERNET_BASE + LPC54_ETH_MAC_TX_TIMESTAMP_STATUS_NSECS_OFFSET)
+#define LPC54_ETH_MAC_TX_TIMESTAMP_STATUS_SECS           (LPC54_ETHERNET_BASE + LPC54_ETH_MAC_TX_TIMESTAMP_STATUS_SECS_OFFSET)
 #define LPC54_ETH_MAC_TIMESTAMP_INGRESS_CORR_NSEC        (LPC54_ETHERNET_BASE + LPC54_ETH_MAC_TIMESTAMP_INGRESS_CORR_NSEC_OFFSET)
 #define LPC54_ETH_MAC_TIMESTAMP_EGRESS_CORR_NSEC         (LPC54_ETHERNET_BASE + LPC54_ETH_MAC_TIMESTAMP_EGRESS_CORR_NSEC_OFFSET)
 
@@ -248,30 +248,30 @@
 #  define ETH_MAC_CONFIG_PRELEN_7                        (0 << ETH_MAC_CONFIG_PRELEN_SHIFT) /* 7 bytes of preamble */
 #  define ETH_MAC_CONFIG_PRELEN_5                        (1 << ETH_MAC_CONFIG_PRELEN_SHIFT) /* 5 bytes of preamble */
 #  define ETH_MAC_CONFIG_PRELEN_3                        (2 << ETH_MAC_CONFIG_PRELEN_SHIFT) /* 3 bytes of preamble */
-#define ETH_MAC_CONFIG_DC                                (1 << 4)  /* Bit 4: Deferral check */
-#define ETH_MAC_CONFIG_BL_SHIFT                          (5)       /* Bits 5-6: Back-off limit */
+#define ETH_MAC_CONFIG_DC                                (1 << 4)                           /* Bit 4: Deferral check */
+#define ETH_MAC_CONFIG_BL_SHIFT                          (5)                                /* Bits 5-6: Back-off limit */
 #define ETH_MAC_CONFIG_BL_MASK                           (3 << ETH_MAC_CONFIG_BL_SHIFT)
 #  define ETH_MAC_CONFIG_BL_10                           (0 << ETH_MAC_CONFIG_BL_SHIFT) /* k = min (n, 10) */
 #  define ETH_MAC_CONFIG_BL_8                            (1 << ETH_MAC_CONFIG_BL_SHIFT) /* k = min (n, 8) */
 #  define ETH_MAC_CONFIG_BL_4                            (2 << ETH_MAC_CONFIG_BL_SHIFT) /* k = min (n, 4) */
 #  define ETH_MAC_CONFIG_BL_1                            (3 << ETH_MAC_CONFIG_BL_SHIFT) /* k = min (n, 1) */
-#define ETH_MAC_CONFIG_DR                                (1 << 8)  /* Bit 8:  Disable retry */
-#define ETH_MAC_CONFIG_DCRS                              (1 << 9)  /* Bit 9:  Disable carrier sense during transmission */
-#define ETH_MAC_CONFIG_DO                                (1 << 10) /* Bit 10: Disable receive own */
-#define ETH_MAC_CONFIG_ECRSFD                            (1 << 11) /* Bit 11: Enable carrier sense full-duplex mode before transmission */
-#define ETH_MAC_CONFIG_LM                                (1 << 12) /* Bit 12: Loopback mode */
-#define ETH_MAC_CONFIG_DM                                (1 << 13) /* Bit 13: Duplex mode */
-#define ETH_MAC_CONFIG_FES                               (1 << 14) /* Bit 14: Speed */
-#define ETH_MAC_CONFIG_PS                                (1 << 15) /* Bit 15: Port select */
-#define ETH_MAC_CONFIG_JE                                (1 << 16) /* Bit 16: Jumbo frame enable */
-#define ETH_MAC_CONFIG_JD                                (1 << 17) /* Bit 17: Jabber disable */
-#define ETH_MAC_CONFIG_BE                                (1 << 18) /* Bit 18: Packet burst enable */
-#define ETH_MAC_CONFIG_WD                                (1 << 19) /* Bit 19: Watchdog disable */
-#define ETH_MAC_CONFIG_ACS                               (1 << 20) /* Bit 20: Automatic pad or CRC stripping */
-#define ETH_MAC_CONFIG_CST                               (1 << 21) /* Bit 21: CRC stripping for type packets */
-#define ETH_MAC_CONFIG_S2KP                              (1 << 22) /* Bit 22: IEEE 802.3as support for 2K packets */
-#define ETH_MAC_CONFIG_GPSLCE                            (1 << 23) /* Bit 23: Giant packet size limit control enable */
-#define ETH_MAC_CONFIG_IPG_SHIFT                         (24)       /* Bits 24-26: Inter-packet gap */
+#define ETH_MAC_CONFIG_DR                                (1 << 8)                       /* Bit 8:  Disable retry */
+#define ETH_MAC_CONFIG_DCRS                              (1 << 9)                       /* Bit 9:  Disable carrier sense during transmission */
+#define ETH_MAC_CONFIG_DO                                (1 << 10)                      /* Bit 10: Disable receive own */
+#define ETH_MAC_CONFIG_ECRSFD                            (1 << 11)                      /* Bit 11: Enable carrier sense full-duplex mode before transmission */
+#define ETH_MAC_CONFIG_LM                                (1 << 12)                      /* Bit 12: Loopback mode */
+#define ETH_MAC_CONFIG_DM                                (1 << 13)                      /* Bit 13: Duplex mode */
+#define ETH_MAC_CONFIG_FES                               (1 << 14)                      /* Bit 14: Speed */
+#define ETH_MAC_CONFIG_PS                                (1 << 15)                      /* Bit 15: Port select */
+#define ETH_MAC_CONFIG_JE                                (1 << 16)                      /* Bit 16: Jumbo frame enable */
+#define ETH_MAC_CONFIG_JD                                (1 << 17)                      /* Bit 17: Jabber disable */
+#define ETH_MAC_CONFIG_BE                                (1 << 18)                      /* Bit 18: Packet burst enable */
+#define ETH_MAC_CONFIG_WD                                (1 << 19)                      /* Bit 19: Watchdog disable */
+#define ETH_MAC_CONFIG_ACS                               (1 << 20)                      /* Bit 20: Automatic pad or CRC stripping */
+#define ETH_MAC_CONFIG_CST                               (1 << 21)                      /* Bit 21: CRC stripping for type packets */
+#define ETH_MAC_CONFIG_S2KP                              (1 << 22)                      /* Bit 22: IEEE 802.3as support for 2K packets */
+#define ETH_MAC_CONFIG_GPSLCE                            (1 << 23)                      /* Bit 23: Giant packet size limit control enable */
+#define ETH_MAC_CONFIG_IPG_SHIFT                         (24)                           /* Bits 24-26: Inter-packet gap */
 #define ETH_MAC_CONFIG_IPG_MASK                          (7 << ETH_MAC_CONFIG_IPG_SHIFT)
 #  define ETH_MAC_CONFIG_IPG_96                          (0 << ETH_MAC_CONFIG_IPG_SHIFT) /* 96 bit times */
 #  define ETH_MAC_CONFIG_IPG_88                          (1 << ETH_MAC_CONFIG_IPG_SHIFT) /* 88 bit times */
@@ -281,7 +281,7 @@
 #  define ETH_MAC_CONFIG_IPG_56                          (5 << ETH_MAC_CONFIG_IPG_SHIFT) /* 56 bit times */
 #  define ETH_MAC_CONFIG_IPG_48                          (6 << ETH_MAC_CONFIG_IPG_SHIFT) /* 48 bit times */
 #  define ETH_MAC_CONFIG_IPG_40                          (7 << ETH_MAC_CONFIG_IPG_SHIFT) /* 40 bit times */
-#define ETH_MAC_CONFIG_IPC                               (1 << 27) /* Bit 27: Checksum offload */
+#define ETH_MAC_CONFIG_IPC                               (1 << 27)                       /* Bit 27: Checksum offload */
 
 /* MAC extended configuration */
 #define ETH_MAC_EXT_CONFIG_
@@ -298,9 +298,9 @@
 #  define ETH_MAC_FRAME_FILTER_PCF_PAUSE                 (1 << ETH_MAC_FRAME_FILTER_PCF_SHIFT) /* All but pause control frames accepted */
 #  define ETH_MAC_FRAME_FILTER_PCF_ALL                   (2 << ETH_MAC_FRAME_FILTER_PCF_SHIFT) /* All control frames accepted */
 #  define ETH_MAC_FRAME_FILTER_PCF_FILTERED              (3 << ETH_MAC_FRAME_FILTER_PCF_SHIFT) /* Control frames accepted if pass the address filter */
-#define ETH_MAC_FRAME_FILTER_SAIF                        (1 << 8)  /* Bit 8:  SA inverse filtering */
-#define ETH_MAC_FRAME_FILTER_SAF                         (1 << 9)  /* Bit 9:  Source address filter enable */
-#define ETH_MAC_FRAME_FILTER_RA                          (1 << 31) /* Bit 31: Receive all */
+#define ETH_MAC_FRAME_FILTER_SAIF                        (1 << 8)                              /* Bit 8:  SA inverse filtering */
+#define ETH_MAC_FRAME_FILTER_SAF                         (1 << 9)                              /* Bit 9:  Source address filter enable */
+#define ETH_MAC_FRAME_FILTER_RA                          (1 << 31)                             /* Bit 31: Receive all */
 
 /* MAC watchdog timeout */
 #define ETH_MAC_WD_TIMEROUT_
@@ -339,7 +339,7 @@
 #define ETH_MAC_RXQ_CTRL0_RXQ0EN_MASK                    (3 << ETH_MAC_RXQ_CTRL0_RXQ0EN_SHIFT)
 #  define ETH_MAC_RXQ_CTRL0_RXQ0EN_DISABLE               (0 << ETH_MAC_RXQ_CTRL0_RXQ0EN_SHIFT) /* Disable */
 #  define ETH_MAC_RXQ_CTRL0_RXQ0EN_ENABLE                (1 << ETH_MAC_RXQ_CTRL0_RXQ0EN_SHIFT) /* Queue 0 enabled for AV  */
-#define ETH_MAC_RXQ_CTRL0_RXQ1EN_SHIFT                   (2)       /* Bits 2-3: Rx Queue 1 enable */
+#define ETH_MAC_RXQ_CTRL0_RXQ1EN_SHIFT                   (2)                                   /* Bits 2-3: Rx Queue 1 enable */
 #define ETH_MAC_RXQ_CTRL0_RXQ1EN_MASK                    (3 << ETH_MAC_RXQ_CTRL0_RXQ1EN_SHIFT)
 #  define ETH_MAC_RXQ_CTRL0_RXQ1EN_DISABLE               (0 << ETH_MAC_RXQ_CTRL0_RXQ1EN_SHIFT) /* Disable */
 #  define ETH_MAC_RXQ_CTRL0_RXQ1EN_ENABLE                (1 << ETH_MAC_RXQ_CTRL0_RXQ1EN_SHIFT) /* Queue 1 enabled for AV */
@@ -349,16 +349,16 @@
 #define ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT                    (0)       /* Bits 0-2: AV untagged control packets queue */
 #define ETH_MAC_RXQ_CTRL1_AVCPQ_MASK                     (7 < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT)
 #  define ETH_MAC_RXQ_CTRL1_AVCPQ(n)                     ((uint32_t)(n) < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT) /* Rx Queue n, n=0..1 */
-#define ETH_MAC_RXQ_CTRL1_AVPTPQ_SHIFT                   (4)       /* Bits 4-6: AV PTP packets queue */
+#define ETH_MAC_RXQ_CTRL1_AVPTPQ_SHIFT                   (4)                                             /* Bits 4-6: AV PTP packets queue */
 #define ETH_MAC_RXQ_CTRL1_AVPTPQ_MASK                    (7 < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT)
 #  define ETH_MAC_RXQ_CTRL1_AVPTPQ(n)                    ((uint32_t)(n) < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT) /* Rx Queue n, n=0..1 */
-#define ETH_MAC_RXQ_CTRL1_UPQ_SHIFT                      (12)      /* Bits 12-14: Untagged packet queue */
+#define ETH_MAC_RXQ_CTRL1_UPQ_SHIFT                      (12)                                            /* Bits 12-14: Untagged packet queue */
 #define ETH_MAC_RXQ_CTRL1_UPQ_MASK                       (7 < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT)
 #  define ETH_MAC_RXQ_CTRL1_UPQ(n)                       ((uint32_t)(n) < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT) /* Rx Queue n, n=0..1 */
-#define ETH_MAC_RXQ_CTRL1_MCBCQ_SHIFT                    (16)      /* Bits 16-18: Multicast and broadcast queue */
+#define ETH_MAC_RXQ_CTRL1_MCBCQ_SHIFT                    (16)                                            /* Bits 16-18: Multicast and broadcast queue */
 #define ETH_MAC_RXQ_CTRL1_MCBCQ_MASK                     (7 < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT)
 #  define ETH_MAC_RXQ_CTRL1_MCBCQ(n)                     ((uint32_t)(n) < ETH_MAC_RXQ_CTRL1_AVCPQ_SHIFT) /* Rx Queue n, n=0..1 */
-#define ETH_MAC_RXQ_CTRL1_MCBCQEN                        (1 << 20) /* Bit 20: Multicast and broadcast queue enable */
+#define ETH_MAC_RXQ_CTRL1_MCBCQEN                        (1 << 20)                                       /* Bit 20: Multicast and broadcast queue enable */
 
 /* Receive Queue control 2 */
 
@@ -421,13 +421,13 @@
 #define ETH_MAC_MDIO_ADDR_MOC_MASK                       (3 << ETH_MAC_MDIO_ADDR_MOC_SHIFT)
 #  define ETH_MAC_MDIO_ADDR_MOC_WRITE                    (1 << ETH_MAC_MDIO_ADDR_MOC_SHIFT) /* Write */
 #  define ETH_MAC_MDIO_ADDR_MOC_READ                     (3 << ETH_MAC_MDIO_ADDR_MOC_SHIFT) /* Read */
-#define ETH_MAC_MDIO_ADDR_CR_SHIFT                       (8)       /* Bits 8-11: CSR clock range */
+#define ETH_MAC_MDIO_ADDR_CR_SHIFT                       (8)                                /* Bits 8-11: CSR clock range */
 #define ETH_MAC_MDIO_ADDR_CR_MASK                        (15 << ETH_MAC_MDIO_ADDR_CR_SHIFT)
 #  define ETH_MAC_MDIO_ADDR_CR_DIV42                     (0 << ETH_MAC_MDIO_ADDR_CR_SHIFT) /* CSR=60-100 MHz; MDC=CSR/42 */
 #  define ETH_MAC_MDIO_ADDR_CR_DIV62                     (1 << ETH_MAC_MDIO_ADDR_CR_SHIFT) /* CSR=100-150 MHz; MDC=CSR/62 */
 #  define ETH_MAC_MDIO_ADDR_CR_DIV16                     (2 << ETH_MAC_MDIO_ADDR_CR_SHIFT) /* CSR=20-35 MHz; MDC=CSR/16 */
 #  define ETH_MAC_MDIO_ADDR_CR_DIV26                     (3 << ETH_MAC_MDIO_ADDR_CR_SHIFT) /* CSR=35-60 MHz; MDC=CSR/26 */
-#define ETH_MAC_MDIO_ADDR_NTC_SHIFT                      (12)      /* Bits 12-14: Number of training clocks */
+#define ETH_MAC_MDIO_ADDR_NTC_SHIFT                      (12)                              /* Bits 12-14: Number of training clocks */
 #define ETH_MAC_MDIO_ADDR_NTC_MASK                       (7 << ETH_MAC_MDIO_ADDR_NTC_SHIFT)
 #  define ETH_MAC_MDIO_ADDR_NTC(n)                       ((uint32_t)(n) << ETH_MAC_MDIO_ADDR_NTC_SHIFT)
 #define ETH_MAC_MDIO_ADDR_RDA_SHIFT                      (16)      /* Bits 16-20: Register/device address */
@@ -471,9 +471,9 @@
 /* Timestamp status */
 #define ETH_MAC_SYS_TIMESTMP_STAT_
 /* Tx timestamp status nanoseconds */
-#define ETH_MAC_Tx_TIMESTAMP_STATUS_NSECS_
+#define ETH_MAC_TX_TIMESTAMP_STATUS_NSECS_
 /* Tx timestamp status seconds */
-#define ETH_MAC_Tx_TIMESTAMP_STATUS_SECS_
+#define ETH_MAC_TX_TIMESTAMP_STATUS_SECS_
 /* Timestamp ingress correction */
 #define ETH_MAC_TIMESTAMP_INGRESS_CORR_NSEC_
 /* Timestamp egress correction */
@@ -508,7 +508,7 @@
 #define ETH_MTL_TXQ_OP_MODE_TXQEN_MASK                   (3 << ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT)
 #  define ETH_MTL_TXQ_OP_MODE_TXQEN_DISABLE              (0 << ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT) /* Not enabled */
 #  define ETH_MTL_TXQ_OP_MODE_TXQEN_ENABLE               (2 << ETH_MTL_TXQ_OP_MODE_TXQEN_SHIFT) /* Enabled */
-#define ETH_MTL_TXQ_OP_MODE_TTC_SHIFT                    (4)       /* Bits 4-6: Transmit threshold control */
+#define ETH_MTL_TXQ_OP_MODE_TTC_SHIFT                    (4)                                    /* Bits 4-6: Transmit threshold control */
 #define ETH_MTL_TXQ_OP_MODE_TTC_MASK                     (7 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
 #  define ETH_MTL_TXQ_OP_MODE_TTC_32                     (0 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
 #  define ETH_MTL_TXQ_OP_MODE_TTC_64                     (1 << ETH_MTL_TXQ_OP_MODE_TTC_SHIFT)
@@ -583,8 +583,8 @@
 #  define ETH_DMA_MODE_TAA_FIXED                         (0 << ETH_DMA_MODE_TAA_SHIFT) /* Fixed priority */
 #  define ETH_DMA_MODE_TAA_WSP                           (1 << ETH_DMA_MODE_TAA_SHIFT) /* Weighted strict priority */
 #  define ETH_DMA_MODE_TAA_WRR                           (2 << ETH_DMA_MODE_TAA_SHIFT) /* Weighted round-robin */
-#define ETH_DMA_MODE_TXPR                                (1 << 11) /* Bit 11: Transmit priority */
-#define ETH_DMA_MODE_PR_SHIFT                            (12)      /* Bits 12-14: Priority ratio */
+#define ETH_DMA_MODE_TXPR                                (1 << 11)                     /* Bit 11: Transmit priority */
+#define ETH_DMA_MODE_PR_SHIFT                            (12)                          /* Bits 12-14: Priority ratio */
 #define ETH_DMA_MODE_PR_MASK                             (7 << ETH_DMA_MODE_PR_SHIFT)
 # define ETH_DMA_MODE_PR_1TO1                            (0 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 1:1 */
 # define ETH_DMA_MODE_PR_3TO1                            (2 << ETH_DMA_MODE_PR_SHIFT) /* Priority ratio is 3:1 */
@@ -623,9 +623,9 @@
 #define ETH_DMACH_TX_CTRL_TCW_MASK                       (7 << ETH_DMACH_TX_CTRL_TCW_SHIFT)
 #  define ETH_DMACH_TX_CTRL_TCW(n)                       ((uint32_t)(n) << ETH_DMACH_TX_CTRL_TCW_SHIFT)
 #define ETH_DMACH_TX_CTRL_OSF                            (1 << 4)  /* Bit 4:  Operate on second frame */
-#define ETH_DMACH_TX_CTRL_TxPBL_SHIFT                    (16)      /* Bits 16-21: Transmit programmable burst length */
-#define ETH_DMACH_TX_CTRL_TxPBL_MASK                     (0x3f << ETH_DMACH_TX_CTRL_TxPBL_SHIFT)
-#  define ETH_DMACH_TX_CTRL_TxPBL(n)                     ((uint32_t)(n) << ETH_DMACH_TX_CTRL_TxPBL_SHIFT)
+#define ETH_DMACH_TX_CTRL_TXPBL_SHIFT                    (16)      /* Bits 16-21: Transmit programmable burst length */
+#define ETH_DMACH_TX_CTRL_TXPBL_MASK                     (0x3f << ETH_DMACH_TX_CTRL_TXPBL_SHIFT)
+#  define ETH_DMACH_TX_CTRL_TXPBL(n)                     ((uint32_t)(n) << ETH_DMACH_TX_CTRL_TXPBL_SHIFT)
 
 /* DMA channel n receive control */
 
@@ -633,14 +633,17 @@
 #define ETH_DMACH_RX_CTRL_RBSZ_SHIFT                     (3)       /* Bits 3-14: Receive buffer size */
 #define ETH_DMACH_RX_CTRL_RBSZ_MASK                      (0xfff << ETH_DMACH_RX_CTRL_RBSZ_SHIFT)
 #  define ETH_DMACH_RX_CTRL_RBSZ(n)                      ((uint32_t)(n) << ETH_DMACH_RX_CTRL_RBSZ_SHIFT)
-#define ETH_DMACH_RX_CTRL_RxPBL_SHIFT                    (16)      /* Bits 16-21: Receive programmable burst length */
-#define ETH_DMACH_RX_CTRL_RxPBL_MASK                     (0x3f << ETH_DMACH_RX_CTRL_RxPBL_SHIFT)
-#  define ETH_DMACH_RX_CTRL_RxPBL(n)                     ((uint32_t)(n) << ETH_DMACH_RX_CTRL_RxPBL_SHIFT)
+#define ETH_DMACH_RX_CTRL_RXPBL_SHIFT                    (16)      /* Bits 16-21: Receive programmable burst length */
+#define ETH_DMACH_RX_CTRL_RXPBL_MASK                     (0x3f << ETH_DMACH_RX_CTRL_RXPBL_SHIFT)
+#  define ETH_DMACH_RX_CTRL_RXPBL(n)                     ((uint32_t)(n) << ETH_DMACH_RX_CTRL_RXPBL_SHIFT)
 #define ETH_DMACH_RX_CTRL_RPF                            (1 << 31) /* Bit 31: DMA Rx channel n packet flush */
 
 /* DMA channel n Tx descriptor list address (32-bit, word-aligned address) */
+
 /* DMA channel n Rx descriptor list address (32-bit, word-aligned address) */
+
 /* DMA channel n Tx descriptor tail pointer (32-bit, word-aligned address) */
+
 /* DMA channel n Rx descriptor tail pointer (32-bit, word-aligned address) */
 
 /* DMA channel n Tx descriptor ring length */
@@ -689,8 +692,11 @@
 /* DMA descriptors ******************************************************************************************/
 
 /* Receive descriptor (read-format) */
+
 /* RDES0: 32-bit address */
+
 /* RDES1: Reserved */
+
 /* RDES2: 32-bit address */
 
 /* RDES3: */
@@ -701,6 +707,7 @@
 #define ETH_RXDES3_OWN                                   (1 << 31) /* Bit 31:  Own bit */
 
 /* Receive descriptor (writeback-format) */
+
 /* RDES0: Reserved */
 
 /* RDES1: */
@@ -715,12 +722,12 @@
 #  define ETH_RXDES1_PT_AVUCP                            (5 << ETH_RXDES1_PT_SHIFT) /* AV untagged control packet */
 #  define ETH_RXDES1_PT_AVTDP                            (6 << ETH_RXDES1_PT_SHIFT) /* AV tagged data packet */
 #  define ETH_RXDES1_PT_AVTCP                            (7 << ETH_RXDES1_PT_SHIFT) /* AV tagged control packet */
-#define ETH_RXDES1_IPHE                                  (1 << 3)  /* Bit 3:  IP header error */
-#define ETH_RXDES1_IPV4                                  (1 << 4)  /* Bit 4:  IPV4 header present */
-#define ETH_RXDES1_IPV6                                  (1 << 5)  /* Bit 5:  IPv6 header present */
-#define ETH_RXDES1_IPCB                                  (1 << 6)  /* Bit 6:  IP checksum bypassed */
-#define ETH_RXDES1_IPCE                                  (1 << 7)  /* Bit 7:  IP payload error */
-#define ETH_RXDES1_PMT_SHIFT                             (8)       /* Bits 8-11: PTP message type */
+#define ETH_RXDES1_IPHE                                  (1 << 3)                   /* Bit 3:  IP header error */
+#define ETH_RXDES1_IPV4                                  (1 << 4)                   /* Bit 4:  IPV4 header present */
+#define ETH_RXDES1_IPV6                                  (1 << 5)                   /* Bit 5:  IPv6 header present */
+#define ETH_RXDES1_IPCB                                  (1 << 6)                   /* Bit 6:  IP checksum bypassed */
+#define ETH_RXDES1_IPCE                                  (1 << 7)                   /* Bit 7:  IP payload error */
+#define ETH_RXDES1_PMT_SHIFT                             (8)                        /* Bits 8-11: PTP message type */
 #define ETH_RXDES1_PMT_MASK                              (15 << ETH_RXDES1_PMT_SHIFT)
 #  define ETH_RXDES1_PMT_NONE                            (0 << ETH_RXDES1_PMT_SHIFT)  /* No PTP message received */
 #  define ETH_RXDES1_PMT_SYNC                            (1 << ETH_RXDES1_PMT_SHIFT)  /* SYNC */
@@ -734,11 +741,11 @@
 #  define ETH_RXDES1_PMT_MGMNT                           (9 << ETH_RXDES1_PMT_SHIFT)  /* Management */
 #  define ETH_RXDES1_PMT_SIGNALING                       (10 << ETH_RXDES1_PMT_SHIFT) /* Signaling */
 #  define ETH_RXDES1_PMT_RESERVERD                       (15 << ETH_RXDES1_PMT_SHIFT) /* Reserved message type */
-#define ETH_RXDES1_PFT                                   (1 << 12) /* Bit 12: PTP packet type */
-#define ETH_RXDES1_PV                                    (1 << 13) /* Bit 13: PTP version */
-#define ETH_RXDES1_TSA                                   (1 << 14) /* Bit 14: Timestamp available */
-#define ETH_RXDES1_TD                                    (1 << 15) /* Bit 15: Timestamp dropped */
-#define ETH_RXDES1_OPC_SHIFT                             (16)      /* Bits 16-31: OAM sub-type code */
+#define ETH_RXDES1_PFT                                   (1 << 12)                    /* Bit 12: PTP packet type */
+#define ETH_RXDES1_PV                                    (1 << 13)                    /* Bit 13: PTP version */
+#define ETH_RXDES1_TSA                                   (1 << 14)                    /* Bit 14: Timestamp available */
+#define ETH_RXDES1_TD                                    (1 << 15)                    /* Bit 15: Timestamp dropped */
+#define ETH_RXDES1_OPC_SHIFT                             (16)                         /* Bits 16-31: OAM sub-type code */
 
 /* RXDES2: */
 
@@ -761,21 +768,22 @@
 #  define ETH_RXDES3_LT_DVLAN                            (5 << ETH_RXDES3_LT_SHIFT) /* Packet is a type packet with double VLAN tag */
 #  define ETH_RXDES3_LT_CTRLPKT                          (6 << ETH_RXDES3_LT_SHIFT) /* Packet is a MAC control packet type */
 #  define ETH_RXDES3_LT_OAM                              (7 << ETH_RXDES3_LT_SHIFT) /* Packet is a OAM packet type */
-#define ETH_RXDES3_DE                                    (1 << 19) /* Bit 19: Dribble bit error */
-#define ETH_RXDES3_RE                                    (1 << 20) /* Bit 20: Receive error */
-#define ETH_RXDES3_OE                                    (1 << 21) /* Bit 21: Overflow error */
-#define ETH_RXDES3_RWT                                   (1 << 22) /* Bit 22: Receive watchdog timeout */
-#define ETH_RXDES3_GP                                    (1 << 23) /* Bit 23: Giant packet */
-#define ETH_RXDES3_CE                                    (1 << 24) /* Bit 24: CRC error */
-#define ETH_RXDES3_RS0V                                  (1 << 25) /* Bit 25: Receive status RDES0 valid */
-#define ETH_RXDES3_RS1V                                  (1 << 26) /* Bit 26: Receive status RDES1 valid */
-#define ETH_RXDES3_RS2V                                  (1 << 27) /* Bit 27: Receive status RDES2 valid */
-#define ETH_RXDES3_LD                                    (1 << 28) /* Bit 28: Last descriptor */
-#define ETH_RXDES3_FD                                    (1 << 29) /* Bit 29: First descriptor */
-#define ETH_RXDES3_CTXT                                  (1 << 30) /* Bit 30: Receive context descriptor */
-                                                                   /* Bit 31: Own bit (see read-format) */
+#define ETH_RXDES3_DE                                    (1 << 19)                  /* Bit 19: Dribble bit error */
+#define ETH_RXDES3_RE                                    (1 << 20)                  /* Bit 20: Receive error */
+#define ETH_RXDES3_OE                                    (1 << 21)                  /* Bit 21: Overflow error */
+#define ETH_RXDES3_RWT                                   (1 << 22)                  /* Bit 22: Receive watchdog timeout */
+#define ETH_RXDES3_GP                                    (1 << 23)                  /* Bit 23: Giant packet */
+#define ETH_RXDES3_CE                                    (1 << 24)                  /* Bit 24: CRC error */
+#define ETH_RXDES3_RS0V                                  (1 << 25)                  /* Bit 25: Receive status RDES0 valid */
+#define ETH_RXDES3_RS1V                                  (1 << 26)                  /* Bit 26: Receive status RDES1 valid */
+#define ETH_RXDES3_RS2V                                  (1 << 27)                  /* Bit 27: Receive status RDES2 valid */
+#define ETH_RXDES3_LD                                    (1 << 28)                  /* Bit 28: Last descriptor */
+#define ETH_RXDES3_FD                                    (1 << 29)                  /* Bit 29: First descriptor */
+#define ETH_RXDES3_CTXT                                  (1 << 30)                  /* Bit 30: Receive context descriptor */
+                                                                                    /* Bit 31: Own bit (see read-format) */
 
 /* Transmit normal descriptor (read-format) */
+
 /* TDES0/1: 32-bit address */
 
 /* TDES2: */
@@ -800,7 +808,7 @@
 #  define ETH_TXDES3_CIC_IPHDR                           (1 << ETH_TXDES3_CIC_SHIFT) /* Only IP header checksum */
 #  define ETH_TXDES3_CIC_PAYLOAD                         (2 << ETH_TXDES3_CIC_SHIFT) /* IP header checksum and payload checksum */
 #  define ETH_TXDES3_CIC_ALL                             (3 << ETH_TXDES3_CIC_SHIFT) /* IP Header checksum, payload, and pseudo-header checksum */
-#define ETH_TXDES3_SLOTNUM_SHIFT                         (19)      /* Bits 19-22: Slot number control bits in AV mode */
+#define ETH_TXDES3_SLOTNUM_SHIFT                         (19)                        /* Bits 19-22: Slot number control bits in AV mode */
 #define ETH_TXDES3_SLOTNUM_MASK                          (15 << ETH_TXDES3_SLOTNUM_SHIFT)
 #define ETH_TXDES3_CPC_SHIFT                             (26)      /* Bits 26-27: CRC pad control */
 #define ETH_TXDES3_CPC_MASK                              (3 << ETH_TXDES2_B1L_SHIFT)
@@ -808,13 +816,15 @@
 #  define ETH_TXDES3_CPC_CRC                             (1 << ETH_TXDES2_B1L_SHIFT) /* CRC insertion (disable pad insertion) */
 #  define ETH_TXDES3_CPC_DISABLED                        (2 << ETH_TXDES2_B1L_SHIFT) /* Disable CRC insertion */
 #  define ETH_TXDES3_CPC_REPLACMENT                      (3 << ETH_TXDES2_B1L_SHIFT) /* CRC replacement */
-#define ETH_TXDES3_LD                                    (1 << 28) /* Bit 28: Last descriptor */
-#define ETH_TXDES3_FD                                    (1 << 29) /* Bit 29: First descriptor */
-#define ETH_TXDES3_CTXT                                  (1 << 30) /* Bit 30: Context type */
-#define ETH_TXDES3_OWN                                   (1 << 31) /* Bit 31: Own bit */
+#define ETH_TXDES3_LD                                    (1 << 28)                   /* Bit 28: Last descriptor */
+#define ETH_TXDES3_FD                                    (1 << 29)                   /* Bit 29: First descriptor */
+#define ETH_TXDES3_CTXT                                  (1 << 30)                   /* Bit 30: Context type */
+#define ETH_TXDES3_OWN                                   (1 << 31)                   /* Bit 31: Own bit */
 
 /* Transmit normal descriptor (writeback-format) */
+
 /* TDES0/1: 64-bit transmit packet timestamp */
+
 /* TDES2: Reserved */
 
 /* TDES3: */

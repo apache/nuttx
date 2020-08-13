@@ -158,12 +158,12 @@ struct sam_dev_s
 
   /* Event support */
 
-  uint32_t base;                 /* SDMMC register base address */
-  sem_t waitsem;                 /* Implements event waiting */
-  sdio_eventset_t waitevents;    /* Set of events to be waited for */
-  uint32_t waitints;             /* Interrupt enables for event waiting */
+  uint32_t base;                       /* SDMMC register base address */
+  sem_t waitsem;                       /* Implements event waiting */
+  sdio_eventset_t waitevents;          /* Set of events to be waited for */
+  uint32_t waitints;                   /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent;  /* The event that caused the wakeup */
-  WDOG_ID waitwdog;              /* Watchdog that handles event timeouts */
+  struct wdog_s waitwdog;              /* Watchdog that handles event timeouts */
 
   /* Callback support */
 
@@ -281,7 +281,7 @@ static void sam_transmit(struct sam_dev_s *priv);
 static void sam_receive(struct sam_dev_s *priv);
 #endif
 
-static void sam_eventtimeout(int argc, uint32_t arg);
+static void sam_eventtimeout(int argc, wdparm_t arg, ...);
 static void sam_endwait(struct sam_dev_s *priv,
               sdio_eventset_t wkupevent);
 static void sam_endtransfer(struct sam_dev_s *priv,
@@ -1171,7 +1171,7 @@ static void sam_receive(struct sam_dev_s *priv)
  *
  ****************************************************************************/
 
-static void sam_eventtimeout(int argc, uint32_t arg)
+static void sam_eventtimeout(int argc, wdparm_t arg, ...)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)arg;
 
@@ -1216,7 +1216,7 @@ static void sam_endwait(struct sam_dev_s *priv, sdio_eventset_t wkupevent)
 {
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Disable event-related interrupts */
 
@@ -1573,7 +1573,7 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
   priv->xfrflags   = 0;         /* Used to synchronize SDIO and DMA completion */
 #endif
 
-  wd_cancel(priv->waitwdog);    /* Cancel any timeouts */
+  wd_cancel(&priv->waitwdog);   /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
 
@@ -2479,7 +2479,7 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
 
   /* Cancel any watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
@@ -2912,8 +2912,8 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret = wd_start(priv->waitwdog, delay, (wdentry_t) sam_eventtimeout,
-                     1, (uint32_t) priv);
+      ret = wd_start(&priv->waitwdog, delay,
+                     sam_eventtimeout, 1, (wdparm_t)priv);
 
       if (ret < 0)
         {
@@ -3617,11 +3617,6 @@ FAR struct sdio_dev_s *sam_sdmmc_sdio_initialize(int slotno)
    */
 
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
-  /* Create a watchdog timer */
-
-  priv->waitwdog = wd_create();
-  DEBUGASSERT(priv->waitwdog);
 
   switch (priv->addr)
     {

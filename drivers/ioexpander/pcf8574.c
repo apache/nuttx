@@ -987,9 +987,8 @@ static void pcf8574_irqworker(void *arg)
   /* Re-start the poll timer */
 
   sched_lock();
-  ret = wd_start(priv->wdog, PCF8574_POLLDELAY,
-                 pcf8574_poll_expiry,
-                 1, (wdparm_t)priv);
+  ret = wd_start(&priv->wdog, PCF8574_POLLDELAY,
+                 pcf8574_poll_expiry, 1, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");
@@ -1037,7 +1036,7 @@ static void pcf8574_interrupt(FAR void *arg)
 #ifdef CONFIG_PCF8574_INT_POLL
       /* Cancel the poll timer */
 
-      wd_cancel(priv->wdog);
+      wd_cancel(&priv->wdog);
 #endif
 
       /* Disable interrupts */
@@ -1159,12 +1158,8 @@ FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
 #ifdef CONFIG_PCF8574_INT_POLL
   /* Set up a timer to poll for missed interrupts */
 
-  priv->wdog    = wd_create();
-  DEBUGASSERT(priv->wdog != NULL);
-
-  ret = wd_start(priv->wdog, PCF8574_POLLDELAY,
-                 pcf8574_poll_expiry,
-                 1, (wdparm_t)priv);
+  ret = wd_start(&priv->wdog, PCF8574_POLLDELAY,
+                 pcf8574_poll_expiry, 1, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");

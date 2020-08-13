@@ -219,12 +219,6 @@ FAR struct bcmf_dev_s *bcmf_allocate_device(void)
   /* Init scan timeout timer */
 
   priv->scan_status = BCMF_SCAN_DISABLED;
-  priv->scan_timeout = wd_create();
-  if (!priv->scan_timeout)
-    {
-      ret = -ENOMEM;
-      goto exit_free_priv;
-    }
 
   return priv;
 
@@ -941,7 +935,7 @@ wl_escan_result_processed:
 
   wlinfo("escan done event %d %d\n", status, bcmf_getle32(&event->reason));
 
-  wd_cancel(priv->scan_timeout);
+  wd_cancel(&priv->scan_timeout);
 
   priv->scan_status = BCMF_SCAN_DONE;
   nxsem_post(&priv->control_mutex);
@@ -1147,7 +1141,7 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
   /*  Start scan_timeout timer */
 
-  wd_start(priv->scan_timeout, BCMF_SCAN_TIMEOUT_TICK,
+  wd_start(&priv->scan_timeout, BCMF_SCAN_TIMEOUT_TICK,
            bcmf_wl_scan_timeout, 1, (wdparm_t)priv);
 
   return OK;

@@ -19,21 +19,21 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of CITEL Technologies Ltd nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * 3. Neither the name of CITEL Technologies Ltd nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY CITEL TECHNOLOGIES AND CONTRIBUTORS ``AS IS''
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL CITEL TECHNOLOGIES OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+ * ARE DISCLAIMED.  IN NO EVENT SHALL CITEL TECHNOLOGIES OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -121,7 +121,8 @@ void igmp_input(struct net_driver_s *dev)
   uint16_t iphdrlen;
   unsigned int ticks;
 
-  ninfo("IGMP message: %04x%04x\n", ipv4->destipaddr[1], ipv4->destipaddr[0]);
+  ninfo("IGMP message: %04x%04x\n",
+        ipv4->destipaddr[1], ipv4->destipaddr[0]);
 
   /* Get the IP header length (accounting for possible options). */
 
@@ -166,10 +167,11 @@ void igmp_input(struct net_driver_s *dev)
     {
       case IGMP_MEMBERSHIP_QUERY:
         /* RFC 2236, 2.2.  ax Response Time
-         *  "The Max Response Time field is meaningful only in Membership Query
-         *   messages, and specifies the maximum allowed time before sending a
-         *   responding report in units of 1/10 second.  In all other messages,
-         *   it is set to zero by the sender and ignored by receivers.
+         *  "The Max Response Time field is meaningful only in Membership
+         *   Query messages, and specifies the maximum allowed time before
+         *   sending a responding report in units of 1/10 second. In all
+         *   other messages, it is set to zero by the sender and ignored by
+         *   receivers.
          */
 
         /* Check if the query was sent to all systems */
@@ -210,13 +212,13 @@ void igmp_input(struct net_driver_s *dev)
 
                 IGMP_STATINCR(g_netstats.igmp.query_received);
 
-                for (member = (FAR struct igmp_group_s *)dev->d_igmp_grplist.head;
-                     member;
-                     member = member->next)
+                member = (FAR struct igmp_group_s *)dev->d_igmp_grplist.head;
+                for (; member; member = member->next)
                   {
                     /* Skip over the all systems group entry */
 
-                    if (!net_ipv4addr_cmp(member->grpaddr, g_ipv4_allsystems))
+                    if (!net_ipv4addr_cmp(member->grpaddr,
+                                          g_ipv4_allsystems))
                       {
                         ticks = net_dsec2tick((int)igmp->maxresp);
                         if (IS_IDLEMEMBER(member->flags) ||
@@ -232,8 +234,8 @@ void igmp_input(struct net_driver_s *dev)
               {
                 ninfo("Group-specific multicast query\n");
 
-                /* We first need to re-lookup the group since we used dest last time.
-                 * Use the incoming IPaddress!
+                /* We first need to re-lookup the group since we used dest
+                 * last time. Use the incoming IPaddress!
                  */
 
                 IGMP_STATINCR(g_netstats.igmp.ucast_query);
@@ -283,7 +285,7 @@ void igmp_input(struct net_driver_s *dev)
             {
               /* This is on a specific group we have already looked up */
 
-              wd_cancel(group->wdog);
+              wd_cancel(&group->wdog);
               SET_IDLEMEMBER(group->flags);
               CLR_LASTREPORT(group->flags);
             }

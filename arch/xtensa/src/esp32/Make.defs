@@ -81,18 +81,6 @@ ifeq ($(CONFIG_FS_HOSTFS),y)
   CMN_CSRCS += xtensa_hostfs.c
 endif
 
-
-# Use of common/xtensa_etherstub.c is deprecated.  The preferred mechanism
-# is to use CONFIG_NETDEV_LATEINIT=y to suppress the call to
-# up_netinitialize() in xtensa_initialize.c.  Then this stub would not be
-# needed.
-
-ifneq ($(CONFIG_LX6_ETHERNET),y)
-ifeq ($(CONFIG_NET),y)
-  CMN_CSRCS += xtensa_etherstub.c
-endif
-endif
-
 # Required ESP32 files (arch/xtensa/src/lx6)
 
 CHIP_CSRCS  = esp32_allocateheap.c esp32_clockconfig.c esp32_cpuint.c
@@ -113,6 +101,10 @@ endif
 
 ifeq ($(CONFIG_ESP32_SPIFLASH),y)
 CHIP_CSRCS += esp32_spiflash.c
+endif
+
+ifeq ($(CONFIG_ESP32_EMAC),y)
+CHIP_CSRCS += esp32_emac.c
 endif
 
 # Configuration-dependent ESP32 files

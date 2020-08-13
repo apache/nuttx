@@ -179,7 +179,7 @@ struct sam_tsd_s
   struct sam_adc_s *adc;        /* ADC device handle */
   struct work_s work;           /* Supports the interrupt handling "bottom half" */
   struct sam_sample_s sample;   /* Last sampled touch point data */
-  WDOG_ID wdog;                 /* Poll the position while the pen is down */
+  struct wdog_s wdog;           /* Poll the position while the pen is down */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
@@ -202,7 +202,7 @@ static int  sam_tsd_waitsample(struct sam_tsd_s *priv,
               struct sam_sample_s *sample);
 static void sam_tsd_bottomhalf(void *arg);
 static int  sam_tsd_schedule(struct sam_tsd_s *priv);
-static void sam_tsd_expiry(int argc, uint32_t arg1, ...);
+static void sam_tsd_expiry(int argc, wdparm_t arg1, ...);
 
 /* Character driver methods */
 
@@ -586,8 +586,8 @@ static void sam_tsd_bottomhalf(void *arg)
        * this case; we rely on the timer expiry to get us going again.
        */
 
-      wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1,
-               (uint32_t)priv);
+      wd_start(&priv->wdog, TSD_WDOG_DELAY,
+               sam_tsd_expiry, 1, (wdparm_t)priv);
       ier = 0;
       goto ignored;
     }
@@ -665,8 +665,8 @@ static void sam_tsd_bottomhalf(void *arg)
 
       /* Continue to sample the position while the pen is down */
 
-      wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1,
-               (uint32_t)priv);
+      wd_start(&priv->wdog, TSD_WDOG_DELAY,
+               sam_tsd_expiry, 1, (wdparm_t)priv);
 
       /* Check the thresholds.  Bail if (1) this is not the first
        * measurement and (2) there is no significant difference from
@@ -774,7 +774,7 @@ static int sam_tsd_schedule(struct sam_tsd_s *priv)
    * while the pen remains down.
    */
 
-  wd_cancel(priv->wdog);
+  wd_cancel(&priv->wdog);
 
   /* Disable further touchscreen interrupts.  Touchscreen interrupts will be
    * re-enabled after the worker thread executes.
@@ -806,7 +806,7 @@ static int sam_tsd_schedule(struct sam_tsd_s *priv)
  *
  ****************************************************************************/
 
-static void sam_tsd_expiry(int argc, uint32_t arg1, ...)
+static void sam_tsd_expiry(int argc, wdparm_t arg1, ...)
 {
   struct sam_tsd_s *priv = (struct sam_tsd_s *)((uintptr_t)arg1);
 
@@ -1590,7 +1590,7 @@ static void sam_tsd_uninitialize(struct sam_tsd_s *priv)
    * while the pen remains down.
    */
 
-  wd_cancel(priv->wdog);
+  wd_cancel(&priv->wdog);
 
   /* Disable further touchscreen interrupts.  Touchscreen interrupts will be
    * re-enabled after the worker thread executes.
@@ -1655,7 +1655,6 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
 
   memset(priv, 0, sizeof(struct sam_tsd_s));
   priv->adc     = adc;               /* Save the ADC device handle */
-  priv->wdog    = wd_create();       /* Create a watchdog timer */
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
   priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
 

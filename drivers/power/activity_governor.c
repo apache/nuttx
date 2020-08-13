@@ -114,7 +114,7 @@ struct pm_domain_state_s
 
   /* Timer to decrease state */
 
-  WDOG_ID wdog;
+  struct wdog_s wdog;
 };
 
 struct pm_activity_governor_s
@@ -548,14 +548,13 @@ static void governor_statechanged(int domain, enum pm_state_e newstate)
     }
 }
 
-static void governor_timer_cb(int argc, wdparm_t arg1, ...)
+static void governor_timer_cb(int argc, ...)
 {
   /* Do nothing here, cause we only need TIMER ISR to wake up PM,
    * for deceasing PM state.
    */
 
   UNUSED(argc);
-  UNUSED(arg1);
 }
 
 /****************************************************************************
@@ -590,30 +589,25 @@ static void governor_timer(int domain)
   pdomstate = &g_pm_activity_governor.domain_states[domain];
   state     = pdom->state;
 
-  if (!pdomstate->wdog)
-    {
-      pdomstate->wdog = wd_create();
-    }
-
   if (state < PM_SLEEP && !pdom->stay[pdom->state])
     {
       int delay = pmtick[state] + pdomstate->btime - clock_systime_ticks();
-      int left  = wd_gettime(pdomstate->wdog);
+      int left  = wd_gettime(&pdomstate->wdog);
 
       if (delay <= 0)
         {
           delay = 1;
         }
 
-      if (!WDOG_ISACTIVE(pdomstate->wdog) ||
+      if (!WDOG_ISACTIVE(&pdomstate->wdog) ||
           abs(delay - left) > PM_TIMER_GAP)
         {
-          wd_start(pdomstate->wdog, delay, governor_timer_cb, 0);
+          wd_start(&pdomstate->wdog, delay, (wdentry_t)governor_timer_cb, 0);
         }
     }
   else
     {
-      wd_cancel(pdomstate->wdog);
+      wd_cancel(&pdomstate->wdog);
     }
 }
 

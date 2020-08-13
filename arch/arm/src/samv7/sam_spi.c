@@ -168,7 +168,7 @@ struct sam_spics_s
 #ifdef CONFIG_SAMV7_SPI_DMA
   bool candma;                 /* DMA is supported */
   sem_t dmawait;               /* Used to wait for DMA completion */
-  WDOG_ID dmadog;              /* Watchdog that handles DMA timeouts */
+  struct wdog_s dmadog;        /* Watchdog that handles DMA timeouts */
   int result;                  /* DMA result */
   DMA_HANDLE rxdma;            /* SPI RX DMA handle */
   DMA_HANDLE txdma;            /* SPI TX DMA handle */
@@ -765,7 +765,7 @@ static void spi_dma_sampledone(struct sam_spics_s *spics)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_SPI_DMA
-static void spi_dmatimeout(int argc, uint32_t arg, ...)
+static void spi_dmatimeout(int argc, wdparm_t arg, ...)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)arg;
   DEBUGASSERT(spics != NULL);
@@ -810,7 +810,7 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(spics->dmadog);
+  wd_cancel(&spics->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -1864,8 +1864,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       /* Start (or re-start) the watchdog timeout */
 
-      ret = wd_start(spics->dmadog, DMA_TIMEOUT_TICKS,
-                     spi_dmatimeout, 1, (uint32_t)spics);
+      ret = wd_start(&spics->dmadog, DMA_TIMEOUT_TICKS,
+                     spi_dmatimeout, 1, (wdparm_t)spics);
       if (ret < 0)
         {
            spierr("ERROR: wd_start failed: %d\n", ret);
@@ -1877,7 +1877,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       /* Cancel the watchdog timeout */
 
-      wd_cancel(spics->dmadog);
+      wd_cancel(&spics->dmadog);
 
       /* Check if we were awakened by an error of some kind. */
 
@@ -2175,11 +2175,6 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port)
 
       nxsem_init(&spics->dmawait, 0, 0);
       nxsem_set_protocol(&spics->dmawait, SEM_PRIO_NONE);
-
-      /* Create a watchdog time to catch DMA timeouts */
-
-      spics->dmadog = wd_create();
-      DEBUGASSERT(spics->dmadog);
 #endif
 
       spi_dumpregs(spi, "After initialization");

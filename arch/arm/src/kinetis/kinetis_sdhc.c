@@ -166,7 +166,7 @@ struct kinetis_dev_s
   sdio_eventset_t    waitevents;      /* Set of events to be waited for */
   uint32_t           waitints;        /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  WDOG_ID            waitwdog;        /* Watchdog that handles event timeouts */
+  struct wdog_s      waitwdog;        /* Watchdog that handles event timeouts */
 
   /* Callback support */
 
@@ -264,7 +264,7 @@ static void kinetis_datadisable(void);
 static void kinetis_transmit(struct kinetis_dev_s *priv);
 static void kinetis_receive(struct kinetis_dev_s *priv);
 #endif
-static void kinetis_eventtimeout(int argc, uint32_t arg, ...);
+static void kinetis_eventtimeout(int argc, wdparm_t arg, ...);
 static void kinetis_endwait(struct kinetis_dev_s *priv,
               sdio_eventset_t wkupevent);
 static void kinetis_endtransfer(struct kinetis_dev_s *priv,
@@ -934,7 +934,7 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
  *
  ****************************************************************************/
 
-static void kinetis_eventtimeout(int argc, uint32_t arg, ...)
+static void kinetis_eventtimeout(int argc, wdparm_t arg, ...)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)arg;
 
@@ -979,7 +979,7 @@ static void kinetis_endwait(struct kinetis_dev_s *priv,
 {
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* Disable event-related interrupts */
 
@@ -1295,7 +1295,7 @@ static void kinetis_reset(FAR struct sdio_dev_s *dev)
   priv->xfrflags   = 0;      /* Used to synchronize SDIO and DMA completion events */
 #endif
 
-  wd_cancel(priv->waitwdog); /* Cancel any timeouts */
+  wd_cancel(&priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
 
@@ -2071,7 +2071,7 @@ static int kinetis_cancel(FAR struct sdio_dev_s *dev)
 
   /* Cancel any watchdog timeout */
 
-  wd_cancel(priv->waitwdog);
+  wd_cancel(&priv->waitwdog);
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
 
@@ -2506,9 +2506,8 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay,
-                       kinetis_eventtimeout,
-                       1, (uint32_t)priv);
+      ret   = wd_start(&priv->waitwdog, delay,
+                       kinetis_eventtimeout, 1, (wdparm_t)priv);
       if (ret < 0)
         {
           mcerr("ERROR: wd_start failed: %d\n", ret);
@@ -2536,7 +2535,7 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
            * return an SDIO error.
            */
 
-          wd_cancel(priv->waitwdog);
+          wd_cancel(&priv->waitwdog);
           return SDIOWAIT_ERROR;
         }
 
@@ -2878,11 +2877,6 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
    */
 
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
-
-  /* Create a watchdog timer */
-
-  priv->waitwdog = wd_create();
-  DEBUGASSERT(priv->waitwdog);
 
   /* In addition to the system clock, the SDHC module needs a clock for the
    * base for the external card clock.  There are four possible sources for
