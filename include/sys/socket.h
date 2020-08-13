@@ -88,25 +88,35 @@
  * the communication semantics.
  */
 
-#define SOCK_UNSPEC    0 /* Unspecified socket type */
-#define SOCK_STREAM    1 /* Provides sequenced, reliable, two-way,
-                          * connection-based byte streams. An out-of-band data
-                          * transmission mechanism may be supported.
-                          */
-#define SOCK_DGRAM     2 /* Supports  datagrams (connectionless, unreliable
-                          * messages of a fixed maximum length).
-                          */
-#define SOCK_RAW       3 /* Provides raw network protocol access. */
-#define SOCK_RDM       4 /* Provides a reliable datagram layer that does not
-                          * guarantee ordering.
-                          */
-#define SOCK_SEQPACKET 5 /* Provides a sequenced, reliable, two-way
-                          * connection-based data transmission path for
-                          * datagrams of fixed maximum length; a consumer is
-                          * required to read an entire packet with each read
-                          * system call.
-                          */
-#define SOCK_PACKET   10 /* Obsolete and should not be used in new programs */
+#define SOCK_UNSPEC    0        /* Unspecified socket type */
+#define SOCK_STREAM    1        /* Provides sequenced, reliable, two-way,
+                                 * connection-based byte streams. An out-of-band data
+                                 * transmission mechanism may be supported.
+                                 */
+#define SOCK_DGRAM     2        /* Supports  datagrams (connectionless, unreliable
+                                 * messages of a fixed maximum length).
+                                 */
+#define SOCK_RAW       3        /* Provides raw network protocol access. */
+#define SOCK_RDM       4        /* Provides a reliable datagram layer that does not
+                                 * guarantee ordering.
+                                 */
+#define SOCK_SEQPACKET 5        /* Provides a sequenced, reliable, two-way
+                                 * connection-based data transmission path for
+                                 * datagrams of fixed maximum length; a consumer is
+                                 * required to read an entire packet with each read
+                                 * system call.
+                                 */
+#define SOCK_PACKET   10        /* Obsolete and should not be used in new programs */
+
+#define SOCK_CLOEXEC  02000000  /* Atomically set close-on-exec flag for the new
+                                 * descriptor(s).
+                                 */
+#define SOCK_NONBLOCK 00004000  /* Atomically mark descriptor(s) as non-blocking. */
+
+#define SOCK_MAX (SOCK_PACKET + 1)
+#define SOCK_TYPE_MASK 0xf      /* Mask which covers at least up to SOCK_MASK-1.
+                                 * The remaining bits are used as flags.
+                                 */
 
 /* Bits in the FLAGS argument to `send', `recv', et al. These are the bits
  * recognized by Linux, not all are supported by NuttX.
