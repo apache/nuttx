@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_fclose.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013, 2017 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,7 +93,7 @@ int fclose(FAR FILE *stream)
               errcode = get_errno();
             }
 
-          /* Close the underlying file descriptor and save the return status */
+          /* Close the file descriptor and save the return status */
 
           status = close(stream->fs_fd);
 
@@ -110,7 +111,7 @@ int fclose(FAR FILE *stream)
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
       /* Destroy the semaphore */
 
-      sem_destroy(&stream->fs_sem);
+      _SEM_DESTROY(&stream->fs_sem);
 
       /* Release the buffer */
 
@@ -135,7 +136,7 @@ int fclose(FAR FILE *stream)
       stream->fs_oflags = 0;
 #endif
 
-      /* Setting the file descriptor to -1 makes the stream available for reuse */
+      /* Set file descriptor to -1 makes the stream available for reuse */
 
       stream->fs_fd = -1;
     }
