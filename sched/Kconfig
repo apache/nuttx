@@ -217,12 +217,6 @@ config START_DAY
 	default 1
 	range 1 31
 
-config MAX_WDOGPARMS
-	int "Maximum number of watchdog parameters"
-	default 2
-	---help---
-		Maximum number of parameters that can be passed to a watchdog handler
-
 config PREALLOC_TIMERS
 	int "Number of pre-allocated POSIX timers"
 	default 8

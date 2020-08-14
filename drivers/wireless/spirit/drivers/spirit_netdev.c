@@ -313,10 +313,10 @@ static int  spirit_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void spirit_txtimeout_work(FAR void *arg);
-static void spirit_txtimeout_expiry(int argc, wdparm_t arg, ...);
+static void spirit_txtimeout_expiry(wdparm_t arg);
 
 static void spirit_txpoll_work(FAR void *arg);
-static void spirit_txpoll_expiry(int argc, wdparm_t arg, ...);
+static void spirit_txpoll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -927,7 +927,7 @@ static void spirit_transmit_work(FAR void *arg)
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
       wd_start(&priv->txtimeout, SPIRIT_TXTIMEOUT,
-               spirit_txtimeout_expiry, 1, (wdparm_t)priv);
+               spirit_txtimeout_expiry, (wdparm_t)priv);
     }
 
   spirit_txunlock(priv);
@@ -1720,8 +1720,7 @@ static void spirit_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1731,7 +1730,7 @@ static void spirit_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void spirit_txtimeout_expiry(int argc, wdparm_t arg, ...)
+static void spirit_txtimeout_expiry(wdparm_t arg)
 {
   FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)arg;
 
@@ -1807,7 +1806,7 @@ static void spirit_txpoll_work(FAR void *arg)
       /* Setup the watchdog poll timer again */
 
       wd_start(&priv->txpoll, SPIRIT_WDDELAY,
-               spirit_txpoll_expiry, 1, (wdparm_t)priv);
+               spirit_txpoll_expiry, (wdparm_t)priv);
     }
   else
     {
@@ -1826,8 +1825,7 @@ static void spirit_txpoll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1837,7 +1835,7 @@ static void spirit_txpoll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void spirit_txpoll_expiry(int argc, wdparm_t arg, ...)
+static void spirit_txpoll_expiry(wdparm_t arg)
 {
   FAR struct spirit_driver_s *priv = (FAR struct spirit_driver_s *)arg;
 
@@ -1946,7 +1944,7 @@ static int spirit_ifup(FAR struct net_driver_s *dev)
       /* Set and activate a timer process */
 
       wd_start(&priv->txpoll, SPIRIT_WDDELAY,
-               spirit_txpoll_expiry, 1, (wdparm_t)priv);
+               spirit_txpoll_expiry, (wdparm_t)priv);
 
       /* Enables the interrupts from the SPIRIT1 */
 

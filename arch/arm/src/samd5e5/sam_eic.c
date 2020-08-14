@@ -49,6 +49,7 @@
 #include "sam_periphclks.h"
 #include "sam_port.h"
 #include "sam_eic.h"
+#include "hardware/sam_pac.h"
 
 #include <arch/board/board.h>
 
@@ -135,7 +136,7 @@ int sam_eic_initialize(void)
 
   /* Configure the EIC APB clock */
 
-  sam_apb_eic_enableperiph();
+  sam_apb_eic_enableperiph(); /* SAM_MCLK_APBAMASK(MCLK_APBAMASK_EIC) */
 
   /* Use the selected GCLK_EIC.  Some optional functions need a peripheral
    * clock, which can either be a generic clock (GCLK_EIC, for wider
@@ -144,13 +145,13 @@ int sam_eic_initialize(void)
    * and enabled before using the peripheral.
    */
 
-  regaddr = SAM_GCLK_PCHCTRL(GCLK_CHAN_EIC);
+  regaddr = SAM_GCLK_PCHCTRL(GCLK_CHAN_EIC); /* (GCLK_CHAN_EIC) */
   regval  = GCLK_PCHCTRL_GEN(BOARD_GCLK_EIC) | GCLK_PCHCTRL_CHEN;
   putreg32(regval, regaddr);
 
   /* Enable the EIC, selecting clocking via the GCLK_EIC  */
 
-  putreg8(EIC_CTRLA_ENABLE | EIC_CTRLA_ENABLE, SAM_EIC_CTRLA);
+  putreg8(EIC_CTRLA_ENABLE, SAM_EIC_CTRLA);
   sam_eic_syncwait();
 
   sam_eic_dumpregs();
@@ -179,6 +180,11 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset)
   uint32_t val;
   uint32_t config;
 
+  /* Disable the EIC: 23.6.2.1 */
+
+  putreg8(0, SAM_EIC_CTRLA);
+  sam_eic_syncwait();
+
   /* Determine which of the CONFIG[0:1] registers to write to */
 
   if (eirq < 8)
@@ -194,6 +200,11 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset)
       if ((pinset & PORT_INT_FALLING) != 0)
         {
           val = EIC_CONFIG0_SENSE_FALL(eirq);
+        }
+
+      if ((pinset & PORT_INT_HIGH) != 0)
+        {
+          val = EIC_CONFIG0_SENSE_HIGH(eirq);
         }
 
       val |= EIC_CONFIG0_FILTEN(eirq);
@@ -213,7 +224,14 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset)
           val = EIC_CONFIG1_SENSE_FALL(eirq);
         }
 
-      val |= EIC_CONFIG1_FILTEN(eirq);
+      if ((pinset & PORT_INT_HIGH) != 0)
+        {
+          val = EIC_CONFIG1_SENSE_HIGH(eirq);
+        }
+
+      config  = getreg32(SAM_EIC_EVCTRL);
+      config |= EIC_EXTINT(eirq);
+      putreg32(config, SAM_EIC_EVCTRL);
     }
 
   /* Write the new config to the CONFIGn register */
@@ -222,9 +240,10 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset)
   config |= val;
   putreg32(config, reg);
 
-  /* Enable interrupt generation for this pin */
+  /* Enable the EIC, selecting clocking via the GCLK_EIC */
 
-  putreg32(EIC_EXTINT(eirq), SAM_EIC_INTENSET);
+  putreg8(EIC_CTRLA_ENABLE, SAM_EIC_CTRLA);
+  sam_eic_syncwait();
 
   sam_eic_dumpregs();
   return OK;
@@ -248,7 +267,9 @@ int sam_eic_irq_ack(int irq)
 {
   int eirq = irq - SAM_IRQ_EXTINT0;
 
-  putreg32(EIC_EXTINT(eirq), SAM_EIC_INTENCLR);
+  irqinfo("sam_eic_irq_ack: irq=%d eirq=%d EIC_EXTINT=0x%x\n", irq,
+                                                eirq, EIC_EXTINT(eirq));
+  putreg32(EIC_EXTINT(eirq), SAM_EIC_INTFLAG);
   return OK;
 }
 

@@ -770,8 +770,8 @@
 
 /* USB PHY General Control Register */
 
-#define USBPHY_CTRLn_SFTRST                               (1 << 31) /* Bit 31: Soft-reset the USBPHY_PWD, USBPHY_TX, USBPHY_RX, and USBPHY_CTRL */
-#define USBPHY_CTRLn_CLKGATE                              (1 << 30) /* Bit 30: Gate UTMI Clocks */
+#define USBPHY_CTRLN_SFTRST                               (1 << 31) /* Bit 31: Soft-reset the USBPHY_PWD, USBPHY_TX, USBPHY_RX, and USBPHY_CTRL */
+#define USBPHY_CTRLN_CLKGATE                              (1 << 30) /* Bit 30: Gate UTMI Clocks */
 #define USBPHY_CTRLn_UTMI_SUSPENDM                        (1 << 29) /* Bit 29: Indicats powered-down state */
 #define USBPHY_CTRLn_HOST_FORCE_LS_SE0                    (1 << 28) /* Bit 28: Forces next FS packet tohave a EOP with low-speed timing */
 #define USBPHY_CTRLn_OTG_ID_VALUE                         (1 << 27) /* Bit 27: Indicates the results of USB_ID pin  */
@@ -782,8 +782,8 @@
 #define USBPHY_CTRLn_ENAUTOCLR_CLKGATE                    (1 << 19) /* Bit 19: Auto-clear the CLKGATE bit if wakeup event while suspended */
 #define USBPHY_CTRLn_AUTORESUME_EN                        (1 << 18) /* Bit 18: Auto resume, HW will send Resume to respond to the device remote wakeup */
                                                                     /* Bit 16-17: Reserved */
-#define USBPHY_CTRLn_ENUTMILEVEL3                         (1 << 15) /* Bit 15: Enables UTMI+ Level 3 operation for the USB HS PHY */
-#define USBPHY_CTRLn_ENUTMILEVEL2                         (1 << 14) /* Bit 14: Enables UTMI+ Level 2 operation for the USB HS PHY */
+#define USBPHY_CTRLN_ENUTMILEVEL3                         (1 << 15) /* Bit 15: Enables UTMI+ Level 3 operation for the USB HS PHY */
+#define USBPHY_CTRLN_ENUTMILEVEL2                         (1 << 14) /* Bit 14: Enables UTMI+ Level 2 operation for the USB HS PHY */
                                                                     /* Bit 13: Reserved */
 #define USBPHY_CTRLn_DEVPLUGIN_IRQ                        (1 << 12) /* Bit 12: Indicates device is connected */
                                                                     /* Bits 5-11: Reserved */
@@ -855,21 +855,21 @@
 
 /* USB PHY PLL Control/Status Register */
 
-#define USBPHY_PLL_SICn_PLL_LOCK                          (1 << 31) /* Bit 31: USB PLL lock status indicator */
+#define USBPHY_PLL_SICN_PLL_LOCK                          (1 << 31) /* Bit 31: USB PLL lock status indicator */
                                                                     /* Bits 17-30: Reserved */
-#define USBPHY_PLL_SICn_PLL_BYPASS                        (1 << 16) /* Bit 16: Bypass the USB PLL */
+#define USBPHY_PLL_SICN_PLL_BYPASS                        (1 << 16) /* Bit 16: Bypass the USB PLL */
                                                                     /* Bits 14-15: Reserved */
 #define USBPHY_PLL_SICn_PLL_ENABLE                        (1 << 13) /* Bit 13: Enable the clock output from the USB PLL */
-#define USBPHY_PLL_SICn_PLL_POWER                         (1 << 12) /* Bit 12: Power up the USB PLL */
+#define USBPHY_PLL_SICN_PLL_POWER                         (1 << 12) /* Bit 12: Power up the USB PLL */
 #define USBPHY_PLL_SICn_PLL_HOLD_RING_OFF                 (1 << 11) /* Bit 11: Analog debug bit */
                                                                     /* Bits 7-10: Reserved */
-#define USBPHY_PLL_SICn_PLL_EN_USB_CLKS                   (1 << 6)  /* Bit 6:  Enable the USB clock output from the USB PHY PLL */
+#define USBPHY_PLL_SICN_PLL_EN_USB_CLKS                   (1 << 6)  /* Bit 6:  Enable the USB clock output from the USB PHY PLL */
                                                                     /* Bits 2-5: Reserved */
 #define USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT                 (0)       /* Bits 0-4: Controls the USB PLL feedback loop divider */
-#define USBPHY_PLL_SICn_PLL_DIV_SEL_MASK                  (0x1f << USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT)
-#  define USBPHY_PLL_SICn_PLL_DIV_SEL_24MHZ               (0 << USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT) /* 24Mhz XTAL */
-#  define USBPHY_PLL_SICn_PLL_DIV_SEL_16MHZ               (1 << USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT) /* 16Mhz XTAL */
-#  define USBPHY_PLL_SICn_PLL_DIV_SEL_12MHZ               (2 << USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT) /* 12Mhz XTAL */
+#define USBPHY_PLL_SICN_PLL_DIV_SEL_MASK                  (0x1f << USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT)
+#  define USBPHY_PLL_SICN_PLL_DIV_SEL_24MHZ               (0 << USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT) /* 24Mhz XTAL */
+#  define USBPHY_PLL_SICN_PLL_DIV_SEL_16MHZ               (1 << USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT) /* 16Mhz XTAL */
+#  define USBPHY_PLL_SICN_PLL_DIV_SEL_12MHZ               (2 << USBPHY_PLL_SICn_PLL_DIV_SEL_SHIFT) /* 12Mhz XTAL */
 
 /* USB PHY VBUS Detect Control Register */
 
@@ -968,6 +968,6 @@
 #define USBPHY_TRIM_OVERRIDE_ENn_TRIM_TX_CAL45DP_OVERRIDE           (1 << 3)  /* Bit 3:  Override enable for TX_CAL45DP */
 #define USBPHY_TRIM_OVERRIDE_ENn_TRIM_TX_D_CAL_OVERRIDE             (1 << 2)  /* Bit 2:  Override enable for TX_D_CAL */
 #define USBPHY_TRIM_OVERRIDE_ENn_TRIM_ENV_TAIL_ADJ_VD_OVERRIDE      (1 << 1)  /* Bit 1:  Override enable for ENV_TAIL_ADJ */
-#define USBPHY_TRIM_OVERRIDE_ENn_TRIM_DIV_SEL_OVERRIDE              (1 << 0)  /* Bit 0:  Override enable for PLL_DIV_SEL */
+#define USBPHY_TRIM_OVERRIDE_ENN_TRIM_DIV_SEL_OVERRIDE              (1 << 0)  /* Bit 0:  Override enable for PLL_DIV_SEL */
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_USBHS_H */

@@ -54,7 +54,6 @@
  *   becomes non-empty.
  *
  * Input Parameters:
- *   argc  - the number of arguments (should be 1)
  *   pid   - the task ID of the task to wakeup
  *
  * Returned Value:
@@ -64,7 +63,7 @@
  *
  ****************************************************************************/
 
-static void nxmq_rcvtimeout(int argc, wdparm_t pid, ...)
+static void nxmq_rcvtimeout(wdparm_t pid)
 {
   FAR struct tcb_s *wtcb;
   irqstate_t flags;
@@ -79,7 +78,7 @@ static void nxmq_rcvtimeout(int argc, wdparm_t pid, ...)
    * longer be active when this watchdog goes off.
    */
 
-  wtcb = nxsched_get_tcb((pid_t)pid);
+  wtcb = nxsched_get_tcb(pid);
 
   /* It is also possible that an interrupt/context switch beat us to the
    * punch and already changed the task's state.
@@ -209,8 +208,7 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
       /* Start the watchdog */
 
-      wd_start(&rtcb->waitdog, ticks,
-               nxmq_rcvtimeout, 1, (wdparm_t)getpid());
+      wd_start(&rtcb->waitdog, ticks, nxmq_rcvtimeout, getpid());
     }
 
   /* Get the message from the message queue */

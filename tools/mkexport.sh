@@ -445,10 +445,10 @@ if [ -e "${APPDIR}/Makefile" ]; then
 fi
 
 if [ "X${TGZ}" = "Xy" ]; then
-  tar cvf "${EXPORTSUBDIR}.tar" "${EXPORTSUBDIR}" 1>/dev/null 2>&1
+  tar cvf "${EXPORTSUBDIR}.tar" "${EXPORTSUBDIR}" 1>/dev/null
   gzip -f "${EXPORTSUBDIR}.tar"
 else
-  zip -r "${EXPORTSUBDIR}.zip" "${EXPORTSUBDIR}" 1>/dev/null 2>&1
+  zip -r "${EXPORTSUBDIR}.zip" "${EXPORTSUBDIR}" 1>/dev/null
 fi
 
 # Clean up after ourselves

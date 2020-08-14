@@ -56,9 +56,7 @@
  *   the condition is signaled.
  *
  * Input Parameters:
- *   argc  - the number of arguments (should be 2)
- *   pid   - the task ID of the task to wakeup
- *   signo - The signal to use to wake up the task
+ *   arg   - the argument
  *
  * Returned Value:
  *   None
@@ -67,10 +65,9 @@
  *
  ****************************************************************************/
 
-static void pthread_condtimedout(int argc, wdparm_t arg1, wdparm_t arg2, ...)
+static void pthread_condtimedout(wdparm_t arg)
 {
-  pid_t pid = (pid_t)arg1;
-  int signo = (int)arg2;
+  pid_t pid = arg;
 
 #ifdef HAVE_GROUP_MEMBERS
     {
@@ -93,7 +90,7 @@ static void pthread_condtimedout(int argc, wdparm_t arg1, wdparm_t arg2, ...)
         {
           /* Create the siginfo structure */
 
-          info.si_signo           = signo;
+          info.si_signo           = SIGCONDTIMEDOUT;
           info.si_code            = SI_QUEUE;
           info.si_errno           = ETIMEDOUT;
           info.si_value.sival_ptr = NULL;
@@ -121,7 +118,7 @@ static void pthread_condtimedout(int argc, wdparm_t arg1, wdparm_t arg2, ...)
       /* Send the specified signal to the specified task. */
 
       value.sival_ptr = NULL;
-      nxsig_queue((int)pid, signo, value);
+      nxsig_queue(pid, SIGCONDTIMEDOUT, value);
     }
 
 #endif /* HAVE_GROUP_MEMBERS */
@@ -159,7 +156,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
   sclock_t ticks;
-  int mypid = (int)getpid();
+  int mypid = getpid();
   int ret = OK;
   int status;
 
@@ -268,8 +265,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
                   /* Start the watchdog */
 
                   wd_start(&rtcb->waitdog, ticks,
-                           (wdentry_t)pthread_condtimedout, 2,
-                           (wdparm_t)mypid, (wdparm_t)SIGCONDTIMEDOUT);
+                           pthread_condtimedout, mypid);
 
                   /* Take the condition semaphore.  Do not restore
                    * interrupts until we return from the wait.  This is

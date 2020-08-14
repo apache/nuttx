@@ -547,7 +547,7 @@ static void   khci_epwrite(struct khci_ep_s *privep,
                 const uint8_t *src, uint32_t nbytes);
 static void   khci_wrcomplete(struct khci_usbdev_s *priv,
                 struct khci_ep_s *privep);
-static void   khci_rqrestart(int argc, wdparm_t arg1, ...);
+static void   khci_rqrestart(wdparm_t arg);
 static void   khci_delayedrestart(struct khci_usbdev_s *priv,
                 uint8_t epno);
 static void   khci_rqstop(struct khci_ep_s *privep);
@@ -1050,7 +1050,7 @@ static void khci_wrcomplete(struct khci_usbdev_s *priv,
  * Name: khci_rqrestart
  ******************************************************************************************/
 
-static void khci_rqrestart(int argc, wdparm_t arg1, ...)
+static void khci_rqrestart(wdparm_t arg)
 {
   struct khci_usbdev_s *priv;
   struct khci_ep_s *privep;
@@ -1061,7 +1061,7 @@ static void khci_rqrestart(int argc, wdparm_t arg1, ...)
 
   /* Recover the pointer to the driver structure */
 
-  priv = (struct khci_usbdev_s *)((uintptr_t)arg1);
+  priv = (struct khci_usbdev_s *)arg;
   DEBUGASSERT(priv != NULL);
 
   /* Sample and clear the set of endpoints that have recovered from a stall */
@@ -1119,7 +1119,7 @@ static void khci_delayedrestart(struct khci_usbdev_s *priv, uint8_t epno)
   /* And start (or re-start) the watchdog timer */
 
   wd_start(&priv->wdog, RESTART_DELAY,
-           khci_rqrestart, 1, (wdparm_t)priv);
+           khci_rqrestart, (wdparm_t)priv);
 }
 
 /******************************************************************************************

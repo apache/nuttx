@@ -127,7 +127,7 @@ static void bcmf_rxpoll(FAR void *arg);
 /* Watchdog timer expirations */
 
 static void bcmf_poll_work(FAR void *arg);
-static void bcmf_poll_expiry(int argc, wdparm_t arg, ...);
+static void bcmf_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -626,7 +626,7 @@ static void bcmf_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   wd_start(&priv->bc_txpoll, BCMF_WDDELAY,
-           bcmf_poll_expiry, 1, (wdparm_t)priv);
+           bcmf_poll_expiry, (wdparm_t)priv);
 exit_unlock:
   net_unlock();
 }
@@ -638,8 +638,7 @@ exit_unlock:
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -649,7 +648,7 @@ exit_unlock:
  *
  ****************************************************************************/
 
-static void bcmf_poll_expiry(int argc, wdparm_t arg, ...)
+static void bcmf_poll_expiry(wdparm_t arg)
 {
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
@@ -702,7 +701,7 @@ static int bcmf_ifup(FAR struct net_driver_s *dev)
   /* Set and activate a timer process */
 
   wd_start(&priv->bc_txpoll, BCMF_WDDELAY,
-           bcmf_poll_expiry, 1, (wdparm_t)priv);
+           bcmf_poll_expiry, (wdparm_t)priv);
 
   /* Enable the hardware interrupt */
 

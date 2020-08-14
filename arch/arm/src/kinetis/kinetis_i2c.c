@@ -171,7 +171,7 @@ static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
 static int  kinetis_i2c_start(struct kinetis_i2cdev_s *priv);
 static void kinetis_i2c_stop(struct kinetis_i2cdev_s *priv);
 static int kinetis_i2c_interrupt(int irq, void *context, void *arg);
-static void kinetis_i2c_timeout(int argc, wdparm_t arg, ...);
+static void kinetis_i2c_timeout(wdparm_t arg);
 static void kinetis_i2c_setfrequency(struct kinetis_i2cdev_s *priv,
                                      uint32_t frequency);
 
@@ -901,7 +901,7 @@ static void kinetis_i2c_stop(struct kinetis_i2cdev_s *priv)
  *
  ****************************************************************************/
 
-static void kinetis_i2c_timeout(int argc, wdparm_t arg, ...)
+static void kinetis_i2c_timeout(wdparm_t arg)
 {
   struct kinetis_i2cdev_s *priv = (struct kinetis_i2cdev_s *)arg;
 
@@ -1223,7 +1223,7 @@ static int kinetis_i2c_transfer(struct i2c_master_s *dev,
       /* Wait for transfer complete */
 
       wd_start(&priv->timeout, I2C_TIMEOUT,
-               kinetis_i2c_timeout, 1, (wdparm_t)priv);
+               kinetis_i2c_timeout, (wdparm_t)priv);
       kinetis_i2c_wait(priv);
 
       wd_cancel(&priv->timeout);

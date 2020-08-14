@@ -86,10 +86,10 @@ static void xbee_process_rxframe(FAR struct xbee_priv_s *priv,
 static void xbee_notify(FAR struct xbee_priv_s *priv,
                 FAR struct ieee802154_primitive_s *primitive);
 static void xbee_notify_worker(FAR void *arg);
-static void xbee_atquery_timeout(int argc, wdparm_t arg, ...);
+static void xbee_atquery_timeout(wdparm_t arg);
 
 #ifdef CONFIG_XBEE_LOCKUP_WORKAROUND
-static void xbee_lockupcheck_timeout(int argc, wdparm_t arg, ...);
+static void xbee_lockupcheck_timeout(wdparm_t arg);
 static void xbee_lockupcheck_worker(FAR void *arg);
 static void xbee_backup_worker(FAR void *arg);
 static void xbee_lockupcheck_reschedule(FAR struct xbee_priv_s *priv);
@@ -1098,8 +1098,7 @@ static void xbee_notify_worker(FAR void *arg)
  *   handle it gracefully by retrying the query.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1108,7 +1107,7 @@ static void xbee_notify_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void xbee_atquery_timeout(int argc, wdparm_t arg, ...)
+static void xbee_atquery_timeout(wdparm_t arg)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
 
@@ -1131,8 +1130,7 @@ static void xbee_atquery_timeout(int argc, wdparm_t arg, ...)
  *   locked up.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1141,7 +1139,7 @@ static void xbee_atquery_timeout(int argc, wdparm_t arg, ...)
  *
  ****************************************************************************/
 
-static void xbee_lockupcheck_timeout(int argc, wdparm_t arg, ...)
+static void xbee_lockupcheck_timeout(wdparm_t arg)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
 
@@ -1212,7 +1210,7 @@ static void xbee_lockupcheck_reschedule(FAR struct xbee_priv_s *priv)
    */
 
   wd_start(&priv->lockup_wd, XBEE_LOCKUP_QUERYTIME,
-           xbee_lockupcheck_timeout, 1, (wdparm_t)priv);
+           xbee_lockupcheck_timeout, (wdparm_t)priv);
 }
 
 #endif
@@ -1578,7 +1576,7 @@ int xbee_atquery(FAR struct xbee_priv_s *priv, FAR const char *atcommand)
           /* Setup a timeout */
 
           wd_start(&priv->atquery_wd, XBEE_ATQUERY_TIMEOUT,
-                   xbee_atquery_timeout, 1, (wdparm_t)priv);
+                   xbee_atquery_timeout, (wdparm_t)priv);
         }
 
       /* Send the query */
