@@ -73,7 +73,7 @@ html_css_files = [
 
 html_show_license = True
 
-html_logo = '../Documentation/NuttX.png'
+html_logo = '_static/NuttX.png'
 html_favicon = '_static/favicon.ico'
 
 today_fmt = '%d %B %y at %H:%M'

@@ -15,7 +15,7 @@ name: Check
 on:
   pull_request:
     paths-ignore:
-      - 'doc/**'
+      - 'Documentation/**'
 
 jobs:
   check:
