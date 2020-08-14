@@ -26,5 +26,6 @@ Last Updated: |today|
    guides/index.rst
    releases/index.rst
    contributing/index.rst
+   glossary.rst
    
 .. include:: substitutions.rst
