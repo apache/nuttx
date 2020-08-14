@@ -501,10 +501,10 @@ static int ads7843e_schedule(FAR struct ads7843e_dev_s *priv)
  * Name: ads7843e_wdog
  ****************************************************************************/
 
-static void ads7843e_wdog(int argc, wdparm_t arg1, ...)
+static void ads7843e_wdog(wdparm_t arg)
 {
   FAR struct ads7843e_dev_s *priv =
-    (FAR struct ads7843e_dev_s *)((uintptr_t)arg1);
+    (FAR struct ads7843e_dev_s *)arg;
 
   ads7843e_schedule(priv);
 }
@@ -603,7 +603,7 @@ static void ads7843e_worker(FAR void *arg)
        */
 
       wd_start(&priv->wdog, ADS7843E_WDOG_DELAY,
-               ads7843e_wdog, 1, (wdparm_t)priv);
+               ads7843e_wdog, (wdparm_t)priv);
       goto ignored;
     }
   else
@@ -638,7 +638,7 @@ static void ads7843e_worker(FAR void *arg)
       /* Continue to sample the position while the pen is down */
 
       wd_start(&priv->wdog, ADS7843E_WDOG_DELAY,
-               ads7843e_wdog, 1, (wdparm_t)priv);
+               ads7843e_wdog, (wdparm_t)priv);
 
       /* Check the thresholds.  Bail if there is no significant difference */
 

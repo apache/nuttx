@@ -193,7 +193,7 @@ static void cdcecm_interrupt_work(FAR void *arg);
 /* Watchdog timer expirations */
 
 static void cdcecm_poll_work(FAR void *arg);
-static void cdcecm_poll_expiry(int argc, wdparm_t arg, ...);
+static void cdcecm_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -708,7 +708,7 @@ static void cdcecm_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   wd_start(&self->txpoll, CDCECM_WDDELAY,
-           cdcecm_poll_expiry, 1, (wdparm_t)self);
+           cdcecm_poll_expiry, (wdparm_t)self);
 
   net_unlock();
 }
@@ -720,8 +720,7 @@ static void cdcecm_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -732,7 +731,7 @@ static void cdcecm_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void cdcecm_poll_expiry(int argc, wdparm_t arg, ...)
+static void cdcecm_poll_expiry(wdparm_t arg)
 {
   FAR struct cdcecm_driver_s *priv = (FAR struct cdcecm_driver_s *)arg;
 
@@ -789,7 +788,7 @@ static int cdcecm_ifup(FAR struct net_driver_s *dev)
   /* Set and activate a timer process */
 
   wd_start(&priv->txpoll, CDCECM_WDDELAY,
-           cdcecm_poll_expiry, 1, (wdparm_t)priv);
+           cdcecm_poll_expiry, (wdparm_t)priv);
 
   priv->bifup = true;
   return OK;

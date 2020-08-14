@@ -580,14 +580,14 @@ static void     ssc_txdma_sampledone(struct sam_ssc_s *priv, int result);
 #endif
 
 #ifdef SSC_HAVE_RX
-static void     ssc_rxdma_timeout(int argc, wdparm_t arg, ...);
+static void     ssc_rxdma_timeout(wdparm_t arg);
 static int      ssc_rxdma_setup(struct sam_ssc_s *priv);
 static void     ssc_rx_worker(void *arg);
 static void     ssc_rx_schedule(struct sam_ssc_s *priv, int result);
 static void     ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result);
 #endif
 #ifdef SSC_HAVE_TX
-static void     ssc_txdma_timeout(int argc, wdparm_t arg, ...);
+static void     ssc_txdma_timeout(wdparm_t arg);
 static int      ssc_txdma_setup(struct sam_ssc_s *priv);
 static void     ssc_tx_worker(void *arg);
 static void     ssc_tx_schedule(struct sam_ssc_s *priv, int result);
@@ -1183,8 +1183,7 @@ static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
  *   The RX watchdog timeout without completion of the RX DMA.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -1195,7 +1194,7 @@ static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
  ****************************************************************************/
 
 #ifdef SSC_HAVE_RX
-static void ssc_rxdma_timeout(int argc, wdparm_t arg, ...)
+static void ssc_rxdma_timeout(wdparm_t arg)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1345,7 +1344,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
   if (!notimeout)
     {
       ret = wd_start(&priv->rx.dog, timeout,
-                     ssc_rxdma_timeout, 1, (wdparm_t)priv);
+                     ssc_rxdma_timeout, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
@@ -1599,8 +1598,7 @@ static void ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result)
  *   The RX watchdog timeout without completion of the RX DMA.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -1611,7 +1609,7 @@ static void ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result)
  ****************************************************************************/
 
 #ifdef SSC_HAVE_TX
-static void ssc_txdma_timeout(int argc, wdparm_t arg, ...)
+static void ssc_txdma_timeout(wdparm_t arg)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1762,7 +1760,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
   if (!notimeout)
     {
       ret = wd_start(&priv->tx.dog, timeout,
-                     ssc_txdma_timeout, 1, (wdparm_t)priv);
+                     ssc_txdma_timeout, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
