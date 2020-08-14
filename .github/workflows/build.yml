@@ -15,10 +15,10 @@ name: Build
 on:
   pull_request:
     paths-ignore:
-      - 'doc/**'
+      - 'Documentation/**'
   push:
     paths-ignore:
-      - 'doc/**'
+      - 'Documentation/**'
     branches:
       - master
       - 'releases/*'
