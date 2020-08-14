@@ -402,10 +402,8 @@ NX Server Callbacks
 
   :param handle: The handle returned by ```nx_connect()`` <#nxconnectinstance>`__.
   :param flags: Optional flags. These include:
-    - ``NXBE_WINDOW_RAMBACKED``: Creates a RAM backed window. This
-      option is only valid if ``CONFIG_NX_RAMBACKED`` is enabled.
-    - ``NXBE_WINDOW_HIDDEN``: The window is create in the HIDDEN state
-      and can be made visible later with ``nx_setvisibility()``.
+    - ``NXBE_WINDOW_RAMBACKED``: Creates a RAM backed window. This option is only valid if ``CONFIG_NX_RAMBACKED`` is enabled.
+    - ``NXBE_WINDOW_HIDDEN``: The window is create in the HIDDEN state and can be made visible later with ``nx_setvisibility()``.
 
   :param cb: Callbacks used to process window events
   :param arg: User provided value that will be returned with NX callbacks.
@@ -510,7 +508,7 @@ NX Server Callbacks
   Bring the specified window to the top of the display.
 
   :param hwnd: The handle returned by :c:func:`nx_openwindow`. This
-    handle must not have been created by :c:func:`nx_requestbkgd`_.
+    handle must not have been created by :c:func:`nx_requestbkgd`.
 
   :return: ``OK`` on success; ``ERROR`` on failure with ``errno`` set appropriately
 
