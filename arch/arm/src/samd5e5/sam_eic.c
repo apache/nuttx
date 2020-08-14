@@ -184,7 +184,7 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset)
 
   putreg8(0, SAM_EIC_CTRLA);
   sam_eic_syncwait();
- 
+
   /* Determine which of the CONFIG[0:1] registers to write to */
 
   if (eirq < 8)
@@ -202,7 +202,7 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset)
           val = EIC_CONFIG0_SENSE_FALL(eirq);
         }
 
-       if ((pinset & PORT_INT_HIGH) != 0)
+      if ((pinset & PORT_INT_HIGH) != 0)
         {
           val = EIC_CONFIG0_SENSE_HIGH(eirq);
         }
@@ -216,7 +216,7 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset)
       val = EIC_CONFIG1_SENSE_BOTH(eirq);
       if ((pinset & PORT_INT_RISING) != 0)
         {
-          val = EIC_CONFIG1_SENSE_RISE(eirq); 
+          val = EIC_CONFIG1_SENSE_RISE(eirq);
         }
 
       if ((pinset & PORT_INT_FALLING) != 0)
@@ -228,9 +228,10 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset)
         {
           val = EIC_CONFIG1_SENSE_HIGH(eirq);
         }
-        config  = getreg32(SAM_EIC_EVCTRL);
-        config |= EIC_EXTINT(eirq);        
-        putreg32(config, SAM_EIC_EVCTRL);
+
+      config  = getreg32(SAM_EIC_EVCTRL);
+      config |= EIC_EXTINT(eirq);
+      putreg32(config, SAM_EIC_EVCTRL);
     }
 
   /* Write the new config to the CONFIGn register */
@@ -267,7 +268,7 @@ int sam_eic_irq_ack(int irq)
   int eirq = irq - SAM_IRQ_EXTINT0;
 
   irqinfo("sam_eic_irq_ack: irq=%d eirq=%d EIC_EXTINT=0x%x\n", irq,
-                                                         eirq, EIC_EXTINT(eirq));
+                                                eirq, EIC_EXTINT(eirq));
   putreg32(EIC_EXTINT(eirq), SAM_EIC_INTFLAG);
   return OK;
 }

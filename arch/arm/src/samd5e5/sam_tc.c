@@ -335,13 +335,13 @@ void tc_bridge_enable(int tc)
     }
 }
 
-/*******************************************************************************
+/****************************************************************************
  * Name: tc_wait_synchronization
  *
  * Description:
  *   Wait until the TC reports that it is synchronized.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 static void tc_wait_synchronization(struct sam_tc_dev_s *priv)
 {
@@ -354,7 +354,7 @@ static void tc_wait_synchronization(struct sam_tc_dev_s *priv)
  * Description:
  *   Configure the TC source clock. PCHCTRL[id]
  *
- *   One generic clock is used by the TC: GCLK_TCx . 
+ *   One generic clock is used by the TC: GCLK_TCx.
  *
  ****************************************************************************/
 
@@ -383,44 +383,49 @@ void tc_coreclk_configure(int tc, int coregen, bool wrlock)
  *   A pointer to the initialized timer channel structure associated with tc
  *   and channel.  NULL is returned on any failure.
  *
- *   On successful return, the caller holds the tc exclusive access semaphore.
+ * On successful return, the caller holds the tc exclusive access semaphore.
  *
  ****************************************************************************/
- 
+
 static int tc_interrupt(int irq, void *context, FAR void *arg)
- {
+{
   struct sam_tc_dev_s *priv = (struct sam_tc_dev_s *)arg;
   uint8_t flags;
 
   /* Get the interrupt status for this channel */
 
   flags = getreg8(priv->attr->base + SAM_TC_INTFLAG_OFFSET);
-  if(flags & TC_INTFLAG_OVF)
+  if (flags & TC_INTFLAG_OVF)
     {
       tmrinfo("Overflow Interrupt Flag\n");
       putreg8(TC_INTFLAG_OVF, priv->attr->base + SAM_TC_INTFLAG_OFFSET);
     }
-  if(flags & TC_INTFLAG_ERR)
+
+  if (flags & TC_INTFLAG_ERR)
     {
       tmrinfo("Error Interrupt Flag\n");
       putreg8(TC_INTFLAG_ERR, priv->attr->base + SAM_TC_INTFLAG_OFFSET);
     }
-  if(flags & TC_INTFLAG_MC0)
+
+  if (flags & TC_INTFLAG_MC0)
     {
       tmrinfo("MC0 Interrupt Flag\n");
       putreg8(TC_INTFLAG_MC0, priv->attr->base + SAM_TC_INTFLAG_OFFSET);
     }
-  if(flags & TC_INTFLAG_MC1)
+
+  if (flags & TC_INTFLAG_MC1)
     {
       tmrinfo("MC1 Interrupt Flag\n");
       putreg8(TC_INTFLAG_MC1, priv->attr->base + SAM_TC_INTFLAG_OFFSET);
     }
-    if (priv->handler)
+
+  if (priv->handler)
     {
       /* Execute the callback */
 
       priv->handler(priv, priv->arg, flags);
     }
+
   return OK;
 }
 
