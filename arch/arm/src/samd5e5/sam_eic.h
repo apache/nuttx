@@ -114,6 +114,8 @@ int sam_eic_configure(uint8_t eirq, port_pinset_t pinset);
 
 int sam_eic_irq_ack(int irq);
 
+void sam_eic_dumpregs(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

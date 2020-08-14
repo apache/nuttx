@@ -258,6 +258,7 @@ config ARCH_CHIP_SAML2X
 config ARCH_CHIP_SAMD5X
 	bool "Microchip SAMD5x"
 	select ARCH_CORTEXM4
+	select ARCH_HAVE_TICKLESS
 	---help---
 		Microchip SAMD5X (ARM Cortex-M4)
 

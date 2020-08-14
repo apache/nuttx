@@ -51,7 +51,7 @@
 /* EIC register offsets *********************************************************************/
 
 #define SAM_EIC_CTRLA_OFFSET         0x0000  /* Control A register */
-#define SAM_EIC_NMITRCL_OFFSET       0x0001  /* Non-maskable interrupt control register */
+#define SAM_EIC_NMICTRL_OFFSET       0x0001  /* Non-maskable interrupt control register */
 #define SAM_EIC_NMIFLAG_OFFSET       0x0002  /* Non-maskable interrupt flasg status and clear register */
 #define SAM_EIC_SYNCBUSY_OFFSET      0x0004  /* Synchronization busy register */
 #define SAM_EIC_EVCTRL_OFFSET        0x0008  /* Event control register */
@@ -68,7 +68,7 @@
 /* EIC register addresses *******************************************************************/
 
 #define SAM_EIC_CTRLA                (SAM_EIC_BASE + SAM_EIC_CTRLA_OFFSET)
-#define SAM_EIC_NMITRCL              (SAM_EIC_BASE + SAM_EIC_NMITRCL_OFFSET)
+#define SAM_EIC_NMICTRL              (SAM_EIC_BASE + SAM_EIC_NMICTRL_OFFSET)
 #define SAM_EIC_NMIFLAG              (SAM_EIC_BASE + SAM_EIC_NMIFLAG_OFFSET)
 #define SAM_EIC_SYNCBUSY             (SAM_EIC_BASE + SAM_EIC_SYNCBUSY_OFFSET)
 #define SAM_EIC_EVCTRL               (SAM_EIC_BASE + SAM_EIC_EVCTRL_OFFSET)
@@ -86,9 +86,9 @@
 
 /* Control A register */
 
-#define EIC_CTRLA_SWRST              (1 << 0)  /* Bit 0:  Software reset */
-#define EIC_CTRLA_ENABLE             (1 << 1)  /* Bit 1:  Enable */
-#define EIC_CTRLA_CKSEL              (1 << 4)  /* Bit 4:  Clock selection */
+#define EIC_CTRLA_SWRST              (1 << 0)        /* Bit 0:  Software reset */
+#define EIC_CTRLA_ENABLE             (1 << 1)        /* Bit 1:  Enable */
+#define EIC_CTRLA_CKSEL              (1 << 4)        /* Bit 4:  Clock selection */
 #  define EIC_CTRLA_CKSEL_GCLK_EIC   (0)             /*   0=EIC clocked by GCLK_EIC */
 #  define EIC_CTRLA_CKSEL_CLK_ULP32K EIC_CTRLA_CKSEL /*   1=EIC clocked by CLK_ULP32K */
 
@@ -102,8 +102,8 @@
 #  define EIC_NMITRCL_NMISENSE_BOTH  (3 << EIC_NMITRCL_NMISENSE_SHIFT) /* Both edge detection */
 #  define EIC_NMITRCL_NMISENSE_HIGH  (4 << EIC_NMITRCL_NMISENSE_SHIFT) /* High level detection */
 #  define EIC_NMITRCL_NMISENSE_LOW   (5 << EIC_NMITRCL_NMISENSE_SHIFT) /* Low level detection */
-#define EIC_NMITRCL_NMIFLTEN         (1 << 3)  /* Bit 3: Non-maskable interrupt filter enable */
-#define EIC_NMITRCL_ASYNC            (1 << 4)  /* Bit 4: Asynchronous edge detection mode */
+#define EIC_NMITRCL_NMIFLTEN         (1 << 3)                          /* Bit 3: Non-maskable interrupt filter enable */
+#define EIC_NMITRCL_ASYNC            (1 << 4)                          /* Bit 4: Asynchronous edge detection mode */
 
 /* Non-maskable interrupt flas status and clear register */
 
@@ -142,7 +142,7 @@
 
 /* Configuration 0 register */
 
-#define EIC_CONFIG0_FILTEN(n)        (3 + ((n) << 2))                  /* Filter n enable, n=0-7 */
+#define EIC_CONFIG0_FILTEN(n)        (0x8 << ((n) << 2))               /* Filter n enable, n=0-7 */
 #define EIC_CONFIG0_SENSE_SHIFT(n)   ((n) << 2)                        /* Filter n input sense, n=0-7 */
 #define EIC_CONFIG0_SENSE_MASK(n)    (7 << EIC_CONFIG0_SENSE_SHIFT(n))
 #  define EIC_CONFIG0_SENSE_NONE(n)  (0 << EIC_CONFIG0_SENSE_SHIFT(n)) /* No detection */
@@ -154,7 +154,7 @@
 
 /* Configuration 1 register */
 
-#define EIC_CONFIG1_FILTEN(n)        (3 + (((n) - 8) << 2))            /* Filter n enable, n=8-15 */
+#define EIC_CONFIG1_FILTEN(n)        (0x8 << (((n) - 8) << 2))         /* Filter n enable, n=8-15 */
 #define EIC_CONFIG1_SENSE_SHIFT(n)   (((n) - 8) << 2)                  /* Filter n input sense, n=8-17 */
 #define EIC_CONFIG1_SENSE_MASK(n)    (7 << EIC_CONFIG1_SENSE_SHIFT(n))
 #  define EIC_CONFIG1_SENSE_NONE(n)  (0 << EIC_CONFIG1_SENSE_SHIFT(n)) /* No detection */
@@ -198,10 +198,10 @@
 #  define EIC_DPRESCALER_PRESCALER0_DIV64  (5 << EIC_DPRESCALER_PRESCALER0_SHIFT) /* EIC clock divided by 64 */
 #  define EIC_DPRESCALER_PRESCALER0_DIV128 (6 << EIC_DPRESCALER_PRESCALER0_SHIFT) /* EIC clock divided by 128 */
 #  define EIC_DPRESCALER_PRESCALER0_DIV256 (7 << EIC_DPRESCALER_PRESCALER0_SHIFT) /* EIC clock divided by 256 */
-#define EIC_DPRESCALER_STATES0          (1 << 3)  /* Bit 3:  Debouncer number of states. EXTINT 0-7 */
-#  define EIC_DPRESCALER_STATES0_3      (0)                    /* 3 low frequency samples */
-#  define EIC_DPRESCALER_STATES0_7      EIC_DPRESCALER_STATES0 /* 7 low frequency samples */
-#define EIC_DPRESCALER_PRESCALER1_SHIFT (4)       /* Bitx 4-6: Debouncer Prescaler. EXTINT 8-15 */
+#define EIC_DPRESCALER_STATES0          (1 << 3)                                  /* Bit 3:  Debouncer number of states. EXTINT 0-7 */
+#  define EIC_DPRESCALER_STATES0_3      (0)                                       /* 3 low frequency samples */
+#  define EIC_DPRESCALER_STATES0_7      EIC_DPRESCALER_STATES0                    /* 7 low frequency samples */
+#define EIC_DPRESCALER_PRESCALER1_SHIFT (4)                                       /* Bitx 4-6: Debouncer Prescaler. EXTINT 8-15 */
 #define EIC_DPRESCALER_PRESCALER1_MASK  (7 << EIC_DPRESCALER_PRESCALER1_SHIFT)
 #  define EIC_DPRESCALER_PRESCALER1_DIV2   (0 << EIC_DPRESCALER_PRESCALER1_SHIFT) /* EIC clock divided by 2 */
 #  define EIC_DPRESCALER_PRESCALER1_DIV4   (1 << EIC_DPRESCALER_PRESCALER1_SHIFT) /* EIC clock divided by 4 */
@@ -211,12 +211,12 @@
 #  define EIC_DPRESCALER_PRESCALER1_DIV64  (5 << EIC_DPRESCALER_PRESCALER1_SHIFT) /* EIC clock divided by 64 */
 #  define EIC_DPRESCALER_PRESCALER1_DIV128 (6 << EIC_DPRESCALER_PRESCALER1_SHIFT) /* EIC clock divided by 128 */
 #  define EIC_DPRESCALER_PRESCALER1_DIV256 (7 << EIC_DPRESCALER_PRESCALER1_SHIFT) /* EIC clock divided by 256 */
-#define EIC_DPRESCALER_STATES1          (1 << 7)  /* Bit 7:  Debouncer number of states. EXTINT 8-15 */
-#  define EIC_DPRESCALER_STATES1_3      (0)                    /* 3 low frequency samples */
-#  define EIC_DPRESCALER_STATES1_7      EIC_DPRESCALER_STATES1 /* 7 low frequency samples */
-#define EIC_DPRESCALER_TICKON           (1 << 16) /* Bit 16: Pin Sampler frequency selection */
-#  define EIC_DPRESCALER_TICKON_GCLKEIC (0)                    /* Bounce sampler uses GCLK_EIC */
-#  define EIC_DPRESCALER_TICKON_LFCLK   EIC_DPRESCALER_TICKON  /* Bounce sampler uses low frequency clock */
+#define EIC_DPRESCALER_STATES1          (1 << 7)                                  /* Bit 7:  Debouncer number of states. EXTINT 8-15 */
+#  define EIC_DPRESCALER_STATES1_3      (0)                                       /* 3 low frequency samples */
+#  define EIC_DPRESCALER_STATES1_7      EIC_DPRESCALER_STATES1                    /* 7 low frequency samples */
+#define EIC_DPRESCALER_TICKON           (1 << 16)                                 /* Bit 16: Pin Sampler frequency selection */
+#  define EIC_DPRESCALER_TICKON_GCLKEIC (0)                                       /* Bounce sampler uses GCLK_EIC */
+#  define EIC_DPRESCALER_TICKON_LFCLK   EIC_DPRESCALER_TICKON                     /* Bounce sampler uses low frequency clock */
 
 /* Pin state */
 
@@ -249,7 +249,7 @@
  ********************************************************************************************/
 
 /********************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ********************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_EIC_H */
