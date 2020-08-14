@@ -408,10 +408,10 @@ static void lpc54_eth_dotimer(struct lpc54_ethdriver_s *priv);
 static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv);
 
 static void lpc54_eth_txtimeout_work(void *arg);
-static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...);
+static void lpc54_eth_txtimeout_expiry(wdparm_t arg);
 
 static void lpc54_eth_poll_work(void *arg);
-static void lpc54_eth_poll_expiry(int argc, wdparm_t arg, ...);
+static void lpc54_eth_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -687,7 +687,7 @@ static int lpc54_eth_transmit(struct lpc54_ethdriver_s *priv,
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   wd_start(&priv->eth_txtimeout, LPC54_TXTIMEOUT,
-           lpc54_eth_txtimeout_expiry, 1, (wdparm_t)priv);
+           lpc54_eth_txtimeout_expiry, (wdparm_t)priv);
   return OK;
 }
 
@@ -1660,8 +1660,7 @@ static void lpc54_eth_txtimeout_work(void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1672,7 +1671,7 @@ static void lpc54_eth_txtimeout_work(void *arg)
  *
  ****************************************************************************/
 
-static void lpc54_eth_txtimeout_expiry(int argc, wdparm_t arg, ...)
+static void lpc54_eth_txtimeout_expiry(wdparm_t arg)
 {
   struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
 
@@ -1859,7 +1858,7 @@ static void lpc54_eth_poll_work(void *arg)
   /* Setup the watchdog poll timer again */
 
   wd_start(&priv->eth_txpoll, LPC54_WDDELAY,
-           lpc54_eth_poll_expiry, 1, (wdparm_t)priv);
+           lpc54_eth_poll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1870,8 +1869,7 @@ static void lpc54_eth_poll_work(void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1882,7 +1880,7 @@ static void lpc54_eth_poll_work(void *arg)
  *
  ****************************************************************************/
 
-static void lpc54_eth_poll_expiry(int argc, wdparm_t arg, ...)
+static void lpc54_eth_poll_expiry(wdparm_t arg)
 {
   struct lpc54_ethdriver_s *priv = (struct lpc54_ethdriver_s *)arg;
 
@@ -2170,7 +2168,7 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
   /* Set and activate a timer process */
 
   wd_start(&priv->eth_txpoll, LPC54_WDDELAY,
-           lpc54_eth_poll_expiry, 1, (wdparm_t)priv);
+           lpc54_eth_poll_expiry, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 

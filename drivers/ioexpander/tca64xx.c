@@ -116,7 +116,7 @@ static void tca64_register_update(FAR struct tca64_dev_s *priv);
 static void tca64_irqworker(void *arg);
 static void tca64_interrupt(FAR void *arg);
 #ifdef CONFIG_TCA64XX_INT_POLL
-static void tca64_poll_expiry(int argc, wdparm_t arg1, ...);
+static void tca64_poll_expiry(wdparm_t arg);
 #endif
 #endif
 
@@ -1262,7 +1262,7 @@ errout_with_restart:
 
   sched_lock();
   ret = wd_start(&priv->wdog, TCA64XX_POLLDELAY,
-                 tca64_poll_expiry, 1, (wdparm_t)priv);
+                 tca64_poll_expiry, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");
@@ -1339,12 +1339,11 @@ static void tca64_interrupt(FAR void *arg)
  ****************************************************************************/
 
 #if defined(CONFIG_TCA64XX_INT_ENABLE) && defined(CONFIG_TCA64XX_INT_POLL)
-static void tca64_poll_expiry(int argc, wdparm_t arg1, ...)
+static void tca64_poll_expiry(wdparm_t arg)
 {
   FAR struct tca64_dev_s *priv;
 
-  DEBUGASSERT(argc == 1);
-  priv = (FAR struct tca64_dev_s *)arg1;
+  priv = (FAR struct tca64_dev_s *)arg;
   DEBUGASSERT(priv != NULL && priv->config != NULL);
 
   /* Defer interrupt processing to the worker thread.  This is not only
@@ -1367,8 +1366,7 @@ static void tca64_poll_expiry(int argc, wdparm_t arg1, ...)
        * thread.
        */
 
-      work_queue(HPWORK, &priv->work, tca64_irqworker,
-                 (FAR void *)priv, 0);
+      work_queue(HPWORK, &priv->work, tca64_irqworker, priv, 0);
     }
 }
 #endif
@@ -1432,7 +1430,7 @@ FAR struct ioexpander_dev_s *tca64_initialize(FAR struct i2c_master_s *i2c,
   /* Set up a timer to poll for missed interrupts */
 
   ret = wd_start(&priv->wdog, TCA64XX_POLLDELAY,
-                 tca64_poll_expiry, 1, (wdparm_t)priv);
+                 tca64_poll_expiry, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");

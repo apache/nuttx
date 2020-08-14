@@ -143,16 +143,16 @@ static int watchdog_automonitor_capture(int irq, FAR void *context,
   return 0;
 }
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
-static void watchdog_automonitor_timer(int argc, wdparm_t arg1, ...)
+static void watchdog_automonitor_timer(wdparm_t arg)
 {
-  FAR struct watchdog_upperhalf_s *upper = (FAR void *)arg1;
+  FAR struct watchdog_upperhalf_s *upper = (FAR void *)arg;
   FAR struct watchdog_lowerhalf_s *lower = upper->lower;
 
   if (upper->monitor)
     {
       lower->ops->keepalive(lower);
       wd_start(&upper->wdog, WATCHDOG_AUTOMONITOR_TIMEOUT_TICK / 2,
-               watchdog_automonitor_timer, 1, (wdparm_t)upper);
+               watchdog_automonitor_timer, (wdparm_t)upper);
     }
 }
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
@@ -195,7 +195,7 @@ static void watchdog_automonitor_start(FAR struct watchdog_upperhalf_s
       lower->ops->capture(lower, watchdog_automonitor_capture);
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
       wd_start(&upper->wdog, WATCHDOG_AUTOMONITOR_TIMEOUT_TICK / 2,
-               watchdog_automonitor_timer, 1, (wdparm_t)upper);
+               watchdog_automonitor_timer, (wdparm_t)upper);
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
       work_queue(LPWORK, &upper->work, watchdog_automonitor_worker,
                  upper, WATCHDOG_AUTOMONITOR_TIMEOUT_TICK / 2);

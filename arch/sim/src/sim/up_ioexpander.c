@@ -144,7 +144,7 @@ static int sim_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle);
 
 static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv);
 static void sim_interrupt_work(void *arg);
-static void sim_interrupt(int argc, wdparm_t arg1, ...);
+static void sim_interrupt(wdparm_t arg);
 
 /****************************************************************************
  * Private Data
@@ -775,7 +775,7 @@ static void sim_interrupt_work(void *arg)
   /* Re-start the poll timer */
 
   ret = wd_start(&priv->wdog, SIM_POLLDELAY,
-                 sim_interrupt, 1, (wdparm_t)priv);
+                 sim_interrupt, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");
@@ -793,12 +793,11 @@ static void sim_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static void sim_interrupt(int argc, wdparm_t arg1, ...)
+static void sim_interrupt(wdparm_t arg)
 {
   FAR struct sim_dev_s *priv;
 
-  DEBUGASSERT(argc == 1);
-  priv = (FAR struct sim_dev_s *)arg1;
+  priv = (FAR struct sim_dev_s *)arg;
   DEBUGASSERT(priv != NULL);
 
   /* Defer interrupt processing to the worker thread.  This is not only
@@ -859,7 +858,7 @@ FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void)
   priv->level[1] = PINSET_ALL;  /* All falling edge */
 
   ret = wd_start(&priv->wdog, SIM_POLLDELAY,
-                 sim_interrupt, 1, (wdparm_t)priv);
+                 sim_interrupt, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");

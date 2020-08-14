@@ -26,7 +26,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdarg.h>
 #include <unistd.h>
 #include <sched.h>
 #include <assert.h>
@@ -105,25 +104,7 @@ static inline void wd_expiration(void)
           /* Execute the watchdog function */
 
           up_setpicbase(wdog->picbase);
-
-#if CONFIG_MAX_WDOGPARMS == 0
-          wdog->func(0);
-#elif CONFIG_MAX_WDOGPARMS == 1
-          wdog->func((int)wdog->argc,
-                     wdog->parm[0]);
-#elif CONFIG_MAX_WDOGPARMS == 2
-          wdog->func((int)wdog->argc,
-                     wdog->parm[0], wdog->parm[1]);
-#elif CONFIG_MAX_WDOGPARMS == 3
-          wdog->func((int)wdog->argc,
-                     wdog->parm[0], wdog->parm[1], wdog->parm[2]);
-#elif CONFIG_MAX_WDOGPARMS == 4
-          wdog->func((int)wdog->argc,
-                     wdog->parm[0], wdog->parm[1], wdog->parm[2],
-                     wdog->parm[3]);
-#else
-#  error Missing support
-#endif
+          wdog->func(wdog->arg);
         }
     }
 }
@@ -154,9 +135,9 @@ static inline void wd_expiration(void)
  *   wdog     - Watchdog ID
  *   delay    - Delay count in clock ticks
  *   wdentry  - Function to call on timeout
- *   parm1..4 - Parameters to pass to wdentry
+ *   arg      - Parameter to pass to wdentry
  *
- *   NOTE:  All parameters must be of type wdparm_t.
+ *   NOTE:  The parameter must be of type wdparm_t.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return to
@@ -169,19 +150,17 @@ static inline void wd_expiration(void)
  ****************************************************************************/
 
 int wd_start(FAR struct wdog_s *wdog, int32_t delay,
-             wdentry_t wdentry, int argc, ...)
+             wdentry_t wdentry, wdparm_t arg)
 {
-  va_list ap;
   FAR struct wdog_s *curr;
   FAR struct wdog_s *prev;
   FAR struct wdog_s *next;
   int32_t now;
   irqstate_t flags;
-  int i;
 
   /* Verify the wdog and setup parameters */
 
-  if (wdog == NULL || argc > CONFIG_MAX_WDOGPARMS || delay < 0)
+  if (wdog == NULL || delay < 0)
     {
       return -EINVAL;
     }
@@ -202,22 +181,7 @@ int wd_start(FAR struct wdog_s *wdog, int32_t delay,
 
   wdog->func = wdentry;         /* Function to execute when delay expires */
   up_getpicbase(&wdog->picbase);
-  wdog->argc = argc;
-
-  va_start(ap, argc);
-  for (i = 0; i < argc; i++)
-    {
-      wdog->parm[i] = va_arg(ap, wdparm_t);
-    }
-
-#ifdef CONFIG_DEBUG_FEATURES
-  for (; i < CONFIG_MAX_WDOGPARMS; i++)
-    {
-      wdog->parm[i] = 0;
-    }
-#endif
-
-  va_end(ap);
+  wdog->arg = arg;
 
   /* Calculate delay+1, forcing the delay into a range that we can handle */
 

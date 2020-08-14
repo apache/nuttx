@@ -719,10 +719,10 @@ static int  tiva_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void tiva_txtimeout_work(FAR void *arg);
-static void tiva_txtimeout_expiry(int argc, wdparm_t arg, ...);
+static void tiva_txtimeout_expiry(wdparm_t arg);
 
 static void tiva_poll_work(FAR void *arg);
-static void tiva_poll_expiry(int argc, wdparm_t arg, ...);
+static void tiva_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -1219,7 +1219,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   wd_start(&priv->txtimeout, TIVA_TXTIMEOUT,
-           tiva_txtimeout_expiry, 1, (wdparm_t)priv);
+           tiva_txtimeout_expiry, (wdparm_t)priv);
   return OK;
 }
 
@@ -2215,8 +2215,7 @@ static void tiva_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2226,7 +2225,7 @@ static void tiva_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void tiva_txtimeout_expiry(int argc, wdparm_t arg, ...)
+static void tiva_txtimeout_expiry(wdparm_t arg)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
 
@@ -2314,7 +2313,7 @@ static void tiva_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   wd_start(&priv->txpoll, TIVA_WDDELAY,
-           tiva_poll_expiry, 1, (wdparm_t)priv);
+           tiva_poll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -2325,8 +2324,7 @@ static void tiva_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2336,7 +2334,7 @@ static void tiva_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void tiva_poll_expiry(int argc, wdparm_t arg, ...)
+static void tiva_poll_expiry(wdparm_t arg)
 {
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)arg;
 
@@ -2391,7 +2389,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   /* Set and activate a timer process */
 
   wd_start(&priv->txpoll, TIVA_WDDELAY,
-           tiva_poll_expiry, 1, (wdparm_t)priv);
+           tiva_poll_expiry, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 

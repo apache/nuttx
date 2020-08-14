@@ -210,7 +210,7 @@ static int  net_rpmsg_drv_send_recv(struct net_driver_s *dev,
 /* Watchdog timer expirations */
 
 static void net_rpmsg_drv_poll_work(FAR void *arg);
-static void net_rpmsg_drv_poll_expiry(int argc, wdparm_t arg, ...);
+static void net_rpmsg_drv_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -844,7 +844,7 @@ static void net_rpmsg_drv_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   wd_start(&priv->txpoll, NET_RPMSG_DRV_WDDELAY,
-           net_rpmsg_drv_poll_expiry, 1, (wdparm_t)dev);
+           net_rpmsg_drv_poll_expiry, (wdparm_t)dev);
   net_unlock();
 }
 
@@ -855,8 +855,7 @@ static void net_rpmsg_drv_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -867,7 +866,7 @@ static void net_rpmsg_drv_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void net_rpmsg_drv_poll_expiry(int argc, wdparm_t arg, ...)
+static void net_rpmsg_drv_poll_expiry(wdparm_t arg)
 {
   FAR struct net_driver_s *dev = (FAR struct net_driver_s *)arg;
   FAR struct net_rpmsg_drv_s *priv = dev->d_private;
@@ -969,7 +968,7 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
   /* Set and activate a timer process */
 
   wd_start(&priv->txpoll, NET_RPMSG_DRV_WDDELAY,
-           net_rpmsg_drv_poll_expiry, 1, (wdparm_t)dev);
+           net_rpmsg_drv_poll_expiry, (wdparm_t)dev);
 
   net_unlock();
 

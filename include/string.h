@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/string.h
  *
- *   Copyright (C) 2007-2012, 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2014, 2016-2017, 2020 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,6 +77,7 @@ int        strncmp(FAR const char *, FAR const char *, size_t);
 int        strcoll(FAR const char *, FAR const char *s2);
 FAR char  *strcpy(FAR char *dest, FAR const char *src);
 FAR char  *stpcpy(FAR char *dest, FAR const char *src);
+size_t     strlcpy(FAR char *dst, FAR const char *src, size_t siz);
 FAR char  *strncpy(FAR char *, FAR const char *, size_t);
 FAR char  *stpncpy(FAR char *, FAR const char *, size_t);
 FAR char  *strpbrk(FAR const char *, FAR const char *);

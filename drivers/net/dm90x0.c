@@ -398,10 +398,10 @@ static int  dm9x_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void dm9x_txtimeout_work(FAR void *arg);
-static void dm9x_txtimeout_expiry(int argc, wdparm_t arg, ...);
+static void dm9x_txtimeout_expiry(wdparm_t arg);
 
 static void dm9x_poll_work(FAR void *arg);
-static void dm9x_poll_expiry(int argc, wdparm_t arg, ...);
+static void dm9x_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -769,7 +769,7 @@ static int dm9x_transmit(FAR struct dm9x_driver_s *priv)
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
       wd_start(&priv->dm_txtimeout, DM6X_TXTIMEOUT,
-               dm9x_txtimeout_expiry, 1, (wdparm_t)priv);
+               dm9x_txtimeout_expiry, (wdparm_t)priv);
       return OK;
     }
 
@@ -1352,8 +1352,7 @@ static void dm9x_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1363,7 +1362,7 @@ static void dm9x_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void dm9x_txtimeout_expiry(int argc, wdparm_t arg, ...)
+static void dm9x_txtimeout_expiry(wdparm_t arg)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
 
@@ -1428,7 +1427,7 @@ static void dm9x_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   wd_start(&priv->dm_txpoll, DM9X_WDDELAY,
-           dm9x_poll_expiry, 1, (wdparm_t)priv);
+           dm9x_poll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1439,8 +1438,7 @@ static void dm9x_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1450,7 +1448,7 @@ static void dm9x_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void dm9x_poll_expiry(int argc, wdparm_t arg, ...)
+static void dm9x_poll_expiry(wdparm_t arg)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)arg;
 
@@ -1564,7 +1562,7 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
   /* Set and activate a timer process */
 
   wd_start(&priv->dm_txpoll, DM9X_WDDELAY,
-           dm9x_poll_expiry, 1, (wdparm_t)priv);
+           dm9x_poll_expiry, (wdparm_t)priv);
 
   /* Enable the DM9X interrupt */
 

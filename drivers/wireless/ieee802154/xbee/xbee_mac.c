@@ -70,7 +70,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void xbee_assoctimer(int argc, wdparm_t arg, ...);
+static void xbee_assoctimer(wdparm_t arg);
 static void xbee_assocworker(FAR void *arg);
 
 /****************************************************************************
@@ -95,8 +95,7 @@ static void xbee_assocworker(FAR void *arg);
  *   again until the association is either successful or fails.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -105,7 +104,7 @@ static void xbee_assocworker(FAR void *arg);
  *
  ****************************************************************************/
 
-static void xbee_assoctimer(int argc, wdparm_t arg, ...)
+static void xbee_assoctimer(wdparm_t arg)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
   int ret;
@@ -156,7 +155,7 @@ static void xbee_assocworker(FAR void *arg)
       xbee_send_atquery(priv, "AI");
 
       wd_start(&priv->assocwd, XBEE_ASSOC_POLLDELAY,
-               xbee_assoctimer, 1, (wdparm_t)arg);
+               xbee_assoctimer, (wdparm_t)arg);
     }
 }
 
@@ -171,8 +170,7 @@ static void xbee_assocworker(FAR void *arg)
  *   randomly drops the request and never sends a response.
  *
  * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -181,7 +179,7 @@ static void xbee_assocworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void xbee_reqdata_timeout(int argc, wdparm_t arg, ...)
+static void xbee_reqdata_timeout(wdparm_t arg)
 {
   FAR struct xbee_priv_s *priv = (FAR struct xbee_priv_s *)arg;
 
@@ -383,7 +381,7 @@ int xbee_req_data(XBEEHANDLE xbee,
       /* Setup a timeout in case the XBee never responds with a tx status */
 
       wd_start(&priv->reqdata_wd, XBEE_RESPONSE_TIMEOUT,
-               xbee_reqdata_timeout, 1, (wdparm_t)priv);
+               xbee_reqdata_timeout, (wdparm_t)priv);
 
       /* Send the frame */
 
@@ -706,7 +704,7 @@ int xbee_req_associate(XBEEHANDLE xbee,
    */
 
   return wd_start(&priv->assocwd, XBEE_ASSOC_POLLDELAY,
-                  xbee_assoctimer, 1, (wdparm_t)priv);
+                  xbee_assoctimer, (wdparm_t)priv);
 }
 
 /****************************************************************************
