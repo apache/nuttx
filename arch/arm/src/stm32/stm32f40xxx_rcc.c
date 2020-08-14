@@ -781,7 +781,13 @@ static void stm32_stdclockconfig(void)
        * and 5 wait states.
        */
 
-      regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN
+      regval = (FLASH_ACR_LATENCY_5
+#ifdef CONFIG_STM32_FLASH_ICACHE
+                | FLASH_ACR_ICEN
+#endif
+#ifdef CONFIG_STM32_FLASH_DCACHE
+                | FLASH_ACR_DCEN
+#endif
 #ifdef CONFIG_STM32_FLASH_PREFETCH
                 | FLASH_ACR_PRFTEN
 #endif

@@ -182,7 +182,8 @@ static inline void rcc_enableahb1(void)
 #ifdef CONFIG_STM32_ETHMAC
   /* Ethernet MAC clocking */
 
-  regval |= (RCC_AHB1ENR_ETHMACEN | RCC_AHB1ENR_ETHMACTXEN | RCC_AHB1ENR_ETHMACRXEN);
+  regval |= (RCC_AHB1ENR_ETHMACEN | RCC_AHB1ENR_ETHMACTXEN |
+                RCC_AHB1ENR_ETHMACRXEN);
 
 #ifdef CONFIG_STM32_ETH_PTP
   /* Precision Time Protocol (PTP) */
@@ -644,13 +645,21 @@ static void stm32_stdclockconfig(void)
 
       while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
 
-      /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
+      /* Enable FLASH prefetch, instruction cache, data cache,
+       * and 5 wait states.
+       */
 
-#ifdef CONFIG_STM32_FLASH_PREFETCH
-      regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);
-#else
-      regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
+      regval = (FLASH_ACR_LATENCY_5
+#ifdef CONFIG_STM32_FLASH_ICACHE
+                | FLASH_ACR_ICEN
 #endif
+#ifdef CONFIG_STM32_FLASH_DCACHE
+                | FLASH_ACR_DCEN
+#endif
+#ifdef CONFIG_STM32_FLASH_PREFETCH
+                | FLASH_ACR_PRFTEN
+#endif
+                );
       putreg32(regval, STM32_FLASH_ACR);
 
       /* Select the main PLL as system clock source */
@@ -662,7 +671,8 @@ static void stm32_stdclockconfig(void)
 
       /* Wait until the PLL source is used as the system clock source */
 
-      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL);
+      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK)
+                != RCC_CFGR_SWS_PLL);
 
 #if defined(CONFIG_STM32_IWDG) || defined(CONFIG_STM32_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
