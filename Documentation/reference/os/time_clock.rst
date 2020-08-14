@@ -484,78 +484,13 @@ watchdog timer function. However, the watchdog timer function may
 use ``mq_send()``, ``sigqueue()``, or ``kill()`` to communicate
 with NuttX tasks.
 
-- :c:func:`wd_create`/:c:func:`wd_static`
-- :c:func:`wd_delete`
 - :c:func:`wd_start`
 - :c:func:`wd_cancel`
 - :c:func:`wd_gettime`
 - Watchdog Timer Callback
 
-.. c:function:: WDOG_ID wd_create(void)
-
-  The ``wd_create()`` function will create a timer
-  by allocating the appropriate resources for the watchdog. The
-  ``wd_create()`` function returns a pointer to a fully initialized,
-  dynamically allocated ``struct wdog_s`` instance (which is
-  ``typedef``'ed as ``WDOG_ID``);
-
-  :return: Pointer to watchdog that may be used as a handle in subsequent
-    NuttX calls (i.e., the watchdog ID), or NULL if insufficient
-    resources are available to create the watchdogs.
-    
-.. c:function:: void wd_static(FAR struct wdog_s *wdog)
-
-  Performs the equivalent initialization of a
-  statically allocated ``struct wdog_s`` instance. No allocation is
-  performed in this case. The initializer definition,
-  ``WDOG_INITIALIZER`` is also available for initialization of
-  static instances of ``struct wdog_s``. NOTE: ``wd_static()`` is
-  also implemented as a macro definition.
-
-  **POSIX Compatibility:** This is a NON-POSIX interface. VxWorks
-  provides the following comparable interface:
-
-  .. code-block:: c
-
-    WDOG_ID wdCreate (void);
-
-  Differences from the VxWorks interface include:
-
-  -  The number of available watchdogs is fixed (configured at
-     initialization time).
-
-.. c:function:: int wd_delete(WDOG_ID wdog)
-
-  Deallocate a watchdog
-  timer previously allocated via ``wd_create()``. The watchdog timer
-  will be removed from the timer queue if has been started.
-
-  This function need not be called for statically allocated timers
-  (but it is not harmful to do so).
-
-  :param wdog: The watchdog ID to delete. This is actually a pointer
-    to a watchdog structure.
-
-  :return: Zero (``OK``) is returned on success; a negated ``errno`` value
-    is return to indicate the nature of any failure.
-
-  **Assumptions/Limitations:** It is the responsibility of the
-  caller to assure that the watchdog is inactive before deleting it.
-
-  **POSIX Compatibility:** This is a NON-POSIX interface. VxWorks
-  provides the following comparable interface:
-
-  .. code-block:: c
-
-    STATUS wdDelete (WDOG_ID wdog);
-
-  Differences from the VxWorks interface include:
-
-  -  Does not make any checks to see if the watchdog is being used
-     before deallocating it (i.e., never returns ERROR).
-
-.. c:function:: int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry, \
-                    int argc, ...);
+.. c:function:: int wd_start(FAR struct wdog_s *wdog, int delay, \
+                 wdentry_t wdentry, wdparm_t arg)
 
   This function adds a watchdog to the timer queue.
   The specified watchdog function will be called from the interrupt
@@ -574,10 +509,9 @@ with NuttX tasks.
   :param wdog: Watchdog ID
   :param delay: Delay count in clock ticks
   :param wdentry: Function to call on timeout
-  :param argc: The number of uint32_t parameters to pass to wdentry.
-  :param ...: ``uint32_t`` size parameters to pass to ``wdentry``
+  :param arg: The parameter to pass to wdentry.
 
-  **NOTE**: All parameters must be of type ``wdparm_t``.
+  **NOTE**: The parameter must be of type ``wdparm_t``.
 
   :return: Zero (``OK``) is returned on success; a negated ``errno`` value
     is return to indicate the nature of any failure.
@@ -599,7 +533,7 @@ with NuttX tasks.
      to wdentry; VxWorks supports only a single parameter. The
      maximum number of parameters is determined by
 
-.. c:function:: int wd_cancel(WDOG_ID wdog)
+.. c:function:: int wd_cancel(FAR struct wdog_s *wdog)
 
   This function cancels a currently running
   watchdog timer. Watchdog timers may be canceled from the interrupt
@@ -617,7 +551,7 @@ with NuttX tasks.
 
     STATUS wdCancel (WDOG_ID wdog);
 
-.. c:function:: int wd_gettime(WDOG_ID wdog)
+.. c:function:: int wd_gettime(FAR struct wdog_s *wdog)
 
   Returns the time remaining before
   the specified watchdog expires.
@@ -628,19 +562,18 @@ with NuttX tasks.
     watchdog time expires. Zero means either that wdog is not valid or
     that the wdog has already expired.
 
-.. c:type:: void (*wdentry_t)(int argc, ...) 
+.. c:type:: void (*wdentry_t)(wdparm_t arg) 
 
   **Watchdog Timer Callback**: when a watchdog expires,
   the callback function with this type is
-  called, where ``argc`` is the number of
-  ``wdparm_t`` type arguments that follow.
-
-  The arguments are passed as scalar ``wdparm_t`` values. For
+  called.
+  
+  The argument is passed as scalar ``wdparm_t`` values. For
   systems where the ``sizeof(pointer) < sizeof(uint32_t)``, the
   following union defines the alignment of the pointer within the
   ``uint32_t``. For example, the SDCC MCS51 general pointer is
   24-bits, but ``uint32_t`` is 32-bits (of course).
-
+  
   We always have ``sizeof(pointer) <= sizeof(uintptr_t)`` by
   definition.
 

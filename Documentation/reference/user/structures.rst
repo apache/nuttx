@@ -26,7 +26,6 @@ structures include:
 .. c:struct:: tcb_s
 .. c:type:: mqd_t
 .. c:type:: sem_t
-.. c:type:: WDOG_ID
 .. c:type:: pthread_key_t
 
 In order to maintain portability, applications should not reference
