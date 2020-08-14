@@ -51,7 +51,7 @@
 /* EIC register offsets *********************************************************************/
 
 #define SAM_EIC_CTRLA_OFFSET         0x0000  /* Control A register */
-#define SAM_EIC_NMITRCL_OFFSET       0x0001  /* Non-maskable interrupt control register */
+#define SAM_EIC_NMICTRL_OFFSET       0x0001  /* Non-maskable interrupt control register */
 #define SAM_EIC_NMIFLAG_OFFSET       0x0002  /* Non-maskable interrupt flasg status and clear register */
 #define SAM_EIC_SYNCBUSY_OFFSET      0x0004  /* Synchronization busy register */
 #define SAM_EIC_EVCTRL_OFFSET        0x0008  /* Event control register */
@@ -68,7 +68,7 @@
 /* EIC register addresses *******************************************************************/
 
 #define SAM_EIC_CTRLA                (SAM_EIC_BASE + SAM_EIC_CTRLA_OFFSET)
-#define SAM_EIC_NMITRCL              (SAM_EIC_BASE + SAM_EIC_NMITRCL_OFFSET)
+#define SAM_EIC_NMICTRL              (SAM_EIC_BASE + SAM_EIC_NMICTRL_OFFSET)
 #define SAM_EIC_NMIFLAG              (SAM_EIC_BASE + SAM_EIC_NMIFLAG_OFFSET)
 #define SAM_EIC_SYNCBUSY             (SAM_EIC_BASE + SAM_EIC_SYNCBUSY_OFFSET)
 #define SAM_EIC_EVCTRL               (SAM_EIC_BASE + SAM_EIC_EVCTRL_OFFSET)
@@ -142,7 +142,7 @@
 
 /* Configuration 0 register */
 
-#define EIC_CONFIG0_FILTEN(n)        (3 + ((n) << 2))                  /* Filter n enable, n=0-7 */
+#define EIC_CONFIG0_FILTEN(n)        (0x8 << ((n) << 2))               /* Filter n enable, n=0-7 */
 #define EIC_CONFIG0_SENSE_SHIFT(n)   ((n) << 2)                        /* Filter n input sense, n=0-7 */
 #define EIC_CONFIG0_SENSE_MASK(n)    (7 << EIC_CONFIG0_SENSE_SHIFT(n))
 #  define EIC_CONFIG0_SENSE_NONE(n)  (0 << EIC_CONFIG0_SENSE_SHIFT(n)) /* No detection */
@@ -154,7 +154,7 @@
 
 /* Configuration 1 register */
 
-#define EIC_CONFIG1_FILTEN(n)        (3 + (((n) - 8) << 2))            /* Filter n enable, n=8-15 */
+#define EIC_CONFIG1_FILTEN(n)        (0x8 << (((n) - 8) << 2))         /* Filter n enable, n=8-15 */
 #define EIC_CONFIG1_SENSE_SHIFT(n)   (((n) - 8) << 2)                  /* Filter n input sense, n=8-17 */
 #define EIC_CONFIG1_SENSE_MASK(n)    (7 << EIC_CONFIG1_SENSE_SHIFT(n))
 #  define EIC_CONFIG1_SENSE_NONE(n)  (0 << EIC_CONFIG1_SENSE_SHIFT(n)) /* No detection */
