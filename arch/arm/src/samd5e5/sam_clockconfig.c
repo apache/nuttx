@@ -422,9 +422,9 @@ static void sam_xosc32k_configure(const struct sam_xosc32_config_s *config)
 static uint32_t sam_xoscctrl(const struct sam_xosc_config_s *config)
 {
   uint32_t regval;
-  uint8_t cfdpresc;
-  uint8_t imult;
-  uint8_t iptat;
+  uint32_t cfdpresc;
+  uint32_t imult;
+  uint8_t iptat = 3;
 
   /* Some settings determined by the crystal frequency */
 
@@ -446,7 +446,7 @@ static uint32_t sam_xoscctrl(const struct sam_xosc_config_s *config)
       imult    = 5;
       iptat    = 3;
     }
-  else if (config->xosc_frequency > 8000000)
+   else
     {
       cfdpresc = 3;
       imult    = 4;
@@ -455,7 +455,7 @@ static uint32_t sam_xoscctrl(const struct sam_xosc_config_s *config)
 
   /* Get the XOSCTCTL register *configuration */
 
-  regval = OSCCTRL_XOSCCTRL_IPTAT(ipta) | OSCCTRL_XOSCCTRL_IMULT(imult) |
+  regval = OSCCTRL_XOSCCTRL_IPTAT(iptat) | OSCCTRL_XOSCCTRL_IMULT(imult) |
            OSCCTRL_XOSCCTRL_STARTUP(config->startup) |
            OSCCTRL_XOSCCTRL_CFDPRESC(cfdpresc);
 
@@ -504,15 +504,15 @@ static uint32_t sam_xoscctrl(const struct sam_xosc_config_s *config)
 #endif
 
 /****************************************************************************
- * Name: sam_xosc32k_configure
+ * Name: sam_xosc0_configure
  *
  * Description:
- *   Configure XOSC32K
+ *   Configure XOSC0K
  *
  ****************************************************************************/
 
 #if BOARD_HAVE_XOSC0 != 0
-static void sam_xosc0_configure(const struct sam_clockconfig_s *config)
+static void sam_xosc0_configure(const struct sam_xosc_config_s *config)
 {
   uint32_t regval;
 
@@ -521,11 +521,11 @@ static void sam_xosc0_configure(const struct sam_clockconfig_s *config)
   regval = sam_xoscctrl(config);
   putreg32(regval, SAM_OSCCTRL_XOSCCTRL0);
 
-  /* Wait for XOSC32 to become ready if it was enabled */
+  /* Wait for XOSC0 to become ready if it was enabled */
 
   if (config->enable)
     {
-      while (getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY0) == 0)
+      while ((getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY0) == 0)
         {
         }
     }
@@ -534,14 +534,14 @@ static void sam_xosc0_configure(const struct sam_clockconfig_s *config)
 
   if (config->ondemand)
     {
-      regval  = getre32(SAM_OSCCTRL_XOSCCTRL0)
+      regval  = getreg32(SAM_OSCCTRL_XOSCCTRL0);
       regval |= OSCCTRL_XOSCCTRL_ONDEMAND;
       putreg32(regval, SAM_OSCCTRL_XOSCCTRL0);
     }
 }
 #endif
 
-#if BOARD_HAVE_XOSC0 != 0
+#if BOARD_HAVE_XOSC1 != 0
 void sam_xosc1_configure(const struct sam_xosc_config_s *config)
 {
   uint32_t regval;
@@ -551,11 +551,11 @@ void sam_xosc1_configure(const struct sam_xosc_config_s *config)
   regval = sam_xoscctrl(config);
   putreg32(regval, SAM_OSCCTRL_XOSCCTRL1);
 
-  /* Wait for XOSC32 to become ready if it was enabled */
+  /* Wait for XOSC1 to become ready if it was enabled */
 
   if (config->enable)
     {
-      while (getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY1) == 0)
+      while ((getreg32(SAM_OSCCTRL_STATUS) & OSCCTRL_INT_XOSCRDY1) == 0)
         {
         }
     }
@@ -564,7 +564,7 @@ void sam_xosc1_configure(const struct sam_xosc_config_s *config)
 
   if (config->ondemand)
     {
-      regval  = getre32(SAM_OSCCTRL_XOSCCTRL1)
+      regval  = getreg32(SAM_OSCCTRL_XOSCCTRL1);
       regval |= OSCCTRL_XOSCCTRL_ONDEMAND;
       putreg32(regval, SAM_OSCCTRL_XOSCCTRL1);
     }
@@ -828,7 +828,7 @@ static void sam_dfll_gclkready(const struct sam_dfll_config_s *config)
     {
     }
 
-  /* Set the source of GCLK0 to the configured source. */
+  /* Set the source of GCLK0 to to the configured source. */
 
   regval32  = getreg32(SAM_GCLK_GENCTRL(0));
   regval32 &= ~GCLK_GENCTRL_SRC_MASK;
