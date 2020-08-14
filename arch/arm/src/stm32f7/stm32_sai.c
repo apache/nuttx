@@ -832,8 +832,7 @@ static void sai_mckdivider(struct stm32f7_sai_s *priv)
  *   The watchdog timeout without completion of the transfer.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -843,7 +842,7 @@ static void sai_mckdivider(struct stm32f7_sai_s *priv)
  *
  ****************************************************************************/
 
-static void sai_timeout(int argc, wdparm_t arg, ...)
+static void sai_timeout(wdparm_t arg)
 {
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -989,7 +988,7 @@ static int sai_dma_setup(struct stm32f7_sai_s *priv)
   if (bfcontainer->timeout > 0)
     {
       ret = wd_start(&priv->dog, bfcontainer->timeout,
-                     sai_timeout, 1, (wdparm_t)priv);
+                     sai_timeout, (wdparm_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We

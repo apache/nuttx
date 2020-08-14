@@ -202,7 +202,7 @@ static int  sam_tsd_waitsample(struct sam_tsd_s *priv,
               struct sam_sample_s *sample);
 static void sam_tsd_bottomhalf(void *arg);
 static int  sam_tsd_schedule(struct sam_tsd_s *priv);
-static void sam_tsd_expiry(int argc, wdparm_t arg1, ...);
+static void sam_tsd_expiry(wdparm_t arg);
 
 /* Character driver methods */
 
@@ -587,7 +587,7 @@ static void sam_tsd_bottomhalf(void *arg)
        */
 
       wd_start(&priv->wdog, TSD_WDOG_DELAY,
-               sam_tsd_expiry, 1, (wdparm_t)priv);
+               sam_tsd_expiry, (wdparm_t)priv);
       ier = 0;
       goto ignored;
     }
@@ -666,7 +666,7 @@ static void sam_tsd_bottomhalf(void *arg)
       /* Continue to sample the position while the pen is down */
 
       wd_start(&priv->wdog, TSD_WDOG_DELAY,
-               sam_tsd_expiry, 1, (wdparm_t)priv);
+               sam_tsd_expiry, (wdparm_t)priv);
 
       /* Check the thresholds.  Bail if (1) this is not the first
        * measurement and (2) there is no significant difference from
@@ -806,9 +806,9 @@ static int sam_tsd_schedule(struct sam_tsd_s *priv)
  *
  ****************************************************************************/
 
-static void sam_tsd_expiry(int argc, wdparm_t arg1, ...)
+static void sam_tsd_expiry(wdparm_t arg)
 {
-  struct sam_tsd_s *priv = (struct sam_tsd_s *)((uintptr_t)arg1);
+  struct sam_tsd_s *priv = (struct sam_tsd_s *)arg;
 
   /* Schedule touchscreen work */
 

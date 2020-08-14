@@ -2838,7 +2838,7 @@ int up_timer_start(FAR const struct timespec *ts);
 <pre>
     #include &lt;nuttx/wdog.h&gt;
     int wd_start(FAR struct wdog_s *wdog, int delay,
-                 wdentry_t wdentry, int argc, ....);
+                 wdentry_t wdentry, wdparm_t arg);
 </pre>
 
 <p>
@@ -2860,11 +2860,10 @@ wd_start() on a given watchdog ID has any effect.
 <li><code>wdog</code>. Watchdog ID
 <li><code>delay</code>. Delay count in clock ticks
 <li><code>wdentry</code>. Function to call on timeout
-<li><code>argc</code>.  The number of uint32_t parameters to pass to wdentry.
-<li><code>...</code>. uint32_t size parameters to pass to wdentry
+<li><code>arg</code>. The parameter to pass to wdentry.
 
 <p>
-<b>NOTE</b>:  All parameters must be of type <code>wdparm_t</code>.
+<b>NOTE</b>:  The parameter must be of type <code>wdparm_t</code>.
 </p>
 </ul>
 
@@ -2955,24 +2954,14 @@ VxWorks provides the following comparable interface:
   When a watchdog expires, the callback function with this type is called:
 </p>
 <pre>
-    typedef void (*wdentry_t)(int argc, wdparm_t arg1, ...);
+    typedef void (*wdentry_t)(wdparm_t arg);
 </pre>
 <p>
-  Where <code>argc</code> is the number of <code>wdparm_t</code> type arguments that follow.
-</p>
-<p>
-  The arguments are passed as scalar <code>wdparm_t</code> values.  For systems where the <code>sizeof(pointer) &lt; sizeof(uint32_t)</code>, the following union defines the alignment of the pointer within the <code>uint32_t</code>.  For example, the SDCC MCS51 general pointer is 24-bits, but <code>uint32_t</code> is 32-bits (of course).
+  The argument is passed as scalar <code>wdparm_t</code> values.  For systems where the <code>sizeof(pointer) &lt; sizeof(uint32_t)</code>, the following union defines the alignment of the pointer within the <code>uint32_t</code>.  For example, the SDCC MCS51 general pointer is 24-bits, but <code>uint32_t</code> is 32-bits (of course).
 </p>
    We always have <code>sizeof(pointer) <= sizeof(uintptr_t)</code> by definition.
 </p>
 <ul><pre>
-union wdparm_u
-{
-  FAR void     *pvarg; /* The size one generic point */
-  uint32_t      dwarg; /* Big enough for a 32-bit value in any case */
-  uintptr_t     uiarg; /* sizeof(uintptr_t) >= sizeof(pointer) */
-};
-
 #if UINTPTR_MAX >= UINT32_MAX
 typedef uintptr_t wdparm_t;
 #else

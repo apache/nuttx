@@ -200,7 +200,7 @@ static int  macnet_rxframe(FAR struct macnet_driver_s *maccb,
 
 static int  macnet_txpoll_callback(FAR struct net_driver_s *dev);
 static void macnet_txpoll_work(FAR void *arg);
-static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...);
+static void macnet_txpoll_expiry(wdparm_t arg);
 
 /* IOCTL support */
 
@@ -591,7 +591,7 @@ static void macnet_txpoll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   wd_start(&priv->md_txpoll, TXPOLL_WDDELAY,
-           macnet_txpoll_expiry, 1, (wdparm_t)priv);
+           macnet_txpoll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -602,8 +602,7 @@ static void macnet_txpoll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -613,7 +612,7 @@ static void macnet_txpoll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void macnet_txpoll_expiry(int argc, wdparm_t arg, ...)
+static void macnet_txpoll_expiry(wdparm_t arg)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)arg;
 
@@ -779,7 +778,7 @@ static int macnet_ifup(FAR struct net_driver_s *dev)
       /* Set and activate a timer process */
 
       wd_start(&priv->md_txpoll, TXPOLL_WDDELAY,
-               macnet_txpoll_expiry, 1, (wdparm_t)priv);
+               macnet_txpoll_expiry, (wdparm_t)priv);
 
       ret = OK;
     }

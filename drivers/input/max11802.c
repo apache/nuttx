@@ -460,10 +460,10 @@ static int max11802_schedule(FAR struct max11802_dev_s *priv)
  * Name: max11802_wdog
  ****************************************************************************/
 
-static void max11802_wdog(int argc, wdparm_t arg1, ...)
+static void max11802_wdog(wdparm_t arg)
 {
   FAR struct max11802_dev_s *priv =
-    (FAR struct max11802_dev_s *)((uintptr_t)arg1);
+    (FAR struct max11802_dev_s *)arg;
 
   max11802_schedule(priv);
 }
@@ -581,7 +581,7 @@ static void max11802_worker(FAR void *arg)
       iinfo("Previous pen up event still in buffer\n");
       max11802_notify(priv);
       wd_start(&priv->wdog, MAX11802_WDOG_DELAY,
-               max11802_wdog, 1, (wdparm_t)priv);
+               max11802_wdog, (wdparm_t)priv);
       goto ignored;
     }
   else
@@ -621,7 +621,7 @@ static void max11802_worker(FAR void *arg)
       /* Continue to sample the position while the pen is down */
 
       wd_start(&priv->wdog, MAX11802_WDOG_DELAY,
-               max11802_wdog, 1, (wdparm_t)priv);
+               max11802_wdog, (wdparm_t)priv);
 
       /* Check if data is valid */
 

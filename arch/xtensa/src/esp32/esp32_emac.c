@@ -246,8 +246,8 @@ static struct esp32_emac_s s_esp32_emac;
 static int emac_ifdown(struct net_driver_s *dev);
 static int emac_ifup(struct net_driver_s *dev);
 static void emac_dopoll(struct esp32_emac_s *priv);
-static void emac_txtimeout_expiry(int argc, wdparm_t arg1, ...);
-static void emac_poll_expiry(int argc, wdparm_t arg1, ...);
+static void emac_txtimeout_expiry(wdparm_t arg);
+static void emac_poll_expiry(wdparm_t arg);
 
 /****************************************************************************
  * External Function Prototypes
@@ -826,7 +826,7 @@ static int emac_transmit(struct esp32_emac_s *priv)
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
   ret = wd_start(&priv->txtimeout, EMAC_TX_TO,
-                 emac_txtimeout_expiry, 1, (wdparm_t)priv);
+                 emac_txtimeout_expiry, (wdparm_t)priv);
   if (ret)
     {
       nerr("ERROR: Failed to start TX timeout timer");
@@ -1295,15 +1295,14 @@ static void emac_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void emac_txtimeout_expiry(int argc, wdparm_t arg, ...)
+static void emac_txtimeout_expiry(wdparm_t arg)
 {
   struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
 
@@ -1799,7 +1798,7 @@ static void emac_poll_work(FAR void *arg)
     }
 
   ret = wd_start(&priv->txpoll, EMAC_WDDELAY,
-                 emac_poll_expiry, 1, (wdparm_t)priv);
+                 emac_poll_expiry, (wdparm_t)priv);
   if (ret)
     {
       nerr("ERROR: Failed to start TX poll timer");
@@ -1815,8 +1814,7 @@ static void emac_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1826,9 +1824,9 @@ static void emac_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void emac_poll_expiry(int argc, wdparm_t arg1, ...)
+static void emac_poll_expiry(wdparm_t arg)
 {
-  FAR struct esp32_emac_s *priv = (FAR struct esp32_emac_s *)arg1;
+  FAR struct esp32_emac_s *priv = (FAR struct esp32_emac_s *)arg;
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -1902,7 +1900,7 @@ static int emac_ifup(struct net_driver_s *dev)
   /* Set and activate a timer process */
 
   wd_start(&priv->txpoll, EMAC_WDDELAY,
-           emac_poll_expiry, 1, (wdparm_t)priv);
+           emac_poll_expiry, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 

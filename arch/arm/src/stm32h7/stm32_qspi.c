@@ -1382,8 +1382,7 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
  *   DMA.
  *
  * Input Parameters:
- *   argc   - The number of arguments (should be 1)
- *   arg    - The argument (state structure reference cast to uint32_t)
+ *   arg    - The argument
  *
  * Returned Value:
  *   None
@@ -1393,7 +1392,7 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void qspi_dma_timeout(int argc, wdparm_t arg, ...)
+static void qspi_dma_timeout(wdparm_t arg)
 {
   struct stm32h7_qspidev_s *priv = (struct stm32h7_qspidev_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1569,7 +1568,7 @@ static int qspi_memory_dma(struct stm32h7_qspidev_s *priv,
       /* Start (or re-start) the watchdog timeout */
 
       ret = wd_start(&priv->dmadog, DMA_TIMEOUT_TICKS,
-                     qspi_dma_timeout, 1, (wdparm_t)priv);
+                     qspi_dma_timeout, (wdparm_t)priv);
       if (ret < 0)
         {
            spierr("ERROR: wd_start failed: %d\n", ret);
