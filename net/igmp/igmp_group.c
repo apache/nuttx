@@ -126,11 +126,6 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
       nxsem_init(&group->sem, 0, 0);
       nxsem_set_protocol(&group->sem, SEM_PRIO_NONE);
 
-      /* Initialize the group timer (but don't start it yet) */
-
-      group->wdog = wd_create();
-      DEBUGASSERT(group->wdog);
-
       /* Save the interface index */
 
       group->ifindex = dev->d_ifindex;
@@ -222,7 +217,7 @@ void igmp_grpfree(FAR struct net_driver_s *dev,
 
   /* Cancel the wdog */
 
-  wd_cancel(group->wdog);
+  wd_cancel(&group->wdog);
 
   /* Remove the group structure from the group list in the device structure */
 
@@ -232,9 +227,9 @@ void igmp_grpfree(FAR struct net_driver_s *dev,
 
   nxsem_destroy(&group->sem);
 
-  /* Destroy the wdog */
+  /* Cancel the watchdog timer */
 
-  wd_delete(group->wdog);
+  wd_cancel(&group->wdog);
 
   /* Then release the group structure resources. */
 

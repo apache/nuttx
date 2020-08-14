@@ -117,8 +117,8 @@
 struct misoc_net_driver_s
 {
   bool misoc_net_bifup;               /* true:ifup false:ifdown */
-  WDOG_ID misoc_net_txpoll;           /* TX poll timer */
-  WDOG_ID misoc_net_txtimeout;        /* TX timeout timer */
+  struct wdog_s misoc_net_txpoll;     /* TX poll timer */
+  struct wdog_s misoc_net_txtimeout;  /* TX timeout timer */
   struct work_s misoc_net_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s misoc_net_pollwork;   /* For deferring poll work to the work queue */
   uint8_t *rx0_buf;                   /* 2 RX and 2 TX buffer */
@@ -273,7 +273,7 @@ static int misoc_net_transmit(FAR struct misoc_net_driver_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  wd_start(priv->misoc_net_txtimeout, MISOC_NET_TXTIMEOUT,
+  wd_start(&priv->misoc_net_txtimeout, MISOC_NET_TXTIMEOUT,
            misoc_net_txtimeout_expiry, 1, (wdparm_t)priv);
   return OK;
 }
@@ -557,7 +557,7 @@ static void misoc_net_txdone(FAR struct misoc_net_driver_s *priv)
    * disable further Tx interrupts.
    */
 
-  wd_cancel(priv->misoc_net_txtimeout);
+  wd_cancel(&priv->misoc_net_txtimeout);
 
   /* And disable further TX interrupts. */
 
@@ -661,7 +661,7 @@ static int misoc_net_interrupt(int irq, FAR void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(priv->misoc_net_txtimeout);
+       wd_cancel(&priv->misoc_net_txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -781,7 +781,7 @@ static void misoc_net_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
+  wd_start(&priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
            misoc_net_poll_expiry, 1, (wdparm_t)priv);
 
   net_unlock();
@@ -866,7 +866,7 @@ static int misoc_net_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
+  wd_start(&priv->misoc_net_txpoll, MISOC_NET_WDDELAY,
            misoc_net_poll_expiry, 1, (wdparm_t)priv);
 
   priv->misoc_net_bifup = true;
@@ -911,8 +911,8 @@ static int misoc_net_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->misoc_net_txpoll);
-  wd_cancel(priv->misoc_net_txtimeout);
+  wd_cancel(&priv->misoc_net_txpoll);
+  wd_cancel(&priv->misoc_net_txtimeout);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the misoc_net_ifup() always
@@ -1205,12 +1205,7 @@ int misoc_net_initialize(int intf)
   priv->misoc_net_dev.d_addmac  = misoc_net_addmac;   /* Add multicast MAC address */
   priv->misoc_net_dev.d_rmmac   = misoc_net_rmmac;    /* Remove multicast MAC address */
 #endif
-  priv->misoc_net_dev.d_private = (FAR void *)g_misoc_net; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->misoc_net_txpoll       = wd_create();    /* Create periodic poll timer */
-  priv->misoc_net_txtimeout    = wd_create();    /* Create TX timeout timer */
+  priv->misoc_net_dev.d_private = g_misoc_net;        /* Used to recover private state from dev */
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling misoc_net_ifdown().

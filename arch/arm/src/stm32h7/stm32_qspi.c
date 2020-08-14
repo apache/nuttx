@@ -224,7 +224,7 @@ struct stm32h7_qspidev_s
   sem_t dmawait;                /* Used to wait for DMA completion */
   int result;                   /* DMA result */
   DMA_HANDLE dmach;             /* QSPI DMA handle */
-  WDOG_ID dmadog;               /* Watchdog that handles DMA timeouts */
+  struct wdog_s dmadog;         /* Watchdog that handles DMA timeouts */
 #endif
 
   /* Debug stuff */
@@ -1436,7 +1436,7 @@ static void qspi_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  wd_cancel(priv->dmadog);
+  wd_cancel(&priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -1568,7 +1568,7 @@ static int qspi_memory_dma(struct stm32h7_qspidev_s *priv,
     {
       /* Start (or re-start) the watchdog timeout */
 
-      ret = wd_start(priv->dmadog, DMA_TIMEOUT_TICKS,
+      ret = wd_start(&priv->dmadog, DMA_TIMEOUT_TICKS,
                      qspi_dma_timeout, 1, (wdparm_t)priv);
       if (ret < 0)
         {
@@ -1587,7 +1587,7 @@ static int qspi_memory_dma(struct stm32h7_qspidev_s *priv,
 
       /* Cancel the watchdog timeout */
 
-      wd_cancel(priv->dmadog);
+      wd_cancel(&priv->dmadog);
 
       /* Check if we were awakened by an error of some kind */
 
@@ -2668,15 +2668,6 @@ struct qspi_dev_s *stm32h7_qspi_initialize(int intf)
 
       nxsem_init(&priv->dmawait, 0, 0);
       nxsem_set_protocol(&priv->dmawait, SEM_PRIO_NONE);
-
-      /* Create a watchdog time to catch DMA timeouts */
-
-      priv->dmadog = wd_create();
-      if (priv->dmadog == NULL)
-        {
-          spierr("ERROR: Failed to create wdog\n");
-          goto errout_with_dmahandles;
-        }
 #endif
 
 #ifdef CONFIG_STM32H7_QSPI_INTERRUPTS
@@ -2686,7 +2677,7 @@ struct qspi_dev_s *stm32h7_qspi_initialize(int intf)
       if (ret < 0)
         {
           spierr("ERROR: Failed to attach irq %d\n", priv->irq);
-          goto errout_with_dmadog;
+          goto errout_with_dmawait;
         }
 
       /* Initialize the semaphore that blocks until the operation completes.
@@ -2724,14 +2715,10 @@ errout_with_irq:
 #ifdef CONFIG_STM32H7_QSPI_INTERRUPTS
   irq_detach(priv->irq);
 
-errout_with_dmadog:
+errout_with_dmawait:
 #endif
 #ifdef CONFIG_STM32H7_QSPI_DMA
-  wd_delete(priv->dmadog);
-
-errout_with_dmahandles:
   nxsem_destroy(&priv->dmawait);
-
   if (priv->dmach)
     {
       stm32_dmafree(priv->dmach);

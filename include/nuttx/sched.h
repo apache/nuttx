@@ -282,7 +282,7 @@ struct sporadic_s;
 struct replenishment_s
 {
   FAR struct tcb_s *tcb;            /* The parent TCB structure                 */
-  WDOG_ID timer;                    /* Timer dedicated to this interval         */
+  struct wdog_s timer;              /* Timer dedicated to this interval         */
   uint32_t budget;                  /* Current budget time                      */
   uint8_t  flags;                   /* See SPORADIC_FLAG_* definitions          */
 };
@@ -677,7 +677,7 @@ struct tcb_s
   FAR struct sporadic_s *sporadic;       /* Sporadic scheduling parameters      */
 #endif
 
-  WDOG_ID waitdog;                       /* All timed waits use this timer      */
+  struct wdog_s waitdog;                 /* All timed waits use this timer      */
 
   /* Stack-Related Fields *******************************************************/
 

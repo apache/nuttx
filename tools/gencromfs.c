@@ -111,7 +111,7 @@
 #define NUTTX_IFLNK        (10 << 12)  /* Must match NuttX's S_IFLNK */
 
 #define DIR_MODEFLAGS      (NUTTX_IFDIR | NUTTX_IRXUSR | NUTTX_IRXGRP | NUTTX_IRXOTH)
-#define DIRLINK_MODEFLAGS  (NUTTX_IFLNK | DIR_MODEFLAGS)
+#define DIRLINK_MODEFLAGS  (NUTTX_IFLNK | NUTTX_IRXUSR | NUTTX_IRXGRP | NUTTX_IRXOTH)
 #define FILE_MODEFLAGS     (NUTTX_IFREG | NUTTX_IRUSR | NUTTX_IRGRP | NUTTX_IROTH)
 
 #define CROMFS_MAGIC       0x4d4f5243
@@ -925,7 +925,7 @@ static void gen_directory(const char *path, const char *name, mode_t mode,
   uint32_t save_offset        = g_offset;
   uint32_t save_diroffset     = g_diroffset;
   uint32_t save_parent_offset = g_parent_offset;
-  FILE *save_tmpstream      = g_tmpstream;
+  FILE *save_tmpstream        = g_tmpstream;
   FILE *subtree_stream;
   int namlen;
   int result;

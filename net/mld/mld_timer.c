@@ -443,7 +443,7 @@ void mld_start_gentimer(FAR struct net_driver_s *dev, clock_t ticks)
 
   mldinfo("ticks: %lu\n", (unsigned long)ticks);
 
-  ret = wd_start(dev->d_mld.gendog, ticks,
+  ret = wd_start(&dev->d_mld.gendog, ticks,
                  mld_gendog_timout, 1, (wdparm_t)dev->d_ifindex);
 
   DEBUGASSERT(ret == OK);
@@ -468,7 +468,7 @@ void mld_start_v1timer(FAR struct net_driver_s *dev, clock_t ticks)
 
   mldinfo("ticks: %lu\n", (unsigned long)ticks);
 
-  ret = wd_start(dev->d_mld.v1dog, ticks,
+  ret = wd_start(&dev->d_mld.v1dog, ticks,
                  mld_v1dog_timout, 1, (wdparm_t)dev->d_ifindex);
 
   DEBUGASSERT(ret == OK);
@@ -491,7 +491,7 @@ void mld_start_polltimer(FAR struct mld_group_s *group, clock_t ticks)
 
   mldinfo("ticks: %lu\n", (unsigned long)ticks);
 
-  ret = wd_start(group->polldog, ticks,
+  ret = wd_start(&group->polldog, ticks,
                  mld_polldog_timout, 1, (wdparm_t)group);
 
   DEBUGASSERT(ret == OK);

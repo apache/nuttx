@@ -65,7 +65,7 @@ struct simgpio_dev_s
 struct simgpint_dev_s
 {
   struct simgpio_dev_s simgpio;
-  WDOG_ID wdog;
+  struct wdog_s wdog;
   pin_interrupt_t callback;
 };
 
@@ -185,7 +185,7 @@ static int gpint_attach(FAR struct gpio_dev_s *dev,
   FAR struct simgpint_dev_s *simgpint = (FAR struct simgpint_dev_s *)dev;
 
   gpioinfo("Cancel 1 second timer\n");
-  wd_cancel(simgpint->wdog);
+  wd_cancel(&simgpint->wdog);
 
   gpioinfo("Attach %p\n", callback);
   simgpint->callback = callback;
@@ -201,14 +201,14 @@ static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
       if (simgpint->callback != NULL)
         {
           gpioinfo("Start 1 second timer\n");
-          wd_start(simgpint->wdog, SEC2TICK(1),
+          wd_start(&simgpint->wdog, SEC2TICK(1),
                    sim_interrupt, 1, (wdparm_t)dev);
         }
     }
   else
     {
        gpioinfo("Cancel 1 second timer\n");
-      wd_cancel(simgpint->wdog);
+      wd_cancel(&simgpint->wdog);
     }
 
   return OK;
@@ -228,9 +228,6 @@ static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
 
 int sim_gpio_initialize(void)
 {
-  g_gpint.wdog = wd_create();
-  DEBUGASSERT(g_gpint.wdog != NULL);
-
   gpio_pin_register(&g_gpin.gpio, g_gpin.id);
   gpio_pin_register(&g_gpout.gpio, g_gpout.id);
   gpio_pin_register(&g_gpint.simgpio.gpio, g_gpint.simgpio.id);

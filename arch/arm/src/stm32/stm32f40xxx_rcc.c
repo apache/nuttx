@@ -41,6 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <arch/board/board.h>
+
 #include "chip.h"
 #include "stm32_pwr.h"
 #include "itm_syslog.h"
@@ -755,8 +758,7 @@ static void stm32_stdclockconfig(void)
         {
         }
 
-#if defined(CONFIG_STM32_STM32F429) || defined(CONFIG_STM32_STM32F446) || \
-    defined(CONFIG_STM32_STM32F469)
+#if defined(CONFIG_STM32_HAVE_OVERDRIVE) && (STM32_SYSCLK_FREQUENCY > 168000000)
 
       /* Enable the Over-drive to extend the clock frequency to 180 MHz */
 
@@ -779,7 +781,13 @@ static void stm32_stdclockconfig(void)
        * and 5 wait states.
        */
 
-      regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN
+      regval = (FLASH_ACR_LATENCY_5
+#ifdef CONFIG_STM32_FLASH_ICACHE
+                | FLASH_ACR_ICEN
+#endif
+#ifdef CONFIG_STM32_FLASH_DCACHE
+                | FLASH_ACR_DCEN
+#endif
 #ifdef CONFIG_STM32_FLASH_PREFETCH
                 | FLASH_ACR_PRFTEN
 #endif

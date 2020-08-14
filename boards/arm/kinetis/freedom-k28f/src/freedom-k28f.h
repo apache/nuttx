@@ -372,7 +372,7 @@ void k28_sdhc_automount_event(bool inserted);
  *
  ****************************************************************************/
 
-#if defined(HAVE_SDHC_AUTOMOUNTER) || defined(HAVE_USB_AUTOMOUNTER)
+#ifdef HAVE_SDHC_AUTOMOUNTER
 void k28_automount_initialize(void);
 #endif
 

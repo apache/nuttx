@@ -323,8 +323,8 @@ struct dm9x_driver_s
   bool dm_b100m;               /* true:speed == 100M; false:speed == 10M */
   uint8_t dm_ntxpending;       /* Count of packets pending transmission */
   uint8_t ncrxpackets;         /* Number of continuous rx packets  */
-  WDOG_ID dm_txpoll;           /* TX poll timer */
-  WDOG_ID dm_txtimeout;        /* TX timeout timer */
+  struct wdog_s dm_txpoll;     /* TX poll timer */
+  struct wdog_s dm_txtimeout;  /* TX timeout timer */
   struct work_s dm_irqwork;    /* For deferring interrupt work to the work queue */
   struct work_s dm_pollwork;   /* For deferring poll work to the work queue */
 
@@ -768,7 +768,7 @@ static int dm9x_transmit(FAR struct dm9x_driver_s *priv)
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-      wd_start(priv->dm_txtimeout, DM6X_TXTIMEOUT,
+      wd_start(&priv->dm_txtimeout, DM6X_TXTIMEOUT,
                dm9x_txtimeout_expiry, 1, (wdparm_t)priv);
       return OK;
     }
@@ -1119,7 +1119,7 @@ static void dm9x_txdone(FAR struct dm9x_driver_s *priv)
 
   if (priv->dm_ntxpending == 0)
     {
-      wd_cancel(priv->dm_txtimeout);
+      wd_cancel(&priv->dm_txtimeout);
     }
 
   /* Then poll the network for new XMIT data */
@@ -1291,7 +1291,7 @@ static int dm9x_interrupt(int irq, FAR void *context, FAR void *arg)
        * expiration and the deferred interrupt processing.
        */
 
-       wd_cancel(priv->dm_txtimeout);
+       wd_cancel(&priv->dm_txtimeout);
     }
 
   /* Schedule to perform the interrupt processing on the worker thread. */
@@ -1427,7 +1427,7 @@ static void dm9x_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(priv->dm_txpoll, DM9X_WDDELAY,
+  wd_start(&priv->dm_txpoll, DM9X_WDDELAY,
            dm9x_poll_expiry, 1, (wdparm_t)priv);
   net_unlock();
 }
@@ -1563,7 +1563,7 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->dm_txpoll, DM9X_WDDELAY,
+  wd_start(&priv->dm_txpoll, DM9X_WDDELAY,
            dm9x_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the DM9X interrupt */
@@ -1604,8 +1604,8 @@ static int dm9x_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->dm_txpoll);
-  wd_cancel(priv->dm_txtimeout);
+  wd_cancel(&priv->dm_txpoll);
+  wd_cancel(&priv->dm_txtimeout);
 
   /* Reset the device */
 
@@ -1887,8 +1887,8 @@ static void dm9x_reset(FAR struct dm9x_driver_s *priv)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->dm_txpoll);
-  wd_cancel(priv->dm_txtimeout);
+  wd_cancel(&priv->dm_txpoll);
+  wd_cancel(&priv->dm_txtimeout);
 
   /* Save previous register address */
 
@@ -1985,12 +1985,7 @@ int dm9x_initialize(void)
   g_dm9x[0].dm_dev.d_addmac  = dm9x_addmac;   /* Add multicast MAC address */
   g_dm9x[0].dm_dev.d_rmmac   = dm9x_rmmac;    /* Remove multicast MAC address */
 #endif
-  g_dm9x[0].dm_dev.d_private = (FAR void *)g_dm9x; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  g_dm9x[0].dm_txpoll       = wd_create();    /* Create periodic poll timer */
-  g_dm9x[0].dm_txtimeout    = wd_create();    /* Create TX timeout timer */
+  g_dm9x[0].dm_dev.d_private = g_dm9x;        /* Used to recover private state from dev */
 
   /* Read the MAC address */
 

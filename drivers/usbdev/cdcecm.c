@@ -158,7 +158,7 @@ struct cdcecm_driver_s
   /* Network device */
 
   bool                         bifup;       /* true:ifup false:ifdown */
-  WDOG_ID                      txpoll;      /* TX poll timer */
+  struct wdog_s                txpoll;      /* TX poll timer */
   struct work_s                irqwork;     /* For deferring interrupt work
                                              * to the work queue */
   struct work_s                pollwork;    /* For deferring poll work to
@@ -707,7 +707,7 @@ static void cdcecm_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(self->txpoll, CDCECM_WDDELAY,
+  wd_start(&self->txpoll, CDCECM_WDDELAY,
            cdcecm_poll_expiry, 1, (wdparm_t)self);
 
   net_unlock();
@@ -788,7 +788,7 @@ static int cdcecm_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, CDCECM_WDDELAY,
+  wd_start(&priv->txpoll, CDCECM_WDDELAY,
            cdcecm_poll_expiry, 1, (wdparm_t)priv);
 
   priv->bifup = true;
@@ -824,7 +824,7 @@ static int cdcecm_ifdown(FAR struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
+  wd_cancel(&priv->txpoll);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the cdcecm_ifup() always
@@ -2130,13 +2130,7 @@ static int cdcecm_classobject(int minor,
 #ifdef CONFIG_NETDEV_IOCTL
   self->dev.d_ioctl   = cdcecm_ioctl;    /* Handle network IOCTL commands */
 #endif
-  self->dev.d_private = (FAR void *)self; /* Used to recover private state from dev */
-
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  self->txpoll        = wd_create();   /* Create periodic poll timer */
-
-  DEBUGASSERT(self->txpoll != NULL);
+  self->dev.d_private = self;            /* Used to recover private state from dev */
 
   /* USB device initialization */
 

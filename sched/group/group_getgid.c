@@ -69,6 +69,6 @@ gid_t getgid(void)
 
   /* Set the task group's group identity. */
 
-  DEBUGASSERT(group != NULL);
+  DEBUGASSERT(rgroup != NULL);
   return rgroup->tg_gid;
 }

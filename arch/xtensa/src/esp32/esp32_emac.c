@@ -200,8 +200,8 @@ struct esp32_emac_s
   uint8_t               mbps100 : 1; /* 100MBps operation (vs 10 MBps) */
   uint8_t               fduplex : 1; /* Full (vs. half) duplex */
 
-  WDOG_ID               txpoll;      /* TX poll timer */
-  WDOG_ID               txtimeout;   /* TX timeout timer */
+  struct wdog_s         txpoll;      /* TX poll timer */
+  struct wdog_s         txtimeout;   /* TX timeout timer */
 
   struct work_s         txwork;      /* For deferring TX work to the work queue */
   struct work_s         rxwork;      /* For deferring RX work to the work queue */
@@ -825,8 +825,8 @@ static int emac_transmit(struct esp32_emac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  ret = wd_start(priv->txtimeout, EMAC_TX_TO, emac_txtimeout_expiry,
-                 1, (uint32_t)priv);
+  ret = wd_start(&priv->txtimeout, EMAC_TX_TO,
+                 emac_txtimeout_expiry, 1, (wdparm_t)priv);
   if (ret)
     {
       nerr("ERROR: Failed to start TX timeout timer");
@@ -1503,7 +1503,7 @@ static void emac_tx_interrupt_work(FAR void *arg)
 
   net_lock();
 
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txtimeout);
 
   emac_dopoll(priv);
 
@@ -1798,8 +1798,8 @@ static void emac_poll_work(FAR void *arg)
         }
     }
 
-  ret = wd_start(priv->txpoll, EMAC_WDDELAY , emac_poll_expiry,
-                 1, (uint32_t)priv);
+  ret = wd_start(&priv->txpoll, EMAC_WDDELAY,
+                 emac_poll_expiry, 1, (wdparm_t)priv);
   if (ret)
     {
       nerr("ERROR: Failed to start TX poll timer");
@@ -1901,7 +1901,8 @@ static int emac_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(priv->txpoll, EMAC_WDDELAY , emac_poll_expiry, 1, (uint32_t)priv);
+  wd_start(&priv->txpoll, EMAC_WDDELAY,
+           emac_poll_expiry, 1, (wdparm_t)priv);
 
   /* Enable the Ethernet interrupt */
 
@@ -1948,8 +1949,8 @@ static int emac_ifdown(struct net_driver_s *dev)
 
   /* Cancel the TX poll timer and TX timeout timers */
 
-  wd_cancel(priv->txpoll);
-  wd_cancel(priv->txtimeout);
+  wd_cancel(&priv->txpoll);
+  wd_cancel(&priv->txtimeout);
 
   /* Reset ethernet MAC and disable clock */
 
@@ -2209,26 +2210,6 @@ int esp32_emac_init(void)
       goto errout_with_attachirq;
     }
 
-  /* Create a watchdog for timing polling for and timing of transmissions */
-
-  priv->txpoll = wd_create();     /* Create periodic poll timer */
-  if (!priv->txpoll)
-    {
-      nerr("ERROR: Failed create TX poll watch dog\n");
-
-      ret = -ENOMEM;
-      goto errout_with_attachirq;
-    }
-
-  priv->txtimeout = wd_create();  /* Create TX timeout timer */
-  if (!priv->txtimeout)
-    {
-      nerr("ERROR: Failed create TX timeout watch dog\n");
-
-      ret = -ENOMEM;
-      goto errout_with_createtxtimeout;
-    }
-
   /* Initialize the driver structure */
 
   priv->dev.d_ifup    = emac_ifup;     /* I/F up (new IP address) callback */
@@ -2255,18 +2236,10 @@ int esp32_emac_init(void)
     {
       nerr("ERROR: Failed to register net device\n");
 
-      goto errout_with_registernetdev;
+      goto errout_with_attachirq;
     }
 
   return 0;
-
-errout_with_registernetdev:
-  wd_delete(priv->txtimeout);
-  priv->txtimeout = NULL;
-
-errout_with_createtxtimeout:
-  wd_delete(priv->txpoll);
-  priv->txpoll = NULL;
 
 errout_with_attachirq:
   esp32_detach_peripheral(0, ESP32_PERIPH_EMAC, priv->cpuint);

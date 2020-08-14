@@ -143,7 +143,7 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
+  DEBUGASSERT(up_interrupt_context() == false);
 
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.
@@ -158,17 +158,6 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
   if (!abstime || abstime->tv_nsec < 0 || abstime->tv_nsec >= 1000000000)
     {
       return -EINVAL;
-    }
-
-  /* Create a watchdog.  We will not actually need this watchdog
-   * unless the queue is not empty, but we will reserve it up front
-   * before we enter the following critical section.
-   */
-
-  rtcb->waitdog = wd_create();
-  if (!rtcb->waitdog)
-    {
-      return -ENOMEM;
     }
 
   /* Get the next message from the message queue.  We will disable
@@ -215,16 +204,13 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
         {
           leave_critical_section(flags);
           sched_unlock();
-
-          wd_delete(rtcb->waitdog);
-          rtcb->waitdog = NULL;
-
           return -result;
         }
 
       /* Start the watchdog */
 
-      wd_start(rtcb->waitdog, ticks, nxmq_rcvtimeout, 1, (wdparm_t)getpid());
+      wd_start(&rtcb->waitdog, ticks,
+               nxmq_rcvtimeout, 1, (wdparm_t)getpid());
     }
 
   /* Get the message from the message queue */
@@ -235,7 +221,7 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
    * it was never started)
    */
 
-  wd_cancel(rtcb->waitdog);
+  wd_cancel(&rtcb->waitdog);
 
   /* We can now restore interrupts */
 
@@ -256,8 +242,6 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
     }
 
   sched_unlock();
-  wd_delete(rtcb->waitdog);
-  rtcb->waitdog = NULL;
   return ret;
 }
 

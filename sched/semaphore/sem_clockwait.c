@@ -96,7 +96,7 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
   int status;
   int ret = ERROR;
 
-  DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
+  DEBUGASSERT(up_interrupt_context() == false);
 
   /* Verify the input parameters and, in case of an error, set
    * errno appropriately.
@@ -108,17 +108,6 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
       return -EINVAL;
     }
 #endif
-
-  /* Create a watchdog.  We will not actually need this watchdog
-   * unless the semaphore is unavailable, but we will reserve it up
-   * front before we enter the following critical section.
-   */
-
-  rtcb->waitdog = wd_create();
-  if (!rtcb->waitdog)
-    {
-      return -ENOMEM;
-    }
 
   /* We will disable interrupts until we have completed the semaphore
    * wait.  We need to do this (as opposed to just disabling pre-emption)
@@ -177,7 +166,7 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
 
   /* Start the watchdog */
 
-  wd_start(rtcb->waitdog, ticks, nxsem_timeout, 1, (wdparm_t)getpid());
+  wd_start(&rtcb->waitdog, ticks, nxsem_timeout, 1, (wdparm_t)getpid());
 
   /* Now perform the blocking wait.  If nxsem_wait() fails, the
    * negated errno value will be returned below.
@@ -187,15 +176,13 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
 
   /* Stop the watchdog timer */
 
-  wd_cancel(rtcb->waitdog);
+  wd_cancel(&rtcb->waitdog);
 
   /* We can now restore interrupts and delete the watchdog */
 
 success_with_irqdisabled:
 errout_with_irqdisabled:
   leave_critical_section(flags);
-  wd_delete(rtcb->waitdog);
-  rtcb->waitdog = NULL;
   return ret;
 }
 

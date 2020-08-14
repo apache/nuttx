@@ -59,6 +59,7 @@
  ********************************************************************************************/
 
 /* Configuration ****************************************************************************/
+
 /* Prerequisites:
  *   CONFIG_I2C
  *     I2C support is required
@@ -149,7 +150,7 @@ struct pcf8574_dev_s
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 #ifdef CONFIG_PCF8574_INT_POLL
-  WDOG_ID wdog;                        /* Timer used to poll for missed interrupts */
+  struct wdog_s wdog;                  /* Timer used to poll for missed interrupts */
 #endif
 
   uint8_t input;                       /* Last input registers */

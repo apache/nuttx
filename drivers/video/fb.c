@@ -49,8 +49,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxglib.h>
 #include <nuttx/video/fb.h>
 
 /****************************************************************************
@@ -402,20 +400,13 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 #endif
 
-#ifdef CONFIG_LCD_UPDATE
-      case FBIO_UPDATE:  /* Update the LCD with the modified framebuffer data  */
+#ifdef CONFIG_FB_UPDATE
+      case FBIO_UPDATE:  /* Update the modified framebuffer data  */
         {
-          FAR struct nxgl_rect_s *rect =
-            (FAR struct nxgl_rect_s *)((uintptr_t)arg);
-          struct fb_planeinfo_s pinfo;
+          struct fb_area_s *area = (FAR struct fb_area_s *)((uintptr_t)arg);
 
-          DEBUGASSERT(fb->vtable != NULL &&
-                      fb->vtable->getplaneinfo != NULL);
-          ret = fb->vtable->getplaneinfo(fb->vtable, fb->plane, &pinfo);
-          if (ret >= 0)
-            {
-               nx_notify_rectangle((FAR NX_PLANEINFOTYPE *)&pinfo, rect);
-            }
+          DEBUGASSERT(fb->vtable != NULL && fb->vtable->updatearea != NULL);
+          ret = fb->vtable->updatearea(fb->vtable, area);
         }
         break;
 #endif

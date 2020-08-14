@@ -295,7 +295,7 @@ struct s32k1xx_driver_s
   uint32_t base;                /* FLEXCAN base address */
   bool bifup;                   /* true:ifup false:ifdown */
 #ifdef TX_TIMEOUT_WQ
-  WDOG_ID txtimeout[TXMBCOUNT]; /* TX timeout timer */
+  struct wdog_s txtimeout[TXMBCOUNT]; /* TX timeout timer */
 #endif
   struct work_s irqwork;        /* For deferring interrupt work to the wq */
   struct work_s pollwork;       /* For deferring poll work to the work wq */
@@ -752,7 +752,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   if (timeout >= 0)
     {
-      wd_start(priv->txtimeout[mbi], timeout + 1,
+      wd_start(&priv->txtimeout[mbi], timeout + 1,
                s32k1xx_txtimeout_expiry, 1, (wdparm_t)priv);
     }
 #endif
@@ -1004,7 +1004,7 @@ static void s32k1xx_txdone(FAR void *arg)
            * corresponding watchdog can be canceled.
            */
 
-          wd_cancel(priv->txtimeout[mbi]);
+          wd_cancel(&priv->txtimeout[mbi]);
 #endif
         }
 
@@ -1718,9 +1718,6 @@ int s32k1xx_caninitialize(int intf)
 {
   struct s32k1xx_driver_s *priv;
   int ret;
-#ifdef TX_TIMEOUT_WQ
-  uint32_t i;
-#endif
 
   switch (intf)
     {
@@ -1861,15 +1858,7 @@ int s32k1xx_caninitialize(int intf)
 #ifdef CONFIG_NETDEV_IOCTL
   priv->dev.d_ioctl   = s32k1xx_ioctl;     /* Support CAN ioctl() calls */
 #endif
-  priv->dev.d_private = (void *)priv;      /* Used to recover private state from dev */
-
-#ifdef TX_TIMEOUT_WQ
-  for (i = 0; i < TXMBCOUNT; i++)
-    {
-      priv->txtimeout[i] = wd_create();    /* Create TX timeout timer */
-    }
-
-#endif
+  priv->dev.d_private = priv;              /* Used to recover private state from dev */
   priv->rx            = (struct mb_s *)(priv->base + S32K1XX_CAN_MB_OFFSET);
   priv->tx            = (struct mb_s *)(priv->base + S32K1XX_CAN_MB_OFFSET +
                           (sizeof(struct mb_s) * RXMBCOUNT));
