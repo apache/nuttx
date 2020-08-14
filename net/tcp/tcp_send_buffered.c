@@ -416,7 +416,9 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
                   sq_rem(entry, &conn->unacked_q);
 
-                  /* And return the write buffer to the pool of free buffers */
+                  /* And return the write buffer to the pool of free
+                   * buffers
+                   */
 
                   tcp_wrbuffer_release(wrb);
 
@@ -537,7 +539,9 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           FAR struct tcp_wrbuffer_s *tmp;
           uint16_t sent;
 
-          /* Yes.. Reset the number of bytes sent sent from the write buffer */
+          /* Yes.. Reset the number of bytes sent sent from
+           * the write buffer
+           */
 
           sent = TCP_WBSENT(wrb);
           if (conn->tx_unacked > sent)
@@ -779,7 +783,9 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       conn->tx_unacked += sndlen;
       conn->sent       += sndlen;
 
-      /* Below prediction will become true, unless retransmission occurrence */
+      /* Below prediction will become true,
+       * unless retransmission occurrence
+       */
 
       predicted_seqno = tcp_getsequence(conn->sndseq) + sndlen;
 
@@ -1086,7 +1092,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                 }
               else
                 {
-                  nerr("ERROR: Failed to add data to the I/O buffer chain\n");
+                  nerr("ERROR: Failed to add data to the I/O chain\n");
                   ret = -EWOULDBLOCK;
                   goto errout_with_wrb;
                 }
@@ -1102,8 +1108,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
           int blresult;
 
           /* iob_copyin might wait for buffers to be freed, but if network is
-           * locked this might never happen, since network driver is also locked,
-           * therefore we need to break the lock
+           * locked this might never happen, since network driver is also
+           * locked, therefore we need to break the lock
            */
 
           blresult = net_breaklock(&count);
@@ -1208,9 +1214,10 @@ int psock_tcp_cansend(FAR struct socket *psock)
    * buffer head and at least one free IOB to initialize the write buffer
    * head.
    *
-   * REVISIT:  The send will still block if we are unable to buffer the entire
-   * user-provided buffer which may be quite large.  We will almost certainly
-   * need to have more than one free IOB, but we don't know how many more.
+   * REVISIT:  The send will still block if we are unable to buffer
+   * the entire user-provided buffer which may be quite large.
+   * We will almost certainly need to have more than one free IOB,
+   * but we don't know how many more.
    */
 
   if (tcp_wrbuffer_test() < 0 || iob_navail(false) <= 0)
