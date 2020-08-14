@@ -10,6 +10,7 @@ OS Components
    
    nsh/index.rst
    power.rst
+   socketcan.rst
    syslog.rst
    binfmt.rst
    drivers/index.rst
