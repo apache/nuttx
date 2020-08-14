@@ -834,7 +834,7 @@ static void tun_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void tun_poll_expiry(FAR void *arg)
+static void tun_poll_expiry(wdparm_t arg)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)arg;
 
@@ -878,7 +878,7 @@ static int tun_ifup(FAR struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  wd_start(&priv->txpoll, TUN_WDDELAY, tun_poll_expiry, priv);
+  wd_start(&priv->txpoll, TUN_WDDELAY, tun_poll_expiry, (wdparm_t)priv);
 
   priv->bifup = true;
   return OK;
