@@ -520,7 +520,7 @@ static int  s32k1xx_flexcan_interrupt(int irq, FAR void *context,
 /* Watchdog timer expirations */
 #ifdef TX_TIMEOUT_WQ
 static void s32k1xx_txtimeout_work(FAR void *arg);
-static void s32k1xx_txtimeout_expiry(int argc, wdparm_t arg, ...);
+static void s32k1xx_txtimeout_expiry(wdparm_t arg);
 #endif
 
 /* NuttX callback functions */
@@ -753,7 +753,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
   if (timeout >= 0)
     {
       wd_start(&priv->txtimeout[mbi], timeout + 1,
-               s32k1xx_txtimeout_expiry, 1, (wdparm_t)priv);
+               s32k1xx_txtimeout_expiry, (wdparm_t)priv);
     }
 #endif
 
@@ -1132,8 +1132,7 @@ static void s32k1xx_txtimeout_work(FAR void *arg)
  *   The last TX never completed.  Reset the hardware and start again.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1143,7 +1142,7 @@ static void s32k1xx_txtimeout_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void s32k1xx_txtimeout_expiry(int argc, wdparm_t arg, ...)
+static void s32k1xx_txtimeout_expiry(wdparm_t arg)
 {
   FAR struct s32k1xx_driver_s *priv = (FAR struct s32k1xx_driver_s *)arg;
 

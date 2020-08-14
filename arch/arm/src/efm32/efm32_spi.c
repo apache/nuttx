@@ -161,7 +161,7 @@ static void      spi_wait_status(const struct efm32_spiconfig_s *config,
 /* DMA support */
 
 #ifdef CONFIG_EFM32_SPI_DMA
-static void      spi_dma_timeout(int argc, wdparm_t arg1, ...);
+static void      spi_dma_timeout(wdparm_t arg);
 static void      spi_dmarxwait(struct efm32_spidev_s *priv);
 static void      spi_dmatxwait(struct efm32_spidev_s *priv);
 static inline void spi_dmarxwakeup(struct efm32_spidev_s *priv);
@@ -407,9 +407,9 @@ static void spi_wait_status(const struct efm32_spiconfig_s *config,
  ****************************************************************************/
 
 #ifdef CONFIG_EFM32_SPI_DMA
-static void spi_dma_timeout(int argc, wdparm_t arg1, ...)
+static void spi_dma_timeout(wdparm_t arg)
 {
-  struct efm32_spidev_s *priv = (struct efm32_spidev_s *)((uintptr_t)arg1);
+  struct efm32_spidev_s *priv = (struct efm32_spidev_s *)arg;
 
   /* Mark DMA timeout error and wakeup form RX and TX waiters */
 
@@ -1465,8 +1465,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
        * when both RX and TX transfers complete.
        */
 
-      ret = wd_start(&priv->wdog, (int)ticks,
-                     spi_dma_timeout, 1, (wdparm_t)priv);
+      ret = wd_start(&priv->wdog, ticks,
+                     spi_dma_timeout, (wdparm_t)priv);
       if (ret < 0)
         {
           spierr("ERROR: Failed to start timeout: %d\n", ret);

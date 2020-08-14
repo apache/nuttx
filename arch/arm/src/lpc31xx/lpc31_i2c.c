@@ -116,7 +116,7 @@ static struct lpc31_i2cdev_s i2cdevices[2];
 
 static int  i2c_interrupt(int irq, FAR void *context, FAR void *arg);
 static void i2c_progress(struct lpc31_i2cdev_s *priv);
-static void i2c_timeout(int argc, wdparm_t arg, ...);
+static void i2c_timeout(wdparm_t arg);
 static void i2c_hwreset(struct lpc31_i2cdev_s *priv);
 static void i2c_setfrequency(struct lpc31_i2cdev_s *priv,
                              uint32_t frequency);
@@ -424,7 +424,7 @@ out:
  *
  ****************************************************************************/
 
-static void i2c_timeout(int argc, wdparm_t arg, ...)
+static void i2c_timeout(wdparm_t arg)
 {
   struct lpc31_i2cdev_s *priv = (struct lpc31_i2cdev_s *) arg;
 
@@ -515,7 +515,7 @@ static int i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Start a watchdog to timeout the transfer if the bus is locked up... */
 
-  wd_start(&priv->timeout, I2C_TIMEOUT, i2c_timeout, 1, (wdparm_t)priv);
+  wd_start(&priv->timeout, I2C_TIMEOUT, i2c_timeout, (wdparm_t)priv);
 
   /* Wait for the transfer to complete */
 

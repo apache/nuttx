@@ -947,9 +947,9 @@ exit_invalid_frame:
   bcmf_hexdump((uint8_t *)event, event_len, (unsigned long)event);
 }
 
-void bcmf_wl_scan_timeout(int argc, wdparm_t arg1, ...)
+void bcmf_wl_scan_timeout(wdparm_t arg)
 {
-  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg1;
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
   if (priv->scan_status < BCMF_SCAN_RUN)
     {
@@ -1142,7 +1142,7 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
   /*  Start scan_timeout timer */
 
   wd_start(&priv->scan_timeout, BCMF_SCAN_TIMEOUT_TICK,
-           bcmf_wl_scan_timeout, 1, (wdparm_t)priv);
+           bcmf_wl_scan_timeout, (wdparm_t)priv);
 
   return OK;
 

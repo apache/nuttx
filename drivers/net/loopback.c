@@ -121,7 +121,7 @@ static uint8_t g_iobuffer[NET_LO_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 static int  lo_txpoll(FAR struct net_driver_s *dev);
 static void lo_poll_work(FAR void *arg);
-static void lo_poll_expiry(int argc, wdparm_t arg, ...);
+static void lo_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -251,7 +251,7 @@ static void lo_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(&priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, 1, (wdparm_t)priv);
+  wd_start(&priv->lo_polldog, LO_WDDELAY, lo_poll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -262,8 +262,7 @@ static void lo_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -273,7 +272,7 @@ static void lo_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void lo_poll_expiry(int argc, wdparm_t arg, ...)
+static void lo_poll_expiry(wdparm_t arg)
 {
   FAR struct lo_driver_s *priv = (FAR struct lo_driver_s *)arg;
 
@@ -319,7 +318,7 @@ static int lo_ifup(FAR struct net_driver_s *dev)
   /* Set and activate a timer process */
 
   wd_start(&priv->lo_polldog, LO_WDDELAY,
-           lo_poll_expiry, 1, (wdparm_t)priv);
+           lo_poll_expiry, (wdparm_t)priv);
 
   priv->lo_bifup = true;
   return OK;

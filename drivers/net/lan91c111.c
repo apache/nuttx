@@ -137,7 +137,7 @@ static int  lan91c111_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void lan91c111_poll_work(FAR void *arg);
-static void lan91c111_poll_expiry(int argc, wdparm_t arg, ...);
+static void lan91c111_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -1042,7 +1042,7 @@ static void lan91c111_poll_work(FAR void *arg)
   /* Setup the watchdog poll timer again */
 
   wd_start(&priv->txpoll, LAN91C111_WDDELAY,
-           lan91c111_poll_expiry, 1, (wdparm_t)dev);
+           lan91c111_poll_expiry, (wdparm_t)dev);
   net_unlock();
 }
 
@@ -1053,8 +1053,7 @@ static void lan91c111_poll_work(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -1065,7 +1064,7 @@ static void lan91c111_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void lan91c111_poll_expiry(int argc, wdparm_t arg, ...)
+static void lan91c111_poll_expiry(wdparm_t arg)
 {
   FAR struct net_driver_s *dev = (FAR struct net_driver_s *)arg;
   FAR struct lan91c111_driver_s *priv = dev->d_private;
@@ -1143,7 +1142,7 @@ static int lan91c111_ifup(FAR struct net_driver_s *dev)
   /* Set and activate a timer process */
 
   wd_start(&priv->txpoll, LAN91C111_WDDELAY,
-           lan91c111_poll_expiry, 1, (wdparm_t)dev);
+           lan91c111_poll_expiry, (wdparm_t)dev);
   net_unlock();
 
   /* Enable the Ethernet interrupt */

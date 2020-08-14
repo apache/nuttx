@@ -900,8 +900,7 @@ static void spi_dma_sampledone(struct xmc4_spics_s *spics)
  *   DMA.
  *
  * Input Parameters:
- *   argc - The number of arguments (should be 1)
- *   arg  - The argument (state structure reference cast to uint32_t)
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -912,7 +911,7 @@ static void spi_dma_sampledone(struct xmc4_spics_s *spics)
  ****************************************************************************/
 
 #ifdef CONFIG_XMC4_SPI_DMA
-static void spi_dmatimeout(int argc, wdparm_t arg, ...)
+static void spi_dmatimeout(wdparm_t arg)
 {
   struct xmc4_spics_s *spics = (struct xmc4_spics_s *)arg;
 
@@ -1662,7 +1661,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       /* Start (or re-start) the watchdog timeout */
 
       ret = wd_start(&spics->dmadog, DMA_TIMEOUT_TICKS,
-                     spi_dmatimeout, 1, (wdparm_t)spics);
+                     spi_dmatimeout, (wdparm_t)spics);
       if (ret != OK)
         {
            spierr("ERROR: wd_start failed: %d\n", ret);

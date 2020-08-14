@@ -353,9 +353,9 @@ static int  enc_interrupt(int irq, FAR void *context, FAR void *arg);
 /* Watchdog timer expirations */
 
 static void enc_toworker(FAR void *arg);
-static void enc_txtimeout(int argc, wdparm_t arg, ...);
+static void enc_txtimeout(wdparm_t arg);
 static void enc_pollworker(FAR void *arg);
-static void enc_polltimer(int argc, wdparm_t arg, ...);
+static void enc_polltimer(wdparm_t arg);
 
 /* NuttX callback functions */
 
@@ -1065,7 +1065,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
    */
 
   wd_start(&priv->txtimeout, ENC_TXTIMEOUT,
-           enc_txtimeout, 1, (wdparm_t)priv);
+           enc_txtimeout, (wdparm_t)priv);
 
   /* free the descriptor */
 
@@ -2086,8 +2086,7 @@ static void enc_toworker(FAR void *arg)
  *   The last TX never completed.  Perform work on the worker thread.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2096,7 +2095,7 @@ static void enc_toworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void enc_txtimeout(int argc, wdparm_t arg, ...)
+static void enc_txtimeout(wdparm_t arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
   int ret;
@@ -2126,8 +2125,7 @@ static void enc_txtimeout(int argc, wdparm_t arg, ...)
  *   Periodic timer handler continuation.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2170,7 +2168,7 @@ static void enc_pollworker(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
-  wd_start(&priv->txpoll, ENC_WDDELAY, enc_polltimer, 1, (wdparm_t)arg);
+  wd_start(&priv->txpoll, ENC_WDDELAY, enc_polltimer, (wdparm_t)arg);
 }
 
 /****************************************************************************
@@ -2180,8 +2178,7 @@ static void enc_pollworker(FAR void *arg)
  *   Periodic timer handler.  Called from the timer interrupt handler.
  *
  * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
+ *   arg  - The argument
  *
  * Returned Value:
  *   None
@@ -2190,7 +2187,7 @@ static void enc_pollworker(FAR void *arg)
  *
  ****************************************************************************/
 
-static void enc_polltimer(int argc, wdparm_t arg, ...)
+static void enc_polltimer(wdparm_t arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
   int ret;
@@ -2273,7 +2270,7 @@ static int enc_ifup(struct net_driver_s *dev)
       /* Set and activate a timer process */
 
       wd_start(&priv->txpoll, ENC_WDDELAY,
-               enc_polltimer, 1, (wdparm_t)priv);
+               enc_polltimer, (wdparm_t)priv);
 
       /* Mark the interface up and enable the Ethernet interrupt at the
        * controller
