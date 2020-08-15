@@ -130,7 +130,7 @@ MCU. Follow the links for the details:
          -  `PIC32MX2xx Family <#pic32mx2xx>`__ (MIPS32 M4K)
          -  `PIC32MX4xx Family <#pic32mx4xx>`__ (MIPS32 M4K)
          -  `PIC32MX7xx Family <#pic32mx7xx>`__ (MIPS32 M4K)
-         -  `PIC32MZEC Family <#pic32mzec>`__ (MIPS32 |br|
+         -  `PIC32MZEC Family <#pic32mzec>`__ (MIPS32 
             microAptiv)
          -  `PIC32MZEF Family <#pic32mzef>`__ (MIPS32 M5150)
 
@@ -139,7 +139,7 @@ MCU. Follow the links for the details:
          -  `AVR ATMega128 <#avratmega128>`__ (8-bit AVR)
          -  `AVR ATMega1284p <#avratmega1284p>`__ (8-bit AVR)
          -  `AVR ATMega2560 <#avratmega2560>`__ (8-bit AVR)
-         -  `AVR AT90USB64x and AT90USB6128x <#avrat90usbxxx>`__ |br|
+         -  `AVR AT90USB64x and AT90USB6128x <#avrat90usbxxx>`__ 
             (8-bit AVR)
          -  `AVR32 AT32UC3BXXX <#at32uc3bxxx>`__ (32-bit AVR32)
          -  `Atmel SAMD20 <#at91samd20>`__ (ARM Cortex-M0+)
@@ -173,52 +173,52 @@ MCU. Follow the links for the details:
        - NXP/Freescale
 
          -  `M68HCS12 <#m68hcs12>`__
-         -  `NXP/Freescale i.MX1 <#freescaleimx1>`__ |br|
+         -  `NXP/Freescale i.MX1 <#freescaleimx1>`__ 
             (ARM920-T)
-         -  `NXP/Freescale i.MX6 <#freescaleimx6>`__ |br|
+         -  `NXP/Freescale i.MX6 <#freescaleimx6>`__ 
             (ARM Cortex-A9)
-         -  `NXP/Freescale i.MX RT <#freescaleimxrt>`__ |br|
+         -  `NXP/Freescale i.MX RT <#freescaleimxrt>`__ 
             (ARM Cortex-M7)
-         -  `NXP/FreeScale KL25Z <#freescalekl25z>`__ |br|
+         -  `NXP/FreeScale KL25Z <#freescalekl25z>`__ 
             (ARM Cortex-M0+)
-         -  `NXP/FreeScale KL26Z <#freescalekl26z>`__ |br|
+         -  `NXP/FreeScale KL26Z <#freescalekl26z>`__ 
             (ARM Cortex-M0+)
 
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
      -
 
        - NXP/Freescale (Continued)
 
-         -  `NXP/FreeScale Kinetis K20 <#kinetisk20>`__ (ARM |br|
+         -  `NXP/FreeScale Kinetis K20 <#kinetisk20>`__ (ARM 
             Cortex-M4)
-         -  `NXP/FreeScale Kinetis K28 <#kinetisk28>`__ (ARM |br|
+         -  `NXP/FreeScale Kinetis K28 <#kinetisk28>`__ (ARM 
             Cortex-M4)
-         -  `NXP/FreeScale Kinetis K40 <#kinetisk40>`__ (ARM |br|
+         -  `NXP/FreeScale Kinetis K40 <#kinetisk40>`__ (ARM 
             Cortex-M4)
-         -  `NXP/FreeScale Kinetis K60 <#kinetisk60>`__ (ARM |br|
+         -  `NXP/FreeScale Kinetis K60 <#kinetisk60>`__ (ARM 
             Cortex-M4)
-         -  `NXP/FreeScale Kinetis K64 <#kinetisk64>`__ (ARM |br|
+         -  `NXP/FreeScale Kinetis K64 <#kinetisk64>`__ (ARM 
             Cortex-M4)
-         -  `NXP/FreeScale Kinetis K66 <#kinetisk66>`__ (ARM |br|
+         -  `NXP/FreeScale Kinetis K66 <#kinetisk66>`__ (ARM 
             Cortex-M4)
 
          -  `NXP LPC11xx <#nxplpc11xx>`__ (Cortex-M0)
@@ -257,167 +257,167 @@ MCU. Follow the links for the details:
        - STMicroelectronics
 
          -  `STMicro STR71x <#str71x>`__ (ARM7TDMI)
-         -  `STMicro STM32F0xx <#stm32f0xx>`__ (STM32 F0, |br|
+         -  `STMicro STM32F0xx <#stm32f0xx>`__ (STM32 F0, 
             ARM Cortex-M0)
-         -  `STMicro STM32L0xx <#stm32l0xx>`__ (STM32 L0, |br|
+         -  `STMicro STM32L0xx <#stm32l0xx>`__ (STM32 L0, 
             ARM Cortex-M0)
-         -  `STMicro STM32G0xx <#stm32g0xx>`__ (STM32 G0 |br|
+         -  `STMicro STM32G0xx <#stm32g0xx>`__ (STM32 G0 
             ARM Cortex-M0+)
-         -  `STMicro STM32L152 <#stm32l152>`__ (STM32 L1 |br|
+         -  `STMicro STM32L152 <#stm32l152>`__ (STM32 L1 
             "EnergyLite" Line, ARM Cortex-M3)
-         -  `STMicro STM32L162 <#stm32l162>`__ (STM32 L1 |br|
-            "EnergyLite" Medium+ Density, |br|
+         -  `STMicro STM32L162 <#stm32l162>`__ (STM32 L1 
+            "EnergyLite" Medium+ Density, 
             ARM Cortex-M3)
-         -  `STMicro STM32F100x <#stm32f100x>`__ (STM32 F1 |br|
+         -  `STMicro STM32F100x <#stm32f100x>`__ (STM32 F1 
             "Value Line" Family, ARM Cortex-M3)
-         -  `STMicro STM32F102x <#stm32f102x>`__ (STM32 F1 |br|
+         -  `STMicro STM32F102x <#stm32f102x>`__ (STM32 F1 
             family, ARM Cortex-M3)
-         -  `STMicro STM32F103C4/C8 <#stm32f103cx>`__ (STM32 F1 |br|
-            "Low- and Medium-Density Line" |br|
+         -  `STMicro STM32F103C4/C8 <#stm32f103cx>`__ (STM32 F1 
+            "Low- and Medium-Density Line" 
             Family, ARM Cortex-M3)
-         -  `STMicro STM32F103x <#stm32f103x>`__ (STM32 F1 |br|
+         -  `STMicro STM32F103x <#stm32f103x>`__ (STM32 F1 
             family, ARM Cortex-M3)
          -  `STMicro STM32F105x <#stm32f105x>`__ (ARM Cortex-M3)
-         -  `STMicro STM32F107x <#stm32f107x>`__ (STM32 F1  |br|
-            family, "Connectivity Line" |br|
+         -  `STMicro STM32F107x <#stm32f107x>`__ (STM32 F1  
+            family, "Connectivity Line" 
             ARM Cortex-M3)
-         -  `STMicro STM32F205x <#stm32f205x>`__ (STM32 F2 |br|
+         -  `STMicro STM32F205x <#stm32f205x>`__ (STM32 F2 
             family, ARM Cortex-M3)
-         -  `STMicro STM32F207x <#stm32f207x>`__ (STM32 F2 |br|
+         -  `STMicro STM32F207x <#stm32f207x>`__ (STM32 F2 
             family, ARM Cortex-M3)
-         -  `STMicro STM32F302x <#stm32f302x>`__ (STM32 F3 |br|
+         -  `STMicro STM32F302x <#stm32f302x>`__ (STM32 F3 
             family, ARM Cortex-M4)
-         -  `STMicro STM32F303x <#stm32f303x>`__ (STM32 F3 |br|
+         -  `STMicro STM32F303x <#stm32f303x>`__ (STM32 F3 
             family, ARM Cortex-M4)
-         -  `STMicro STM32F334 <#stm32f334x>`__ (STM32 F3 |br|
+         -  `STMicro STM32F334 <#stm32f334x>`__ (STM32 F3 
             family, ARM Cortex-M4)
 
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
-         |br|
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
 
      -
 
        - STMicroelectronics (Continued)
 
-         -  `STMicro STM32 F372/F373 <#stm32f372x>`__ |br|
+         -  `STMicro STM32 F372/F373 <#stm32f372x>`__ 
             (ARM Cortex-M4)
-         -  `STMicro STM32F4x1 <#stm32f4x1>`__ |br|
-            (STM32 F4 family, ARM |br|
+         -  `STMicro STM32F4x1 <#stm32f4x1>`__ 
+            (STM32 F4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32F410 <#stm32f410>`__ |br|
-            (STM32 F4 family, ARM |br|
+         -  `STMicro STM32F410 <#stm32f410>`__ 
+            (STM32 F4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32F405x/407x <#stm32f407x>`__ |br|
-            (STM32 F4 family, ARM |br|
+         -  `STMicro STM32F405x/407x <#stm32f407x>`__ 
+            (STM32 F4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 F427/F437 <#stm32f427x>`__ |br|
-            (STM32 F4 family, ARM |br|
+         -  `STMicro STM32 F427/F437 <#stm32f427x>`__ 
+            (STM32 F4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 F429 <#stm32f429x>`__ |br|
-            (STM32 FB family, ARM |br|
+         -  `STMicro STM32 F429 <#stm32f429x>`__ 
+            (STM32 FB family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 F433 <#stm32f433x>`__ |br|
-            (STM32 F4 family, ARM |br|
+         -  `STMicro STM32 F433 <#stm32f433x>`__ 
+            (STM32 F4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 F446 <#stm32f446x>`__ |br|
-            (STM32 F4 family, ARM |br|
+         -  `STMicro STM32 F446 <#stm32f446x>`__ 
+            (STM32 F4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 F46xx <#stm32f46xxx>`__ |br|
-            (STM32 F4 family, ARM |br|
+         -  `STMicro STM32 F46xx <#stm32f46xxx>`__ 
+            (STM32 F4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 G474x <#stm32g474x>`__ |br|
-            (STM32 G4 family, ARM |br|
+         -  `STMicro STM32 G474x <#stm32g474x>`__ 
+            (STM32 G4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 L4x2 <#stm32l4x2>`__ |br|
-            (STM32 L4 family, ARM |br|
+         -  `STMicro STM32 L4x2 <#stm32l4x2>`__ 
+            (STM32 L4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 L475 <#stm32l475>`__ |br|
-            (STM32 L4 family, ARM |br|
+         -  `STMicro STM32 L475 <#stm32l475>`__ 
+            (STM32 L4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 L476 <#stm32l476>`__ |br|
-            (STM32 L4 family, ARM |br|
+         -  `STMicro STM32 L476 <#stm32l476>`__ 
+            (STM32 L4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 L496 <#stm32l496>`__ |br|
-            (STM32 L4 family, ARM |br|
+         -  `STMicro STM32 L496 <#stm32l496>`__ 
+            (STM32 L4 family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 L4Rx <#stm32l4rx>`__ |br|
-            (STM32 LB family, ARM |br|
+         -  `STMicro STM32 L4Rx <#stm32l4rx>`__ 
+            (STM32 LB family, ARM 
             Cortex-M4)
-         -  `STMicro STM32 F72x/F73x <#stm32f72x3x>`__ |br|
-            (STM32 F7 family, ARM |br|
+         -  `STMicro STM32 F72x/F73x <#stm32f72x3x>`__ 
+            (STM32 F7 family, ARM 
             Cortex-M7)
-         -  `STMicro STM32 F745/F746 <#stm32f74x>`__ |br|
-            (STM32 F7 family, ARM |br|
+         -  `STMicro STM32 F745/F746 <#stm32f74x>`__ 
+            (STM32 F7 family, ARM 
             Cortex-M7)
-         -  `STMicro STM32 F756 <#stm32f75x>`__ |br|
-            (STM32 F7 family, ARM |br|
+         -  `STMicro STM32 F756 <#stm32f75x>`__ 
+            (STM32 F7 family, ARM 
             Cortex-M7)
-         -  `STMicro STM32 F76xx/F77xx <#stm32f76xx77xx>`__ |br|
-            (STM32 F7 family, ARM |br|
+         -  `STMicro STM32 F76xx/F77xx <#stm32f76xx77xx>`__ 
+            (STM32 F7 family, ARM 
             Cortex-M7)
-         -  `STMicro STM32 H7x3 <#stm32h7x3>`__ |br|
-            (STM32 H7 family, ARM |br|
+         -  `STMicro STM32 H7x3 <#stm32h7x3>`__ 
+            (STM32 H7 family, ARM 
             Cortex-M7)
 
        - Texas Instruments
 
          - (some formerly Luminary)
-         -  `TI TMS320-C5471 <#tms320c5471>`__ |br|
+         -  `TI TMS320-C5471 <#tms320c5471>`__ 
             (ARM7TDMI)
-         -  `TI TMS320-DM320 <#titms320dm320>`__ |br|
+         -  `TI TMS320-DM320 <#titms320dm320>`__ 
             (ARM9E6JS)
-         -  `TI/Stellaris LM3S6432 <#tilms6432>`__ |br|
+         -  `TI/Stellaris LM3S6432 <#tilms6432>`__ 
             (ARM Cortex-M3)
-         -  `TI/Stellaris LM3S6432S2E <#tilm3s6432s2e>`__ |br|
+         -  `TI/Stellaris LM3S6432S2E <#tilm3s6432s2e>`__ 
             (ARM Cortex-M3)
-         -  `TI/Stellaris LM3S6918 <#tilms6918>`__ |br|
+         -  `TI/Stellaris LM3S6918 <#tilms6918>`__ 
             (ARM Cortex-M3)
-         -  `TI/Stellaris LM3S6965 <#tilms6965>`__ |br|
+         -  `TI/Stellaris LM3S6965 <#tilms6965>`__ 
             (ARM Cortex-M3)
-         -  `TI/Stellaris LM3S8962 <#tilms8962>`__ |br|
+         -  `TI/Stellaris LM3S8962 <#tilms8962>`__ 
             (ARM Cortex-M3)
-         -  `TI/Stellaris LM3S9B92 <#tilms9b92>`__ |br|
+         -  `TI/Stellaris LM3S9B92 <#tilms9b92>`__ 
             (ARM Cortex-M3)
-         -  `TI/Stellaris LM3S9B96 <#tilms9b96>`__ |br|
+         -  `TI/Stellaris LM3S9B96 <#tilms9b96>`__ 
             (ARM Cortex-M3)
-         -  `TI/SimpleLink CC13x0 <#tilcc13x0>`__ |br|
+         -  `TI/SimpleLink CC13x0 <#tilcc13x0>`__ 
             (ARM Cortex-M3)
-         -  `TI/Stellaris LM4F120x <#tilm4f120x>`__ |br|
+         -  `TI/Stellaris LM4F120x <#tilm4f120x>`__ 
             (ARM Cortex-M4)
-         -  `TI/Tiva TM4C123G <#titm4c123g>`__ |br|
+         -  `TI/Tiva TM4C123G <#titm4c123g>`__ 
             (ARM Cortex-M4)
-         -  `TI/Tiva TM4C1294 <#titm4c1294>`__ |br|
+         -  `TI/Tiva TM4C1294 <#titm4c1294>`__ 
             (ARM Cortex-M4)
-         -  `TI/Tiva TM4C129X <#titm4c129x>`__ |br|
+         -  `TI/Tiva TM4C129X <#titm4c129x>`__ 
             (ARM Cortex-M4)
-         -  `TI/SimpleLink CC13x2 <#tilcc13x2>`__ |br|
+         -  `TI/SimpleLink CC13x2 <#tilcc13x2>`__ 
             (ARM Cortex-M4)
-         -  `TI/Hercules TMS570LS04xx <#tms570ls04x>`__ |br|
+         -  `TI/Hercules TMS570LS04xx <#tms570ls04x>`__ 
             (ARM Cortex-R4)
-         -  `TI/Hercules TMS570LS31xx <#tms570ls31x>`__ |br|
+         -  `TI/Hercules TMS570LS31xx <#tms570ls31x>`__ 
             (ARM Cortex-R4)
-         -  `TI/Sitara AM335x <#tiam355x>`__ |br|
+         -  `TI/Sitara AM335x <#tiam355x>`__ 
             (Cortex-A8)
 
        - ZiLOG

@@ -31,8 +31,11 @@ version = release = 'latest'
 extensions = [
     "sphinx_rtd_theme",
     "recommonmark",
-    'sphinx.ext.autosectionlabel'
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.todo'
 ]
+
+todo_include_todos = True
 
 autosectionlabel_prefix_document = True
 

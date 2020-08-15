@@ -2,7 +2,10 @@
 About NuttX
 ===========
 
-**Goals**. NuttX is a real time embedded operating system (RTOS). Its goals are:
+Goals
+=====
+
+NuttX is a real time embedded operating system (RTOS). Its goals are:
 
 * **Small Footprint**
   Usable in all but the tightest micro-controller environments, the focus is on the
@@ -41,8 +44,10 @@ About NuttX
   Compatible GNU toolchains based on `buildroot <http://buildroot.uclibc.org/>`__ available for `download <https://bitbucket.org/nuttx/buildroot/downloads/>`__
   to provide a complete development environment for many architectures.
 
+Feature Set
+===========
 
-**Feature Set**. Key features of NuttX include:
+Key features of NuttX include:
 
 * **Standards Compliant Core Task Management**
 
@@ -222,7 +227,10 @@ About NuttX
   * **BAS 2.4**
     Seamless integration of Michael Haardt's BAS 2.4: "Bas is an interpreter for the classic dialect of the programming language BASIC. It is pretty compatible to typical BASIC interpreters of the 1980s, unlike some other UNIX BASIC interpreters, that implement a different syntax, breaking compatibility to existing programs. Bas offers many ANSI BASIC statements for structured programming, such as procedures, local variables and various loop types. Further there are matrix operations, automatic LIST indentation and many statements and functions found in specific classic dialects. Line numbers are not required."
 
-**Look at all those files and features... How can it be a tiny OS?**. The NuttX feature list (above) is fairly long and if you
+Look at all those files and features... How can it be a tiny OS?
+================================================================
+
+The NuttX feature list (above) is fairly long and if you
 look at the NuttX source tree, you will see that there are hundreds of source files comprising NuttX. How can NuttX be a tiny
 OS with all of that?
 

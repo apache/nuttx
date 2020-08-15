@@ -2,18 +2,18 @@
 SocketCAN Device Drivers
 ========================
 
-  -  **``include/nuttx/net/netdev.h``**. All structures and APIs
+  -  ``include/nuttx/net/netdev.h``. All structures and APIs
      needed to work with drivers are provided in this header file.
      The structure struct net_driver_s defines the interface and is
      passed to the network via netdev_register().
 
-  -  **``include/nuttx/can.h``**. CAN & CAN FD frame data
+  -  ``include/nuttx/can.h``. CAN & CAN FD frame data
      structures.
 
-  -  **``int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)'``**.
+  -  ``int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)'``.
      Each driver registers itself by calling netdev_register().
 
-  -  **``Include/nuttx/net/can.h``**. contains lookup tables for CAN
+  -  ``Include/nuttx/net/can.h``. contains lookup tables for CAN
      dlc to CAN FD len sizes named
 
      .. code-block:: c

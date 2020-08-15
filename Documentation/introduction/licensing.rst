@@ -2,8 +2,10 @@
 Licensing
 =========
 
-.. warning:: update to Apache!
+NuttX is available under the Apache 2.0 License. You can find more information about the terms `here <https://www.apache.org/foundation/license-faq.html>`_.
 
-NuttX is available under the highly permissive BSD license. Other than some fine print that
-you agree to respect the copyright you should feel absolutely free to use NuttX in any environment and without any concern for jeopardizing any proprietary software that you may link with it.
+License terms
+=============
 
+.. include:: ../../LICENSE
+  :literal:

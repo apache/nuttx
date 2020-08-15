@@ -1,11 +1,10 @@
+.. todo::
+  Migration is not yet completed from previous documentation. You can find the original list here:
+  `here <https://cwiki.apache.org/confluence/display/NUTTX/About>`__ 
+
 =========================
 Detailed Platform Support
 =========================
-
-.. note:: This is a work in progress, the details of each board is not completely migrated as it is possible that this information will be moved to the "supported boards" section and improved.
-         
-.. warning:: The following list is not yet completely migrated, in the meantime
-  you can see this `here <https://cwiki.apache.org/confluence/display/NUTTX/About>`__ 
 
 **Details**. The details, caveats and fine print follow. For even more
 information see the *README* files that can be found
