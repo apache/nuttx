@@ -249,7 +249,7 @@ Configuration                        Description
                                      command works very must like the set command except that is        
                                      operates on environment variables. When CONFIG_NSH_VARS   
                                      is enabled, there are changes in the behavior of certain commands.
-                                     See table :ref:`_nsh_vars_table`.
+                                     See following :ref:`table <nsh_vars_table>`.
                                                                                   
  ``CONFIG_NSH_QUOTE``                Enables back-slash quoting of certain characters within the     
                                      command. This option is useful for the case where an NSH script  
