@@ -245,7 +245,12 @@ int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
 
   /* Iterate over non NULL event fds */
 
-  for (i = 0, counter = 0; i < rc && counter < eph->size; counter++)
+  if (rc > maxevents)
+    {
+      rc = maxevents;
+    }
+
+  for (i = 0, counter = 0; i < rc && counter < eph->occupied; counter++)
     {
       if (eph->evs[counter].revents != 0)
         {
