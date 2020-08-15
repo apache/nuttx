@@ -95,11 +95,11 @@ struct epoll_event
 {
   epoll_data_t data;
   pollevent_t  events;   /* The input event flags */
-  pollevent_t  revents;  /* The output event flags */
 
   /* Non-standard fields used internally by NuttX. */
 
-  void        *reserved; /* reserved feild sync with struct pollfd */
+  pollevent_t  revents;  /* The output event flags */
+  void        *reserved; /* reserved field sync with struct pollfd */
   FAR sem_t   *sem;      /* Pointer to semaphore used to post output event */
   FAR void    *priv;     /* For use by drivers */
 };
