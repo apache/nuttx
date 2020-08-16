@@ -63,27 +63,28 @@ static const char *dequote_list[] =
 {
   /* NuttX */
 
-  "CONFIG_USER_ENTRYPOINT",               /* Name of entry point function */
-  "CONFIG_EXECFUNCS_SYMTAB_ARRAY",        /* Symbol table array used by exec[l|v] */
+  "CONFIG_DEBUG_OPTLEVEL",                /* Custom debug level */
   "CONFIG_EXECFUNCS_NSYMBOLS_VAR",        /* Variable holding number of symbols in the table */
+  "CONFIG_EXECFUNCS_SYMTAB_ARRAY",        /* Symbol table array used by exec[l|v] */
+  "CONFIG_INIT_ARGS",                     /* Argument list of entry point */
+  "CONFIG_INIT_SYMTAB",                   /* Global symbol table */
+  "CONFIG_INIT_NEXPORTS",                 /* Global symbol table size */
   "CONFIG_MODLIB_SYMTAB_ARRAY",           /* Symbol table array used by modlib functions */
   "CONFIG_MODLIB_NSYMBOLS_VAR",           /* Variable holding number of symbols in the table */
   "CONFIG_PASS1_BUILDIR",                 /* Pass1 build directory */
   "CONFIG_PASS1_TARGET",                  /* Pass1 build target */
   "CONFIG_PASS1_OBJECT",                  /* Pass1 build object */
-  "CONFIG_DEBUG_OPTLEVEL",                /* Custom debug level */
-  "CONFIG_INIT_SYMTAB",                   /* Global symbol table */
-  "CONFIG_INIT_NEXPORTS",                 /* Global symbol table size */
+  "CONFIG_USER_ENTRYPOINT",               /* Name of entry point function */
 
   /* NxWidgets/NxWM */
 
   "CONFIG_NXWM_BACKGROUND_IMAGE",         /* Name of bitmap image class */
-  "CONFIG_NXWM_STOP_BITMAP",              /* Name of bitmap image class */
-  "CONFIG_NXWM_MINIMIZE_BITMAP",          /* Name of bitmap image class */
-  "CONFIG_NXWM_STARTWINDOW_ICON",         /* Name of bitmap image class */
-  "CONFIG_NXWM_NXTERM_ICON",              /* Name of bitmap image class */
   "CONFIG_NXWM_CALIBRATION_ICON",         /* Name of bitmap image class */
   "CONFIG_NXWM_HEXCALCULATOR_ICON",       /* Name of bitmap image class */
+  "CONFIG_NXWM_MINIMIZE_BITMAP",          /* Name of bitmap image class */
+  "CONFIG_NXWM_NXTERM_ICON",              /* Name of bitmap image class */
+  "CONFIG_NXWM_STARTWINDOW_ICON",         /* Name of bitmap image class */
+  "CONFIG_NXWM_STOP_BITMAP",              /* Name of bitmap image class */
 
   /* apps/ definitions */
 
