@@ -263,6 +263,11 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
         {
           evs[i].data.fd = eph->evs[counter].data.fd;
           evs[i].events  = eph->evs[counter].revents;
+          if (eph->evs[counter].events & EPOLLONESHOT)
+            {
+              eph->evs[counter].events = 0; /* Disable oneshot internally */
+            }
+
           i += 1;
         }
     }
