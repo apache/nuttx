@@ -80,13 +80,13 @@ enum EPOLL_EVENTS
 
 enum
 {
-    EPOLL_CLOEXEC = 02000000
+  EPOLL_CLOEXEC = 02000000
 #define EPOLL_CLOEXEC EPOLL_CLOEXEC
 };
 
 typedef union poll_data
 {
-  void        *ptr;
+  FAR void    *ptr;
   int          fd;
   uint32_t     u32;
 } epoll_data_t;
@@ -99,7 +99,7 @@ struct epoll_event
   /* Non-standard fields used internally by NuttX. */
 
   pollevent_t  revents;  /* The output event flags */
-  void        *reserved; /* reserved field sync with struct pollfd */
+  FAR void    *reserved; /* reserved field sync with struct pollfd */
   FAR sem_t   *sem;      /* Pointer to semaphore used to post output event */
   FAR void    *priv;     /* For use by drivers */
 };
@@ -117,9 +117,11 @@ struct epoll_head
 
 int epoll_create(int size);
 int epoll_create1(int flags);
-int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev);
-int epoll_wait(int epfd, struct epoll_event *evs,
+int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev);
+int epoll_wait(int epfd, FAR struct epoll_event *evs,
                int maxevents, int timeout);
+int epoll_pwait(int epfd, FAR struct epoll_event *evs,
+                int maxevents, int timeout, FAR const sigset_t *sigmask);
 
 void epoll_close(int epfd);
 

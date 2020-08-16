@@ -203,18 +203,11 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
 }
 
 /****************************************************************************
- * Name: epoll_wait
- *
- * Description:
- *
- * Input Parameters:
- *
- * Returned Value:
- *
+ * Name: epoll_pwait
  ****************************************************************************/
 
-int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
-               int timeout)
+int epoll_pwait(int epfd, FAR struct epoll_event *evs,
+                int maxevents, int timeout, FAR const sigset_t *sigmask)
 {
   /* REVISIT: This will not work on machines where:
    * sizeof(struct epoll_head *) > sizeof(int)
@@ -225,7 +218,21 @@ int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
   int rc;
   int i;
 
-  rc = poll((FAR struct pollfd *)eph->evs, eph->occupied, timeout);
+  if (timeout < 0)
+    {
+      rc = ppoll((FAR struct pollfd *)eph->evs,
+                 eph->occupied, NULL, sigmask);
+    }
+  else
+    {
+      struct timespec timeout_ts;
+
+      timeout_ts.tv_sec  = timeout / 1000;
+      timeout_ts.tv_nsec = timeout % 1000 * 1000;
+
+      rc = ppoll((FAR struct pollfd *)eph->evs,
+                 eph->occupied, &timeout_ts, sigmask);
+    }
 
   if (rc <= 0)
     {
@@ -261,4 +268,21 @@ int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
     }
 
   return i;
+}
+
+/****************************************************************************
+ * Name: epoll_wait
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
+int epoll_wait(int epfd, FAR struct epoll_event *evs,
+               int maxevents, int timeout)
+{
+  return epoll_pwait(epfd, evs, maxevents, timeout, NULL);
 }
