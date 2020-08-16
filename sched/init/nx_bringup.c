@@ -221,10 +221,18 @@ static inline void nx_workqueues(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_INIT_ENTRYPOINT)
 static inline void nx_start_application(void)
 {
-  int pid;
+#ifdef CONFIG_INIT_ARGS
+  FAR char *const argv[] =
+  {
+    CONFIG_INIT_ARGS,
+    NULL,
+  };
+#else
+  FAR char *const *argv = NULL;
+#endif
+  int ret;
 
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform any last-minute, board-specific initialization, if so
@@ -233,6 +241,8 @@ static inline void nx_start_application(void)
 
   board_late_initialize();
 #endif
+
+#if defined(CONFIG_INIT_ENTRYPOINT)
 
   /* Start the application initialization task.  In a flat build, this is
    * entrypoint is given by the definitions, CONFIG_USER_ENTRYPOINT.  In
@@ -244,31 +254,17 @@ static inline void nx_start_application(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
-  pid = nxtask_create("init", CONFIG_USERMAIN_PRIORITY,
-                      CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,
-                      (FAR char * const *)NULL);
-#else
-  pid = nxtask_create("init", CONFIG_USERMAIN_PRIORITY,
+  ret = nxtask_create("init", CONFIG_USERMAIN_PRIORITY,
                       CONFIG_USERMAIN_STACKSIZE,
-                      (main_t)CONFIG_USER_ENTRYPOINT,
-                      (FAR char * const *)NULL);
+                      USERSPACE->us_entrypoint, argv);
+#else
+  ret = nxtask_create("init", CONFIG_USERMAIN_PRIORITY,
+                      CONFIG_USERMAIN_STACKSIZE,
+                      (main_t)CONFIG_USER_ENTRYPOINT, argv);
 #endif
-  DEBUGASSERT(pid > 0);
-  UNUSED(pid);
-}
+  DEBUGASSERT(ret > 0);
 
 #elif defined(CONFIG_INIT_FILEPATH)
-static inline void nx_start_application(void)
-{
-  int ret;
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-  /* Perform any last-minute, board-specific initialization, if so
-   * configured.
-   */
-
-  board_late_initialize();
-#endif
 
 #ifdef CONFIG_INIT_MOUNT
   /* Mount the file system containing the init program. */
@@ -277,7 +273,6 @@ static inline void nx_start_application(void)
               CONFIG_INIT_MOUNT_FSTYPE, CONFIG_INIT_MOUNT_FLAGS,
               CONFIG_INIT_MOUNT_DATA);
   DEBUGASSERT(ret >= 0);
-  UNUSED(ret);
 #endif
 
   /* Start the application initialization program from a program in a
@@ -287,19 +282,13 @@ static inline void nx_start_application(void)
 
   sinfo("Starting init task: %s\n", CONFIG_USER_INITPATH);
 
-  ret = exec(CONFIG_USER_INITPATH, NULL, CONFIG_INIT_SYMTAB,
-             CONFIG_INIT_NEXPORTS);
+  ret = exec(CONFIG_USER_INITPATH, argv,
+             CONFIG_INIT_SYMTAB, CONFIG_INIT_NEXPORTS);
   DEBUGASSERT(ret >= 0);
+#endif
+
   UNUSED(ret);
 }
-
-#elif defined(CONFIG_INIT_NONE)
-#  define nx_start_application()
-
-#else
-#  error "Cannot start initialization thread"
-
-#endif
 
 /****************************************************************************
  * Name: nx_start_task
