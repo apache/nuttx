@@ -1,170 +1,180 @@
-.. include:: /substitutions.rst
-
-.. note:: This is a first version of the document, will be updated once new documentation
-  system is in place.
-
+=============
 Documentation
 =============
 
-The Apache NuttX Documentation is made using the
-`Sphinx documentation system <https://www.sphinx-doc.org/en/master/>`_. Sphinx documentation
-is written in `ReStructured Text <https://docutils.sourceforge.io/rst.html>`_ (RST). RST is
-the format used for `Python documentation <https://docs.python.org/3/>`_ and is also used
-in many other projects.
+The Apache NuttX Documentation is built using the
+`Sphinx documentation system <https://www.sphinx-doc.org/en/master/>`_. Documentation
+is written in `ReStructured Text <https://docutils.sourceforge.io/rst.html>`_ (RST),
+with Sphinx-specific directives. RST is the format used for
+`Python documentation <https://docs.python.org/3/>`_ and is also used in many other projects.
+Using Sphinx, the RST files are rendered into HTML files that can be read in your browser.
 
-Contributions and fixes to the Apache NuttX Companion are encouraged and welcome. Here's how to do
-it.
+Building
+========
 
-#. Fork the Apache NuttX Documentation Repository
+To render the Documentation locally, you should clone the NuttX main repository, and 
+go into ``Documentation`` directory. Then,
 
-   Visit this link and hit the Fork button in the upper right of the page:
+  1. Install sphinx and other dependencies. You can do this in one of two ways:
+  
+    * **Fast and easy**: 
+    
+      .. code-block:: console
+      
+        pip3 install -r requirements.txt
+         
+    * **Slower but cleaner**:
+    
+      .. code-block:: console
 
-   * `NuttX (v01d's fork) <https://github.com/v01d/incubator-nuttx/>`_
+        $ # install pyenv
+        $ curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
+        $ # install python
+        $ pyenv install 3.7.3
+        $ pyenv local 3.7.3
+        $ # install pipenv
+        $ pip install pipenv
+        $ # install sphinx and related software
+        $ pipenv install
+        $ # activate the virtual environent
+        $ pipenv shell
+        
+        .. todo:: check that Pipfile.lock is up to date w.r.t. requirements.txt
+        
+  2. Build documentation:
+  
+    .. code-block:: console
+    
+      $ make html
+      
+    The resulting HTMLs will end up under ``_build/html``. You can open your browser at the root with:
+    
+    .. code-block:: console
+    
+      $ xdg-open _build/html/index.html 
 
-   |br|
+Contributing
+============
 
-#. Clone the Forked Repository
+Contributions to documentation are appreciated. These can be as simple as fixing a typo or formatting issues to more involved
+changes such as documenting parts of NuttX which are not yet covered or even writing guides for other users.
 
-   Click the "Clone or Download" button and copy the clone URL. Then do this:
+The contribution workflow is the same as for the code, so check the :doc:`/contributing/workflow` to understand
+how your changes should be upstreamed.
 
-    .. code-block:: bash
+Writing ReStructure Text with Sphinx
+====================================
 
-       $ git clone <CLONE-URL-THAT-YOU-COPIED>
+The following links can be used to learn about RST syntax and about Sphinx specific directives. Note that
+sometimes Sphinx's approach is used over standard RST since it is more powerful (e.g. standard linking vs Sphinx
+``:ref:`` which can be used across files, ``code-block`` directive vs ``::`` which allows specifying highlight language, etc.):
 
-#. Install Sphinx
+  * `Sphinx documentation system <https://www.sphinx-doc.org/en/master/>`__
+  * `ReStructured Text documentation <https://docutils.sourceforge.io/rst.html>`__
+  * `Sphinx Guide to ReStructured Text <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`__
+  * `Restructured Text cheat sheet <https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html>`__
 
-    On the command line, change directories to the newly-downloaded repository directory:
+Documentation Conventions
+=========================
 
-    .. code-block:: bash
+While RST/Sphinx provide many ways to do things, it is best to follow a given convention to mantain consistency and avoid
+pitfalls. For this reason, documentation changes should follow the following set of conventions.
 
-       $ cd incubator-nuttx
-       $ # install pyenv
-       $ curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
-       $ # install python
-       $ pyenv install 3.7.3
-       $ pyenv local 3.7.3
-       $ # install pipenv
-       $ pip install pipenv
-       $ # install sphinx and related software
-       $ pipenv install
-       $ # activate the virtual environent
-       $ pipenv shell
+Indentation
+-----------
 
-#. Build the HTML Documentation Locally
+Child blocks should be indented two-spaces. This includes itemizations/enumerations.
 
-    .. code-block:: bash
+Headings
+--------
 
-       $ cd docs
-       $ make html
-       Running Sphinx v2.4.1
-       making output directory... done
-       building [mo]: targets for 0 po files that are out of date
-       building [html]: targets for 12 source files that are out of date
-       updating environment: [new config] 12 added, 0 changed, 0 removed
-       reading sources... [100%] user/simulator
-       looking for now-outdated files... none found
-       pickling environment... done
-       checking consistency... done
-       preparing documents... done
-       writing output... [100%] user/simulator
-       generating indices...  genindexdone
-       writing additional pages...  searchdone
-       copying static files... ... done
-       copying extra files... done
-       dumping search index in English (code: en)... done
-       dumping object inventory... done
-       build succeeded.
+Three levels of headings should be used in general. The style used to mark sections is based around ``=`` and ``-``.
+Sections should look like this:
 
-       The HTML pages are in ``_build/html``.
+.. code-block:: RST
 
-#. Check Out a New Branch
+  =================
+  Top Level Heading
+  =================
 
-    .. code-block:: bash
+  Subsection
+  ==========
+  
+  Subsubsection
+  -------------
+  
+Code
+----
 
-       $ git checkout -b feature/my-branch
+Code should be documented using the `C domain <https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#the-c-domain>`_. 
+This means for example that a function should be documented as:
 
-#. Make Your Changes
+.. code-block:: RST
 
-    .. code-block:: bash
+  .. c:function:: bool myfunction(int arg1, int arg2)
+  
+    Here the function should be described
+    
+    :param arg1: Description of arg1
+    :param arg2: Description of arg2
+    
+    :return: Description of return value
+    
+To document a piece of code, use a ``code-block`` `directive <https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-code-block>`_, specifying the highlight language. If the block is not of code but some verbatim piece of text,
+it is acceptable to use RST standard `::`. This is specially useful and compact when used in the following mode:
 
-       $ vim user/intro.rst  # or use the editor of your choice
-                                  # on whatever file you want to change
+.. code-block:: RST
 
-#. Rebuild the HTML Documentation
+  The text file should have the following content::
+  
+    Line1 
+    Line2
+    Line3
 
-    .. code-block:: bash
+Linking
+-------
 
-       $ make html
+To generate internal links, Sphinx's `roles <https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#ref-role>`_ should
+be used. So, use ``:ref:`` instead of standard RST syntax like ```link <target>`_`` for internal links.
 
-#. View the Documentation in a Web Browser
+Moreover, sphinx is configured to use `autosectionlabel <https://www.sphinx-doc.org/en/master/usage/extensions/autosectionlabel.html#confval-autosectionlabel_prefix_document>`_ extension. This means that sections will automatically get a label that can be linked with the
+`:ref:`. For example: 
 
-   You can open the file ``docs/_build/html/index.html``.
-   |br|
-   |br|
+.. code-block:: RST
 
-#. Iterate
+  This is a Section
+  =================
+  
+  :ref:`This is a Section` is a link to this very same section.
+  
+If the target is in a different file, you can refer it with: ``:ref:`link text </pathtorst:Section Name>```.
 
-   Repeat Steps 6, 7, and 8 until you're happy with the result.
-   |br|
-   |br|
+Notes and TODOS
+---------------
 
-#. Commit the Changes
+Use RST `admonitions <https://docutils.sourceforge.io/docs/ref/rst/directives.html#admonitions>`_ to highlight things from the text,
+such as a note that should be prominently displayed.
 
-    .. code-block:: bash
+In case you need to leave a TODO note in the documentation to point that something needs to be improved, use a ``todo`` admonition,
+which is available via the ``sphinx.ext.todo`` extension. This will let the reader of the documentation also know that the documentation
+is not yet finished somewhere and may further motivate a contribution.
 
-       $ git add introduction/main.rst  # or whatever files you changed
-       $ git commit
+Tips
+====
 
-#. Push to Your Branch
+Spacing
+-------
 
-    .. code-block:: bash
+If you are getting formatting errors, be sure to provide the appropiate spacing between a directive and its content.
+Generally, you should follow this format:
 
-       $ git push
+.. code-block:: RST
 
-#. Submit Your Pull Request
-
-   Go to the `Apache NuttX (v01d's fork) <https://github.com/v01d/incubator-nuttx/>`_ page
-   on Github and click the "Pull Request" button. See Github's `Creating a Pull Request
-   <https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request>`__
-   page for more info.
-
-   Use this template for the Pull Request description text:
-
-    ::
-
-       ### Summary
-       ### Impact
-       ### Limitations / TODO
-       ### Detail
-       ### Testing
-       ### How To Verify
-
-   Fill out the sections describing your changes. The summary should be a concise bulleted
-   list.
-
-   The ``How To Verify`` section is only needed if you change how the project is built or
-   add some other programs or scripts.
-   |br|
-   |br|
-
-#. Make Changes If Requested
-
-   When you submit your Pull Request, the Apache NuttX Documentation team will review the changes,
-   and may request that you modify your submission. Please work with them to get your
-   changes accepted.
-   |br|
-   |br|
-
-#. You're Done!
-
-   Feel good that you've made Apache NuttX documentation better for yourself and others. You've
-   just made the world a better place!
-
-Sphinx Resources
-----------------
-
-* `Sphinx documentation system <https://www.sphinx-doc.org/en/master/>`__
-* `ReStructured Text documentation <https://docutils.sourceforge.io/rst.html>`__
-* `Sphinx Guide to ReStructured Text <http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`__
-* `Restructured Text cheat sheet <https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html>`__
+  .. directive::
+  
+    child content
+    
+  non-child content which appears after previous directive 
+    
+Note the line between directive and content and the indentation. 
 
