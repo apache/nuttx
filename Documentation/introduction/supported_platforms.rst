@@ -10,7 +10,7 @@ CPU follow in parentheses. The state of the various ports vary
 from board-to-board. Follow the links for the details:
 
 .. list-table::
-   :widths: auto
+   :class: valign-top
 
    * -
 
@@ -88,6 +88,7 @@ follows in parentheses. The state of the various ports vary from MCU to
 MCU. Follow the links for the details:
 
 .. list-table::
+   :class: valign-top
 
    * -
 
