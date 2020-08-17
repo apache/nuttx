@@ -11,6 +11,7 @@
 }
 
 /* override table width restrictions */
+
 @media screen and (min-width: 767px) {
 
    .wy-table-responsive table td {
@@ -24,9 +25,16 @@
    }
 }
 
+/* remove useless padding on the sidebar */
 
 .wy-nav-side
 {
   padding-bottom: 0em !important;
+}
+
+/* define some classes to be used */
+
+table.valign-top td {
+  vertical-align: top !important;
 }
 
