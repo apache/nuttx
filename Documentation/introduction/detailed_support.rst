@@ -1,7 +1,3 @@
-.. todo::
-  Migration is not yet completed from previous documentation. You can find the original list here:
-  `here <https://cwiki.apache.org/confluence/display/NUTTX/About>`__ 
-
 =========================
 Detailed Platform Support
 =========================
@@ -11,89 +7,78 @@ information see the *README* files that can be found
 `here <README.html>`__.
 
 
-
-Linux User Mode.
-
-| 
+Linux User Mode Simulation
+==========================
 
 A user-mode port of NuttX to the x86 Linux/Cygwin platform is available.
 The purpose of this port is primarily to support OS feature development.
 
+ARM7TDMI
+========
 
+TI TMS320-C5471
+---------------
 
-ARM7TDMI.
+(also called **C5471** or **TMS320DA180** or **DA180**)
 
-| 
-
-TI TMS320C5471 (also called **C5471** or **TMS320DA180** or **DA180**).
 NuttX operates on the ARM7 of this dual core processor. This port uses
 the `Spectrum Digital <http://www.spectrumdigital.com/>`__ evaluation
 board with a GNU arm-nuttx-elf toolchain\* under Linux or Cygwin.
 
-| 
+NXP LPC214x
+-----------
 
---------------
-
-| 
-
-NXP LPC214x. Support is provided for the NXP LPC214x family of
+Support is provided for the NXP LPC214x family of
 processors. In particular, support is provided for (1) the mcu123.com
 lpc214x evaluation board (LPC2148) and (1) the The0.net ZPA213X/4XPA
 development board (with the The0.net UG-2864AMBAG01 OLED) This port also
 used the GNU arm-nuttx-elf toolchain\* under Linux or Cygwin.
 
-| 
+NXP LPC2378
+-----------
 
---------------
-
-| 
-
-NXP LPC2378. Support is provided for the NXP LPC2378 MCU. In particular,
+Support is provided for the NXP LPC2378 MCU. In particular,
 support is provided for the Olimex-LPC2378 development board. This port
 was contributed by Rommel Marcelo is was first released in NuttX-5.3.
 This port also used the GNU arm-nuttx-elf toolchain\* under Linux or
 Cygwin.
 
-| 
-
+STMicro STR71x
 --------------
 
-| 
-
-STMicro STR71x. Support is provided for the STMicro STR71x family of
+Support is provided for the STMicro STR71x family of
 processors. In particular, support is provided for the Olimex STR-P711
 evaluation board. This port also used the GNU arm-nuttx-elf toolchain\*
 under Linux or Cygwin.
 
+ARM920T
+=======
 
+NXP/Freescale i.MX1
+-------------------
 
-ARM920T.
-
-| 
-
-Freescale MC9328MX1 or i.MX1. This port uses the Freescale MX1ADS
+Or MC9328MX1 – This port uses the Freescale MX1ADS
 development board with a GNU arm-nuttx-elf toolchain\* under either
 Linux or Cygwin.
 
+ARM926EJS
+=========
 
+TI TMS320-DM320
+---------------
 
-ARM926EJS.
+(also called **DM320**)
 
-| 
-
-TI TMS320DM320 (also called **DM320**). NuttX operates on the ARM9 of
+NuttX operates on the ARM9 of
 this dual core processor. This port uses the `Neuros
 OSD <http://wiki.neurostechnology.com/index.php/Developer_Welcome>`__
 with a GNU arm-nuttx-elf toolchain\* under Linux or Cygwin. The port was
 performed using the OSD v1.0, development board.
 
-| 
+NXP LPC3131
+-----------
 
---------------
-
-| 
-
-NXP LPC3131. Two boards based on the NXP LPC3131 are supported:
+Two boards based on the NXP LPC3131 are supported:
 
 -  First, a port for the NXP
    `LPC3131 <http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/>`__
@@ -108,36 +93,34 @@ NXP LPC3131. Two boards based on the NXP LPC3131 are supported:
    LPC-H3131 <https://www.olimex.com/Products/ARM/NXP/LPC-H3131/>`__
    development board was added in NuttX-6.32.
 
-| 
+NXP LPC315x
+-----------
 
---------------
-
-| 
-
-NXP LPC315x. Support for the NXP
+Support for the NXP
 `LPC315x <http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/>`__
 family has been incorporated into the code base as of NuttX-6.4. Support
 was added for the Embedded Artists EA3152 board in NuttX-6.11.
 
 
+Other ARMv4
+===========
 
-Other ARMv4.
+Moxa NP51x0
+-----------
 
-| 
-
-MoxaRT A port to the Moxa NP51x0 series of 2-port advanced
+A port to the Moxa NP51x0 series of 2-port advanced
 RS-232/422/485 serial device servers was contributed by Anton D.
 Kachalov in NuttX-7.11. This port includes a NuttShell (NSH)
 configuration with support for the Faraday FTMAC100 Ethernet MAC Driver.
 
 
+ARM1176JZ
+=========
 
-ARM1176JZ.
+Broadcom BCM2708
+----------------
 
-| 
-
-Broadcom BCM2708. Very basic support for the Broadcom BCM2708 was
-released with NuttX-7.23.
+Very basic support for the Broadcom BCM2708 was released with NuttX-7.23.
 
 Raspberry Pi Zero. This support was provided for the Raspberry Pi Zero
 which is based on the BCM2835. Basic logic is in place but the port is
@@ -153,23 +136,20 @@ found in the *Obsoleted* repository.
 
 
 
-ARM Cortex-A5.
+ARM Cortex-A5
+=============
 
-| 
-
-Atmel SAMA5D2.
+Atmel SAMA5D2
+-------------
 
 -  **Atmel SAMA5D2 Xplained Ultra development board**. This is the port
    of NuttX to the Atmel SAMA5D2 Xplained Ultra development board. This
    board features the Atmel SAMA5D27 microprocessor.
 
-| 
+Atmel SAMA5D3 
+-------------
 
---------------
-
-| 
-
-Atmel SAMA5D3. There are ports to two Atmel SAMA5D3 boards:
+There are ports to two Atmel SAMA5D3 boards:
 
 -  **Atmel SAMA5D3\ x-EK development boards**. This is the port of NuttX
    to the Atmel SAMA5D3\ *x*-EK development boards (where *x*\ =1,3,4,
@@ -279,13 +259,10 @@ Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sama5/sama5d3-xplained/README.txt>`__
 file for further information.
 
-| 
+Atmel SAMA5D4 
+-------------
 
---------------
-
-| 
-
-Atmel SAMA5D4. There is a port in progress on one Atmel SAMA5D4 board:
+There is a port in progress on one Atmel SAMA5D4 board:
 
 -  **Atmel SAMA5D4-EK/MB development boards** This is the port of NuttX
    to the Atmel SAMA5D4-MB Rev C. development board (which should be
@@ -307,12 +284,6 @@ Atmel SAMA5D4. There is a port in progress on one Atmel SAMA5D4 board:
    `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sama5/sama5d4-ek/README.txt>`__
    file for current status.
 
-| 
-
---------------
-
-| 
-
 **Development Environments:** 1) Linux with native Linux GNU toolchain,
 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS with Windows
 native toolchain, or 4) Native Windows. All testing has been performed
@@ -320,12 +291,13 @@ with the CodeSourcery toolchain (GCC version 4.7.3) in the Cygwin
 environment under Windows.
 
 
+ARM Cortex-A8
+=============
 
-ARM Cortex-A8.
+Allwinner A10
+-------------
 
-| 
-
-Allwinner A10. These following boards are based on the Allwinner A10
+These following boards are based on the Allwinner A10
 have are supported by NuttX:
 
 -  **pcDuino v1**. A port of NuttX to the pcDuino v1 board was first
@@ -345,13 +317,10 @@ have are supported by NuttX:
    basis for a more extensive development. There is, at present, no work
    in progress to extend this port, however.
 
-| 
+TI/Sitara AM335x
+----------------
 
---------------
-
-| 
-
-TI/Sitara AM335x. These following boards are based on the TI/Sitara
+These following boards are based on the TI/Sitara
 AM335x are supported by NuttX:
 
 -  **Beaglebone Black**. A port of NuttX to the Beaglebone Black board
@@ -372,14 +341,13 @@ AM335x are supported by NuttX:
    `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/am335x/beaglebone-black/README.txt>`__
    file for further, up-to-date information.
 
+ARM Cortex-A9
+=============
 
+NXP/Freescale i.MX6
+-------------------
 
-ARM Cortex-A9.
-
-| 
-
-NXP/Freescale i.MX6. The basic port has been completed for the following
-i.MX6 board
+The basic port has been completed for the following i.MX6 board:
 
 -  **Sabre-6Quad**. This is a port to the NXP/Freescale Sabre-6Quad
    board. Refer to the NuttX board
@@ -400,27 +368,32 @@ i.MX6 board
 
 
 
-ARM Cortex-R4.
+ARM Cortex-R4
+=============
 
-| 
+TI/Hercules TMS570LS04xx
+------------------------
 
-TI/Hercules TMS570LS04xx. A port is available for the Texas Instruments
+A port is available for the Texas Instruments
 Hercules TMS570LS04x/03x LaunchPad Evaluation Kit (*LAUNCHXL-TMS57004*)
 featuring the Hercules TMS570LS0432PZ chip.
 
-| 
+TI/Hercules TMS570LS31xx
+------------------------
 
-TI/Hercules TMS570LS31xx. Architecture support for the TMS570LS3137ZWT
+Architecture support for the TMS570LS3137ZWT
 part was added in NuttX 7.25 by Ivan Ucherdzhiev. Ivan also added
 support for the TI Hercules TMS570LS31x USB Kit.
 
 
 
-ARM Cortex-M0/M0+.
+ARM Cortex-M0/M0+
+=================
 
-| 
+nuvoTon NUC120
+--------------
 
-nuvoTon NUC120. This is a port of NuttX to the nuvoTon NuTiny-SDK-NUC120
+This is a port of NuttX to the nuvoTon NuTiny-SDK-NUC120
 that features the NUC120LE3AN MCU.
 
 **STATUS**. Initial support for the NUC120 was released in NuttX-6.26.
@@ -457,13 +430,10 @@ Cygwin is provided by the NuttX
 `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 package.
 
-| 
+NXP/FreeScale KL25Z
+-------------------
 
---------------
-
-| 
-
-FreeScale KL25Z. There are two board ports for the KL25Z parts:
+There are two board ports for the KL25Z parts:
 
 **Freedom KL25Z**. This is a port of NuttX to the Freedom KL25Z board
 that features the MKL25Z128 Cortex-M0+ MCU, 128KB of FLASH and 16KB of
@@ -478,35 +448,26 @@ comes with a USB based bootloader. See the
 `Freescale <http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=FRDM-KL25Z&tid=vanFRDM-KL25Z>`__
 website for further information about this board.
 
-| 
+NXP/FreeScale KL26Z
+-------------------
 
---------------
-
-| 
-
-FreeScale Freedom KL26Z. This is a port of NuttX to the Freedom KL25Z
+This is a port of NuttX to the Freedom KL25Z
 board that features the MK26Z128VLH4 Cortex-M0+ MCU, 128KB of FLASH and
 16KB of SRAM. See the
 `Freescale <http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=FRDM-KL26Z&tid=vanFRDM-KL26Z>`__
 website for further information about this board.
 
-| 
+Atmel SAMD20
+------------
 
---------------
-
-| 
-
-Atmel SAMD20. The port of NuttX to the Atmel SAMD20-Xplained Pro
+The port of NuttX to the Atmel SAMD20-Xplained Pro
 development board. This board features the ATSAMD20J18A MCU (Cortex-M0+
 with 256KB of FLASH and 32KB of SRAM).
 
-| 
+Atmel SAMD21
+------------
 
---------------
-
-| 
-
-Atmel SAMD21. There two boards supported for the SAMD21:
+There two boards supported for the SAMD21:
 
 #. The port of NuttX to the Atmel SAMD21-Xplained Pro development board
    added in NuttX-7.11, and
@@ -514,52 +475,40 @@ Atmel SAMD21. There two boards supported for the SAMD21:
    Assis in NuttX-8.2. The initial release included *nsh* and *usbnsh*
    configurations.
 
-| 
+Atmel SAML21
+------------
 
---------------
-
-| 
-
-Atmel SAML21. The port of NuttX to the Atmel SAML21-Xplained Pro
+The port of NuttX to the Atmel SAML21-Xplained Pro
 development board. This board features the ATSAML21J18A MCU (Cortex-M0+
 with 256KB of FLASH and 32KB of SRAM).
 
-| 
+NXP LPC11xx
+-----------
 
---------------
-
-| 
-
-NXP LPC11xx. Support is provided for the NXP LPC11xx family of
+Support is provided for the NXP LPC11xx family of
 processors. In particular, support is provided for LPCXpresso LPC1115
 board. This port was contributed by Alan Carvalho de Assis.
 
-| 
+NXP S32K11x
+-----------
 
---------------
-
-| 
-
-NXP S32K11x. Support is provided for the NXP S32K11x family of
+Support is provided for the NXP S32K11x family of
 processors and, in particular, the S32K118EVB development board.
 
+ARM Cortex-M3
+=============
 
+TI/Stellaris LM3S6432
+---------------------
 
-ARM Cortex-M3.
-
-| 
-
-TI/Stellaris LM3S6432. This is a port of NuttX to the Stellaris RDK-S2E
+This is a port of NuttX to the Stellaris RDK-S2E
 Reference Design Kit and the MDL-S2E Ethernet to Serial module
 (contributed by Mike Smith).
 
-| 
+TI/Stellaris LM3S6432S2E
+------------------------
 
---------------
-
-| 
-
-TI/Stellaris LM3S6432S2E. This port uses Serial-to-Ethernet Reference
+This port uses Serial-to-Ethernet Reference
 Design Kit (`RDK-S2E <http://www.ti.com/tool/rdk-s2e>`__) and has
 similar support as for the other Stellaris family members. A
 configuration is available for the NuttShell (NSH) (see the `NSH User
@@ -567,13 +516,10 @@ Guide <http://www.nuttx.org/Documentation/NuttShell.html>`__). The NSH
 configuration including networking support with a Telnet NSH console.
 This port was contributed by Mike Smith.
 
-| 
+TI/Stellaris LM3S6918
+---------------------
 
---------------
-
-| 
-
-TI/Stellaris LM3S6918. This port uses the
+This port uses the
 `Micromint <%20http://www.micromint.com/>`__ Eagle-100 development board
 with a GNU arm-nuttx-elf toolchain\* under either Linux or Cygwin.
 
@@ -584,68 +530,50 @@ DIY toolchain for Linux or Cygwin is provided by the NuttX
 `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 package.
 
-| 
+TI/Stellaris LM3S6965
+---------------------
 
---------------
-
-| 
-
-TI/Stellaris LM3S6965. This port uses the Stellaris LM3S6965 Ethernet
+This port uses the Stellaris LM3S6965 Ethernet
 Evaluation Kit with a GNU arm-nuttx-elf toolchain\* under either Linux
 or Cygwin.
 
 **Development Environments:** See the Eagle-100 LM3S6918 above.
 
-| 
+TI/Stellaris LM3S8962
+---------------------
 
---------------
-
-| 
-
-TI/Stellaris LM3S8962. This port uses the Stellaris EKC-LM3S8962
+This port uses the Stellaris EKC-LM3S8962
 Ethernet+CAN Evaluation Kit with a GNU arm-nuttx-elf toolchain\* under
 either Linux or Cygwin. Contributed by Larry Arnold.
 
-| 
+TI/Stellaris LM3S9B92
+---------------------
 
---------------
-
-| 
-
-TI/Stellaris LM3S9B92. Architectural support for the LM3S9B92 was
+Architectural support for the LM3S9B92 was
 contributed by Lwazi Dube in NuttX 7.28. No board support for boards
 using the LM3S9B92 are currently available.
 
-| 
+TI/Stellaris LM3S9B96
+---------------------
 
---------------
-
-| 
-
-TI/Stellaris LM3S9B96. Header file support was contributed by Tiago
+Header file support was contributed by Tiago
 Maluta for this part. Jose Pablo Rojas V. is used those header file
 changes to port NuttX to the TI/Stellaris EKK-LM3S9B96. That port was
 available in the NuttX-6.20 release. Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/ekk-lm3s9b96/README.txt>`__
 file for further information.
 
-| 
+TI/SimpleLink CC13x0
+--------------------
 
---------------
-
-| 
-
-TI/SimpleLink CC13x0. Basic, unverified architectural support for the
+Basic, unverified architectural support for the
 CC13x0 was added in NuttX-7.28. This is a work in progress and, with any
 luck, a fully verified port will be available in NuttX-7.29.
 
-| 
+SiLabs EFM32 Gecko
+------------------
 
---------------
-
-| 
-
-SiLabs EFM32 Gecko. This is a port for the Silicon Laboratories' EFM32
+This is a port for the Silicon Laboratories' EFM32
 *Gecko* family. Board support is available for the following:
 
 #. **SiLabs EFM32 Gecko Starter Kit (EFM32-G8XX-STK)**. The Gecko
@@ -693,13 +621,10 @@ SiLabs EFM32 Gecko. This is a port for the Silicon Laboratories' EFM32
    `README.txt <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/efm32/olimex-efm32g880f129-stk/README.txt>`__
    for further information.
 
-| 
+SiLabs EFM32 Giant Gecko
+------------------------
 
---------------
-
-| 
-
-SiLabs EFM32 Giant Gecko. This is a port for the Silicon Laboratories'
+This is a port for the Silicon Laboratories'
 EFM32 *Giant Gecko* family. This board features the EFM32GG990F1024 MCU
 with 1 MB flash and 128 kB RAM.
 
@@ -735,13 +660,10 @@ Board support is available for the following:
    -  Reset Management Unit (RMU) was added Pierre-noel Bouteville in
       NuttX-7.7.
 
-| 
+STMicro STM32 L152
+------------------
 
---------------
-
-| 
-
-STMicro STM32L152 (STM32L "EnergyLite" Line). Two boards are supported:
+(STM32L "EnergyLite" Line). Two boards are supported:
 
 -  STM32L-Discovery. This is a port of NuttX to the STMicro
    STM32L-Discovery development board. The STM32L-Discovery board is
@@ -798,26 +720,20 @@ SRAM usage at run-time can be shown with the NSH ``free`` command:
 You can see that 9.9KB (62%) of SRAM heap is still available for further
 application development while NSH is running.
 
-| 
+STMicro STM32 L15x/16x
+----------------------
 
---------------
-
-| 
-
-STMicro STM32L152x/162x (STM32 L1 "EnergyLite" Medium+ Density Family).
+(STM32 L1 "EnergyLite" Medium+ Density Family).
 Support for the STM32L152 and STM32L162 Medium+ density parts from Jussi
 Kivilinna and Sami Pelkonen was included in NuttX-7.3, extending the
 basic STM32L152x support. This is *architecture-only* support, meaning
 that support for the boards with these chips is available, but no
 support for any publicly available boards is included.
 
-| 
+STMicro STM32 F0xx
+------------------
 
---------------
-
-| 
-
-STMicro STM32F0xx (STM32 F0, ARM Cortex-M0). Support for the STM32 F0
+(STM32 F0, ARM Cortex-M0). Support for the STM32 F0
 family was contributed by Alan Carvalho de Assis in NuttX-7.21. There
 are ports to three different boards in this repository:
 
@@ -830,18 +746,20 @@ are ports to three different boards in this repository:
 -  **Nucleo-F091RC** With 32KB of SRAM the STM32 F091RC this board is a
    great match for NuttX. Contributed by Juha Niskanen in NuttX-7.21.
 
-| 
+STMicro STM32 L0xx
+------------------
 
-STMicro STM32L0xx (STM32 L0, ARM Cortex-M0). Support for the STM32 FL
+(STM32 L0, ARM Cortex-M0). Support for the STM32 FL
 family was contributed by Mateusz Sfafoni in NuttX-7.28. There are ports
 to two different STM32 L0 boards in the repository:
 
--  **B-L072Z-LRWAN1** Contributed byMateusz Sfafoni in NuttX-7.28.
--  **Nucleo-L073RZ** Contributed byMateusz Sfafoni in NuttX-7.28.
+  **B-L072Z-LRWAN1** Contributed byMateusz Sfafoni in NuttX-7.28.
+  **Nucleo-L073RZ** Contributed byMateusz Sfafoni in NuttX-7.28.
 
-| 
+STMicro STM32 G0xx
+------------------
 
-STMicro STM32G0xx (STM32 G0, ARM Cortex-M0+). Support for the STM32 FL
+(STM32 G0, ARM Cortex-M0+). Support for the STM32 FL
 family was contributed by Mateusz Sfafoni in NuttX-7.28. There are ports
 to two different STM32 L0 boards in the repository:
 
@@ -854,7 +772,6 @@ to two different STM32 L0 boards in the repository:
    `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32f0l0g0/nucleo-g070rb/README.txt>`__
    file for further information.
 
-| 
 
 **STATUS:** Status for the STM32F0xx, STM32L0xx, and STM32G0xx is shown
 together since these parts share many drivers in common.
@@ -877,13 +794,10 @@ Volpato.
 
 **NuttX-9.0** Added I2C support for F0, L0 and G0.
 
-| 
+STMicro STM32 F100x
+-------------------
 
---------------
-
-| 
-
-STMicro STM32F100x (STM32 F1 "Value Line"Family).
+(STM32 F1 "Value Line"Family).
 
 -  **Proprietary Boards** Chip support for these STM32 "Value Line"
    family was contributed by Mike Smith and users have reported that
@@ -897,22 +811,16 @@ STMicro STM32F100x (STM32 F1 "Value Line"Family).
    `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/stm32vldiscovery/README.txt>`__
    file for further information.
 
-| 
+STMicro STM32 F102x
+-------------------
 
---------------
-
-| 
-
-STMicro STM32F102. Architecture support (only) for the STM32 F102 family
+Architecture support (only) for the STM32 F102 family
 was contributed by the PX4 team in NuttX-7.7.
 
-| 
+STMicro STM32 F103C4/C8
+-----------------------
 
---------------
-
-| 
-
-STMicro STM32F103C4/8 (STM32 F1 Low- and Medium-Density Family). There
+(STM32 F1 Low- and Medium-Density Family). There
 are two ports available for this family:
 
 -  One port is for "STM32 Tiny" development board. This board is
@@ -927,13 +835,10 @@ are two ports available for this family:
 
 **STATUS:**
 
-| 
+STMicro STM32 F103x
+-------------------
 
---------------
-
-| 
-
-STMicro STM32F103x (STM32 F1 Family). Support for five board
+(STM32 F1 Family). Support for five board
 configurations are available. MCU support includes all of the high
 density and connectivity line families. Board supported is available
 specifically for: STM32F103ZET6, STM32F103RET6, STM32F103VCT,
@@ -1018,23 +923,17 @@ Windows. A DIY toolchain or Linux or Cygwin is provided by the NuttX
 `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 package.
 
-| 
+STMicro STM32 F105x
+-------------------
 
---------------
-
-| 
-
-STMicro STM32F105x. Architecture support (only) for the STM32 F105R was
+Architecture support (only) for the STM32 F105R was
 contribed in NuttX-7.17 by Konstantin Berezenko. There is currently no
 support for boards using any STM32F105x parts in the source tree.
 
-| 
+STMicro STM32 F107x
+-------------------
 
---------------
-
-| 
-
-STMicro STM32F107x (STM32 F1 "Connectivity Line" family). Chip support
+(STM32 F1 "Connectivity Line" family). Chip support
 for the STM32 F1 "Connectivity Line" family has been present in NuttX
 for some time and users have reported that they have successful brought
 up NuttX on their proprietary boards using this logic.
@@ -1087,13 +986,10 @@ STMicro STM32F107VC MCU.
 **STATUS:** A configuration for the NuttShell (NSH), NSH with
 networking, and NSH with USB host are available and verified.
 
-| 
+STMicro STM32 F205x
+-------------------
 
---------------
-
-| 
-
-STMicro STM32F205 (STM32 F2 family). Architecture only support for the
+(STM32 F2 family). Architecture only support for the
 STM32F205RG was contributed as an anonymous contribution in NuttX-7.10.
 
 **Particle.io Phone**. Support for the Particle.io Photon board was
@@ -1110,13 +1006,10 @@ configurations. See the Photon
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/photon/README.txt>`__
 file for additional information.
 
-| 
+STMicro STM32 F207x
+-------------------
 
---------------
-
-| 
-
-STMicro STM32F207 (STM32 F2 family).
+(STM32 F2 family)
 
 -  Support for the STMicro STM3220G-EVAL development board was
    contributed by Gary Teravskis and first released in NuttX-6.16. This
@@ -1127,13 +1020,10 @@ STMicro STM32F207 (STM32 F2 family).
    Szafoni in NuttX-7.28. Available configurations include NSH, ADC, and
    PWM.
 
-| 
+Atmel SAM3U
+-----------
 
---------------
-
-| 
-
-Atmel SAM3U. This port uses the `Atmel <http://www.atmel.com/>`__
+This port uses the `Atmel <http://www.atmel.com/>`__
 SAM3U-EK development board that features the SAM3U4E MCU. This port uses
 a GNU arm-nuttx-elf or arm-nuttx-eabi toolchain\* under either Linux or
 Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
@@ -1145,13 +1035,10 @@ DIY toolchain for inux or Cygwin is provided by the NuttX
 `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 package.
 
-| 
+Atmel SAM3X
+-----------
 
---------------
-
-| 
-
-Atmel SAM3X. There are two SAM3X boards supported:
+There are two SAM3X boards supported:
 
 #. The `Arduino <http://arduino.cc//>`__ Due development board that
    features the ATSAM3X8E MCU running at 84MHz. See the `Arduino
@@ -1165,11 +1052,8 @@ Atmel SAM3X. There are two SAM3X boards supported:
 **Development Environments:** See the Atmel SAM3U discussion
 `above. <#at91sam3u>`__
 
-| 
-
---------------
-
-| 
+NXP LPC176x
+-----------
 
 NXP LPC1766, LPC1768, and LPC1769. Drivers are available for CAN, DAC,
 Ethernet, GPIO, GPIO interrupts, I2C, UARTs, SPI, SSP, USB host, and USB
@@ -1328,25 +1212,19 @@ Windows. A DIY toolchain for Linux or Cygwin is provided by the NuttX
 `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 package.
 
-| 
+NXP LPC178x
+-----------
 
---------------
-
-| 
-
-NXP LPC1788. The port of NuttX to the WaveShare Open1788 is a
+The port of NuttX to the WaveShare Open1788 is a
 collaborative effort between Rommel Marcelo and myself (with Rommel
 being the leading contributor and I claiming only a support role). You
 can get more information at the Open1788 board from the WaveShare
 `website <http://www.wvshare.com/product/Open1788-Standard.htm>`__.
 
-| 
+ON Semiconductor LC823450
+-------------------------
 
---------------
-
-| 
-
-ON Semiconductor LC823450 (Dual core ARM Cortex-M3). In NuttX-7.22,
+(Dual core ARM Cortex-M3). In NuttX-7.22,
 Masayuki Ishikawa contributed support for both the LC823450 architecture
 and for ON Semiconductor's **LC823450XGEVK board**:
 
@@ -1383,15 +1261,11 @@ Masayuki Ishikawa in NuttX-7.23. Bluetooth, SPI, and *PROTECTED* build
 support were added by Masayuki Ishikawa in NuttX-7.26. Support for for
 SPI flash boot was added in NuttX-7.28.
 
-| 
+Maxim Integrated MAX32660
+-------------------------
 
---------------
-
-| 
-
-Maxim Integrated MAX36600. Architectural upport for the MAX32660 was
-added (along with partial support for other members of the MAX326xx
-family) in NuttX 7.28.
+Architectural upport for the MAX32660 was added (along with partial
+support for other members of the MAX326xx family) in NuttX 7.28.
 
 **MAX32660-EVSYS**. Basic support for the Maxim Integrated MAC3X660
 EVSYS was included in the NuttX-7.28 release. A basic NSH configuration
@@ -1404,15 +1278,16 @@ SPI0-based SD card.
 
 
 
-ARM Cortex-M4.
+ARM Cortex-M4
+=============
 
-| 
+Infineon XMC45xx
+----------------
 
-Infineon XMC45xx. An initial but still incomplete port to the XMC4500
-Relax board was released with NuttX-7.21 (although it was not really
-ready for prime time). Basic NSH functionality was a serial console was
-added by Alan Carvahlo de Assis in NuttX-7.23. Alan also added an SPI
-driver in NuttX-7.25.
+An initial but still incomplete port to the XMC4500 Relax board was released
+with NuttX-7.21 (although it was not really ready for prime time). Basic NSH
+functionality was a serial console was added by Alan Carvahlo de Assis in
+NuttX-7.23. Alan also added an SPI driver in NuttX-7.25.
 
 This initial porting effort uses the Infineon XMC4500 Relax v1 board as
 described on the manufacturer's
@@ -1421,13 +1296,10 @@ The current status of the board is available in the board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/xmc4/xmc4500-relax/README.txt>`__
 file
 
-| 
+Nordic Semiconductor NRF52xxx
+-----------------------------
 
---------------
-
-| 
-
-Nordic Semiconductor/NRF52xxx. Initial architecture support of the NRF52
+Initial architecture support of the NRF52
 including UART, Timer, and GPIOs was contributed by Janne Rosberg in
 NuttX-7.25. Janne also contributed board support for the NRF52-PCA10040
 development board at that time.
@@ -1445,24 +1317,18 @@ Available drivers include:
 -  **NuttX-7.29**. Support for the 52804 family and an RNG drivers was
    added by Levin Li.
 
-| 
+NXP/FreeScale Kinetis K20
+-------------------------
 
---------------
-
-| 
-
-NXP/FreeScale Kinetis K20/Teensy-3.x. Architecture support (only) was
+Used by Teensy-3.x. Architecture support (only) was
 added in NuttX-7.10. This support was taken from PX4 and is the work of
 Jakob Odersky. Support was added for the PJRC Teensy-3.1 board in
 NuttX-7.11. Backward compatible support for the Teensy-3.0 is included.
 
-| 
+NXP/FreeScale Kinetis K28F
+--------------------------
 
---------------
-
-| 
-
-NXP/FreeScale Kinetis K28F/Freedom-K28F. Architecture support for the
+Use by Freedom-K28F. Architecture support for the
 Kinetis K28F along with board support for the Freedom-K28F was added in
 NuttX-7.15. The Freedom-K28F board is based on the Kinetis
 MK28FN2M0VMI15 MCU (ARM Cortex-M4 at150 MHz, 1 MB SRAM, 2 MB flash, HS
@@ -1470,25 +1336,19 @@ and FS USB, 169 MAPBGA package). More information is available from the
 `NXP
 website <https://www.nxp.com/support/developer-resources/hardware-development-tools/freedom-development-boards/mcu-boards/nxp-freedom-development-board-for-kinetis-k27-and-k28-mcus:FRDM-K28F>`__.
 
-| 
+NXP/FreeScale Kinetis K40
+-------------------------
 
---------------
-
-| 
-
-NXP/FreeScale Kinetis K40. This port uses the Freescale Kinetis KwikStik
+This port uses the Freescale Kinetis KwikStik
 K40. Refer to the `Freescale web
 site <http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=KWIKSTIK-K40>`__
 for further information about this board. The Kwikstik is used with the
 FreeScale Tower System (mostly just to provide a simple UART connection)
 
-| 
+NXP/FreeScale Kinetis K60
+-------------------------
 
---------------
-
-| 
-
-NXP/FreeScale Kinetis K60. This port uses the **Freescale Kinetis
+This port uses the **Freescale Kinetis
 TWR-K60N512** tower system. Refer to the `Freescale web
 site <http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=TWR-K60N512-KIT>`__
 for further information about this board. The TWR-K60N51 includes with
@@ -1498,13 +1358,10 @@ UART connection.
 **MK60N512VLL100**. Architecture support for the MK60N512VLL100 was
 contributed by Andrew Webster in NuttX-7.14.
 
-| 
+NXP/FreeScale Kinetis K64
+-------------------------
 
---------------
-
-| 
-
-NXP/FreeScale Kinetis K64. Support for the Kinetis K64 family and
+Support for the Kinetis K64 family and
 specifically for the **NXP/Freescale Freedom K64F** board was added in
 NuttX 7.17. Initial release includes two NSH configurations with support
 for on-board LEDs, buttons, and Ethernet with the on-board KSZ8081 PHY.
@@ -1528,7 +1385,6 @@ Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kinetis/twr-k64f120m/README.txt>`__
 file for further information.
 
-| 
 
 **Driver Status**.
 
@@ -1544,19 +1400,15 @@ file for further information.
    Freedom K64F. A Kinetis USB device controller driver and PWM support
    was contributed by kfazz.
 
-| 
+NXP/FreeScale Kinetis K66
+-------------------------
 
---------------
-
-| 
-
-NXP/FreeScale Kinetis K66. Support for the Kinetis K64 family and
+Support for the Kinetis K64 family and
 specifically for the **NXP/Freescale Freedom K66F** board was
 contributed by David Sidrane in NuttX 7.20. Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/kinetis/freedom-k66f/README.txt>`__
 file for further information.
 
-| 
 
 **Driver Status**.
 
@@ -1568,13 +1420,12 @@ file for further information.
 -  **NuttX-7.26**. David Sidrane contributed DMA support to the Kinetis
    K6x family.
 
-| 
+Sony CXD56xx
+------------
 
---------------
+(6 x ARM Cortex-M4)
 
-| 
-
-Sony CXD56\ xx (6 x ARM Cortex-M4). Support for the CXD56\ *xx* was
+Support for the CXD56\ *xx* was
 introduced by Nobuto Kobayashi in NuttX-7.30.
 
 **Sony Spresence**. Spresense is a compact development board based on
@@ -1617,13 +1468,10 @@ added an audio_tone_generator, added optional initialization of GNSS and
 GEOFENCE at boot if the drivers are enabled, added an lcd examples
 configuration.
 
-| 
+STMicro STM32 F302x
+-------------------
 
---------------
-
-| 
-
-STMicro STM32 F302 (STM32 F3 family). Architecture (only) support for
+(STM32 F3 family). Architecture (only) support for
 the STM32 F302 was contributed in NuttX-7.10 by Ben Dyer (via the PX4
 team and David Sidrane).
 
@@ -1632,13 +1480,10 @@ NuttX-7.27. Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/nucleo-f302r8/README.txt>`__
 file for further information.
 
-| 
+STMicro STM32 F303x
+-------------------
 
---------------
-
-| 
-
-STMicro STM32 F303 (STM32 F3 family).
+(STM32 F3 family)
 
 -  **STM32F3-Discovery**. This port uses the STMicro STM32F3-Discovery
    board featuring the STM32F303VCT6 MCU (STM32 F3 family). Refer to the
@@ -1658,37 +1503,28 @@ STMicro STM32 F303 (STM32 F3 family).
    `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/nucleo-f303ze/README.txt>`__
    file for further information.
 
-| 
+STMicro STM32 F334
+------------------
 
---------------
-
-| 
-
-STMicro STM32 F334 (STM32 F3 family, ARM Cortex-M4).
+(STM32 F3 family, ARM Cortex-M4)
 
 Support for the STMicro **STM32F334-Disco** board was contributed by
 Mateusz Szafoni in NuttX-7.22 and for the **Nucleo-STM32F334R8** was
 contributed in an earlier release.
 
-| 
+STMicro STM32 F372/F373
+-----------------------
 
---------------
-
-| 
-
-STMicro STM32 F372/F373 (ARM Cortex-M4).
+(ARM Cortex-M4)
 
 Basic architecture support for the STM32F372/F373 was contributed by
 Marten Svanfeldt in NuttX 7.9. There are no STM32F*72 boards currently
 supported, however.
 
-| 
+STMicro STM32 F4x1
+------------------
 
---------------
-
-| 
-
-STMicro STM324x1 (STM32 F4 family).
+(STM32 F4 family).
 
 **Nucleo F401RE**. This port uses the STMicro Nucleo F401RE board
 featuring the STM32F401RE MCU. Refer to the `STMicro web
@@ -1712,24 +1548,18 @@ further information about this board.
    `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/nucleo-f4x1re/README.txt>`__
    file for further information.
 
-| 
+STMicro STM32410
+----------------
 
---------------
-
-| 
-
-STMicro STM32410 (STM32 F4 family).
+(STM32 F4 family)
 
 Architecture-only support was contributed to NuttX-7.21 by Gwenhael
 Goavec-Merou.
 
-| 
+STMicro STM32 F405x/407x
+------------------------
 
---------------
-
-| 
-
-STMicro STM32405x/407x (STM32 F4 family).
+(STM32 F4 family).
 
 **STMicro STM3240G-EVAL**. This port uses the STMicro STM3240G-EVAL
 board featuring the STM32F407IGH6 MCU. Refer to the `STMicro web
@@ -1865,13 +1695,10 @@ is included in this port. The OmnibusF4 specification mandates the
 InvenSense MPU6000 which is included in NuttX-7.29 along with a driver
 for the MAX7546 OSD.
 
-| 
+STMicro STM32 F427/F437
+-----------------------
 
---------------
-
-| 
-
-STMicro STM32 F427/437. General architectural support was provided for
+General architectural support was provided for
 the F427/437 family in NuttX 6.27. Specific support includes the
 STM32F427I, STM32F427Z, and STM32F427V chips. This is
 *architecture-only* support, meaning that support for the boards with
@@ -1904,13 +1731,10 @@ board features:
 Refer to `Axloti <http://www.axoloti.com/>`__ website for further
 information about this board.
 
-| 
+STMicro STM32 F429
+------------------
 
---------------
-
-| 
-
-STMicro STM32 F429. Support for STMicro STM32F429I-Discovery development
+Support for STMicro STM32F429I-Discovery development
 board featuring the STM32F429ZIT6 MCU was contributed in NuttX-6.32 by
 Ken Pettit. The STM32F429ZIT6 is a 180MHz Cortex-M4 operation with 2Mbit
 Flash memory and 256kbytes.
@@ -1935,47 +1759,35 @@ Refer to the STM32F429I-Discovery board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32/stm32f429i-disco/README.txt>`__
 file for further information.
 
-| 
+STMicro STM32 F433
+------------------
 
---------------
-
-| 
-
-STMicro STM32 F433. Architecture-only support for the STM32 F433 family
+Architecture-only support for the STM32 F433 family
 was contributed by Alan Carvalho de Assis in NuttX-7.22 (meaning that
 the parts are supported, but there is no example board supported in the
 system). This support was contributed by David Sidrane and made
 available in NuttX-7.11.
 
-| 
+STMicro STM32 F446
+------------------
 
---------------
-
-| 
-
-STMicro STM32 F446. Architecture-only support is available for the STM32
+Architecture-only support is available for the STM32
 F446 family (meaning that the parts are supported, but there is no
 example board supported in the system). This support was contributed by
 David Sidrane and made available in NuttX-7.11.
 
-| 
+STMicro STM32 F46xx
+-------------------
 
---------------
-
-| 
-
-STMicro STM32 F46xx. Architecture-only support is available for the
+Architecture-only support is available for the
 STM32 F46xx family (meaning that the parts are supported, but there is
 no example board supported in the system). This support was contributed
 by Paul Alexander Patienc and made available in NuttX-7.15.
 
-| 
+STMicro STM32 G474x
+-------------------
 
---------------
-
-| 
-
-STMicro STM32 G474. One board is supported in this family:
+One board is supported in this family:
 
 -  **B-G474E-DPOW1 Discovery Kit**. Initial board support for the
    STMicro B-G474E-DPOW1 board from ST Micro was added in NuttX-9.1. See
@@ -1990,13 +1802,10 @@ STMicro STM32 G474. One board is supported in this family:
 **NuttX-9.1**. Initial support for booting NuttX to a functional NSH
 prompt on this board.
 
-| 
+STMicro STM32 L475
+------------------
 
---------------
-
-| 
-
-STMicro STM32 L475. One board in supported in this family:
+One board in supported in this family:
 
 -  **B-L475E-IOT01A Discovery Kit**. Board support for the STMicro
    B-L475E-IOT01A board from ST Micro was contributed by Simon Piriou in
@@ -2026,13 +1835,10 @@ topologies.
 Simon Pirou also contributed support for the on-board Macronix QuadSPI
 FLASH in NuttX 7.22.
 
-| 
+STMicro STM32 L476
+------------------
 
---------------
-
-| 
-
-STMicro STM32 L476. Three boards are supported in this family:
+Three boards are supported in this family:
 
 -  **Nucleo-L476RG**. Board support for the STMicro NucleoL476RG board
    from ST Micro was contributed by Sebastien Lorquet in NuttX-7.15. See
@@ -2109,13 +1915,10 @@ N.
 Enable OTGFS for STM32L4+ series. The OTGFS peripheral on stm32l4x6 and
 stm32l4rxxx reference manual is exactly the same. From Jussi Kivilinna.
 
-| 
+STMicro STM32 L4x2
+------------------
 
---------------
-
-| 
-
-STMicro STM32 L4x2. Architecture support for STM32 L4x2 family was
+Architecture support for STM32 L4x2 family was
 contributed by Juha Niskanen in NuttX-7.21. Support was extended for the
 STM32L412 and STM32L422 chips in NuttX-7.27. Two boards are currently
 supported.
@@ -2139,13 +1942,10 @@ supported.
 See also the status above for the STM32 L476 most of which also applies
 to these parts.
 
-| 
+STMicro STM32 L496
+------------------
 
---------------
-
-| 
-
-STMicro STM32 L496. Architecture support for STM32 L496 was contributed
+Architecture support for STM32 L496 was contributed
 by Juha Niskanen along with board support for the Nucleo-L496ZG in
 NuttX-7.21:
 
@@ -2158,13 +1958,10 @@ NuttX-7.21:
    file for further information. See also the status above for the STM32
    L476 most of which also applies to this part.
 
-| 
+STMicro STM32 L4Rx
+------------------
 
---------------
-
-| 
-
-STMicro STM32 L4Rx. Architecture support for STM32 L4+ family was
+Architecture support for STM32 L4+ family was
 contributed by Juha Niskanen along with board support for the
 STM32L4R9I-Discovery in NuttX-7.26. Additional support for the
 STM32L4R5ZI part was added by Jussi in NuttX-8.2.
@@ -2179,13 +1976,10 @@ STM32L4R5ZI part was added by Jussi in NuttX-8.2.
    file for further information. See also the status above for the
    opther STM32 L4 parts, most of which also applies to this part.
 
-| 
+NXP LPC40xx
+-----------
 
---------------
-
-| 
-
-NCP LPC40xx. The LPC40xx family is very similar to the LPC17xx family
+The LPC40xx family is very similar to the LPC17xx family
 except that it features a Cortex-M4F versus the LPC17xx's Cortex-M3.
 Architectural support for the LPC40xx family was built on top of the
 existing LPC17xx by jjlange in NuttX-7.31. With that architectural
@@ -2196,13 +1990,10 @@ board may be configured to use either the LPC4088 or the LPC1788.
 
 **Driver Status.**
 
-| 
+NXP LPC43xx
+-----------
 
---------------
-
-| 
-
-NCP LPC43xx. Several board ports are available for this higher end, NXP
+Several board ports are available for this higher end, NXP
 Cortex-M4F part:
 
 **NXG Technologies LPC4330-Xplorer**. This NuttX port is for the
@@ -2262,12 +2053,10 @@ LPC4337-WS development board featuring the NXP LPC4337JBD144 MCU.
    Alexander Vasiljev. Alexander also contributed an LPC43xx AES driver
    available in NuttX-7.16.
 
-| 
 
 **Driver Status**.
 
 -  **NuttX-6.20** Several drivers have been copied from the related
-   LPC17xx port but require integration into the LPC43xx: ADC, DAC,
    GPDMA, I2C, SPI, and SSP. The registers for these blocks are the same
    in both the LPC43xx and the LPC17xx and they should integrate into
    the LPC43xx very easily by simply adapting the clocking and pin
@@ -2308,13 +2097,10 @@ LPC4337-WS development board featuring the NXP LPC4337JBD144 MCU.
    Leveraged the LPC54xx SD/MMC to the LPC43xx. There are still
    remaining issues with the SD/MMC driver and it is not yet functional.
 
-| 
+NXP LPC54xx
+-----------
 
---------------
-
-| 
-
-NCP LPC54xx. A port to the
+A port to the
 `LPCXpresso-LPC54628 <https://www.nxp.com/support/developer-resources/hardware-development-tools/lpcxpresso-boards/lpcxpresso54628-development-board:OM13098>`__
 was added in NuttX-7.24. Initial configurations include: A basic NSH
 configuration (nsh), a networking configuration (netnsh), and three
@@ -2323,7 +2109,6 @@ graphics configurations (nxwm, fb, and lvgl).
 **LPC4508**. The port was verified on an LPC5408 by a NuttX user with
 relevant changes incorporated in NuttX-7.26.
 
-| 
 
 **Driver Status**.
 
@@ -2340,13 +2125,10 @@ Refer to the LPCXpresso-LPC54628 board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/lpc54xx/lpcxpresso-lpc54628/README.txt>`__
 file for more detailed information about this port.
 
-| 
+NXP S32K14x
+-----------
 
---------------
-
-| 
-
-NXP S32K14x. Support for the S32K14x family was added in NuttX-8.1. Two
+Support for the S32K14x family was added in NuttX-8.1. Two
 boards are supported
 
 -  **S32K146EVB**. A port to the S32K146EVB was included in NuttX-8.1.
@@ -2364,8 +2146,6 @@ Both boards featured two NSH configurations: One for execution out of
 FLASH and a *safe* version that executes out of SRAM and, hence, cannot
 lock up the system because of a bad FLASH image.
 
-| 
-
 **Driver Status**.
 
 -  **NuttX-8.1** The initial release for the S32K14x boards in NuttX
@@ -2374,22 +2154,16 @@ lock up the system because of a bad FLASH image.
    Additional complete-but-unverified drivers were also included: GPIO
    interrupts, eDMA, LPSPI, LPI2C, and Ethernet (S32K148 only).
 
-| 
+TI/Stellaris LM4F120x
+---------------------
 
---------------
-
-| 
-
-TI Stellaris LM4F120. This port uses the TI Stellaris LM4F120 LaunchPad.
+This port uses the TI Stellaris LM4F120 LaunchPad.
 Jose Pablo Carballo and I are doing this port.
 
-| 
+TI/Tiva TM4C123G
+----------------
 
---------------
-
-| 
-
-TI Tiva TM4C123G. This port uses the Tiva C Series TM4C123G LaunchPad
+This port uses the Tiva C Series TM4C123G LaunchPad
 Evaluation Kit
 `(EK-TM4C123GXL) <http://www.ti.com/tool/ek-tm4c123gxl>`__.
 
@@ -2410,13 +2184,10 @@ was contributed in NuttX-8.1 by Nathan Hartman.
 -  **NuttX-8.1**. Along with TM4C123AH6PM support, Nathan Hartman also
    reinstated and extended the Tiva Quadrature Encoder driver.
 
-| 
+TI/Tiva TM4C1294
+----------------
 
---------------
-
-| 
-
-TI Tiva TM4C1294. This port uses the TI Tiva C Series TM4C1294 Connected
+This port uses the TI Tiva C Series TM4C1294 Connected
 LaunchPad `(EK-TM4C1294XL) <http://www.ti.com/tool/ek-tm4c1294xl>`__.
 
 **STATUS:**
@@ -2434,13 +2205,10 @@ Refer to the EK-TM4C1294XL board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/tm4c1294-launchpad/README.txt>`__
 file for more detailed information about this port.
 
-| 
+TI/Tiva TM4C129X
+----------------
 
---------------
-
-| 
-
-TI Tiva TM4C129X. This port uses the TI Tiva C Series TM4C129X Connected
+This port uses the TI Tiva C Series TM4C129X Connected
 Development Kit `(DK-TM4C129X) <http://www.ti.com/tool/dk-tm4c129x>`__.
 
 **STATUS:**
@@ -2464,13 +2232,10 @@ Refer to the DK-TM4C129X board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/dk-tm4c129x/README.txt>`__
 file for more detailed information about this port.
 
-| 
+TI/SimpleLink CC13x2
+--------------------
 
---------------
-
-| 
-
-TI/SimpleLink CC13x2. Basic, unverified architectural support for the
+Basic, unverified architectural support for the
 CC13x2 was added in NuttX-7.28. Fragmentary support for very similar
 CC26x2 family is included. This is a work in progress and, with any
 luck, a fully verified port will be available in NuttX-7.29. It is
@@ -2481,13 +2246,10 @@ LaunchXL-CC1312R1 board is in place. Board bring-up, however, cannot be
 done until the the basic CC13x2 architecture support is complete,
 hopefully in NuttX-7.29.
 
-| 
+Atmel SAM4L
+-----------
 
---------------
-
-| 
-
-Atmel SAM4L. This port uses the Atmel SAM4L Xplained Pro development
+This port uses the Atmel SAM4L Xplained Pro development
 board. This board features the ATSAM4LC4C MCU running at 48MHz with
 256KB of FLASH and 32KB of internal SRAM.
 
@@ -2525,21 +2287,16 @@ memory allocation for things like stacks and I/O buffers:
 You can see that 22.8KB (71.1%) of the SRAM heap is still available for
 further application development while NSH is running.
 
-| 
+Atmel SAM4CM
+------------
 
---------------
-
-| 
-
-Atmel SAM4CM. General architectural support was provided for SAM4CM
+General architectural support was provided for SAM4CM
 family in NuttX 7.3 This was *architecture-only* support, meaning that
 support for the boards with these chips is available, but no support for
 any publicly available boards was included. The SAM4CM port should be
 compatible with most of the SAM3/4 drivers (like HSMCI, DMAC, etc.) but
 those have not be verified on hardware as of this writing. This support
 was contributed in part by Max Neklyudov.
-
-| 
 
 **Atmel SAM4CMP-DB**. Support for the SAM4CMP-DB board was contributed
 to NuttX by Masayuki Ishikawa in NuttX-7.19. The SAM4CM is a dual-CPU
@@ -2549,13 +2306,10 @@ an SMP configuration. Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sam34/sam4cmp-db/README.txt>`__
 file for further information.
 
-| 
+Atmel SAM4E
+-----------
 
---------------
-
-| 
-
-Atmel SAM4E. General architectural support was provided for the SAM4E
+General architectural support was provided for the SAM4E
 family in NuttX 6.32. This was *architecture-only* support, meaning that
 support for the boards with these chips is available, but no support for
 any publicly available boards was included. This support was contributed
@@ -2568,13 +2322,10 @@ Guide <http://www.nuttx.org/Documentation/NuttShell.html>`__). That NSH
 configuration includes networking support and support for an AT25 Serial
 FLASH file system.
 
-| 
+Atmel SAM4S
+-----------
 
---------------
-
-| 
-
-Atmel SAM4S. There are ports to two Atmel SAM4S board:
+There are ports to two Atmel SAM4S board:
 
 -  There is a port the Atmel SAM4S Xplained development board. This
    board features the ATSAM4S16 MCU running at 120MHz with 1MB of FLASH
@@ -2584,12 +2335,6 @@ Atmel SAM4S. There are ports to two Atmel SAM4S board:
    board. This board features the ATSAM4S32C MCU running at 120MHz with
    2MB of FLASH and 160KB of internal SRAM.
 
-| 
-
---------------
-
-| 
-
 Atmel SAM4E. General architectural support was provided for the SAM4E
 family in NuttX 6.32. This was *architecture-only* support, meaning that
 support for the boards with these chips is available, but no support for
@@ -2602,12 +2347,6 @@ available (see the `NSH User
 Guide <http://www.nuttx.org/Documentation/NuttShell.html>`__). That NSH
 configuration includes networking support and support for an AT25 Serial
 FLASH file system.
-
-| 
-
---------------
-
-| 
 
 **Development Environments:** 1) Linux with native Linux GNU toolchain,
 2) Cygwin/MSYS with Cygwin GNU Cortex-M3 or 4 toolchain, 3) Cygwin/MSYS
@@ -2619,11 +2358,13 @@ package.
 
 
 
-ARM Cortex-M7.
+ARM Cortex-M7
+=============
 
-| 
+Atmel SAMV71
+------------
 
-Atmel SAMV71. This port uses Atmel SAM V71 Xplained Ultra Evaluation Kit
+This port uses Atmel SAM V71 Xplained Ultra Evaluation Kit
 (SAMV71-XULT). This board features the ATSAMV71Q21 Cortex-M7
 microcontroller. Refer to the `Atmel web
 site <http://www.atmel.com/tools/atsamv71-xult.aspx>`__ for further
@@ -2679,13 +2420,10 @@ Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/samv7/samv71-xult/README.txt>`__
 file for further information.
 
-| 
+Atmel SAME70
+------------
 
---------------
-
-| 
-
-Atmel SAME70. This port uses Atmel SAM E70 Xplained Evaluation Kit
+This port uses Atmel SAM E70 Xplained Evaluation Kit
 (ATSAME70-XPLD). This board is essentially a lower cost version of the
 SAMV71-XULT board featuring the ATSAME70Q21 Cortex-M7 microcontroller.
 See the `Atmel SAMV71 <#at91samv71>`__ for supported features. Also
@@ -2693,13 +2431,10 @@ refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/samv7/same70-xplained/README.txt>`__
 file for further information.
 
-| 
+Atmel SAMD5x/E5x
+----------------
 
---------------
-
-| 
-
-Atmel SAMD5x/E5x. The port of NuttX to Adafruit Metro M4 development
+The port of NuttX to Adafruit Metro M4 development
 board was released with NuttX-7/26. This board is essentially a advanced
 version of the Adafruit Metro board based on the SAMD21, but upgraded to
 the SAMD51, specifically the SAMD51J19. See the
@@ -2723,26 +2458,20 @@ file for further information about the current state of the port.
 Nuttx-9.0 added basic support for Microchip SAME54 Xplained Pro board.
 An ethernet driver was also added to the SAME5x familly.
 
-| 
+STMicro STM32 F72x/F73x
+-----------------------
 
---------------
-
-| 
-
-STMicro STM32 F72x/F73x. Support for the F72x/F73x family was provided
+Support for the F72x/F73x family was provided
 by Bob Feretich in NuttX-7.23. A single board is supported in this
 family:
 
 **STATUS**: See `below <#stm32f7drivers>`__ for STM32 F7 driver
 availability.
 
-| 
+STMicro STM32 F745/F746
+-----------------------
 
---------------
-
-| 
-
-STMicro STM32 F745/F746. Three boards are supported for this MCU:
+Three boards are supported for this MCU:
 
 #. **STM32F746G Discovery**. One port uses the STMicro STM32F746G-DISCO
    development board featuring the STM32F746NGH6 MCU. The STM32F746NGH6
@@ -2783,25 +2512,19 @@ STM32 F7 Driver Status:
 
 -  **NuttX-9.0**. Added serial DMA support.
 
-| 
+STMicro STM32 F756
+------------------
 
---------------
-
-| 
-
-STMicro STM32 F756. Architecture-only support is available for the STM32
+Architecture-only support is available for the STM32
 F756 family (meaning that the parts are supported, but there is no
 example board supported in the system). This support was made available
 in NuttX-7.11. See `above <#stm32f7drivers>`__ for STM32 F7 driver
 availability.
 
-| 
+STMicro STM32 F76xx/F77xx
+-------------------------
 
---------------
-
-| 
-
-STMicro STM32 F76xx/F77xx. Architecture support for the STM32 F76xx and
+Architecture support for the STM32 F76xx and
 F77xx families was contributed by David Sidrane in NuttX 7.17. Support
 is available for two boards from this family:
 
@@ -2840,13 +2563,10 @@ is available for two boards from this family:
 **STATUS**: See `above <#stm32f7drivers>`__ for STM32 F7 driver
 availability.
 
-| 
+STMicro STM32 H7x3
+------------------
 
---------------
-
-| 
-
-STMicro STM32 H7x3 Architecture support for the STM32 H7x3 was added
+Architecture support for the STM32 H7x3 was added
 through efforts of several people in NuttX-7.26. Support is available
 for one board from this family:
 
@@ -2866,12 +2586,6 @@ for one board from this family:
 
    This port is still a work in progress.
 
-| 
-
-**Driver Availability**:
-
-**NuttX-7.27**. Add I2C and SPI support for the STM32H7. From Mateusz
-Szafoni.
 
 **NuttX-7.30**. Added support for Ethernet, SDMMC, and Timer drivers.
 All from Jukka Laitinen.
@@ -2884,13 +2598,10 @@ Sidrane.
 
 **NuttX-9.0**. Added QSPI support for the STM32H7.
 
-| 
+NXP/Freescale i.MX RT
+---------------------
 
---------------
-
-| 
-
-NXP/Freescale i.MX RT. The initial port to the IMXRT1050-EVKB featuring
+The initial port to the IMXRT1050-EVKB featuring
 the MIMXRT1052DVL6A *Crossover* MCU was included initially in
 NuttX-7.25. The initial port was the joint effort of Janne Rosberg, Ivan
 Ucherdzhiev, and myself. Ivan gets credit for the bulk of the bring-up
@@ -2949,12 +2660,6 @@ NuttX-7.27.
 
    **NuttX-9.0**. Added USB Device support.
 
-| 
-
---------------
-
-| 
-
 **Development Environments:** The same basic development environment is
 recommended for the Cortex-M7 as for the Cortex-M4. It would be wise to
 use the latest GNU toolchains for this part because as of this writing
@@ -2962,15 +2667,21 @@ use the latest GNU toolchains for this part because as of this writing
 
 
 
-Atmel AVR.
+Atmel AVR
+=========
 
-| 
+AVR ATMega
+----------
 
-**AVR ATMega**.
+AVR ATMega128
+-------------
 
-SoC Robotics ATMega128. This port of NuttX to the Amber Web Server from
+This port of NuttX to the Amber Web Server from
 `SoC Robotics <http://www.soc-robotics.com/index.htm>`__ is partially
 completed. The Amber Web Server is based on an Atmel ATMega128.
+
+AVR ATMega1284P
+---------------
 
 LowPowerLab MoteinoMEGA. This port of NuttX to the MoteinoMEGA from
 `LowPowerLab <http://www.lowpowerlab.com>`__. The MoteinoMEGA is based
@@ -2980,17 +2691,15 @@ and the board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/avr/atmega/moteino-mega/README.txt>`__
 file for further information.
 
-Arduino MEGA2560. Extension of the AVR architecture to support the
+AVR ATMega2560
+--------------
+
+Extension of the AVR architecture to support the
 ATMega2560 and specifi support for the Arduion MEGA2560 board were
 contributed by Dimitry Kloper and first released in NuttX-7.14.
 
-| 
-
---------------
-
-| 
-
-AVR AT90USB64x and AT90USB6128x.
+AVR AT90USB64x and AT90USB6128x
+-------------------------------
 
 **Micropendous 3 AT90USB64x** and **AT90USB6128x**. This port of NuttX
 to the Opendous Micropendous 3 board. The Micropendous3 is may be
@@ -3002,12 +2711,6 @@ resources: 64K of FLASH and 4K of SRAM.
 Teensy++ 2.0 board. This board was developed by
 `PJRC <http://pjrc.com/teensy/>`__. The Teensy++ 2.0 is based on an
 Atmel AT90USB1286 MCU.
-
-| 
-
---------------
-
-| 
 
 **AVR-Specific Issues**. The basic AVR port is solid. The biggest issue
 for using AVR is its tiny SRAM memory and its Harvard architecture.
@@ -3030,12 +2733,6 @@ done:
 #. Create a special version of printf that knows how to access strings
    that reside in FLASH (or EEPROM).
 
-| 
-
---------------
-
-| 
-
 **Development Environments:** 1) Linux with native Linux GNU toolchain,
 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS with Windows
 native toolchain, or 4) Native Windows. All testing, however, has been
@@ -3044,15 +2741,8 @@ by the NuttX
 `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 package. As a result, that toolchain is recommended.
 
-| 
-
-| 
-
-
-
-Atmel AVR32.
-
-| 
+Atmel AVR32
+===========
 
 AV32DEV1. This port uses the www.mcuzone.com AVRDEV1 board based on the
 Atmel AT32UC3B0256 MCU. This port requires a special GNU avr32 toolchain
@@ -3085,10 +2775,8 @@ NuttX board
 file for further information.
 
 
-
-**Misoc**.
-
-| 
+Misoc
+=====
 
 Misoc LM32 Architectural Support. Architectural support for the Misoc
 LM32 was contributed by Ramtin Amin in NuttX 7.19
@@ -3102,20 +2790,16 @@ Misoc LM32 under Qemu or on your custom FPGA.
 
 
 
-OpenRISC mor1kx.
-
-| 
+OpenRISC mor1kx
+===============
 
 **OpenRISC mor1kx Architectural Support**. Architectural support for the
 OpenRISC mor1kx was developed by Matt Thompson Amin and released in
 NuttX 7.25. Currently only an mor1kx Qemu simulation is available for
 testing.
 
-
-
-Freescale M68HCS12.
-
-| 
+Freescale M68HCS12
+==================
 
 **MC9S12NE64**. Support for the MC9S12NE64 MCU and two boards are
 included:
@@ -3130,9 +2814,8 @@ for the m9s12x family.
 
 
 
-Intel 80x86.
-
-| 
+Intel 80x86
+===========
 
 **QEMU/Bifferboard i486**. This port uses the
 `QEMU <http://wiki.qemu.org/Main_Page>`__ i486 and the native Linux,
@@ -3164,23 +2847,22 @@ This kernel with ostest have been tested with
 
 
 
-Microchip PIC32MX (MIPS M4K).
+Microchip PIC32MX
+=================
 
-| 
+(MIPS M4K architecture)
 
-PIC32MX250F128D. A port is in progress from the DTX1-4000L "Mirtoo"
+Microchip PIC32MX2xx
+--------------------
+
+A port is in progress from the DTX1-4000L "Mirtoo"
 module from `Dimitech <http://www.dimitech.com/>`__. This module uses
 Microchip PIC32MX250F128D and the Dimitech DTX1-4000L EV-kit1 V2. See
 the `Dimitech <http://www.dimitech.com/>`__ website for further
 information.
 
-| 
-
---------------
-
-| 
-
-PIC32MX4xx Family.
+Microchip PIC32MX4xx
+--------------------
 
 **PIC32MX440F512H**. This port uses the "Advanced USB Storage Demo
 Board," Model DB-DP11215, from `Sure
@@ -3207,11 +2889,8 @@ port configuration.)
    board <http://www.sparkfun.com/products/9713>`__. See also the
    `UBW32 <http://www.schmalzhaus.com/UBW32/>`__ web site.
 
-| 
-
---------------
-
-| 
+Microchip PIC32MX7xx
+--------------------
 
 PIC32MX795F512L. There one two board ports using this chip:
 
@@ -3223,12 +2902,6 @@ PIC32MX795F512L. There one two board ports using this chip:
    completed for the Mikroelektronika PIC32MX7 Multimedia Board (MMB).
    See http://www.mikroe.com/ for further information about this board.
 
-| 
-
---------------
-
-| 
-
 **Development Environment:** These ports uses either:
 
 #. The *LITE* version of the PIC32MX toolchain available for download
@@ -3239,10 +2912,8 @@ PIC32MX795F512L. There one two board ports using this chip:
    Graphics <http://www.mentor.com>`__ website.
 
 
-
-Microchip PIC32MZ.
-
-| 
+Microchip PIC32MZEC
+-------------------
 
 PIC32MZEC Family (MIPS microAptiv). A port is in available for the
 PIC32MZ Embedded Connectivity (EC) Starter Kit. There are two
@@ -3260,8 +2931,12 @@ This was a collaborative effort between Kristopher Tate, David Sidrane
 and myself. The basic port is functional and a NuttShell (NSH)
 configuration is available.
 
-PIC32MZEF Family (MIPS M5150). A port is in available for the
-MikroElectronika `Flip&Click
+Microchip PIC32MZEF
+===================
+
+(MIPS M5150 architecture).
+
+A port is in available for the MikroElectronika `Flip&Click
 PIC32MZ <https://www.mikroe.com/flipclick-pic32mz>`__ development board
 based on the PIC32MZ2048EFH100 MCU. This board configuration was added
 in NuttX-7.24 and is, for the most part, compatible with the PIC32MZEC
@@ -3293,33 +2968,18 @@ Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/mips/pic32mz/pic32mz-starterkit/README.txt>`__
 file for further information.
 
-| 
-
---------------
-
-| 
-
 **Development Environment:** Same as for the PIC32MZ.
 
-| 
-
---------------
-
-
-
-Renesas/Hitachi SuperH.
-
-| 
+Renesas/Hitachi SuperH
+======================
 
 **SH-1 SH7032**. This port uses the Hitachi SH-1 Low-Cost Evaluation
 Board (SH1_LCEVB1), US7032EVB, with a GNU ELF toolchain\* under Linux or
 Cygwin.
 
 
-
-Renesas M16C/26.
-
-| 
+Renesas M16C/26
+---------------
 
 **Renesas M16C/26 Microcontroller**. This port uses the Renesas SKP16C26
 Starter kit and the GNU M32C toolchain. The development environment is
@@ -3336,11 +2996,8 @@ Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/renesas/m16c/skp16c26/README.txt>`__
 file for further information.
 
-
-
-Renesas RX65N.
-
-| 
+Renesas RX65N
+-------------
 
 Support for the Renesas RX65N family was released in NuttX with a
 contribution from Anjana. Two boards are supported in this initial
@@ -3356,17 +3013,25 @@ release:
 
 
 
-RISC-V.
-
-| 
+RISC-V
+======
 
 RISC-V Architectural Support. Basic support for the RISC-V architecture
-was contributed by Ken Pettit in NuttX-7.19. This support is for a
-custom NEXT RISC-V NR5Mxx (RV32IM). The initial release is *thin* but a
-great starting point for anyone interested in RISC-V development with
+was contributed by Ken Pettit in NuttX-7.19.
+
+NEXT RISC-V NR5Mxx
+------------------
+
+This support is for a custom NEXT RISC-V NR5Mxx (RV32IM). The initial release
+is *thin* but a great starting point for anyone interested in RISC-V development with
 NuttX.
 
-GreenWaves GAP8 (RV32IM). Basic support GreenWaves GAP8 *gapuino* board
+GreenWaves GAP8
+---------------
+
+(RV32IM architecture)
+
+Basic support GreenWaves GAP8 *gapuino* board
 was added by hhuysqt in NuttX-7.27. The GAP8 is a 1+8-core DSP-like
 RISC-V MCU. The GAP8 features a RI5CY core called Fabric Controller(FC),
 and a cluster of 8 RI5CY cores that runs at a bit slower speed. The GAP8
@@ -3377,19 +3042,22 @@ Parallel-Ultra-Low-Power design.
 
 Initial support for the Sipeed Maix bit board was added in Nuttx-9.0.
 
-Litex ARTY_A7. Support for the Digilent ARTY_A7 board along with CPU
-VexRiscV SOC were added in NuttX-9.0.
+LiteX on ARTY A7
+----------------
+
+Support for the Digilent ARTY_A7 board along with CPU VexRiscV SOC were
+added in NuttX-9.0.
 
 
+ESP32 (Dual Xtensa LX6)
+=======================
 
-ESP32 (Dual Xtensa LX6).
+Xtensa LX6 ESP32
+----------------
 
-| 
-
-**Xtensa LX6 ESP32 Architectural Support**. Basic architectural support
-for Xtensa LX6 processors and the port for the Espressif ESP32 were
-added in NuttX-7.19. The basic ESP32 port is function in both single CPU
-and dual CPU SMP configurations.
+Basic architectural support for Xtensa LX6 processors and the port for
+the Espressif ESP32 were added in NuttX-7.19. The basic ESP32 port is
+function in both single CPU and dual CPU SMP configurations.
 
 **Espressif ESP32 Core v2 Board** The NuttX release includes support for
 Espressif ESP32 Core v2 board. There is an NSH configuration for each
@@ -3407,28 +3075,25 @@ file for further information.
 
 
 
-Zilog ZNEO Z16F.
+Zilog ZNEO Z16F
+===============
 
-| 
+**Zilog z16f2800100zcog development kit**. This port use the Zilog
+z16f2800100zcog development kit and the Zilog ZDS-II Windows command
+line tools. The development environment is either Windows native or
+Cygwin under Windows.
 
--  **Zilog z16f2800100zcog development kit**. This port use the Zilog
-   z16f2800100zcog development kit and the Zilog ZDS-II Windows command
-   line tools. The development environment is either Windows native or
-   Cygwin under Windows.
-
-   **STATUS:** The initial release of support for the z16f was made
-   available in NuttX version 0.3.7. A working NuttShell (NSH)
-   configuration as added in NuttX-6.33 (although a patch is required to
-   work around an issue with a ZDS-II 5.0.1 tool problem). An ESPI
-   driver was added in NuttX-7.2. Refer to the NuttX board
-   `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/z16/z16f/z16f2800100zcog/README.txt>`__
-   file for further information.
-
+**STATUS:** The initial release of support for the z16f was made
+available in NuttX version 0.3.7. A working NuttShell (NSH)
+configuration as added in NuttX-6.33 (although a patch is required to
+work around an issue with a ZDS-II 5.0.1 tool problem). An ESPI
+driver was added in NuttX-7.2. Refer to the NuttX board
+`README <https://bitbucket.org/nuttx/nuttx/src/master/boards/z16/z16f/z16f2800100zcog/README.txt>`__
+file for further information.
 
 
-Zilog eZ80 Acclaim!.
-
-| 
+Zilog eZ80 Acclaim!
+===================
 
 **Zilog eZ80Acclaim! Microcontroller**. There are four eZ80Acclaim!
 ports:
@@ -3444,9 +3109,8 @@ Windows native or Cygwin or MSYS2 under Windows.
 
 
 
-Zilog Z8Encore!.
-
-| 
+Zilog Z8Encore!
+===============
 
 **Zilog Z8Encore! Microcontroller**. This port uses the either:
 
@@ -3466,9 +3130,8 @@ for further information.
 
 
 
-Zilog Z180.
-
-| 
+Zilog Z180
+==========
 
 **P112**. The P112 is a hobbyist single board computer based on a 16MHz
 Z80182 with up to 1MB of memory, serial, parallel and diskette IO, and
@@ -3489,9 +3152,8 @@ file for further information.
 
 
 
-Zilog Z80.
-
-| 
+Zilog Z80
+=========
 
 **Z80 Instruction Set Simulator**. This port uses the
 `SDCC <http://sdcc.sourceforge.net/>`__ toolchain under Linux or Cygwin
@@ -3502,12 +3164,6 @@ Z80 instruction simulator called z80sim.
 be tested using an instruction set simulator. Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/z80/z80/z80sim/README.txt>`__
 file for further information.
-
-| 
-
---------------
-
-| 
 
 **XTRS: TRS-80 Model I/III/4/4P Emulator for Unix**. A very similar Z80
 port is available for `XTRS <http://www.tim-mann.org/xtrs.html>`__, the
