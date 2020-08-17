@@ -76,6 +76,14 @@ enum EPOLL_EVENTS
 #define EPOLLHUP EPOLLHUP
   };
 
+/* Flags to be passed to epoll_create1.  */
+
+enum
+{
+    EPOLL_CLOEXEC = 02000000
+#define EPOLL_CLOEXEC EPOLL_CLOEXEC
+};
+
 typedef union poll_data
 {
   void        *ptr;
@@ -108,8 +116,10 @@ struct epoll_head
  ****************************************************************************/
 
 int epoll_create(int size);
+int epoll_create1(int flags);
 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev);
-int epoll_wait(int epfd, struct epoll_event *evs, int maxevents, int timeout);
+int epoll_wait(int epfd, struct epoll_event *evs,
+               int maxevents, int timeout);
 
 void epoll_close(int epfd);
 

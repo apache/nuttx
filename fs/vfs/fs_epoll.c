@@ -81,6 +81,31 @@ int epoll_create(int size)
 }
 
 /****************************************************************************
+ * Name: epoll_create1
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
+int epoll_create1(int flags)
+{
+  /* For current implementation, Close-on-exec is a default behavior,
+   * the handle of epoll(2) is not a real file handle.
+   */
+
+  if (flags != EPOLL_CLOEXEC)
+    {
+      return EINVAL;
+    }
+
+  return epoll_create(CONFIG_FS_NEPOLL_DESCRIPTORS);
+}
+
+/****************************************************************************
  * Name: epoll_close
  *
  * Description:
