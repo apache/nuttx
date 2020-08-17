@@ -3359,14 +3359,14 @@ endmenu
 config STM32_FLASH_ICACHE
 	bool "Enable FLASH Instruction Cache"
 	default y
-	depends on STM32_HAVE_ICACHE
+	depends on STM32_HAVE_FLASH_ICACHE
 	---help---
 		Enable the FLASH instruction cache.
 
 config STM32_FLASH_DCACHE
 	bool "Enable FLASH Data Cache"
 	default y
-	depends on STM32_HAVE_DCACHE
+	depends on STM32_HAVE_FLASH_DCACHE
 	---help---
 		Enable the FLASH data cache.
 
