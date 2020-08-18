@@ -2245,6 +2245,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 #elif defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
       /* Read each block using only the single block transfer method */
 
+      ret = nsectors;
       endsector = startsector + nsectors - 1;
       for (sector = startsector; sector <= endsector; sector++)
         {
@@ -2309,51 +2310,55 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
   finfo("sector: %lu nsectors: %u sectorsize: %u\n",
         (unsigned long)startsector, nsectors, priv->blocksize);
 
-  ret = mmcsd_takesem(priv);
-  if (ret < 0)
+  if (nsectors > 0)
     {
-      return (ssize_t)ret;
-    }
-
-#if defined(CONFIG_DRVR_WRITEBUFFER)
-  /* Write the data to the write buffer */
-
-  ret = rwb_write(&priv->rwbuffer, startsector, nsectors, buffer);
-
-#elif defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
-  /* Write each block using only the single block transfer method */
-
-  endsector = startsector + nsectors - 1;
-  for (sector = startsector; sector <= endsector; sector++)
-    {
-      /* Write this block from the user buffer */
-
-      ssize_t nread = mmcsd_writesingle(priv, buffer, sector);
-      if (nread < 0)
+      ret = mmcsd_takesem(priv);
+      if (ret < 0)
         {
-          ret = nread;
-          break;
+          return (ssize_t)ret;
         }
 
-      /* Increment the buffer pointer by the block size */
+#if defined(CONFIG_DRVR_WRITEBUFFER)
+      /* Write the data to the write buffer */
 
-      buffer += priv->blocksize;
-    }
+      ret = rwb_write(&priv->rwbuffer, startsector, nsectors, buffer);
+
+#elif defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
+      /* Write each block using only the single block transfer method */
+
+      ret = nsectors;
+      endsector = startsector + nsectors - 1;
+      for (sector = startsector; sector <= endsector; sector++)
+        {
+          /* Write this block from the user buffer */
+
+          ssize_t nread = mmcsd_writesingle(priv, buffer, sector);
+          if (nread < 0)
+            {
+              ret = nread;
+              break;
+            }
+
+          /* Increment the buffer pointer by the block size */
+
+          buffer += priv->blocksize;
+        }
 
 #else
-  /* Use either the single- or multiple-block transfer method */
+      /* Use either the single- or multiple-block transfer method */
 
-  if (nsectors == 1)
-    {
-      ret = mmcsd_writesingle(priv, buffer, startsector);
-    }
-  else
-    {
-      ret = mmcsd_writemultiple(priv, buffer, startsector, nsectors);
-    }
+      if (nsectors == 1)
+        {
+          ret = mmcsd_writesingle(priv, buffer, startsector);
+        }
+      else
+        {
+          ret = mmcsd_writemultiple(priv, buffer, startsector, nsectors);
+        }
 
 #endif
-  mmcsd_givesem(priv);
+      mmcsd_givesem(priv);
+    }
 
   /* On success, return the number of blocks written */
 
