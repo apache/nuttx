@@ -917,8 +917,12 @@ static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
               uint32_t regval);
 #ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
 static void fdcan_dumpregs(FAR struct stm32_fdcan_s *priv, FAR const char *msg);
+static void fdcan_dumprxregs(FAR struct stm32_fdcan_s *priv, FAR const char *msg);
+static void fdcan_dumptxregs(FAR struct stm32_fdcan_s *priv, FAR const char *msg);
 #else
 #  define fdcan_dumpregs(priv,msg)
+#  define fdcan_dumprxregs(priv,msg)
+#  define fdcan_dumptxregs(priv,msg)
 #endif
 
 /* Semaphore helpers */
@@ -1287,13 +1291,13 @@ static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
 #endif
 
 /****************************************************************************
- * Name: fdcan_dumpregs
+ * Name: fdcan_dumpctrlregs
  *
  * Description:
- *   Dump the contents of all FDCAN control registers
+ *   Dump the contents of all CAN control registers
  *
  * Input Parameters:
- *   priv - A reference to the FDCAN peripheral state
+ *   priv - A reference to the CAN block status
  *
  * Returned Value:
  *   None
@@ -1301,78 +1305,114 @@ static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
  ****************************************************************************/
 
 #ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
-static void fdcan_dumpregs(FAR struct stm32_fdcan_s *priv, FAR const char *msg)
+static void fdcan_dumpregs(FAR struct stm32_fdcan_s *priv,
+                                  FAR const char *msg)
+{  
+  FAR const struct stm32_config_s *config = priv->config;
+
+  caninfo("CAN%d Control and Status Registers: %s\n", config->port, msg);
+  caninfo("  Base: %08x\n", config->base);
+
+  /* CAN control and status registers */
+
+  caninfo("  CCCR:  %08x   TEST:  %08x\n",
+          getreg32(config->base + STM32_FDCAN_CCCR_OFFSET),
+          getreg32(config->base + STM32_FDCAN_TEST_OFFSET));
+
+  caninfo("  NBTP:  %08x   DBTP:  %08x\n",
+          getreg32(config->base + STM32_FDCAN_NBTP_OFFSET),
+          getreg32(config->base + STM32_FDCAN_DBTP_OFFSET));
+
+  caninfo("  IE:    %08x   ILE:   %08x    ILS:  %08x\n",
+          getreg32(config->base + STM32_FDCAN_IE_OFFSET),
+          getreg32(config->base + STM32_FDCAN_ILE_OFFSET),
+          getreg32(config->base + STM32_FDCAN_ILS_OFFSET));
+
+  caninfo("  PSR:   %08x   ECR:   %08x\n",
+          getreg32(config->base + STM32_FDCAN_PSR_OFFSET),
+          getreg32(config->base + STM32_FDCAN_ECR_OFFSET));
+
+  caninfo("  HPMS:  %08x   RXF0S: %08x   RXF1S: %08x\n",
+          getreg32(config->base + STM32_FDCAN_HPMS_OFFSET),
+          getreg32(config->base + STM32_FDCAN_RXF0S_OFFSET),
+          getreg32(config->base + STM32_FDCAN_RXF1S_OFFSET));
+
+  caninfo("  TXFQS: %08x   TXEFS: %08x\n",
+          getreg32(config->base + STM32_FDCAN_TXFQS_OFFSET),
+          getreg32(config->base + STM32_FDCAN_TXEFS_OFFSET));
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32can_dumprxregs
+ *
+ * Description:
+ *   Dump the contents of all Rx status registers
+ *
+ * Input Parameters:
+ *   priv - A reference to the CAN block status
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+static void fdcan_dumprxregs(FAR struct stm32_fdcan_s *priv,
+                                FAR const char *msg)
 {
   FAR const struct stm32_config_s *config = priv->config;
 
-  caninfo("FDCAN%d Registers: %s\n", config->port, msg);
-  caninfo("   Base: %08x\n", config->base);
+  caninfo("CAN%d Rx Registers: %s\n", config->port, msg);
+  caninfo("  Base: %08x\n", config->base);
 
-  caninfo("   CUST: %08x  FBTP: %08x TEST: %08x    RWD: %08x\n",
-          getreg32(config->base + STM32_FDCAN_CUST_OFFSET),
-          getreg32(config->base + STM32_FDCAN_FBTP_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TEST_OFFSET),
-          getreg32(config->base + STM32_FDCAN_RWD_OFFSET));
 
-  caninfo("  CCCR: %08x   BTP: %08x  TSCC: %08x   TSCV: %08x\n",
-          getreg32(config->base + STM32_FDCAN_CCCR_OFFSET),
-          getreg32(config->base + STM32_FDCAN_NBTP_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TSCC_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TSCV_OFFSET));
-
-  caninfo("  TOCC: %08x  TOCV: %08x   ECR: %08x    PSR: %08x\n",
-          getreg32(config->base + STM32_FDCAN_TOCC_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TOCV_OFFSET),
-          getreg32(config->base + STM32_FDCAN_ECR_OFFSET),
-          getreg32(config->base + STM32_FDCAN_PSR_OFFSET));
-
-  caninfo("    IR: %08x    IE: %08x   ILS: %08x    ILE: %08x\n",
-          getreg32(config->base + STM32_FDCAN_IR_OFFSET),
-          getreg32(config->base + STM32_FDCAN_IE_OFFSET),
-          getreg32(config->base + STM32_FDCAN_ILS_OFFSET),
-          getreg32(config->base + STM32_FDCAN_ILE_OFFSET));
-
-  caninfo("   GFC: %08x SIDFC: %08x XIDFC: %08x  XIDAM: %08x\n",
-          getreg32(config->base + STM32_FDCAN_GFC_OFFSET),
-          getreg32(config->base + STM32_FDCAN_SIDFC_OFFSET),
-          getreg32(config->base + STM32_FDCAN_XIDFC_OFFSET),
-          getreg32(config->base + STM32_FDCAN_XIDAM_OFFSET));
-
-  caninfo("  HPMS: %08x NDAT1: %08x NDAT2: %08x  RXF0C: %08x\n",
-          getreg32(config->base + STM32_FDCAN_HPMS_OFFSET),
-          getreg32(config->base + STM32_FDCAN_NDAT1_OFFSET),
-          getreg32(config->base + STM32_FDCAN_NDAT2_OFFSET),
-          getreg32(config->base + STM32_FDCAN_RXF0C_OFFSET));
-
-  caninfo(" RXF0S: %08x FXF0A: %08x  RXBC: %08x  RXF1C: %08x\n",
-          getreg32(config->base + STM32_FDCAN_RXF0S_OFFSET),
-          getreg32(config->base + STM32_FDCAN_RXF0A_OFFSET),
-          getreg32(config->base + STM32_FDCAN_RXBC_OFFSET),
-          getreg32(config->base + STM32_FDCAN_RXF1C_OFFSET));
-
-  caninfo(" RXF1S: %08x FXF1A: %08x RXESC: %08x   TXBC: %08x\n",
-          getreg32(config->base + STM32_FDCAN_RXF1S_OFFSET),
-          getreg32(config->base + STM32_FDCAN_RXF1A_OFFSET),
+  caninfo("  RXESC: %08x   RXF0S: %08x   RXF1S: %08x\n",
           getreg32(config->base + STM32_FDCAN_RXESC_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TXBC_OFFSET));
+          getreg32(config->base + STM32_FDCAN_RXF0S_OFFSET),
+          getreg32(config->base + STM32_FDCAN_RXF1S_OFFSET));
 
-  caninfo(" TXFQS: %08x TXESC: %08x TXBRP: %08x  TXBAR: %08x\n",
+  caninfo("  IR:    %08x   IE:    %08x\n",
+          getreg32(config->base + STM32_FDCAN_IR_OFFSET),
+          getreg32(config->base + STM32_FDCAN_IE_OFFSET));
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32can_dumptxregs
+ *
+ * Description:
+ *   Dump the contents of all Tx buffer registers
+ *
+ * Input Parameters:
+ *   priv - A reference to the CAN block status
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+static void fdcan_dumptxregs(FAR struct stm32_fdcan_s *priv,
+                                  FAR const char *msg)
+{
+  FAR const struct stm32_config_s *config = priv->config;
+
+  caninfo("CAN%d Tx Registers: %s\n", config->port, msg);
+  caninfo("  Base: %08x\n", config->base);
+
+  caninfo("  TXQFS: %08x  TXBAR: %08x  TXBRP: %08x\n",
           getreg32(config->base + STM32_FDCAN_TXFQS_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TXESC_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TXBRP_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TXBAR_OFFSET));
-
-  caninfo(" TXBCR: %08x TXBTO: %08x TXBCF: %08x TXBTIE: %08x\n",
-          getreg32(config->base + STM32_FDCAN_TXBCR_OFFSET),
+          getreg32(config->base + STM32_FDCAN_TXBAR_OFFSET),
+          getreg32(config->base + STM32_FDCAN_TXBRP_OFFSET));
+  
+  caninfo("  TXBTO: %08x  TXBCR: %08x  TXBCF: %08x\n",
           getreg32(config->base + STM32_FDCAN_TXBTO_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TXBCF_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TXBTIE_OFFSET));
+          getreg32(config->base + STM32_FDCAN_TXBCR_OFFSET),
+          getreg32(config->base + STM32_FDCAN_TXBCF_OFFSET));
 
-  caninfo("TXBCIE: %08x TXEFC: %08x TXEFS: %08x  TXEFA: %08x\n",
-          getreg32(config->base + STM32_FDCAN_TXBCIE_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TXEFC_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TXEFS_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TXEFA_OFFSET));
+  caninfo("  TIE:   %08x\n",
+          getreg32(config->base + STM32_FDCAN_TXBTIE_OFFSET));
 }
 #endif
 
@@ -3092,6 +3132,8 @@ static int fdcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
    */
 
   can_txdone(dev);
+  fdcan_dumptxregs(priv, "After send");
+
   return OK;
 }
 
@@ -3645,6 +3687,9 @@ static int fdcan_interrupt(int irq, void *context, FAR void *arg)
   priv = dev->cd_priv;
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
+
+  fdcan_dumprxregs(priv, "RX interrupt");
+  fdcan_dumpregs(priv, "RX interrupt");
 
   /* Loop while there are pending interrupt events */
 
