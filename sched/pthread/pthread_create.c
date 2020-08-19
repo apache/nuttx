@@ -284,6 +284,11 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       goto errout_with_tcb;
     }
 
+  if (attr->detachstate == PTHREAD_CREATE_DETACHED)
+    {
+      pjoin->detached = true;
+    }
+
   if (attr->stackaddr)
     {
       /* Use pre-allocated stack */
