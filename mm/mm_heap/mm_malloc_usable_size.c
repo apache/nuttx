@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/malloc.h
+ * mm/mm_heap/mm_malloc_usable_size.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,49 +18,40 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_MALLOC_H
-#define __INCLUDE_MALLOC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <stdlib.h>
+#include <nuttx/config.h>
+
+#include <assert.h>
+#include <debug.h>
+#include <malloc.h>
+
+#include <nuttx/mm/mm.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-struct mallinfo
+size_t malloc_usable_size(FAR void *mem)
 {
-  int arena;    /* This is the total size of memory allocated
-                 * for use by malloc in bytes. */
-  int ordblks;  /* This is the number of free (not in use) chunks */
-  int mxordblk; /* Size of the largest free (not in use) chunk */
-  int uordblks; /* This is the total size of memory occupied by
-                 * chunks handed out by malloc. */
-  int fordblks; /* This is the total size of memory occupied
-                 * by free (not in use) chunks. */
-};
+  FAR struct mm_freenode_s *node;
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+  /* Protect against attempts to query a NULL reference */
 
-#if defined(__cplusplus)
-extern "C"
-{
-#endif
+  if (!mem)
+    {
+      return 0;
+    }
 
-struct mallinfo mallinfo(void);
-size_t malloc_usable_size(FAR void *ptr);
+  /* Map the memory chunk into a free node */
 
-#if defined(__cplusplus)
+  node = (FAR struct mm_freenode_s *)((FAR char *)mem - SIZEOF_MM_ALLOCNODE);
+
+  /* Sanity check against double-frees */
+
+  DEBUGASSERT(node->preceding & MM_ALLOC_BIT);
+
+  return node->size - SIZEOF_MM_ALLOCNODE;
 }
-#endif
-
-#endif /* __INCLUDE_MALLOC_H */
