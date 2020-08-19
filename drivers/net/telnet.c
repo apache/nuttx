@@ -123,9 +123,9 @@ struct telnet_dev_s
   sem_t             td_exclsem;   /* Enforces mutually exclusive access */
   sem_t             td_iosem;     /* I/O thread will notify that data is available */
   uint8_t           td_state;     /* (See telnet_state_e) */
-  uint8_t           td_offset;    /* Offset to the valid, pending bytes in the rxbuffer */
   uint8_t           td_crefs;     /* The number of open references to the session */
   uint8_t           td_minor;     /* Minor device number */
+  uint16_t          td_offset;    /* Offset to the valid, pending bytes in the rxbuffer */
   uint16_t          td_pending;   /* Number of valid, pending bytes in the rxbuffer */
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
   uint16_t          td_rows;      /* Number of NAWS rows */
