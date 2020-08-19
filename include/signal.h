@@ -335,6 +335,10 @@ typedef CODE void (*_sa_handler_t)(int signo);
 typedef CODE void (*_sa_sigaction_t)(int signo, FAR siginfo_t *siginfo,
                                      FAR void *context);
 
+/* glibc definition of signal handling function types */
+
+typedef _sa_handler_t sighandler_t;
+
 /* The following structure defines the action to take for given signal */
 
 struct sigaction
