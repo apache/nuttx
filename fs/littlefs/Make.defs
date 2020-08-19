@@ -31,6 +31,14 @@ CSRCS += lfs.c lfs_util.c
 DEPPATH += --dep-path littlefs/littlefs
 VPATH += :littlefs/littlefs
 
+ifneq ($(CONFIG_DEBUG_FS_INFO),y)
+  CFLAGS += -DLFS_NO_DEBUG
+endif
+
+ifneq ($(CONFIG_DEBUG_FS_WARN),y)
+  CFLAGS += -DLFS_NO_WARN
+endif
+
 LITTLEFS_VERSION ?= 2.2.1
 LITTLEFS_TARBALL = v$(LITTLEFS_VERSION).tar.gz
 

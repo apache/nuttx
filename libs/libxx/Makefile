@@ -37,6 +37,10 @@ include $(TOPDIR)/Make.defs
 
 CXXSRCS = libxx_cxa_atexit.cxx libxx_eabi_atexit.cxx
 
+ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+CXXSRCS += libxx_impure.cxx
+endif
+
 # Include the uClibc++ Make.defs file if selected.  If it is included,
 # the uClibc++/Make.defs file will add its files to the source file list,
 # add its DEPPATH info, and will add the appropriate paths to the VPATH
@@ -50,7 +54,7 @@ CXXSRCS = libxx_cxa_atexit.cxx libxx_eabi_atexit.cxx
 ifeq ($(CONFIG_UCLIBCXX),y)
 include uClibc++.defs
 else ifeq ($(CONFIG_LIBCXX),y)
-include libcxx/Make.defs
+include libcxx.defs
 else
 include cxx.defs
 endif

@@ -76,17 +76,31 @@ enum EPOLL_EVENTS
 #define EPOLLHUP EPOLLHUP
   };
 
+/* Flags to be passed to epoll_create1.  */
+
+enum
+{
+    EPOLL_CLOEXEC = 02000000
+#define EPOLL_CLOEXEC EPOLL_CLOEXEC
+};
+
 typedef union poll_data
 {
-  int          fd;       /* The descriptor being polled */
+  void        *ptr;
+  int          fd;
+  uint32_t     u32;
 } epoll_data_t;
 
 struct epoll_event
 {
   epoll_data_t data;
-  FAR sem_t   *sem;      /* Pointer to semaphore used to post output event */
   pollevent_t  events;   /* The input event flags */
   pollevent_t  revents;  /* The output event flags */
+
+  /* Non-standard fields used internally by NuttX. */
+
+  void        *reserved; /* reserved feild sync with struct pollfd */
+  FAR sem_t   *sem;      /* Pointer to semaphore used to post output event */
   FAR void    *priv;     /* For use by drivers */
 };
 
@@ -102,8 +116,10 @@ struct epoll_head
  ****************************************************************************/
 
 int epoll_create(int size);
+int epoll_create1(int flags);
 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev);
-int epoll_wait(int epfd, struct epoll_event *evs, int maxevents, int timeout);
+int epoll_wait(int epfd, struct epoll_event *evs,
+               int maxevents, int timeout);
 
 void epoll_close(int epfd);
 
