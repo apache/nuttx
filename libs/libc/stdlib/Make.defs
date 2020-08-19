@@ -36,6 +36,10 @@ ifeq ($(CONFIG_PSEUDOTERM_SUSV1),y)
 CSRCS += lib_ptsname.c lib_ptsnamer.c
 endif
 
+ifeq ($(CONFIG_STACK_CANARIES),y)
+CSRCS += lib_stackchk.c
+endif
+
 ifeq ($(CONFIG_PSEUDOTERM),y)
 CSRCS += lib_unlockpt.c
 endif

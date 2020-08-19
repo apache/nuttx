@@ -270,14 +270,20 @@ typedef pid_t pthread_t;
 #define __PTHREAD_T_DEFINED 1
 #endif
 
+struct pthread_condattr_s
+{
+  clockid_t clockid;
+};
+
 #ifndef __PTHREAD_CONDATTR_T_DEFINED
-typedef int pthread_condattr_t;
+typedef struct pthread_condattr_s pthread_condattr_t;
 #define __PTHREAD_CONDATTR_T_DEFINED 1
 #endif
 
 struct pthread_cond_s
 {
   sem_t sem;
+  clockid_t clockid;
 };
 
 #ifndef __PTHREAD_COND_T_DEFINED
@@ -285,7 +291,7 @@ typedef struct pthread_cond_s pthread_cond_t;
 #define __PTHREAD_COND_T_DEFINED 1
 #endif
 
-#define PTHREAD_COND_INITIALIZER {SEM_INITIALIZER(0)}
+#define PTHREAD_COND_INITIALIZER {SEM_INITIALIZER(0), CLOCK_REALTIME }
 
 struct pthread_mutexattr_s
 {
@@ -607,6 +613,10 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex);
 
 int pthread_condattr_init(FAR pthread_condattr_t *attr);
 int pthread_condattr_destroy(FAR pthread_condattr_t *attr);
+int pthread_condattr_getclock(FAR const pthread_condattr_t *attr,
+                              clockid_t *clock_id);
+int pthread_condattr_setclock(FAR pthread_condattr_t *attr,
+                              clockid_t clock_id);
 
 /* A thread can create and delete condition variables. */
 
@@ -739,7 +749,7 @@ typedef pid_t pthread_t;
 #endif
 
 #ifndef __PTHREAD_CONDATTR_T_DEFINED
-typedef int pthread_condattr_t;
+typedef struct pthread_condattr_s pthread_condattr_t;
 #  define __PTHREAD_CONDATTR_T_DEFINED 1
 #endif
 

@@ -355,7 +355,7 @@ static void cxd56_rtc_initialize(wdparm_t arg)
 
 int up_rtc_initialize(void)
 {
-  cxd56_rtc_initialize(1, NULL);
+  cxd56_rtc_initialize(0);
   return OK;
 }
 

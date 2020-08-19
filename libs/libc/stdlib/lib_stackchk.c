@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_condtimedwait.c
+ * libs/libc/stdlib/lib_stackchk.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,36 +22,39 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <assert.h>
 
-#include <pthread.h>
+#ifdef CONFIG_STACK_CANARIES
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+FAR const void *const __stack_chk_guard = &__stack_chk_guard;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_cond_timedwait
+ * Name: __stack_chk_fail
  *
  * Description:
- *   A thread can perform a timed wait on a condition variable.
+ *   The interface __stack_chk_fail() shall abort the function that called
+ *   it with a message that a stack overflow has been detected. The program
+ *   that called the function shall then exit.
  *
  * Input Parameters:
- *   cond    - the condition variable to wait on
- *   mutex   - the mutex that protects the condition variable
- *   abstime - wait until this absolute time
+ *   None
  *
  * Returned Value:
- *   OK (0) on success; A non-zero errno value is returned on failure.
- *
- * Assumptions:
- *   Timing is of resolution 1 msec, with +/-1 millisecond accuracy.
+ *   None.
  *
  ****************************************************************************/
 
-int pthread_cond_timedwait(FAR pthread_cond_t *cond,
-                           FAR pthread_mutex_t *mutex,
-                           FAR const struct timespec *abstime)
+void __stack_chk_fail(void)
 {
-  return pthread_cond_clockwait(cond, mutex, cond->clockid, abstime);
+  PANIC();
 }
+
+#endif /* CONFIG_STACK_CANARIES */

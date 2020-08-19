@@ -1,0 +1,50 @@
+############################################################################
+# libs/libxx/libcxx.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+###########################################################################
+
+VERSION=11.0.0
+
+$(TOPDIR)/include/libcxx:
+	$(Q) wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$(VERSION)-rc1/libcxx-$(VERSION)rc1.src.tar.xz
+	$(Q) tar -xf libcxx-$(VERSION)rc1.src.tar.xz
+	$(Q) $(DELFILE) libcxx-$(VERSION)rc1.src.tar.xz
+	$(Q) mv libcxx-$(VERSION)rc1.src libcxx
+	$(Q) patch -p0 < 0001-libcxx-Port-to-NuttX-https-nuttx.apache.org-RTOS.patch
+	$(Q) $(DIRLINK) $(CURDIR)/libcxx/include $(TOPDIR)/include/libcxx
+
+dirlinks:: $(TOPDIR)/include/libcxx
+
+distclean::
+	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libcxx
+	$(call DELDIR, libcxx)
+
+CXXFLAGS += ${shell $(DEFINE) "$(CC)" __GLIBCXX__}
+CXXFLAGS += ${shell $(DEFINE) "$(CC)" _LIBCPP_BUILDING_LIBRARY}
+
+CPPSRCS += $(notdir $(wildcard libcxx/src/*.cpp))
+CPPSRCS += $(notdir $(wildcard libcxx/src/experimental/*.cpp))
+CPPSRCS += $(notdir $(wildcard libcxx/src/filesystem/*.cpp))
+
+DEPPATH += --dep-path libcxx/src
+DEPPATH += --dep-path libcxx/src/experimental
+DEPPATH += --dep-path libcxx/src/filesystem
+
+VPATH += libcxx/src
+VPATH += libcxx/src/experimental
+VPATH += libcxx/src/filesystem

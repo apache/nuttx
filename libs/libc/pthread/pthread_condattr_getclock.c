@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_condtimedwait.c
+ * libs/libc/pthread/pthread_condattr_getclock.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,33 +25,38 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
+#include <errno.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_cond_timedwait
+ * Name:  pthread_condattr_getclock
  *
  * Description:
- *   A thread can perform a timed wait on a condition variable.
+ *   set the clock selection condition variable attribute
  *
  * Input Parameters:
- *   cond    - the condition variable to wait on
- *   mutex   - the mutex that protects the condition variable
- *   abstime - wait until this absolute time
+ *   None
  *
  * Returned Value:
- *   OK (0) on success; A non-zero errno value is returned on failure.
- *
- * Assumptions:
- *   Timing is of resolution 1 msec, with +/-1 millisecond accuracy.
+ *   If successful, the pthread_condattr_getclock() function shall return
+ *   zero and store the value of the clock attribute of attr into the object
+ *   referenced by the clock_id argument. Otherwise, an error number shall
+ *   be returned to indicate the error.
  *
  ****************************************************************************/
 
-int pthread_cond_timedwait(FAR pthread_cond_t *cond,
-                           FAR pthread_mutex_t *mutex,
-                           FAR const struct timespec *abstime)
+int pthread_condattr_getclock(FAR const pthread_condattr_t *attr,
+                              FAR clockid_t *clock_id)
 {
-  return pthread_cond_clockwait(cond, mutex, cond->clockid, abstime);
+  if (!attr)
+    {
+      return EINVAL;
+    }
+
+  *clock_id = attr->clockid;
+
+  return OK;
 }

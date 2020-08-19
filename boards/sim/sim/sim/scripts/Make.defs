@@ -31,6 +31,10 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -O2 -fno-strict-aliasing
 endif
 
+ifeq ($(CONFIG_STACK_CANARIES),y)
+  ARCHOPTIMIZATION += -fstack-protector-all
+endif
+
 ARCHCPUFLAGS = -fno-builtin
 ARCHCPUFLAGSXX = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHPICFLAGS = -fpic
