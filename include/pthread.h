@@ -129,6 +129,11 @@
 #define PTHREAD_INHERIT_SCHED         0
 #define PTHREAD_EXPLICIT_SCHED        1
 
+/* Detach state  */
+
+#define PTHREAD_CREATE_JOINABLE       0
+#define PTHREAD_CREATE_DETACHED       1
+
 /* Default priority */
 
 #define PTHREAD_DEFAULT_PRIORITY      100
@@ -241,7 +246,7 @@ struct pthread_attr_s
   uint8_t priority;            /* Priority of the pthread */
   uint8_t policy;              /* Pthread scheduler policy */
   uint8_t inheritsched;        /* Inherit parent priority/policy? */
-
+  uint8_t detachstate;         /* Initialize to the detach state */
 #ifdef CONFIG_SCHED_SPORADIC
   uint8_t low_priority;        /* Low scheduling priority */
   uint8_t max_repl;            /* Maximum pending replenishments */
@@ -465,6 +470,10 @@ int pthread_attr_setinheritsched(FAR pthread_attr_t *attr,
                                  int inheritsched);
 int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
                                  FAR int *inheritsched);
+int pthread_attr_getdetachstate(FAR const pthread_attr_t *attr,
+                                FAR int *detachstate);
+int pthread_attr_setdetachstate(FAR pthread_attr_t *attr,
+                                int detachstate);
 
 #ifdef CONFIG_SMP
 /* Set or obtain thread affinity attributes */
