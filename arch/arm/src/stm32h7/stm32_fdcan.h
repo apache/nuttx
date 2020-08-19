@@ -56,8 +56,8 @@
 
 /* Port numbers for use with stm32_fdcan_initialize() */
 
-#define FDCAN0 0
 #define FDCAN1 1
+#define FDCAN2 2
 
 /************************************************************************************
  * Public Types

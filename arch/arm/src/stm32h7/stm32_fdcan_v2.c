@@ -128,12 +128,12 @@
 
 /* Bit timing */
 
-#  define FDCAN1_NTSEG1  (CONFIG_STM32H7_FDCAN1_PROPSEG + CONFIG_STM32H7_FDCAN1_PHASESEG1)
-#  define FDCAN1_NTSEG2  CONFIG_STM32H7_FDCAN1_PHASESEG2
+#  define FDCAN1_NTSEG1  (CONFIG_STM32H7_FDCAN1_NTSEG1 - 1)
+#  define FDCAN1_NTSEG2  (CONFIG_STM32H7_FDCAN1_NTSEG2 - 1)
 #  define FDCAN1_NBRP    ((uint32_t)(((float) STM32H7_FDCANCLK_FREQUENCY / \
                        ((float)(FDCAN1_NTSEG1 + FDCAN1_NTSEG2 + 3) * \
                         (float)CONFIG_STM32H7_FDCAN1_BITRATE)) - 1))
-#  define FDCAN1_NSJW    (CONFIG_STM32H7_FDCAN1_FSJW - 1)
+#  define FDCAN1_NSJW    (CONFIG_STM32H7_FDCAN1_NSJW - 1)
 
 #  if FDCAN1_NTSEG1 > 63
 #    error Invalid FDCAN1 NTSEG1
@@ -413,12 +413,12 @@
 #ifdef CONFIG_STM32H7_FDCAN2
   /* Bit timing */
 
-#  define FDCAN2_NTSEG1  (CONFIG_STM32H7_FDCAN2_PROPSEG + CONFIG_STM32H7_FDCAN2_PHASESEG1)
-#  define FDCAN2_NTSEG2  CONFIG_STM32H7_FDCAN2_PHASESEG2
+#  define FDCAN2_NTSEG1  CONFIG_STM32H7_FDCAN2_NTSEG1
+#  define FDCAN2_NTSEG2  CONFIG_STM32H7_FDCAN2_NTSEG2
 #  define FDCAN2_NBRP    ((uint32_t)(((float) STM32H7_FDCANCLK_FREQUENCY / \
                        ((float)(FDCAN2_NTSEG1 + FDCAN2_NTSEG2 + 3) * \
                         (float)CONFIG_STM32H7_FDCAN2_BITRATE)) - 1))
-#  define FDCAN2_NSJW    (CONFIG_STM32H7_FDCAN2_DSJW - 1)
+#  define FDCAN2_NSJW    (CONFIG_STM32H7_FDCAN2_NSJW - 1)
 
 #  if FDCAN2_NTSEG1 > 63
 #    error Invalid FDCAN2 NTSEG1
@@ -1021,14 +1021,14 @@ static const struct stm32_config_s g_fdcan1const =
                       FDCAN_DBTP_DTSEG1(FDCAN1_DTSEG1) |
                       FDCAN_DBTP_DTSEG2(FDCAN1_DTSEG2) |
                       FDCAN_DBTP_DSJW(FDCAN1_DSJW),
-  .port             = 0,
+  .port             = 1,
   .irq0             = STM32_IRQ_FDCAN1_0,
   .irq1             = STM32_IRQ_FDCAN1_1,
 #if defined(CONFIG_STM32H7_FDCAN1_CLASSIC)
   .mode             = FDCAN_CLASSIC_MODE,
 #elif defined(CONFIG_STM32H7_FDCAN1_FD)
   .mode             = FDCAN_FD_MODE,
-#else /* if defined(CONFIG_STM32H7_FDCAN1_FD_BRS) */
+#else /* if defined(STM32H7_FDCAN1_ISO11898_1) */
   .mode             = FDCAN_FD_BRS_MODE,
 #endif
 #if defined(CONFIG_STM32H7_FDCAN1_NONISO_FORMAT)
@@ -1105,7 +1105,7 @@ static const struct stm32_config_s g_fdcan2const =
                       FDCAN_DBTP_DTSEG1(FDCAN2_DTSEG1) |
                       FDCAN_DBTP_DTSEG2(FDCAN2_DTSEG2) |
                       FDCAN_DBTP_DSJW(FDCAN2_DSJW),
-  .port             = 1,
+  .port             = 2,
   .irq0             = STM32_IRQ_FDCAN2_0,
   .irq1             = STM32_IRQ_FDCAN2_1,
 #if defined(CONFIG_STM32H7_FDCAN2_CLASSIC)
@@ -1117,7 +1117,7 @@ static const struct stm32_config_s g_fdcan2const =
 #endif
 #if defined(CONFIG_STM32H7_FDCAN2_NONISO_FORMAT)
   .format           = FDCAN_NONISO_BOSCH_V1_FORMAT,
-#else /* if defined(CONFIG_STM32H7_FDCAN2_FD_BRS) */
+#else /* if defined(STM32H7_FDCAN2_ISO11898_1) */
   .fromat           = FDCAN_ISO11898_1_FORMAT,
 #endif
   .nstdfilters      = CONFIG_STM32H7_FDCAN2_NSTDFILTERS,
@@ -3989,7 +3989,7 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
   /* Enable writing to configuration registers */
 
   regval  = fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET);
-  regval |= (FDCAN_CCCR_INIT | FDCAN_CCCR_CCE); //TODO: don't really need INIT
+  regval |= FDCAN_CCCR_CCE;
   fdcan_putreg(priv, STM32_FDCAN_CCCR_OFFSET, regval);
 
   /* Global Filter Configuration:
