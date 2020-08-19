@@ -116,19 +116,12 @@ static void gs2200m_irq_enable(void)
 
   wlinfo("== ec:%d called=%d \n", _enable_count, _n_called++);
 
-  if (1 == _enable_count)
-    {
-      /* NOTE: This would happen if we received an event */
-
-      return;
-    }
-
-  _enable_count++;
-
-  if (1 == _enable_count)
+  if (0 == _enable_count)
     {
       cxd56_gpioint_enable(PIN_UART2_CTS);
     }
+
+  _enable_count++;
 
   spin_unlock_irqrestore(flags);
 }
