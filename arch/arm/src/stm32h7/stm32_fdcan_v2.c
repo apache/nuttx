@@ -4100,6 +4100,24 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
   fdcan_putreg(priv, STM32_FDCAN_NDAT1_OFFSET, 0xffffffff);
   fdcan_putreg(priv, STM32_FDCAN_NDAT2_OFFSET, 0xffffffff);
 
+  /* TTCAN configuration (FDCAN1 only) */
+
+  if(config->port == 1)
+    {
+      /* Disable TTCAN operation */
+
+      regval = fdcan_getreg(priv, STM32_FDCAN_TTOCF_OFFSET);
+      regval &= ~FDCAN_TTOCF_OM_MASK;
+      fdcan_putreg(priv, STM32_FDCAN_TTOCF_OFFSET, regval);
+    }
+  
+  /* CCU configuration */ /*REVIST: shared CCU config between cores */
+
+  regval = getreg32(STM32_FDCAN_CCU_CCFG);
+  regval |= FDCAN_CCU_CCFG_BCC;
+  putreg32(regval, STM32_FDCAN_CCU_CCFG);
+
+
   /* Clear to CCCR defaults in preparation of selection of frame
    * format and mode 
    */
