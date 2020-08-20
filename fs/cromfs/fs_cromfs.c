@@ -755,8 +755,6 @@ static int cromfs_open(FAR struct file *filep, FAR const char *relpath,
       return ret;
     }
 
-  DEBUGASSERT(node != NULL);
-
   /* Verify that the node is a regular file */
 
   if (!S_ISREG(info.ci_mode))
@@ -1206,8 +1204,6 @@ static int cromfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
       return ret;
     }
-
-  DEBUGASSERT(node != NULL);
 
   /* Verify that the node is a directory */
 
