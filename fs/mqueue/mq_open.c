@@ -289,7 +289,7 @@ mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
   ret = nxmq_open(mq_name, oflags, mode, attr, &mqdes);
   if (ret < 0)
     {
-      set_errno(ret);
+      set_errno(-ret);
       mqdes = (mqd_t)ERROR;
     }
 
