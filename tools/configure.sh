@@ -37,10 +37,11 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-e] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name> [make-opts]
+USAGE: ${0} [-E] [-e] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name> [make-opts]
 
 Where:
-  -e enforce distclean if already configured
+  -E enforces distclean.
+  -e performs distclean if configuration changed.
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
   -c selects the Windows host and Cygwin (c) environment.
@@ -71,7 +72,8 @@ unset boardconfig
 unset winnative
 unset appdir
 unset host
-unset enforce
+unset enforce_distclean
+unset distclean
 
 while [ ! -z "$1" ]; do
   case "$1" in
@@ -87,8 +89,11 @@ while [ ! -z "$1" ]; do
     winnative=y
     host+=" $1"
     ;;
+  -E )
+    enforce_distclean=y
+    ;;
   -e )
-    enforce=y
+    distclean=y
     ;;
   -h )
     echo "$USAGE"
@@ -166,13 +171,17 @@ if [ ! -r ${src_config} ]; then
   exit 5
 fi
 
+if [ "X${enforce_distclean}" = "Xy" ]; then
+  make -C ${TOPDIR} distclean $*
+fi
+
 if [ -r ${dest_config} ]; then
   if cmp -s ${src_config} ${backup_config}; then
     echo "No configuration change."
     exit 0
   fi
 
-  if [ "X${enforce}" = "Xy" ]; then
+  if [ "X${distclean}" = "Xy" ]; then
     make -C ${TOPDIR} distclean $*
   else
     echo "Already configured!"
