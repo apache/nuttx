@@ -85,18 +85,21 @@ static void esp32_set_cpu_freq(int cpu_freq_mhz)
       case 160:
         per_conf = CPU_160M;
         break;
+
       case 240:
         dbias = DIG_DBIAS_240M;
         per_conf = CPU_240M;
         break;
+
       case 80:
         per_conf = CPU_80M;
+
       default:
         break;
     }
 
-  value = (((80 * MHZ) >> 12) & UINT16_MAX)
-          | ((((80 * MHZ) >> 12) & UINT16_MAX) << 16);
+  value = (((80 * MHZ) >> 12) & UINT16_MAX) |
+          ((((80 * MHZ) >> 12) & UINT16_MAX) << 16);
   putreg32(value, RTC_APB_FREQ_REG);
   putreg32(per_conf, DPORT_CPU_PER_CONF_REG);
   REG_SET_FIELD(RTC_CNTL_REG, RTC_CNTL_DIG_DBIAS_WAK, dbias);
@@ -150,6 +153,7 @@ static void esp32_bbpll_configure(enum xtal_freq_e xtal_freq, int pll_freq)
             dcur = 6;
             bw = 3;
             break;
+
           case XTAL_26M:
             div_ref = 12;
             div7_0 = 224;
@@ -158,6 +162,7 @@ static void esp32_bbpll_configure(enum xtal_freq_e xtal_freq, int pll_freq)
             dcur = 0;
             bw = 1;
             break;
+
           case XTAL_24M:
             div_ref = 11;
             div7_0 = 224;
@@ -166,6 +171,7 @@ static void esp32_bbpll_configure(enum xtal_freq_e xtal_freq, int pll_freq)
             dcur = 0;
             bw = 1;
             break;
+
           default:
             div_ref = 12;
             div7_0 = 224;
@@ -199,6 +205,7 @@ static void esp32_bbpll_configure(enum xtal_freq_e xtal_freq, int pll_freq)
             dcur = 6;
             bw = 3;
             break;
+
           case XTAL_26M:
             div_ref = 12;
             div7_0 = 144;
@@ -207,6 +214,7 @@ static void esp32_bbpll_configure(enum xtal_freq_e xtal_freq, int pll_freq)
             dcur = 0;
             bw = 1;
             break;
+
           case XTAL_24M:
             div_ref = 11;
             div7_0 = 144;
@@ -215,6 +223,7 @@ static void esp32_bbpll_configure(enum xtal_freq_e xtal_freq, int pll_freq)
             dcur = 0;
             bw = 1;
             break;
+
           default:
             div_ref = 12;
             div7_0 = 224;
@@ -344,9 +353,11 @@ void esp32_clockconfig(void)
       case 240:
         source_freq_mhz = RTC_PLL_FREQ_480M;
         break;
+
       case 160:
         source_freq_mhz = RTC_PLL_FREQ_320M;
         break;
+
       case 80:
       default:
         return;
