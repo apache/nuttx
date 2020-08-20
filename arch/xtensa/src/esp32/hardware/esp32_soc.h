@@ -61,16 +61,16 @@
 #define BIT12   0x00001000
 #define BIT11   0x00000800
 #define BIT10   0x00000400
-#define BIT9     0x00000200
-#define BIT8     0x00000100
-#define BIT7     0x00000080
-#define BIT6     0x00000040
-#define BIT5     0x00000020
-#define BIT4     0x00000010
-#define BIT3     0x00000008
-#define BIT2     0x00000004
-#define BIT1     0x00000002
-#define BIT0     0x00000001
+#define BIT9    0x00000200
+#define BIT8    0x00000100
+#define BIT7    0x00000080
+#define BIT6    0x00000040
+#define BIT5    0x00000020
+#define BIT4    0x00000010
+#define BIT3    0x00000008
+#define BIT2    0x00000004
+#define BIT1    0x00000002
+#define BIT0    0x00000001
 
 #define PRO_CPU_NUM (0)
 #define APP_CPU_NUM (1)
@@ -372,26 +372,28 @@
 
 /* Other interrupt numbers should be managed by the user */
 
-#define DR_REG_APB_CTRL_BASE                    0x3ff66000    /* Old name for SYSCON, to be removed */
-#define APB_CTRL_SYSCLK_CONF_REG          (DR_REG_APB_CTRL_BASE + 0x0)
-#define APB_CTRL_XTAL_TICK_CONF_REG          (DR_REG_APB_CTRL_BASE + 0x4)
+#define DR_REG_APB_CTRL_BASE        0x3ff66000    /* Old name for SYSCON,
+                                                   to be removed */
+#define APB_CTRL_SYSCLK_CONF_REG    (DR_REG_APB_CTRL_BASE + 0x0)
+#define APB_CTRL_XTAL_TICK_CONF_REG (DR_REG_APB_CTRL_BASE + 0x4)
 
 /* APB_CTRL_PRE_DIV_CNT : R/W ;bitpos:[9:0] ;default: 10'h0 ; */
 
-#define APB_CTRL_PRE_DIV_CNT  0x000003FF
-#define APB_CTRL_PRE_DIV_CNT_M  ((APB_CTRL_PRE_DIV_CNT_V)<<(APB_CTRL_PRE_DIV_CNT_S))
-#define APB_CTRL_PRE_DIV_CNT_V  0x3FF
-#define APB_CTRL_PRE_DIV_CNT_S  0
+#define APB_CTRL_PRE_DIV_CNT        0x000003FF
+#define APB_CTRL_PRE_DIV_CNT_M      ((APB_CTRL_PRE_DIV_CNT_V) << \
+                                     (APB_CTRL_PRE_DIV_CNT_S))
+#define APB_CTRL_PRE_DIV_CNT_V      0x3FF
+#define APB_CTRL_PRE_DIV_CNT_S      0
 
-#define I2C_BBPLL_IR_CAL_DELAY         0
-#define I2C_BBPLL_IR_CAL_EXT_CAP       1
-#define I2C_BBPLL_OC_ENB_FCAL          4
-#define I2C_BBPLL_OC_ENB_VCON          10
-#define I2C_BBPLL_BBADC_CAL_7_0        12
+#define I2C_BBPLL_IR_CAL_DELAY      0
+#define I2C_BBPLL_IR_CAL_EXT_CAP    1
+#define I2C_BBPLL_OC_ENB_FCAL       4
+#define I2C_BBPLL_OC_ENB_VCON       10
+#define I2C_BBPLL_BBADC_CAL_7_0     12
 
-#define I2C_BBPLL_OC_LREF        2
-#define I2C_BBPLL_OC_LREF_MSB    7
-#define I2C_BBPLL_OC_LREF_LSB    7
+#define I2C_BBPLL_OC_LREF           2
+#define I2C_BBPLL_OC_LREF_MSB       7
+#define I2C_BBPLL_OC_LREF_LSB       7
 
 #define I2C_BBPLL_OC_DIV_7_0        3
 #define I2C_BBPLL_OC_DIV_7_0_MSB    7
@@ -401,14 +403,14 @@
 #define I2C_BBPLL_BBADC_DSMP_MSB    7
 #define I2C_BBPLL_BBADC_DSMP_LSB    4
 
-#define I2C_BBPLL_OC_DCUR        5
-#define I2C_BBPLL_OC_DCUR_MSB    2
-#define I2C_BBPLL_OC_DCUR_LSB    0
+#define I2C_BBPLL_OC_DCUR           5
+#define I2C_BBPLL_OC_DCUR_MSB       2
+#define I2C_BBPLL_OC_DCUR_LSB       0
 
-#define I2C_BBPLL_ENDIV5        11
+#define I2C_BBPLL_ENDIV5            11
 
-#define I2C_BBPLL               0x66
-#define I2C_BBPLL_HOSTID        4
+#define I2C_BBPLL                   0x66
+#define I2C_BBPLL_HOSTID            4
 
 extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
                             int indata);
@@ -484,11 +486,13 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
 #define RTC_CNTL_DBIAS_HP_VOLT      (RTC_CNTL_DBIAS_1V25 - \
                                     (REG_GET_FIELD(EFUSE_BLK0_RDATA5_REG, \
                                      EFUSE_RD_VOL_LEVEL_HP_INV)))
+
 #ifdef CONFIG_ESPTOOLPY_FLASHFREQ_80M
 #define DIG_DBIAS_80M_160M          RTC_CNTL_DBIAS_HP_VOLT
 #else
 #define DIG_DBIAS_80M_160M          RTC_CNTL_DBIAS_1V10
 #endif
+
 #define DIG_DBIAS_240M              RTC_CNTL_DBIAS_HP_VOLT
 #define DIG_DBIAS_XTAL              RTC_CNTL_DBIAS_1V10
 #define DIG_DBIAS_2M                RTC_CNTL_DBIAS_1V00
