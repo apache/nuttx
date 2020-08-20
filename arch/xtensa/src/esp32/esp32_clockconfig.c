@@ -38,7 +38,7 @@
  * Private Types
  ****************************************************************************/
 
-enum xtal_freq_t
+enum xtal_freq_e
 {
   XTAL_40M = 40,
   XTAL_26M = 26,
@@ -46,7 +46,7 @@ enum xtal_freq_t
   XTAL_AUTO = 0
 };
 
-enum cpu_freq_t
+enum cpu_freq_e
 {
   CPU_80M = 0,
   CPU_160M = 1,
@@ -56,6 +56,8 @@ enum cpu_freq_t
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+extern void ets_delay_us(int delay_us);
 
 /****************************************************************************
  * Name: esp32_set_cpu_freq
@@ -117,7 +119,7 @@ static void esp32_set_cpu_freq(int cpu_freq_mhz)
  *
  ****************************************************************************/
 
-static void esp32_bbpll_configure(enum xtal_freq_t xtal_freq, int pll_freq)
+static void esp32_bbpll_configure(enum xtal_freq_e xtal_freq, int pll_freq)
 {
   uint8_t div_ref;
   uint8_t div7_0;
@@ -335,18 +337,14 @@ void esp32_clockconfig(void)
 {
   uint32_t freq_mhz = CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ;
   uint32_t source_freq_mhz;
-  enum xtal_freq_t xtal_freq = XTAL_40M;
-  enum cpu_freq_t freq;
+  enum xtal_freq_e xtal_freq = XTAL_40M;
 
-  freq = CPU_80M;
   switch (freq_mhz)
     {
       case 240:
-        freq = CPU_240M;
         source_freq_mhz = RTC_PLL_FREQ_480M;
         break;
       case 160:
-        freq = CPU_160M;
         source_freq_mhz = RTC_PLL_FREQ_320M;
         break;
       case 80:
