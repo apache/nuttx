@@ -31,26 +31,10 @@ Contents
 STATUS
 ======
 
-  Currently, the NuttX port depends on the bootloader to initialize hardware,
-  including basic (slow) clocking.  That is because the clock configuration
-  logic is only available via an Espressif add-on library.
+  Currently we have support to UART, SPI, I2C, Ethernet, etc.
 
-  Because of this, all board configurations require these settings:
-
-    CONFIG_EXPERIMENTAL=y
-    CONFIG_DEBUG_FEATURES=y
-    CONFIG_SUPPRESS_CLOCK_CONFIG=y
-
-  Some configurations may also require:
-
-    CONFIG_SUPPRESS_UART_CONFIG=y
-
-  The NuttX fork, TizenRT, has taken the NuttX ESP32 code and developed it
-  further.  Refer to:
-
-    https://github.com/Samsung/TizenRT/tree/master/os/arch/xtensa
-
-  for the current status.
+  Espressif is working to include support to WiFi and Bluetooth, but
+  it will depends on their external libraries to get it up and running.
 
 ESP32 Features
 ==============

@@ -5,7 +5,7 @@
 
 if ARCH_CHIP_ESP32
 
-choice ESP32_DEFAULT_CPU_FREQ_MHZ
+choice ESP32_DEFAULT_CPU_FREQ
 	prompt "CPU frequency"
 	default ESP32_DEFAULT_CPU_FREQ_240
 	help
