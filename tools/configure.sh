@@ -40,7 +40,7 @@ USAGE="
 USAGE: ${0} [-E] [-e] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name> [make-opts]
 
 Where:
-  -E enforces distclean.
+  -E enforces distclean if already configured.
   -e performs distclean if configuration changed.
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
@@ -171,22 +171,22 @@ if [ ! -r ${src_config} ]; then
   exit 5
 fi
 
-if [ "X${enforce_distclean}" = "Xy" ]; then
-  make -C ${TOPDIR} distclean $*
-fi
-
 if [ -r ${dest_config} ]; then
-  if cmp -s ${src_config} ${backup_config}; then
-    echo "No configuration change."
-    exit 0
-  fi
-
-  if [ "X${distclean}" = "Xy" ]; then
+  if [ "X${enforce_distclean}" = "Xy" ]; then
     make -C ${TOPDIR} distclean $*
   else
-    echo "Already configured!"
-    echo "Do 'make distclean' and try again."
-    exit 6
+    if cmp -s ${src_config} ${backup_config}; then
+      echo "No configuration change."
+      exit 0
+    fi
+
+    if [ "X${distclean}" = "Xy" ]; then
+      make -C ${TOPDIR} distclean $*
+    else
+      echo "Already configured!"
+      echo "Do 'make distclean' and try again."
+      exit 6
+    fi
   fi
 fi
 
