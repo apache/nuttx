@@ -122,7 +122,7 @@
 
 /* void CPU_FREE(cpu_set_t *set); */
 
-#  define CPU_ALLOC(s) free(s)
+#  define CPU_FREE(s) free(s)
 
 /* size_t CPU_ALLOC_SIZE(int num_cpus); */
 
