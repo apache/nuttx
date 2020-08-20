@@ -66,11 +66,11 @@
 #define SAM_NVMCTRL_SEECFG_OFFSET    0x002a  /* SmartEEPROM configuration register */
 #define SAM_NVMCTRL_SEESTAT_OFFSET   0x002c  /* SmartEEPROM status register */
 
-
 /* NVMCTRL register addresses ***************************************************************/
 
 #define SAM_NVMCTRL_CTRLA            (SAM_NVMCTRL_BASE + SAM_NVMCTRL_CTRLA_OFFSET)
 #define SAM_NVMCTRL_CTRLB            (SAM_NVMCTRL_BASE + SAM_NVMCTRL_CTRLB_OFFSET)
+#define SAM_NVMCTRL_PARAM            (SAM_NVMCTRL_BASE + SAM_NVMCTRL_PARAM_OFFSET)
 #define SAM_NVMCTRL_INTENCLR         (SAM_NVMCTRL_BASE + SAM_NVMCTRL_INTENCLR_OFFSET)
 #define SAM_NVMCTRL_INTENSET         (SAM_NVMCTRL_BASE + SAM_NVMCTRL_INTENSET_OFFSET)
 #define SAM_NVMCTRL_INTFLAG          (SAM_NVMCTRL_BASE + SAM_NVMCTRL_INTFLAG_OFFSET)
@@ -95,15 +95,15 @@
 #  define NVMCTRL_CTRLA_WMODE_MAN    (0 << NVMCTRL_CTRLA_WMODE_SHIFT) /* Manual Write */
 #  define NVMCTRL_CTRLA_WMODE_ADW    (1 << NVMCTRL_CTRLA_WMODE_SHIFT) /* Automatic Double Word Write */
 #  define NVMCTRL_CTRLA_WMODE_AQW    (2 << NVMCTRL_CTRLA_WMODE_SHIFT) /* Automatic Quad Word */
-#  define NVMCTRL_CTRLA_WMODE_AP     (2 << NVMCTRL_CTRLA_WMODE_SHIFT) /* Automatic Page Write */
-#define NVMCTRL_CTRLA_PRM_SHIFT      (8)       /* Bits 8-9: Power Reduction Mode during Sleep */
+#  define NVMCTRL_CTRLA_WMODE_AP     (3 << NVMCTRL_CTRLA_WMODE_SHIFT) /* Automatic Page Write */
+#define NVMCTRL_CTRLA_PRM_SHIFT      (6)                              /* Bits 8-9: Power Reduction Mode during Sleep */
 #define NVMCTRL_CTRLA_PRM_MASK       (3 << NVMCTRL_CTRLA_PRM_SHIFT)
 #  define NVMCTRL_CTRLA_PRM_SEMIAUTO (0 << NVMCTRL_CTRLA_PRM_SHIFT) /* Enter low power on STANDBY/SPRM cmd;
                                                                      * Exit on first access */
 #  define NVMCTRL_CTRLA_PRM_FULLAUTO (1 << NVMCTRL_CTRLA_PRM_SHIFT) /* Enter/Exit low power on STANDBY */
 #  define NVMCTRL_CTRLA_PRM_MANUAL   (3 << NVMCTRL_CTRLA_PRM_SHIFT) /* Enter low power only on SPRM cmd;
                                                                      * Exit on first access */
-#define NVMCTRL_CTRLA_RWS_SHIFT      (8)       /* Bits 8-11: NVM Read Wait States */
+#define NVMCTRL_CTRLA_RWS_SHIFT      (8)                            /* Bits 8-11: NVM Read Wait States */
 #define NVMCTRL_CTRLA_RWS_MASK       (15 << NVMCTRL_CTRLA_RWS_SHIFT)
 #  define NVMCTRL_CTRLA_RWS(n)       ((uint32_t)(n) << NVMCTRL_CTRLA_RWS_SHIFT)
 #define NVMCTRL_CTRLA_AHBNS0         (1 << 12) /* Bit 12: Force AHB0 access to Non-Sequential */
@@ -139,7 +139,7 @@
 #  define NVMCTRL_CTRLB_CMD_USEE     (0x35 << NVMCTRL_CTRLB_CMD_SHIFT) /* Unlock SmartEEPROM data*/
 #  define NVMCTRL_CTRLB_CMD_LSEER    (0x36 << NVMCTRL_CTRLB_CMD_SHIFT) /* Lock SmartEEPROM registers */
 #  define NVMCTRL_CTRLB_CMD_USEER    (0x37 << NVMCTRL_CTRLB_CMD_SHIFT) /* Unlock SmartEEPROM registers */
-#define NVMCTRL_CTRLB_CMDEX_SHIFT    (8)       /* Bits 8-15: Command Execution */
+#define NVMCTRL_CTRLB_CMDEX_SHIFT    (8)                               /* Bits 8-15: Command Execution */
 #define NVMCTRL_CTRLB_CMDEX_MASK     (0xff << NVMCTRL_CTRLB_CMDEX_SHIFT)
 #  define NVMCTRL_CTRLB_CMDEX_KEY    (0xa5 << NVMCTRL_CTRLB_CMDEX_SHIFT)
 
@@ -158,11 +158,12 @@
 #  define NVMCTRL_PARAM_PSZ_256B     (5 << NVMCTRL_PARAM_PSZ_SHIFT) /* 256 bytes */
 #  define NVMCTRL_PARAM_PSZ_512B     (6 << NVMCTRL_PARAM_PSZ_SHIFT) /* 512 bytes */
 #  define NVMCTRL_PARAM_PSZ_1KB      (7 << NVMCTRL_PARAM_PSZ_SHIFT) /* 1024 bytes */
-#define NVMCTRL_PARAM_SEE_           (1 << 31) /* Bit 31: SmartEEPROM Supported */
+#define NVMCTRL_PARAM_SEE_           (1 << 31)                      /* Bit 31: SmartEEPROM Supported */
 
-/* Interrupt clear register */
-/* Interrupt set register */
-/* Interface flags status and clear register */
+/* Interrupt clear register
+ * Interrupt set register
+ * Interface flags status and clear register
+ */
 
 #define NVMCTRL_INT_DONE             (1 << 0)  /* Bit 0:  Command done interrupt */
 #define NVMCTRL_INT_ADDRE            (1 << 1)  /* Bit 1:  Address error interrupt */
@@ -208,7 +209,7 @@
 #  define NVMCTRL_ECCERR_TYPEL_NONE   (0 << NVMCTRL_ECCERR_TYPEL_SHIFT) /* No error detected */
 #  define NVMCTRL_ECCERR_TYPEL_SINGLE (1 << NVMCTRL_ECCERR_TYPEL_SHIFT) /* Single error(s) detected */
 #  define NVMCTRL_ECCERR_TYPEL_DUAL   (2 << NVMCTRL_ECCERR_TYPEL_SHIFT) /* Dual error(s) detected */
-#define NVMCTRL_ECCERR_TYPEH_SHIFT    (30)     /* Bits 30-31: High double-word error type */
+#define NVMCTRL_ECCERR_TYPEH_SHIFT    (30)                              /* Bits 30-31: High double-word error type */
 #define NVMCTRL_ECCERR_TYPEH_MASK     (3 << NVMCTRL_ECCERR_TYPEH_SHIFT)
 #  define NVMCTRL_ECCERR_TYPEH_NONE   (0 << NVMCTRL_ECCERR_TYPEH_SHIFT) /* No error detected */
 #  define NVMCTRL_ECCERR_TYPEH_SINGLE (1 << NVMCTRL_ECCERR_TYPEH_SHIFT) /* Single error(s) detected */
@@ -247,7 +248,7 @@
  ********************************************************************************************/
 
 /********************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ********************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_NVMCTRL_H */

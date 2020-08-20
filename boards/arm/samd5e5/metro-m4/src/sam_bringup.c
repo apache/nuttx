@@ -64,6 +64,11 @@
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
+#ifdef CONFIG_BQ27426
+  #include <nuttx/power/battery_gauge.h>
+  #include <nuttx/power/battery_ioctl.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -98,7 +103,7 @@ int sam_bringup(void)
   ret = mount(NULL, PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
-      syslot(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
              PROCFS_MOUNTPOINT, ret);
     }
 #endif
@@ -137,10 +142,45 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_FS_SMARTFS
+  /* Initialize Smart File System (SMARTFS) */
+
+  ret = sam_smartfs_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount smartfs  %d\n", ret);
+      return ret;
+    }
+
+  /* Mount the file system at /mnt/nvm */
+
+  ret = mount("/dev/smart0", "/mnt/nvm", "smartfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount the SmartFS volume: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_FS_AUTOMOUNTER
   /* Initialize the auto-mounter */
 
   sam_automount_initialize();
+#endif
+
+#ifdef CONFIG_BQ27426
+  /* Configure and initialize the BQ2426 distance sensor */
+
+  ret = sam_bq27426_initialize("/dev/batt1");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_bq27426_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+  ret = sam_gpio_initialize();
 #endif
 
   UNUSED(ret);
