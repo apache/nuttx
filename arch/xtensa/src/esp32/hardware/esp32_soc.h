@@ -372,8 +372,8 @@
 
 /* Other interrupt numbers should be managed by the user */
 
-#define DR_REG_APB_CTRL_BASE        0x3ff66000    /* Old name for SYSCON,
-                                                   to be removed */
+#define DR_REG_APB_CTRL_BASE        0x3ff66000    /* Old name for SYSCON */
+                                                  /* to be removed */
 #define APB_CTRL_SYSCLK_CONF_REG    (DR_REG_APB_CTRL_BASE + 0x0)
 #define APB_CTRL_XTAL_TICK_CONF_REG (DR_REG_APB_CTRL_BASE + 0x4)
 
