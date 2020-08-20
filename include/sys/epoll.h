@@ -95,22 +95,8 @@ typedef union poll_data
 
 struct epoll_event
 {
+  uint32_t     events;
   epoll_data_t data;
-  pollevent_t  events;   /* The input event flags */
-
-  /* Non-standard fields used internally by NuttX. */
-
-  pollevent_t  revents;  /* The output event flags */
-  FAR void    *reserved; /* reserved field sync with struct pollfd */
-  FAR sem_t   *sem;      /* Pointer to semaphore used to post output event */
-  FAR void    *priv;     /* For use by drivers */
-};
-
-struct epoll_head
-{
-  int size;
-  int occupied;
-  FAR struct epoll_event *evs;
 };
 
 /****************************************************************************

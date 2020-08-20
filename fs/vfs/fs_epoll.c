@@ -50,6 +50,18 @@
 #include <nuttx/kmalloc.h>
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct epoll_head
+{
+  int size;
+  int occupied;
+  FAR epoll_data_t *data;
+  FAR struct pollfd *poll;
+};
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -67,11 +79,14 @@
 int epoll_create(int size)
 {
   FAR struct epoll_head *eph =
-    (FAR struct epoll_head *)kmm_malloc(sizeof(struct epoll_head));
+    (FAR struct epoll_head *)kmm_malloc(sizeof(struct epoll_head) +
+                                        sizeof(epoll_data_t) * size +
+                                        sizeof(struct pollfd) * size);
 
   eph->size = size;
   eph->occupied = 0;
-  eph->evs = kmm_malloc(sizeof(struct epoll_event) * eph->size);
+  eph->data = (FAR epoll_data_t *)(eph + 1);
+  eph->poll = (FAR struct pollfd *)(eph->data + size);
 
   /* REVISIT: This will not work on machines where:
    * sizeof(struct epoll_head *) > sizeof(int)
@@ -124,7 +139,6 @@ void epoll_close(int epfd)
 
   FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
 
-  kmm_free(eph->evs);
   kmm_free(eph);
 }
 
@@ -153,8 +167,9 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
         finfo("%08x CTL ADD(%d): fd=%d ev=%08x\n",
               epfd, eph->occupied, fd, ev->events);
 
-        eph->evs[eph->occupied].events = ev->events | POLLERR | POLLHUP;
-        eph->evs[eph->occupied++].data.fd = fd;
+        eph->data[eph->occupied]        = ev->data;
+        eph->poll[eph->occupied].events = ev->events | POLLERR | POLLHUP;
+        eph->poll[eph->occupied++].fd   = fd;
         return 0;
 
       case EPOLL_CTL_DEL:
@@ -163,12 +178,14 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
 
           for (i = 0; i < eph->occupied; i++)
             {
-              if (eph->evs[i].data.fd == fd)
+              if (eph->poll[i].fd == fd)
                 {
                   if (i != eph->occupied - 1)
                     {
-                      memmove(&eph->evs[i], &eph->evs[i + 1],
-                              eph->occupied - i);
+                      memmove(&eph->data[i], &eph->data[i + 1],
+                              sizeof(epoll_data_t) * (eph->occupied - i));
+                      memmove(&eph->poll[i], &eph->poll[i + 1],
+                              sizeof(struct pollfd) * (eph->occupied - i));
                     }
 
                   eph->occupied--;
@@ -188,9 +205,10 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
 
           for (i = 0; i < eph->occupied; i++)
             {
-              if (eph->evs[i].data.fd == fd)
+              if (eph->poll[i].fd == fd)
                 {
-                  eph->evs[i].events = ev->events | POLLERR | POLLHUP;
+                  eph->data[i]        = ev->data;
+                  eph->poll[i].events = ev->events | POLLERR | POLLHUP;
                   return 0;
                 }
             }
@@ -220,8 +238,7 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
 
   if (timeout < 0)
     {
-      rc = ppoll((FAR struct pollfd *)eph->evs,
-                 eph->occupied, NULL, sigmask);
+      rc = ppoll(eph->poll, eph->occupied, NULL, sigmask);
     }
   else
     {
@@ -230,8 +247,7 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
       timeout_ts.tv_sec  = timeout / 1000;
       timeout_ts.tv_nsec = timeout % 1000 * 1000;
 
-      rc = ppoll((FAR struct pollfd *)eph->evs,
-                 eph->occupied, &timeout_ts, sigmask);
+      rc = ppoll(eph->poll, eph->occupied, &timeout_ts, sigmask);
     }
 
   if (rc <= 0)
@@ -243,7 +259,7 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
 
           for (i = 0; i < eph->occupied; i++)
             {
-              ferr("  %02d: fd=%d\n", i, eph->evs[i].data.fd);
+              ferr("  %02d: fd=%d\n", i, eph->poll[i].fd);
             }
         }
 
@@ -259,16 +275,14 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
 
   for (i = 0, counter = 0; i < rc && counter < eph->occupied; counter++)
     {
-      if (eph->evs[counter].revents != 0)
+      if (eph->poll[counter].revents != 0)
         {
-          evs[i].data.fd = eph->evs[counter].data.fd;
-          evs[i].events  = eph->evs[counter].revents;
-          if (eph->evs[counter].events & EPOLLONESHOT)
+          evs[i].data     = eph->data[counter];
+          evs[i++].events = eph->poll[counter].revents;
+          if (eph->poll[counter].events & EPOLLONESHOT)
             {
-              eph->evs[counter].events = 0; /* Disable oneshot internally */
+              eph->poll[counter].events = 0; /* Disable oneshot internally */
             }
-
-          i += 1;
         }
     }
 
