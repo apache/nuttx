@@ -9,7 +9,7 @@ will be reviewed and checked using Continuous Integration (CI) practices.
 You should be aware of the following:
 
   - All contributions must adhere to the :doc:`Coding Standard <coding_style>`. You can check your files using ``nxstyle``
-    or complete patchsets using ``checkpath`` script (both found in ``tools`` subdirectory of NuttX repository). This check will also run
+    or complete patchsets using ``checkpatch`` script (both found in ``tools`` subdirectory of NuttX repository). This check will also run
     automatically during CI to ensure conformance.
     
     Note that not all existing files in the repository are already adapted to conform to the standard as this is an ongoing effort. Thus,
