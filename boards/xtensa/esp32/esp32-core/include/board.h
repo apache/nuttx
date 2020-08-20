@@ -70,13 +70,17 @@
  *   which is 40MHz by default.
  *
  * Reference:
- *     https://github.com/espressif/esp-idf/blob/6fd855ab8d00d23bad4660216bc2122c2285d5be/components/bootloader_support/src/bootloader_clock.c#L38-L62
+ *     https://bit.ly/3aJhjPH (shorten URL to avoid nxstyle issues)
  */
 
 #ifdef CONFIG_ESP32CORE_RUN_IRAM
 #  define BOARD_CLOCK_FREQUENCY (2 * BOARD_XTAL_FREQUENCY)
 #else
+#ifdef CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ
+#  define BOARD_CLOCK_FREQUENCY (CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ * 1000000)
+#else
 #  define BOARD_CLOCK_FREQUENCY 80000000
+#endif
 #endif
 
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_CORE_INCLUDE_BOARD_H */

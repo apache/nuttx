@@ -31,20 +31,14 @@
 #include <stdint.h>
 #include "xtensa.h"
 
-#ifndef CONFIG_SUPPRESS_CLOCK_CONFIG
-#warning REVISIT ... function prototypes
-
-void phy_get_romfunc_addr(void);
-void rtc_init_lite(void);
-void rtc_set_cpu_freq(xtal_freq_t xtal_freq, enum xtal_freq_e cpu_freq);
-#endif
+#include "hardware/esp32_dport.h"
+#include "hardware/esp32_soc.h"
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-#ifndef CONFIG_SUPPRESS_CLOCK_CONFIG
-enum xtal_freq_e
+enum xtal_freq_t
 {
   XTAL_40M = 40,
   XTAL_26M = 26,
@@ -52,13 +46,276 @@ enum xtal_freq_e
   XTAL_AUTO = 0
 };
 
-enum xtal_freq_e
+enum cpu_freq_t
 {
-  CPU_80M = 1,
-  CPU_160M = 2,
-  CPU_240M = 3,
+  CPU_80M = 0,
+  CPU_160M = 1,
+  CPU_240M = 2,
 };
-#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32_set_cpu_freq
+ *
+ * Description:
+ *   Switch to one of PLL-based frequencies.
+ *   Current frequency can be XTAL or PLL.
+ *
+ * Input Parameters:
+ *   cpu_freq_mhz      - new CPU frequency
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp32_set_cpu_freq(int cpu_freq_mhz)
+{
+  int dbias = DIG_DBIAS_80M_160M;
+  int per_conf;
+  uint32_t  value;
+
+  switch (cpu_freq_mhz)
+    {
+      case 160:
+        per_conf = CPU_160M;
+        break;
+      case 240:
+        dbias = DIG_DBIAS_240M;
+        per_conf = CPU_240M;
+        break;
+      case 80:
+        per_conf = CPU_80M;
+      default:
+        break;
+    }
+
+  value = (((80 * MHZ) >> 12) & UINT16_MAX)
+          | ((((80 * MHZ) >> 12) & UINT16_MAX) << 16);
+  putreg32(value, RTC_APB_FREQ_REG);
+  putreg32(per_conf, DPORT_CPU_PER_CONF_REG);
+  REG_SET_FIELD(RTC_CNTL_REG, RTC_CNTL_DIG_DBIAS_WAK, dbias);
+  REG_SET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_SOC_CLK_SEL,
+                RTC_CNTL_SOC_CLK_SEL_PLL);
+}
+
+/****************************************************************************
+ * Name: esp32_bbpll_configure
+ *
+ * Description:
+ *   Configure main XTAL frequency values according to pll_freq.
+ *
+ * Input Parameters:
+ *   xtal_freq -    XTAL frequency values
+ *   pll_freq  -    PLL frequency values
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp32_bbpll_configure(enum xtal_freq_t xtal_freq, int pll_freq)
+{
+  uint8_t div_ref;
+  uint8_t div7_0;
+  uint8_t div10_8;
+  uint8_t lref;
+  uint8_t dcur;
+  uint8_t bw;
+  uint8_t i2c_bbpll_lref;
+  uint8_t i2c_bbpll_div_7_0;
+  uint8_t i2c_bbpll_dcur;
+
+  if (pll_freq == RTC_PLL_FREQ_320M)
+    {
+      /* Raise the voltage, if needed */
+
+      REG_SET_FIELD(RTC_CNTL_REG, RTC_CNTL_DIG_DBIAS_WAK,
+                    DIG_DBIAS_80M_160M);
+
+      /* Configure 320M PLL */
+
+      switch (xtal_freq)
+        {
+          case XTAL_40M:
+            div_ref = 0;
+            div7_0 = 32;
+            div10_8 = 0;
+            lref = 0;
+            dcur = 6;
+            bw = 3;
+            break;
+          case XTAL_26M:
+            div_ref = 12;
+            div7_0 = 224;
+            div10_8 = 4;
+            lref = 1;
+            dcur = 0;
+            bw = 1;
+            break;
+          case XTAL_24M:
+            div_ref = 11;
+            div7_0 = 224;
+            div10_8 = 4;
+            lref = 1;
+            dcur = 0;
+            bw = 1;
+            break;
+          default:
+            div_ref = 12;
+            div7_0 = 224;
+            div10_8 = 4;
+            lref = 0;
+            dcur = 0;
+            bw = 0;
+            break;
+        }
+
+      I2C_WRITEREG_RTC(I2C_BBPLL, I2C_BBPLL_ENDIV5, BBPLL_ENDIV5_VAL_320M);
+      I2C_WRITEREG_RTC(I2C_BBPLL, I2C_BBPLL_BBADC_DSMP,
+                       BBPLL_BBADC_DSMP_VAL_320M);
+    }
+  else
+    {
+      /* Raise the voltage */
+
+      REG_SET_FIELD(RTC_CNTL_REG, RTC_CNTL_DIG_DBIAS_WAK, DIG_DBIAS_240M);
+      ets_delay_us(DELAY_PLL_DBIAS_RAISE);
+
+      /* Configure 480M PLL */
+
+      switch (xtal_freq)
+        {
+          case XTAL_40M:
+            div_ref = 0;
+            div7_0 = 28;
+            div10_8 = 0;
+            lref = 0;
+            dcur = 6;
+            bw = 3;
+            break;
+          case XTAL_26M:
+            div_ref = 12;
+            div7_0 = 144;
+            div10_8 = 4;
+            lref = 1;
+            dcur = 0;
+            bw = 1;
+            break;
+          case XTAL_24M:
+            div_ref = 11;
+            div7_0 = 144;
+            div10_8 = 4;
+            lref = 1;
+            dcur = 0;
+            bw = 1;
+            break;
+          default:
+            div_ref = 12;
+            div7_0 = 224;
+            div10_8 = 4;
+            lref = 0;
+            dcur = 0;
+            bw = 0;
+            break;
+        }
+
+      I2C_WRITEREG_RTC(I2C_BBPLL, I2C_BBPLL_ENDIV5, BBPLL_ENDIV5_VAL_480M);
+      I2C_WRITEREG_RTC(I2C_BBPLL,
+                       I2C_BBPLL_BBADC_DSMP, BBPLL_BBADC_DSMP_VAL_480M);
+    }
+
+  i2c_bbpll_lref  = (lref << 7) | (div10_8 << 4) | (div_ref);
+  i2c_bbpll_div_7_0 = div7_0;
+  i2c_bbpll_dcur = (bw << 6) | dcur;
+  I2C_WRITEREG_RTC(I2C_BBPLL, I2C_BBPLL_OC_LREF, i2c_bbpll_lref);
+  I2C_WRITEREG_RTC(I2C_BBPLL, I2C_BBPLL_OC_DIV_7_0, i2c_bbpll_div_7_0);
+  I2C_WRITEREG_RTC(I2C_BBPLL, I2C_BBPLL_OC_DCUR, i2c_bbpll_dcur);
+}
+
+/****************************************************************************
+ * Name: esp32_bbpll_enable
+ *
+ * Description:
+ *   Reset BBPLL configuration.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp32_bbpll_enable(void)
+{
+  modifyreg32(RTC_CNTL_OPTIONS0_REG,
+              RTC_CNTL_BIAS_I2C_FORCE_PD | RTC_CNTL_BB_I2C_FORCE_PD |
+              RTC_CNTL_BBPLL_FORCE_PD | RTC_CNTL_BBPLL_I2C_FORCE_PD, 0);
+
+  /* reset BBPLL configuration */
+
+  I2C_WRITEREG_RTC(I2C_BBPLL, I2C_BBPLL_IR_CAL_DELAY,
+                   BBPLL_IR_CAL_DELAY_VAL);
+  I2C_WRITEREG_RTC(I2C_BBPLL, I2C_BBPLL_IR_CAL_EXT_CAP,
+                   BBPLL_IR_CAL_EXT_CAP_VAL);
+  I2C_WRITEREG_RTC(I2C_BBPLL, I2C_BBPLL_OC_ENB_FCAL,
+                   BBPLL_OC_ENB_FCAL_VAL);
+  I2C_WRITEREG_RTC(I2C_BBPLL, I2C_BBPLL_OC_ENB_VCON,
+                   BBPLL_OC_ENB_VCON_VAL);
+  I2C_WRITEREG_RTC(I2C_BBPLL, I2C_BBPLL_BBADC_CAL_7_0,
+                   BBPLL_BBADC_CAL_7_0_VAL);
+}
+
+/****************************************************************************
+ * Name: esp32_update_to_xtal
+ *
+ * Description:
+ *   Switch to XTAL frequency, does not disable the PLL
+ *
+ * Input Parameters:
+ *   freq -  XTAL frequency
+ *   div  -  REF_TICK divider
+ *
+ * Returned Value:
+ *   none
+ *
+ ****************************************************************************/
+
+static void esp32_update_to_xtal(int freq, int div)
+{
+  uint32_t value = (((freq * MHZ) >> 12) & UINT16_MAX)
+                   | ((((freq * MHZ) >> 12) & UINT16_MAX) << 16);
+  putreg32(value, RTC_APB_FREQ_REG);
+
+  /* set divider from XTAL to APB clock */
+
+  REG_SET_FIELD(APB_CTRL_SYSCLK_CONF_REG, APB_CTRL_PRE_DIV_CNT, div - 1);
+
+  /* switch clock source */
+
+  REG_SET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_SOC_CLK_SEL,
+                RTC_CNTL_SOC_CLK_SEL_XTL);
+
+  /* adjust ref_tick */
+
+  modifyreg32(APB_CTRL_XTAL_TICK_CONF_REG, 0,
+             (freq * MHZ) / REF_CLK_FREQ - 1);
+
+  /* lower the voltage */
+
+  if (freq <= 2)
+    {
+      REG_SET_FIELD(RTC_CNTL_REG, RTC_CNTL_DIG_DBIAS_WAK, DIG_DBIAS_2M);
+    }
+  else
+    {
+      REG_SET_FIELD(RTC_CNTL_REG, RTC_CNTL_DIG_DBIAS_WAK, DIG_DBIAS_XTAL);
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -76,40 +333,29 @@ enum xtal_freq_e
 
 void esp32_clockconfig(void)
 {
-#ifdef CONFIG_SUPPRESS_CLOCK_CONFIG
-#  warning WARNING: Clock configuration disabled
-#else
   uint32_t freq_mhz = CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ;
-  enum xtal_freq_e freq;
-
-  phy_get_romfunc_addr();
-
-  /* Frequency will be changed to 40MHz in rtc_init_lite */
-
-  rtc_init_lite();
+  uint32_t source_freq_mhz;
+  enum xtal_freq_t xtal_freq = XTAL_40M;
+  enum cpu_freq_t freq;
 
   freq = CPU_80M;
   switch (freq_mhz)
     {
-    case 240:
-      freq = CPU_240M;
-      break;
-    case 160:
-      freq = CPU_160M;
-      break;
-    default:
-      freq_mhz = 80;
-
-      /* no break */
-
-    case 80:
-      freq = CPU_80M;
-      break;
+      case 240:
+        freq = CPU_240M;
+        source_freq_mhz = RTC_PLL_FREQ_480M;
+        break;
+      case 160:
+        freq = CPU_160M;
+        source_freq_mhz = RTC_PLL_FREQ_320M;
+        break;
+      case 80:
+      default:
+        return;
     }
 
-  /* Frequency will be changed to freq in rtc_set_cpu_freq */
-
-  rtc_set_cpu_freq(XTAL_AUTO, freq);
-  ets_update_cpu_frequency(freq_mhz);
-#endif
+  esp32_update_to_xtal(xtal_freq, 1);
+  esp32_bbpll_enable();
+  esp32_bbpll_configure(xtal_freq, source_freq_mhz);
+  esp32_set_cpu_freq(freq_mhz);
 }
