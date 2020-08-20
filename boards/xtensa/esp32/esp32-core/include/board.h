@@ -70,7 +70,9 @@
  *   which is 40MHz by default.
  *
  * Reference:
- *     https://bit.ly/3aJhjPH (shorten URL to avoid nxstyle issues)
+ *     https://github.com/espressif/esp-idf/blob
+ *           /6fd855ab8d00d23bad4660216bc2122c2285d5be/components
+ *           /bootloader_support/src/bootloader_clock.c#L38-L62
  */
 
 #ifdef CONFIG_ESP32CORE_RUN_IRAM
