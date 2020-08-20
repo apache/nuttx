@@ -190,10 +190,11 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   if (tcb->stack_alloc_ptr)
     {
-      /* The ARM uses a push-down stack:  the stack grows toward lower
-       * addresses in memory.  The stack pointer register, points to
-       * the lowest, valid work address (the "top" of the stack).  Items
-       * on the stack are referenced as positive word offsets from sp.
+      /* The ARM uses a "full descending" stack:
+       * the stack grows toward lower addresses in memory.
+       * The stack pointer register points to the last pushed item in
+       * the stack.
+       * Items on the stack are referenced as positive word offsets from sp.
        */
 
       /* Since both stack_alloc_ptr and alloc_size are in
