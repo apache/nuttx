@@ -102,10 +102,10 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
       up_release_stack(tcb, tcb->flags & TCB_FLAG_TTYPE_MASK);
     }
 
-  /* The ARM uses a push-down stack:  the stack grows toward lower
-   * addresses in memory.  The stack pointer register, points to
-   * the lowest, valid work address (the "top" of the stack).  Items
-   * on the stack are referenced as positive word offsets from sp.
+  /* The ARM uses a "full descending" stack:
+   * the stack grows toward lower addresses in memory.
+   * The stack pointer register, points to the last pushed item in the stack.
+   * Items on the stack are referenced as positive word offsets from sp.
    */
 
   /* We align all sizes and pointer to CONFIG_STACK_ALIGNMENT.
@@ -129,26 +129,26 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   /* Is there enough room for at least TLS ? */
 
-  if ((uintptr_t)stack <= (uintptr_t)tcb->adj_stack_ptr)
+  if ((uintptr_t)stack > (uintptr_t)tcb->adj_stack_ptr)
     {
-      tcb->adj_stack_size = (uintptr_t)tcb->adj_stack_ptr - (uintptr_t)stack;
-
-      /* Initialize the TLS data structure */
-
-      memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
-
-#ifdef CONFIG_STACK_COLORATION
-      /* If stack debug is enabled, then fill the stack with a
-       * recognizable value that we can use later to test for high
-       * water marks.
-       */
-
-      arm_stack_color((FAR void *)((uintptr_t)tcb->adj_stack_ptr -
-          tcb->adj_stack_size), tcb->adj_stack_size);
-#endif /* CONFIG_STACK_COLORATION */
-
-      return OK;
+      return -ENOMEM;
     }
 
-  return ERROR;
+  tcb->adj_stack_size = (uintptr_t)tcb->adj_stack_ptr - (uintptr_t)stack;
+
+  /* Initialize the TLS data structure */
+
+  memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
+
+#ifdef CONFIG_STACK_COLORATION
+  /* If stack debug is enabled, then fill the stack with a
+   * recognizable value that we can use later to test for high
+   * water marks.
+   */
+
+  arm_stack_color((FAR void *)((uintptr_t)tcb->adj_stack_ptr -
+      tcb->adj_stack_size), tcb->adj_stack_size);
+#endif /* CONFIG_STACK_COLORATION */
+
+  return OK;
 }
