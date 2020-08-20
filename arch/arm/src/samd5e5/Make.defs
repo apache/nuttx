@@ -177,3 +177,7 @@ endif
 ifeq ($(CONFIG_SAMD5E5_RTC),y)
 CHIP_CSRCS += sam_rtc.c
 endif
+
+ifeq ($(CONFIG_SAMD5E5_PROGMEM),y)
+CHIP_CSRCS += sam_progmem.c
+endif

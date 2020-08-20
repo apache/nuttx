@@ -69,6 +69,21 @@ endif
 
 ifeq ($(CONFIG_SAMD5E5_SERCOM5_ISI2C),y)
 CSRCS += sam_i2c.c
+ifeq ($(CONFIG_MTD_AT24XX),y)
+CSRCS += sam_at24.c
+endif
+endif
+
+ifeq ($(CONFIG_FS_SMARTFS),y)
+CSRCS += sam_smartfs.c
+endif
+
+ifeq ($(CONFIG_BQ27426),y)
+CSRCS += sam_bq27426.c
+endif
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += sam_gpio.c
 endif
 
 include $(TOPDIR)/boards/Board.mk
