@@ -81,6 +81,7 @@ static void show_usage(const char *progname, int exitcode);
 static void debug(const char *fmt, ...);
 static void parse_args(int argc, char **argv);
 static int run_make(const char *arg);
+static bool filecmp(const char *f1, const char *f2);
 static bool check_directory(const char *directory);
 static void verify_directory(const char *directory);
 static bool verify_optiondir(const char *directory);
@@ -131,6 +132,7 @@ static bool        g_winpaths      = false; /* False: POSIX style paths */
 #endif
 static bool        g_debug         = false; /* Enable debug output */
 static bool        g_enforce       = false; /* Enfore distclean */
+static bool        g_distclean     = false; /* Distclean if configured */
 
 static const char *g_appdir        = NULL;  /* Relative path to the application directory */
 static const char *g_archdir       = NULL;  /* Name of architecture subdirectory */
@@ -179,15 +181,17 @@ static const char *g_optfiles[] =
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s  [-d] [-e] [-b|f] [-l|m|c|u|g|n] "
+  fprintf(stderr, "\nUSAGE: %s  [-d] [-E] [-e] [-b|f] [-l|m|c|u|g|n] "
           "[-a <app-dir>] <board-name>:<config-name> [make-opts]\n",
           progname);
   fprintf(stderr, "\nUSAGE: %s  [-h]\n", progname);
   fprintf(stderr, "\nWhere:\n");
   fprintf(stderr, "  -d:\n");
   fprintf(stderr, "    Enables debug output\n");
-  fprintf(stderr, "  -e:\n");
+  fprintf(stderr, "  -E:\n");
   fprintf(stderr, "    Enforce distclean if already configured\n");
+  fprintf(stderr, "  -e:\n");
+  fprintf(stderr, "    Performs distclean if configuration changed\n");
   fprintf(stderr, "  -b:\n");
 #ifdef CONFIG_WINDOWS_NATIVE
   fprintf(stderr, "    Informs the tool that it should use Windows style\n");
@@ -265,7 +269,7 @@ static void parse_args(int argc, char **argv)
 
   /* Parse command line options */
 
-  while ((ch = getopt(argc, argv, "a:bcdefghlmnu")) > 0)
+  while ((ch = getopt(argc, argv, "a:bcdEefghlmnu")) > 0)
     {
       switch (ch)
         {
@@ -287,8 +291,12 @@ static void parse_args(int argc, char **argv)
             g_debug = true;
             break;
 
-          case 'e' :
+          case 'E' :
             g_enforce = true;
+            break;
+
+          case 'e' :
+            g_distclean = true;
             break;
 
           case 'f' :
@@ -390,6 +398,39 @@ static int run_make(const char *arg)
     }
 
   return system(g_buffer);
+}
+
+static bool filecmp(const char *f1, const char *f2)
+{
+  FILE *stream1;
+  FILE *stream2;
+  char ch1;
+  char ch2;
+
+  stream1 = fopen(f1, "r");
+  stream2 = fopen(f2, "r");
+
+  if (stream1 == NULL || stream2 == NULL)
+    {
+      return false;
+    }
+
+  do
+    {
+      ch1 = fgetc(stream1);
+      ch2 = fgetc(stream2);
+
+      if (ch1 != ch2)
+        {
+          return false;
+        }
+    }
+  while (ch1 != EOF && ch2 != EOF);
+
+  fclose(stream1);
+  fclose(stream2);
+
+  return true;
 }
 
 static bool check_directory(const char *directory)
@@ -800,18 +841,46 @@ static void check_configured(void)
 
   snprintf(g_buffer, BUFFER_SIZE, "%s%c.config", g_topdir, g_delim);
   debug("check_configured: Checking %s\n", g_buffer);
-  if (verify_file(g_buffer))
+
+  if (!verify_file(g_buffer))
     {
-      if (g_enforce)
+      return;
+    }
+
+  if (g_enforce)
+    {
+      run_make("distclean");
+    }
+  else
+    {
+      char *defcfgpath = NULL;
+
+      snprintf(g_buffer, BUFFER_SIZE, "%s%cdefconfig",
+               g_configpath, g_delim);
+      defcfgpath = strdup(g_buffer);
+
+      snprintf(g_buffer, BUFFER_SIZE, "%s%cdefconfig",
+               g_topdir, g_delim);
+
+      if (filecmp(g_buffer, defcfgpath))
         {
-          run_make("distclean");
+          fprintf(stderr, "No configuration change.\n");
+          free(defcfgpath);
+          exit(EXIT_SUCCESS);
         }
       else
         {
-          fprintf(stderr, "ERROR: Found %s... Already configured\n",
-                  g_buffer);
-          fprintf(stderr, "       Please 'make distclean' and try again\n");
-          exit(EXIT_FAILURE);
+          free(defcfgpath);
+          if (g_distclean)
+            {
+              run_make("distclean");
+            }
+          else
+            {
+              fprintf(stderr, "Already configured!\n");
+              fprintf(stderr, "Please 'make distclean' and try again.\n");
+              exit(EXIT_FAILURE);
+            }
         }
     }
 }
@@ -1360,6 +1429,11 @@ static void set_host(const char *destconfig)
 static void configure(void)
 {
   char *destconfig;
+
+  /* Copy the defconfig to toplevel */
+
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cdefconfig", g_topdir, g_delim);
+  copy_file(g_srcdefconfig, g_buffer, 0644);
 
   /* Copy the defconfig file as .config */
 

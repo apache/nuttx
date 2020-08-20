@@ -184,7 +184,7 @@ if [ -r ${dest_config} ]; then
       make -C ${TOPDIR} distclean $*
     else
       echo "Already configured!"
-      echo "Do 'make distclean' and try again."
+      echo "Please 'make distclean' and try again."
       exit 6
     fi
   fi
