@@ -410,7 +410,8 @@
 #define I2C_BBPLL           0x66
 #define I2C_BBPLL_HOSTID    4
 
-extern int rom_i2c_writeReg(int block, int block_id, int reg_add, int indata);
+extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
+                            int indata);
 
 #define I2C_WRITEREG_RTC(block, reg_add, indata) \
       rom_i2c_writeReg(block, block##_HOSTID,  reg_add, indata)
