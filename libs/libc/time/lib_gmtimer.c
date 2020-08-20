@@ -342,18 +342,19 @@ FAR struct tm *gmtime_r(FAR const time_t *timep, FAR struct tm *result)
 
   /* Then return the struct tm contents */
 
-  result->tm_year  = (int)year - 1900; /* Relative to 1900 */
-  result->tm_mon   = (int)month - 1;   /* zero-based */
-  result->tm_mday  = (int)day;         /* one-based */
-  result->tm_hour  = (int)hour;
-  result->tm_min   = (int)min;
-  result->tm_sec   = (int)sec;
+  result->tm_year   = (int)year - 1900; /* Relative to 1900 */
+  result->tm_mon    = (int)month - 1;   /* zero-based */
+  result->tm_mday   = (int)day;         /* one-based */
+  result->tm_hour   = (int)hour;
+  result->tm_min    = (int)min;
+  result->tm_sec    = (int)sec;
 
-  result->tm_wday  = clock_dayoftheweek(day, month, year);
-  result->tm_yday  = day +
-                     clock_daysbeforemonth(result->tm_mon,
-                                           clock_isleapyear(year));
-  result->tm_isdst = 0;
+  result->tm_wday   = clock_dayoftheweek(day, month, year);
+  result->tm_yday   = day +
+                      clock_daysbeforemonth(result->tm_mon,
+                                            clock_isleapyear(year));
+  result->tm_isdst  = 0;
+  result->tm_gmtoff = 0;
 
   return result;
 }
