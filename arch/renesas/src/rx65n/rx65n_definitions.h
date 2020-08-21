@@ -26,7 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "rx65n/iodefine.h"
+#include "arch/rx65n/iodefine.h"
 #include "arch/board/board.h"
 
 /****************************************************************************
@@ -133,7 +133,7 @@
 
 /* Bit 7: TDR does not contain valid transmit data */
 
-#define RX_SCISSR_TDRE     (0x80)
+#define RX_SCISSR_TDRE                  (0x80)
 #define RX65N_CMT_CMSTR0_ADDR           (0x00088000)  /* 8-bits wide */
 #define RX65N_CMT0_CMCNT_ADDR           (0x00088004)
 #define RX65N_CMT0_CMCOR_ADDR           (0x00088006)
@@ -158,6 +158,7 @@
 #define rx65n_cmtw0_timeout 2
 
 #define RX65N_MSTPCRA_ADDR              (0x00080010)
+#define RX65N_MSTPCRB_ADDR              (0x00080014)
 #define RX65N_CMT0_TICKFREQ             (100)           /* 100Hz tick frequency */
 #define RX65N_CMT_DIV32                 (0x0001)
 #define RX65N_CMT0_DIV_VALUE            (32)
@@ -212,10 +213,16 @@
 #define RX65N_GRPBL0_ERI6_MASK          (1U << 13)  /* (0x00002000) */
 #define RX65N_GRPBL0_TEI7_MASK          (1U << 14)  /* (0x00004000) */
 #define RX65N_GRPBL0_ERI7_MASK          (1U << 15)  /* (0x00008000) */
+#define RX65N_GRPBL1_TEI0_MASK          (1U << 13)
+#define RX65N_GRPBL1_EEI0_MASK          (1U << 14)
+#define RX65N_GRPBL1_TEI2_MASK          (1U << 15)
+#define RX65N_GRPBL1_EEI2_MASK          (1U << 16)
 #define RX65N_GRPBL1_TEI8_MASK          (1U << 24)
 #define RX65N_GRPBL1_ERI8_MASK          (1U << 25)
 #define RX65N_GRPBL1_TEI9_MASK          (1U << 26)
 #define RX65N_GRPBL1_ERI9_MASK          (1U << 27)
+#define RX65N_GRPBL1_TEI1_MASK          (1U << 28)
+#define RX65N_GRPBL1_EEI1_MASK          (1U << 29)
 #define RX65N_GRPAL0_TEI10_MASK         (1U <<  8)
 #define RX65N_GRPAL0_ERI10_MASK         (1U <<  9)
 #define RX65N_GRPAL0_TEI11_MASK         (1U << 12)
@@ -433,11 +440,11 @@
 
 /* EDMAC Transmit Request Register's bit */
 
-#define ETHD_EDRRR_TR     (1) /* Transmit Request */
+#define ETHD_EDRRR_TR        (1) /* Transmit Request */
 
 /* EDMAC Receive Request Register's bit */
 
-#define ETHD_EDRRR_RR     (1) /* Receive descriptor read,
+#define ETHD_EDRRR_RR        (1) /* Receive descriptor read,
                                * and receive function is enabled
                                */
 
@@ -470,17 +477,17 @@
 
 /* PHY Interface Register's bit and values */
 
-#define ETH_PIR_MDC        (1)           /* MII/RMII Management Data Clock */
-#define ETH_PIR_MMD        (1<<1)        /* MII/RMII Management Mode */
-#define ETH_PIR_MDO        (1<<2)        /* MII/RMII Management Data-Out */
-#define ETH_PIR_MDI        (1<<3)        /* MII/RMII Management Data-In */
+#define ETH_PIR_MDC              (1)     /* MII/RMII Management Data Clock */
+#define ETH_PIR_MMD              (1<<1)  /* MII/RMII Management Mode */
+#define ETH_PIR_MDO              (1<<2)  /* MII/RMII Management Data-Out */
+#define ETH_PIR_MDI              (1<<3)  /* MII/RMII Management Data-In */
 
-#define ETH_PIR_RESET_ALL        (0x00000000)    /* Reset All Flags of PIR      */
-#define ETH_PIR_SET_MDC          (0x00000001)    /* Setting MDC of PIR */
-#define ETH_PIR_SET_MMD          (0x00000002)    /* Setting MMD of PIR */
-#define ETH_PIR_SET_MMD_MDC      (0x00000003)    /* Setting MMD and MDC */
-#define ETH_PIR_SET_MDO_MMD      (0x00000006)    /* Setting MDO and MMD */
-#define ETH_PIR_SET_MDO_MMD_MDC  (0x00000007)    /* Setting MDO, MMD and MDC */
+#define ETH_PIR_RESET_ALL        (0x00000000) /* Reset All Flags of PIR */
+#define ETH_PIR_SET_MDC          (0x00000001) /* Setting MDC of PIR */
+#define ETH_PIR_SET_MMD          (0x00000002) /* Setting MMD of PIR */
+#define ETH_PIR_SET_MMD_MDC      (0x00000003) /* Setting MMD and MDC */
+#define ETH_PIR_SET_MDO_MMD      (0x00000006) /* Setting MDO and MMD */
+#define ETH_PIR_SET_MDO_MMD_MDC  (0x00000007) /* Setting MDO, MMD and MDC */
 
 /* Ethernet Control Register's bit and value */
 
@@ -520,70 +527,236 @@
 #define RX65N_RTC_RCR4_OFFSET      (0x0028)
 #define RX65N_RTC_RADJ_OFFSET      (0x002e)
 
-#define RX65N_RTC_BASE      (0x0008c400)
-#define RX65N_RTC_R64CNT    (RX65N_RTC_BASE + RX65N_RTC_R64CNT_OFFSET)
-#define RX65N_RTC_RSECCNT   (RX65N_RTC_BASE + RX65N_RTC_RSECCNT_OFFSET)
-#define RX65N_RTC_RMINCNT   (RX65N_RTC_BASE + RX65N_RTC_RMINCNT_OFFSET)
-#define RX65N_RTC_RHRCNT    (RX65N_RTC_BASE + RX65N_RTC_RHRCNT_OFFSET)
-#define RX65N_RTC_RWKCNT    (RX65N_RTC_BASE + RX65N_RTC_RWKCNT_OFFSET)
-#define RX65N_RTC_RDAYCNT   (RX65N_RTC_BASE + RX65N_RTC_RDAYCNT_OFFSET)
-#define RX65N_RTC_RMONCNT   (RX65N_RTC_BASE + RX65N_RTC_RMONCNT_OFFSET)
-#define RX65N_RTC_RYRCNT    (RX65N_RTC_BASE + RX65N_RTC_RYRCNT_OFFSET)
-#define RX65N_RTC_RSECAR    (RX65N_RTC_BASE + RX65N_RTC_RSECAR_OFFSET)
-#define RX65N_RTC_RMINAR    (RX65N_RTC_BASE + RX65N_RTC_RMINAR_OFFSET)
-#define RX65N_RTC_RHRAR     (RX65N_RTC_BASE + RX65N_RTC_RHRAR_OFFSET)
-#define RX65N_RTC_RWKAR     (RX65N_RTC_BASE + RX65N_RTC_RWKAR_OFFSET)
-#define RX65N_RTC_RDAYAR    (RX65N_RTC_BASE + RX65N_RTC_RDAYAR_OFFSET)
-#define RX65N_RTC_RMONAR    (RX65N_RTC_BASE + RX65N_RTC_RMONAR_OFFSET)
-#define RX65N_RTC_RYRAR     (RX65N_RTC_BASE + RX65N_RTC_RYRAR_OFFSET)
-#define RX65N_RTC_RYRAREN   (RX65N_RTC_BASE + RX65N_RTC_RYRAREN_OFFSET)
-#define RX65N_RTC_RCR1      (RX65N_RTC_BASE + RX65N_RTC_RCR1_OFFSET)
-#define RX65N_RTC_RCR2      (RX65N_RTC_BASE + RX65N_RTC_RCR2_OFFSET)
-#define RX65N_RTC_RCR3      (RX65N_RTC_BASE + RX65N_RTC_RCR3_OFFSET)
-#define RX65N_RTC_RCR4      (RX65N_RTC_BASE + RX65N_RTC_RCR4_OFFSET)
-#define RX65N_RTC_RADJ      (RX65N_RTC_BASE + RX65N_RTC_RADJ_OFFSET)
+#define RX65N_RTC_BASE             (0x0008c400)
+#define RX65N_RTC_R64CNT           (RX65N_RTC_BASE + RX65N_RTC_R64CNT_OFFSET)
+#define RX65N_RTC_RSECCNT          (RX65N_RTC_BASE + RX65N_RTC_RSECCNT_OFFSET)
+#define RX65N_RTC_RMINCNT          (RX65N_RTC_BASE + RX65N_RTC_RMINCNT_OFFSET)
+#define RX65N_RTC_RHRCNT           (RX65N_RTC_BASE + RX65N_RTC_RHRCNT_OFFSET)
+#define RX65N_RTC_RWKCNT           (RX65N_RTC_BASE + RX65N_RTC_RWKCNT_OFFSET)
+#define RX65N_RTC_RDAYCNT          (RX65N_RTC_BASE + RX65N_RTC_RDAYCNT_OFFSET)
+#define RX65N_RTC_RMONCNT          (RX65N_RTC_BASE + RX65N_RTC_RMONCNT_OFFSET)
+#define RX65N_RTC_RYRCNT           (RX65N_RTC_BASE + RX65N_RTC_RYRCNT_OFFSET)
+#define RX65N_RTC_RSECAR           (RX65N_RTC_BASE + RX65N_RTC_RSECAR_OFFSET)
+#define RX65N_RTC_RMINAR           (RX65N_RTC_BASE + RX65N_RTC_RMINAR_OFFSET)
+#define RX65N_RTC_RHRAR            (RX65N_RTC_BASE + RX65N_RTC_RHRAR_OFFSET)
+#define RX65N_RTC_RWKAR            (RX65N_RTC_BASE + RX65N_RTC_RWKAR_OFFSET)
+#define RX65N_RTC_RDAYAR           (RX65N_RTC_BASE + RX65N_RTC_RDAYAR_OFFSET)
+#define RX65N_RTC_RMONAR           (RX65N_RTC_BASE + RX65N_RTC_RMONAR_OFFSET)
+#define RX65N_RTC_RYRAR            (RX65N_RTC_BASE + RX65N_RTC_RYRAR_OFFSET)
+#define RX65N_RTC_RYRAREN          (RX65N_RTC_BASE + RX65N_RTC_RYRAREN_OFFSET)
+#define RX65N_RTC_RCR1             (RX65N_RTC_BASE + RX65N_RTC_RCR1_OFFSET)
+#define RX65N_RTC_RCR2             (RX65N_RTC_BASE + RX65N_RTC_RCR2_OFFSET)
+#define RX65N_RTC_RCR3             (RX65N_RTC_BASE + RX65N_RTC_RCR3_OFFSET)
+#define RX65N_RTC_RCR4             (RX65N_RTC_BASE + RX65N_RTC_RCR4_OFFSET)
+#define RX65N_RTC_RADJ             (RX65N_RTC_BASE + RX65N_RTC_RADJ_OFFSET)
 
-#define RTC_RTC_ALRDIS                          (0x00)
-#define RTC_RCR4_RCKSEL                         (0x00)
-#define RTC_RCR3_RTCEN                          (0x01)
-#define RTC_RCR3_RTCDV                          (0x02)
-#define RTC_RCR2_START                          (0x01)
-#define RTC_RCR2_CNTMD                          (0x00)
-#define RTC_RCR2_RESET                          (0x01)
-#define RTC_ALARM_INT_ENABLE                    (0x01)
-#define RTC_CARRY_INT_ENABLE                    (0x02)
-#define RTC_PERIOD_INT_ENABLE                   (0x04)
-#define RTC_PERIODIC_INT_PERIOD_1               (0xe0)
-#define _04_FOUR_READ_COUNT                     (0x04)
-#define RTC_1_64_SEC_CYCLE                      (0x0005b8d9)
-#define _0F_RTC_PRIORITY_LEVEL15                (0x0f)
-#define  RTC_RCR1_CUP                           (0x02)
-#define RX65N_SUBCLKOSC_SOSCCR                  (0x00080033)
-#define SUBCLKOSC_SOSCCR_SOSTP                  (0x01)
-#define RX65N_SUBCLKOSC_SOSCWTCR                (0x0008c293)
-#define RTC_SOSCWTCR_VALUE                      (0x21)
-#define RTC_DUMMY_READ                          (3)
-#define _00_RTC_PRIORITY_LEVEL0                 (0)
-#define _04_RTC_PERIOD_INT_ENABLE               (0x04)
-#define RTC_RTC_CARRYDIS                        (0xe5)
-#define RTC_RTC_PERDIS                          (0xe3)
-#define RTC_RADJ_INITVALUE                      (0x0)
-#define RTC_RCR2_AADJE                          (0x10)
-#define RTC_RCR2_AADJP                          (0x20)
+#define RTC_RTC_ALRDIS             (0x00)
+#define RTC_RCR4_RCKSEL            (0x00)
+#define RTC_RCR3_RTCEN             (0x01)
+#define RTC_RCR3_RTCDV             (0x02)
+#define RTC_RCR2_START             (0x01)
+#define RTC_RCR2_CNTMD             (0x00)
+#define RTC_RCR2_RESET             (0x01)
+#define RTC_ALARM_INT_ENABLE       (0x01)
+#define RTC_CARRY_INT_ENABLE       (0x02)
+#define RTC_PERIOD_INT_ENABLE      (0x04)
+#define RTC_PERIODIC_INT_PERIOD_1  (0xe0)
+#define _04_FOUR_READ_COUNT        (0x04)
+#define RTC_1_64_SEC_CYCLE         (0x0005b8d9)
+#define _0F_RTC_PRIORITY_LEVEL15   (0x0f)
+#define  RTC_RCR1_CUP              (0x02)
+#define RX65N_SUBCLKOSC_SOSCCR     (0x00080033)
+#define SUBCLKOSC_SOSCCR_SOSTP     (0x01)
+#define RX65N_SUBCLKOSC_SOSCWTCR   (0x0008c293)
+#define RTC_SOSCWTCR_VALUE         (0x21)
+#define RTC_DUMMY_READ             (3)
+#define _00_RTC_PRIORITY_LEVEL0    (0)
+#define _04_RTC_PERIOD_INT_ENABLE  (0x04)
+#define RTC_RTC_CARRYDIS           (0xe5)
+#define RTC_RTC_PERDIS             (0xe3)
+#define RTC_RADJ_INITVALUE         (0x0)
+#define RTC_RCR2_AADJE             (0x10)
+#define RTC_RCR2_AADJP             (0x20)
 
 #if defined(CONFIG_RTC) || defined(CONFIG_RTC_DRIVER)
 
-#define HAVE_RTC_DRIVER       1
+#define HAVE_RTC_DRIVER            1
 
 #endif
 
-#define RX65N_RTC_WAIT_PERIOD 184
+/* Constant values used in RTC */
+
+#define RX65N_RTC_WAIT_PERIOD           184
 #define RTC_RCR2_HR24                   (0x40)
 #define RTC_PERIODIC_INTERRUPT_2_SEC    (0xf)
 
 /* StandBy RAM Address */
 
 #define RX65N_SBRAM_BASE  0x000a4000
+
+/* RIIC related definitions */
+
+#if defined(CONFIG_I2C) || defined(CONFIG_I2C_DRIVER)
+  #define HAVE_RIIC_DRIVER       1
+#endif
+
+/* RIIC Channel Base Address definitions */
+
+#define RX65N_RIIC0_BASE          (uint32_t)&RIIC0
+#define RX65N_RIIC1_BASE          (uint32_t)&RIIC1
+#define RX65N_RIIC2_BASE          (uint32_t)&RIIC2
+
+/* RIIC Register Offset definitions */
+
+#define RX65N_RIIC_ICCR1_OFFSET   (0x0000)
+#define RX65N_RIIC_ICCR2_OFFSET   (0x0001)
+#define RX65N_RIIC_ICMR1_OFFSET   (0x0002)
+#define RX65N_RIIC_ICMR2_OFFSET   (0x0003)
+#define RX65N_RIIC_ICMR3_OFFSET   (0x0004)
+#define RX65N_RIIC_ICFER_OFFSET   (0x0005)
+#define RX65N_RIIC_ICSER_OFFSET   (0x0006)
+#define RX65N_RIIC_ICIER_OFFSET   (0x0007)
+#define RX65N_RIIC_ICSR1_OFFSET   (0x0008)
+#define RX65N_RIIC_ICSR2_OFFSET   (0x0009)
+#define RX65N_RIIC_SARL0_OFFSET   (0x000a)
+#define RX65N_RIIC_SARU0_OFFSET   (0x000b)
+#define RX65N_RIIC_SARL1_OFFSET   (0x000c)
+#define RX65N_RIIC_SARU1_OFFSET   (0x000d)
+#define RX65N_RIIC_SARL2_OFFSET   (0x000e)
+#define RX65N_RIIC_SARU2_OFFSET   (0x000f)
+#define RX65N_RIIC_ICBRL_OFFSET   (0x0010)
+#define RX65N_RIIC_ICBRH_OFFSET   (0x0011)
+#define RX65N_RIIC_ICDRT_OFFSET   (0x0012)
+#define RX65N_RIIC_ICDRR_OFFSET   (0x0013)
+
+/* RIIC register address definitions */
+
+#define RX65N_RIIC0_ICCR1         (RX65N_RIIC0_BASE + RX65N_RIIC_ICCR1_OFFSET)
+#define RX65N_RIIC0_ICCR2         (RX65N_RIIC0_BASE + RX65N_RIIC_ICCR2_OFFSET)
+#define RX65N_RIIC0_ICMR1         (RX65N_RIIC0_BASE + RX65N_RIIC_ICMR1_OFFSET)
+#define RX65N_RIIC0_ICMR2         (RX65N_RIIC0_BASE + RX65N_RIIC_ICMR2_OFFSET)
+#define RX65N_RIIC0_ICMR3         (RX65N_RIIC0_BASE + RX65N_RIIC_ICMR3_OFFSET)
+#define RX65N_RIIC0_ICFER         (RX65N_RIIC0_BASE + RX65N_RIIC_ICFER_OFFSET)
+#define RX65N_RIIC0_ICSER         (RX65N_RIIC0_BASE + RX65N_RIIC_ICSER_OFFSET)
+#define RX65N_RIIC0_ICIER         (RX65N_RIIC0_BASE + RX65N_RIIC_ICIER_OFFSET)
+#define RX65N_RIIC0_ICSR1         (RX65N_RIIC0_BASE + RX65N_RIIC_ICSR1_OFFSET)
+#define RX65N_RIIC0_ICSR2         (RX65N_RIIC0_BASE + RX65N_RIIC_ICSR2_OFFSET)
+#define RX65N_RIIC0_SARL0         (RX65N_RIIC0_BASE + RX65N_RIIC_SARL0_OFFSET)
+#define RX65N_RIIC0_SARU0         (RX65N_RIIC0_BASE + RX65N_RIIC_SARU0_OFFSET)
+#define RX65N_RIIC0_SARL1         (RX65N_RIIC0_BASE + RX65N_RIIC_SARL1_OFFSET)
+#define RX65N_RIIC0_SARU1         (RX65N_RIIC0_BASE + RX65N_RIIC_SARU1_OFFSET)
+#define RX65N_RIIC0_SARL2         (RX65N_RIIC0_BASE + RX65N_RIIC_SARL2_OFFSET)
+#define RX65N_RIIC0_SARU2         (RX65N_RIIC0_BASE + RX65N_RIIC_SARU2_OFFSET)
+#define RX65N_RIIC0_ICBRL         (RX65N_RIIC0_BASE + RX65N_RIIC_ICBRL_OFFSET)
+#define RX65N_RIIC0_ICBRH         (RX65N_RIIC0_BASE + RX65N_RIIC_ICBRH_OFFSET)
+#define RX65N_RIIC0_ICDRT         (RX65N_RIIC0_BASE + RX65N_RIIC_ICDRT_OFFSET)
+#define RX65N_RIIC0_ICDRR         (RX65N_RIIC0_BASE + RX65N_RIIC_ICDRR_OFFSET)
+
+#define RX65N_RIIC1_ICCR1         (RX65N_RIIC1_BASE + RX65N_RIIC_ICCR1_OFFSET)
+#define RX65N_RIIC1_ICCR2         (RX65N_RIIC1_BASE + RX65N_RIIC_ICCR2_OFFSET)
+#define RX65N_RIIC1_ICMR1         (RX65N_RIIC1_BASE + RX65N_RIIC_ICMR1_OFFSET)
+#define RX65N_RIIC1_ICMR2         (RX65N_RIIC1_BASE + RX65N_RIIC_ICMR2_OFFSET)
+#define RX65N_RIIC1_ICMR3         (RX65N_RIIC1_BASE + RX65N_RIIC_ICMR3_OFFSET)
+#define RX65N_RIIC1_ICFER         (RX65N_RIIC1_BASE + RX65N_RIIC_ICFER_OFFSET)
+#define RX65N_RIIC1_ICSER         (RX65N_RIIC1_BASE + RX65N_RIIC_ICSER_OFFSET)
+#define RX65N_RIIC1_ICIER         (RX65N_RIIC1_BASE + RX65N_RIIC_ICIER_OFFSET)
+#define RX65N_RIIC1_ICSR1         (RX65N_RIIC1_BASE + RX65N_RIIC_ICSR1_OFFSET)
+#define RX65N_RIIC1_ICSR2         (RX65N_RIIC1_BASE + RX65N_RIIC_ICSR2_OFFSET)
+#define RX65N_RIIC1_SARL0         (RX65N_RIIC1_BASE + RX65N_RIIC_SARL0_OFFSET)
+#define RX65N_RIIC1_SARU0         (RX65N_RIIC1_BASE + RX65N_RIIC_SARU0_OFFSET)
+#define RX65N_RIIC1_SARL1         (RX65N_RIIC1_BASE + RX65N_RIIC_SARL1_OFFSET)
+#define RX65N_RIIC1_SARU1         (RX65N_RIIC1_BASE + RX65N_RIIC_SARU1_OFFSET)
+#define RX65N_RIIC1_SARL2         (RX65N_RIIC1_BASE + RX65N_RIIC_SARL2_OFFSET)
+#define RX65N_RIIC1_SARU2         (RX65N_RIIC1_BASE + RX65N_RIIC_SARU2_OFFSET)
+#define RX65N_RIIC1_ICBRL         (RX65N_RIIC1_BASE + RX65N_RIIC_ICBRL_OFFSET)
+#define RX65N_RIIC1_ICBRH         (RX65N_RIIC1_BASE + RX65N_RIIC_ICBRH_OFFSET)
+#define RX65N_RIIC1_ICDRT         (RX65N_RIIC1_BASE + RX65N_RIIC_ICDRT_OFFSET)
+#define RX65N_RIIC1_ICDRR         (RX65N_RIIC1_BASE + RX65N_RIIC_ICDRR_OFFSET)
+
+#define RX65N_RIIC2_ICCR1         (RX65N_RIIC2_BASE + RX65N_RIIC_ICCR1_OFFSET)
+#define RX65N_RIIC2_ICCR2         (RX65N_RIIC2_BASE + RX65N_RIIC_ICCR2_OFFSET)
+#define RX65N_RIIC2_ICMR1         (RX65N_RIIC2_BASE + RX65N_RIIC_ICMR1_OFFSET)
+#define RX65N_RIIC2_ICMR2         (RX65N_RIIC2_BASE + RX65N_RIIC_ICMR2_OFFSET)
+#define RX65N_RIIC2_ICMR3         (RX65N_RIIC2_BASE + RX65N_RIIC_ICMR3_OFFSET)
+#define RX65N_RIIC2_ICFER         (RX65N_RIIC2_BASE + RX65N_RIIC_ICFER_OFFSET)
+#define RX65N_RIIC2_ICSER         (RX65N_RIIC2_BASE + RX65N_RIIC_ICSER_OFFSET)
+#define RX65N_RIIC2_ICIER         (RX65N_RIIC2_BASE + RX65N_RIIC_ICIER_OFFSET)
+#define RX65N_RIIC2_ICSR1         (RX65N_RIIC2_BASE + RX65N_RIIC_ICSR1_OFFSET)
+#define RX65N_RIIC2_ICSR2         (RX65N_RIIC2_BASE + RX65N_RIIC_ICSR2_OFFSET)
+#define RX65N_RIIC2_SARL0         (RX65N_RIIC2_BASE + RX65N_RIIC_SARL0_OFFSET)
+#define RX65N_RIIC2_SARU0         (RX65N_RIIC2_BASE + RX65N_RIIC_SARU0_OFFSET)
+#define RX65N_RIIC2_SARL1         (RX65N_RIIC2_BASE + RX65N_RIIC_SARL1_OFFSET)
+#define RX65N_RIIC2_SARU1         (RX65N_RIIC2_BASE + RX65N_RIIC_SARU1_OFFSET)
+#define RX65N_RIIC2_SARL2         (RX65N_RIIC2_BASE + RX65N_RIIC_SARL2_OFFSET)
+#define RX65N_RIIC2_SARU2         (RX65N_RIIC2_BASE + RX65N_RIIC_SARU2_OFFSET)
+#define RX65N_RIIC2_ICBRL         (RX65N_RIIC2_BASE + RX65N_RIIC_ICBRL_OFFSET)
+#define RX65N_RIIC2_ICBRH         (RX65N_RIIC2_BASE + RX65N_RIIC_ICBRH_OFFSET)
+#define RX65N_RIIC2_ICDRT         (RX65N_RIIC2_BASE + RX65N_RIIC_ICDRT_OFFSET)
+#define RX65N_RIIC2_ICDRR         (RX65N_RIIC2_BASE + RX65N_RIIC_ICDRR_OFFSET)
+
+/* RIIC register field/bit value definitions */
+
+#define RX65N_RIIC_ICCR1_ICE_RST        (0x7f)
+#define RX65N_RIIC_ICCR1_IICRST_SET     (0x40)
+
+#define RX65N_RIIC_ICCR2_ST_SET         (0x02)
+#define RX65N_RIIC_ICCR2_SP_SET         (0x08)
+#define RX65N_RIIC_ICCR2_RS_SET         (0x04)
+
+#define RX65N_RIIC_ICSR2_STOP_SET       (0x08)
+#define RX65N_RIIC_ICSR2_START_SET      (0x04)
+
+#define RX65N_RIIC_ICMR1_CKS_MASK       (0x8f)
+
+#define RX65N_RIIC_ICMR2_SDDL0          (0x06)
+#define RX65N_RIIC_ICMR2_SDDL1          (0x16)
+#define RX65N_RIIC_ICMR2_SDDL2          (0x26)
+#define RX65N_RIIC_ICMR2_SDDL3          (0x36)
+#define RX65N_RIIC_ICMR2_SDDL4          (0x46)
+#define RX65N_RIIC_ICMR2_SDDL5          (0x56)
+#define RX65N_RIIC_ICMR2_SDDL6          (0x66)
+#define RX65N_RIIC_ICMR2_SDDL7          (0x76)
+
+#define RX65N_RIIC_ICMR3_NF1            (0x00)
+#define RX65N_RIIC_ICMR3_NF2            (0x01)
+#define RX65N_RIIC_ICMR3_NF3            (0x02)
+#define RX65N_RIIC_ICMR3_NF4            (0x03)
+
+#define RX65N_RIIC_ICMR3_WAIT_SET       (0x40)
+#define RX65N_RIIC_ICMR3_ACKWP_SET      (0x10)
+#define RX65N_RIIC_ICMR3_ACKBT_SET      (0x08)
+#define RX65N_RIIC_ICMR3_ACKWP_CLR      (0xEF)
+#define RX65N_RIIC_ICMR3_RDRFS_SET      (0x20)
+
+#define RX65N_RIIC_ICIER_ALIE           (0x02)
+#define RX65N_RIIC_ICIER_ST_NAK_AL      (0x16)
+#define RX65N_RIIC_ICIER_SP_NAK_AL      (0x1a)
+#define RX65N_RIIC_ICIER_SP_AL          (0x0a)
+#define RX65N_RIIC_ICIER_TMO            (0x01)
+#define RX65N_RIIC_ICIER_TEND_NAK_AL    (0x52)
+#define RX65N_RIIC_ICIER_RX_NAK_AL      (0x32)
+
+#define RX65N_RIIC_ICFER_TMOE_SET       (0x01)
+#define RX65N_RIIC_ICFER_NFE_SET        (0x20)
+#define RX65N_RIIC_ICFER_NFE_RST        (0xdf)
+
+#define RX65N_RIIC_ICSER_SET            (0x00)
+
+#define RX65N_RIIC_ICBRL_MASK           (0xe0)
+#define RX65N_RIIC_ICBRH_MASK           (0xe0)
+
+#define RX65N_I2C_SLV_ADDR              (0x80)
+#define RX65N_RIIC_READ_MASK            (0x01)
+
+#define RX65N_RIIC_10BIT_SARU_MASK      (0x0300)
+#define RX65N_RIIC_10BIT_SARL_MASK      (0x00ff)
+
+#define BUS_CHECK_COUNTER               (1000)
+#define RIIC_REG_INIT                   (0x00)
+#define RIIC_BUS_BUSY                   ((bool)(1))
+#define RIIC_BUS_FREE                   ((bool)(0))
+
+/* End of RIIC related definitions */
 
 /****************************************************************************
  * Public Types

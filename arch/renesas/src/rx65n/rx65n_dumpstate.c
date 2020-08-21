@@ -34,7 +34,7 @@
 #include "up_internal.h"
 #include "sched/sched.h"
 #include "chip.h"
-#include "rx65n/irq.h"
+#include "arch/rx65n/irq.h"
 
 #ifdef CONFIG_ARCH_STACKDUMP
 

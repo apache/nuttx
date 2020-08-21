@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include "rx65n/iodefine.h"
+#include "arch/rx65n/iodefine.h"
 
 #include "up_internal.h"
 
@@ -426,6 +426,77 @@ void up_disable_irq(int irq)
 
 #endif
 #endif
+#ifdef CONFIG_RX65N_RIIC0
+  if (irq == RX65N_RIIC0_RXI0_IRQ)
+    {
+      ICU.IER[6].BIT.IEN4 = 0;
+    }
+
+  if (irq == RX65N_RIIC0_TXI0_IRQ)
+    {
+      ICU.IER[6].BIT.IEN5 = 0;
+    }
+
+  if (irq == RX65N_RIIC0_TEI0_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS13 = 0;
+      ICU.GENBL1.BIT.EN13 = 0;
+    }
+
+  if (irq == RX65N_RIIC0_EEI0_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS14 = 0;
+      ICU.GENBL1.BIT.EN14 = 0;
+    }
+#endif
+
+#ifdef CONFIG_RX65N_RIIC1
+  if (irq == RX65N_RIIC1_RXI1_IRQ)
+    {
+      ICU.IER[6].BIT.IEN2 = 0;
+    }
+
+  if (irq == RX65N_RIIC1_TXI1_IRQ)
+    {
+      ICU.IER[6].BIT.IEN3 = 0;
+    }
+
+  if (irq == RX65N_RIIC1_TEI1_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS28 = 0;
+      ICU.GENBL1.BIT.EN28 = 0;
+    }
+
+  if (irq == RX65N_RIIC1_EEI1_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS29 = 0;
+      ICU.GENBL1.BIT.EN29 = 0;
+    }
+#endif
+
+#ifdef CONFIG_RX65N_RIIC2
+  if (irq == RX65N_RIIC2_RXI2_IRQ)
+    {
+      ICU.IER[6].BIT.IEN6 = 0;
+    }
+
+  if (irq == RX65N_RIIC2_TXI2_IRQ)
+    {
+      ICU.IER[6].BIT.IEN7 = 0;
+    }
+
+  if (irq == RX65N_RIIC2_TEI2_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS15 = 0;
+      ICU.GENBL1.BIT.EN15 = 0;
+    }
+
+  if (irq == RX65N_RIIC2_EEI2_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS16 = 0;
+      ICU.GENBL1.BIT.EN16 = 0;
+    }
+#endif
 }
 
 /****************************************************************************
@@ -784,5 +855,76 @@ void up_enable_irq(int irq)
     }
 
 #endif
+#endif
+#ifdef CONFIG_RX65N_RIIC0
+  if (irq == RX65N_RIIC0_RXI0_IRQ)
+    {
+      ICU.IER[6].BIT.IEN4 = 1;
+    }
+
+  if (irq == RX65N_RIIC0_TXI0_IRQ)
+    {
+      ICU.IER[6].BIT.IEN5 = 1;
+    }
+
+  if (irq == RX65N_RIIC0_TEI0_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS13 = 1;
+      ICU.GENBL1.BIT.EN13 = 1;
+    }
+
+  if (irq == RX65N_RIIC0_EEI0_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS14 = 1;
+      ICU.GENBL1.BIT.EN14 = 1;
+    }
+#endif
+
+#ifdef CONFIG_RX65N_RIIC1
+  if (irq == RX65N_RIIC1_RXI1_IRQ)
+    {
+      ICU.IER[6].BIT.IEN2 = 1;
+    }
+
+  if (irq == RX65N_RIIC1_TXI1_IRQ)
+    {
+      ICU.IER[6].BIT.IEN3 = 1;
+    }
+
+  if (irq == RX65N_RIIC1_TEI1_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS28 = 1;
+      ICU.GENBL1.BIT.EN28 = 1;
+    }
+
+  if (irq == RX65N_RIIC1_EEI1_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS29 = 1;
+      ICU.GENBL1.BIT.EN29 = 1;
+    }
+#endif
+
+#ifdef CONFIG_RX65N_RIIC2
+  if (irq == RX65N_RIIC2_RXI2_IRQ)
+    {
+      ICU.IER[6].BIT.IEN6 = 1;
+    }
+
+  if (irq == RX65N_RIIC2_TXI2_IRQ)
+    {
+      ICU.IER[6].BIT.IEN7 = 1;
+    }
+
+  if (irq == RX65N_RIIC2_TEI2_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS15 = 1;
+      ICU.GENBL1.BIT.EN15 = 1;
+    }
+
+  if (irq == RX65N_RIIC2_EEI2_IRQ)
+    {
+      ICU.GRPBL1.BIT.IS16 = 1;
+      ICU.GENBL1.BIT.EN16 = 1;
+    }
 #endif
 }

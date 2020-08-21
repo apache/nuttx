@@ -196,21 +196,6 @@ void r_ether_pheriperal_enable(void)
 
   MPC.P34PFS.BYTE = 0x11u;
   PORT3.PMR.BIT.B4 = 1u;
-
-  /* Set VBUS pin for USB */
-
-  /* Referred from r_usb_basic_pinset.c */
-
-  MPC.P16PFS.BYTE = 0x12u;
-
-  /* PORT1.PMR.BYTE |= 0x40; */
-
-  PORT1.PMR.BIT.B6 = 1u;
-
-  /* Set USB0_OVRCURA pin */
-
-  MPC.P14PFS.BYTE = 0x12u;
-  PORT1.PMR.BIT.B4 = 1u;
 }
 #endif
 
@@ -316,6 +301,72 @@ inline void sci12_init_port(void)
    * PORTX.PDR.BIT.BX = 1u;
    * PORTX.PMR.BIT.BX = 1u;
    */
+}
+#endif
+
+/****************************************************************************
+ * Name: riic0_init_port
+ *
+ * Description:
+ * RIIC0 Initialization RX65N RSK2MB
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC0
+inline void riic0_init_port(void)
+{
+  /* Set SCL0 pin (P12) */
+
+  MPC.P12PFS.BYTE  = 0x0fu;
+  PORT1.PMR.BIT.B2 = 1u;
+
+  /* Set SDA0 pin (P13) */
+
+  MPC.P13PFS.BYTE   = 0x0fu;
+  PORT1.PMR.BIT.B3  = 1u;
+}
+#endif
+
+/****************************************************************************
+ * Name: riic1_init_port
+ *
+ * Description:
+ * RIIC1 Initialization RX65N RSK2MB
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC1
+inline void riic1_init_port(void)
+{
+  /* Set SCL0 pin (P21) */
+
+  MPC.P21PFS.BYTE  = 0x0fu;
+  PORT2.PMR.BIT.B1 = 1u;
+
+  /* Set SDA0 pin (P20) */
+
+  MPC.P20PFS.BYTE   = 0x0fu;
+  PORT2.PMR.BIT.BT0  = 1u;
+}
+#endif
+
+/****************************************************************************
+ * Name: riic2_init_port
+ *
+ * Description:
+ * RIIC2 Initialization RX65N RSK2MB
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC2
+inline void riic2_init_port(void)
+{
+  /* Set SCL0 pin (P16) */
+
+  MPC.P16PFS.BYTE  = 0x0fu;
+  PORT1.PMR.BIT.B6 = 1u;
+
+  /* Set SDA0 pin (P17) */
+
+  MPC.P17PFS.BYTE   = 0x0fu;
+  PORT1.PMR.BIT.B7  = 1u;
 }
 #endif
 #endif /* CONFIG_ARCH_BOARD_RX65N_RSK2MB */

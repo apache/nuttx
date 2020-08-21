@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/renesas/src/rx65n/rx65n_eth.h
+ * arch/renesas/src/rx65n/rx65n_riic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,98 +18,78 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RENESAS_SRC_RX65N_RX65N_ETH_H
-#define __ARCH_RENESAS_SRC_RX65N_RX65N_ETH_H
+#ifndef __ARCH_RENESAS_SRC_RX65N_RX65N_RIIC_H
+#define __ARCH_RENESAS_SRC_RX65N_RX65N_RIIC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/wdog.h>
+#include <nuttx/i2c/i2c_master.h>
 #include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Understood PHY types */
+#define SCL_RISE_TIME_FASTPLUS 120E-9
+#define SCL_FALL_TIME_FASTPLUS 120E-9
+#define SCL_RISE_TIME_FAST 300E-9
+#define SCL_FALL_TIME_FAST 300E-9
+#define SCL_RISE_TIME_STANDARD 1000E-9
+#define SCL_FALL_TIME_STANDARD 300E-9
+#define RIIC_MAX_DIV 0x08
+#define RIIC_CALC_MAX 32
+#define RIIC_INTERRUPT_PRIO (0x0f)
+#define RIIC_RATE_CALC  (0xff)
 
-/* Definitions for use with rx65n_phy_boardinitialize */
-
-#define RX65N_NETHERNET 1
-
-#define EMAC0_INTF 0
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#define RIIC_SUCCESS            0 /* Successful operation */
+#define RIIC_ERR_NO_INIT        1 /* Uninitialized state */
+#define RIIC_ERR_BUS_BUSY       2 /* Channel is on communication. */
+#define RIIC_ERR_AL             3 /* Arbitration lost error */
+#define RIIC_ERR_TMO            4 /* Time Out error */
+#define RIIC_ERR_NACK           5 /* NACK reception */
+#define RIIC_ERR_OTHER          6 /* Other error */      
 
 /****************************************************************************
- * Function: rx65n_ethinitialize
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: rx65n_i2cbus_initialize
  *
  * Description:
- *   Initialize the EMAC driver.
+ *   Initialize the selected RIIC channel. And return a unique instance of
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
  *
  * Input Parameters:
- *   intf - If multiple EMAC peripherals are supported, this identifies the
- *     the EMAC peripheral being initialized.
+ *   Port number (for hardware that has multiple I2C interfaces)
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *   Called very early in the initialization sequence.
+ *   Valid I2C device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RX65N_EMAC0
-int rx65n_ethinitialize(int intf);
+FAR struct i2c_master_s *rx65n_i2cbus_initialize(int channel);
 
 /****************************************************************************
- * Function: rx65n_poll_expiry
+ * Name: rx65n_i2cbus_uninitialize
  *
  * Description:
- *   Poll Expiry timer
+ *   De-initialize the selected I2C port, and power down the device.
  *
  * Input Parameters:
- *   arg  - Input argument
+ *   Device structure as returned by the rx65n_i2cbus_initialize()
  *
  * Returned Value:
- *  None
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
  *
  ****************************************************************************/
 
-void rx65n_poll_expiry(wdparm_t arg);
+int rx65n_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
-/****************************************************************************
- * Function: rx65n_txtimeout_expiry
- *
- * Description:
- *   txtimeout timer
- *
- * Input Parameters:
- *   arg  - Input argument
- *
- * Returned Value:
- *  None
- *
- ****************************************************************************/
-
-void rx65n_txtimeout_expiry(wdparm_t arg);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_ETH_H */
+#endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_RIIC_H */

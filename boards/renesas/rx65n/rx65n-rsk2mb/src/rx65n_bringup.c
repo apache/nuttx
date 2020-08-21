@@ -43,6 +43,10 @@
 #  include "rx65n_rtc.h"
 #endif
 
+#ifdef HAVE_RIIC_DRIVER
+#  include <nuttx/i2c/i2c_master.h>
+#  include "rx65n_riic.h"
+#endif
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -129,6 +133,52 @@ int rx65n_bringup(void)
   /* Initialize standby RAM */
 
   (void)rx65n_sbram_int();
+#endif
+#ifdef HAVE_RIIC_DRIVER
+  FAR struct i2c_master_s *i2c;
+
+  /* Get the I2C lower half instance */
+
+#ifdef CONFIG_RX65N_RIIC0
+  i2c = rx65n_i2cbus_initialize(0);
+  if (i2c == NULL)
+    {
+      i2cerr("ERROR: Initialization of RIIC Channel 0 failed: %d\n", ret);
+    }
+  else
+    {
+      /* Register the I2C character driver */
+
+      ret = i2c_register(i2c, 0);
+      if (ret < 0)
+        {
+          i2cerr("ERROR: Failed to register RIIC device: %d\n", ret);
+        }
+    }
+
+#endif
+#ifdef CONFIG_RX65N_RIIC1
+  i2c = rx65n_i2cbus_initialize(1);
+  if (i2c == NULL)
+    {
+      i2cerr("ERROR: Initialization of RIIC Channel 1 failed: %d\n", ret);
+    }
+  else
+    {
+      /* Register the I2C character driver */
+
+      ret = i2c_register(i2c, 1);
+      if (ret < 0)
+        {
+          i2cerr("ERROR: Failed to register RIIC device: %d\n", ret);
+        }
+    }
+
+#endif
+#ifdef CONFIG_RX65N_RIIC2
+  i2cerr("RIIC2 setting is not supported on RSK-2MB Board\n");
+  i2cerr("It is used for USB port and cannot be configured\n");
+#endif
 #endif
   return OK;
 }

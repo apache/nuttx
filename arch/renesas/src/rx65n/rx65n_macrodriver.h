@@ -25,7 +25,7 @@
  * Included Files
  ****************************************************************************/
 
-#include "rx65n/iodefine.h"
+#include "arch/rx65n/iodefine.h"
 
 #ifndef TRUE
 #define TRUE (1)

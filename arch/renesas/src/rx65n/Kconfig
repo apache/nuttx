@@ -203,6 +203,143 @@ config RX65N_RTC
 config RX65N_CARRY
 	bool "RTC"
 	default y
+config RX65N_RIIC0 
+	bool "RIIC0"
+	default n
+	depends on I2C && I2C_DRIVER
+	
+if RX65N_RIIC0
+
+config RX65N_RIIC0_BITRATE
+	int "RIIC0 Bus Bit Rate"
+	default 400000
+
+config RX65N_RIIC0_NF
+	bool "Enable Noise Filter for RIIC0"
+	default y
+
+if RX65N_RIIC0_NF
+
+config RX65N_RIIC0_NF_STAGE
+	int "RIIC0 Noise Filter Stages"
+	default 2
+	
+endif #RX65N_RIIC0_NF
+
+config RX65N_RIIC0_SDA_DELAY
+	bool "Enable SDA Output Delay"
+	default n
+	
+if RX65N_RIIC0_SDA_DELAY
+
+config RX65N_RIIC0_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC0_SDA_DELAY
+
+config RX65N_RIIC0_RCV_CONTINUOUS
+	bool "RIIC0 receive continuously"
+	default n
+	
+config RX65N_RIIC0_RCV_IN_BYTE_UNITS
+	bool "RIIC0 receive in byte units"
+	default y
+	depends on !RX65N_RIIC0_RCV_CONTINUOUS
+	
+endif #RX65N_RIIC0
+	
+config RX65N_RIIC1
+	bool "RIIC1"
+	default n
+	depends on I2C && I2C_DRIVER
+	
+if RX65N_RIIC1
+
+config RX65N_RIIC1_BITRATE
+	int "RIIC1 Bus Bit Rate"
+	default 400000
+
+config RX65N_RIIC1_NF
+	bool "Enable Noise Filter"
+	default y
+
+if RX65N_RIIC1_NF
+
+config RX65N_RIIC1_NF_STAGE
+	int "RIIC1 Noise Filter Stages"
+	default 2
+	
+endif #RX65N_RIIC1_NF
+
+config RX65N_RIIC1_SDA_DELAY
+	bool "Enable SDA Output Delay"
+	default n
+	
+if RX65N_RIIC1_SDA_DELAY
+
+config RX65N_RIIC1_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC1_SDA_DELAY
+
+config RX65N_RIIC1_RCV_CONTINUOUS
+	bool "RIIC1 receive continuously"
+	default n
+	
+config RX65N_RIIC1_RCV_IN_BYTE_UNITS
+	bool "RIIC1 receive in byte units"
+	default y
+	depends on !RX65N_RIIC1_RCV_CONTINUOUS
+	
+endif #RX65N_RIIC1
+
+config RX65N_RIIC2
+	bool "RIIC2"
+	default n
+	depends on I2C && I2C_DRIVER
+	
+if RX65N_RIIC2
+
+config RX65N_RIIC2_BITRATE
+	int "RIIC2 Bus Bit Rate"
+	default 400000
+
+config RX65N_RIIC2_NF
+	bool "Enable Noise Filter"
+	default y
+
+if RX65N_RIIC2_NF
+
+config RX65N_RIIC2_NF_STAGE
+	int "RIIC2 Noise Filter Stages"
+	default 2
+	
+endif #RX65N_RIIC2_NF
+
+config RX65N_RIIC2_SDA_DELAY
+	bool "Enable SDA Output Delay for RIIC2"
+	default n
+	
+if RX65N_RIIC2_SDA_DELAY
+
+config RX65N_RIIC2_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC2_SDA_DELAY
+
+config RX65N_RIIC2_RCV_CONTINUOUS
+	bool "RIIC2 receive continuously"
+	default n
+
+config RX65N_RIIC2_RCV_IN_BYTE_UNITS
+	bool "RIIC2 receive in byte units"
+	default y
+	depends on !RX65N_RIIC2_RCV_CONTINUOUS
+	
+endif #RX65N_RIIC2
 endmenu # RX65N Peripheral Selections
 endif
 
@@ -336,6 +473,143 @@ config RX65N_EMAC0
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 
+config RX65N_RIIC0 
+	bool "RIIC0"
+	default n
+	depends on I2C && I2C_DRIVER
+	
+if RX65N_RIIC0
+
+config RX65N_RIIC0_BITRATE
+	int "RIIC0 Bus Bit Rate"
+	default 400000
+	
+config RX65N_RIIC0_NF
+	bool "Enable Noise Filter for RIIC0"
+	default y
+
+if RX65N_RIIC0_NF
+
+config RX65N_RIIC0_NF_STAGE
+	int "RIIC0 Noise Filter Stages"
+	default 2
+	
+endif #RX65N_RIIC0_NF
+
+config RX65N_RIIC0_SDA_DELAY
+	bool "Enable SDA Output Delay"
+	default n
+	
+if RX65N_RIIC0_SDA_DELAY
+
+config RX65N_RIIC0_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC0_SDA_DELAY
+
+config RX65N_RIIC0_RCV_CONTINUOUS
+	bool "RIIC0 receive continuously"
+	default n
+
+config RX65N_RIIC0_RCV_IN_BYTE_UNITS
+	bool "RIIC0 receive in byte units"
+	default y
+	depends on !RX65N_RIIC0_RCV_CONTINUOUS
+	
+endif #RX65N_RIIC0
+
+config RX65N_RIIC1
+	bool "RIIC1"
+	default n
+	depends on I2C && I2C_DRIVER
+	
+if RX65N_RIIC1
+
+config RX65N_RIIC1_BITRATE
+	int "RIIC1 Bus Bit Rate"
+	default 400000
+
+config RX65N_RIIC1_NF
+	bool "Enable Noise Filter for RIIC1"
+	default y
+
+if RX65N_RIIC1_NF
+
+config RX65N_RIIC1_NF_STAGE
+	int "RIIC1 Noise Filter Stages"
+	default 2
+	
+endif #RX65N_RIIC1_NF
+
+config RX65N_RIIC1_SDA_DELAY
+	bool "Enable SDA Output Delay"
+	default n
+	
+if RX65N_RIIC1_SDA_DELAY
+
+config RX65N_RIIC1_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC1_SDA_DELAY
+
+config RX65N_RIIC1_RCV_CONTINUOUS
+	bool "RIIC1 receive continuously"
+	default n
+
+config RX65N_RIIC1_RCV_IN_BYTE_UNITS
+	bool "RIIC1 receive in byte units"
+	default y
+	depends on !RX65N_RIIC1_RCV_CONTINUOUS
+	
+endif #RX65N_RIIC1
+
+config RX65N_RIIC2
+	bool "RIIC2"
+	default n
+	depends on I2C && I2C_DRIVER
+	
+if RX65N_RIIC2
+
+config RX65N_RIIC2_BITRATE
+	int "RIIC2 Bus Bit Rate"
+	default 400000
+
+config RX65N_RIIC2_NF
+	bool "Enable Noise Filter for RIIC2"
+	default y
+
+if RX65N_RIIC2_NF
+
+config RX65N_RIIC2_NF_STAGE
+	int "RIIC2 Noise Filter Stages"
+	default 2
+	
+endif #RX65N_RIIC2_NF
+
+config RX65N_RIIC2_SDA_DELAY
+	bool "Enable SDA Output Delay"
+	default n
+	
+if RX65N_RIIC2_SDA_DELAY
+
+config RX65N_RIIC2_DELAY_CNT
+	int "Number of Cycles Delay"
+	default 1
+
+endif #RX65N_RIIC2_SDA_DELAY
+
+config RX65N_RIIC2_RCV_CONTINUOUS
+	bool "RIIC2 receive continuously"
+	default n
+
+config RX65N_RIIC2_RCV_IN_BYTE_UNITS
+	bool "RIIC2 receive in byte units"
+	default y
+	depends on !RX65N_RIIC2_RCV_CONTINUOUS
+	
+endif #RX65N_RIIC2
 endmenu # RX65N Peripheral Selections
 endif
 

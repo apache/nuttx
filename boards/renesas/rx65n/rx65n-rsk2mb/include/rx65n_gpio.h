@@ -174,4 +174,43 @@ void sci8_init_port(void);
 #ifdef CONFIG_RX65N_SCI12
 void sci12_init_port(void);
 #endif
+/****************************************************************************
+ * Name: riic0_init_port
+ *
+ * Description:
+ *   RIIC0 Initialization RX65N RSK2MB
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC0
+void riic0_init_port(void);
+#endif
+
+/****************************************************************************
+ * Name: riic1_init_port
+ *
+ * Description:
+ * RIIC1 Initialization RX65N RSK2MB
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC1
+void riic1_init_port(void);
+#endif
+
+/****************************************************************************
+ * Name: riic2_init_port
+ *
+ * Description:
+ * RIIC2 Initialization RX65N RSK2MB
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RIIC2
+void riic2_init_port(void);
+#endif
 #endif /* __BOARDS_RENESAS_RX65N_RX65N_RSK2MB_INCLUDE_RX65N_GPIO_H */
