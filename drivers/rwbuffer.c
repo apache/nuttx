@@ -828,16 +828,12 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
 
       /* Allocate the write buffer */
 
-      rwb->wrbuffer = NULL;
-      if (rwb->wrmaxblocks > 0)
+      allocsize     = rwb->wrmaxblocks * rwb->blocksize;
+      rwb->wrbuffer = kmm_malloc(allocsize);
+      if (!rwb->wrbuffer)
         {
-          allocsize     = rwb->wrmaxblocks * rwb->blocksize;
-          rwb->wrbuffer = kmm_malloc(allocsize);
-          if (!rwb->wrbuffer)
-            {
-              ferr("Write buffer kmm_malloc(%d) failed\n", allocsize);
-              return -ENOMEM;
-            }
+          ferr("Write buffer kmm_malloc(%d) failed\n", allocsize);
+          return -ENOMEM;
         }
 
       finfo("Write buffer size: %d bytes\n", allocsize);
@@ -859,16 +855,12 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
 
       /* Allocate the read-ahead buffer */
 
-      rwb->rhbuffer = NULL;
-      if (rwb->rhmaxblocks > 0)
+      allocsize     = rwb->rhmaxblocks * rwb->blocksize;
+      rwb->rhbuffer = kmm_malloc(allocsize);
+      if (!rwb->rhbuffer)
         {
-          allocsize     = rwb->rhmaxblocks * rwb->blocksize;
-          rwb->rhbuffer = kmm_malloc(allocsize);
-          if (!rwb->rhbuffer)
-            {
-              ferr("Read-ahead buffer kmm_malloc(%d) failed\n", allocsize);
-              return -ENOMEM;
-            }
+          ferr("Read-ahead buffer kmm_malloc(%d) failed\n", allocsize);
+          return -ENOMEM;
         }
 
       finfo("Read-ahead buffer size: %d bytes\n", allocsize);
