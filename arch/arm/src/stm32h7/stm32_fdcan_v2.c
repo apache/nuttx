@@ -57,45 +57,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Common definitions *******************************************************/
-
-#ifndef MIN
-#  define MIN(a,b) ((a < b) ? a : b)
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) ((a > b) ? a : b)
-#endif
-
 /* Clock source *************************************************************/
 
-/* PCK5 is the programmable clock source, common to all FDCAN controllers */
-
-// #if defined(CONFIG_STM32H7_FDCAN_CLKSRC_SLOW)
-// #  define STM32H7_FDCAN_CLKSRC           PMC_PCK_CSS_SLOW
-// #  define STM32H7_FDCAN_CLKSRC_FREQUENCY BOARD_SLOWCLK_FREQUENCY
-// #elif defined(CONFIG_STM32H7_FDCAN_CLKSRC_PLLA)
-// #  define STM32H7_FDCAN_CLKSRC           PMC_PCK_CSS_PLLA
-// #  define STM32H7_FDCAN_CLKSRC_FREQUENCY BOARD_PLLA_FREQUENCY
-// #elif defined(CONFIG_STM32H7_FDCAN_CLKSRC_UPLL)
-// #  define STM32H7_FDCAN_CLKSRC           PMC_PCK_CSS_UPLL
-// #  define STM32H7_FDCAN_CLKSRC_FREQUENCY BOARD_UPLL_FREQUENCY
-// #elif defined(CONFIG_STM32H7_FDCAN_CLKSRC_MCK)
-// #  define STM32H7_FDCAN_CLKSRC           PMC_PCK_CSS_MCK
-// #  define STM32H7_FDCAN_CLKSRC_FREQUENCY BOARD_MCK_FREQUENCY
-// #else /* if defined(CONFIG_STM32H7_FDCAN_CLKSRC_MAIN */
-// #  define STM32H7_FDCAN_CLKSRC           PMC_PCK_CSS_MAIN
-// #  define STM32H7_FDCAN_CLKSRC_FREQUENCY BOARD_MAINOSC_FREQUENCY
-// #endif
-
-// #ifndef CONFIG_STM32H7_FDCAN_CLKSRC_PRESCALER
-// #  define CONFIG_STM32H7_FDCAN_CLKSRC_PRESCALER 1
-// #endif
-
-// #define STM32H7_FDCANCLK_FREQUENCY \
-//   (STM32H7_FDCAN_CLKSRC_FREQUENCY / CONFIG_STM32H7_FDCAN_CLKSRC_PRESCALER)
-
 #define STM32H7_FDCANCLK_FREQUENCY STM32_FDCANCLK
+
 /* Buffer Alignment *********************************************************/
 
 /* Buffer Alignment.
