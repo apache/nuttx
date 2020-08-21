@@ -145,12 +145,19 @@
 #    error Invalid FDCAN1 NSJW
 #  endif
 
+#  ifdef STM32H7_FDCAN1_FD_BRS
 #  define FDCAN1_DTSEG1 (CONFIG_STM32H7_FDCAN1_FPROPSEG + CONFIG_STM32H7_FDCAN1_FPHASESEG1)
 #  define FDCAN1_DTSEG2 (CONFIG_STM32H7_FDCAN1_FPHASESEG2)
 #  define FDCAN1_DBRP   ((uint32_t)(((float) STM32H7_FDCANCLK_FREQUENCY / \
                        ((float)(FDCAN1_DTSEG1 + FDCAN1_DTSEG2 + 3) * \
                         (float)CONFIG_STM32H7_FDCAN1_FBITRATE)) - 1))
 #  define FDCAN1_DSJW   (CONFIG_STM32H7_FDCAN1_FFSJW - 1)
+#  else
+#  define FDCAN1_DTSEG1 1
+#  define FDCAN1_DTSEG2 1
+#  define FDCAN1_DBRP   1
+#  define FDCAN1_DSJW   1
+#  endif /* STM32H7_FDCAN1_FD_BRS */
 
 #  if FDCAN1_DTSEG1 > 15
 #    error Invalid FDCAN1 DTSEG1
@@ -447,8 +454,8 @@
 #ifdef CONFIG_STM32H7_FDCAN2
   /* Bit timing */
 
-#  define FDCAN2_NTSEG1  CONFIG_STM32H7_FDCAN2_NTSEG1
-#  define FDCAN2_NTSEG2  CONFIG_STM32H7_FDCAN2_NTSEG2
+#  define FDCAN2_NTSEG1  (CONFIG_STM32H7_FDCAN2_NTSEG1 - 1)
+#  define FDCAN2_NTSEG2  (CONFIG_STM32H7_FDCAN2_NTSEG2 - 1)
 #  define FDCAN2_NBRP    ((uint32_t)(((float) STM32H7_FDCANCLK_FREQUENCY / \
                        ((float)(FDCAN2_NTSEG1 + FDCAN2_NTSEG2 + 3) * \
                         (float)CONFIG_STM32H7_FDCAN2_BITRATE)) - 1))
