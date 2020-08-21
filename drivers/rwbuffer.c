@@ -880,6 +880,7 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
   if (rwb->wrmaxblocks > 0)
     {
       rwb_wrcanceltimeout(rwb);
+      rwb_wrflush(rwb);
       nxsem_destroy(&rwb->wrsem);
       if (rwb->wrbuffer)
         {
