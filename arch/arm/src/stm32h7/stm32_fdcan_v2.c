@@ -19,8 +19,8 @@
  ****************************************************************************/
 
 /* References:
- *   SAMV7D3 Series Data Sheet
- *   Atmel sample code
+ *   ST32H7 Series Data Sheet
+ *   SAMv7 MCAN NuttX driver
  */
 
 /****************************************************************************
@@ -1337,7 +1337,7 @@ static void fdcan_dumpregs(FAR struct stm32_fdcan_s *priv,
   FAR const struct stm32_config_s *config = priv->config;
 
   caninfo("CAN%d Control and Status Registers: %s\n", config->port, msg);
-  caninfo("  Base: %08x\n", config->base);
+  caninfo("  Base:  %08x\n", config->base);
 
   /* CAN control and status registers */
 
@@ -1349,23 +1349,26 @@ static void fdcan_dumpregs(FAR struct stm32_fdcan_s *priv,
           getreg32(config->base + STM32_FDCAN_NBTP_OFFSET),
           getreg32(config->base + STM32_FDCAN_DBTP_OFFSET));
 
-  caninfo("  IE:    %08x   ILE:   %08x    ILS:  %08x\n",
+  caninfo("  IE:    %08x   TIE:   %08x\n",
           getreg32(config->base + STM32_FDCAN_IE_OFFSET),
+          getreg32(config->base + STM32_FDCAN_TXBTIE_OFFSET));
+  
+  caninfo("  ILE:   %08x   ILS:   %08x\n",
           getreg32(config->base + STM32_FDCAN_ILE_OFFSET),
           getreg32(config->base + STM32_FDCAN_ILS_OFFSET));
 
-  caninfo("  PSR:   %08x   ECR:   %08x\n",
-          getreg32(config->base + STM32_FDCAN_PSR_OFFSET),
-          getreg32(config->base + STM32_FDCAN_ECR_OFFSET));
+  caninfo("  RXBC:  %08x   RXESC: %08x\n",
+          getreg32(config->base + STM32_FDCAN_RXBC_OFFSET),
+          getreg32(config->base + STM32_FDCAN_RXESC_OFFSET));
 
-  caninfo("  HPMS:  %08x   RXF0S: %08x   RXF1S: %08x\n",
-          getreg32(config->base + STM32_FDCAN_HPMS_OFFSET),
-          getreg32(config->base + STM32_FDCAN_RXF0S_OFFSET),
-          getreg32(config->base + STM32_FDCAN_RXF1S_OFFSET));
+  caninfo("  RXF0C: %08x   RXF1C: %08x\n",
+          getreg32(config->base + STM32_FDCAN_RXF0C_OFFSET),
+          getreg32(config->base + STM32_FDCAN_RXF1C_OFFSET));
 
-  caninfo("  TXFQS: %08x   TXEFS: %08x\n",
-          getreg32(config->base + STM32_FDCAN_TXFQS_OFFSET),
-          getreg32(config->base + STM32_FDCAN_TXEFS_OFFSET));
+  caninfo("  TXBC:  %08x   TXESC: %08x   TXEFC: %08x\n",
+          getreg32(config->base + STM32_FDCAN_TXBC_OFFSET),
+          getreg32(config->base + STM32_FDCAN_TXESC_OFFSET),
+          getreg32(config->base + STM32_FDCAN_TXEFC_OFFSET));
 }
 #endif
 
@@ -1390,13 +1393,24 @@ static void fdcan_dumprxregs(FAR struct stm32_fdcan_s *priv,
   FAR const struct stm32_config_s *config = priv->config;
 
   caninfo("CAN%d Rx Registers: %s\n", config->port, msg);
-  caninfo("  Base: %08x\n", config->base);
+  caninfo("  Base:  %08x\n", config->base);
 
+  caninfo("  PSR:   %08x   ECR:   %08x   HPMS: %08x\n",
+          getreg32(config->base + STM32_FDCAN_PSR_OFFSET),
+          getreg32(config->base + STM32_FDCAN_ECR_OFFSET),
+          getreg32(config->base + STM32_FDCAN_HPMS_OFFSET));
 
-  caninfo("  RXESC: %08x   RXF0S: %08x   RXF1S: %08x\n",
-          getreg32(config->base + STM32_FDCAN_RXESC_OFFSET),
+  caninfo("  RXF0S: %08x   RXF0A: %08x\n",
           getreg32(config->base + STM32_FDCAN_RXF0S_OFFSET),
-          getreg32(config->base + STM32_FDCAN_RXF1S_OFFSET));
+          getreg32(config->base + STM32_FDCAN_RXF0A_OFFSET));
+
+  caninfo("  RXF1S: %08x   RXF1A: %08x\n",
+          getreg32(config->base + STM32_FDCAN_RXF1S_OFFSET),
+          getreg32(config->base + STM32_FDCAN_RXF1A_OFFSET));
+  
+  caninfo("  NDAT1: %08x   NDAT2: %08x\n",
+          getreg32(config->base + STM32_FDCAN_NDAT1_OFFSET),
+          getreg32(config->base + STM32_FDCAN_NDAT2_OFFSET));
 
   caninfo("  IR:    %08x   IE:    %08x\n",
           getreg32(config->base + STM32_FDCAN_IR_OFFSET),
@@ -1425,19 +1439,30 @@ static void fdcan_dumptxregs(FAR struct stm32_fdcan_s *priv,
   FAR const struct stm32_config_s *config = priv->config;
 
   caninfo("CAN%d Tx Registers: %s\n", config->port, msg);
-  caninfo("  Base: %08x\n", config->base);
+  caninfo("  Base:  %08x\n", config->base);
 
-  caninfo("  TXQFS: %08x  TXBAR: %08x  TXBRP: %08x\n",
+  caninfo("  PSR:   %08x   ECR:   %08x\n",
+          getreg32(config->base + STM32_FDCAN_PSR_OFFSET),
+          getreg32(config->base + STM32_FDCAN_ECR_OFFSET));
+
+  caninfo("  TXQFS: %08x   TXBAR: %08x   TXBRP: %08x\n",
           getreg32(config->base + STM32_FDCAN_TXFQS_OFFSET),
           getreg32(config->base + STM32_FDCAN_TXBAR_OFFSET),
           getreg32(config->base + STM32_FDCAN_TXBRP_OFFSET));
   
-  caninfo("  TXBTO: %08x  TXBCR: %08x  TXBCF: %08x\n",
+  caninfo("  TXBTO: %08x   TXBCR: %08x   TXBCF: %08x\n",
           getreg32(config->base + STM32_FDCAN_TXBTO_OFFSET),
           getreg32(config->base + STM32_FDCAN_TXBCR_OFFSET),
           getreg32(config->base + STM32_FDCAN_TXBCF_OFFSET));
 
-  caninfo("  TIE:   %08x\n",
+  caninfo("  TXEFC: %08x   TXEFS: %08x   TXEFA: %08x\n",
+          getreg32(config->base + STM32_FDCAN_TXEFC_OFFSET),
+          getreg32(config->base + STM32_FDCAN_TXEFS_OFFSET),
+          getreg32(config->base + STM32_FDCAN_TXEFA_OFFSET));
+
+  caninfo("  IR:    %08x   IE:    %08x   TIE:   %08x\n",
+          getreg32(config->base + STM32_FDCAN_IR_OFFSET),
+          getreg32(config->base + STM32_FDCAN_IE_OFFSET),
           getreg32(config->base + STM32_FDCAN_TXBTIE_OFFSET));
 }
 #endif
@@ -1462,45 +1487,45 @@ static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv)
   FAR const struct stm32_config_s *config = priv->config;
 
   caninfo(" ******* FDCAN%d Message RAM layout *******\n", config->port);
-  caninfo("                Start   # Elmnt  Elmnt size\n");
+  caninfo("                Start     # Elmnt  Elmnt size (words)\n");
 
 #if CONFIG_STM32H7_FDCAN1_NSTDFILTERS > 0
-  caninfo("STD filters   %p   %4d      %2d\n",
+  caninfo("STD filters   %p   %4d        %2d\n",
           config->msgram.stdfilters,
           config->nstdfilters,
           1);
 #endif
 
 #if CONFIG_STM32H7_FDCAN1_NEXTFILTERS > 0
-  caninfo("EXT filters   %p   %4d      %2d\n",
+  caninfo("EXT filters   %p   %4d        %2d\n",
           config->msgram.extfilters,
           config->nextfilters,
           2);
 #endif
 
 #if CONFIG_STM32H7_FDCAN1_RXFIFO0_SIZE > 0
-  caninfo("RX FIFO 0     %p   %4d      %2d\n",
+  caninfo("RX FIFO 0     %p   %4d        %2d\n",
           config->msgram.rxfifo0,
           config->nrxfifo0,
           config->rxfifo0esize);
 #endif
 
 #if CONFIG_STM32H7_FDCAN1_RXFIFO1_SIZE
-  caninfo("RX FIFO 1     %p   %4d      %2d\n",
+  caninfo("RX FIFO 1     %p   %4d        %2d\n",
           config->msgram.rxfifo1,
           config->nrxfifo1,
           config->rxfifo1esize);
 #endif
 
 #if CONFIG_STM32H7_FDCAN1_DEDICATED_RXBUFFER_SIZE > 0
-  caninfo("RX Buffers    %p   %4d      %2d\n",
+  caninfo("RX Buffers    %p   %4d        %2d\n",
           config->msgram.rxdedicated,
           config->nrxdedicated,
           config->rxbufferesize);
 #endif
 
 #if CONFIG_STM32H7_FDCAN1_TXFIFOQ_SIZE > 0
-  caninfo("TX FIFO       %p   %4d      %2d\n",
+  caninfo("TX FIFO       %p   %4d        %2d\n",
           config->msgram.txfifoq,
           config->ntxfifoq,
           config->txbufferesize);
@@ -2633,8 +2658,6 @@ static int fdcan_setup(FAR struct can_dev_s *dev)
   priv->state = FDCAN_STATE_SETUP;
   fdcan_rxint(dev, true);
 
-  fdcan_dumpregs(priv, "After receive setup");
-
   /* Enable the interrupts at the NVIC (they are still disabled at the FDCAN
    * peripheral).
    */
@@ -3686,6 +3709,8 @@ static void fdcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   unsigned int nbytes;
   int ret;
 
+  fdcan_dumprxregs(dev->cd_priv, "Before receive");
+
   /* Invalidate the D-Cache so that we reread the RX buffer data from memory. */
 
   nbytes = (nwords << 2);
@@ -3788,9 +3813,6 @@ static int fdcan_interrupt(int irq, void *context, FAR void *arg)
   priv = dev->cd_priv;
   DEBUGASSERT(priv && priv->config);
   config = priv->config;
-
-  fdcan_dumprxregs(priv, "RX interrupt");
-  fdcan_dumpregs(priv, "RX interrupt");
 
   /* Loop while there are pending interrupt events */
 
@@ -4109,7 +4131,6 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
   FAR uint32_t *msgram;
   uint32_t regval;
   uint32_t cntr;
-  uint32_t cmr;
 
   caninfo("FDCAN%d\n", config->port);
 
@@ -4117,10 +4138,6 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
 
   stm32_configgpio(config->rxpinset);
   stm32_configgpio(config->txpinset);
-
-  /* Enable peripheral clocking */
-
-  // sam_enableperiph1(config->pid); // TODO: check this isn't needed
 
   /* Enable the Initialization state */
 
@@ -4218,7 +4235,6 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
   regval = FDCAN_TXESC_TBDS(config->txbufferecode);
   fdcan_putreg(priv, STM32_FDCAN_TXESC_OFFSET, regval);
 
-  /* Dump Message RAM layout */
   fdcan_dumpramlayout(priv);
 
   /* Configure Message Filters */
@@ -4260,16 +4276,14 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
       fdcan_putreg(priv, STM32_FDCAN_TTOCF_OFFSET, regval);
     }
   
-  /* CCU configuration */ /*REVIST: shared CCU config between cores */
+  /* CCU configuration
+   * REVIST: CCU currently bypassed to used kernel clock
+   * directly. Could be beneficial to get this working.
+   */
 
   regval = getreg32(STM32_FDCAN_CCU_CCFG);
   regval |= FDCAN_CCU_CCFG_BCC;
   putreg32(regval, STM32_FDCAN_CCU_CCFG);
-
-
-  /* Clear to CCCR defaults in preparation of selection of frame
-   * format and mode 
-   */
 
   regval  = fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET);
   regval &= ~(FDCAN_CCCR_NISO | FDCAN_CCCR_FDOE | FDCAN_CCCR_BRSE);
@@ -4286,7 +4300,6 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
       regval |= FDCAN_CCCR_NISO;
       break;
     }
-
 
   /* Select Classic CAN mode or FD mode with or without fast bit rate
    * switching
@@ -4312,18 +4325,6 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
   /* Set the initial CAN mode */
 
   fdcan_putreg(priv, STM32_FDCAN_CCCR_OFFSET, regval);
-
-  /* Request the mode change */
-  //TODO:
-  // regval |= cmr;
-  // fdcan_putreg(priv, STM32_FDCAN_CCCR_OFFSET, regval);
-
-#if 0 /* Not necessary in initialization mode */
-  /* Wait for the mode to take effect */
-
-  while ((fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET) &
-         (FDCAN_CCCR_FDBS | FDCAN_CCCR_FDO)) != 0);
-#endif
 
   /* Enable FIFO/Queue mode
    *
@@ -4422,22 +4423,8 @@ FAR struct can_dev_s *stm32_fdcan_initialize(int port)
   FAR struct can_dev_s *dev;
   FAR struct stm32_fdcan_s *priv;
   FAR const struct stm32_config_s *config;
-  uint32_t regval;
 
   caninfo("FDCAN%d\n", port);
-
-  //TODO:
-  // /* Select PCK5 clock source and pre-scaler value.  Both FDCAN controllers
-  //  * use PCK5 to derive bit rate.
-  //  */
-
-  // regval = PMC_PCK_PRES(CONFIG_STM32H7_FDCAN_CLKSRC_PRESCALER - 1) |
-  //          STM32H7_FDCAN_CLKSRC;
-  // putreg32(regval, STM32_PMC_PCK5);
-
-  // /* Enable PCK5 */
-
-  // putreg32(PMC_PCK5, STM32_PMC_SCER);
 
   /* Select FDCAN peripheral to be initialized */
 
@@ -4449,15 +4436,6 @@ FAR struct can_dev_s *stm32_fdcan_initialize(int port)
       dev    = &g_fdcan1dev;
       priv   = &g_fdcan1priv;
       config = &g_fdcan1const;
-
-      /* Configure FDCAN1 Message RAM Base Address */
-      
-      //TODO: Check this out. Looks like a DMA mapping
-      // regval  = getreg32(STM32_MATRIX_CAN0);
-      // regval &= MATRIX_CAN0_RESERVED;
-      // regval |= (uint32_t)config->msgram.stdfilters &
-      //           MATRIX_CAN0_CAN0DMABA_MASK;
-      // putreg32(regval, STM32_MATRIX_CAN0);
     }
   else
 #endif
@@ -4469,15 +4447,6 @@ FAR struct can_dev_s *stm32_fdcan_initialize(int port)
       dev    = &g_fdcan2dev;
       priv   = &g_fdcan2priv;
       config = &g_fdcan2const;
-
-      /* Configure FDCAN2 Message RAM Base Address */
-
-      //TODO: Check this out. Looks like a DMA mapping
-      // regval  = getreg32(STM32_MATRIX_CCFG_SYSIO);
-      // regval &= ~MATRIX_CCFG_CAN1DMABA_MASK;
-      // regval |= (uint32_t)config->msgram.stdfilters &
-      //           MATRIX_CCFG_CAN1DMABA_MASK;
-      // putreg32(regval, STM32_MATRIX_CCFG_SYSIO);
     }
   else
 #endif
