@@ -31,7 +31,7 @@
 #include "chip/chip.h"
 #include "up_internal.h"
 #include "up_arch.h"
-#include "rx65n/irq.h"
+#include "arch/rx65n/irq.h"
 
 /****************************************************************************
  * Pre-processor Definitions
