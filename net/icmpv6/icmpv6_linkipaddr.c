@@ -121,12 +121,12 @@ icmpv6_linkipaddr_8(FAR const void *mac_, net_ipv6addr_t ipaddr)
  *
  * Description:
  *   Generate the device link scope ipv6 address as below:
- *    128  112  96   80    64   48   32   16
- *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxff fexx xxxx 6-byte normal address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *    128  112   96   80   64   48   32   16
+ *    ---- ---- ---- ---- ---- ---- ---- ----
+ *    fe80 0000 0000 0000 0000 00ff fe00 xx00 1B short address IEEE 48b MAC
+ *    fe80 0000 0000 0000 0000 00ff fe00 xxxx 2B short address IEEE 48b MAC
+ *    fe80 0000 0000 0000 xxxx xxff fexx xxxx 6B normal address IEEE 48b MAC
+ *    fe80 0000 0000 0000 xxxx xxxx xxxx xxxx 8B extended address IEEE EUI-64
  *
  * Input Parameters:
  *   dev    - The device driver structure containing the link layer address
