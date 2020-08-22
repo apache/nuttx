@@ -119,6 +119,10 @@ ifeq ($(CONFIG_ESP32_UART),y)
 CMN_CSRCS += esp32_serial.c
 endif
 
+ifeq ($(CONFIG_ESP32_RNG),y)
+CMN_CSRCS += esp32_rng.c
+endif
+
 ifeq ($(CONFIG_ARCH_USE_MODULE_TEXT),y)
 CHIP_CSRCS += esp32_modtext.c
 CMN_ASRCS += xtensa_loadstore.S

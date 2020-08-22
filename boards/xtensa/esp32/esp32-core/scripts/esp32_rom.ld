@@ -186,6 +186,7 @@ PROVIDE ( ets_isr_mask = 0x400067fc );
 PROVIDE ( ets_isr_unmask = 0x40006808 );
 PROVIDE ( ets_post = 0x4000673c );
 PROVIDE ( ets_printf = 0x40007d54 );
+PROVIDE ( g_ticks_per_us_pro = 0x3ffe01e0 );
 PROVIDE ( ets_readySet_ = 0x3ffe01f0 );
 PROVIDE ( ets_run = 0x400066bc );
 PROVIDE ( ets_secure_boot_check = 0x4005cb40 );

@@ -84,6 +84,14 @@ config ESP32_RMT
 	---help---
 		No yet implemented
 
+config ESP32_RNG
+	bool "Random Number Generator (RNG)"
+	default n
+	depends on EXPERIMENTAL
+        select ARCH_HAVE_RNG
+	---help---
+		ESP32 supports a RNG that passed on Dieharder test suite.
+
 config ESP32_SDIO_SAVE
 	bool "SDIO Slave"
 	default n

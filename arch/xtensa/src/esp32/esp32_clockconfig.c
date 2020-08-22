@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_clockconfig.C
+ * arch/xtensa/src/esp32/esp32_clockconfig.c
  *
  * Mofidifed by use in NuttX by:
  *
@@ -30,9 +30,18 @@
 
 #include <stdint.h>
 #include "xtensa.h"
+#include "xtensa_attr.h"
 
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_soc.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef MIN
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 
 /****************************************************************************
  * Private Types
@@ -57,7 +66,8 @@ enum cpu_freq_e
  * Private Functions
  ****************************************************************************/
 
-extern void ets_delay_us(int delay_us);
+extern uint32_t g_ticks_per_us_pro;
+extern void     ets_delay_us(int delay_us);
 
 /****************************************************************************
  * Name: esp32_set_cpu_freq
@@ -368,3 +378,14 @@ void esp32_clockconfig(void)
   esp32_bbpll_configure(xtal_freq, source_freq_mhz);
   esp32_set_cpu_freq(freq_mhz);
 }
+
+int IRAM_ATTR esp_clk_cpu_freq(void)
+{
+  return g_ticks_per_us_pro * MHZ;
+}
+
+int IRAM_ATTR esp_clk_apb_freq(void)
+{
+  return MIN(g_ticks_per_us_pro, 80) * MHZ;
+}
+
