@@ -117,8 +117,8 @@ void nrf52_ppi_grp_channel_enable(uint8_t group, uint8_t ch, bool enable)
   DEBUGASSERT(group < NRF52_PPI_NUM_GROUPS);
   DEBUGASSERT(ch < NRF52_PPI_NUM_CHANNELS);
 
-  modifyreg32(NRF52_PPI_CHG(group), (enable ? PPI_CHEN_CH(ch) : 0),
-                                    (enable ? 0 : PPI_CHEN_CH(ch)));
+  modifyreg32(NRF52_PPI_CHG(group), (enable ? 0 : PPI_CHEN_CH(ch)),
+                                    (enable ? PPI_CHEN_CH(ch) : 0));
 }
 
 /****************************************************************************
