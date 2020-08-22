@@ -83,15 +83,6 @@ extern const struct procfs_operations part_procfsoperations;
 extern const struct procfs_operations mount_procfsoperations;
 extern const struct procfs_operations smartfs_procfsoperations;
 
-/* And even worse, this one is specific to the STM32.  The solution to
- * this nasty couple would be to replace this hard-coded, ROM-able
- * operations table with a RAM-base registration table.
- */
-
-#if defined(CONFIG_STM32_CCM_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CCM)
-extern const struct procfs_operations ccm_procfsoperations;
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
