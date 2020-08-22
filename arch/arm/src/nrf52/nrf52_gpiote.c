@@ -183,7 +183,9 @@ int nrf52_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
   int        ret    = OK;
   int        i      = 0;
   int        pin    = 0;
+#ifdef CONFIG_NRF52_HAVE_PORT1
   int        port   = 0;
+#endif
   uint32_t   regval = 0;
   bool       found  = false;
   irqstate_t flags;
@@ -218,15 +220,18 @@ int nrf52_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
   /* Select GPIOTE pin */
 
   pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-
   regval = (pin << GPIOTE_CONFIG_PSEL_SHIFT);
+
+#ifdef CONFIG_NRF52_HAVE_PORT1
+  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   regval |= (port << GPIOTE_CONFIG_PORT_SHIFT);
+#endif
 
   /* Select EVENT mode */
 
   if (event || func)
     {
+      regval &= ~GPIOTE_CONFIG_MODE_MASK;
       regval |= GPIOTE_CONFIG_MODE_EV;
     }
 
@@ -282,6 +287,82 @@ int nrf52_gpiote_init(void)
 
   irq_attach(NRF52_IRQ_GPIOTE, nrf52_gpiote_isr, NULL);
   up_enable_irq(NRF52_IRQ_GPIOTE);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nrf52_gpiotaskset
+ *
+ * Description:
+ *   Configure GPIO in TASK mode (to be controlled via tasks).
+ *   Note that a pin can only be either in TASK or EVENT mode (set by
+ *   nrf52_gpiosetevent with event set to true). Also, once set to TASK mode,
+ *   pin control is only possible via tasks on the via nrf52_gpio_write and
+ *   will automatically set the output mode.
+ *   Finally, a given pin should only be assigned to a given channel.
+ *
+ * Input Parameters:
+ *  - pinset: gpio pin configuration (only port + pin is important here)
+ *  - channel: the GPIOTE channel used to control the given pin
+ *  - output_high: set pin initially to output HIGH or LOW.
+ *  - outcfg: configure pin behavior one OUT task is triggered
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
+ *
+ ****************************************************************************/
+
+int nrf52_gpiotaskset(uint32_t pinset, int channel,
+                       bool output_high, enum nrf52_gpiote_outcfg_e outcfg)
+{
+  uint32_t regval;
+  int pin;
+
+  /* Select GPIOTE pin */
+
+  pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  regval = (pin << GPIOTE_CONFIG_PSEL_SHIFT);
+
+#ifdef CONFIG_NRF52_HAVE_PORT1
+  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  regval |= (port << GPIOTE_CONFIG_PORT_SHIFT);
+#endif
+
+  /* Select TASK mode */
+
+  regval |= GPIOTE_CONFIG_MODE_TS;
+
+  /* Select pin number */
+
+  regval |= (pin << GPIOTE_CONFIG_PSEL_SHIFT);
+
+  /* Select initial output */
+
+  if (output_high)
+    {
+      regval |= (1 << GPIOTE_CONFIG_OUTINIT_SHIFT);
+    }
+
+  /* Set polarity mode */
+
+  switch (outcfg)
+    {
+      case NRF52_GPIOTE_SET:
+        regval |= GPIOTE_CONFIG_POL_LTH;
+        break;
+      case NRF52_GPIOTE_CLEAR:
+        regval |= GPIOTE_CONFIG_POL_HTL;
+        break;
+      case NRF52_GPIOTE_TOGGLE:
+        regval |= GPIOTE_CONFIG_POL_TG;
+        break;
+    }
+
+  /* Write register */
+
+  nrf52_gpiote_putreg(NRF52_GPIOTE_CONFIG_OFFSET(channel), regval);
 
   return OK;
 }
