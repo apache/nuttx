@@ -570,7 +570,7 @@ static int nrf52_rtc_checkint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s)
 
       case NRF52_RTC_EVT_COMPARE1:
         {
-          ret = nrf52_rtc_getreg(dev, NRF52_RTC_EVENTS_COMPARE_OFFSET(0));
+          ret = nrf52_rtc_getreg(dev, NRF52_RTC_EVENTS_COMPARE_OFFSET(1));
           break;
         }
 
