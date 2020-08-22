@@ -103,7 +103,7 @@
 #define NRF52_RADIO_PREFIX0_OFFSET           0x0524 /* Prefixes bytes for logical addresses 0-3 */
 #define NRF52_RADIO_PREFIX1_OFFSET           0x0528 /* Prefixes bytes for logical addresses 4-7 */
 #define NRF52_RADIO_TXADDRESS_OFFSET         0x052c /* Transmit address select */
-#define NRF52_RADIO_RXADDRESS_OFFSET         0x0530 /* Receive address select */
+#define NRF52_RADIO_RXADDRESSES_OFFSET       0x0530 /* Receive address select */
 #define NRF52_RADIO_CRCCNF_OFFSET            0x0534 /* CRC configuration */
 #define NRF52_RADIO_CRCPOLY_OFFSET           0x0538 /* CRC polynomial */
 #define NRF52_RADIO_CRCINIT_OFFSET           0x053c /* CRC initial value */
@@ -180,7 +180,7 @@
 #define NRF52_RADIO_PREFIX0           (NRF52_RADIO_BASE + NRF52_RADIO_PREFIX0_OFFSET)
 #define NRF52_RADIO_PREFIX1           (NRF52_RADIO_BASE + NRF52_RADIO_PREFIX1_OFFSET)
 #define NRF52_RADIO_TXADDRESS         (NRF52_RADIO_BASE + NRF52_RADIO_TXADDRESS_OFFSET)
-#define NRF52_RADIO_RXADDRESS         (NRF52_RADIO_BASE + NRF52_RADIO_RXADDRESS_OFFSET)
+#define NRF52_RADIO_RXADDRESSES       (NRF52_RADIO_BASE + NRF52_RADIO_RXADDRESSES_OFFSET)
 #define NRF52_RADIO_CRCCNF            (NRF52_RADIO_BASE + NRF52_RADIO_CRCCNF_OFFSET)
 #define NRF52_RADIO_CRCPOLY           (NRF52_RADIO_BASE + NRF52_RADIO_CRCPOLY_OFFSET)
 #define NRF52_RADIO_CRCINIT           (NRF52_RADIO_BASE + NRF52_RADIO_CRCINIT_OFFSET)
@@ -436,11 +436,18 @@
 #define RADIO_MODE_MASK                   (0xf << RADIO_MODE_SHIFT)
 #define RADIO_MODE_NRF1MBIT               (0x00 << RADIO_MODE_SHIFT) /* 0: 1 Mbit/s Nordic proprietary radio mode */
 #define RADIO_MODE_NRF2MBIT               (0x01 << RADIO_MODE_SHIFT) /* 1: 2 Mbit/s Nordic proprietary radio mode */
+
+#if defined(CONFIG_ARCH_CHIP_NRF52832)
+#define RADIO_MODE_NRF250KBIT             (0x02 << RADIO_MODE_SHIFT) /* 2: 250 kbit/s Nordic proprietary radio mode (deprecated) */
+#define RADIO_MODE_BLE1MBIT               (0x03 << RADIO_MODE_SHIFT) /* 3: 1 Mbit/s BLE */
+#define RADIO_MODE_BLE2MBIT               (0x04 << RADIO_MODE_SHIFT) /* 4: 2 Mbit/s BLE */
+#elif defined(CONFIG_ARCH_CHIP_NRF52840)
 #define RADIO_MODE_BLE1MBIT               (0x03 << RADIO_MODE_SHIFT) /* 3: 1 Mbit/s BLE */
 #define RADIO_MODE_BLE2MBIT               (0x04 << RADIO_MODE_SHIFT) /* 4: 2 Mbit/s BLE */
 #define RADIO_MODE_BLELR125KBIT           (0x05 << RADIO_MODE_SHIFT) /* 5: Long range 125 kbit/s TX, 125 kbit/s and 500 kbit/s RX */
 #define RADIO_MODE_BLELR500KBIT           (0x06 << RADIO_MODE_SHIFT) /* 6: Long range 500 kbit/s TX, 125 kbit/s and 500 kbit/s RX */
 #define RADIO_MODE_IEEE802154             (0x0f << RADIO_MODE_SHIFT) /* 15: IEEE 802.15.4-2006 250 kbit/s */
+#endif
 
 /* PCNF0 Register */
 
@@ -454,20 +461,27 @@
 #define RADIO_PCNF0_S1LEN_MASK            (0xf << RADIO_PCNF0_S1LEN_SHIFT)
 #define RADIO_PCNF0_S1LEN_MAX             (0xf)
 #define RADIO_PCNF0_S1INCL                (1 << 20) /* Bit 20: Include or exclude S1 field in RAM */
+
+#ifdef CONFIG_ARCH_CHIP_NRF52840
 #define RADIO_PCNF0_CILEN_SHIFT           (22)      /* Bits 22-23: Length of code indicator - long range */
 #define RADIO_PCNF0_CILEN_MASK            (0x3 << RADIO_PCNF0_CILEN_SHIFT)
 #define RADIO_PCNF0_CILEN_MAX             (0x3)
+#endif
+
 #define RADIO_PCNF0_PLEN_SHIFT            (24)      /* Bits 24-25: Length of preamble on air */
 #define RADIO_PCNF0_PLEN_MASK             (0x3 << RADIO_PCNF0_PLEN_SHIFT)
 #  define RADIO_PCNF0_PLEN_8BIT           (0 << RADIO_PCNF0_PLEN_SHIFT)
 #  define RADIO_PCNF0_PLEN_16BIT          (1 << RADIO_PCNF0_PLEN_SHIFT)
 #  define RADIO_PCNF0_PLEN_32BITZ         (2 << RADIO_PCNF0_PLEN_SHIFT)
 #  define RADIO_PCNF0_PLEN_LONGRANGE      (3 << RADIO_PCNF0_PLEN_SHIFT)
+
+#ifdef CONFIG_ARCH_CHIP_NRF52840
 #define RADIO_PCNF0_CRCINC_SHIFT          (26)      /* Bit 26: Indicates if LENGTH field contains CRC */
 #define RADIO_PCNF0_CRCINC                (1 << RADIO_PCNF0_CRCINC_SHIFT)
 #define RADIO_PCNF0_TERMLEN_SHIFT         (29)      /* Bits 29-30: Length of TERM field in Long Range operation */
 #define RADIO_PCNF0_TERMLEN_MASK          (0x3 << RADIO_PCNF0_TERMLEN_SHIFT)
 #define RADIO_PCNF0_TERMLEN_MAX           (0x3)
+#endif
 
 /* PCNF1 Register */
 
@@ -506,10 +520,16 @@
 #  define RADIO_CRCCNF_LEN_2              (2 << RADIO_CRCCNF_LEN_SHIFT)
 #  define RADIO_CRCCNF_LEN_3              (3 << RADIO_CRCCNF_LEN_SHIFT)
 #define RADIO_CRCCNF_SKIPADDR_SHIFT       (8)       /* Bit 8-9: Include or exclude packet address field out of CRC calculation */
-#define RADIO_CRCCNF_SKIPADDR_MASK        (0 << RADIO_CRCCNF_SKIPADDR_SHIFT)
+#if defined(CONFIG_ARCH_CHIP_NRF52832)
+#  define RADIO_CRCCNF_SKIPADDR_MASK      (0x1 << RADIO_CRCCNF_SKIPADDR_SHIFT)
+#  define RADIO_CRCCNF_SKIPADDR_INCL      (0 << RADIO_CRCCNF_SKIPADDR_SHIFT)
+#  define RADIO_CRCCNF_SKIPADDR_SKIP      (1 << RADIO_CRCCNF_SKIPADDR_SHIFT)
+#elif defined(CONFIG_ARCH_CHIP_NRF52840)
+#  define RADIO_CRCCNF_SKIPADDR_MASK      (0x3 << RADIO_CRCCNF_SKIPADDR_SHIFT)
 #  define RADIO_CRCCNF_SKIPADDR_INCL      (1 << RADIO_CRCCNF_SKIPADDR_SHIFT)
 #  define RADIO_CRCCNF_SKIPADDR_SKIP      (2 << RADIO_CRCCNF_SKIPADDR_SHIFT)
 #  define RADIO_CRCCNF_SKIPADDR_IEEE      (3 << RADIO_CRCCNF_SKIPADDR_SHIFT)
+#endif
 
 /* CRCPOLY Register */
 
