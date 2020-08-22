@@ -87,20 +87,18 @@
 #  error Hi-priority work queue support is required (CONFIG_SCHED_HPWORK)
 #endif
 
-/* Configurable number of Queue Head (QH) structures.  The default is one per
- * Root hub port plus one for EP0.
- */
+/* Configurable number of Queue Head (QH) structures.  The default is 4. */
 
 #ifndef CONFIG_KINETIS_EHCI_NQHS
-#  define CONFIG_KINETIS_EHCI_NQHS (KINETIS_EHCI_NRHPORT + 1)
+#  define CONFIG_KINETIS_EHCI_NQHS (4)
 #endif
 
 /* Configurable number of Queue Element Transfer Descriptor (qTDs).  The
- * default is one per root hub plus three from EP0.
+ * default is 6
  */
 
 #ifndef CONFIG_KINETIS_EHCI_NQTDS
-#  define CONFIG_KINETIS_EHCI_NQTDS (KINETIS_EHCI_NRHPORT + 3)
+#  define CONFIG_KINETIS_EHCI_NQTDS (6)
 #endif
 
 /* Buffers must be aligned to the cache line size */
@@ -217,7 +215,8 @@ struct kinetis_qh_s
 
   struct kinetis_epinfo_s *epinfo; /* Endpoint used for the transfer */
   uint32_t fqp;                    /* First qTD in the list (physical address) */
-  uint8_t pad[8];                  /* Padding to assure 32-byte alignment */
+  bool     aawait;                 /* Waiting for async_advance doorbell interrupt */
+  uint8_t  pad[7];                 /* Padding to assure 32-byte alignment */
 };
 
 /* Internal representation of the EHCI Queue Element Transfer Descriptor (qTD) */
@@ -587,8 +586,8 @@ static int kinetis_reset(void);
  * Private Data
  ************************************************************************************/
 
-/* In this driver implementation, support is provided for only a single a
- * single USB device.  All status information can be simply retained in a
+/* In this driver implementation, support is provided for only a single
+ * USB device.  All status information can be simply retained in a
  * single global instance.
  */
 
@@ -2817,6 +2816,7 @@ static int kinetis_qh_ioccheck(struct kinetis_qh_s *qh, uint32_t **bp, void *arg
   struct kinetis_epinfo_s *epinfo;
   uint32_t token;
   int ret;
+  uint32_t regval;
 
   DEBUGASSERT(qh && bp);
 
@@ -2949,9 +2949,12 @@ static int kinetis_qh_ioccheck(struct kinetis_qh_s *qh, uint32_t **bp, void *arg
         }
 #endif
 
-      /* Then release this QH by returning it to the free list */
+      /* Then start async advance doorbell process */
 
-      kinetis_qh_free(qh);
+      qh->aawait = true;
+
+      regval = kinetis_getreg(&HCOR->usbcmd);
+      kinetis_putreg(regval | EHCI_USBCMD_IAADB, &HCOR->usbcmd);
     }
   else
     {
@@ -3040,12 +3043,6 @@ static int kinetis_qh_cancel(struct kinetis_qh_s *qh, uint32_t **bp, void *arg)
       return OK;
     }
 
-  /* Disable both the asynchronous and period schedules */
-
-  regval = kinetis_getreg(&HCOR->usbcmd);
-  kinetis_putreg(regval & ~(EHCI_USBCMD_ASEN | EHCI_USBCMD_PSEN),
-               &HCOR->usbcmd);
-
   /* Remove the QH from the list
    *
    * NOTE that we don't check if the qTD is active nor do we check if there
@@ -3071,11 +3068,15 @@ static int kinetis_qh_cancel(struct kinetis_qh_s *qh, uint32_t **bp, void *arg)
       usbhost_trace1(EHCI_TRACE1_QTDFOREACH_FAILED, -ret);
     }
 
-  /* Then release this QH by returning it to the free list.  Return 1
-   * to stop the traverse without an error.
-   */
+  /* Then start async advance doorbell process */
 
-  kinetis_qh_free(qh);
+  qh->aawait = true;
+
+  regval = kinetis_getreg(&HCOR->usbcmd);
+  kinetis_putreg(regval | EHCI_USBCMD_IAADB, &HCOR->usbcmd);
+
+  /* Return 1 to stop the traverse without an error. */
+
   return 1;
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
@@ -3338,9 +3339,19 @@ static inline void kinetis_syserr_bottomhalf(void)
 
 static inline void kinetis_async_advance_bottomhalf(void)
 {
+  int i;
   usbhost_vtrace1(EHCI_VTRACE1_AAINTR, 0);
 
-  /* REVISIT: Could remove all tagged QH entries here */
+  for (i = 0; i < CONFIG_KINETIS_EHCI_NQHS; i++)
+    {
+      /* Put the QH structure in the free list if tagged */
+
+      if (g_qhpool[i].aawait)
+        {
+          g_qhpool[i].aawait = false;
+          kinetis_qh_free(&g_qhpool[i]);
+        }
+    }
 }
 
 /************************************************************************************
@@ -3363,7 +3374,25 @@ static void kinetis_ehci_bottomhalf(FAR void *arg)
   kinetis_takesem_noncancelable(&g_ehci.exclsem);
 
   /* Handle all unmasked interrupt sources
-   * USB Interrupt (USBINT)
+   * Interrupt on Async Advance
+   *
+   *  "System software can force the host controller to issue an interrupt
+   *   the next time the host controller advances the asynchronous schedule
+   *   by writing a one to the Interrupt on Async Advance Doorbell bit in
+   *   the USBCMD register. This status bit indicates the assertion of that
+   *   interrupt source."
+   *
+   *   Must be first because later more QH can become unlinked.
+   */
+
+  if ((pending & EHCI_INT_AAINT) != 0)
+    {
+      uerr("Async Advance\n");
+      kinetis_async_advance_bottomhalf();
+      kinetis_putreg(EHCI_INT_AAINT, &HCOR->usbsts);
+    }
+
+  /* USB Interrupt (USBINT)
    *
    *  "The Host Controller sets this bit to 1 on the completion of a USB
    *   transaction, which results in the retirement of a Transfer Descriptor
@@ -3396,6 +3425,7 @@ static void kinetis_ehci_bottomhalf(FAR void *arg)
         }
 
       kinetis_ioc_bottomhalf();
+      kinetis_putreg(EHCI_INT_USBINT | EHCI_INT_USBERRINT, &HCOR->usbsts);
     }
 
   /* Port Change Detect
@@ -3418,6 +3448,7 @@ static void kinetis_ehci_bottomhalf(FAR void *arg)
   if ((pending & EHCI_INT_PORTSC) != 0)
     {
       kinetis_portsc_bottomhalf();
+      kinetis_putreg(EHCI_INT_PORTSC, &HCOR->usbsts);
     }
 
   /* Frame List Rollover
@@ -3436,6 +3467,7 @@ static void kinetis_ehci_bottomhalf(FAR void *arg)
   if ((pending & EHCI_INT_FLROLL) != 0)
     {
       kinetis_flroll_bottomhalf();
+      kinetis_putreg(EHCI_INT_FLROLL, &HCOR->usbsts);
     }
 #endif
 
@@ -3452,21 +3484,7 @@ static void kinetis_ehci_bottomhalf(FAR void *arg)
     {
       uerr("Syserror\n");
       kinetis_syserr_bottomhalf();
-    }
-
-  /* Interrupt on Async Advance
-   *
-   *  "System software can force the host controller to issue an interrupt
-   *   the next time the host controller advances the asynchronous schedule
-   *   by writing a one to the Interrupt on Async Advance Doorbell bit in
-   *   the USBCMD register. This status bit indicates the assertion of that
-   *   interrupt source."
-   */
-
-  if ((pending & EHCI_INT_AAINT) != 0)
-    {
-      uerr("Async Advance\n");
-      kinetis_async_advance_bottomhalf();
+      kinetis_putreg(EHCI_INT_SYSERROR, &HCOR->usbsts);
     }
 
   /* We are done with the EHCI structures */
@@ -3523,16 +3541,10 @@ static int kinetis_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
                             (FAR void *)pending, 0));
 
       /* Disable further EHCI interrupts so that we do not overrun the work
-       * queue.
+       * queue. We acknowledge the interrupts after servicing.
        */
 
       kinetis_putreg(0, &HCOR->usbintr);
-
-      /* Clear all pending status bits by writing the value of the pending
-       * interrupt bits back to the status register.
-       */
-
-      kinetis_putreg(usbsts & EHCI_INT_ALLINTS, &HCOR->usbsts);
     }
 
   return OK;
@@ -4986,7 +4998,7 @@ static int kinetis_reset(void)
 
   do
     {
-      /* Wait five microsecondw and update the timeout counter */
+      /* Wait five microseconds and update the timeout counter */
 
       up_udelay(5);
       timeout += 5;
@@ -5287,7 +5299,7 @@ FAR struct usbhost_connection_s *kinetis_ehci_initialize(int controller)
    */
 
   memset(&g_asynchead, 0, sizeof(struct kinetis_qh_s));
-  physaddr = kinetis_physramaddr((uintptr_t) & g_asynchead);
+  physaddr = kinetis_physramaddr((uintptr_t)&g_asynchead);
   g_asynchead.hw.hlp = kinetis_swap32(physaddr | QH_HLP_TYP_QH);
   g_asynchead.hw.epchar = kinetis_swap32(QH_EPCHAR_H | QH_EPCHAR_EPS_FULL);
   g_asynchead.hw.overlay.nqp = kinetis_swap32(QH_NQP_T);

@@ -1114,6 +1114,41 @@ config KINETIS_SD4BIT_FREQ
 endif
 endmenu # Kinetis SDHC Configuration
 
+if KINETIS_USBHS && USBHOST
+
+menu "USB host controller driver (HCD) options"
+
+config KINETIS_EHCI_NQHS
+	int "Number of Queue Head (QH) structures"
+	default 4
+	---help---
+		Configurable number of Queue Head (QH) structures.
+
+config KINETIS_EHCI_NQTDS
+	int "Number of Queue Element Transfer Descriptor (qTDs)"
+	default 6
+	---help---
+		Configurable number of Queue Element Transfer Descriptor (qTDs).
+
+config KINETIS_EHCI_BUFSIZE
+	int "Size of one request/descriptor buffer"
+	default 128
+	---help---
+		The size of one request/descriptor buffer in bytes.  The TD buffe
+		size must be an even number of 32-bit words and must be large enough
+		to hangle the largest transfer via a SETUP request.
+
+config KINETIS_EHCI_PREALLOCATE
+	bool "Preallocate descriptor pool"
+	default y
+	---help---
+		Select this option to pre-allocate EHCI queue and descriptor
+		structure pools in .bss.  Otherwise, these pools will be
+		dynamically allocated using kmm_memalign().
+
+endmenu # USB host controller driver (HCD) options
+endif # KINETIS_USBHS && USBHOST
+
 #
 # MCU serial peripheral driver?
 #
