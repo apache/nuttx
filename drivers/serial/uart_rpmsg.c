@@ -90,7 +90,8 @@ static int  uart_rpmsg_setup(FAR struct uart_dev_s *dev);
 static void uart_rpmsg_shutdown(FAR struct uart_dev_s *dev);
 static int  uart_rpmsg_attach(FAR struct uart_dev_s *dev);
 static void uart_rpmsg_detach(FAR struct uart_dev_s *dev);
-static int  uart_rpmsg_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int  uart_rpmsg_ioctl(FAR struct file *filep,
+                             int cmd, unsigned long arg);
 static void uart_rpmsg_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool uart_rpmsg_rxflowcontrol(FAR struct uart_dev_s *dev,
                                      unsigned int nbuffered, bool upper);

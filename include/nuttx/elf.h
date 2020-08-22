@@ -96,8 +96,8 @@ int up_relocateadd(FAR const Elf_Rela *rel,
  *   size    - The exception index section size.
  *
  * Returned Value:
- *   Zero (OK) if the initialization was successful. Otherwise, a negated errno
- *   value indicating the cause of the failure.
+ *   Zero (OK) if the initialization was successful. Otherwise, a negated
+ *   errno value indicating the cause of the failure.
  *
  ****************************************************************************/
 

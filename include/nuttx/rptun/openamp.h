@@ -68,4 +68,4 @@ void rpmsg_unregister_callback(FAR void *priv,
 #endif
 
 #endif /* CONFIG_RPTUN */
-#endif /*__INCLUDE_NUTTX_RPTUN_OPENAMP_H */
+#endif /* __INCLUDE_NUTTX_RPTUN_OPENAMP_H */

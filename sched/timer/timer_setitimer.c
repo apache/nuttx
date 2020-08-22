@@ -76,9 +76,9 @@
  *   to indicate the error.
  *
  *   EINVAL - The which argument does not correspond to an predefined ID.
- *   EINVAL - A value structure specified a microsecond value less than zero or
- *     greater than or equal to 1000 million, and the it_value member of that
- *     structure did not specify zero seconds and nanoseconds.
+ *   EINVAL - A value structure specified a microsecond value less than zero
+ *     or greater than or equal to 1000 million, and the it_value member of
+ *     that structure did not specify zero seconds and nanoseconds.
  *
  * Assumptions:
  *

@@ -46,7 +46,7 @@ extern "C"
 
 struct partition_s
 {
-  char   name[NAME_MAX+1];
+  char   name[NAME_MAX + 1];
   size_t index;
   size_t firstblock;
   size_t nblocks;

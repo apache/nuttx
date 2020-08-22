@@ -269,7 +269,8 @@ static inline void list_delete(struct list_node *item)
   item->prev       = item->next = 0;
 }
 
-static inline FAR struct list_node *list_remove_head(FAR struct list_node *list)
+static inline FAR struct list_node *
+list_remove_head(FAR struct list_node *list)
 {
   if (list->next != list)
     {
@@ -283,7 +284,8 @@ static inline FAR struct list_node *list_remove_head(FAR struct list_node *list)
     }
 }
 
-static inline FAR struct list_node *list_remove_tail(FAR struct list_node *list)
+static inline FAR struct list_node *
+list_remove_tail(FAR struct list_node *list)
 {
   if (list->prev != list)
     {
@@ -297,7 +299,8 @@ static inline FAR struct list_node *list_remove_tail(FAR struct list_node *list)
     }
 }
 
-static inline FAR struct list_node *list_peek_head(FAR struct list_node *list)
+static inline FAR struct list_node *
+list_peek_head(FAR struct list_node *list)
 {
   if (list->next != list)
     {
@@ -309,7 +312,8 @@ static inline FAR struct list_node *list_peek_head(FAR struct list_node *list)
     }
 }
 
-static inline FAR struct list_node *list_peek_tail(FAR struct list_node *list)
+static inline FAR struct list_node *
+list_peek_tail(FAR struct list_node *list)
 {
   if (list->prev != list)
     {
@@ -334,8 +338,8 @@ static inline FAR struct list_node *list_prev(FAR struct list_node *list,
     }
 }
 
-static inline FAR struct list_node *list_prev_wrap(FAR struct list_node *list,
-                                                   FAR struct list_node *item)
+static inline FAR struct list_node *
+list_prev_wrap(FAR struct list_node *list, FAR struct list_node *item)
 {
   if (item->prev != list)
     {
@@ -364,8 +368,8 @@ static inline FAR struct list_node *list_next(FAR struct list_node *list,
     }
 }
 
-static inline FAR struct list_node *list_next_wrap(FAR struct list_node *list,
-                                                   FAR struct list_node *item)
+static inline FAR struct list_node *
+list_next_wrap(FAR struct list_node *list, FAR struct list_node *item)
 {
   if (item->next != list)
     {
@@ -399,4 +403,4 @@ static inline size_t list_length(FAR struct list_node *list)
   return cnt;
 }
 
-#endif /*__INCLUDE_NUTTX_LIST_H */
+#endif /* __INCLUDE_NUTTX_LIST_H */

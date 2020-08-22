@@ -416,7 +416,7 @@ int up_timer_start(FAR const struct timespec *ts)
 }
 #endif
 
-/********************************************************************************
+/****************************************************************************
  * Name: up_critmon_*
  *
  * Description:
@@ -433,7 +433,7 @@ int up_timer_start(FAR const struct timespec *ts)
  *
  *   The second interface simple converts an elapsed time into well known
  *   units.
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SCHED_CRITMONITOR
 uint32_t up_critmon_gettime(void)

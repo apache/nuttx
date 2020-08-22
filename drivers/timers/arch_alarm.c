@@ -331,8 +331,8 @@ int up_alarm_cancel(FAR struct timespec *ts)
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - The time in the future at the alarm is expected to occur.  When
- *        the alarm occurs the timer logic will call nxsched_alarm_expiration().
+ *   ts - The time in the future at the alarm is expected to occur. When the
+ *        alarm occurs the timer logic will call nxsched_alarm_expiration().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on

@@ -146,8 +146,9 @@ static void syslog_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept)
   kmm_free(priv);
 }
 
-static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
-                               size_t len, uint32_t src, FAR void *priv_)
+static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
+                               FAR void *data, size_t len,
+                               uint32_t src, FAR void *priv_)
 {
   FAR struct syslog_rpmsg_server_s *priv = priv_;
   FAR struct syslog_rpmsg_header_s *header = data;
@@ -168,7 +169,8 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
 
           if (priv->nextpos)
             {
-              syslog_rpmsg_write(priv->tmpbuf, priv->nextpos, msg->data, printed);
+              syslog_rpmsg_write(priv->tmpbuf, priv->nextpos,
+                                 msg->data, printed);
               priv->nextpos = 0;
             }
           else

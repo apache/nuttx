@@ -33,7 +33,7 @@
 #define SYSLOG_RPMSG_RESUME             3
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
 begin_packed_struct struct syslog_rpmsg_header_s

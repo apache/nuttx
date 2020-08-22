@@ -137,7 +137,7 @@ static int do_ioctl_request(FAR struct usrsock_conn_s *conn, int cmd,
  * Name: usrsock_ioctl
  *
  * Description:
- *   The usrsock_ioctl() function performs network device specific operations.
+ *   This function performs network device specific operations.
  *
  * Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
