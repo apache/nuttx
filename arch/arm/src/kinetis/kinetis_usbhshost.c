@@ -215,8 +215,8 @@ struct kinetis_qh_s
 
   struct kinetis_epinfo_s *epinfo; /* Endpoint used for the transfer */
   uint32_t fqp;                    /* First qTD in the list (physical address) */
-  bool     aawait;                 /* Waiting for async_advance doorbell interrupt */
-  uint8_t  pad[7];                 /* Padding to assure 32-byte alignment */
+  uint8_t  pad[4];                 /* Padding to assure 32-byte alignment */
+  struct kinetis_qh_s *flink;      /* Link for async await and free list */
 };
 
 /* Internal representation of the EHCI Queue Element Transfer Descriptor (qTD) */
@@ -230,13 +230,13 @@ struct kinetis_qtd_s
   /* Internal fields used by the EHCI driver */
 };
 
-/* The following is used to manage lists of free QHs and qTDs */
+/* The following is used to manage lists of free qTDs */
 
 struct kinetis_list_s
 {
   struct kinetis_list_s *flink;    /* Link to next entry in the list
-                                  * Variable length entry data follows
-                                  */
+                                    * Variable length entry data follows
+                                    */
 };
 
 /* List traversal call-out functions */
@@ -303,7 +303,8 @@ struct kinetis_ehci_s
   sem_t pscsem;                 /* Semaphore to wait for port status change events */
 
   struct kinetis_epinfo_s ep0;    /* Endpoint 0 */
-  struct kinetis_list_s *qhfree;  /* List of free Queue Head (QH) structures */
+  struct kinetis_qh_s *qhaawait;  /* List of waiting Queue Head (QH) structures */
+  struct kinetis_qh_s *qhfree;    /* List of free Queue Head (QH) structures */
   struct kinetis_list_s *qtdfree; /* List of free Queue Element Transfer Descriptor (qTD) */
   struct work_s work;             /* Supports interrupt bottom half */
 
@@ -1136,14 +1137,37 @@ static struct kinetis_qh_s *kinetis_qh_alloc(void)
 
   /* Remove the QH structure from the freelist */
 
-  qh = (struct kinetis_qh_s *)g_ehci.qhfree;
+  qh = g_ehci.qhfree;
   if (qh)
     {
-      g_ehci.qhfree = ((struct kinetis_list_s *)qh)->flink;
+      g_ehci.qhfree = qh->flink;
       memset(qh, 0, sizeof(struct kinetis_qh_s));
     }
 
   return qh;
+}
+
+/************************************************************************************
+ * Name: kinetis_qh_aawait
+ *
+ * Description:
+ *   Let a Queue Head (QH) structure wait for free by adding it to the aawait list
+ *
+ * Assumption:  Caller holds the exclsem
+ *
+ ************************************************************************************/
+
+static void kinetis_qh_aawait(struct kinetis_qh_s *qh)
+{
+  uint32_t regval;
+
+  /* Put the QH structure to the aawait list */
+
+  qh->flink  = g_ehci.qhaawait;
+  g_ehci.qhaawait = qh;
+
+  regval = kinetis_getreg(&HCOR->usbcmd);
+  kinetis_putreg(regval | EHCI_USBCMD_IAADB, &HCOR->usbcmd);
 }
 
 /************************************************************************************
@@ -1158,12 +1182,10 @@ static struct kinetis_qh_s *kinetis_qh_alloc(void)
 
 static void kinetis_qh_free(struct kinetis_qh_s *qh)
 {
-  struct kinetis_list_s *entry = (struct kinetis_list_s *)qh;
-
   /* Put the QH structure back into the free list */
 
-  entry->flink  = g_ehci.qhfree;
-  g_ehci.qhfree = entry;
+  qh->flink  = g_ehci.qhfree;
+  g_ehci.qhfree = qh;
 }
 
 /************************************************************************************
@@ -2816,7 +2838,6 @@ static int kinetis_qh_ioccheck(struct kinetis_qh_s *qh, uint32_t **bp, void *arg
   struct kinetis_epinfo_s *epinfo;
   uint32_t token;
   int ret;
-  uint32_t regval;
 
   DEBUGASSERT(qh && bp);
 
@@ -2951,10 +2972,7 @@ static int kinetis_qh_ioccheck(struct kinetis_qh_s *qh, uint32_t **bp, void *arg
 
       /* Then start async advance doorbell process */
 
-      qh->aawait = true;
-
-      regval = kinetis_getreg(&HCOR->usbcmd);
-      kinetis_putreg(regval | EHCI_USBCMD_IAADB, &HCOR->usbcmd);
+      kinetis_qh_aawait(qh);
     }
   else
     {
@@ -3043,6 +3061,12 @@ static int kinetis_qh_cancel(struct kinetis_qh_s *qh, uint32_t **bp, void *arg)
       return OK;
     }
 
+  /* Disable both the asynchronous and period schedules */
+
+  regval = kinetis_getreg(&HCOR->usbcmd);
+  kinetis_putreg(regval & ~(EHCI_USBCMD_ASEN | EHCI_USBCMD_PSEN),
+               &HCOR->usbcmd);
+
   /* Remove the QH from the list
    *
    * NOTE that we don't check if the qTD is active nor do we check if there
@@ -3070,10 +3094,7 @@ static int kinetis_qh_cancel(struct kinetis_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Then start async advance doorbell process */
 
-  qh->aawait = true;
-
-  regval = kinetis_getreg(&HCOR->usbcmd);
-  kinetis_putreg(regval | EHCI_USBCMD_IAADB, &HCOR->usbcmd);
+  kinetis_qh_aawait(qh);
 
   /* Return 1 to stop the traverse without an error. */
 
@@ -3339,18 +3360,14 @@ static inline void kinetis_syserr_bottomhalf(void)
 
 static inline void kinetis_async_advance_bottomhalf(void)
 {
-  int i;
+  struct kinetis_qh_s *qh;
   usbhost_vtrace1(EHCI_VTRACE1_AAINTR, 0);
 
-  for (i = 0; i < CONFIG_KINETIS_EHCI_NQHS; i++)
+  while (g_ehci.qhaawait != NULL)
     {
-      /* Put the QH structure in the free list if tagged */
-
-      if (g_qhpool[i].aawait)
-        {
-          g_qhpool[i].aawait = false;
-          kinetis_qh_free(&g_qhpool[i]);
-        }
+      qh = g_ehci.qhaawait;
+      g_ehci.qhaawait = qh->flink;
+      kinetis_qh_free(qh);
     }
 }
 
@@ -3387,7 +3404,6 @@ static void kinetis_ehci_bottomhalf(FAR void *arg)
 
   if ((pending & EHCI_INT_AAINT) != 0)
     {
-      uerr("Async Advance\n");
       kinetis_async_advance_bottomhalf();
       kinetis_putreg(EHCI_INT_AAINT, &HCOR->usbsts);
     }
