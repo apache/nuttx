@@ -53,30 +53,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_SIM_X11FB
-#  ifdef CONFIG_SIM_TOUCHSCREEN
-#    error "CONFIG_SIM_TOUCHSCREEN depends on CONFIG_SIM_X11FB"
-#    undef CONFIG_SIM_TOUCHSCREEN
-#  endif
-#  ifdef CONFIG_SIM_AJOYSTICK
-#    error "CONFIG_SIM_AJOYSTICK depends on CONFIG_SIM_X11FB"
-#    undef CONFIG_SIM_AJOYSTICK
-#  endif
-#endif
-
-#ifndef CONFIG_INPUT
-#  ifdef CONFIG_SIM_TOUCHSCREEN
-#    error "CONFIG_SIM_TOUCHSCREEN depends on CONFIG_INPUT"
-#    undef CONFIG_SIM_TOUCHSCREEN
-#  endif
-#  ifdef CONFIG_SIM_AJOYSTICK
-#    error "CONFIG_SIM_AJOYSTICK depends on CONFIG_INPUT"
-#    undef CONFIG_SIM_AJOYSTICK
-#  endif
-#endif
-
 /* Determine which (if any) console driver to use */
 
 #ifndef CONFIG_DEV_CONSOLE
@@ -299,8 +275,7 @@ int sim_tsc_uninitialize(void);
 
 /* up_eventloop.c ***********************************************************/
 
-#if defined(CONFIG_SIM_X11FB) && \
-   (defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK))
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
 void up_x11events(void);
 void up_buttonevent(int x, int y, int buttons);
 #endif
