@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 #define XTHAL_GET_CCOUNT()              ({ int __ccount; \
-                                        __asm__ __volatile__("rsr.ccount %0" : \
+                                        __asm__ __volatile__("rsr.ccount %0":\
                                         "=a"(__ccount)); __ccount; })
 
 #endif /* __ARCH_XTENSA_INCUDE_XTENSA_CORE_H */
