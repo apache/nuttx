@@ -144,7 +144,9 @@ static int esp32_rng_initialize(void)
   static bool first_flag = true;
 
   if (false == first_flag)
-    return OK;
+    {
+      return OK;
+    }
 
   first_flag = false;
 
