@@ -1290,9 +1290,10 @@ static int stm32can_send(FAR struct can_dev_s *dev,
 #else
   regval |= ( ( (uint32_t) msg->cm_hdr.ch_id << CAN_TIR_STID_SHIFT) & CAN_TIR_STID_MASK );
 
+#endif
+
 #ifdef CONFIG_CAN_USE_RTR
   regval |= (msg->cm_hdr.ch_rtr ? CAN_TIR_RTR : 0);
-#endif
 #endif
 
   stm32can_putreg(priv, STM32_CAN_TIR_OFFSET(txmb), regval);
