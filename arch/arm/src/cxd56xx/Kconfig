@@ -356,6 +356,15 @@ config CXD56_SPI_DRIVER
 		used to perform SPI bus transfers from applications.  The intent of
 		this driver is to support SPI testing.
 
+config CXD56_SPI_DMATHRESHOLD
+       int "SPI DMA threshold"
+       default 64
+       depends on CXD56_DMAC
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
 config CXD56_SPI0
 	bool "SPI0"
 
