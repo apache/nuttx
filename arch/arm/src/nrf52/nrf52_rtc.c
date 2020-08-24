@@ -89,7 +89,8 @@ static int nrf52_rtc_disableint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
 static int nrf52_rtc_checkint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
 static int nrf52_rtc_ackint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s);
 static int nrf52_rtc_enableevt(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
-static int nrf52_rtc_disableevt(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
+static int nrf52_rtc_disableevt(FAR struct nrf52_rtc_dev_s *dev,
+                                uint8_t evt);
 
 /****************************************************************************
  * Private Data
