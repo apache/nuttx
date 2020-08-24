@@ -30,7 +30,9 @@
 #include <arch/board/board.h>
 #include <arch/multiboot2.h>
 
+#ifdef CONFIG_MULTBOOT2_FB_TERM
 #include <nuttx/nx/nxfonts.h>
+#endif
 
 #include "up_internal.h"
 
@@ -48,6 +50,7 @@ struct multiboot_fb_s
   uint8_t type;
 };
 
+#ifdef CONFIG_MULTBOOT2_FB_TERM
 struct fb_term_s
 {
   const struct nx_fontpackage_s *font;
@@ -56,6 +59,8 @@ struct fb_term_s
 };
 
 void fb_term_initialize(void);
+#endif  /* CONFIG_MULTBOOT2_FB_TERM */
+
 void fb_clear(void);
 
 /****************************************************************************
@@ -66,7 +71,10 @@ struct multiboot_fb_s fb =
 {
   .baseaddr = NULL
 };
+
+#ifdef CONFIG_MULTBOOT2_FB_TERM
 struct fb_term_s fb_term;
+#endif  /* CONFIG_MULTBOOT2_FB_TERM */
 
 /****************************************************************************
  * Public Data
@@ -138,6 +146,7 @@ static void fb_draw_pixel(uint32_t color, uint32_t x, uint32_t y)
     }
 }
 
+#if 0
 /****************************************************************************
  * Function:  fb_test_line
  *
@@ -176,7 +185,9 @@ static void fb_test_line(void)
       fb_draw_pixel(color, idx, idx);
     }
 }
+#endif
 
+#ifdef CONFIG_MULTBOOT2_FB_TERM
 static void fb_scroll(void)
 {
   void *destp = fb.baseaddr;
@@ -194,6 +205,7 @@ static void fb_scroll(void)
 
   fb_term.cursor_y -= fb_term.font->metrics.mxheight;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -213,7 +225,11 @@ void x86_64_mb2_fbinitialize(struct multiboot_tag_framebuffer *fbt)
     X86_PAGE_NOCACHE | X86_PAGE_GLOBAL);
 
   fb_clear();
+ 
+#ifdef CONFIG_MULTBOOT2_FB_TERM
   fb_term_initialize();
+#endif
+
 }
 
 void fb_clear(void)
@@ -224,6 +240,7 @@ void fb_clear(void)
   memset(fb.baseaddr, 0, fb.pitch * fb.height);
 }
 
+#ifdef CONFIG_MULTBOOT2_FB_TERM
 void fb_term_initialize(void)
 {
   fb_term.font = nxf_getfonthandle(FONTID_DEFAULT);
@@ -289,3 +306,4 @@ void fb_putc(char ch)
 
   fb_term.cursor_x += fbm->metric.width;
 }
+#endif  /* CONFIG_MULTBOOT2_FB_TERM */
