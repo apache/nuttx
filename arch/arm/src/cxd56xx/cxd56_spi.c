@@ -855,7 +855,13 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 #ifdef CONFIG_CXD56_DMAC
   FAR struct cxd56_spidev_s *priv = (FAR struct cxd56_spidev_s *)dev;
 
-  if (priv->dmaenable)
+#ifdef CONFIG_CXD56_SPI_DMATHRESHOLD
+  size_t dmath = CONFIG_CXD56_SPI_DMATHRESHOLD;
+#else
+  size_t dmath = 0;
+#endif
+
+  if (priv->dmaenable && dmath < nwords)
     {
       spi_dmaexchange(dev, txbuffer, rxbuffer, nwords);
     }
