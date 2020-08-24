@@ -1,5 +1,5 @@
 /****************************************************************************
- * /home/v01d/coding/nuttx_nrf_ble/nuttx/arch/arm/src/chip/nrf52_ppi.c
+ * arch/arm/src/chip/nrf52_ppi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
