@@ -207,37 +207,37 @@ static uint32_t nrf52_rtc_irq2reg(FAR struct nrf52_rtc_dev_s *dev, uint8_t s)
 
   switch (s)
     {
-      case NRF52_RTC_INT_TICK:
+      case NRF52_RTC_EVT_TICK:
         {
           regval = RTC_INT_TICK;
           break;
         }
 
-      case NRF52_RTC_INT_OVRFLW:
+      case NRF52_RTC_EVT_OVRFLW:
         {
           regval = RTC_INT_OVRFLW;
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE0:
+      case NRF52_RTC_EVT_COMPARE0:
         {
           regval = RTC_INT_COMPARE(0);
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE1:
+      case NRF52_RTC_EVT_COMPARE1:
         {
           regval = RTC_INT_COMPARE(1);
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE2:
+      case NRF52_RTC_EVT_COMPARE2:
         {
           regval = RTC_INT_COMPARE(2);
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE3:
+      case NRF52_RTC_EVT_COMPARE3:
         {
           regval = RTC_INT_COMPARE(3);
           break;
@@ -550,37 +550,37 @@ static int nrf52_rtc_checkint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s)
 
   switch (s)
     {
-      case NRF52_RTC_INT_TICK:
+      case NRF52_RTC_EVT_TICK:
         {
           ret = nrf52_rtc_getreg(dev, NRF52_RTC_EVENTS_TICK_OFFSET);
           break;
         }
 
-      case NRF52_RTC_INT_OVRFLW:
+      case NRF52_RTC_EVT_OVRFLW:
         {
           ret = nrf52_rtc_getreg(dev, NRF52_RTC_EVENTS_OVRFLW_OFFSET);
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE0:
+      case NRF52_RTC_EVT_COMPARE0:
         {
           ret = nrf52_rtc_getreg(dev, NRF52_RTC_EVENTS_COMPARE_OFFSET(0));
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE1:
+      case NRF52_RTC_EVT_COMPARE1:
         {
           ret = nrf52_rtc_getreg(dev, NRF52_RTC_EVENTS_COMPARE_OFFSET(0));
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE2:
+      case NRF52_RTC_EVT_COMPARE2:
         {
           ret = nrf52_rtc_getreg(dev, NRF52_RTC_EVENTS_COMPARE_OFFSET(2));
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE3:
+      case NRF52_RTC_EVT_COMPARE3:
         {
           ret = nrf52_rtc_getreg(dev, NRF52_RTC_EVENTS_COMPARE_OFFSET(3));
           break;
@@ -610,37 +610,37 @@ static int nrf52_rtc_ackint(FAR struct nrf52_rtc_dev_s *dev, uint8_t s)
 
   switch (s)
     {
-      case NRF52_RTC_INT_TICK:
+      case NRF52_RTC_EVT_TICK:
         {
           nrf52_rtc_putreg(dev, NRF52_RTC_EVENTS_TICK_OFFSET, 0);
           break;
         }
 
-      case NRF52_RTC_INT_OVRFLW:
+      case NRF52_RTC_EVT_OVRFLW:
         {
           nrf52_rtc_putreg(dev, NRF52_RTC_EVENTS_OVRFLW_OFFSET, 0);
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE0:
+      case NRF52_RTC_EVT_COMPARE0:
         {
           nrf52_rtc_putreg(dev, NRF52_RTC_EVENTS_COMPARE_OFFSET(0), 0);
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE1:
+      case NRF52_RTC_EVT_COMPARE1:
         {
           nrf52_rtc_putreg(dev, NRF52_RTC_EVENTS_COMPARE_OFFSET(1), 0);
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE2:
+      case NRF52_RTC_EVT_COMPARE2:
         {
           nrf52_rtc_putreg(dev, NRF52_RTC_EVENTS_COMPARE_OFFSET(2), 0);
           break;
         }
 
-      case NRF52_RTC_INT_COMPARE3:
+      case NRF52_RTC_EVT_COMPARE3:
         {
           nrf52_rtc_putreg(dev, NRF52_RTC_EVENTS_COMPARE_OFFSET(3), 0);
           break;
