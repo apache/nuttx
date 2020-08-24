@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/chip/nrf52_ppi.h
+ * arch/arm/src/nrf52/nrf52_ppi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CHIP_NRF52_PPI_H
-#define __ARCH_ARM_SRC_CHIP_NRF52_PPI_H
+#ifndef __ARCH_ARM_SRC_NRF52_NRF52_PPI_H
+#define __ARCH_ARM_SRC_NRF52_NRF52_PPI_H
 
 /****************************************************************************
  * Included Files
@@ -150,4 +150,4 @@ void nrf52_ppi_grp_enable(uint8_t group, bool enable);
 }
 #endif
 
-#endif // __ARCH_ARM_SRC_CHIP_NRF52_PPI_H
+#endif // __ARCH_ARM_SRC_NRF52_NRF52_PPI_H
