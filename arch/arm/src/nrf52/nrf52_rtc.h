@@ -64,19 +64,7 @@ enum nrf52_rtc_cc_e
   NRF52_RTC_CC3 = 3,
 };
 
-/* RTC IRQ source */
-
-enum nrf52_rtc_irq_e
-{
-  NRF52_RTC_INT_TICK     = 0,
-  NRF52_RTC_INT_OVRFLW   = 1,
-  NRF52_RTC_INT_COMPARE0 = 2,
-  NRF52_RTC_INT_COMPARE1 = 3,
-  NRF52_RTC_INT_COMPARE2 = 4,
-  NRF52_RTC_INT_COMPARE3 = 5,
-};
-
-/* RTC Events */
+/* RTC Interrupts/Events */
 
 enum nrf52_rtc_evt_e
 {
