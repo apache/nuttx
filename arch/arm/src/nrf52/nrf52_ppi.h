@@ -86,7 +86,7 @@ void nrf52_ppi_channel_enable(uint8_t ch, bool enable);
  *
  ****************************************************************************/
 
-void nrf52_ppi_set_event_ep(uint8_t ch, volatile uint32_t *event_reg);
+void nrf52_ppi_set_event_ep(uint8_t ch, uint32_t event_reg);
 
 /****************************************************************************
  * Name: nrf52_ppi_set_task_ep
@@ -100,7 +100,7 @@ void nrf52_ppi_set_event_ep(uint8_t ch, volatile uint32_t *event_reg);
  *
  ****************************************************************************/
 
-void nrf52_ppi_set_task_ep(uint8_t ch, volatile uint32_t *task_reg);
+void nrf52_ppi_set_task_ep(uint8_t ch, uint32_t task_reg);
 
 /****************************************************************************
  * Name: nrf52_ppi_set_task2_ep
@@ -114,7 +114,7 @@ void nrf52_ppi_set_task_ep(uint8_t ch, volatile uint32_t *task_reg);
  *
  ****************************************************************************/
 
-void nrf52_ppi_set_task2_ep(uint8_t ch, volatile uint32_t *task_reg);
+void nrf52_ppi_set_task2_ep(uint8_t ch, uint32_t task_reg);
 
 /****************************************************************************
  * Name: nrf52_ppi_grp_channel_enable

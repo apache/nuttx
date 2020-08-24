@@ -79,33 +79,33 @@ void nrf52_ppi_channel_enable(uint8_t ch, bool enable)
  * Name: nrf52_ppi_set_event_ep
  ****************************************************************************/
 
-void nrf52_ppi_set_event_ep(uint8_t ch, volatile uint32_t *event_reg)
+void nrf52_ppi_set_event_ep(uint8_t ch, uint32_t event_reg)
 {
   DEBUGASSERT(ch < NRF52_PPI_NUM_CONFIGURABLE_CHANNELS);
 
-  putreg32((uint32_t)event_reg, NRF52_PPI_CHEEP(ch));
+  putreg32(event_reg, NRF52_PPI_CHEEP(ch));
 }
 
 /****************************************************************************
  * Name: nrf52_ppi_set_task_ep
  ****************************************************************************/
 
-void nrf52_ppi_set_task_ep(uint8_t ch, volatile uint32_t *task_reg)
+void nrf52_ppi_set_task_ep(uint8_t ch, uint32_t task_reg)
 {
   DEBUGASSERT(ch < NRF52_PPI_NUM_CONFIGURABLE_CHANNELS);
 
-  putreg32((uint32_t)task_reg, NRF52_PPI_CHTEP(ch));
+  putreg32(task_reg, NRF52_PPI_CHTEP(ch));
 }
 
 /****************************************************************************
  * Name: nrf52_ppi_set_task2_ep
  ****************************************************************************/
 
-void nrf52_ppi_set_task2_ep(uint8_t ch, volatile uint32_t *task_reg)
+void nrf52_ppi_set_task2_ep(uint8_t ch, uint32_t task_reg)
 {
   DEBUGASSERT(ch < NRF52_PPI_NUM_CHANNELS);
 
-  putreg32((uint32_t)task_reg, NRF52_PPI_FORKTEP(ch));
+  putreg32(task_reg, NRF52_PPI_FORKTEP(ch));
 }
 
 /****************************************************************************
