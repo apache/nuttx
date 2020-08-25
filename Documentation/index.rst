@@ -21,6 +21,7 @@ Last Updated: |today|
 
    Home <self>
    introduction/index.rst
+   introduction/inviolables.rst
    quickstart/index.rst
    components/index.rst
    applications/index.rst

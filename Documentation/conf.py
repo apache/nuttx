@@ -52,7 +52,7 @@ extensions = [
     "sphinx_rtd_theme",
     "m2r2",
     'sphinx.ext.autosectionlabel',
-    'sphinx.ext.todo'
+    'sphinx.ext.todo',
 ]
 
 source_suffix = [ '.rst', '.md' ]
@@ -115,3 +115,4 @@ c_id_attributes = [
   'CODE',
   'noreturn_function'
 ]
+
