@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_clock.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_CLOCK_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_CLOCK_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************************/
+/* Register offsets *********************************************************/
 
 #define NRF52_CLOCK_TASKS_HFCLKSTART_OFFSET    0x0000 /* Start HFCLK crystal oscillator */
 #define NRF52_CLOCK_TASKS_HFCLKSTOP_OFFSET     0x0004 /* Stop HFCLK crystal oscillator */
@@ -78,7 +78,7 @@
 #define NRF52_CLOCK_CTIV_OFFSET                0x0538 /* Calibration timer interval */
 #define NRF52_CLOCK_TRACECONFIG_OFFSET         0x055c /* Clocking options for the Trace Port debug interface */
 
-/* Register Addresses ***************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define NRF52_CLOCK_TASKS_HFCLKSTART    (NRF52_CLOCK_BASE + NRF52_CLOCK_TASKS_HFCLKSTART_OFFSET)
 #define NRF52_CLOCK_TASKS_HFCLKSTOP     (NRF52_CLOCK_BASE + NRF52_CLOCK_TASKS_HFCLKSTOP_OFFSET)
@@ -109,7 +109,7 @@
 #define NRF52_CLOCK_CTIV                (NRF52_CLOCK_BASE + NRF52_CLOCK_CTIV_OFFSET)
 #define NRF52_CLOCK_TRACECONFIG         (NRF52_CLOCK_BASE + NRF52_CLOCK_TRACECONFIG_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* HFCLKRUN Register */
 
@@ -117,11 +117,11 @@
 
 /* HFCLKSTAT Register */
 
-#define CLOCK_HFCLKSTAT_SRC_SHIFT       (0)       /* Bit 0: Source of HFCLK */
+#define CLOCK_HFCLKSTAT_SRC_SHIFT       (0)                              /* Bit 0: Source of HFCLK */
 #define CLOCK_HFCLKSTAT_SRC_MASK        (1 << CLOCK_HFCLKSTAT_SRC_SHIFT)
 #  define CLOCK_HFCLKSTAT_SRC_RC        (0 << CLOCK_HFCLKSTAT_SRC_SHIFT) /* 0b0: 64 MHz internal oscillator (HFINT) */
 #  define CLOCK_HFCLKSTAT_SRC_XTAL      (1 << CLOCK_HFCLKSTAT_SRC_SHIFT) /* 0b1: 64 MHz crystal oscilator (HFXO) */
-#define CLOCK_HFCLKSTAT_STATE           (1 << 16) /* Bit 16: HFCLK state */
+#define CLOCK_HFCLKSTAT_STATE           (1 << 16)                        /* Bit 16: HFCLK state */
 
 /* LFCLKRUN Register */
 
@@ -129,12 +129,12 @@
 
 /* LFCLKSTAT Register */
 
-#define CLOCK_LFCLKSTAT_SRC_SHIFT       (0)       /* Bits 0-1: Source of LFCLK */
+#define CLOCK_LFCLKSTAT_SRC_SHIFT       (0)                              /* Bits 0-1: Source of LFCLK */
 #define CLOCK_LFCLKSTAT_SRC_MASK        (3 << CLOCK_LFCLKSTAT_SRC_SHIFT)
 #  define CLOCK_LFCLKSTAT_SRC_RC        (0 << CLOCK_LFCLKSTAT_SRC_SHIFT) /* 0b0: RC oscillator (LFRC) */
 #  define CLOCK_LFCLKSTAT_SRC_XTAL      (1 << CLOCK_LFCLKSTAT_SRC_SHIFT) /* 0b1: crystal oscillator (LFXO) */
 #  define CLOCK_LFCLKSTAT_SRC_SYNTH     (2 << CLOCK_LFCLKSTAT_SRC_SHIFT) /* 0b2: synthesized from HFCLK (LFSYNT) */
-#define CLOCK_LFCLKSTAT_STATE           (1 << 16) /* Bit 16: LFCLKSTAT state */
+#define CLOCK_LFCLKSTAT_STATE           (1 << 16)                        /* Bit 16: LFCLKSTAT state */
 
 /* LFCLKSRC Register */
 
