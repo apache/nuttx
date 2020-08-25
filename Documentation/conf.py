@@ -50,10 +50,12 @@ version = release = 'latest'
 # ones.
 extensions = [
     "sphinx_rtd_theme",
-    "recommonmark",
+    "m2r2",
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.todo'
 ]
+
+source_suffix = [ '.rst', '.md' ]
 
 todo_include_todos = True
 
