@@ -21,18 +21,18 @@
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_RADIO_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_RADIO_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************************/
+/* Register offsets *********************************************************/
 
 #define NRF52_RADIO_TASKS_TXEN_OFFSET        0x0000 /* Enable RADIO in TX mode */
 #define NRF52_RADIO_TASKS_RXEN_OFFSET        0x0004 /* Enable RADIO in RX mode */
@@ -97,8 +97,10 @@
 #define NRF52_RADIO_STATE_OFFSET             0x0550 /* Current radio state */
 #define NRF52_RADIO_DATAWHITEIV_OFFSET       0x0554 /* Data whitening initial value */
 #define NRF52_RADIO_BCC_OFFSET               0x0560 /* Bit counter compare */
+
 #define NRF52_RADIO_DAB_OFFSET(p)            (0x0600 + ((p) * 0x4)) /* Device address base segment */
 #define NRF52_RADIO_DAP_OFFSET(p)            (0x0620 + ((p) * 0x4)) /* Device address prefix */
+
 #define NRF52_RADIO_DACNF_OFFSET             0x0640 /* Device address match configuration */
 #define NRF52_RADIO_MHRMATCHCONF_OFFSET      0x0644 /* Search pattern configuration */
 #define NRF52_RADIO_MHRMATCHMAS_OFFSET       0x0648 /* Pattern mask */
@@ -109,7 +111,7 @@
 #define NRF52_RADIO_CCACTRL_OFFSET           0x066c /* IEEE 802.15.4 clear channel assessment control */
 #define NRF52_RADIO_POWER_OFFSET             0x0ffc /* Peripheral power control */
 
-/* Register Addresses ***************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define NRF52_RADIO_TASKS_TXEN        (NRF52_RADIO_BASE + NRF52_RADIO_TASKS_TXEN_OFFSET)
 #define NRF52_RADIO_TASKS_RXEN        (NRF52_RADIO_BASE + NRF52_RADIO_TASKS_RXEN_OFFSET)
@@ -186,7 +188,7 @@
 #define NRF52_RADIO_CCACTRL           (NRF52_RADIO_BASE + NRF52_RADIO_CCACTRL_OFFSET)
 #define NRF52_RADIO_POWER             (NRF52_RADIO_BASE + NRF52_RADIO_POWER_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* TASKS_TXEN Register */
 
@@ -423,15 +425,15 @@
 #define RADIO_MODE_NRF2MBIT               (0x01 << RADIO_MODE_SHIFT) /* 1: 2 Mbit/s Nordic proprietary radio mode */
 
 #if defined(CONFIG_ARCH_CHIP_NRF52832)
-#define RADIO_MODE_NRF250KBIT             (0x02 << RADIO_MODE_SHIFT) /* 2: 250 kbit/s Nordic proprietary radio mode (deprecated) */
-#define RADIO_MODE_BLE1MBIT               (0x03 << RADIO_MODE_SHIFT) /* 3: 1 Mbit/s BLE */
-#define RADIO_MODE_BLE2MBIT               (0x04 << RADIO_MODE_SHIFT) /* 4: 2 Mbit/s BLE */
+#  define RADIO_MODE_NRF250KBIT           (0x02 << RADIO_MODE_SHIFT) /* 2: 250 kbit/s Nordic proprietary radio mode (deprecated) */
+#  define RADIO_MODE_BLE1MBIT             (0x03 << RADIO_MODE_SHIFT) /* 3: 1 Mbit/s BLE */
+#  define RADIO_MODE_BLE2MBIT             (0x04 << RADIO_MODE_SHIFT) /* 4: 2 Mbit/s BLE */
 #elif defined(CONFIG_ARCH_CHIP_NRF52840)
-#define RADIO_MODE_BLE1MBIT               (0x03 << RADIO_MODE_SHIFT) /* 3: 1 Mbit/s BLE */
-#define RADIO_MODE_BLE2MBIT               (0x04 << RADIO_MODE_SHIFT) /* 4: 2 Mbit/s BLE */
-#define RADIO_MODE_BLELR125KBIT           (0x05 << RADIO_MODE_SHIFT) /* 5: Long range 125 kbit/s TX, 125 kbit/s and 500 kbit/s RX */
-#define RADIO_MODE_BLELR500KBIT           (0x06 << RADIO_MODE_SHIFT) /* 6: Long range 500 kbit/s TX, 125 kbit/s and 500 kbit/s RX */
-#define RADIO_MODE_IEEE802154             (0x0f << RADIO_MODE_SHIFT) /* 15: IEEE 802.15.4-2006 250 kbit/s */
+#  define RADIO_MODE_BLE1MBIT             (0x03 << RADIO_MODE_SHIFT) /* 3: 1 Mbit/s BLE */
+#  define RADIO_MODE_BLE2MBIT             (0x04 << RADIO_MODE_SHIFT) /* 4: 2 Mbit/s BLE */
+#  define RADIO_MODE_BLELR125KBIT         (0x05 << RADIO_MODE_SHIFT) /* 5: Long range 125 kbit/s TX, 125 kbit/s and 500 kbit/s RX */
+#  define RADIO_MODE_BLELR500KBIT         (0x06 << RADIO_MODE_SHIFT) /* 6: Long range 500 kbit/s TX, 125 kbit/s and 500 kbit/s RX */
+#  define RADIO_MODE_IEEE802154           (0x0f << RADIO_MODE_SHIFT) /* 15: IEEE 802.15.4-2006 250 kbit/s */
 #endif
 
 /* PCNF0 Register */
@@ -448,9 +450,9 @@
 #define RADIO_PCNF0_S1INCL                (1 << 20) /* Bit 20: Include or exclude S1 field in RAM */
 
 #ifdef CONFIG_ARCH_CHIP_NRF52840
-#define RADIO_PCNF0_CILEN_SHIFT           (22)      /* Bits 22-23: Length of code indicator - long range */
-#define RADIO_PCNF0_CILEN_MASK            (0x3 << RADIO_PCNF0_CILEN_SHIFT)
-#define RADIO_PCNF0_CILEN_MAX             (0x3)
+#  define RADIO_PCNF0_CILEN_SHIFT         (22)      /* Bits 22-23: Length of code indicator - long range */
+#  define RADIO_PCNF0_CILEN_MASK          (0x3 << RADIO_PCNF0_CILEN_SHIFT)
+#  define RADIO_PCNF0_CILEN_MAX           (0x3)
 #endif
 
 #define RADIO_PCNF0_PLEN_SHIFT            (24)      /* Bits 24-25: Length of preamble on air */
@@ -461,11 +463,11 @@
 #  define RADIO_PCNF0_PLEN_LONGRANGE      (3 << RADIO_PCNF0_PLEN_SHIFT)
 
 #ifdef CONFIG_ARCH_CHIP_NRF52840
-#define RADIO_PCNF0_CRCINC_SHIFT          (26)      /* Bit 26: Indicates if LENGTH field contains CRC */
-#define RADIO_PCNF0_CRCINC                (1 << RADIO_PCNF0_CRCINC_SHIFT)
-#define RADIO_PCNF0_TERMLEN_SHIFT         (29)      /* Bits 29-30: Length of TERM field in Long Range operation */
-#define RADIO_PCNF0_TERMLEN_MASK          (0x3 << RADIO_PCNF0_TERMLEN_SHIFT)
-#define RADIO_PCNF0_TERMLEN_MAX           (0x3)
+#  define RADIO_PCNF0_CRCINC_SHIFT        (26)      /* Bit 26: Indicates if LENGTH field contains CRC */
+#  define RADIO_PCNF0_CRCINC              (1 << RADIO_PCNF0_CRCINC_SHIFT)
+#  define RADIO_PCNF0_TERMLEN_SHIFT       (29)      /* Bits 29-30: Length of TERM field in Long Range operation */
+#  define RADIO_PCNF0_TERMLEN_MASK        (0x3 << RADIO_PCNF0_TERMLEN_SHIFT)
+#  define RADIO_PCNF0_TERMLEN_MAX         (0x3)
 #endif
 
 /* PCNF1 Register */
