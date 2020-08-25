@@ -23,6 +23,10 @@ on:
       - master
       - 'releases/*'
     tags:
+  workflow_dispatch:
+    inputs:
+      app_pr:
+        description: 'APP PR (just the number)'
 
 jobs:
   Fetch-Source:
@@ -30,6 +34,9 @@ jobs:
     steps:
       - name: Determine Target Branches
         id: gittargets
+        env:
+          APP_PR: ${{ github.event.inputs.app_pr }}
+          OS_PR: ${{ github.event.inputs.os_pr }}
         shell: bash
         run: |
           TESTING_REF="master"  # Always use master for testing
@@ -76,6 +83,13 @@ jobs:
                 echo "Trigger by change on $GITHUB_REPOSITORY. This is unexpected."
                 ;;
             esac
+          fi
+
+          if [ -n "$APP_PR" ]; then
+            APPS_REF=refs/pull/$APP_PR/head
+          fi
+          if [ -n "$OS_PR" ]; then
+            OS_REF=refs/pull/$OS_PR/head
           fi
 
           echo ::set-output name=os_ref::$OS_REF
