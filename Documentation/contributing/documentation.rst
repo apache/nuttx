@@ -39,8 +39,6 @@ go into ``Documentation`` directory. Then,
         $ # activate the virtual environent
         $ pipenv shell
         
-      .. todo:: check that Pipfile.lock is up to date w.r.t. requirements.txt
-        
   2. Build documentation:
   
     .. code-block:: console
