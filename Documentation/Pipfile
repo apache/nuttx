@@ -6,10 +6,9 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-recommonmark = "*"
-m2r2 = "==0.2.5"
-Sphinx = "==3.2.1"
-sphinx-rtd-theme = "==0.5.0"
+m2r2 = "*"
+sphinx_rtd_theme = "*"
+Sphinx = "*"
 
 [requires]
 python_version = "3.7"
