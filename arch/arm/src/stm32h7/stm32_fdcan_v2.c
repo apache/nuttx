@@ -87,6 +87,8 @@
 #  warning WARNING!!! CONFIG_CAN_TXREADY is required by this driver
 #endif
 
+#define MSGRAM_MAX_WORDS 2560
+
 /* FDCAN1 Configuration ******************************************************/
 
 #ifdef CONFIG_STM32H7_FDCAN1
@@ -111,12 +113,12 @@
 #  endif
 
 #  ifdef STM32H7_FDCAN1_FD_BRS
-#  define FDCAN1_DTSEG1 (CONFIG_STM32H7_FDCAN1_FPROPSEG + CONFIG_STM32H7_FDCAN1_FPHASESEG1)
-#  define FDCAN1_DTSEG2 (CONFIG_STM32H7_FDCAN1_FPHASESEG2)
+#  define FDCAN1_DTSEG1 (CONFIG_STM32H7_FDCAN1_DTSEG1 - 1)
+#  define FDCAN1_DTSEG2 (CONFIG_STM32H7_FDCAN1_DTSEG2 - 1)
 #  define FDCAN1_DBRP   ((uint32_t)(((float) STM32H7_FDCANCLK_FREQUENCY / \
                        ((float)(FDCAN1_DTSEG1 + FDCAN1_DTSEG2 + 3) * \
-                        (float)CONFIG_STM32H7_FDCAN1_FBITRATE)) - 1))
-#  define FDCAN1_DSJW   (CONFIG_STM32H7_FDCAN1_FFSJW - 1)
+                        (float)CONFIG_STM32H7_FDCAN1_DBITRATE)) - 1))
+#  define FDCAN1_DSJW   (CONFIG_STM32H7_FDCAN1_DSJW - 1)
 #  else
 #  define FDCAN1_DTSEG1 1
 #  define FDCAN1_DTSEG2 1
@@ -210,8 +212,9 @@
 #  define FDCAN1_RXFIFO0_BYTES \
      (CONFIG_STM32H7_FDCAN1_RXFIFO0_SIZE * \
                   (FDCAN1_RXFIFO0_ELEMENT_SIZE + 8))
-     // FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN1_RXFIFO0_SIZE * \
-     //               FDCAN1_RXFIFO0_ELEMENT_SIZE + 8)
+     /* ( FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN1_RXFIFO0_SIZE * \
+      *               FDCAN1_RXFIFO0_ELEMENT_SIZE + 8)
+      */
 #  define FDCAN1_RXFIFO0_WORDS (FDCAN1_RXFIFO0_BYTES >> 2)
 
 
@@ -254,9 +257,11 @@
 #    define FDCAN1_RXFIFO1_ENCODED_SIZE  0
 #  endif
 
-// #  define FDCAN1_RXFIFO1_BYTES \
-//      FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN1_RXFIFO1_SIZE * \
-//                    FDCAN1_RXFIFO1_ELEMENT_SIZE + 8)
+/* #  define FDCAN1_RXFIFO1_BYTES \
+ *      FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN1_RXFIFO1_SIZE * \
+ *                   FDCAN1_RXFIFO1_ELEMENT_SIZE + 8)
+ */
+
 #  define FDCAN1_RXFIFO1_BYTES (CONFIG_STM32H7_FDCAN1_RXFIFO1_SIZE * \
                    (FDCAN1_RXFIFO1_ELEMENT_SIZE + 8))
 #  define FDCAN1_RXFIFO1_WORDS (FDCAN1_RXFIFO1_BYTES >> 2)
@@ -304,8 +309,9 @@
 #  define FDCAN1_DEDICATED_RXBUFFER_BYTES \
      (CONFIG_STM32H7_FDCAN1_DEDICATED_RXBUFFER_SIZE * \
                    (FDCAN1_RXBUFFER_ELEMENT_SIZE + 8))
-     // FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN1_DEDICATED_RXBUFFER_SIZE * \
-                   FDCAN1_RXBUFFER_ELEMENT_SIZE + 8)
+     /* FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN1_DEDICATED_RXBUFFER_SIZE * \
+       *            FDCAN1_RXBUFFER_ELEMENT_SIZE + 8)
+  */
 #  define FDCAN1_DEDICATED_RXBUFFER_WORDS \
      (FDCAN1_DEDICATED_RXBUFFER_BYTES >> 2)
 
@@ -351,8 +357,9 @@
 #  define FDCAN1_DEDICATED_TXBUFFER_BYTES \
      (CONFIG_STM32H7_FDCAN1_DEDICATED_TXBUFFER_SIZE * \
                    (FDCAN1_TXBUFFER_ELEMENT_SIZE + 8))
-     // FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN1_DEDICATED_TXBUFFER_SIZE * \
-     //               FDCAN1_TXBUFFER_ELEMENT_SIZE + 8)
+     /* FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN1_DEDICATED_TXBUFFER_SIZE * \
+      *               FDCAN1_TXBUFFER_ELEMENT_SIZE + 8)
+      */
 #  define FDCAN1_DEDICATED_TXBUFFER_WORDS \
      (FDCAN1_DEDICATED_TXBUFFER_BYTES >> 2)
 
@@ -371,8 +378,9 @@
 #  define FDCAN1_TXFIFIOQ_BYTES \
      (CONFIG_STM32H7_FDCAN1_TXFIFOQ_SIZE *  \
                    (FDCAN1_TXBUFFER_ELEMENT_SIZE + 8))
-     // FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN1_TXFIFOQ_SIZE *  \
-                   FDCAN1_TXBUFFER_ELEMENT_SIZE + 8)
+     /*FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN1_TXFIFOQ_SIZE *  \
+       *            FDCAN1_TXBUFFER_ELEMENT_SIZE + 8)
+*/
 #  define FDCAN1_TXFIFIOQ_WORDS (FDCAN1_TXFIFIOQ_BYTES >> 2)
 
 
@@ -405,19 +413,17 @@
 #  define FDCAN1_TXFIFOQ_INDEX     (FDCAN1_TXDEDICATED_INDEX + FDCAN1_DEDICATED_TXBUFFER_WORDS)
 #  define FDCAN1_MSGRAM_WORDS      (FDCAN1_TXFIFOQ_INDEX + FDCAN1_TXFIFIOQ_WORDS)
 
+#  if FDCAN1_MSGRAM_WORDS > MSGRAM_MAX_WORDS
+#    error FDCAN1 config exceeds message RAM word limit
+#  endif
+
 #endif /* CONFIG_STM32H7_FDCAN1 */
-
-/* Loopback mode */
-
-#undef STM32H7_FDCAN_LOOPBACK
-#if defined(CONFIG_STM32H7_FDCAN1_LOOPBACK) || defined(CONFIG_STM32H7_FDCAN2_LOOPBACK)
-#  define STM32H7_FDCAN_LOOPBACK 1
-#endif
 
 /* FDCAN2 Configuration ******************************************************/
 
 #ifdef CONFIG_STM32H7_FDCAN2
-  /* Bit timing */
+
+/* Bit timing */
 
 #  define FDCAN2_NTSEG1  (CONFIG_STM32H7_FDCAN2_NTSEG1 - 1)
 #  define FDCAN2_NTSEG2  (CONFIG_STM32H7_FDCAN2_NTSEG2 - 1)
@@ -436,24 +442,73 @@
 #    error Invalid FDCAN2 NSJW
 #  endif
 
-#  define FDCAN2_DTSEG1 (CONFIG_STM32H7_FDCAN2_FPROPSEG + CONFIG_STM32H7_FDCAN2_FPHASESEG1)
-#  define FDCAN2_DTSEG2 (CONFIG_STM32H7_FDCAN2_FPHASESEG2)
+#  ifdef STM32H7_FDCAN2_FD_BRS
+#  define FDCAN2_DTSEG1 (CONFIG_STM32H7_FDCAN2_DTSEG1 - 1)
+#  define FDCAN2_DTSEG2 (CONFIG_STM32H7_FDCAN2_DTSEG2 - 1)
 #  define FDCAN2_DBRP   ((uint32_t)(((float) STM32H7_FDCANCLK_FREQUENCY / \
                        ((float)(FDCAN2_DTSEG1 + FDCAN2_DTSEG2 + 3) * \
-                        (float)CONFIG_STM32H7_FDCAN2_FBITRATE)) - 1))
-#  define FDCAN2_DSJW   (CONFIG_STM32H7_FDCAN2_FFSJW - 1)
+                        (float)CONFIG_STM32H7_FDCAN2_DBITRATE)) - 1))
+#  define FDCAN2_DSJW   (CONFIG_STM32H7_FDCAN2_DSJW - 1)
+#  else
+#  define FDCAN2_DTSEG1 1
+#  define FDCAN2_DTSEG2 1
+#  define FDCAN2_DBRP   1
+#  define FDCAN2_DSJW   1
+#  endif /* STM32H7_FDCAN2_FD_BRS */
 
-#if FDCAN2_DTSEG1 > 15
-#  error Invalid FDCAN2 DTSEG1
-#endif
-#if FDCAN2_DTSEG2 > 7
-#  error Invalid FDCAN2 DTSEG2
-#endif
-#if FDCAN2_DSJW > 3
-#  error Invalid FDCAN2 DSJW
-#endif
+#  if FDCAN2_DTSEG1 > 15
+#    error Invalid FDCAN2 DTSEG1
+#  endif
+#  if FDCAN2_DTSEG2 > 7
+#    error Invalid FDCAN2 DTSEG2
+#  endif
+#  if FDCAN2_DSJW > 3
+#    error Invalid FDCAN2 DSJW
+#  endif
 
-/* FDCAN2 RX FIFO0 element size */
+/* FDCAN2 Message RAM Configuration ******************************************************/
+
+/* FDCAN2 standard filters */
+
+#  ifndef CONFIG_STM32H7_FDCAN2_NSTDFILTERS
+#    define CONFIG_STM32H7_FDCAN2_NSTDFILTERS 0
+#  endif
+
+#  if (CONFIG_STM32H7_FDCAN2_NSTDFILTERS > 128)
+#    error Invalid FDCAN2 number of Standard Filters
+#  endif
+
+#  define FDCAN2_STDFILTER_BYTES \
+      (CONFIG_STM32H7_FDCAN2_NSTDFILTERS << 2)
+      // FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_NSTDFILTERS << 2)
+#  define FDCAN2_STDFILTER_WORDS (FDCAN2_STDFILTER_BYTES >> 2)
+
+
+/* FDCAN2 extended filters */
+
+#  ifndef CONFIG_STM32H7_FDCAN2_NEXTFILTERS
+#    define CONFIG_STM32H7_FDCAN2_NEXTFILTERS 0
+#  endif
+
+#  if (CONFIG_STM32H7_FDCAN2_NEXTFILTERS > 64)
+#    error Invalid FDCAN2 number of Extended Filters
+#  endif
+
+#  define FDCAN2_EXTFILTER_BYTES \
+      (CONFIG_STM32H7_FDCAN2_NEXTFILTERS << 3)
+      // FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_NEXTFILTERS << 3)
+#  define FDCAN2_EXTFILTER_WORDS (FDCAN2_EXTFILTER_BYTES >> 2)
+
+
+/* FDCAN2 RX FIFO0 */
+
+#  ifndef CONFIG_STM32H7_FDCAN2_RXFIFO0_SIZE
+#    define CONFIG_STM32H7_FDCAN2_RXFIFO0_SIZE 0
+#  endif
+
+#  if CONFIG_STM32H7_FDCAN2_RXFIFO0_SIZE > 64
+#    error Invalid FDCAN2 number of RX FIFO0 elements
+#  endif
 
 #  if defined(CONFIG_STM32H7_FDCAN2_RXFIFO0_8BYTES)
 #    define FDCAN2_RXFIFO0_ELEMENT_SIZE  8
@@ -480,23 +535,28 @@
 #    define FDCAN2_RXFIFO0_ELEMENT_SIZE  64
 #    define FDCAN2_RXFIFO0_ENCODED_SIZE  7
 #  else
-#    error Undefined FDCAN2 RX FIFO0 element size
-#  endif
-
-#  ifndef CONFIG_STM32H7_FDCAN2_RXFIFO0_SIZE
-#    define CONFIG_STM32H7_FDCAN2_RXFIFO0_SIZE 0
-#  endif
-
-#  if CONFIG_STM32H7_FDCAN2_RXFIFO0_SIZE > 64
-#    error Invalid FDCAN2 number of RX FIFO 0 elements
+#    define FDCAN2_RXFIFO0_ELEMENT_SIZE  8
+#    define FDCAN2_RXFIFO0_ENCODED_SIZE  0
 #  endif
 
 #  define FDCAN2_RXFIFO0_BYTES \
-     FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_RXFIFO0_SIZE * \
-                   FDCAN2_RXFIFO0_ELEMENT_SIZE + 8)
+     (CONFIG_STM32H7_FDCAN2_RXFIFO0_SIZE * \
+                  (FDCAN2_RXFIFO0_ELEMENT_SIZE + 8))
+     /* ( FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_RXFIFO0_SIZE * \
+      *               FDCAN2_RXFIFO0_ELEMENT_SIZE + 8)
+      */               
 #  define FDCAN2_RXFIFO0_WORDS (FDCAN2_RXFIFO0_BYTES >> 2)
 
-/* FDCAN2 RX FIFO1 element size */
+
+/* FDCAN2 RX FIFO1 */
+
+#  ifndef CONFIG_STM32H7_FDCAN2_RXFIFO1_SIZE
+#    define CONFIG_STM32H7_FDCAN2_RXFIFO1_SIZE 0
+#  endif
+
+#  if CONFIG_STM32H7_FDCAN2_RXFIFO1_SIZE > 64
+#    error Invalid FDCAN2 number of RX FIFO1 elements
+#  endif
 
 #  if defined(CONFIG_STM32H7_FDCAN2_RXFIFO1_8BYTES)
 #    define FDCAN2_RXFIFO1_ELEMENT_SIZE  8
@@ -523,49 +583,29 @@
 #    define FDCAN2_RXFIFO1_ELEMENT_SIZE  64
 #    define FDCAN2_RXFIFO1_ENCODED_SIZE  7
 #  else
-#    error Undefined FDCAN2 RX FIFO1 element size
+#    define FDCAN2_RXFIFO1_ELEMENT_SIZE  8
+#    define FDCAN2_RXFIFO1_ENCODED_SIZE  0
 #  endif
 
-#  ifndef CONFIG_STM32H7_FDCAN2_RXFIFO1_SIZE
-#    define CONFIG_STM32H7_FDCAN2_RXFIFO1_SIZE 0
-#  endif
+/* #  define FDCAN2_RXFIFO1_BYTES \
+ *      FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_RXFIFO1_SIZE * \
+ *                   FDCAN2_RXFIFO1_ELEMENT_SIZE + 8)
+ */
 
-#  if CONFIG_STM32H7_FDCAN2_RXFIFO1_SIZE > 64
-#    error Invalid FDCAN2 number of RX FIFO 0 elements
-#  endif
-
-#  define FDCAN2_RXFIFO1_BYTES \
-     FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_RXFIFO1_SIZE * \
-                   FDCAN2_RXFIFO1_ELEMENT_SIZE + 8)
+#  define FDCAN2_RXFIFO1_BYTES (CONFIG_STM32H7_FDCAN2_RXFIFO1_SIZE * \
+                   (FDCAN2_RXFIFO1_ELEMENT_SIZE + 8))
 #  define FDCAN2_RXFIFO1_WORDS (FDCAN2_RXFIFO1_BYTES >> 2)
 
-/* FDCAN2 Filters */
 
-#  ifndef CONFIG_STM32H7_FDCAN2_NSTDFILTERS
-#    define CONFIG_STM32H7_FDCAN2_NSTDFILTERS 0
+/* FDCAN2 RX dedicated buffer */
+
+#  ifndef CONFIG_STM32H7_FDCAN2_DEDICATED_RXBUFFER_SIZE
+#    define CONFIG_STM32H7_FDCAN2_DEDICATED_RXBUFFER_SIZE 0
 #  endif
 
-#  if CONFIG_STM32H7_FDCAN2_NSTDFILTERS > 128
-#    error Invalid FDCAN2 number of Standard Filters
+#  if CONFIG_STM32H7_FDCAN2_DEDICATED_RXBUFFER_SIZE > 64
+#    error Invalid FDCAN2 number of RX BUFFER elements
 #  endif
-
-#  ifndef CONFIG_STM32H7_FDCAN2_NEXTFILTERS
-#    define CONFIG_STM32H7_FDCAN2_NEXTFILTERS 0
-#  endif
-
-#  if CONFIG_STM32H7_FDCAN2_NEXTFILTERS > 64
-#    error Invalid FDCAN2 number of Extended Filters
-#  endif
-
-#  define FDCAN2_STDFILTER_BYTES \
-      FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_NSTDFILTERS << 2)
-#  define FDCAN2_STDFILTER_WORDS (FDCAN2_STDFILTER_BYTES >> 2)
-
-#  define FDCAN2_EXTFILTER_BYTES \
-      FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_NEXTFILTERS << 3)
-#  define FDCAN2_EXTFILTER_WORDS (FDCAN2_EXTFILTER_BYTES >> 2)
-
-/* FDCAN2 RX buffer element size */
 
 #  if defined(CONFIG_STM32H7_FDCAN2_RXBUFFER_8BYTES)
 #    define FDCAN2_RXBUFFER_ELEMENT_SIZE  8
@@ -592,22 +632,19 @@
 #    define FDCAN2_RXBUFFER_ELEMENT_SIZE  64
 #    define FDCAN2_RXBUFFER_ENCODED_SIZE  7
 #  else
-#    error Undefined FDCAN2 RX buffer element size
-#  endif
-
-#  ifndef CONFIG_STM32H7_FDCAN2_DEDICATED_RXBUFFER_SIZE
-#    define CONFIG_STM32H7_FDCAN2_DEDICATED_RXBUFFER_SIZE 0
-#  endif
-
-#  if CONFIG_STM32H7_FDCAN2_DEDICATED_RXBUFFER_SIZE > 64
-#    error Invalid FDCAN2 number of RX BUFFER elements
+#    define FDCAN2_RXBUFFER_ELEMENT_SIZE  8
+#    define FDCAN2_RXBUFFER_ENCODED_SIZE  0
 #  endif
 
 #  define FDCAN2_DEDICATED_RXBUFFER_BYTES \
-     FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_DEDICATED_RXBUFFER_SIZE * \
-                   FDCAN2_RXBUFFER_ELEMENT_SIZE + 8)
+     (CONFIG_STM32H7_FDCAN2_DEDICATED_RXBUFFER_SIZE * \
+                   (FDCAN2_RXBUFFER_ELEMENT_SIZE + 8))
+     /* FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_DEDICATED_RXBUFFER_SIZE * \
+       *            FDCAN2_RXBUFFER_ELEMENT_SIZE + 8)
+  */
 #  define FDCAN2_DEDICATED_RXBUFFER_WORDS \
      (FDCAN2_DEDICATED_RXBUFFER_BYTES >> 2)
+
 
 /* FDCAN2 TX buffer element size */
 
@@ -636,20 +673,28 @@
 #    define FDCAN2_TXBUFFER_ELEMENT_SIZE  64
 #    define FDCAN2_TXBUFFER_ENCODED_SIZE  7
 #  else
-#    error Undefined FDCAN2 TX buffer element size
+#    define FDCAN2_TXBUFFER_ELEMENT_SIZE  8
+#    define FDCAN2_TXBUFFER_ENCODED_SIZE  0
 #  endif
+
+
+/* FDCAN2 TX dedicated buffer */
 
 #  ifndef CONFIG_STM32H7_FDCAN2_DEDICATED_TXBUFFER_SIZE
 #    define CONFIG_STM32H7_FDCAN2_DEDICATED_TXBUFFER_SIZE 0
 #  endif
 
 #  define FDCAN2_DEDICATED_TXBUFFER_BYTES \
-     FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_DEDICATED_TXBUFFER_SIZE * \
-                   FDCAN2_TXBUFFER_ELEMENT_SIZE + 8)
+     (CONFIG_STM32H7_FDCAN2_DEDICATED_TXBUFFER_SIZE * \
+                   (FDCAN2_TXBUFFER_ELEMENT_SIZE + 8))
+     /* FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_DEDICATED_TXBUFFER_SIZE * \
+      *               FDCAN2_TXBUFFER_ELEMENT_SIZE + 8)
+      */
 #  define FDCAN2_DEDICATED_TXBUFFER_WORDS \
      (FDCAN2_DEDICATED_TXBUFFER_BYTES >> 2)
 
-/* FDCAN2 TX FIFOs */
+
+/* FDCAN2 TX FIFO/Queue*/
 
 #  ifndef CONFIG_STM32H7_FDCAN2_TXFIFOQ_SIZE
 #    define CONFIG_STM32H7_FDCAN2_TXFIFOQ_SIZE 0
@@ -660,6 +705,17 @@
 #    error Invalid FDCAN2 number of TX BUFFER elements
 #  endif
 
+#  define FDCAN2_TXFIFIOQ_BYTES \
+     (CONFIG_STM32H7_FDCAN2_TXFIFOQ_SIZE *  \
+                   (FDCAN2_TXBUFFER_ELEMENT_SIZE + 8))
+     /*FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_TXFIFOQ_SIZE *  \
+       *            FDCAN2_TXBUFFER_ELEMENT_SIZE + 8)
+*/
+#  define FDCAN2_TXFIFIOQ_WORDS (FDCAN2_TXFIFIOQ_BYTES >> 2)
+
+
+/* FDCAN2 TX Event FIFO */
+
 #  ifndef CONFIG_STM32H7_FDCAN2_TXEVENTFIFO_SIZE
 #    define CONFIG_STM32H7_FDCAN2_TXEVENTFIFO_SIZE 0
 #  endif
@@ -669,28 +725,46 @@
 #  endif
 
 #  define FDCAN2_TXEVENTFIFO_BYTES \
-     FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_TXEVENTFIFO_SIZE << 3)
+     (CONFIG_STM32H7_FDCAN2_TXEVENTFIFO_SIZE << 3)
+     // FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_TXEVENTFIFO_SIZE << 3)
 #  define FDCAN2_TXEVENTFIFO_WORDS \
      (FDCAN2_TXEVENTFIFO_BYTES >> 2)
 
-#  define FDCAN2_TXFIFIOQ_BYTES \
-     FDCAN_ALIGN_UP(CONFIG_STM32H7_FDCAN2_TXFIFOQ_SIZE *  \
-                   FDCAN2_TXBUFFER_ELEMENT_SIZE + 8)
-#  define FDCAN2_TXFIFIOQ_WORDS (FDCAN2_TXFIFIOQ_BYTES >> 2)
 
-/* FDCAN2 Message RAM */
+/* FDCAN2 Message RAM Layout*/
 
-#  define FDCAN2_STDFILTER_INDEX   0
-#  define FDCAN2_EXTFILTERS_INDEX  (FDCAN2_STDFILTER_INDEX + FDCAN2_STDFILTER_WORDS)
-#  define FDCAN2_RXFIFO0_INDEX     (FDCAN2_EXTFILTERS_INDEX + FDCAN2_EXTFILTER_WORDS)
-#  define FDCAN2_RXFIFO1_INDEX     (FDCAN2_RXFIFO0_INDEX + FDCAN2_RXFIFO0_WORDS)
-#  define FDCAN2_RXDEDICATED_INDEX (FDCAN2_RXFIFO1_INDEX + FDCAN2_RXFIFO1_WORDS)
-#  define FDCAN2_TXEVENTFIFO_INDEX (FDCAN2_RXDEDICATED_INDEX + FDCAN2_DEDICATED_RXBUFFER_WORDS)
-#  define FDCAN2_TXDEDICATED_INDEX (FDCAN2_TXEVENTFIFO_INDEX + FDCAN2_TXEVENTFIFO_WORDS)
-#  define FDCAN2_TXFIFOQ_INDEX     (FDCAN2_TXDEDICATED_INDEX + FDCAN2_DEDICATED_TXBUFFER_WORDS)
-#  define FDCAN2_MSGRAM_WORDS      (FDCAN2_TXFIFOQ_INDEX + FDCAN2_TXFIFIOQ_WORDS)
+#  ifdef CONFIG_STM32H7_FDCAN1
+#    define FDCAN2_STDFILTER_INDEX  FDCAN1_MSGRAM_WORDS
+#  else
+#    define FDCAN2_STDFILTER_INDEX  0
+#  endif
+#  define FDCAN2_EXTFILTERS_INDEX   (FDCAN2_STDFILTER_INDEX + FDCAN2_STDFILTER_WORDS)
+#  define FDCAN2_RXFIFO0_INDEX      (FDCAN2_EXTFILTERS_INDEX + FDCAN2_EXTFILTER_WORDS)
+#  define FDCAN2_RXFIFO1_INDEX      (FDCAN2_RXFIFO0_INDEX + FDCAN2_RXFIFO0_WORDS)
+#  define FDCAN2_RXDEDICATED_INDEX  (FDCAN2_RXFIFO1_INDEX + FDCAN2_RXFIFO1_WORDS)
+#  define FDCAN2_TXEVENTFIFO_INDEX  (FDCAN2_RXDEDICATED_INDEX + FDCAN2_DEDICATED_RXBUFFER_WORDS)
+#  define FDCAN2_TXDEDICATED_INDEX  (FDCAN2_TXEVENTFIFO_INDEX + FDCAN2_TXEVENTFIFO_WORDS)
+#  define FDCAN2_TXFIFOQ_INDEX      (FDCAN2_TXDEDICATED_INDEX + FDCAN2_DEDICATED_TXBUFFER_WORDS)
+#  define FDCAN2_MSGRAM_WORDS       (FDCAN2_TXFIFOQ_INDEX + FDCAN2_TXFIFIOQ_WORDS)
+
+#  ifdef CONFIG_STM32H7_FDCAN1 
+#    if (FDCAN1_MSGRAM_WORDS + FDCAN2_MSGRAM_WORDS) > MSGRAM_MAX_WORDS
+#      error FDCAN1 and FDCAN2 config exceeds message RAM word limit
+#    endif
+#  else
+#    if FDCAN2_MSGRAM_WORDS > MSGRAM_MAX_WORDS
+#      error FDCAN2 config exceeds message RAM word limit
+#    endif
+#  endif
 
 #endif /* CONFIG_STM32H7_FDCAN2 */
+
+/* Loopback mode */
+
+#undef STM32H7_FDCAN_LOOPBACK
+#if defined(CONFIG_STM32H7_FDCAN1_LOOPBACK) || defined(CONFIG_STM32H7_FDCAN2_LOOPBACK)
+#  define STM32H7_FDCAN_LOOPBACK 1
+#endif
 
 /* Interrupts ***************************************************************/
 
@@ -1079,7 +1153,7 @@ static const struct stm32_config_s g_fdcan1const =
 
   .msgram =
   {
-    (uint32_t*)(STM32_CANRAM_BASE),
+    (uint32_t*)(STM32_CANRAM_BASE + (FDCAN1_STDFILTER_INDEX << 2)),
     (uint32_t*)(STM32_CANRAM_BASE + (FDCAN1_EXTFILTERS_INDEX << 2)),
     (uint32_t*)(STM32_CANRAM_BASE + (FDCAN1_RXFIFO0_INDEX << 2)),
     (uint32_t*)(STM32_CANRAM_BASE + (FDCAN1_RXFIFO1_INDEX << 2)),
@@ -1112,12 +1186,12 @@ static struct can_dev_s g_fdcan1dev;
 #ifdef CONFIG_STM32H7_FDCAN2
 /* FDCAN2 message RAM allocation */
 
-static uint32_t g_fdcan2_msgram[FDCAN2_MSGRAM_WORDS]
-#ifdef CONFIG_ARMV7M_DCACHE
-  __attribute__((aligned(FDCAN_ALIGN)));
-#else
-  ;
-#endif
+// static uint32_t g_fdcan2_msgram[FDCAN2_MSGRAM_WORDS]
+// #ifdef CONFIG_ARMV7M_DCACHE
+//   __attribute__((aligned(FDCAN_ALIGN)));
+// #else
+//   ;
+// #endif
 
 /* FDCAN2 constant configuration */
 
@@ -1131,7 +1205,7 @@ static const struct stm32_config_s g_fdcan2const =
                       FDCAN_NBTP_NTSEG1(FDCAN2_NTSEG1) |
                       FDCAN_NBTP_NTSEG2(FDCAN2_NTSEG2) |
                       FDCAN_NBTP_NSJW(FDCAN2_NSJW),
-  .dbtp             = FDCAN_DBTP_DBRP(FDCAN2_NBRP) |
+  .dbtp             = FDCAN_DBTP_DBRP(FDCAN2_DBRP) |
                       FDCAN_DBTP_DTSEG1(FDCAN2_DTSEG1) |
                       FDCAN_DBTP_DTSEG2(FDCAN2_DTSEG2) |
                       FDCAN_DBTP_DSJW(FDCAN2_DSJW),
@@ -1142,13 +1216,13 @@ static const struct stm32_config_s g_fdcan2const =
   .mode             = FDCAN_CLASSIC_MODE,
 #elif defined(CONFIG_STM32H7_FDCAN2_FD)
   .mode             = FDCAN_FD_MODE,
-#else /* if defined(CONFIG_STM32H7_FDCAN2_FD_BRS) */
+#else /* if defined(STM32H7_FDCAN2_ISO11898_1) */
   .mode             = FDCAN_FD_BRS_MODE,
 #endif
 #if defined(CONFIG_STM32H7_FDCAN2_NONISO_FORMAT)
   .format           = FDCAN_NONISO_BOSCH_V1_FORMAT,
-#else /* if defined(STM32H7_FDCAN2_ISO11898_1) */
-  .fromat           = FDCAN_ISO11898_1_FORMAT,
+#else
+  .format           = FDCAN_ISO11898_1_FORMAT,
 #endif
   .nstdfilters      = CONFIG_STM32H7_FDCAN2_NSTDFILTERS,
   .nextfilters      = CONFIG_STM32H7_FDCAN2_NEXTFILTERS,
@@ -1158,6 +1232,14 @@ static const struct stm32_config_s g_fdcan2const =
   .ntxeventfifo     = CONFIG_STM32H7_FDCAN2_TXEVENTFIFO_SIZE,
   .ntxdedicated     = CONFIG_STM32H7_FDCAN2_DEDICATED_TXBUFFER_SIZE,
   .ntxfifoq         = CONFIG_STM32H7_FDCAN2_TXFIFOQ_SIZE,
+  .stdfiltersstart  = FDCAN2_STDFILTER_INDEX,
+  .extfiltersstart  = FDCAN2_EXTFILTERS_INDEX,
+  .rxfifo0start     = FDCAN2_RXFIFO0_INDEX,
+  .rxfifo1start     = FDCAN2_RXFIFO1_INDEX,
+  .rxbufferstart    = FDCAN2_RXDEDICATED_INDEX,
+  .txeventstart     = FDCAN2_TXEVENTFIFO_INDEX,
+  .txbufferstart    = FDCAN2_TXDEDICATED_INDEX,
+  .txfifoqstart     = FDCAN2_TXFIFOQ_INDEX,
   .rxfifo0ecode     = FDCAN2_RXFIFO0_ENCODED_SIZE,
   .rxfifo0esize     = (FDCAN2_RXFIFO0_ELEMENT_SIZE / 4) + 2,
   .rxfifo1ecode     = FDCAN2_RXFIFO1_ENCODED_SIZE,
@@ -1170,19 +1252,32 @@ static const struct stm32_config_s g_fdcan2const =
 #ifdef CONFIG_STM32H7_FDCAN2_LOOPBACK
   .loopback         = true,
 #endif
-  /* FDCAN1 Message RAM */
+
+  /* FDCAN2 Message RAM */
 
   .msgram =
   {
-     &g_fdcan2_msgram[FDCAN2_STDFILTER_INDEX],
-     &g_fdcan2_msgram[FDCAN2_EXTFILTERS_INDEX],
-     &g_fdcan2_msgram[FDCAN2_RXFIFO0_INDEX],
-     &g_fdcan2_msgram[FDCAN2_RXFIFO1_INDEX],
-     &g_fdcan2_msgram[FDCAN2_RXDEDICATED_INDEX],
-     &g_fdcan2_msgram[FDCAN2_TXEVENTFIFO_INDEX],
-     &g_fdcan2_msgram[FDCAN2_TXDEDICATED_INDEX],
-     &g_fdcan2_msgram[FDCAN2_TXFIFOQ_INDEX]
+    (uint32_t*)(STM32_CANRAM_BASE + (FDCAN2_STDFILTER_INDEX << 2)),
+    (uint32_t*)(STM32_CANRAM_BASE + (FDCAN2_EXTFILTERS_INDEX << 2)),
+    (uint32_t*)(STM32_CANRAM_BASE + (FDCAN2_RXFIFO0_INDEX << 2)),
+    (uint32_t*)(STM32_CANRAM_BASE + (FDCAN2_RXFIFO1_INDEX << 2)),
+    (uint32_t*)(STM32_CANRAM_BASE + (FDCAN2_RXDEDICATED_INDEX << 2)),
+    (uint32_t*)(STM32_CANRAM_BASE + (FDCAN2_TXEVENTFIFO_INDEX << 2)),
+    (uint32_t*)(STM32_CANRAM_BASE + (FDCAN2_TXDEDICATED_INDEX << 2)),
+    (uint32_t*)(STM32_CANRAM_BASE + (FDCAN2_TXFIFOQ_INDEX << 2))
   }
+
+  // .msgram =
+  // {
+  //    &g_FDCAN2_msgram[FDCAN2_STDFILTER_INDEX],
+  //    &g_FDCAN2_msgram[FDCAN2_EXTFILTERS_INDEX],
+  //    &g_FDCAN2_msgram[FDCAN2_RXFIFO0_INDEX],
+  //    &g_FDCAN2_msgram[FDCAN2_RXFIFO1_INDEX],
+  //    &g_FDCAN2_msgram[FDCAN2_RXDEDICATED_INDEX],
+  //    &g_FDCAN2_msgram[FDCAN2_TXEVENTFIFO_INDEX],
+  //    &g_FDCAN2_msgram[FDCAN2_TXDEDICATED_INDEX],
+  //    &g_FDCAN2_msgram[FDCAN2_TXFIFOQ_INDEX]
+  // }
 };
 
 /* FDCAN1 variable driver state */
@@ -1948,6 +2043,7 @@ static int fdcan_add_extfilter(FAR struct stm32_fdcan_s *priv,
   int word;
   int bit;
   int ndx;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL && extconfig != NULL);
   config = priv->config;
@@ -2019,7 +2115,7 @@ static int fdcan_add_extfilter(FAR struct stm32_fdcan_s *priv,
 
           /* Flush the filter entry into physical RAM */
 
-          up_clean_dcache((uintptr_t)extfilter, (uintptr_t)exfilter + 8);
+          // up_clean_dcache((uintptr_t)extfilter, (uintptr_t)exfilter + 8);
 
           /* Is this the first extended filter? */
 
@@ -2098,6 +2194,7 @@ static int fdcan_del_extfilter(FAR struct stm32_fdcan_s *priv, int ndx)
   uint32_t regval;
   int word;
   int bit;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
@@ -2285,7 +2382,7 @@ static int fdcan_add_stdfilter(FAR struct stm32_fdcan_s *priv,
 
           /* Flush the filter entry into physical RAM */
 
-          up_clean_dcache((uintptr_t)stdfilter, (uintptr_t)stdfilter + 4);
+          // up_clean_dcache((uintptr_t)stdfilter, (uintptr_t)stdfilter + 4);
 
           /* Is this the first standard filter? */
 
@@ -3105,7 +3202,7 @@ static int fdcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   FAR const uint8_t *src;
   FAR uint32_t *dest;
   uint32_t regval;
-  unsigned int msglen;
+  // unsigned int msglen;
   unsigned int ndx;
   unsigned int nbytes;
   uint32_t wordbuffer;
@@ -3706,14 +3803,20 @@ static void fdcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
 {
   struct can_hdr_s hdr;
   uint32_t regval;
-  unsigned int nbytes;
+  // unsigned int nbytes;
   int ret;
 
   fdcan_dumprxregs(dev->cd_priv, "Before receive");
 
+  caninfo("*** Raw message data ***\n");
+  caninfo("   R0 @%08x : %08x\n", &rxbuffer[0], rxbuffer[0]); 
+  caninfo("   R1 @%08x : %08x\n", &rxbuffer[1], rxbuffer[1]); 
+  caninfo("   R2 @%08x : %08x\n", &rxbuffer[2], rxbuffer[2]);
+  caninfo("   R3 @%08x : %08x\n", &rxbuffer[3], rxbuffer[3]);
+
   /* Invalidate the D-Cache so that we reread the RX buffer data from memory. */
 
-  nbytes = (nwords << 2);
+  // nbytes = (nwords << 2);
   // up_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
   caninfo("rx address: %p\n",rxbuffer);
   /* Format the CAN header */

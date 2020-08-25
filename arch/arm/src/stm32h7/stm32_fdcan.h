@@ -47,8 +47,7 @@
 
 #include <nuttx/can/can.h>
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32H7_FDCAN1) || \
-    defined(CONFIG_STM32H7_FDCAN2))
+#if defined(CONFIG_CAN) && defined(CONFIG_STM32H7_FDCAN)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -106,5 +105,5 @@ FAR struct can_dev_s *stm32_fdcan_initialize(int port);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_CAN && (CONFIG_STM32H7_FDCAN1 || CONFIG_STM32H7_FDCAN2) */
+#endif /* CONFIG_CAN && CONFIG_STM32H7_FDCAN */
 #endif /* __ARCH_ARM_SRC_STM32H7_STM32_FDCAN_H */
