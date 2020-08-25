@@ -3086,25 +3086,21 @@ errout:
 static int gs2200m_irq(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct gs2200m_dev_s *dev;
-  int ec = 0;
 
   DEBUGASSERT(arg != NULL);
   dev = (FAR struct gs2200m_dev_s *)arg;
 
-  dev->lower->dready(&ec);
-  ASSERT(0 < ec);
-
   wlinfo(">>>> \n");
-
-  /* NOTE: Disable gs2200m irq during processing */
-
-  dev->lower->disable();
 
   if (!work_available(&dev->irq_work))
     {
       wlwarn("*** warning: there is still pending work **** \n");
       return 0;
     }
+
+  /* NOTE: Disable gs2200m irq during processing */
+
+  dev->lower->disable();
 
   return work_queue(GS2200MWORK, &dev->irq_work, gs2200m_irq_worker,
                     (FAR void *)dev, 0);
