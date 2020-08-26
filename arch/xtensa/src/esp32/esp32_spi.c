@@ -835,39 +835,6 @@ static int esp32_spi_hwfeatures(FAR struct spi_dev_s *dev,
 #endif
 
 /****************************************************************************
- * Name: esp32_spi_cmddata
- *
- * Description:
- *   Some devices require and additional out-of-band bit to specify if the
- *   next word sent to the device is a command or data. This is typical, for
- *   example, in "9-bit" displays where the 9th bit is the CMD/DATA bit.
- *   This function provides selection of command or data.
- *
- *   This "latches" the CMD/DATA state.  It does not have to be called before
- *   every word is transferred; only when the CMD/DATA state changes.  This
- *   method is required if CONFIG_SPI_CMDDATA is selected in the NuttX
- *   configuration
- *
- * Input Parameters:
- *   dev - Device-specific state data
- *   cmd - true: The following word is a command; fals: the following words
- *         are data.
- *
- * Returned Value:
- *   OK unless an error occurs.  Then a negated errno value is returned.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SPI_CMDDATA
-static int esp32_spi_cmddata(FAR struct spi_dev_s *dev,
-                             uint32_t devid,
-                             bool cmd)
-{
-  return -ENODEV;
-}
-#endif
-
-/****************************************************************************
  * Name: esp32_spi_dma_exchange
  *
  * Description:
