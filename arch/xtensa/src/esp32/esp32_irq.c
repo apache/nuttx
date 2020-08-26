@@ -49,6 +49,7 @@
 #include "xtensa.h"
 #include "esp32_cpuint.h"
 #include "esp32_smp.h"
+#include "esp32_gpio.h"
 
 /****************************************************************************
  * Public Data
