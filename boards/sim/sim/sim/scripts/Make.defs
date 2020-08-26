@@ -29,6 +29,7 @@ endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -O2 -fno-strict-aliasing
+  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
 endif
 
 ifeq ($(CONFIG_STACK_CANARIES),y)
@@ -135,6 +136,8 @@ ifeq ($(CONFIG_SIM_M32),y)
   LDELFFLAGS += -melf_i386
   HOSTLDFLAGS += -m32
 endif
+
+CCLINKFLAGS += -Wl,--gc-sections
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
