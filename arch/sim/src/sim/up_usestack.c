@@ -64,6 +64,10 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
+/* Stack margin for idle thread coloring */
+
+#define STACK_MARGIN_IDLE   (CONFIG_IDLETHREAD_STACKSIZE / 4)
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -136,9 +140,18 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
    * water marks.
    */
 
+  if (tcb->pid == 0)
+    {
+      /* The whole idle thread stack can't be colored here
+       * because the code is running on the idle thead now.
+       */
+
+      adj_stack_size -= STACK_MARGIN_IDLE;
+    }
+
   up_stack_color((FAR void *)((uintptr_t)tcb->stack_alloc_ptr +
                  sizeof(struct tls_info_s)),
-                 tcb->adj_stack_size - sizeof(struct tls_info_s));
+                 adj_stack_size - sizeof(struct tls_info_s));
 #endif
 
   return OK;
