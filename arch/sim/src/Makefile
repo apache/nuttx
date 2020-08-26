@@ -107,6 +107,10 @@ endif
   STDLIBS += -lpthread
 endif
 
+ifeq ($(CONFIG_BT_LIBUSB),y)
+  STDLIBS += -lusb-1.0
+endif
+
 ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
 ifneq ($(CONFIG_SCHED_INSTRUMENTATION_BUFFER),y)
   CSRCS += up_schednote.c

@@ -83,6 +83,11 @@ int board_app_initialize(uintptr_t arg)
   up_rptun_init();
 #endif
 
+#ifdef CONFIG_BT_LIBUSB
+  extern int libusb_bt_stack_initialize(void);
+  libusb_bt_stack_initialize();
+#endif
+
   return 0;
 }
 #endif /* CONFIG_LIB_BOARDCTL */
