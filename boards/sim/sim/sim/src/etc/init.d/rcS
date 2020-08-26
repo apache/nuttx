@@ -27,8 +27,14 @@
 
 /* Create a RAMDISK and mount it at /tmp */
 
+#ifdef CONFIG_FS_FAT
 mkrd -m CONFIG_NSH_FATDEVNO -s CONFIG_NSH_FATSECTSIZE CONFIG_NSH_FATNSECTORS
 mkfatfs CONCAT(/dev/ram, CONFIG_NSH_FATDEVNO)
 mount -t vfat CONCAT(/dev/ram, CONFIG_NSH_FATDEVNO) CONFIG_NSH_FATMOUNTPT
+#endif /* CONFIG_FS_FAT */
+
+#ifdef CONFIG_FS_HOSTFS
+mount -t hostfs -o fs=. /data
+#endif /* CONFIG_FS_HOSTFS */
 
 #endif /* CONFIG_NSH_ROMFSETC */
