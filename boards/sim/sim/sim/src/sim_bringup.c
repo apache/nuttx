@@ -301,5 +301,15 @@ int sim_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SIM_HCISOCKET
+  /* Register the Host Bluetooth network device via HCI socket */
+
+  ret = bthcisock_register(0);  /* Use HCI0 */
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: bthcisock_register() failed: %d\n", ret);
+    }
+#endif
+
   return ret;
 }
