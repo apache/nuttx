@@ -365,6 +365,13 @@ struct spi_dev_s *up_spiflashinitialize(const char *name);
 struct qspi_dev_s *up_qspiflashinitialize(void);
 #endif
 
+/* up_hcisocket.c ***********************************************************/
+
+#ifdef CONFIG_SIM_HCISOCKET
+int bthcisock_register(int dev_id);
+int bthcisock_loop(void);
+#endif
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION

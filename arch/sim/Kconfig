@@ -475,4 +475,14 @@ config SIM_QSPIFLASH_PAGESIZE
 		"wrap" causing the initial data sent to be overwritten.
 		This is consistent with standard SPI FLASH operation.
 
+config SIM_HCISOCKET
+	bool "Attach Host Bluetooth"
+	default false
+	depends on (WIRELESS_BLUETOOTH && HOST_LINUX)
+	---help---
+		Attached the local bluetooth device to the simulation
+		target via HCI_CHANNEL_USER. This gives NuttX full
+		control of the device, but is abstracted from the
+		physical interface which is still handled by Linux.
+
 endif # ARCH_SIM

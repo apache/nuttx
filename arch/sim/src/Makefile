@@ -196,6 +196,11 @@ else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
   HOSTSRCS += protocol.c negotiate.c
 endif
 
+ifeq ($(CONFIG_SIM_HCISOCKET),y)
+  HOSTSRCS += up_hcisocket_host.c
+  CSRCS += up_hcisocket.c
+endif 
+
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += up_rptun.c
 endif

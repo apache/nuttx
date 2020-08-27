@@ -111,6 +111,10 @@ void up_idle(void)
   up_rptun_loop();
 #endif
 
+#ifdef CONFIG_SIM_HCISOCKET
+  bthcisock_loop();
+#endif
+
 #ifdef CONFIG_ONESHOT
   /* Driver the simulated interval timer */
 
