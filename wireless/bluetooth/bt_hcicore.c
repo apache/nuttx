@@ -121,6 +121,30 @@ static struct work_s g_hp_work;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: bt_send
+ *
+ * Description:
+ *   Add the provided buffer 'buf' to the head selected buffer list 'list'
+ *
+ * Input Parameters:
+ *   btdev - An instance of the low-level drivers interface structure.
+ *   buf   - The buffer to be sent by the driver
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+static int bt_send(FAR const struct bt_driver_s *btdev,
+                   FAR struct bt_buf_s *buf)
+{
+  /* TODDO: Hook here to notify hci monitor */
+
+  return btdev->send(btdev, buf);
+}
+
+/****************************************************************************
  * Name: bt_enqueue_bufwork
  *
  * Description:
@@ -1049,6 +1073,8 @@ static void hci_rx_work(FAR void *arg)
     {
       wlinfo("buf %p type %u len %u\n", buf, buf->type, buf->len);
 
+      /* TODO: Hook monitor callback */
+
       switch (buf->type)
         {
           case BT_ACL_IN:
@@ -1095,6 +1121,8 @@ static void priority_rx_work(FAR void *arg)
       FAR struct bt_hci_evt_hdr_s *hdr = (FAR void *)buf->data;
 
       wlinfo("buf %p type %u len %u\n", buf, buf->type, buf->len);
+
+      /* TODO: Hook monitor callback */
 
       if (buf->type != BT_EVT)
         {
@@ -1684,7 +1712,7 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
 
   if (opcode == BT_HCI_OP_HOST_NUM_COMPLETED_PACKETS)
     {
-      g_btdev.btdev->send(g_btdev.btdev, buf);
+      bt_send(g_btdev.btdev, buf);
       bt_buf_release(buf);
       return 0;
     }
