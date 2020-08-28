@@ -86,6 +86,7 @@ int psock_socket(int domain, int type, int protocol,
 
   psock->s_crefs  = 1;
   psock->s_domain = domain;
+  psock->s_proto  = protocol;
   psock->s_conn   = NULL;
 #if defined(CONFIG_NET_TCP_WRITE_BUFFERS) || defined(CONFIG_NET_UDP_WRITE_BUFFERS)
   psock->s_sndcb  = NULL;
