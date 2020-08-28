@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_pipe.c
+ * libs/libc/unistd/lib_pipe2.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,16 +36,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pipe
+ * Name: pipe2
  *
  * Description:
- *   pipe() creates a pair of file descriptors, pointing to a pipe inode,
+ *   pipe2() creates a pair of file descriptors, pointing to a pipe inode,
  *   and  places them in the array pointed to by 'fd'. fd[0] is for reading,
- *   fd[1] is for writing.
+ *   fd[1] is for writing. If flags is 0, then pipe2() is the same as pipe().
  *
  * Input Parameters:
  *   fd[2] - The user provided array in which to catch the pipe file
  *   descriptors
+ *   flags - The file status flags.
  *
  * Returned Value:
  *   0 is returned on success; otherwise, -1 is returned with errno set
@@ -53,11 +54,11 @@
  *
  ****************************************************************************/
 
-int pipe(int fd[2])
+int pipe2(int fd[2], int flags)
 {
   int ret;
 
-  ret = nx_pipe(fd, CONFIG_DEV_PIPE_SIZE, 0);
+  ret = nx_pipe(fd, CONFIG_DEV_PIPE_SIZE, flags);
   if (ret < 0)
     {
       set_errno(-ret);

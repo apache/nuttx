@@ -60,7 +60,7 @@ CSRCS += lib_truncate.c
 endif
 
 ifeq ($(CONFIG_PIPES),y)
-CSRCS += lib_pipe.c
+CSRCS += lib_pipe.c lib_pipe2.c
 endif
 
 CSRCS += lib_gethostname.c lib_sethostname.c

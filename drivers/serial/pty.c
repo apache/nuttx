@@ -1119,13 +1119,13 @@ int pty_register(int minor)
    *   pipe_b:  Master sink, slave source (RX, master-to-slave)
    */
 
-  ret = nx_pipe(pipe_a, CONFIG_PSEUDOTERM_TXBUFSIZE);
+  ret = nx_pipe(pipe_a, CONFIG_PSEUDOTERM_TXBUFSIZE, 0);
   if (ret < 0)
     {
       goto errout_with_devpair;
     }
 
-  ret = nx_pipe(pipe_b, CONFIG_PSEUDOTERM_RXBUFSIZE);
+  ret = nx_pipe(pipe_b, CONFIG_PSEUDOTERM_RXBUFSIZE, 0);
   if (ret < 0)
     {
       goto errout_with_pipea;
