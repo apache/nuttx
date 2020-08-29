@@ -237,6 +237,7 @@ lldiv_t   lldiv(long long number, long long denom);
 
 FAR char *mktemp(FAR char *path_template);
 int       mkstemp(FAR char *path_template);
+FAR char *mkdtemp(FAR char *path_template);
 
 /* Sorting */
 
