@@ -74,7 +74,7 @@ uint8_t up_testset(volatile uint8_t *lock)
    * following test and set is atomic.
    */
 
-  return atomic_exchange(lock, 1);
+  return atomic_exchange((_Atomic uint8_t *)lock, 1);
 #else
 
   /* In the non-SMP case, the simulation is implemented with a single thread
