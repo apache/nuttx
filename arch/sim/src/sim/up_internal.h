@@ -169,6 +169,28 @@ struct ioexpander_dev_s;
  * Public Data
  ****************************************************************************/
 
+/* g_current_regs[] holds a references to the current interrupt level
+ * register storage structure.  If is non-NULL only during interrupt
+ * processing.  Access to g_current_regs[] must be through the macro
+ * CURRENT_REGS for portability.
+ */
+
+#ifdef CONFIG_SMP
+/* For the case of architectures with multiple CPUs, then there must be one
+ * such value for each processor that can receive an interrupt.
+ */
+
+int up_cpu_index(void); /* See include/nuttx/arch.h */
+extern volatile void *g_current_regs[CONFIG_SMP_NCPUS];
+#  define CURRENT_REGS (g_current_regs[up_cpu_index()])
+
+#else
+
+extern volatile void *g_current_regs[1];
+#  define CURRENT_REGS (g_current_regs[0])
+
+#endif
+
 #ifdef CONFIG_SMP
 /* These spinlocks are used in the SMP configuration in order to implement
  * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
@@ -191,6 +213,8 @@ extern volatile uint8_t g_cpu_paused[CONFIG_SMP_NCPUS];
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+void *up_doirq(int irq, void *regs);
 
 /* up_setjmp32.S ************************************************************/
 

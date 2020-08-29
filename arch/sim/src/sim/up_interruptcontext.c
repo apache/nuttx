@@ -41,6 +41,7 @@
 
 #include <stdbool.h>
 #include <nuttx/arch.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -58,7 +59,38 @@
 
 bool up_interrupt_context(void)
 {
-  /* The simulation is never in the interrupt state */
+  return CURRENT_REGS != NULL;
+}
 
-  return false;
+/****************************************************************************
+ * Name: up_doirq
+ ****************************************************************************/
+
+void *up_doirq(int irq, void *regs)
+{
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * CURRENT_REGS is also used to manage interrupt level context switches.
+   */
+
+  CURRENT_REGS = regs;
+
+  /* Deliver the IRQ */
+
+  irq_dispatch(irq, regs);
+
+  /* If a context switch occurred while processing the interrupt then
+   * CURRENT_REGS may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
+
+  regs = (void *)CURRENT_REGS;
+
+  /* Restore the previous value of CURRENT_REGS.  NULL would indicate that
+   * we are no longer in an interrupt handler.  It will be non-NULL if we
+   * are returning from a nested interrupt.
+   */
+
+  CURRENT_REGS = NULL;
+  return regs;
 }

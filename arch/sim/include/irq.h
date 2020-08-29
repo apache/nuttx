@@ -44,9 +44,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* No interrupts */
-
-#define NR_IRQS 0
+#define NR_IRQS 64
 
 /* Number of registers saved in context switch */
 

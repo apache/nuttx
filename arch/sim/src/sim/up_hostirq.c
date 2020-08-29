@@ -25,6 +25,19 @@
 #include <signal.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
+
+#include "up_internal.h"
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+volatile void *g_current_regs[CONFIG_SMP_NCPUS];
+#else
+volatile void *g_current_regs[1];
+#endif
 
 /****************************************************************************
  * Private Types
@@ -35,6 +48,19 @@ union sigset_u
   uint64_t flags;
   sigset_t sigset;
 };
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_handle_irq
+ ****************************************************************************/
+
+static void up_handle_irq(int irq, siginfo_t *info, void *context)
+{
+  up_doirq(irq, context);
+}
 
 /****************************************************************************
  * Public Functions
@@ -85,4 +111,49 @@ void up_irq_restore(uint64_t flags)
 
 void up_irqinitialize(void)
 {
+}
+
+/****************************************************************************
+ * Name: up_enable_irq
+ *
+ * Description:
+ *   Enable the IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void up_enable_irq(int irq)
+{
+  struct sigaction act;
+  sigset_t set;
+
+  /* Register signal handler */
+
+  memset(&act, 0, sizeof(act));
+  act.sa_sigaction = up_handle_irq;
+  act.sa_flags     = SA_SIGINFO;
+  sigfillset(&act.sa_mask);
+  sigaction(irq, &act, NULL);
+
+  /* Unmask the signal */
+
+  sigemptyset(&set);
+  sigaddset(&set, irq);
+  pthread_sigmask(SIG_UNBLOCK, &set, NULL);
+}
+
+/****************************************************************************
+ * Name: up_disable_irq
+ *
+ * Description:
+ *   Disable the IRQ specified by 'irq'
+ *
+ ****************************************************************************/
+
+void up_disable_irq(int irq)
+{
+  /* Since it's hard to mask the signal on all threads,
+   * let's change the signal handler to ignore instead.
+   */
+
+  signal(irq, SIG_IGN);
 }
