@@ -1,35 +1,20 @@
 /****************************************************************************
  * net/socket/bluetooth_sockif.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -274,7 +259,7 @@ static int bluetooth_connect(FAR struct socket *psock,
                              socklen_t addrlen)
 {
   FAR struct bluetooth_conn_s *conn;
-  FAR struct sockaddr_bt_s *btaddr;
+  FAR struct sockaddr_l2 *btaddr;
   int ret = OK;
 
   DEBUGASSERT(psock != NULL || addr != NULL);
@@ -287,9 +272,9 @@ static int bluetooth_connect(FAR struct socket *psock,
     {
       /* Save the "connection" address */
 
-      btaddr = (FAR struct sockaddr_bt_s *)addr;
-      memcpy(&conn->bc_raddr, &btaddr->bt_bdaddr, sizeof(bt_addr_t));
-      conn->bc_channel = btaddr->bt_channel;
+      btaddr = (FAR struct sockaddr_l2 *)addr;
+      memcpy(&conn->bc_raddr, &btaddr->l2_bdaddr, sizeof(bt_addr_t));
+      conn->bc_channel = btaddr->l2_cid;
     }
   else
     {
@@ -379,7 +364,7 @@ static int bluetooth_accept(FAR struct socket *psock,
 static int bluetooth_bind(FAR struct socket *psock,
                           FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  FAR const struct sockaddr_bt_s *iaddr;
+  FAR const struct sockaddr_l2 *iaddr;
   FAR struct radio_driver_s *radio;
   FAR struct bluetooth_conn_s *conn;
 
@@ -388,10 +373,10 @@ static int bluetooth_bind(FAR struct socket *psock,
   /* Verify that a valid address has been provided */
 
   if (addr->sa_family != AF_BLUETOOTH ||
-      addrlen < sizeof(struct sockaddr_bt_s))
+      addrlen < sizeof(struct sockaddr_l2))
     {
       nerr("ERROR: Invalid family: %u or address length: %d < %d\n",
-           addr->sa_family, addrlen, sizeof(struct sockaddr_bt_s));
+           addr->sa_family, addrlen, sizeof(struct sockaddr_l2));
       return -EBADF;
     }
 
@@ -414,7 +399,7 @@ static int bluetooth_bind(FAR struct socket *psock,
       return -EINVAL;
     }
 
-  iaddr = (FAR const struct sockaddr_bt_s *)addr;
+  iaddr = (FAR const struct sockaddr_l2 *)addr;
 
   /* Very that some address was provided.
    *
@@ -426,7 +411,7 @@ static int bluetooth_bind(FAR struct socket *psock,
 
   /* Find the device associated with the requested address */
 
-  radio = bluetooth_find_device(conn, &iaddr->bt_bdaddr);
+  radio = bluetooth_find_device(conn, &iaddr->l2_bdaddr);
   if (radio == NULL)
     {
       nerr("ERROR: No radio at this address\n");
@@ -435,7 +420,7 @@ static int bluetooth_bind(FAR struct socket *psock,
 
   /* Save the address as the socket's local address */
 
-  memcpy(&conn->bc_laddr, &iaddr->bt_bdaddr, sizeof(bt_addr_t));
+  memcpy(&conn->bc_laddr, &iaddr->l2_bdaddr, sizeof(bt_addr_t));
 
   return OK;
 }
@@ -473,7 +458,7 @@ static int bluetooth_getsockname(FAR struct socket *psock,
                                   socklen_t *addrlen)
 {
   FAR struct bluetooth_conn_s *conn;
-  FAR struct sockaddr_bt_s tmp;
+  FAR struct sockaddr_l2 tmp;
   socklen_t copylen;
 
   DEBUGASSERT(psock != NULL && addr != NULL && addrlen != NULL);
@@ -483,12 +468,12 @@ static int bluetooth_getsockname(FAR struct socket *psock,
 
   /* Create a copy of the full address on the stack */
 
-  tmp.bt_family = AF_BLUETOOTH;
-  memcpy(&tmp.bt_bdaddr, &conn->bc_laddr, sizeof(bt_addr_t));
+  tmp.l2_family = AF_BLUETOOTH;
+  memcpy(&tmp.l2_bdaddr, &conn->bc_laddr, sizeof(bt_addr_t));
 
   /* Copy to the user buffer, truncating if necessary */
 
-  copylen = sizeof(struct sockaddr_bt_s);
+  copylen = sizeof(struct sockaddr_l2);
   if (copylen > *addrlen)
     {
       copylen = *addrlen;
@@ -535,7 +520,7 @@ static int bluetooth_getpeername(FAR struct socket *psock,
                                  FAR socklen_t *addrlen)
 {
   FAR struct bluetooth_conn_s *conn;
-  FAR struct sockaddr_bt_s tmp;
+  FAR struct sockaddr_l2 tmp;
   socklen_t copylen;
 
   DEBUGASSERT(psock != NULL && addr != NULL && addrlen != NULL);
@@ -545,12 +530,12 @@ static int bluetooth_getpeername(FAR struct socket *psock,
 
   /* Create a copy of the full address on the stack */
 
-  tmp.bt_family = AF_BLUETOOTH;
-  memcpy(&tmp.bt_bdaddr, &conn->bc_raddr, sizeof(bt_addr_t));
+  tmp.l2_family = AF_BLUETOOTH;
+  memcpy(&tmp.l2_bdaddr, &conn->bc_raddr, sizeof(bt_addr_t));
 
   /* Copy to the user buffer, truncating if necessary */
 
-  copylen = sizeof(struct sockaddr_bt_s);
+  copylen = sizeof(struct sockaddr_l2);
   if (copylen > *addrlen)
     {
       copylen = *addrlen;
@@ -645,7 +630,7 @@ static int bluetooth_poll_local(FAR struct socket *psock,
 static ssize_t bluetooth_send(FAR struct socket *psock, FAR const void *buf,
                                size_t len, int flags)
 {
-  struct sockaddr_bt_s to;
+  struct sockaddr_l2 to;
   FAR struct bluetooth_conn_s *conn;
   ssize_t ret;
 
@@ -665,15 +650,15 @@ static ssize_t bluetooth_send(FAR struct socket *psock, FAR const void *buf,
         }
       else
         {
-          to.bt_family = AF_BLUETOOTH;
-          memcpy(&to.bt_bdaddr, &conn->bc_raddr, sizeof(bt_addr_t));
-          to.bt_channel = conn->bc_channel;
+          to.l2_family = AF_BLUETOOTH;
+          memcpy(&to.l2_bdaddr, &conn->bc_raddr, sizeof(bt_addr_t));
+          to.l2_cid = conn->bc_channel;
 
           /* Then perform the send() as sendto() */
 
           ret = psock_bluetooth_sendto(psock, buf, len, flags,
                                         (FAR const struct sockaddr *)&to,
-                                        sizeof(struct sockaddr_bt_s));
+                                        sizeof(struct sockaddr_l2));
         }
     }
   else

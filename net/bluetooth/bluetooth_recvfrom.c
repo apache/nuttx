@@ -110,7 +110,7 @@ static int bluetooth_count_frames(FAR struct bluetooth_conn_s *conn)
  * Returned Value:
  *
  * Assumptions:
- *   The network is lockec
+ *   The network is locked
  *
  ****************************************************************************/
 
@@ -119,7 +119,7 @@ static ssize_t
                              FAR struct bluetooth_recvfrom_s *pstate)
 {
   FAR struct bluetooth_container_s *container;
-  FAR struct sockaddr_bt_s *iaddr;
+  FAR struct sockaddr_l2 *iaddr;
   FAR struct bluetooth_conn_s *conn;
   FAR struct iob_s *iob;
   size_t copylen;
@@ -175,10 +175,10 @@ static ssize_t
 
       if (pstate->ir_from != NULL)
         {
-          iaddr             = (FAR struct sockaddr_bt_s *)pstate->ir_from;
-          iaddr->bt_family  = AF_BLUETOOTH;
-          BLUETOOTH_ADDRCOPY(&iaddr->bt_bdaddr, &container->bn_raddr);
-          iaddr->bt_channel = container->bn_channel;
+          iaddr             = (FAR struct sockaddr_l2 *)pstate->ir_from;
+          iaddr->l2_family  = AF_BLUETOOTH;
+          BLUETOOTH_ADDRCOPY(&iaddr->l2_bdaddr, &container->bn_raddr);
+          iaddr->l2_cid = container->bn_channel;
         }
 
       /* Free both the IOB and the container */
@@ -319,7 +319,7 @@ ssize_t bluetooth_recvfrom(FAR struct socket *psock, FAR void *buf,
    * enough to hold this address family.
    */
 
-  if (from != NULL && *fromlen < sizeof(struct sockaddr_bt_s))
+  if (from != NULL && *fromlen < sizeof(struct sockaddr_l2))
     {
       return -EINVAL;
     }
