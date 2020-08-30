@@ -14,25 +14,31 @@ config ARCH_CHIP_NRF52832
 	bool "NRF52832"
 	select ARCH_FAMILY_NRF52
 	select ARCH_FAMILY_NRF52832
+	select NRF52_HAVE_BPROT
 
 config ARCH_CHIP_NRF52833
 	bool "NRF52832"
 	select ARCH_FAMILY_NRF52
 	select ARCH_FAMILY_NRF52833
+	select NRF52_HAVE_ACL
 	select NRF52_HAVE_UART1
 	select NRF52_HAVE_PORT1
 	select NRF52_HAVE_SPI3_MASTER
 	select NRF52_HAVE_USBDEV
+	select NRF52_HAVE_PWM3
 
 config ARCH_CHIP_NRF52840
 	bool "NRF52840"
 	select ARCH_FAMILY_NRF52
 	select ARCH_FAMILY_NRF52840
+	select NRF52_HAVE_ACL
 	select NRF52_HAVE_UART1
 	select NRF52_HAVE_PORT1
 	select NRF52_HAVE_SPI3_MASTER
 	select NRF52_HAVE_QSPI
 	select NRF52_HAVE_USBDEV
+	select NRF52_HAVE_PWM3
+	select NRF52_HAVE_CRYPTOCELL
 
 endchoice # NRF52 Chip Selection
 
@@ -56,6 +62,14 @@ config ARCH_FAMILY_NRF52840
 
 # Peripheral support
 
+config NRF52_HAVE_BPROT
+	bool
+	default n
+
+config NRF52_HAVE_ACL
+	bool
+	default n
+
 config NRF52_HAVE_UART1
 	bool
 	default n
@@ -73,6 +87,14 @@ config NRF52_HAVE_QSPI
 	default n
 
 config NRF52_HAVE_USBDEV
+	bool
+	default n
+
+config NRF52_HAVE_PWM3
+	bool
+	default n
+
+config NRF52_HAVE_CRYPTOCELL
 	bool
 	default n
 

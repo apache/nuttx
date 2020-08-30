@@ -1,4 +1,4 @@
-/***************************************************************************************************
+/***************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_uicr.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -31,40 +31,54 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ***************************************************************************************************/
+ ***************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_UICR_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_UICR_H
 
-/***************************************************************************************************
+/***************************************************************************
  * Included Files
- ***************************************************************************************************/
+ ***************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
-/***************************************************************************************************
+/***************************************************************************
  * Pre-processor Definitions
- ***************************************************************************************************/
+ ***************************************************************************/
 
-/* UICR Register Offsets ****************************************************************************/
+/* Configuration ***********************************************************/
 
-/* Registers for the UICR */
+#if defined(CONFIG_ARCH_CHIP_NRF52832)
+#  undef  HAVE_UICR_DEBUGCTRL
+#  undef  HAVE_UICR_REGOUT0
+#elif defined(CONFIG_ARCH_CHIP_NRF52833)
+#  define HAVE_UICR_DEBUGCTRL
+#  define HAVE_UICR_REGOUT0
+#elif defined(CONFIG_ARCH_CHIP_NRF52840)
+#  define HAVE_UICR_DEBUGCTRL
+#  define HAVE_UICR_REGOUT0
+#else
+#  error Unknown NRF52 chip !
+#endif
 
-                                                /* 0x000 - 0x010 : UNUSED */
+/* UICR Register Offsets ***************************************************/
+
 #define NRF52_UICR_NRFFW_OFFSET(x)       (0x014 + ((x) * 0x4)) /* Reserved for Nordic firmware design */
 #define NRF52_UICR_NRFHW_OFFSET(x)       (0x050 + ((x) * 0x4)) /* Reserved for Nordic hardware design */
 #define NRF52_UICR_CUSTOMER_OFFSET(x)    (0x080 + ((x) * 0x4)) /* Reserved for customer */
-#define NRF52_UICR_PSELRESET0_OFFSET     0x200  /* Mapping of the nRESET function */
-#define NRF52_UICR_PSELRESET1_OFFSET     0x204  /* Mapping of the nRESET function */
-#define NRF52_UICR_APPROTECT_OFFSET      0x208  /* Access port protection */
-#define NRF52_UICR_NFCPINS_OFFSET        0x20c  /* Setting of pins dedicated to NFC */
-#ifdef CONFIG_ARCH_CHIP_NRF52840
-#  define NRF52_UICR_DEBUGCTRL_OFFSET    0x210  /* Setting of pins dedicated to NFC */
-#  define NRF52_UICR_REGOUT0_OFFSET      0x304  /* GPIO reference voltage / external voltage */
+#define NRF52_UICR_PSELRESET0_OFFSET     0x200                 /* Mapping of the nRESET function */
+#define NRF52_UICR_PSELRESET1_OFFSET     0x204                 /* Mapping of the nRESET function */
+#define NRF52_UICR_APPROTECT_OFFSET      0x208                 /* Access port protection */
+#define NRF52_UICR_NFCPINS_OFFSET        0x20c                 /* Setting of pins dedicated to NFC */
+#ifdef HAVE_UICR_DEBUGCTRL
+#  define NRF52_UICR_DEBUGCTRL_OFFSET    0x210                 /* Setting of pins dedicated to NFC */
+#endif
+#ifdef HAVE_UICR_REGOUT0
+#  define NRF52_UICR_REGOUT0_OFFSET      0x304                 /* GPIO reference voltage / external voltage */
 #endif
 
-/* UICR Register Addresses **************************************************************************/
+/* UICR Register Addresses *************************************************/
 
 #define NRF52_UICR_PSELRESET0            (NRF52_UICR_BASE + NRF52_UICR_PSELRESET0_OFFSET)
 #define NRF52_UICR_PSELRESET1            (NRF52_UICR_BASE + NRF52_UICR_PSELRESET1_OFFSET)
@@ -73,7 +87,7 @@
 #define NRF52_UICR_DEBUGCTRL             (NRF52_UICR_BASE + NRF52_UICR_DEBUGCTRL_OFFSET)
 #define NRF52_UICR_REGOUT0               (NRF52_UICR_BASE + NRF52_UICR_REGOUT0_OFFSET)
 
-/* UICR Register Bitfield Definitions **************************************************************/
+/* UICR Register Bitfield Definitions **************************************/
 
 /* REGOUT0 Register */
 
