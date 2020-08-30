@@ -817,7 +817,7 @@ Configurations
 
     4. This configuration supports logging of debug output to a circular
        buffer in RAM.  This feature is discussed fully in this Wiki page:
-       http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
+       https://cwiki.apache.org/confluence/display/NUTTX/SYSLOG . Relevant
        configuration settings are summarized below:
 
        File System:

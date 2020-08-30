@@ -77,7 +77,7 @@ o Task/Scheduler (sched/)
   Title:       ON-DEMAND PAGING INCOMPLETE
   Description: On-demand paging has recently been incorporated into the RTOS.
                The design of this feature is described here:
-               http://www.nuttx.org/NuttXDemandPaging.html.
+               https://nuttx.apache.org/docs/latest/components/paging.html.
                As of this writing, the basic feature implementation is
                complete and much of the logic has been verified.  The test
                harness for the feature exists only for the NXP LPC3131 (see
@@ -862,7 +862,7 @@ o pthreads (sched/pthreads libs/libc/pthread)
                Excerpted from my post in a Linked-In discussion:
 
                "I started to implement this HLS/"PCP" semaphore in an RTOS that I
-                work with (http://www.nuttx.org) and I discovered after doing the
+                work with (https://apache.nuttx.org) and I discovered after doing the
                 analysis and basic code framework that a complete solution for the
                 case of a counting semaphore is still quite complex -- essentially
                 as complex as is priority inheritance.
@@ -1195,7 +1195,7 @@ o C++ Support
                   processes).]
 
                   NuttX does not have processes, but it does have "task groups".
-                  See http://www.nuttx.org/doku.php?id=wiki:nxinternal:tasksnthreads.
+                  See https://cwiki.apache.org/confluence/display/NUTTX/Tasks+vs.+Threads+FAQ.
                   A task group is the task plus all of the pthreads created by
                   the task via pthread_create().  Resources like FILE streams
                   are shared within a task group. Task groups are like a poor
@@ -2504,7 +2504,7 @@ o Linux/Cygwin simulation (arch/sim)
   Priority:    Low, unless there is a need for developing a higher fidelity simulation
                I have been thinking about how to implement simulated interrupts in
                the simulation.  I think a solution would work like this:
-               http://www.nuttx.org/doku.php?id=wiki:nxinternal:simulator
+               https://cwiki.apache.org/confluence/display/NUTTX/NuttX+Simulation
 
   Title:       ROUND-ROBIN SCHEDULING IN THE SIMULATOR
   Description: Since the simulation is not pre-emptible, you can't use round-robin

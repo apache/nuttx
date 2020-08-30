@@ -1760,7 +1760,7 @@ Configuration Sub-directories
             not be possible.
          b) Develop a strategy to manage CCM memory and DMA memory.  Look
             at this discussion on the NuttX Wiki:
-            http://www.nuttx.org/doku.php?id=wiki:howtos:stm32-ccm-alloc
+            https://cwiki.apache.org/confluence/display/NUTTX/STM32+CCM+Allocator
 
        To put the CCM memory back into the heap you would need to change
        the following in the NuttX configuration:
@@ -2142,8 +2142,8 @@ Configuration Sub-directories
      There are some issues with the presentation... some tuning of the
      configuration could fix that.  Lower resolution displays are also more
      subject to the "fat, flat line bug" that I need to fix someday.  See
-     http://www.nuttx.org/doku.php?id=wiki:graphics:nxgraphics for a description
-     of the fat, flat line bug.
+     https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=139629474
+     for a description of the fat, flat line bug.
 
   pm:
   --

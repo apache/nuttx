@@ -110,7 +110,7 @@ Moxa NP51x0
 
 A port to the Moxa NP51x0 series of 2-port advanced
 RS-232/422/485 serial device servers was contributed by Anton D.
-Kachalov in NuttX-7.11. This port includes a NuttShell (NSH)
+Kachalov in NuttX-7.11. This port includes :ref:`NSH <nsh>`
 configuration with support for the Faraday FTMAC100 Ethernet MAC Driver.
 
 
@@ -174,9 +174,9 @@ There are ports to two Atmel SAMA5D3 boards:
    configurations that run out of internal SRAM and extended
    configurations that run out of the on-board NOR FLASH:
 
-   -  A barebones NuttShell (`NSH <NuttShell.html>`__) configuration
+   -  A barebones NuttShell (:ref:`NSH <nsh>`) configuration
       that can be used as the basis for further application development.
-   -  A full-loaded NuttShell (`NSH <NuttShell.html>`__) configuration
+   -  A full-loaded NuttShell (:ref:`NSH <nsh>`) configuration
       that demonstrates all of the SAMA5D3x features.
 
    The following support was added in Nuttx 6.30:
@@ -398,7 +398,7 @@ that features the NUC120LE3AN MCU.
 
 **STATUS**. Initial support for the NUC120 was released in NuttX-6.26.
 This initial support is very minimal: There is a NuttShell
-(`NSH <NuttShell.html>`__) configuration that might be the basis for an
+(:ref:`NSH <nsh>`) configuration that might be the basis for an
 application development. As of this writing, more device drivers are
 needed to make this a more complete port. Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/nuc1xx/nutiny-nuc120/README.txt>`__
@@ -511,8 +511,7 @@ TI/Stellaris LM3S6432S2E
 This port uses Serial-to-Ethernet Reference
 Design Kit (`RDK-S2E <http://www.ti.com/tool/rdk-s2e>`__) and has
 similar support as for the other Stellaris family members. A
-configuration is available for the NuttShell (NSH) (see the `NSH User
-Guide <http://www.nuttx.org/Documentation/NuttShell.html>`__). The NSH
+configuration is available for the NuttShell (NSH) (see :ref:`NSH <nsh>`). The NSH
 configuration including networking support with a Telnet NSH console.
 This port was contributed by Mike Smith.
 
@@ -691,7 +690,7 @@ family was added in NuttX-7.21. Support for the Nucleo-L152RE was added
 in NuttX-7.28.
 
 That initial STM32L-Discovery support included a configuration using the
-NuttShell (`NSH <NuttShell.html>`__) that might be the basis for an
+NuttShell (:ref:`NSH <nsh>`) that might be the basis for an
 application development. A driver for the on-board segment LCD is
 included as well as an option to drive the segment LCD from an NSH
 "built-in" command. Refer to the STM32L-Discovery board
@@ -970,7 +969,7 @@ Three configurations are available:
    with the STM32F107 part.
 #. The configuration that was used to verify the Nuttx `high-priority,
    nested interrupt
-   feature <http://www.nuttx.org/doku.php?id=wiki:nxinternal:highperfints>`__.
+   feature <https://cwiki.apache.org/confluence/display/NUTTX/High+Performance%2C+Zero+Latency+Interrupts>`__.
 
 **STATUS:** Networking and touchscreen support are well test. But, at
 present, neither USB nor LCD functionality have been verified. Refer to
@@ -1103,8 +1102,7 @@ boards.
    That initial, 5.6, basic release included *timer* interrupts and a
    *serial console* and was verified using the NuttX OS test
    (``apps/examples/ostest``). Configurations available include include
-   a verified NuttShell (NSH) configuration (see the `NSH User
-   Guide <http://www.nuttx.org/Documentation/NuttShell.html>`__). The
+   a verified NuttShell (NSH) configuration (see :ref:`NSH <nsh>`). The
    NSH configuration supports the Nucleus2G's microSD slot and
    additional configurations are available to exercise the USB serial
    and USB mass storage devices. However, due to some technical reasons,
@@ -1145,8 +1143,7 @@ boards.
       file for further information.
 
    Verified configurations are now available for the NuttShell with
-   networking and microSD support(NSH, see the `NSH User
-   Guide <http://www.nuttx.org/Documentation/NuttShell.html>`__), for
+   networking and microSD support(NSH, see :ref:`NSH <nsh>`), for
    the NuttX network test, for the
    `THTTPD <http://acme.com/software/thttpd>`__ webserver, for USB
    serial deive and USB storage devices examples, and for the USB host
@@ -1570,8 +1567,7 @@ further information about this board.
 
 -  **NuttX-6.12** The basic port is complete and first appeared in
    NuttX-6.12. The initial port passes the NuttX OS test and includes a
-   validated configuration for the NuttShell (NSH, see the `NSH User
-   Guide <http://www.nuttx.org/Documentation/NuttShell.html>`__) as well
+   validated configuration for the NuttShell (NSH, see :ref:`NSH <nsh>`) as well
    as several other configurations.
 -  **NuttX-6.13-6.16** Additional drivers and configurations were added
    in NuttX 6.13-6.16. Drivers include an Ethernet driver, ADC driver,
@@ -2177,7 +2173,7 @@ was contributed in NuttX-8.1 by Nathan Hartman.
    the EK-TM4C123GXL was also included in that release but was not fully
    tested. This basic board support included a configuration for the
    NuttShell
-   `NSH <http://www.nuttx.org/Documentation/NuttShell.html>`__).
+   :ref:`NSH <nsh>`).
 -  **NuttX-7.2**. The fully verified port to the EK-TM4C123GXL was
    provided in NuttX-7.2.
 -  **NuttX-7.7**. An I2C driver was added in NuttX-7.7.
@@ -2195,7 +2191,7 @@ LaunchPad `(EK-TM4C1294XL) <http://www.ti.com/tool/ek-tm4c1294xl>`__.
 -  Support for the EK-TM4C1294XL was contributed by Frank Sautter and
    was released in NuttX 7.9. This basic board support included a
    configuration for the NuttShell
-   `NSH <http://www.nuttx.org/Documentation/NuttShell.html>`__) and a
+   :ref:`NSH <nsh>`) and a
    configuration for testing IPv6. See drivers for the `TI Tiva
    TM4C129X <#titm4c129x>`__.
 -  FLASH and EEPROM drivers from Shirshak Sengupta were included in
@@ -2220,7 +2216,7 @@ Development Kit `(DK-TM4C129X) <http://www.ti.com/tool/dk-tm4c129x>`__.
    Other Tiva/Stellaris drivers should port to the TM4C129X without
    major difficulty.
 -  This board supports included two configurations for the NuttShell
-   (`NSH <http://www.nuttx.org/Documentation/NuttShell.html>`__). Both
+   (:ref:`NSH <nsh>`). Both
    are networked enabled: One configured to support IPv4 and one
    configured to supported IPv6. Instructions are included in the board
    `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/tiva/dk-tm4c129x/README.txt>`__
@@ -2255,7 +2251,7 @@ board. This board features the ATSAM4LC4C MCU running at 48MHz with
 
 **STATUS:** As of this writing, the basic port is code complete and a
 fully verified configuration exists for the NuttShell
-`NSH <http://www.nuttx.org/Documentation/NuttShell.html>`__). The first
+:ref:`NSH <nsh>`). The first
 fully functional SAM4L Xplained Pro port was released in NuttX-6.28.
 Support for the SAM4L Xplained modules was added in NuttX-6.29:
 
@@ -2317,8 +2313,7 @@ in part by Mitko.
 
 **Atmel SAM4E-EK**. Board support was added for the SAM4E-EK development
 board in NuttX 7.1. A fully functional NuttShell (NSH) configuration is
-available (see the `NSH User
-Guide <http://www.nuttx.org/Documentation/NuttShell.html>`__). That NSH
+available (see :ref:`NSH <nsh>`). That NSH
 configuration includes networking support and support for an AT25 Serial
 FLASH file system.
 
@@ -2343,8 +2338,7 @@ in part by Mitko.
 
 **Atmel SAM4E-EK**. Board support was added for the SAM4E-EK development
 board in NuttX 7.1. A fully functional NuttShell (NSH) configuration is
-available (see the `NSH User
-Guide <http://www.nuttx.org/Documentation/NuttShell.html>`__). That NSH
+available (see :ref:`NSH <nsh>`). That NSH
 configuration includes networking support and support for an AT25 Serial
 FLASH file system.
 
@@ -2491,7 +2485,7 @@ STM32 F7 Driver Status:
    peripherals are very similar to some members of the STM32 F4 and
    additional drivers can easily be ported the F7 as discussed in this
    Wiki page: `Porting Drivers to the STM32
-   F7 <http://www.nuttx.org/doku.php?id=wiki:howtos:port-drivers_stm32f7>`__
+   F7 <https://cwiki.apache.org/confluence/display/NUTTX/Porting+Drivers+to+the+STM32+F7>`__
 
 -  **NuttX-7.17**. David Sidrane contributed PWR, RTC, BBSRAM, and
    DBGMCU support. Lok Tep contribed SPI, I2c, ADC, SDMMC, and USB
@@ -2757,8 +2751,7 @@ basic RTOS port has solidified:
 
 -  The port successfully passes the NuttX OS test
    (apps/examples/ostest).
--  A NuttShell (NSH) configuration is in place (see the `NSH User
-   Guide <http://www.nuttx.org/Documentation/NuttShell.html>`__).
+-  A NuttShell (NSH) configuration is in place (see :ref:`NSH <nsh>`).
    Testing of that configuration has been postponed (because it got
    bumped by the Olimex LPC1766-STK port). Current Status: I think I
    have a hardware problem with my serial port setup. There is a good

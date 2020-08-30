@@ -43,17 +43,11 @@ Note: Many of the fundamental classed in NxWidgets derive from the
 Antony Dzeryn's "Woopsi" project: http://woopsi.org/ which also has a
 BSD style license. See the COPYING file for details.
 
-NXWidgets DOxygen Documentation
+NXWidgets Doxygen Documentation
 ===============================
 
-Release notes, DOxygen documentation, as well as downloads for the
-latest NxWidgets releases are available online:
-
-**NxWidgets-1.19**:
-`Documentation <http://nuttx.org/nxwidgets_v1_19/html/index.html>`__,
-`Release
-notes <http://sourceforge.net/projects/nuttx/files/NxWidgets/NxWidgets-1.19/>`__,
-and
-`Downloads <http://sourceforge.net/projects/nuttx/files/NxWidgets/NxWidgets-1.19/>`__
+.. todo::
+   NXWidgets supports building HTML documentation via Doxygen. We should
+   integrate this into the Sphinx documentation build.
 
 Thanks go to Jose Pablo Carballo for contributing this!

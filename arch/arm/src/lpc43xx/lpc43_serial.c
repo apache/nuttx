@@ -812,7 +812,7 @@ static int up_interrupt(int irq, void *context, void *arg)
  *     RS-485/EIA-485 Auto Address Detection (AAD) mode -- NOT supported
  *
  *       In this mode, the receiver will compare any address byte received
- *       (parity = �1�) to the 8-bit value programmed into the RS485ADRMATCH
+ *       (parity = 1) to the 8-bit value programmed into the RS485ADRMATCH
  *       register.  When a matching address character is detected it will be
  *       pushed onto the RXFIFO along with the parity bit, and the receiver
  *       will be automatically enabled.

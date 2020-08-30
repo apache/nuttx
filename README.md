@@ -963,7 +963,7 @@ This make target will bring up NuttX configuration menus.
 **WARNING**:  Never do `make menuconfig` on a configuration that has
 not been converted to use the kconfig-frontends tools!  This will
 damage your configuration (see
-<http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig>).
+<https://cwiki.apache.org/confluence/display/NUTTX/Converting+Legacy+Configurations+to+Use+kconfig-mconf>).
 
 How do we tell a new configuration from an old one? See "Incompatibilities
 with Older Configurations" below.
@@ -1278,7 +1278,7 @@ configuration will probably not be functional.
   > Q: How can I convert a older, manual configuration into a new,
   >    kconfig-frontends toolchain.
   >
-  > A: Refer to <http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig>
+  > A: Refer to <https://cwiki.apache.org/confluence/display/NUTTX/Converting+Legacy+Configurations+to+Use+kconfig-mconf>
 
 **WARNING**
 
@@ -1304,7 +1304,7 @@ file, regenerating the `.config` and making it usable for NuttX builds.
 Never do `make oldconfig` (OR `make menuconfig`) on a  configuration that
 has not been converted to use the kconfig-frontends tools!  This will
 damage your configuration (see
-<http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig>).
+<https://cwiki.apache.org/confluence/display/NUTTX/Converting+Legacy+Configurations+to+Use+kconfig-mconf>).
 
 ## NuttX Configuration Tool under DOS
 
@@ -1876,7 +1876,7 @@ into your Web browser:
 
     Documentation/index.html
 
-NuttX documentation is also available online at <http://www.nuttx.org>.
+NuttX documentation is also available online at <https://apache.nuttx.org>.
 
 Below is a guide to the available README files in the NuttX source tree:
 
