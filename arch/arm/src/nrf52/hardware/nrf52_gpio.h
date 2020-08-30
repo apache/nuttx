@@ -48,7 +48,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_NRF52840
+#ifdef CONFIG_NRF52_HAVE_PORT1
 #  define NRF52_GPIO_NPORTS         2
 #  define NRF52_GPIO_PORT0          0
 #  define NRF52_GPIO_PORT1          1

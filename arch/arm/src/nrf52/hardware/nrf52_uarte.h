@@ -1,4 +1,4 @@
-/****************************************************************************
+/***************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_uarte.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -36,16 +36,31 @@
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_UARTE_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_UARTE_H
 
-/****************************************************************************
+/***************************************************************************
  * Included Files
  ***************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
-/****************************************************************************
+/***************************************************************************
  * Pre-processor Definitions
  ***************************************************************************/
+
+/* Configuration ***********************************************************/
+
+#if defined(CONFIG_ARCH_CHIP_NRF52832)
+#  undef  HAVE_UART_PARITYTYPE
+#  undef  HAVE_UART_STOPBITS
+#elif defined(CONFIG_ARCH_CHIP_NRF52833)
+#  define HAVE_UART_PARITYTYPE
+#  define HAVE_UART_STOPBITS
+#elif defined(CONFIG_ARCH_CHIP_NRF52840)
+#  undef  HAVE_UART_PARITYTYPE
+#  define HAVE_UART_STOPBITS
+#else
+#  error Unknown NRF52 chip !
+#endif
 
 /* UART/UARTE Register Offsets *********************************************/
 
@@ -347,6 +362,8 @@
 #  define UART_BAUDRATE_460800              (0x07400000)
 #  define UART_BAUDRATE_921600              (0x0f000000)
 #  define UART_BAUDRATE_1000000             (0x10000000)
+#else
+#  error Unknown NRF52 chip !
 #endif
 
 /* CONFIG Register */
@@ -355,11 +372,11 @@
 #define UART_CONFIG_PARITY_SHIFT            (1)      /* Bits 1-3: Parity */
 #define UART_CONFIG_PARITY                  (7 << UART_CONFIG_PARITY_SHIFT)
 
-#if defined(CONFIG_ARCH_CHIP_NRF52833) || defined(CONFIG_ARCH_CHIP_NRF52840)
+#ifdef HAVE_UART_STOPBITS
 #  define UART_CONFIG_STOP                  (1 << 4) /* Bit 4: Stop bits */
 #endif
 
-#ifdef CONFIG_ARCH_CHIP_NRF52833
+#ifdef HAVE_UART_PARITYTYPE
 #  define UART_CONFIG_PARITYTYPE            (1 << 8) /* Bit 8: Parity type */
 #endif
 
