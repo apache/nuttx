@@ -448,7 +448,7 @@ No support for the following pthread interfaces is provided by NuttX:
   When cancellability is deferred, all cancellations are held pending in
   the target thread until the thread changes the cancellability type or a
   `Cancellation
-  Point <http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points>`__
+  Point <https://cwiki.apache.org/confluence/display/NUTTX/Cancellation+Points>`__
   function such as ```pthread_testcancel()`` <#pthreadtestcancel>`__ is
   entered.
 
@@ -528,7 +528,7 @@ No support for the following pthread interfaces is provided by NuttX:
 .. c:function:: void pthread_testcancel(void);
 
   The ``pthread_testcancel()`` function creates a `Cancellation
-  Point <http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points>`__
+  Point <https://cwiki.apache.org/confluence/display/NUTTX/Cancellation+Points>`__
   in the calling thread. The ``pthread_testcancel()`` function has no
   effect if cancellability is disabled.
 

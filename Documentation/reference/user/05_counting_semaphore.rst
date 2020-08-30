@@ -132,7 +132,7 @@ the case of pthread mutexes,
 with ``PTHREAD_PRIO_NONE``.
 
 This is discussed in much more detail on this `Wiki
-page <http://www.nuttx.org/doku.php?id=wiki:howtos:signalling-semaphores>`__.
+page <https://cwiki.apache.org/confluence/display/NUTTX/Signaling+Semaphores+and+Priority+Inheritance>`__.
 
 **POSIX semaphore interfaces:**
 

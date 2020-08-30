@@ -58,7 +58,7 @@ config ARMV7M_USEBASEPRI
 		Though, these hardfaults are properly handled by the RTOS, the
 		hardfaults can confuse some debuggers. With the BASEPRI
 		register, these hardfaults, will be avoided. For more details see
-		http://www.nuttx.org/doku.php?id=wiki:nxinternal:svcall
+		https://cwiki.apache.org/confluence/display/NUTTX/ARMv7-M+Hardfaults%2C+SVCALL%2C+and+Debuggers
 
 		WARNING:  If CONFIG_ARCH_HIPRI_INTERRUPT is selected, then you
 		MUST select CONFIG_ARMV7M_USEBASEPRI.  The Kconfig dependencies

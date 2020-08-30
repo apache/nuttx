@@ -692,7 +692,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
    * The fractional divider, BRFA, is a 5 bit fractional value that is
    * logically added to the SBR:
    *
-   *   UART baud rate = clock / (16 � (SBR + BRFD))
+   *   UART baud rate = clock / (16 * (SBR + BRFD))
    *
    * The BRFA the remainder.  This will be a non-negative value since the SBR
    * was calculated by truncation.

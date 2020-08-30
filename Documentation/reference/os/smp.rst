@@ -22,7 +22,7 @@ bus or a crossbar."
 
 For a technical description of the NuttX implementation of SMP,
 see the NuttX `SMP Wiki
-Page <http://www.nuttx.org/doku.php?id=wiki:nxinternal:smp>`__.
+Page <https://cwiki.apache.org/confluence/display/NUTTX/SMP>`__.
 
 .. c:function:: spinlock_t up_testset(volatile FAR spinlock_t *lock)
 

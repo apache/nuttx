@@ -3032,9 +3032,9 @@ TM7000 LCD/Touchscreen
 
     - 7 inch LCD at 800x480 18-bit RGB resolution and white backlight
     - Projected Capacitive Multi-Touch Controller based on the Atmel
-      MXT768E maXTouch™ IC
-    - 4 Capacitive “Navigation” Keys available via an Atmel AT42QT1070
-      QTouch™ Button Sensor IC
+      MXT768E maXTouch IC
+    - 4 Capacitive Navigation Keys available via an Atmel AT42QT1070
+      QTouch Button Sensor IC
     - 200 bytes of non-volatile serial EEPROM
 
   NOTE: It appears that my TM7000 differs slightly from the version
@@ -3873,7 +3873,7 @@ Configurations
                  task_create() as it is used in the ELF test, but the code
                  seems to survive it. See:
 
-                 http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#task_create
+                 https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
       2014-8-29: System call interface verified.
       2014-9-16: Reverified after fixing changes for the knsh configuration
@@ -4243,7 +4243,7 @@ Configurations
 
     4. This configuration supports logging of debug output to a circular
        buffer in RAM.  This feature is discussed fully in this Wiki page:
-       http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
+       https://cwiki.apache.org/confluence/display/NUTTX/SYSLOG . Relevant
        configuration settings are summarized below:
 
        Device Drivers:

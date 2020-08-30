@@ -584,7 +584,7 @@ Configuration Sub-Directories
   pgnsh
 
     This is the same configuration as nsh, but with On-Demand
-    paging enabled.  See http://www.nuttx.org/Documentation/NuttXDemandPaging.html.
+    paging enabled.  See https://nuttx.apache.org/docs/latest/components/paging.html.
     This configuration is an experiment for the purposes of test
     and debug.  At present, this does not produce functioning,
     usable system

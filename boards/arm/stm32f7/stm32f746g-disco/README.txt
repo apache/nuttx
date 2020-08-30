@@ -140,7 +140,7 @@ Porting STM32 F4 Drivers
   and, as a result, we need to exercise much more care to maintain cache
   coherency.  There is a Wiki page discussing the issues of porting
   drivers from the stm32/ to the stm32f7/ directories here:
-  http://www.nuttx.org/doku.php?id=wiki:howtos:port-drivers_stm32f7
+  https://cwiki.apache.org/confluence/display/NUTTX/Porting+Drivers+to+the+STM32+F7
 
 FPU
 ===

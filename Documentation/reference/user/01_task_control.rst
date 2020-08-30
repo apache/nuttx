@@ -48,7 +48,7 @@ Non-standard task control interfaces inspired by VxWorks interfaces:
 
 Non-standard extensions to VxWorks-like interfaces to support POSIX
 `Cancellation
-Points <http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points>`__.
+Points <https://cwiki.apache.org/confluence/display/NUTTX/Cancellation+Points>`__.
 
   - :c:func:`task_setcancelstate`
   - :c:func:`task_setcanceltype`
@@ -168,7 +168,7 @@ Functions
   This function obeys the semantics of pthread cancellation: task deletion
   is deferred if cancellation is disabled or if deferred cancellation is
   supported (with `Cancellation
-  Points <http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points>`__
+  Points <https://cwiki.apache.org/confluence/display/NUTTX/Cancellation+Points>`__
   enabled).
 
   :param pid: The task ID of the task to delete. An ID of zero signifies
@@ -297,7 +297,7 @@ Functions
 .. c:function:: void task_testcancel(void)
 
   Creates a `Cancellation
-  Point <http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points>`__
+  Point <https://cwiki.apache.org/confluence/display/NUTTX/Cancellation+Points>`__
   in the calling task. The ``task_testcancel()`` function has no effect if
   cancellability is disabled.
 

@@ -441,8 +441,6 @@ Loading Code
    https://www.olimex.com/Products/ARM/JTAG/ARM-JTAG-20-10/ .  I have been
    loading code and debugging with no problems using JTAG.
 
-   You can find photos my setup here: http://www.nuttx.org/doku.php?id=wiki:howtos:flipnclick-sam3x
-
 Flip&Click SAM3X-specific Configuration Options
 ===============================================
 

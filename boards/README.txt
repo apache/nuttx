@@ -160,10 +160,6 @@ any time using that tool or, more appropriately, the wrapper script at
 nuttx/tools/mkconfigvars.sh.  That script will generate the file
 nuttx/Documentation/NuttXConfigVariables.html.
 
-The version of NuttXConfigVariables.html for the last released version of
-NuttX can also be found online at:
-http://nuttx.org/Documentation/NuttXConfigVariables.html.
-
 Supported Boards
 ^^^^^^^^^^^^^^^^
 
@@ -228,8 +224,8 @@ boards/hc/m9s12/demo9s12ne64
   is code complete but has not yet been verified.
 
 boards/arm/tiva/dk-tm4c129x
-  This is the port of NuttX to the Tiva® DK-TM4C129x Connected Development Kit.  The
-  Tiva® DK-TM4C129x features the TM4C129XNCZAD MCU.
+  This is the port of NuttX to the Tiva DK-TM4C129x Connected Development Kit.  The
+  Tiva DK-TM4C129x features the TM4C129XNCZAD MCU.
 
 boards/arm/lpc31xx/ea3131
   Embedded Artists EA3131 Development board.  This board is based on the
@@ -338,8 +334,8 @@ boards/arm/tiva/lm3s8962-ek
 
 boards/arm/tiva/lm4f120-launchpad
   This is the port of NuttX to the Stellaris LM4F120 LaunchPad.  The
-  Stellaris® LM4F120 LaunchPad Evaluation Board is a low-cost evaluation
-  platform for ARM® Cortex™-M4F-based microcontrollers from Texas
+  Stellaris LM4F120 LaunchPad Evaluation Board is a low-cost evaluation
+  platform for ARM Cortex-M4F-based microcontrollers from Texas
   Instruments.
 
 boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768
@@ -826,15 +822,15 @@ boards/arm/kl/teensy-lc
   based bootloader.
 
 boards/arm/tiva/tm4c123g-launchpad
-  This is the port of NuttX to the Tiva® TM4C123G LaunchPad.  The
-  Tiva® TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
-  platform for ARM® Cortex™-M4F-based microcontrollers from Texas
+  This is the port of NuttX to the Tiva TM4C123G LaunchPad.  The
+  Tiva TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
+  platform for ARM Cortex-M4F-based microcontrollers from Texas
   Instruments.
 
 boards/arm/tiva/tm4c1294-launchpad
-  This is the port of NuttX to the Tiva® TM4C1294 LaunchPad.  The
-  Tiva® TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
-  platform for ARM® Cortex™-M4F-based microcontrollers from Texas
+  This is the port of NuttX to the Tiva TM4C1294 LaunchPad.  The
+  Tiva TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
+  platform for ARM Cortex-M4F-based microcontrollers from Texas
   Instruments.
 
 boards/arm/tmx570/tms570ls31x-usb-kit

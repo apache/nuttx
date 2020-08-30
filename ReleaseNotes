@@ -869,7 +869,7 @@ OS feature and corrects and extends the eZ80 port:
   * Priority Inheritance.  The basic NuttX waiting logic was extended
     to support priority inheritance. See the NuttX User Manual for
     further information:
-    http://www.nuttx.org/NuttxUserGuide.html#priorityinheritance.
+    http://nuttx.apache.org/docs/latest/reference/user/05_counting_semaphore.html.
 
   * ez80Acclaim! Corrected several critical, show-stopping bugs on that
     platform including:
@@ -994,7 +994,7 @@ This is the 41st release of NuttX.  This release adds:
 
   * Support for a new binary format call NXFLAT that can be used to
     execute separately linked programs in place in a file system.
-    See http://www.nuttx.org/NuttXNxFlat.html.
+    See https://nuttx.apache.org/docs/latest/components/nxflat.html.
 
   * Several important bugs were files related to networking and ROMFS.
     See the ChangeLog for a complete list.
@@ -1034,7 +1034,7 @@ THTTPD have been tested on the Micromint Eagle-100 development board
   * Serving of files from any file system
   * Execution of CGI executable.  This release supports execution
     of NXFLAT executables on a ROMFS file system
-    (http://www.nuttx.org/NuttXNxFlat.html)
+    (https://nuttx.apache.org/docs/latest/components/nxflat.html)
 
 A standard CGI interface is used:  Information is pasted to the CGI
 program via POST commands and via environment variables.  CGI socket
@@ -1294,7 +1294,7 @@ NuttX-5.4
 
 This is the 51st release of NuttX.  This release includes one new,
 important extension to th NX graphics system (See
-http://www.nuttx.org/NXGraphicsSubsystem.html).
+https://nuttx.apache.org/docs/latest/components/nxgraphics/index.html).
 
 NX was develop a couple years back on hardware that supported only
 framebuffer devices, that is, video hardware with video memory
@@ -1389,7 +1389,7 @@ for one new ARM Cortex-M3 architecture:
   * That initial basic release included timer interrupts and a
     serial console and was verified using the NuttX OS test.
   * That release includes a verified NuttShell (NSH) configuration
-    (see the http://www.nuttx.org/NuttShell.html).
+    (see the https://nuttx.apache.org/docs/latest/components/nsh/index.html).
   * Also included are unverified SPI and USB device drivers.
 
 Further efforts include:
@@ -1448,7 +1448,8 @@ implementations, and a couple of important bugfixes.
     of on-demand paging support.  This feature will allow you to
     execute large programs on a mass storage device (such as SPI
     FLASH) in a small RAM.  All of the core on-demand paging logic
-    was completed (see http://www.nuttx.org/NuttXDemandPaging.html)
+    was completed
+    (see https://nuttx.apache.org/docs/latest/components/paging.html)
     and support was implemented for the ARM-9 family.  A test
     configuration is in place for the NXP LPC3131.  It has been
     verified that this new logic does not interfere with normal
@@ -1492,9 +1493,9 @@ include:
   * On-Demand Paging Support:
     The basic logic for the On-Demand Paging feature is complete,
     implemented for the NXP LPC3131, and partially tested.  See
-    http://www.nuttx.org/NuttXDemandPaging.html.  Some additional
-    test infrastructure will be needed in order to complete the
-    verification.  See configs/ea3131/README.txt for details.
+    https://nuttx.apache.org/docs/latest/components/paging.html.
+    Some additional test infrastructure will be needed in order to complete
+    the verification.  See configs/ea3131/README.txt for details.
   * Two Pass Build Support:
     The make system now supports a two pass build where a relocatable,
     partially linked object is created on the first pass and that
@@ -1586,9 +1587,9 @@ include:
     Atmel AT32UC3B0256 MCU was (almost) fully integrated. The port
     now successfully passes the NuttX OS test (examples/ostest).
     A NuttShell (NSH) configuration is in place (see the NSH User
-    Guide at http://www.nuttx.org/NuttShell.html). Testing of that
-    NSH configuration, however, has been postponed (because it got
-    bumped by the Olimex LPC1766-STK port -- see below)
+    Guide at https://nuttx.apache.org/docs/latest/components/nsh/index.html).
+    Testing of that NSH configuration, however, has been postponed
+    (because it got bumped by the Olimex LPC1766-STK port -- see below)
 
     Current Status: I think I have a hardware problem with my serial
     port setup. There is a good chance that the NSH port is complete
@@ -1606,7 +1607,8 @@ include:
     Support for the Olimex-LPC1766 is newly added to NuttX and is
     still undergoing development, test, and integration. Verified
     configurations for the NuttX OS test and for the NuttShell (NSH,
-    see the NSH User Guide at http://www.nuttx.org/NuttShell.html.
+    see the NSH User Guide at
+    https://nuttx.apache.org/docs/latest/components/nsh/index.html .
     Additional USB configurations are in the release as well, but
     they have not yet been verified.  Goals for NuttX-5.14 include:
     (1) An Ethernet driver, (2) Verified USB support, and (3) SD
@@ -1654,11 +1656,11 @@ Additional support has been included for the Olimex-LPC1766.  Support
 for that board was added to NuttX 5.13.  This release extends that
 support with an Ethernet driver.  Verified configurations are now
 available for the NuttX OS test, for the NuttShell (NSH, see
-http://www.nuttx.org/NuttShell.html), for the NuttX network test,
-and for the THTTPD webserver. (Additional USB configurations are
-in the release as well, but those have not yet been verified.  Goals
-for NuttX-5.15 (and beyond) include: (1) Verified USB support, (2)
-SD card support, and (3) LCD support.
+https://nuttx.apache.org/docs/latest/components/nsh/index.html),
+for the NuttX network test, and for the THTTPD webserver.
+(Additional USB configurations are in the release as well, but those
+have not yet been verified.  Goals for NuttX-5.15 (and beyond) include:
+(1) Verified USB support, (2) SD card support, and (3) LCD support.
 
 NuttX-5.15
 ----------
@@ -2111,7 +2113,7 @@ they are, ordered from the least to the most complete:
     STATUS:  The basic port was released in NuttX-6.5.  This basic
     port consists of a "Hello, World!!" example and also slightly
     simplified NuttShell (NSH) configuration (see the NSH User Guide
-    at http://www.nuttx.org/NuttShell.html).
+    at https://nuttx.apache.org/docs/latest/components/nsh/index.html).
 
     An SPI driver and a USB device driver exist for the AT90USB as
     well as a USB mass storage configuration.  However, this
@@ -2905,7 +2907,7 @@ That command will mount the remote NFS server directory <remote-path> at
 the remote server.
 
 The NFS development was the graduation project of Jose Pablo Rojas V. who
-is a student at the Instituto Tecnológico de Costa Rica (ITCR, or TEC).
+is a student at the Instituto TecnolÃ³gico de Costa Rica (ITCR, or TEC).
 A lot of effort went into understanding what a tiny, embedded NFS client should
 do and getting the target resource usage to a bare minimum.  Only around a
 kilobyte or so of memory is required to run the NFS client (and most of that
@@ -5595,7 +5597,7 @@ Additional new features and extended functionality:
       - Add support for high priority, nested interrupts. This change
         effects not only core ARMv-7M logic, but all ARMv7-M MCU logic:
         LM3S, LM4F,  LPC17xx, LPC43xx, SAM3, SAM4, and STM32. See
-        http://www.nuttx.org/doku.php?id=wiki:nxinternal:highperfints
+        https://cwiki.apache.org/confluence/display/NUTTX/High+Performance%2C+Zero+Latency+Interrupts
 
     * STMicro STM32
 
@@ -5774,7 +5776,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
         doing nothing!  It turns out that that is not really important
         because up_disable_irq() is not really used for that purpose.  But
         some spurions STM32 ADC interrupts have been reported to me and this
-        turned out to be the cause in that case.  Thanks to Manuel Stühn for
+        turned out to be the cause in that case.  Thanks to Manuel StÃ¼hn for
         the tip.
 
     * STMicro STM32
@@ -5850,8 +5852,8 @@ file for build information).
   use the newer configuration, but if you have some older style configurations
   for you board, you will need to convert those configurations to use the
   kconfig-frontends tools before taking any new code from the repository. See
-  http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig for some
-  guidelines.
+  https://cwiki.apache.org/confluence/display/NUTTX/Converting+Legacy+Configurations+to+Use+kconfig-mconf
+  for some guidelines.
 
 Additional new features and extended functionality:
 
@@ -5951,7 +5953,7 @@ Additional new features and extended functionality:
     * Documentation:
 
       - Added a coding standards document.  See
-        http://www.nuttx.org/doku.php?id=documentation:codingstandard
+        https://nuttx.apache.org/docs/latest/contributing/coding_style.html
 
     * Configuration/Build System:
 
@@ -5970,8 +5972,8 @@ Additional new features and extended functionality:
         have been converted to use the newer configuration, but if you have
         some older style configurations for you board, you will need to
         convert those configurations to use the kconfig-frontends tools. See
-        http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig for some
-        guidelines.
+        https://cwiki.apache.org/confluence/display/NUTTX/Converting+Legacy+Configurations+to+Use+kconfig-mconf
+        for some guidelines.
 
     * Applications:
 
@@ -6165,7 +6167,7 @@ Additional new features and extended functionality:
 
     * STMicro STM32 Drivers:
 
-      - Add STM32 Ethernet IGMP hashing support.  From Manuel Stühn.
+      - Add STM32 Ethernet IGMP hashing support.  From Manuel StÃ¼hn.
       - OTG FS Host:  USB host tracing added by Leo.
 
     * Freescale Kinetis
@@ -6211,7 +6213,7 @@ Additional new features and extended functionality:
 
       - IGMP Example:  Fill out Kconfig file; update makefile so that the
         IGMP example can be used as an NSH built-in application. From Manuel
-        Stühn.
+        StÃ¼hn.
       - lcdrw Example:  Fill out empty Kconfig file.
       - touchscreen Example:  Add a configuration option to indicate if
         architecture-specific initialized is required, yes or no.
@@ -6232,7 +6234,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
 
     * Networking:
 
-      - IGMP-related bug fixes from Manuel Stühn.
+      - IGMP-related bug fixes from Manuel StÃ¼hn.
       - In netdev_findbyaddr(), skip network devices that are in the "down"
         state.  It does not make sense to consider an address match with a
         "down" device.  From Brennan Ashton.
@@ -6489,7 +6491,7 @@ Bugfixes.  Only the most critical bugfixes are listed here (see the ChangeLog fo
         function could not have been working correctly before???  From
         eero.nurkkala.
       - Fix typo in conditional compilation:  CONFIG_CLOCK_MONOTONIC vs.
-        CLOCK_MONOTONIC.  From Manuel Stühn.
+        CLOCK_MONOTONIC.  From Manuel StÃ¼hn.
 
     * Graphics
 
@@ -7232,7 +7234,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -7416,12 +7418,12 @@ Additional new features and extended functionality:
 
     * File Systems/Block Drivers/MTD:
 
-      - Extend MTD support to the M25P16. From Sébastien Lorquet.
+      - Extend MTD support to the M25P16. From SÃ©bastien Lorquet.
 
     * Drivers:
 
       - BCH (Block-to-Character): Add support for seeking in BCH.  From
-        Sébastien Lorquet.
+        SÃ©bastien Lorquet.
 
     * Graphics Support/Graphics-Related Drivers:
 
@@ -7566,7 +7568,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -7697,7 +7699,7 @@ operation.  My thanks to the developers of cppcheck!  I am impressed!
       - The implementation of access() as vararg macro has the issue that
         any function call with the same name (even in a C++ class) will
         match with it and result in a compile error.  Replaced with a small
-        function. This resolves the compile issue, and shouldn’t have
+        function. This resolves the compile issue, and shouldn't have
         negative side effects for users of the function. From Lorenz Meier.
       - The definition of strncpy() is that empty space should be zero-
         filled, the change adds the zero filling (See the POSIX spec here:
@@ -7789,7 +7791,7 @@ Additional new features and extended functionality:
     * Drivers:
 
       - Add support for a generic EEPROM driver that accesses EEPROM as a
-        character driver (vs. an MTD driver).  From Sébastien Lorquet.
+        character driver (vs. an MTD driver).  From SÃ©bastien Lorquet.
 
     * Graphics Support:
 
@@ -7808,7 +7810,7 @@ Additional new features and extended functionality:
       - All Ethernet drivers:  Modified to support.  Most, however, are
         still missing address filtering logic required for ICMPv6 Neighbor
         Discovery Protocol.  See
-        http://www.nuttx.org/doku.php?id=wiki:howtos:ipv6#ethernet_driver_requirements
+        https://cwiki.apache.org/confluence/display/NUTTX/IPv6
       - Also added missing raw/packet socket support to all Ethernet drivers.
 
     * Host Simulation:
@@ -7970,7 +7972,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -8084,7 +8086,7 @@ detailed bugfix information):
       - strncpy():  Would trash a lot of memory if n == 0.  From Yasuhiro
         Osaki.
       - sscanf().  Accept %X and %F as well as %x %f as a format specifiers.
-        From Sébastien Lorquet
+        From SÃ©bastien Lorquet
 
     * Applications:
 
@@ -8297,7 +8299,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -8618,7 +8620,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -9032,7 +9034,7 @@ completed soon.
     * Processes.  Much of the work in this release is focused on the
       realization of Unix-style user processes in NuttX.  There is more to
       be done, however.  The full roadmap and status is available at:
-      http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#the_roadmap_toward_processes
+      https://cwiki.apache.org/confluence/display/NUTTX/Memory+Configurations
 
     * XMega:  There are some fragments in place for an XMega port.  That
       port has not really started, however.
@@ -9361,7 +9363,7 @@ Additional new features and extended functionality:
     * Atmel SAM3/4 Drivers:
 
       - SAM4E: Add default loop optimization if EEFC_FMR is available in the
-        configuration (i.e., for SAM4S and 4E). From Marco Aurélio da Cruz.
+        configuration (i.e., for SAM4S and 4E). From Marco AurÃ©lio da Cruz.
       - crypto/ and SAM4CM: Add CFB and MAC AES modes.  From Max Neklyudov.
       - SAM3/4:  Add a TWI driver for the SAM4CM.  From  Max Neklyudov.
 
@@ -10479,9 +10481,9 @@ Additional new features and extended functionality:
         interfaces to support CPU initialization and inter-actions, and
         new application interfaces to manage CPU affinity.  The changes
         are too extensive to summarize here; see the SMP Wiki page at
-        http://www.nuttx.org/doku.php?id=wiki:nxinternal:smp.  The
+        https://cwiki.apache.org/confluence/display/NUTTX/SMP.  The
         new platform interfaces are also described in the NuttX porting
-        guide: http://www.nuttx.org/doku.php?id=documentation:portingguide.
+        guide: https://nuttx.apache.org/docs/latest/quickstart/organization.html.
         Only partially verified; awaiting hardware for the complete
         verification.
       - TLS:  Basic definitions needed to support thread local storage
@@ -10923,7 +10925,7 @@ Additional new features and extended functionality:
         (NUCLEO-F746ZG).  From Mark Olsson.
       - apps/examples/media:  You can now override the default device driver
         path by providing an alternal path on the command line.  From
-        Sébastien Lorquet.
+        SÃ©bastien Lorquet.
 
 Works-In-Progress:
 
@@ -10975,7 +10977,7 @@ detailed bugfix information):
       - SAMV7 Tickless Mode: This is a fix to a problem in the handling of
         the oneshot timer. Due to a wrong assumption concerning the behavior
         directly after the start of the timer/counter the function
-        sam_oneshot_cancel(…) calculates the wrong remaining time. The code
+        sam_oneshot_cancel calculates the wrong remaining time. The code
         assumes that the counter register is zero directly after the start
         of the timer, but this is not true. To start the time/counter a
         software trigger is invoked, this trigger starts the timer/count and
@@ -10988,7 +10990,7 @@ detailed bugfix information):
         In my fix I use the freerun count value to determine if at least one
         tick passed since the start of the timer and thus if the value of
         the oneshot counter is correct. I also tried to use the function
-        up_timer_gettime(…) to achieve this but, at least if compiled with
+        up_timer_gettime to achieve this but, at least if compiled with
         no optimization the problem vanishes without using the value of the
         function, the function call takes too long.
         Another problem treated in the fix is that if the oneshot timer/counter
@@ -11229,7 +11231,7 @@ Additional new features and extended functionality:
             also do an automatic recovery if a slave got stuck (SDA stays
             low).
 
-        With the above changes I²C-Bus reliability in harsh environments (eg.
+        With the above changes I2C-Bus reliability in harsh environments (eg.
         EMC) is greatly improved. The small change in the GPIO-Driver was
         necessary because otherwise you cannot read back the correct line
         status of Open-Drain Outputs and this is needed by the twi_reset
@@ -11381,13 +11383,13 @@ Additional new features and extended functionality:
         make.defs, Add empty preconfig rules to 'leaf' makefiles, Use
         directory.mk for recursive dir makefiles, Individual app kconfig
         fixes, Recursive Kconfig autogeneration, Add kconfig files for
-        pcode and tiff, and fix a gitignore rule,  From Sébastien Lorquet.
+        pcode and tiff, and fix a gitignore rule,  From SÃ©bastien Lorquet.
       - apps/include directory structure reorganized.  There are no longer
         any header files in the apps/include/. directory.  Rather, sub-
         directories were added to match the partitioning of apps/ sub-
         directories and the header files were moved into the appropriate
         sub-directory.  This change is intended to help with some changes
-        being considered by Sébastien Lorquet.
+        being considered by SÃ©bastien Lorquet.
       - Call all includes from <apps/bla/bla.h> to "bla/bla.h". From Sebastien
         Lorquet.
       - Add apps/include to include path in top-level Make.defs file.
@@ -11753,7 +11755,7 @@ detailed bugfix information):
 
       - apps/nshilib: PS Command: When Priority Inheritance is enabled, the
         format of /proc/<PID>/status changes to show both the current
-        priority and the thread’s base priority.  This messes up the format
+        priority and the thread's base priority.  This messes up the format
         of cmd_ps. From David Alessio.
 
     * apps/netutils:
@@ -11802,7 +11804,7 @@ Additional new features and extended functionality:
 
     * File System and Block and MTD Drivers:
 
-      - Add Fujistu MB85RS256B ramtron support.  From Beat Küng.
+      - Add Fujistu MB85RS256B ramtron support.  From Beat KÃ¼ng.
       - SPI-based MTD driver for Macronix MX25L3233F or MX25L6433F.  From
         Aleksandr Vyhovanec.
 
@@ -12059,7 +12061,7 @@ detailed bugfix information):
         space.  Rather, FIONSPACE should return the free space in the send
         queue.
       - Add missing prototype for btn_lower_initialize().
-      - Make DAC sample structure packed.  From Marc Rechté.
+      - Make DAC sample structure packed.  From Marc RechtÃ©.
 
     * Networking:
 
@@ -12087,7 +12089,7 @@ detailed bugfix information):
         Likewise, enabling the pull-up resistor while the pull-down resistor
         is still enabled is not possible. In this case, the write of
         PIO_PUER for the relevant I/O line is discarded.  From Wolfgang
-        Reißnegger.
+        ReiÃŸnegger.
 
     * Atmel SAMV7 Drivers:
 
@@ -12191,7 +12193,7 @@ detailed bugfix information):
         DMA is enabled.
       - STM32 DMA2D: fix an error in up_dma2dcreatelayer where an invalid
         pointer was returned when a certain underlying function failed.
-        From Jens Gräf.
+        From Jens GrÃ¤f.
 
     * TI Tiva Drivers:
 
@@ -12205,17 +12207,17 @@ detailed bugfix information):
         problems when the syslog output is prefixed with time.  From
         Pierre-noel Bouteville.
       - libc/math: This fixes the following libc/math issues: (1) asin[f l]()
-        use Newton’s method to converge on a solution. But Newton’s method
+        use Newton's method to converge on a solution. But Newton's method
         converges very slowly (> 500,000 iterations) for values of x close to
         1.0; and, in the case of asinl(), sometimes fails to converge (loops
         forever). The attached patch uses an trig identity for values of
         x > sqrt(2). The resultant functions converge in no more than 5
         iterations, 6 for asinl().  (2) The NuttX erf[f l]() functions are
-        based on Chebyshev fitting to a good guess. The problem there’s a
+        based on Chebyshev fitting to a good guess. The problem there's a
         bug in the implementation that causes the functions to blow up with
         x near -3.0. This patch fixes that problem. It should be noted that
         this method returns the error function erf(x) with fractional error
-        less than 1.2E-07 and that’s fine for the float version erff(), but
+        less than 1.2E-07 and that's fine for the float version erff(), but
         the same method is used for double and long double version which
         will yield only slightly better precision. This patch doesn't
         address the issue of lower precision for erf() and erfl(). (3) a
@@ -12254,7 +12256,7 @@ detailed bugfix information):
         to run all of the context setup; the compiler is never invoked; no
         code is autogenerated and things work.
       - CXXFLAGS:  Add -fcheck-new whenever -fno-exceptions is used. From
-        Beat Küng.
+        Beat KÃ¼ng.
 
     * Tools
 
@@ -12482,10 +12484,10 @@ Additional new features and extended functionality:
       - STM32 F3:  Implementation of the STM32 F37xx SDADC module. There are
         also changes to ADC, DAC modules. SDADC has only been tested in DMA
         mode and does not support external TIMER triggers. This is a work in
-        progress.  From  Marc Rechté.
+        progress.  From  Marc RechtÃ©.
       - STM32 F3:  Add PWM driver support for STMF37xx.  The changes have been
         tested successfully for TIM4 and TIM17 (different IPs).  From  Marc
-        Rechté.
+        RechtÃ©.
       - STM32 F4:  Support oversampling by 8 for the STM32 F4. From David
         Sidrane.
       - STM32 F4:  Added Timers 2-5 and control of SAI and I2S PLLs.  Added
@@ -12512,13 +12514,13 @@ Additional new features and extended functionality:
       - STM32F103 Minimum:  Add Vishay VEML6070 driver support to the
         STM32F103-Minimum board.  From Alan Carvalho de Assis.
       - Nucleo-F303RE:  Add STM32 F303RE hello configuration.   From Marc
-        Rechté.
+        RechtÃ©.
       - Nucleo-L476:  Support PWM testing on board Nucleo L476.  From
         Sebastien Lorquet.
       - Nucleo L476:  Add support for timers to Nucleo L476.  From Sebastien
         Lorquet.
       - Hymini STM32v:  Enable CONFIG_RTC in the hymini-stm32v/nsh2
-        (kitchensink) config. From Maciej Wójcik.
+        (kitchensink) config. From Maciej WÃ³jcik.
       - Olimex STM32-p407:  Add support for the Olimex STM32 P407 board.
 
     * TI Tiva Drivers:
@@ -12766,7 +12768,7 @@ detailed bugfix information):
       - All timer lower half drivers.  Port Sebastien's changes to all other
         implementations of the timer lower half.
       - USB MSC Device:  Fix length of mode6 sense reply packet.  From
-        Wolfgang Reißnegger.
+        Wolfgang ReiÃŸnegger.
       - USB Composite Host:  Fix end offset in usbhost_copyinterface().  From
         Janne Rosberg.
       - USB CDC/ACM Host:   Add CDC_SUBCLASS_ACM and CDC_PROTO_ATM to
@@ -12831,12 +12833,12 @@ detailed bugfix information):
         be cleared which will cause the next transaction to fail if DTGLE is
         1. If that happens the host will time-out and reset the bus.  Adding
         this delay may also fix the USBMSC_STALL_RACEWAR in usbmsc_scsi.c,
-        however this has not been verified yet.  From Wolfgang Reißnegger.
+        however this has not been verified yet.  From Wolfgang ReiÃŸnegger.
       - SAM3/4: Remove unused 'halted' flag from UDP driver.  From Wolfgang
-        Reißnegger.
+        ReiÃŸnegger.
       - SAM3/4: Remove 'stalled' flag from the UDP driver.  This flag is not
         necessary because the state of the endpoint can be determined using
-        'epstate' instead. From Wolfgang Reißnegger.
+        'epstate' instead. From Wolfgang ReiÃŸnegger.
 
     * Atmel SAM3/4 Boards:
 
@@ -12910,9 +12912,9 @@ detailed bugfix information):
 
       - STM32 CHxN channels are always outputs.  From Sebastien Lorquet.
       - STM32 DAC:  Fix shift value whenever there are is a DAC2 and, hence,
-        up to three interfaces.  From Marc Rechté.
-      - STM32 F1:  Add TIM8 to STM32F103V pinmap.  From Maciej Wójcik.
-      - STM32 F1: Fix for F1 RTC Clock, tested on F103.  From Maciej Wójcik.
+        up to three interfaces.  From Marc RechtÃ©.
+      - STM32 F1:  Add TIM8 to STM32F103V pinmap.  From Maciej WÃ³jcik.
+      - STM32 F1: Fix for F1 RTC Clock, tested on F103.  From Maciej WÃ³jcik.
       - STM32 F3:  STM32F303xB and STM32F303xC chips have 4 ADCs.  From Paul
         A. Patience.
       - STM32 F4:  A new implementation of the STM32 F4 I2C bottom half.  The
@@ -12957,14 +12959,14 @@ detailed bugfix information):
       - STM32F103 Minimum: Fix Timers 2 to 7 clock frequencies. From Alan
         Carvalho de Assis.
       - Nucleo-F303RE:  Remove duplicate setting from board.h.   From  Marc
-        Rechté.
+        RechtÃ©.
       - Nucleo F303RE: Various fixes to get the ADC configuration building
         again after PR.  Refresh all configurations.
       - Nucleo L476RG: Add better selection of timer.
 
     * TI Tiva Boards:
 
-      - DK-TM4C129x: Typo fix.  From Wolfgang Reißnegger.
+      - DK-TM4C129x: Typo fix.  From Wolfgang ReiÃŸnegger.
 
     * Xtensa ESP32:
 
@@ -13129,8 +13131,8 @@ Additional new features and extended functionality:
         kinetis_pinirq(), stm32_gpiosetevent(), and others.
       - IRQ subsystem:  Add support for smaller interrupt tables as
         described at
-        http://www.nuttx.org/doku.php?id=wiki:howtos:smallvectors .  This
-        is partially the work of Mark Schulte.
+        https://cwiki.apache.org/confluence/display/NUTTX/Smaller+Vector+Tables.
+        This is partially the work of Mark Schulte.
 
     * File Systems/Block and MTD Drivers
 
@@ -13167,7 +13169,7 @@ Additional new features and extended functionality:
 
     * Atmel SAM3/4:
 
-      - SAM3/4: Add support for ATSAM4S4C.  From Wolfgang Reißnegger.
+      - SAM3/4: Add support for ATSAM4S4C.  From Wolfgang ReiÃŸnegger.
 
     * NXP Freescale i.MX6 Boards:
 
@@ -13209,7 +13211,7 @@ Additional new features and extended functionality:
       - Add support for NXP Freedom-k66f development board.  From David
         Sidrane.
       - Kinetis Freedom K66F:  Add Ethernet support.  From David Sidrane.
-      - Add twr-k64f120m config.  From Marc Rechté.
+      - Add twr-k64f120m config.  From Marc RechtÃ©.
 
     * NXP Freescale LPC43xx Boards:
 
@@ -13386,7 +13388,7 @@ detailed bugfix information):
       - File System: Don't build block driver proxy if PSEUDOFS_OPERATIONS
         are disabled.
       - sendfile():  Fix error introduced with commit
-        ff73be870e38959b0aaee5961dc47b4b58dc2d86.  Noted by Maciej Wójcik.
+        ff73be870e38959b0aaee5961dc47b4b58dc2d86.  Noted by Maciej WÃ³jcik.
 
     * Graphics/Graphic Drivers:
 
@@ -13403,7 +13405,7 @@ detailed bugfix information):
       - Typos withim mtd/ with Macronix MX25L.  In
         NuttX/drivers/mtd/Make.defs letters X between M and 25 are
         missing.  Noted by Oleg Evseev.
-      - USBMSC: Always set LUN readonly flag.  From Wolfgang Reißnegger.
+      - USBMSC: Always set LUN readonly flag.  From Wolfgang ReiÃŸnegger.
       - drivers/lcd:  ssd1306_configspi() must have global scope.
       - MMC/SD SDIO:  Some drivers need to start DMA before sending CMD24
         and some AFTER.  From Alan Carvalho de Assis.
@@ -13413,9 +13415,9 @@ detailed bugfix information):
       - drivers/tone.c:  50% duty needs to be expressed a a fixed precision
         number.
       - drivers/spi/Kconfig:  There is too much SPI in the configuration
-        menu; SPI Driver Support menu is empty.  From Maciej Wójcik.
+        menu; SPI Driver Support menu is empty.  From Maciej WÃ³jcik.
       - option to enable Memory Card debug output was hidden with SD cards
-        connected through SPI.   From Maciej Wójcik.
+        connected through SPI.   From Maciej WÃ³jcik.
       - usbhost_cdcacm: fix tx outbuffer overflow and remove now invalid
         assert.  From Janne Rosberg.
 
@@ -13438,7 +13440,7 @@ detailed bugfix information):
 
     * Atmel SAM3/4 Drivers:
 
-      - SAM3/4: GPIO bit numbering typo fixes.  From Wolfgang Reißnegger.
+      - SAM3/4: GPIO bit numbering typo fixes.  From Wolfgang ReiÃŸnegger.
 
     * Atmel SAM3/4 Boards:
 
@@ -13460,7 +13462,7 @@ detailed bugfix information):
       - Kinetis:  Correct some SPI and I2C configuration issues.  From
         David Sidrane.
       - Kinetis Ethernet:  Add #define for number of loops for auto
-        negotiation to complete.  From Marc Rechté.
+        negotiation to complete.  From Marc RechtÃ©.
       - Kinetis Werial:  Fixed up_rxint - did not disable the RX
         interuppts. There was an OR where and AND NOT was needed.  From
         David Sidrane.
@@ -13536,7 +13538,7 @@ detailed bugfix information):
 
       - The CONFIG_NETUTILS_HTTPD_PATH constant is used by httpd_mmap.c and
         httpd_sendfile.c but It was not present in Kconfig menu.  From
-        Maciej Wójcik.
+        Maciej WÃ³jcik.
 
     * apps/examples:
 
@@ -14066,16 +14068,16 @@ detailed bugfix information):
         elf_sectname().  From Masayuki Ishikawa.
       - There can be a failure in IOB allocation to some asynchronous
         behavior caused by the use of sem_post().  Consider this scenario:
-        (1) Task A holds an IOB.  There are no further IOBs.  The value of
-        semcount is zero. Task B calls iob_alloc().  Since there are not
-        IOBs, it calls sem_wait().  The value of semcount is now -1.  (2)
-        Task A frees the IOB.  iob_free() adds the IOB to the free list and
+        (1) Task A holds an IOB. There are no further IOBs. The value of
+        semcount is zero. Task B calls iob_alloc(). Since there are not
+        IOBs, it calls sem_wait(). The value of semcount is now -1.  (2)
+        Task A frees the IOB. iob_free() adds the IOB to the free list and
         calls sem_post() this makes Task B ready to run and sets semcount to
-        zero NOT 1.  There is one IOB in the free list and semcount is zero.
+        zero NOT 1. There is one IOB in the free list and semcount is zero.
         When Task B wakes up it would increment the sem_count back to the
         correct value.  (3) But an interrupt or another task runs occurs
-        before Task B executes.  The interrupt or other tak takes the IOB off
-        of the free list and decrements the semcount.  But since semcount is
+        before Task B executes. The interrupt or other tak takes the IOB off
+        of the free list and decrements the semcount. But since semcount is
         then < 0, this causes the assertion because that is an invalid state
         in the interrupt handler. So I think that the root cause is that
         there the asynchrony between incrementing the semcount.  This change
@@ -14197,10 +14199,10 @@ detailed bugfix information):
       - drivers/i2c:  Fix compile issues if CONFIG_DISABLE_PSEUDOFS_OPERATIONS
         is enabled.
       - drivers/serial: I discovered a problem in the file
-        drivers/serial/serial.c concerning the function uart_close(…). In the
+        drivers/serial/serial.c concerning the function uart_close. In the
         case that a serial device is opened with the flag O_NONBLOCK the
-        function uart_close(…) blocks until all data in the buffer is
-        transmitted. The function close(…) called on an handle opened with
+        function uart_close blocks until all data in the buffer is
+        transmitted. The function close called on an handle opened with
         O_NONBLOCK should not block. The problem occurred with a CDC/ACM
         device.  From Stefan Kolb.
       - drivers:  Fix some bad NULL checks.  From Juha Niskanen.
@@ -14320,7 +14322,7 @@ detailed bugfix information):
       - STM32:  Fix erase sector number for microcontrolers with more than 11
         sectors.  Erase a sector from the second bank cause the bit 4 of SNB
         being set but never unused, so trying to erase a sector from the first
-        bank was actually eraseing a sector from the second bank.  From José
+        bank was actually eraseing a sector from the second bank.  From JosÃ©
         Roberto de Souza.
       - STM32:  Make up_progmem thread safe.  Writing to a flash sector while
         starting the erase of other sector have a undefined behavior so lets
@@ -14329,16 +14331,16 @@ detailed bugfix information):
         call stm32_flash_initialize() on initialization, so to avoid runtime
         problems it is only using semaphore and making it thread safe if
         initialized, after all boards starts to call stm32_flash_initialize()
-        we can remove the boolean and the check.  From José Roberto de Souza.
+        we can remove the boolean and the check.  From JosÃ© Roberto de Souza.
       - STM32:  Add workaround for flash data cache corruption on
         read-while-write.  This is a known hardware issue on some STM32 see
         the errata of your model and if you make use of both memory banks you
-        should enable it.  From José Roberto de Souza.
-      - STM32 Flash fixes.  From José Roberto de Souza.
+        should enable it.  From JosÃ© Roberto de Souza.
+      - STM32 Flash fixes.  From JosÃ© Roberto de Souza.
       - STM32 Flash:  Missing unlock on F1 HSI off path.  From David Sidrane.
-      - STM32 F4 I2C: I needed to use DS3231, I remember that in past it
+      - STM32 F4 I2C: I needed to use DS3231, I remember that in past it
         worked ok, but now for stm32f4xx is used another driver (chip
-        specific, stm32f40xxx_i2c.c) and DS3231 driver doesn't work.  After
+        specific, stm32f40xxx_i2c.c) and DS3231 driver doesn't work.  After
         investigating a problem I found that I2C driver (isr routine) has a
         few places there it sends stop bit even if not all messages are
         managed. So, e.g., removing stm32_i2c_sendstop (#1744) and adding
@@ -14686,7 +14688,7 @@ Additional new features and extended functionality:
       - LED Driver:  Add support for inverted LEDS.  From Jeff.
       - LED Driver:  Add lightness correction for RGB LED driver.  From Jeff.
       - LTC4151 Driver:  Add driver for LTC4151 current and voltage monitor.
-        From Giorgio Groß.
+        From Giorgio GroÃŸ.
       - Serial TERMIOS:  tcdrain() implementation based on a new term ioctl.
         From Sebastien Lorquet.
       - Serial TERMIOS:  Add support for TCFLUSH.  From Sebastien Lorquet.
@@ -14816,12 +14818,12 @@ Additional new features and extended functionality:
         STM32_RCC_CR_HSEBYP in their board.h file if they want this
         configuration.  From Jeff.
       - STM32 F4 USB:  I'm working on bringing up USB full-speed support on
-        STM32F405.  My board does not include a USB power switch, VBus
+        STM32F405. My board does not include a USB power switch, VBus
         sensing, over current detection, or ID pin.  This commit add a
-        config STM32_OTGFS_VBUS_ CONTROL which lets us selectively disable
-        VBus sensing and control.  I also sneaked in a change to disable the
+        config STM32_OTGFS_VBUS_ CONTROL which lets us selectively disable
+        VBus sensing and control.  I also sneaked in a change to disable the
         configgpio call for the ID pin, which is only used in OTG mode which
-        isn't supported yet.  The only pins that need to be initialized should
+        isn't supported yet.  The only pins that need to be initialized should
         be OTGFS_DP and OTGFS_DM.  From Jeff.
       - STM32 FLASH:  Add CONFIG_STM32_STM32F469 support. From David Sidrane.
       - STM32 COMP:  Add default INM configuration and some missing COMP
@@ -15020,7 +15022,7 @@ Additional new features and extended functionality:
       - examples/ipforward: Add an IP forwarding example using only TUN
         devices.  Test extended to test forwarding of ICMPv6 multicast messages.
       - Implement powermonitor example for ltc4151 current and voltage
-        monitor.  From Giorgio Groß.
+        monitor.  From Giorgio GroÃŸ.
       - examples/pf_ieee802154:  Add for testing PF_IEEE802154 sockets.  Add
         PANID to command line options; Cannot bind to address zero... There is
         no counterpart to INADDR_ANY for these radios (not now at least).
@@ -15326,7 +15328,7 @@ detailed bugfix information):
         of the other CAN nodes to 500000. The device is restarted and sends a
         CANopen "bootup message" to the CAN network. This results in huge
         amount of errors messages on the CAN bus, probably because of the CAN
-        feature for acknowledging error messages. The error messages can’t be
+        feature for acknowledging error messages. The error messages can't be
         read by the device because of the misconfigured CAN speed, instead the
         CAN chip reports lots of errors, which are reported to the application
         which uses the CAN driver (CONFIG_CAN_ERRORS is enabled).  The CAN
@@ -16029,7 +16031,7 @@ Additional new features and extended functionality:
         Merlino.
       - Olimex STM32-H407:  Add serial support on the on-board UEXT
         connector.  Add USART6 for UEXT connector.   Add nsh_uext
-        configuration and README update.  From Jan Pobríslo.
+        configuration and README update.  From Jan PobÅ™Ã­slo.
       - Nucleo-F410RB:  Add support for the nucleo-F410RB board.  From
         Gwenhael Goavec-Merou.
       - STM32F429i-DISCO:  Add framebuffer driver initialization.  Add a
@@ -16587,9 +16589,9 @@ detailed bugfix information):
       - Nucleo-F334R8:  Add Missing ADC trigger configuration tot he highpri
         configuration.  From Mateusz Szafoni.
       - STM3240G-EVAL:  The timer frequencies (BOARD_TIMx_FREQUENCY) are
-        incorrectly defined in board.h.  Since the APB prescalers are set to
+        incorrectly defined in board.h.  Since the APB prescalers are set to
         divide by 4 and 2 respectively, the frequencies should be "2xAPBx"
-        as said in the comment.  The correct frequencies are already defined
+        as said in the comment. The correct frequencies are already defined
         but as STM32_APBx_TIMx_CLKIN.  From Mattias Edlund.
       - STM32F429i-DISCO:  The ltdc configuration has been deleted because
         it violated the portable POSIX OS interface.  It used
@@ -17535,7 +17537,7 @@ Additional new features and extended functionality:
         allow any I2C operations after unlink, making it possible to
         deallocate the I2C bus.  From Juha Niskanen.
       - drivers/i2c:  Added support for the pca9540bdp i2cmultiplexer.  From
-        Giorgio Groß.
+        Giorgio GroÃŸ.
       - drivers/power:  Added pm_unregister  From Juha Niskanen.
       - drivers/power:  Added generic upper-half motor driver  From Mateusz
         Szafoni.
@@ -18958,9 +18960,9 @@ Additional new features and extended functionality:
       - apps/nshlib:  Add parsing support for back-slash quoted
         characters. Currently only implemented properly if
         CONFIG_NSH_ARGCAT is also selected.  This commit is in response to
-        Bitbucket Issue 11 opened by Maciej Wójcik  From Gregory Nutt.
+        Bitbucket Issue 11 opened by Maciej WÃ³jcik  From Gregory Nutt.
       - apps/nshlib:  Add inverted logic support in the form of 'if !
-        <cmd>'  From  Beat Küng.
+        <cmd>'  From  Beat KÃ¼ng.
       - apps/nshlib:  Expand reboot and poweroff commands to include a
         second, optional mode argument  From ligd.
       - apps/nshlib:  Add a force flag (-f) to mksmartfs command.  SmartFS
@@ -19595,7 +19597,7 @@ detailed bugfix information):
         would exit immediately, while using 'until' would stay in the
         loop.  This is the opposite of how it is supposed to work.  The
         reason is that 'state' was set wrong because 'whilematch' is a
-        bool.  From Beat Küng.
+        bool.  From Beat KÃ¼ng.
       - apps/nshlib:  I was able to cause an assertion with some typos in
         testing the 'fi' command.  Not an important thing, but this will
         protect against the assertion.  From Gregory Nutt.
@@ -21579,7 +21581,7 @@ detailed bugfix information):
         code if it's divided into smaller functions  From Mateusz Szafoni
       - STM32 F0 Clocking:  Fixes the problem in GPIO port clocks. Only port
         A clock was enabled although the comment states otherwise.  From Juha
-        Paalijärvi
+        PaalijÃ¤rvi
       - STM32 F7 I2C:  I2C out of bounds access on priv->msgv.  Error in if
         statement. It was checking for msgc > 0.  If message count is 1, only
         index 0 is valid on priv->msgv.  Therefore random values in memory
@@ -22415,9 +22417,9 @@ detailed bugfix information):
         and (2) once via sched_releasetcb().  this was corrected by adding
         logic to free/unload the memory once and nullify the pointer so
         that cannot be freed a second time.  This commit resolves Bitbucket
-        issue #145.  From Valmantas Palikša.
+        issue #145.  From Valmantas PalikÅ¡a.
       - NxFLAT:  File descriptor leaks when nxflat loading fails.  From
-        Valmantas Palikša.
+        Valmantas PalikÅ¡a.
       - ProcFS:  Fix typo in procfs uptime logic.  From Sebastien Lorquet.
 
     * Networking/Network Drivers:
@@ -22708,7 +22710,7 @@ detailed bugfix information):
         Szafoni.
       - STM32F429I-DISCO:  Handle multiple calls to the LCD
         up_fbinitialize() function.  From Gregory Nutt.
-      - STM32F769I-DISCO:  Florian R. Hölzlwimmer reports that
+      - STM32F769I-DISCO:  Florian R. HÃ¶lzlwimmer reports that
         stm32_appinitialize.c often has missing OK and NULL definitions.
         This should be fixed by including sys/types.h where they are
         defined.  From GregoryN.
@@ -22818,7 +22820,7 @@ detailed bugfix information):
       - NSH Console:  Fix copy paste errors. Some Kconfig configuration
         names needed CONFIG_ prefix.  From David Sidrane.
       - nshlib/nsh_timcmds.c:  Uninitialized struct tm caused 'date -s' to
-        fail.  From Valmantas Palikša.
+        fail.  From Valmantas PalikÅ¡a.
 
     * Examples: apps/examples:
 
@@ -23529,7 +23531,7 @@ Additional new features and extended functionality:
       - Telnet Driver:  Handle ctrl events (SIGINT, SIGSTP).  From
         Valmantas Paliksa.
       - Telnet Driver:  I/O thread now offloads reading from socket
-        from client thread to the I/O thread.  From Valmantas Palikša.
+        from client thread to the I/O thread.  From Valmantas PalikÅ¡a.
 
     * Wireless/Wireless Drivers:
 
@@ -23599,7 +23601,7 @@ Additional new features and extended functionality:
         only one port is active (either 1 or 2) it will always be numbered
         as 0, if both are active then USDHC1 will be number 0, USDHC2 will
         be 1.  From Dave Marples.
-      - i.MXRT Serial:  Add TIOCSINVERT ioctls.  From Beat Küng.
+      - i.MXRT Serial:  Add TIOCSINVERT ioctls.  From Beat KÃ¼ng.
       - i.MXRT Serial:  Implemented RS485 RX/TX switching and RTS/CTS flow
         control for the IMXRT family.  It has been tested on 1020 but I
         don't see any reason for issues on any other family member.  From
@@ -23607,7 +23609,7 @@ Additional new features and extended functionality:
 
     * NXP/Freescale Kinetis Drivers:
 
-      - Kinetis Serial:  Add UART signal inversion support  From Beat Küng.
+      - Kinetis Serial:  Add UART signal inversion support  From Beat KÃ¼ng.
 
     * NXP LPC11xx:
 
@@ -23815,7 +23817,7 @@ Additional new features and extended functionality:
       - STM32F7 Serial:  This adds the ability to invert and swap RX/TX on
         STM32F7 UARTs.  I added the TIOCGINVERT as well to reserve the IOCTL
         number, but did not implement it. This is the same as for
-        TIOCGSINGLEWIRE.  From Beat Küng.
+        TIOCGSINGLEWIRE.  From Beat KÃ¼ng.
       - STM32L4 CRS:  Make STM32L4 CRS synchronization source board
         configurable.  From Juha Niskanen.
       - STM32L4 HSI48:  Enable CRS_CR_CEN with CRS_CR_AUTOTRIMEN.  From
@@ -23827,14 +23829,14 @@ Additional new features and extended functionality:
       - STM32L4 RCC:  Use Range 1 Boost mode if SYSCLK is higher than 80
         MHz.  From Juha Niskanen.
       - STM32L4 Serial:  Add TIOCSINVERT and TIOCSSWAP ioctls.  From Beat
-        Küng.
+        KÃ¼ng.
       - STM32H7 ADC:  Added ADC Driver, ADC clocking.  From David Sidrane.
       - STM32H7 Ethernet: Fix typo in define.  From Pierre-Olivier Vauboin.
       - STM32H7 PWM:  Port PWM from STM32  From Mateusz Szafoni.
       - STM32H7 QEncoder:  Ported the QEncoder from F7 to H7.  From Eduard
         Niesner.
       - STM32H7 Serial:  Add TIOCSINVERT and TIOCSSWAP ioctls.  Ensure
-        TIOCSSINGLEWIRE is atomic and UE disabled.  From Beat Küng.
+        TIOCSSINGLEWIRE is atomic and UE disabled.  From Beat KÃ¼ng.
 
     * STMicro STM32 Boards:
 
@@ -24745,7 +24747,7 @@ Additional new features and extended functionality:
     * NXP/Freescale Kinetis Drivers:
 
       - Kinetis Serial:  Add possibility to specify pull-up instead of
-        open drain for serial single-wire mode.  From Beat Küng.
+        open drain for serial single-wire mode.  From Beat KÃ¼ng.
 
     * NXP LPC17xx/40xx:
 
@@ -25595,7 +25597,7 @@ information):
     * Tools:
 
       - tools/:  Change all occurrences of /bin/(ba)sh in shell scripts to
-        /usr/bin/env bash which appears more portable  From Manuel Stühn.
+        /usr/bin/env bash which appears more portable  From Manuel StÃ¼hn.
 
     * NSH Library: apps/nshlib:
 
@@ -26113,7 +26115,7 @@ information):
         options and SDCC no longer needs the work-around.  From Gregory
         Nutt.
       - clock_systimespec():  Fix early timespec overflow if using 32 bit
-        system timer.  From Jens Gräf.
+        system timer.  From Jens GrÃ¤f.
       - Spinlocks:  spin_trylock handle memory barrier and instrumentation
         correctly.  From Xiang Xiao.
       - Power Management:  Fix a problem where a timer cannot start when it
