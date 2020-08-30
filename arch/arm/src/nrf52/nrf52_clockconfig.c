@@ -49,6 +49,7 @@
 #include "arm_internal.h"
 
 #include "nrf52_clockconfig.h"
+#include "hardware/nrf52_clock.h"
 
 /****************************************************************************
  * Public Functions
@@ -65,6 +66,43 @@
  *
  ****************************************************************************/
 
-void nrf52_clockconfig()
+void nrf52_clockconfig(void)
 {
+#ifdef CONFIG_NRF52_HFCLK_XTAL
+  /* Initilize HFCLK crystal oscillator */
+
+  putreg32(0x0, NRF52_CLOCK_EVENTS_HFCLKSTARTED);
+  putreg32(0x1, NRF52_CLOCK_TASKS_HFCLKSTART);
+
+  while (!getreg32(NRF52_CLOCK_EVENTS_HFCLKSTARTED))
+    {
+      /* wait for external oscillator to start */
+    }
+#endif
+
+#ifdef CONFIG_NRF52_USE_LFCLK
+  /* Initialize LFCLK */
+
+#if defined(CONFIG_NRF52_LFCLK_XTAL)
+  putreg32(CLOCK_LFCLKSRC_SRC_XTAL, NRF52_CLOCK_LFCLKSRC);
+#elif defined(CONFIG_NRF52_LFCLK_SYNTH)
+  putreg32(CLOCK_LFCLKSRC_SRC_SYNTH, NRF52_CLOCK_LFCLKSRC);
+#else
+  putreg32(CLOCK_LFCLKSRC_SRC_RC, NRF52_CLOCK_LFCLKSRC);
+#endif
+
+  /* Trigger LFCLK start */
+
+  putreg32(0x0, NRF52_CLOCK_EVENTS_LFCLKSTARTED);
+  putreg32(0x1, NRF52_CLOCK_TASKS_LFCLKSTART);
+
+  while (!getreg32(NRF52_CLOCK_EVENTS_LFCLKSTARTED))
+    {
+      /* Wait for LFCLK to be running */
+    }
+
+#if defined(CONFIG_NRF52_LFCLK_RC)
+  /* TODO: calibrate LFCLK RC oscillator */
+#endif
+#endif
 }
