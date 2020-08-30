@@ -79,6 +79,10 @@ VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
 HOSTCFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)}
+ifeq ($(CONFIG_HOST_MACOS),y)
+  HOSTCFLAGS += -Wno-deprecated-declarations
+endif
+
 HOSTSRCS = up_hostmemory.c up_hosttime.c
 ifneq ($(CONFIG_HOST_MACOS),y)
   STDLIBS += -lrt
