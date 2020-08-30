@@ -310,15 +310,17 @@ void arm_lowputc(char ch)
    * redesigning all of the FIFO status logic.
    */
 
-  while ((getreg8(CONSOLE_BASE+KINETIS_UART_S1_OFFSET) & UART_S1_TDRE) == 0);
+  while (
+    (getreg8(CONSOLE_BASE + KINETIS_UART_S1_OFFSET) & UART_S1_TDRE) == 0);
 #  endif
 
   /* Then write the character to the UART data register */
 
-  putreg8((uint8_t)ch, CONSOLE_BASE+KINETIS_UART_D_OFFSET);
+  putreg8((uint8_t)ch, CONSOLE_BASE + KINETIS_UART_D_OFFSET);
 
 #elif defined(HAVE_LPUART_CONSOLE)
-  while ((getreg32(CONSOLE_BASE + KINETIS_LPUART_STAT_OFFSET) & LPUART_STAT_TDRE) == 0);
+  while ((getreg32(CONSOLE_BASE + KINETIS_LPUART_STAT_OFFSET) &
+         LPUART_STAT_TDRE) == 0);
 
   /* Then send the character */
 
@@ -350,20 +352,20 @@ void kinetis_lowsetup(void)
 #  if defined(CONFIG_KINETIS_UART0) || defined(CONFIG_KINETIS_UART1) || \
       defined(CONFIG_KINETIS_UART2) || defined(CONFIG_KINETIS_UART3)
 
-   regval = getreg32(KINETIS_SIM_SCGC4);
+  regval = getreg32(KINETIS_SIM_SCGC4);
 #    ifdef CONFIG_KINETIS_UART0
-   regval |= SIM_SCGC4_UART0;
+  regval |= SIM_SCGC4_UART0;
 #    endif
 #    ifdef CONFIG_KINETIS_UART1
-   regval |= SIM_SCGC4_UART1;
+  regval |= SIM_SCGC4_UART1;
 #    endif
 #    ifdef CONFIG_KINETIS_UART2
-   regval |= SIM_SCGC4_UART2;
+  regval |= SIM_SCGC4_UART2;
 #    endif
 #    ifdef CONFIG_KINETIS_UART3
-   regval |= SIM_SCGC4_UART3;
+  regval |= SIM_SCGC4_UART3;
 #    endif
-   putreg32(regval, KINETIS_SIM_SCGC4);
+  putreg32(regval, KINETIS_SIM_SCGC4);
 
 #  endif
 
@@ -371,14 +373,14 @@ void kinetis_lowsetup(void)
 
 #  if defined(CONFIG_KINETIS_UART4) || defined(CONFIG_KINETIS_UART5)
 
-   regval = getreg32(KINETIS_SIM_SCGC1);
+  regval = getreg32(KINETIS_SIM_SCGC1);
 #    ifdef CONFIG_KINETIS_UART4
-   regval |= SIM_SCGC1_UART4;
+  regval |= SIM_SCGC1_UART4;
 #    endif
 #    ifdef CONFIG_KINETIS_UART5
-   regval |= SIM_SCGC1_UART5;
+  regval |= SIM_SCGC1_UART5;
 #    endif
-   putreg32(regval, KINETIS_SIM_SCGC1);
+  putreg32(regval, KINETIS_SIM_SCGC1);
 
 #  endif
 
@@ -486,7 +488,7 @@ void kinetis_lowsetup(void)
 #  warning REVISIT
 #endif
 
-   /* Configure UART pins for the all enabled UARTs */
+  /* Configure UART pins for the all enabled UARTs */
 
 #ifdef CONFIG_KINETIS_LPUART0
   kinetis_pinconfig(PIN_LPUART0_TX);
@@ -567,9 +569,9 @@ void kinetis_uartreset(uintptr_t uart_base)
 
   /* Just disable the transmitter and receiver */
 
-  regval = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
+  regval = getreg8(uart_base + KINETIS_UART_C2_OFFSET);
   regval &= ~(UART_C2_RE | UART_C2_TE);
-  putreg8(regval, uart_base+KINETIS_UART_C2_OFFSET);
+  putreg8(regval, uart_base + KINETIS_UART_C2_OFFSET);
 }
 #endif
 
@@ -588,9 +590,9 @@ void kinetis_lpuartreset(uintptr_t uart_base)
 
   /* Just disable the transmitter and receiver */
 
-  regval = getreg32(uart_base+KINETIS_LPUART_CTRL_OFFSET);
+  regval = getreg32(uart_base + KINETIS_LPUART_CTRL_OFFSET);
   regval &= ~(LPUART_CTRL_RE | LPUART_CTRL_TE);
-  putreg32(regval, uart_base+KINETIS_LPUART_CTRL_OFFSET);
+  putreg32(regval, uart_base + KINETIS_LPUART_CTRL_OFFSET);
 }
 #endif
 
@@ -618,9 +620,9 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 
   /* Disable the transmitter and receiver throughout the reconfiguration */
 
-  regval = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
+  regval = getreg8(uart_base + KINETIS_UART_C2_OFFSET);
   regval &= ~(UART_C2_RE | UART_C2_TE);
-  putreg8(regval, uart_base+KINETIS_UART_C2_OFFSET);
+  putreg8(regval, uart_base + KINETIS_UART_C2_OFFSET);
 
   /* Configure number of bits, stop bits and parity */
 
@@ -664,7 +666,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
       DEBUGASSERT(nbits == 8);
     }
 
-  putreg8(regval, uart_base+KINETIS_UART_C1_OFFSET);
+  putreg8(regval, uart_base + KINETIS_UART_C1_OFFSET);
 
   /* Calculate baud settings (truncating) */
 
@@ -675,18 +677,19 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
    * UARTx_BDH register.
    */
 
-  regval  = getreg8(uart_base+KINETIS_UART_BDH_OFFSET);
+  regval  = getreg8(uart_base + KINETIS_UART_BDH_OFFSET);
   regval  &= ~(UART_BDH_SBR_MASK | UART_BDH_SBNS);
   if (stop2)
     {
       regval |= UART_BDH_SBNS;
     }
+
   tmp     = sbr >> 8;
   regval |= (((uint8_t)tmp) << UART_BDH_SBR_SHIFT) & UART_BDH_SBR_MASK;
-  putreg8(regval, uart_base+KINETIS_UART_BDH_OFFSET);
+  putreg8(regval, uart_base + KINETIS_UART_BDH_OFFSET);
 
   regval  = sbr & 0xff;
-  putreg8(regval, uart_base+KINETIS_UART_BDL_OFFSET);
+  putreg8(regval, uart_base + KINETIS_UART_BDL_OFFSET);
 
   /* Calculate a fractional divider to get closer to the requested baud.
    * The fractional divider, BRFA, is a 5 bit fractional value that is
@@ -703,9 +706,9 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 
   /* Set the BRFA field (retaining other bits in the UARTx_C4 register) */
 
-  regval  = getreg8(uart_base+KINETIS_UART_C4_OFFSET) & ~UART_C4_BRFA_MASK;
+  regval  = getreg8(uart_base + KINETIS_UART_C4_OFFSET) & ~UART_C4_BRFA_MASK;
   regval |= ((uint8_t)brfa << UART_C4_BRFA_SHIFT) & UART_C4_BRFA_MASK;
-  putreg8(regval, uart_base+KINETIS_UART_C4_OFFSET);
+  putreg8(regval, uart_base + KINETIS_UART_C4_OFFSET);
 
   /* Set the FIFO watermarks.
    *
@@ -720,25 +723,28 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
    */
 
 #ifdef CONFIG_KINETIS_UARTFIFOS
-  depth = g_sizemap[(regval & UART_PFIFO_RXFIFOSIZE_MASK) >> UART_PFIFO_RXFIFOSIZE_SHIFT];
+  depth = g_sizemap[(regval & UART_PFIFO_RXFIFOSIZE_MASK) >>
+                    UART_PFIFO_RXFIFOSIZE_SHIFT];
   if (depth > 1)
     {
       depth = (3 * depth) >> 2;
     }
 
-  putreg8(depth , uart_base+KINETIS_UART_RWFIFO_OFFSET);
+  putreg8(depth , uart_base + KINETIS_UART_RWFIFO_OFFSET);
 
-  depth = g_sizemap[(regval & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT];
+  depth = g_sizemap[(regval & UART_PFIFO_TXFIFOSIZE_MASK) >>
+                    UART_PFIFO_TXFIFOSIZE_SHIFT];
   if (depth > 3)
     {
       depth = (depth >> 2);
     }
 
-  putreg8(depth, uart_base+KINETIS_UART_TWFIFO_OFFSET);
+  putreg8(depth, uart_base + KINETIS_UART_TWFIFO_OFFSET);
 
   /* Enable RX and TX FIFOs */
 
-  putreg8(UART_PFIFO_RXFE | UART_PFIFO_TXFE, uart_base+KINETIS_UART_PFIFO_OFFSET);
+  putreg8(UART_PFIFO_RXFE | UART_PFIFO_TXFE,
+          uart_base + KINETIS_UART_PFIFO_OFFSET);
 #else
   /* Otherwise, disable the FIFOs.  Then the FIFOs are disable, the effective
    * FIFO depth is 1.  So set the watermarks as follows:
@@ -751,14 +757,14 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
    * Set the watermarks to one/zero and disable the FIFOs
    */
 
-  putreg8(1, uart_base+KINETIS_UART_RWFIFO_OFFSET);
-  putreg8(0, uart_base+KINETIS_UART_TWFIFO_OFFSET);
-  putreg8(0, uart_base+KINETIS_UART_PFIFO_OFFSET);
+  putreg8(1, uart_base + KINETIS_UART_RWFIFO_OFFSET);
+  putreg8(0, uart_base + KINETIS_UART_TWFIFO_OFFSET);
+  putreg8(0, uart_base + KINETIS_UART_PFIFO_OFFSET);
 #endif
 
   /* Hardware flow control */
 
-  regval  = getreg8(uart_base+KINETIS_UART_MODEM_OFFSET);
+  regval  = getreg8(uart_base + KINETIS_UART_MODEM_OFFSET);
   regval &= ~(UART_MODEM_TXCTSE | UART_MODEM_RXRTSE);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -775,13 +781,13 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
     }
 #endif
 
-  putreg8(regval, uart_base+KINETIS_UART_MODEM_OFFSET);
+  putreg8(regval, uart_base + KINETIS_UART_MODEM_OFFSET);
 
   /* Now we can (re-)enable the transmitter and receiver */
 
-  regval  = getreg8(uart_base+KINETIS_UART_C2_OFFSET);
+  regval  = getreg8(uart_base + KINETIS_UART_C2_OFFSET);
   regval |= (UART_C2_RE | UART_C2_TE);
-  putreg8(regval, uart_base+KINETIS_UART_C2_OFFSET);
+  putreg8(regval, uart_base + KINETIS_UART_C2_OFFSET);
 }
 #endif
 
@@ -839,45 +845,45 @@ void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud,
 
   for (osr = 32; osr >= 4; osr--)
     {
-       sbr = clock / (baud * osr);
+      sbr = clock / (baud * osr);
 
-       /* Ensure the minimum SBR */
+      /* Ensure the minimum SBR */
 
-       if (sbr == 0)
-         {
-           sbr++;
-         }
+      if (sbr == 0)
+        {
+          sbr++;
+        }
 
-       /* Calculate the actual baud rate */
+      /* Calculate the actual baud rate */
 
-       current_baud = clock / (sbr * osr);
+      current_baud = clock / (sbr * osr);
 
-       /* look at the deviation of current baud to requested */
+      /* look at the deviation of current baud to requested */
 
-       baud_error = current_baud - baud;
-       if (baud_error <= min_baud_error)
-         {
-           min_baud_error = baud_error;
-           actual_baud = current_baud;
-           sbrreg = sbr;
-           osrreg = osr;
-         }
+      baud_error = current_baud - baud;
+      if (baud_error <= min_baud_error)
+        {
+          min_baud_error = baud_error;
+          actual_baud = current_baud;
+          sbrreg = sbr;
+          osrreg = osr;
+        }
     }
 
   UNUSED(actual_baud);
-  DEBUGASSERT(actual_baud-baud < (baud /100) * 2);
+  DEBUGASSERT(actual_baud - baud < (baud / 100) * 2);
   DEBUGASSERT(sbrreg != 0 && sbrreg < 8192);
   DEBUGASSERT(osrreg != 0);
 
   /* Disable the transmitter and receiver throughout the reconfiguration */
 
-  regval = getreg32(uart_base+KINETIS_LPUART_CTRL_OFFSET);
+  regval = getreg32(uart_base + KINETIS_LPUART_CTRL_OFFSET);
   regval &= ~(LPUART_CTRL_RE | LPUART_CTRL_TE);
-  putreg32(regval, uart_base+KINETIS_LPUART_CTRL_OFFSET);
+  putreg32(regval, uart_base + KINETIS_LPUART_CTRL_OFFSET);
 
   /* Reset the BAUD register */
 
-  regval = getreg32(uart_base+KINETIS_LPUART_BAUD_OFFSET);
+  regval = getreg32(uart_base + KINETIS_LPUART_BAUD_OFFSET);
   regval &= ~(LPUART_BAUD_INIT);
 
   /* Set the Baud rate, nbits and stop bits */
@@ -906,7 +912,7 @@ void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud,
       regval |= LPUART_BAUD_BOTHEDGE;
     }
 
-  putreg32(regval, uart_base+KINETIS_LPUART_BAUD_OFFSET);
+  putreg32(regval, uart_base + KINETIS_LPUART_BAUD_OFFSET);
 
   /* Configure number of bits and parity */
 
@@ -949,7 +955,7 @@ void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud,
 
   /* Hardware flow control */
 
-  regval  = getreg32(uart_base+KINETIS_LPUART_MODIR_OFFSET);
+  regval  = getreg32(uart_base + KINETIS_LPUART_MODIR_OFFSET);
   regval &= ~(UART_MODEM_TXCTSE | UART_MODEM_RXRTSE);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -957,18 +963,21 @@ void kinetis_lpuartconfigure(uintptr_t uart_base, uint32_t baud,
     {
       regval |= LPUART_MODIR_RXRTSE;
     }
+
 #endif
   #ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (oflow)
     {
       regval |= LPUART_MODIR_TXCTSE;
     }
+
 #endif
-  putreg32(regval, uart_base+KINETIS_LPUART_MODIR_OFFSET);
+  putreg32(regval, uart_base + KINETIS_LPUART_MODIR_OFFSET);
 
   /* Now we can (re-)enable the transmitter and receiver */
 
   regval |= (LPUART_CTRL_RE | LPUART_CTRL_TE);
-  putreg32(regval, uart_base+KINETIS_LPUART_CTRL_OFFSET);
+  putreg32(regval, uart_base + KINETIS_LPUART_CTRL_OFFSET);
 }
+
 #endif
