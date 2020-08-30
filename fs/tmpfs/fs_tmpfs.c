@@ -339,11 +339,6 @@ static int tmpfs_realloc_directory(FAR struct tmpfs_directory_s **tdo,
   newtdo->tdo_nentries = nentries;
   *tdo                 = newtdo;
 
-  /* Adjust the reference in the parent directory entry */
-
-  DEBUGASSERT(newtdo->tdo_dirent);
-  newtdo->tdo_dirent->tde_object = (FAR struct tmpfs_object_s *)newtdo;
-
   /* Return the index to the first, newly allocated directory entry */
 
   return ret;
