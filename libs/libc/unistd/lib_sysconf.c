@@ -241,6 +241,13 @@ long sysconf(int name)
         return 1;
 #endif
 
+      case _SC_PAGESIZE:
+#ifdef CONFIG_MM_PGSIZE
+        return CONFIG_MM_PGSIZE;
+#else
+        return 1;
+#endif
+
       default:
 #if 0 /* Assume valid but not implemented for the time being */
         errcode = EINVAL;
