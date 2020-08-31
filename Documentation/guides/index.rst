@@ -7,3 +7,5 @@ Guides
 .. toctree::
   nfs.rst
   usbtrace.rst
+  simulator.rst
+  drivers.rst

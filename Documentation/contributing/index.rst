@@ -8,6 +8,7 @@ and documentation (the one you are reading now):
    :maxdepth: 2
 
    workflow.rst
+   making-changes.rst
    coding_style.rst
    documentation.rst
 
