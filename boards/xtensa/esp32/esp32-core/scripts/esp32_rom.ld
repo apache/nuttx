@@ -1850,3 +1850,6 @@ PROVIDE ( g_rom_spiflash_dummy_len_plus = 0x3ffae290 );
 PROVIDE ( esp_rom_spiflash_read_user_cmd = 0x400621b0 );
 PROVIDE ( esp_rom_spiflash_write_encrypted_enable = 0x40062df4 );
 PROVIDE ( esp_rom_spiflash_prepare_encrypted_data = 0x40062e1c );
+
+PROVIDE ( esp_rom_printf   = ets_printf );
+PROVIDE ( esp_rom_delay_us = ets_delay_us );

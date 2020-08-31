@@ -39,6 +39,12 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <syslog.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/mount.h>
 #include <syslog.h>
@@ -47,8 +53,13 @@
 #ifdef CONFIG_TIMER
 #  include <nuttx/timers/timer.h>
 #endif
+#include <syslog.h>
+#include <sys/errno.h>
 
 #include "esp32-core.h"
+
+#include "esp32_wlan.h"
+#include "esp32_spiflash.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -88,6 +99,38 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
+static int esp32_init_wifi_storage(void)
+{
+  int ret;
+  const char *path = "/dev/mtdblock1";
+  FAR struct mtd_dev_s *mtd_part;
+
+  mtd_part = esp32_spiflash_alloc_mtdpart();
+  if (!mtd_part)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to alloc MTD partition of SPI Flash\n");
+      return -1;
+    }
+
+  ret = register_mtddriver(path, mtd_part, 0777, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to regitser MTD: %d\n", ret);
+      return -1;
+    }
+
+  ret = mount(path, CONFIG_ESP32_WIFI_FS_MOUNTPT, "spiffs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", errno);
+      return ret;
+    }
+
+  return 0;
+}
+#endif
+
 int esp32_bringup(void)
 {
   int ret;
@@ -113,6 +156,33 @@ int esp32_bringup(void)
 
 #ifdef CONFIG_ESP32_SPIFLASH
   ret = esp32_spiflash_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32_WIRELESS
+
+#ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
+  ret = esp32_init_wifi_storage();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize WiFi storage\n");
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_NET
+  ret = esp32_wlan_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize WiFi\n");
+      return ret;
+    }
+#endif
+
 #endif
 
 #ifdef CONFIG_TIMER
