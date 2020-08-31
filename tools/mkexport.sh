@@ -34,7 +34,7 @@
 
 # Get the input parameter list
 
-USAGE="USAGE: $0 [-d] [-z] [-u] [-w|wy|wn] -t <top-dir> [-x <lib-ext>] [-a <apps-dir>] [-m <make-exe>] -l \"lib1 [lib2 [lib3 ...]]\""
+USAGE="USAGE: $0 [-d] [-z] [-u] [-t <top-dir> [-x <lib-ext>] [-a <apps-dir>] [-m <make-exe>] -l \"lib1 [lib2 [lib3 ...]]\""
 unset TOPDIR
 unset LIBLIST
 unset TGZ
@@ -42,7 +42,6 @@ unset APPDIR
 unset BOARDDIR
 
 USRONLY=n
-WINTOOL=n
 LIBEXT=.a
 
 while [ ! -z "$1" ]; do
@@ -65,12 +64,6 @@ while [ ! -z "$1" ]; do
   -m )
     shift
     MAKE="$1"
-    ;;
-  -wy )
-    WINTOOL=y
-    ;;
-  -w | -wn )
-    WINTOOL=n
     ;;
   -t )
     shift
