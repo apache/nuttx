@@ -77,7 +77,11 @@
 
 /* Cortex-M4 External interrupts (vectors >= 16) */
 
-#if defined(CONFIG_ARCH_FAMILY_NRF52832) ||  defined(CONFIG_ARCH_FAMILY_NRF52840)
+/********************************************************************************************
+ * Included Files
+ ********************************************************************************************/
+
+#if defined(CONFIG_ARCH_FAMILY_NRF52)
 #  include <arch/nrf52/nrf52_irq.h>
 #else
 #  error "Unsupported NRF52XX MCU"

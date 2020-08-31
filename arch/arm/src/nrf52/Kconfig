@@ -13,13 +13,11 @@ choice
 config ARCH_CHIP_NRF52832
 	bool "NRF52832"
 	select ARCH_FAMILY_NRF52
-	select ARCH_FAMILY_NRF52832
 	select NRF52_HAVE_BPROT
 
 config ARCH_CHIP_NRF52833
 	bool "NRF52832"
 	select ARCH_FAMILY_NRF52
-	select ARCH_FAMILY_NRF52833
 	select NRF52_HAVE_ACL
 	select NRF52_HAVE_UART1
 	select NRF52_HAVE_PORT1
@@ -30,7 +28,6 @@ config ARCH_CHIP_NRF52833
 config ARCH_CHIP_NRF52840
 	bool "NRF52840"
 	select ARCH_FAMILY_NRF52
-	select ARCH_FAMILY_NRF52840
 	select NRF52_HAVE_ACL
 	select NRF52_HAVE_UART1
 	select NRF52_HAVE_PORT1
@@ -45,18 +42,6 @@ endchoice # NRF52 Chip Selection
 # NRF52 Families
 
 config ARCH_FAMILY_NRF52
-	bool
-	default n
-
-config ARCH_FAMILY_NRF52832
-	bool
-	default n
-
-config ARCH_FAMILY_NRF52833
-	bool
-	default n
-
-config ARCH_FAMILY_NRF52840
 	bool
 	default n
 
@@ -122,7 +107,7 @@ config NRF52_RTC
 
 config NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
 	bool "SPI Master 1 Byte transfer anomaly workaround"
-	depends on NRF52_SPI_MASTER && ARCH_FAMILY_NRF52832
+	depends on NRF52_SPI_MASTER && ARCH_CHIP_NRF52832
 	default y
 	---help---
 		Enable the workaround to fix SPI Master 1 byte transfer bug
