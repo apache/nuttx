@@ -259,17 +259,21 @@ void up_timer_update(void);
 void rpmsg_serialinit(void);
 #endif
 
-/* up_devconsole.c **********************************************************/
+/* up_uart.c ****************************************************************/
 
-void up_devconsole(void);
-void up_devconloop(void);
+void up_uartinit(void);
+void up_uartloop(void);
 
 /* up_simuart.c *************************************************************/
 
 void simuart_start(void);
-int  simuart_putc(int ch);
-int  simuart_getc(void);
-bool simuart_checkc(void);
+int  simuart_open(const char *pathname);
+void simuart_close(int fd);
+int  simuart_putc(int fd, int ch);
+int  simuart_getc(int fd);
+bool simuart_checkc(int fd);
+int  simuart_setcflag(int fd, unsigned int cflag);
+int  simuart_getcflag(int fd, unsigned int *cflag);
 
 /* up_deviceimage.c *********************************************************/
 
