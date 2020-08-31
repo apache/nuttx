@@ -320,75 +320,8 @@ because these segments overlap.
 object to create the final, NXFLAT module ``hello`` by executing
 ``ldnxflat``.
 
-Binary Loader APIs
-==================
-
-**Relevant Header Files:**
-
-  - The interface to the binary loader is described in the header file
-    ```include/nuttx/binfmt/binfmt.h``.
-    A brief summary of the APIs prototyped in that header file are listed
-    below.
-  - NXFLAT APIs needed to register NXFLAT as a binary loader appear in
-    the header file
-    ``include/nuttx/binfmt/nxflat.h``.
-  - The format of an NXFLAT object itself is described in the header
-    file:
-    ``include/nuttx/binfmt/nxflat.h``.
-
-**binfmt Registration** These first interfaces are used only by a binary
-loader module, such as NXFLAT itself. NXFLAT (or any future binary
-loader) calls ``register_binfmt()`` to incorporate itself into the
-system. In this way, the binary loader logic is dynamically extensible
-to support any kind of loader. Normal application code should not be
-concerned with these interfaces.
-
-.. c:function:: int register_binfmt(FAR struct binfmt_s *binfmt)
-
-  Register a loader for a binary format
-
-  :return: This is a NuttX internal function so it follows the
-    convention that 0 (``OK``) is returned on success and a
-    negated errno is returned on failure.
-
-.. c:function:: int unregister_binfmt(FAR struct binfmt_s *binfmt)
-
-   Register a loader for a binary format 
-
-  :return: This is a NuttX internal function so it follows the
-    convention that 0 (``OK``) is returned on success and a
-    negated errno is returned on failure.
-
-**Binary Loader Interfaces**. The remaining APIs are called by user
-applications to maintain modules in the file system.
-
-.. c:function:: int load_module(FAR struct binary_s *bin)
-
-  Load a module into memory, bind it to an exported symbol take,
-  and prep the module for execution. 
-
-  :return: This is a NuttX internal function so it follows the
-    convention that 0 (``OK``) is returned on success and a
-    negated errno is returned on failure.
-
-.. c:function:: int unload_module(FAR struct binary_s *bin)
-
-   Unload a (non-executing) module from memory. If the module
-   has been started (via :c:func:`exec_module`), calling this
-   will be fatal. 
-
-  :return: This is a NuttX internal function so it follows the
-    convention that 0 (``OK``) is returned on success and a
-    negated errno is returned on failure.
-
-.. c:function:: int exec_module(FAR const struct binary_s *bin)
-
-   Execute a module that has been loaded into memory by
-   :c:func:`load_module`.
-   
-   :return: This is a NuttX internal function so it follows the
-    convention that 0 (``OK``) is returned on success and a
-    negated errno is returned on failure.
+**binfmt Registration** NXFLAT calls :c:func:`register_binfmt` to
+incorporate itself into the system.
 
 Appendix A: No GOT Operation
 ============================

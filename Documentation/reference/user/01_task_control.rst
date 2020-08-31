@@ -873,15 +873,3 @@ Functions
   :param policy: The new value of the *spawn-stacksize* attribute.
   :return: On success, this function returns 0; on failure it
     will return an error number from ``<errno.h>``
-
-.. c:function:: int posix_spawn_file_actions_init(FAR posix_spawn_file_actions_t *file_actions);
-
-  The ``posix_spawn_file_actions_init()`` function
-  initializes the object referenced by ``file_actions`` to an empty set of
-  file actions for subsequent use in a call to ``posix_spawn()`` or
-  ``posix_spawnp()``.
-
-  :param file_actions: The address of the ``posix_spawn_file_actions_t``
-    to be initialized.
-  :return: On success, this function returns 0; on failure it
-    will return an error number from ``<errno.h>``.

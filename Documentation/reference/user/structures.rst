@@ -106,6 +106,8 @@ NuttX and a MoBY application:
    size_t       mq_curmsgs;  /* Number of messages currently in queue */
   };
 
+.. note that this gives a warning due to https://github.com/sphinx-doc/sphinx/issues/7819
+
 .. c:struct:: sigaction
 
 The following structure defines the action to take for given signal:

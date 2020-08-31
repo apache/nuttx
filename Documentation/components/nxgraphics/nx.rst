@@ -69,13 +69,21 @@ start this daemon. There are two ways that this can be done:
    board startup logic can run automatically during the early system if
    ``CONFIG_BOARD_LATE_INITIALIZE`` is defined in the configuration. Or,
    the board startup logic can execute under control of the application
-   by calling the ``boardctl(BOARDIOC_INIT, arg)`` OS interface.
+   by calling :c:func:`boardctl` as:
+  
+   .. code-block:: c
+     
+     boardctl(BOARDIOC_INIT, arg)
 
    The board initialization logic will run in either case and the simple
    call to ``nxmu_start()`` will start the NX server.
 
-#. The NX server may also be started later by the application via the
-   ``boardctl(BOARDIOC_NX_START, arg)``
+#. The NX server may also be started later by the application via
+   :c:func:`boardctl` as:
+
+   .. code-block:: c
+
+     boardctl(BOARDIOC_NX_START, arg)
 
 .. c:function:: int nxmu_start(int display, int plane);
 
@@ -91,35 +99,6 @@ start this daemon. There are two ways that this can be done:
     A negated ``errno`` value is returned on failure. The ``errno`` value
     indicates the nature of the failure.
     
-.. c:function:: void boardctl(...)
-
-  Generic NuttX interface that among
-  many of it functions, may also be used to start the NX server.
-
-  In a small embedded system, there will typically be a much greater
-  interaction between application and low-level board features. The
-  canonically correct to implement such interactions is by implementing a
-  character driver and performing the interactions via low level
-  ``ioctl()`` calls. This, however, may not be practical in many cases and
-  will lead to "correct" but awkward implementations.
-
-  ``boardctl()`` is non-standard OS interface to alleviate the problem. It
-  basically circumvents the normal device driver ioctl interlace and
-  allows the application to perform direction IOCTL-like calls to the
-  board-specific logic. In it is especially useful for setting up board
-  operational and test configurations.
-
-  When called with the ``cmd`` of ``BOARDIOC_NX_START``, then the
-  ``boardctl()`` will call ``nxmu_start`` indirectly on behalf of the
-  application. In this case the ``arg`` parameter is ignored.
-
-  :param cmd: Identifies the board command to be executed
-  :param arg: The argument that accompanies the command. The nature of the argument
-    is determined by the specific command.
-
-  :return: On success zero (``OKERROR``) is returned on failure
-    with the ``errno`` variable set to indicate the nature of the failure.
-
 NX Server Callbacks
 ===================
 
