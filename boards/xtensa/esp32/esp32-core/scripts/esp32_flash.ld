@@ -59,6 +59,8 @@ SECTIONS
     *libpp.a:(.literal .text .literal.* .text.*)
     *libhal.a:(.literal .text .literal.* .text.*)
     *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
+    *(.wifirxiram .wifirxiram.*)
+    *(.wifirxiram .wifi0iram.*)
     _iram_text_end = ABSOLUTE(.);
 
     /* Module text area starts at the end of iram0_0_seg */

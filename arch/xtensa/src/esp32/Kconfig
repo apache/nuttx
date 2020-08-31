@@ -256,6 +256,9 @@ config ESP32_WIRELESS
 	bool "Wireless"
 	default n
 	depends on EXPERIMENTAL
+	select NET
+	select ARCH_PHY_INTERRUPT
+	select ESP32_RNG
 	---help---
 		No yet implemented
 
@@ -627,5 +630,39 @@ config ESP32_ETH_PHY_ADDR
 	default 1
 
 endmenu # ESP32_EMAC
+
+menu "WiFi configuration"
+	depends on ESP32_WIRELESS
+
+config ESP32_WIFI_CONNECT_TIMEOUT
+	int "Connect timeout by second"
+	default 10
+	help
+		Max waiting time of connecting to AP.
+
+config ESP32_WIFI_SAVE_PARAM
+	bool "Save WiFi Parameters"
+	default n
+	help
+		If you enable this option, WiFi adapter parameters will be saved
+		into the file system instead of computing them each time.
+
+		These parameters mainly contains:
+		  - SSID
+		  - Password
+		  - BSSID
+		  - PMK(compute when connecting)
+		  - Author mode
+		  - MAC address
+		  - WiFi hardware configuration parameters
+
+config ESP32_WIFI_FS_MOUNTPT
+	string "Save WiFi Parameters"
+	default "/mnt/esp/wifi"
+	depends on ESP32_WIFI_SAVE_PARAM
+	help
+		Mount point of WiFi storage file system.
+
+endmenu # ESP32_WIRELESS
 
 endif # ARCH_CHIP_ESP32
