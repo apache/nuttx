@@ -37,12 +37,14 @@
  * Included Files
  ****************************************************************************/
 
+#include <fcntl.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include <termios.h>
 #include <poll.h>
+#include <errno.h>
 
 /****************************************************************************
  * Private Data
@@ -58,17 +60,13 @@ static struct termios g_cooked;
  * Name: setrawmode
  ****************************************************************************/
 
-static void setrawmode(void)
+static void setrawmode(int fd)
 {
   struct termios raw;
 
-  /* Get the current stdin terminal mode */
-
-  tcgetattr(0, &g_cooked);
+  tcgetattr(fd, &raw);
 
   /* Switch to raw mode */
-
-  memcpy(&raw, &g_cooked, sizeof(struct termios));
 
   raw.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR |
                    ICRNL | IXON);
@@ -77,7 +75,7 @@ static void setrawmode(void)
   raw.c_cflag &= ~(CSIZE | PARENB);
   raw.c_cflag |= CS8;
 
-  tcsetattr(0, TCSANOW, &raw);
+  tcsetattr(fd, TCSANOW, &raw);
 }
 
 /****************************************************************************
@@ -92,24 +90,6 @@ static void restoremode(void)
 }
 
 /****************************************************************************
- * Name: simuart_putraw
- ****************************************************************************/
-
-int simuart_putraw(int ch)
-{
-  ssize_t nwritten;
-  unsigned char buf = ch;
-
-  nwritten = write(1, &buf, 1);
-  if (nwritten != 1)
-    {
-      return -1;
-    }
-
-  return ch;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -119,9 +99,13 @@ int simuart_putraw(int ch)
 
 void simuart_start(void)
 {
+  /* Get the current stdin terminal mode */
+
+  tcgetattr(0, &g_cooked);
+
   /* Put stdin into raw mode */
 
-  setrawmode();
+  setrawmode(0);
 
   /* Restore the original terminal mode before exit */
 
@@ -129,48 +113,114 @@ void simuart_start(void)
 }
 
 /****************************************************************************
+ * Name: simuart_open
+ ****************************************************************************/
+
+int simuart_open(const char *pathname)
+{
+  int fd;
+
+  fd = open(pathname, O_RDWR | O_NONBLOCK);
+  if (fd >= 0)
+    {
+      /* keep raw mode */
+
+      setrawmode(fd);
+    }
+  else
+    {
+      fd = -errno;
+    }
+
+  return fd;
+}
+
+/****************************************************************************
+ * Name: simuart_close
+ ****************************************************************************/
+
+void simuart_close(int fd)
+{
+  close(fd);
+}
+
+/****************************************************************************
  * Name: simuart_putc
  ****************************************************************************/
 
-int simuart_putc(int ch)
+int simuart_putc(int fd, int ch)
 {
-  int ret = ch;
-
-  if (ch == '\n')
-    {
-      ret = simuart_putraw('\r');
-    }
-
-  if (ret >= 0)
-    {
-      ret = simuart_putraw(ch);
-    }
-
-  return ret;
+  return write(fd, &ch, 1) == 1 ? ch : -1;
 }
 
 /****************************************************************************
  * Name: simuart_getc
  ****************************************************************************/
 
-int simuart_getc(void)
+int simuart_getc(int fd)
 {
   int ret;
   unsigned char ch;
 
-  ret = read(0, &ch, 1);
+  ret = read(fd, &ch, 1);
   return ret < 0 ? ret : ch;
+}
+
+/****************************************************************************
+ * Name: simuart_getcflag
+ ****************************************************************************/
+
+int simuart_getcflag(int fd, tcflag_t *cflag)
+{
+  struct termios t;
+  int ret;
+
+  ret = tcgetattr(fd, &t);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+  else
+    {
+      *cflag = t.c_cflag;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: simuart_setcflag
+ ****************************************************************************/
+
+int simuart_setcflag(int fd, tcflag_t cflag)
+{
+  struct termios t;
+  int ret;
+
+  ret = tcgetattr(fd, &t);
+  if (!ret)
+    {
+      t.c_cflag = cflag;
+      ret = tcsetattr(fd, TCSANOW, &t);
+    }
+
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
  * Name: simuart_checkc
  ****************************************************************************/
 
-bool simuart_checkc(void)
+bool simuart_checkc(int fd)
 {
   struct pollfd pfd;
 
-  pfd.fd     = 0;
+  pfd.fd     = fd;
   pfd.events = POLLIN;
   return poll(&pfd, 1, 0) == 1;
 }

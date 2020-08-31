@@ -73,7 +73,7 @@ CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_initialstate.c
 CSRCS += up_createstack.c up_usestack.c up_releasestack.c up_stackframe.c
 CSRCS += up_unblocktask.c up_blocktask.c up_releasepending.c
 CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c
-CSRCS += up_allocateheap.c
+CSRCS += up_allocateheap.c up_uart.c
 
 VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
@@ -83,7 +83,7 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
 endif
 
-HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c
+HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c
 STDLIBS += -lpthread
 ifneq ($(CONFIG_HOST_MACOS),y)
   STDLIBS += -lrt
@@ -114,13 +114,6 @@ endif
 ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
 ifneq ($(CONFIG_SCHED_INSTRUMENTATION_BUFFER),y)
   CSRCS += up_schednote.c
-endif
-endif
-
-ifeq ($(CONFIG_DEV_CONSOLE),y)
-ifneq ($(CONFIG_SYSLOG_RPMSG),y)
-  CSRCS += up_devconsole.c
-  HOSTSRCS += up_simuart.c
 endif
 endif
 

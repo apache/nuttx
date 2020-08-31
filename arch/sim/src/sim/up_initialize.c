@@ -228,15 +228,11 @@ void up_initialize(void)
   rpmsg_serialinit();
 #endif
 
-#if defined(USE_DEVCONSOLE)
-  /* Start the simulated UART device */
+  /* Register some tty-port to access tty-port on sim platform */
 
-  simuart_start();
+  up_uartinit();
 
-  /* Register a console (or not) */
-
-  up_devconsole();          /* Our private /dev/console */
-#elif defined(CONFIG_CONSOLE_SYSLOG)
+#if defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
 #endif
 

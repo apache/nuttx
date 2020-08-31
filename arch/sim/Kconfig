@@ -485,4 +485,28 @@ config SIM_HCISOCKET
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
 
+config SIM_UART_NUMBER
+	int "The number of tty ports on sim platform, range is 0~4"
+	default 0
+
+config SIM_UART0_NAME
+	string "the name of uart0 on sim"
+	default "/dev/ttySIM0"
+	depends on SIM_UART_NUMBER >= 1
+
+config SIM_UART1_NAME
+	string "the name of uart1 on sim"
+	default "/dev/ttySIM1"
+	depends on SIM_UART_NUMBER >= 2
+
+config SIM_UART2_NAME
+	string "the name of uart2 on sim"
+	default "/dev/ttySIM2"
+	depends on SIM_UART_NUMBER >= 3
+
+config SIM_UART3_NAME
+	string "the name of uart3 on sim"
+	default "/dev/ttySIM3"
+	depends on SIM_UART_NUMBER >= 4
+
 endif # ARCH_SIM

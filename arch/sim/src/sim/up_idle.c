@@ -89,11 +89,9 @@ void up_idle(void)
     }
 #endif
 
-#ifdef USE_DEVCONSOLE
   /* Handle UART data availability */
 
-  up_devconloop();
-#endif
+  up_uartloop();
 
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
   /* Drive the X11 event loop */
