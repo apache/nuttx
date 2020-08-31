@@ -206,21 +206,10 @@ Basic module management
   :return:
     This is a NuttX internal function so it follows the convention that 0 (``OK``)
     is returned on success and a negated ``errno`` is returned on failure.
- 
-.. c:function:: int exec(FAR const char *filename, FAR const char **argv, FAR const struct symtab_s *exports, int nexports)
 
-  This is a convenience function that wraps :c:func:`load_module` and
-  :c:func:`exec_module` into one call. 
-
-  :param filename: Full path to the binary to be loaded.
-  :param argv: Argument list.
-  :param exports: Table of exported symbols.
-  :param exports: The number of symbols in exports.
-
-  :return: 
-    This is an end-user function, so it follows the normal convention:
-    Returns 0 (``OK``) on success. On failure, it returns -1 (ERROR)
-    with ``errno`` set appropriately. 
+.. tip::
+  The function :c:func:`exec` is a convenience function that wraps
+  :c:func:`load_module` and :c:func:`exec_module` into one call. 
 
 ``PATH`` traversal logic
 ~~~~~~~~~~~~~~~~~~~~~~~~ 

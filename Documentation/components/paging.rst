@@ -371,25 +371,9 @@ Most standard, architecture-specific functions are declared in
 ``include/nuttx/arch.h``. However, for the case of this paging logic,
 the architecture specific functions are declared in
 ``include/nuttx/page.h``. Standard, architecture-specific functions that
-should already be provided in the architecture port. The following are
-used by the common paging logic:
-
-.. c:function:: void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
-
-   The currently executing task at the head of the ready to run list
-   must be stopped. Save its context and move it to the inactive list
-   specified by task_state. This function is called by the on-demand
-   paging logic in order to block the task that requires the page fill,
-   and to
-   
-.. c:function:: void up_unblock_task(FAR struct tcb_s *tcb)
- 
-   A task is currently in an inactive task list but has been prepped to
-   execute. Move the TCB to the ready-to-run list, restore its context,
-   and start execution. This function will be called
-
-New, additional functions that must be implemented just for on-demand
-paging support:
+should already be provided in the architecture port are :c:func:`up_block_task`
+and :c:func:`up_unblock_task`. New, additional functions that must be
+implemented just for on-demand paging support are:
 
 .. c:function:: int up_checkmapping(FAR struct tcb_s *tcb)
 
