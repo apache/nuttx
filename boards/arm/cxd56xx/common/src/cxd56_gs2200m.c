@@ -118,7 +118,24 @@ static void gs2200m_irq_enable(void)
 
   if (0 == _enable_count)
     {
+#ifdef CONFIG_SMP
+      bool unlock = false;
+
+      if (0 != up_cpu_index())
+        {
+          unlock = true;
+          spin_unlock_irqrestore(flags);
+        }
+#endif
+
       cxd56_gpioint_enable(PIN_UART2_CTS);
+
+#ifdef CONFIG_SMP
+      if (unlock)
+        {
+          flags = spin_lock_irqsave();
+        }
+#endif
     }
 
   _enable_count++;
@@ -140,7 +157,24 @@ static void gs2200m_irq_disable(void)
 
   if (0 == _enable_count)
     {
+#ifdef CONFIG_SMP
+      bool unlock = false;
+
+      if (0 != up_cpu_index())
+        {
+          unlock = true;
+          spin_unlock_irqrestore(flags);
+        }
+#endif
+
       cxd56_gpioint_disable(PIN_UART2_CTS);
+
+#ifdef CONFIG_SMP
+      if (unlock)
+        {
+          flags = spin_lock_irqsave();
+        }
+#endif
     }
 
   spin_unlock_irqrestore(flags);
