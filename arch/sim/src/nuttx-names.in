@@ -31,8 +31,8 @@
   #define NXSYMBOLS(s) s NX##s
 #endif
 
-NXSYMBOLS(__errno)
 NXSYMBOLS(__cxa_atexit)
+NXSYMBOLS(__errno)
 NXSYMBOLS(_exit)
 NXSYMBOLS(accept)
 NXSYMBOLS(asprintf)
