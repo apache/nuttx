@@ -1563,7 +1563,7 @@ static void fdcan_dumptxregs(FAR struct stm32_fdcan_s *priv,
 #endif
 
 /****************************************************************************
- * Name: stm32can_showramlayout
+ * Name: stm32can_dumpramlayout
  *
  * Description:
  *   Print the layout of the message RAM
@@ -1584,47 +1584,53 @@ static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv)
   caninfo(" ******* FDCAN%d Message RAM layout *******\n", config->port);
   caninfo("                Start     # Elmnt  Elmnt size (words)\n");
 
-#if CONFIG_STM32H7_FDCAN1_NSTDFILTERS > 0
-  caninfo("STD filters   %p   %4d        %2d\n",
-          config->msgram.stdfilters,
-          config->nstdfilters,
-          1);
-#endif
+  if(config->nstdfilters > 0)
+    {
+      caninfo("STD filters   %p   %4d        %2d\n",
+              config->msgram.stdfilters,
+              config->nstdfilters,
+              1);
+    }
 
-#if CONFIG_STM32H7_FDCAN1_NEXTFILTERS > 0
-  caninfo("EXT filters   %p   %4d        %2d\n",
-          config->msgram.extfilters,
-          config->nextfilters,
-          2);
-#endif
+  if(config->nextfilters)
+    {
+      caninfo("EXT filters   %p   %4d        %2d\n",
+              config->msgram.extfilters,
+              config->nextfilters,
+              2);
+    }
 
-#if CONFIG_STM32H7_FDCAN1_RXFIFO0_SIZE > 0
-  caninfo("RX FIFO 0     %p   %4d        %2d\n",
-          config->msgram.rxfifo0,
-          config->nrxfifo0,
-          config->rxfifo0esize);
-#endif
+  if(config->nrxfifo0)
+    {
+      caninfo("RX FIFO 0     %p   %4d        %2d\n",
+              config->msgram.rxfifo0,
+              config->nrxfifo0,
+              config->rxfifo0esize);
+    }
 
-#if CONFIG_STM32H7_FDCAN1_RXFIFO1_SIZE
-  caninfo("RX FIFO 1     %p   %4d        %2d\n",
-          config->msgram.rxfifo1,
-          config->nrxfifo1,
-          config->rxfifo1esize);
-#endif
+  if(config->nrxfifo1)
+    {
+      caninfo("RX FIFO 1     %p   %4d        %2d\n",
+              config->msgram.rxfifo1,
+              config->nrxfifo1,
+              config->rxfifo1esize);
+    }
 
-#if CONFIG_STM32H7_FDCAN1_DEDICATED_RXBUFFER_SIZE > 0
-  caninfo("RX Buffers    %p   %4d        %2d\n",
-          config->msgram.rxdedicated,
-          config->nrxdedicated,
-          config->rxbufferesize);
-#endif
+  if(config->nrxdedicated)
+    {
+      caninfo("RX Buffers    %p   %4d        %2d\n",
+              config->msgram.rxdedicated,
+              config->nrxdedicated,
+              config->rxbufferesize);
+    }
 
-#if CONFIG_STM32H7_FDCAN1_TXFIFOQ_SIZE > 0
-  caninfo("TX FIFO       %p   %4d        %2d\n",
-          config->msgram.txfifoq,
-          config->ntxfifoq,
-          config->txbufferesize);
-#endif
+  if(config->ntxfifoq)
+    {
+      caninfo("TX FIFO       %p   %4d        %2d\n",
+              config->msgram.txfifoq,
+              config->ntxfifoq,
+              config->txbufferesize);
+    }
 }
 #endif
 
