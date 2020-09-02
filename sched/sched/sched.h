@@ -57,17 +57,12 @@
 
 /* These are macros to access the current CPU and the current task on a CPU.
  * These macros are intended to support a future SMP implementation.
- * NOTE: this_task() for SMP is implemented in sched_thistask.c if the CPU
- * supports disabling of inter-processor interrupts or if it supports the
- * atomic fetch add operation.
+ * NOTE: this_task() for SMP is implemented in sched_thistask.c
  */
 
 #ifdef CONFIG_SMP
 #  define current_task(cpu)      ((FAR struct tcb_s *)g_assignedtasks[cpu].head)
 #  define this_cpu()             up_cpu_index()
-#  if !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE) && !defined(CONFIG_ARCH_HAVE_FETCHADD)
-#    define this_task()          (current_task(this_cpu()))
-#  endif
 #else
 #  define current_task(cpu)      ((FAR struct tcb_s *)g_readytorun.head)
 #  define this_cpu()             (0)
@@ -353,14 +348,6 @@ extern volatile cpu_set_t g_cpu_lockset SP_SECTION;
 
 extern volatile spinlock_t g_cpu_tasklistlock SP_SECTION;
 
-#if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
-/* This is part of the sched_lock() logic to handle atomic operations when
- * locking the scheduler.
- */
-
-extern volatile int16_t g_global_lockcount;
-#endif
-
 #endif /* CONFIG_SMP */
 
 /****************************************************************************
@@ -425,10 +412,7 @@ void nxsched_continue(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SMP
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE) || \
-    defined(CONFIG_ARCH_HAVE_FETCHADD)
 FAR struct tcb_s *this_task(void);
-#endif
 
 int  nxsched_select_cpu(cpu_set_t affinity);
 int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
@@ -436,15 +420,7 @@ int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
 irqstate_t nxsched_lock_tasklist(void);
 void nxsched_unlock_tasklist(irqstate_t lock);
 
-#if defined(CONFIG_ARCH_HAVE_FETCHADD) && \
-   !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
-#  define nxsched_islocked_global() \
-     (spin_islocked(&g_cpu_schedlock) || g_global_lockcount > 0)
-#else
-#  define nxsched_islocked_global() \
-     spin_islocked(&g_cpu_schedlock)
-#endif
-
+#  define nxsched_islocked_global() spin_islocked(&g_cpu_schedlock)
 #  define nxsched_islocked_tcb(tcb) nxsched_islocked_global()
 
 #else

@@ -16,7 +16,6 @@ config ARCH_CHIP_ESP32
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MODULE_TEXT
 	select ARCH_TOOLCHAIN_GNU
-	select ARCH_GLOBAL_IRQDISABLE
 	---help---
 		The ESP32 is a dual-core system from Espressif with two Harvard
 		architecture Xtensa LX6 CPUs. All embedded memory, external memory
