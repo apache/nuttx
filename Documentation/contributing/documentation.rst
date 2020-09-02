@@ -15,29 +15,17 @@ Building
 To render the Documentation locally, you should clone the NuttX main repository, and 
 go into ``Documentation`` directory. Then,
 
-  1. Install sphinx and other dependencies. You can do this in one of two ways:
+  1. Install Sphinx and other dependencies using pipenv.
+     You may also find it helpful on platforms such as Windows and MacOS to use *pyenv*
+     to manage your python installation.  You can read about installing that on the
+     project `site <https://github.com/pyenv/pyenv#installation>`_.
   
-    * **Fast and easy**: 
+    .. code-block:: console
     
-      .. code-block:: console
-      
-        pip3 install -r requirements.txt
-         
-    * **Slower but cleaner**:
-    
-      .. code-block:: console
-
-        $ # install pyenv
-        $ curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
-        $ # install python
-        $ pyenv install 3.7.3
-        $ pyenv local 3.7.3
-        $ # install pipenv
-        $ pip install pipenv
-        $ # install sphinx and related software
-        $ pipenv install
-        $ # activate the virtual environent
-        $ pipenv shell
+      $ pip3 install pipenv
+      $ pipenv install
+      $ # activate the virtual environent
+      $ pipenv shell
         
   2. Build documentation:
   
