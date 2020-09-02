@@ -135,6 +135,18 @@ endif
 
 ifeq ($(CONFIG_NRF52_RADIO),y)
 CHIP_CSRCS += nrf52_radio.c
+
+ifeq ($(CONFIG_BLUETOOTH_LINKLAYER),y)
+include chip/ble/Make.defs
+endif
+endif
+
+ifeq ($(CONFIG_NRF52_CCM),y)
+CHIP_CSRCS += nrf52_ccm.c
+endif
+
+ifeq ($(CONFIG_NRF52_ECB),y)
+CHIP_CSRCS += nrf52_ecb.c
 endif
 
 ifeq ($(CONFIG_NRF52_TIMER),y)
@@ -154,4 +166,8 @@ endif
 
 ifeq ($(CONFIG_NRF52_SAADC),y)
 CHIP_CSRCS += nrf52_adc.c
+endif
+
+ifeq ($(CONFIG_NET),y)
+CHIP_CSRCS += nrf52_netinit.c
 endif

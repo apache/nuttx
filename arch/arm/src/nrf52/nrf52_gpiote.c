@@ -308,6 +308,12 @@ int nrf52_gpiotaskset(uint32_t pinset, int channel,
   int port;
 #endif
 
+  DEBUGASSERT(channel < NRF52_GPIOTE_NUM_CHANNELS);
+
+  /* This channel should not be used for EVENT mode */
+
+  DEBUGASSERT(g_gpiote_callbacks[channel].callback == NULL);
+
   /* Select GPIOTE pin */
 
   pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;

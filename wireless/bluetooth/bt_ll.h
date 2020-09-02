@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf52/nrf52832-mdk/src/nrf52_bringup.c
+ * /home/v01d/coding/nuttx_nrf51/nuttx/wireless/bluetooth/bt_ll.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,84 +18,49 @@
  *
  ****************************************************************************/
 
+#ifndef __WIRELESS_BLUETOOTH_BT_LL_H
+#define __WIRELESS_BLUETOOTH_BT_LL_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <syslog.h>
-
-#ifdef CONFIG_NRF52_WDT
-#  include "nrf52_wdt.h"
-#endif
-
-#ifdef CONFIG_USERLED
-#  include <nuttx/leds/userled.h>
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-#include <nuttx/fs/procfs.h>
-#endif
-
+#include <nuttx/wireless/bluetooth/bt_driver.h>
+#include <nuttx/wireless/bluetooth/bt_hci.h>
 #include <nuttx/wireless/bluetooth/bt_ll.h>
-#include "nrf52_ble.h"
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf52_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
+ * Public Types
  ****************************************************************************/
 
-int nrf52_bringup(void)
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  int ret;
-
-#ifdef CONFIG_NRF52_WDT
-  /* Start Watchdog timer */
-
-  ret = nrf52_wdt_initialize(CONFIG_WATCHDOG_DEVPATH, 1, 1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: nrf52_wdt_initialize failed: %d\n", ret);
-    }
+#else
+#define EXTERN extern
 #endif
 
-#ifdef CONFIG_USERLED
-  /* Register the LED driver */
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
 
-  ret = userled_lower_initialize(CONFIG_EXAMPLES_LEDS_DEVPATH);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-    }
-#endif
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#ifdef CONFIG_FS_PROCFS
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: failed to mount procfs\n");
-    }
-#endif
-
-  const struct bt_ll_lowerhalf_s *lower = nrf52_ble_ll_initialize();
-  bt_ll_initialize(lower);
-
-  UNUSED(ret);
-  return OK;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif // __WIRELESS_BLUETOOTH_BT_LL_H

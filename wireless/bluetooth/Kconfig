@@ -61,6 +61,14 @@ menuconfig WIRELESS_BLUETOOTH_HOST
 if WIRELESS_BLUETOOTH_HOST
 endif # WIRELESS_BLUETOOTH_HOST
 
+config BLUETOOTH_LINKLAYER
+  bool "Bluetooth LE Link Layer"
+  default n
+  ---help---
+    This option enables the Link Layer, which is the upper half of the
+    controller side. When bound to an architecture dependant lower layer,
+    it enables support for fully contained SoC Bluetooth solution.
+
 config BLUETOOTH_MAX_CONN
 	int "Maximum number of simultaneous connections"
 	default 1

@@ -1,8 +1,8 @@
 ############################################################################
-# wireless/bluetooth/Make.defs
+# arch/arm/src/nrf52/Make.defs
 #
 #   Copyright (C) 2018 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+#   Author:  Janne Rosberg <janne@offcode.fi>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,28 +33,8 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_WIRELESS_BLUETOOTH),y)
+CHIP_CSRCS += nrf52_ble.c nrf52_ble_advertising.c nrf52_ble_connection.c \
+              nrf52_ble_isr.c nrf52_ble_misc.c nrf52_ble_scanning.c \
+              nrf52_ble_security.c
 
-# Include Bluetooth support
-
-CSRCS += bt_buf.c bt_netdev.c bt_queue.c bt_hcicore.c
-
-ifeq ($(CONFIG_WIRELESS_BLUETOOTH_HOST),y)
-
-# Host-layer
-
-CSRCS += bt_atomic.c bt_att.c  bt_conn.c bt_gatt.c
-CSRCS += bt_ioctl.c bt_keys.c bt_l2cap.c bt_smp.c
-CSRCS += bt_uuid.c
-
-endif
-
-ifeq ($(CONFIG_BLUETOOTH_LINKLAYER),y)
-CSRCS += bt_ll.c
-endif
-
-DEPPATH += --dep-path bluetooth
-VPATH += :bluetooth
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)wireless$(DELIM)bluetooth}
-
-endif # CONFIG_WIRELESS_BLUETOOTH
+VPATH += chip/ble

@@ -32,6 +32,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define NRF52_GPIOTE_NUM_CHANNELS           8
+
 /* Register offsets for GPIOTE **********************************************/
 
 #define NRF52_GPIOTE_TASKS_OUT_OFFSET(x)    (0x0000 + (0x04 * x)) /* TASKS_OUT[x] */

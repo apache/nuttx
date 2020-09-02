@@ -60,7 +60,7 @@
 /* Reserve PPI channel and GPIOTE channel for 1 byte transfer workaround */
 
 #ifdef CONFIG_NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
-#  define SPI_1B_WORKAROUND_PPI_CHAN    (18)
+#  define SPI_1B_WORKAROUND_PPI_CHAN    (13)
 #  define SPI_1B_WORKAROUND_GPIOTE_CHAN (7)
 #endif
 

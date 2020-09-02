@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/nrf52/nrf52832-mdk/src/nrf52_bringup.c
+ * arch/arm/src/nrf52/nrf52_ecb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,84 +18,46 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_NRF52_NRF52_ECB_H
+#define __ARCH_ARM_SRC_NRF52_NRF52_ECB_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <syslog.h>
-
-#ifdef CONFIG_NRF52_WDT
-#  include "nrf52_wdt.h"
-#endif
-
-#ifdef CONFIG_USERLED
-#  include <nuttx/leds/userled.h>
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-#include <nuttx/fs/procfs.h>
-#endif
-
-#include <nuttx/wireless/bluetooth/bt_ll.h>
-#include "nrf52_ble.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf52_bringup
- *
- * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
+ * Public Types
  ****************************************************************************/
 
-int nrf52_bringup(void)
+/* RAM layout of ECB data structure */
+
+begin_packed_struct struct nrf52_ecb_data_s
 {
-  int ret;
+  uint8_t key[16];
+  uint8_t input[16];
+  uint8_t output[16];
+} end_packed_struct;
 
-#ifdef CONFIG_NRF52_WDT
-  /* Start Watchdog timer */
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-  ret = nrf52_wdt_initialize(CONFIG_WATCHDOG_DEVPATH, 1, 1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: nrf52_wdt_initialize failed: %d\n", ret);
-    }
-#endif
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
 
-#ifdef CONFIG_USERLED
-  /* Register the LED driver */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-  ret = userled_lower_initialize(CONFIG_EXAMPLES_LEDS_DEVPATH);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-    }
-#endif
+void nrf52_ecb_encrypt(struct nrf52_ecb_data_s *data);
 
-#ifdef CONFIG_FS_PROCFS
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: failed to mount procfs\n");
-    }
-#endif
-
-  const struct bt_ll_lowerhalf_s *lower = nrf52_ble_ll_initialize();
-  bt_ll_initialize(lower);
-
-  UNUSED(ret);
-  return OK;
-}
+#endif // __NRF52_ECB_H

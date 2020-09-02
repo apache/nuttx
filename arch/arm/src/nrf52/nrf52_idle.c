@@ -182,10 +182,12 @@ void up_idle(void)
    * running (not in WFE/WFI) or when the system is in debug interface mode.
    */
 
+#if 0
 #ifdef CONFIG_NRF52_SYSTIMER_RTC
   BEGIN_IDLE();
   asm("WFI");
   END_IDLE();
+#endif
 #endif
 #endif
 }

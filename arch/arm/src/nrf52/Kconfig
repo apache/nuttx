@@ -192,11 +192,18 @@ config NRF52_WDT
 
 config NRF52_RADIO
 	bool "RADIO"
-	depends on EXPERIMENTAL
 	default n
 
 config NRF52_NFCT
 	bool "NFCT"
+	default n
+
+config NRF52_CCM
+	bool "CCM"
+	default n
+
+config NRF52_ECB
+	bool "ECB"
 	default n
 
 config NRF52_SAADC

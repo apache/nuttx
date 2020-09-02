@@ -36,6 +36,21 @@
 #define NRF52_PPI_NUM_CONFIGURABLE_CHANNELS 20    /* Number of configurable PPI channels */
 #define NRF52_PPI_NUM_GROUPS                6     /* Number of PPI channel groups */
 
+/* Preconfigured channels by name */
+
+#define PPI_CH_TIMER0_COMPARE0_RADIO_TXEN     20
+#define PPI_CH_TIMER0_COMPARE0_RADIO_RXEN     21
+#define PPI_CH_TIMER0_COMPARE1_RADIO_DISABLE  22
+#define PPI_CH_RADIO_BCMATCH_AAR_START        23
+#define PPI_CH_RADIO_READY_CCM_KSGEN          24
+#define PPI_CH_RADIO_ADDRESS_CCM_CRYPT        25
+#define PPI_CH_RADIO_ADDRESS_TIMER0_CAPTURE1  26
+#define PPI_CH_RADIO_END_TIMER0_CAPTURE2      27
+#define PPI_CH_RTC0_COMPARE0_RADIO_TXEN       28
+#define PPI_CH_RTC0_COMPARE0_RADIO_RXEN       30
+#define PPI_CH_RTC0_COMPARE0_TIMER0_CLEAR     31
+#define PPI_CH_RTC0_COMPARE0_TIMER0_START     32
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
