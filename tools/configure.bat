@@ -65,6 +65,7 @@ if "%1"=="-l" goto :SetHostOption
 if "%1"=="-c" goto :SetHostOption
 if "%1"=="-u" goto :SetHostOption
 if "%1"=="-n" goto :SetHostOption
+if "%1"=="-L" goto :SetList
 if "%1"=="-a" goto :SetAppDir
 
 set config=%1
@@ -81,6 +82,10 @@ goto :NextArg
 :SetHostOption
 set hostopt=%1
 goto :NextArg
+
+:SetList
+set list=%1
+goto :EndOfLoop
 
 :SetAppDir
 shift
@@ -108,7 +113,7 @@ if errorlevel 1 (
 
 :HaveConfigureExe
 cd ..
-tools\configure.exe %debug% %fmt% %hostopt% %appdir% %config%
+tools\configure.exe %debug% %fmt% %hostopt% %appdir% %config% %list%
 if errorlevel 1 echo configure.exe failed
 goto End
 
@@ -133,6 +138,8 @@ echo    select one of the Windows environments.  Default:  Use host setup
 echo    in the defconfig file
 echo  [-c^|u^|n] selects the Windows host and a Windows environment:  Cygwin (c),
 echo    Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin
+echo  -L:
+echo    List all available configurations.
 echo  -a ^<app-dir^>:
 echo    Informs the configuration tool where the application build
 echo    directory.  This is a relative path from the top-level NuttX

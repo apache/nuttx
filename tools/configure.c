@@ -78,6 +78,7 @@
  ****************************************************************************/
 
 static void show_usage(const char *progname, int exitcode);
+static void dumpcfgs(void);
 static void debug(const char *fmt, ...);
 static void parse_args(int argc, char **argv);
 static int run_make(const char *arg);
@@ -181,7 +182,7 @@ static const char *g_optfiles[] =
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s  [-d] [-E] [-e] [-b|f] [-l|m|c|u|g|n] "
+  fprintf(stderr, "\nUSAGE: %s  [-d] [-E] [-e] [-b|f] [-L] [-l|m|c|u|g|n] "
           "[-a <app-dir>] <board-name>:<config-name> [make-opts]\n",
           progname);
   fprintf(stderr, "\nUSAGE: %s  [-h]\n", progname);
@@ -224,6 +225,8 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "    -n Selects the Windows native (n) environment.\n");
   fprintf(stderr, "  Default: Use host setup in the defconfig file.\n");
   fprintf(stderr, "  Default Windows: Cygwin.\n");
+  fprintf(stderr, "  -L:\n");
+  fprintf(stderr, "    Lists all available configurations.\n");
   fprintf(stderr, "  -a <app-dir>:\n");
   fprintf(stderr, "    Informs the configuration tool where the\n");
   fprintf(stderr, "    application build directory.  This is a relative\n");
@@ -250,6 +253,17 @@ static void show_usage(const char *progname, int exitcode)
   exit(exitcode);
 }
 
+static void dumpcfgs(void)
+{
+  find_topdir();
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cboards", g_topdir, g_delim);
+  verify_directory(g_buffer);
+  g_configtop = strdup(g_buffer);
+  enumerate_configs();
+  free(g_configtop);
+  exit(EXIT_SUCCESS);
+}
+
 static void debug(const char *fmt, ...)
 {
   va_list ap;
@@ -269,7 +283,7 @@ static void parse_args(int argc, char **argv)
 
   /* Parse command line options */
 
-  while ((ch = getopt(argc, argv, "a:bcdEefghlmnu")) > 0)
+  while ((ch = getopt(argc, argv, "a:bcdEefghLlmnu")) > 0)
     {
       switch (ch)
         {
@@ -311,6 +325,9 @@ static void parse_args(int argc, char **argv)
 
           case 'h' :
             show_usage(argv[0], EXIT_SUCCESS);
+
+          case 'L' :
+            dumpcfgs();
 
           case 'l' :
             g_host = HOST_LINUX;
@@ -811,7 +828,8 @@ static void check_configdir(void)
   if (!verify_optiondir(g_buffer))
     {
       fprintf(stderr, "ERROR: No configuration at %s\n", g_buffer);
-      enumerate_configs();
+      fprintf(stderr, "Run tools/configure -L"
+                      " to list available configurations.\n");
       exit(EXIT_FAILURE);
     }
 
@@ -1072,7 +1090,8 @@ static void check_configuration(void)
     {
       fprintf(stderr, "ERROR: No configuration in %s\n", g_configpath);
       fprintf(stderr, "       No defconfig file found.\n");
-      enumerate_configs();
+      fprintf(stderr, "Run tools/configure -L"
+                      " to list available configurations.\n");
       exit(EXIT_FAILURE);
     }
 
@@ -1097,14 +1116,16 @@ static void check_configuration(void)
                       g_configpath);
               fprintf(stderr, "       No Make.defs file in %s\n",
                       g_scriptspath);
-              enumerate_configs();
+              fprintf(stderr, "Run tools/configure -L"
+                              " to list available configurations.\n");
               exit(EXIT_FAILURE);
             }
         }
       else
         {
           fprintf(stderr, "ERROR: No Make.defs file in %s\n", g_configpath);
-          enumerate_configs();
+          fprintf(stderr, "Run tools/configure -L"
+                          " to list available configurations.\n");
           exit(EXIT_FAILURE);
         }
     }
