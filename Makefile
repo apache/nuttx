@@ -22,8 +22,11 @@
 
 ifeq ($(wildcard .config),)
 .DEFAULT default:
-	@echo "Nuttx has not been configured:"
-	@echo "  tools/configure.sh <target>"
+	@echo "NuttX has not been configured!"
+	@echo "To configure the project:"
+	@echo "  tools/configure.sh <config>"
+	@echo "For a list of available configurations:"
+	@echo "  tools/configure.sh -L"
 else
 include .config
 

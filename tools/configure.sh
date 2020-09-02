@@ -37,7 +37,7 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-E] [-e] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name> [make-opts]
+USAGE: ${0} [-E] [-e] [-l|m|c|u|g|n] [L] [-a <app-dir>] <board-name>:<config-name> [make-opts]
 
 Where:
   -E enforces distclean if already configured.
@@ -50,6 +50,7 @@ Where:
   -n selects the Windows host and Windows native (n) environment.
   Default: Use host setup in the defconfig file
   Default Windows: Cygwin
+  -L  Lists all available configurations.
   -a <app-dir> is the path to the apps/ directory, relative to the nuttx
      directory
   <board-name> is the name of the board in the boards directory
@@ -75,6 +76,17 @@ unset host
 unset enforce_distclean
 unset distclean
 
+function dumpcfgs
+{
+  configlist=`find ${TOPDIR}/boards -name defconfig`
+  for defconfig in ${configlist}; do
+    config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g"`
+    boardname=`echo ${config} | cut -d'/' -f3`
+    configname=`echo ${config} | cut -d'/' -f5`
+    echo "  ${boardname}:${configname}"
+  done
+}
+
 while [ ! -z "$1" ]; do
   case "$1" in
   -a )
@@ -97,6 +109,10 @@ while [ ! -z "$1" ]; do
     ;;
   -h )
     echo "$USAGE"
+    exit 0
+    ;;
+  -L )
+    dumpcfgs
     exit 0
     ;;
   *)
@@ -131,17 +147,9 @@ if [ ! -d ${configpath} ]; then
 
   configpath=${TOPDIR}/${boardconfig}
   if [ ! -d ${configpath} ]; then
-    echo "Directory for ${boardconfig} does not exist.  Options are:"
+    echo "Directory for ${boardconfig} does not exist."
     echo ""
-    echo "Select one of the following options for <board-name>:"
-    configlist=`find ${TOPDIR}/boards -name defconfig`
-    for defconfig in ${configlist}; do
-      config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g"`
-      boardname=`echo ${config} | cut -d'/' -f3`
-      configname=`echo ${config} | cut -d'/' -f5`
-      echo "  ${boardname}:${configname}"
-    done
-    echo ""
+    echo "Run tools/configure.sh -L to list available configurations."
     echo "$USAGE"
     exit 3
   fi
