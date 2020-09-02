@@ -20,6 +20,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+    - name: Generate requirements.txt file
+      run: |
+        cd Documentation/
+        pip3 install pipenv
+        pipenv lock -r > requirements.txt
     - uses: ammaraskar/sphinx-action@master
       with:
         docs-folder: "Documentation/"
