@@ -1,4 +1,4 @@
-# The Inviolable Principles of Nuttx
+# The Inviolable Principles of NuttX
 
 These are properties of NuttX that we can be certain of for all time:
 
@@ -69,7 +69,7 @@ Source: Oxford Dictionary of the English Language
     the supported platforms.
   - Inclusive rather than exclusive.
   - Hobbyists are valued users of the OS including retro computing hobbyists
-    * and DIY “Maker” hobbyists.
+    and DIY “Maker” hobbyists.
   - Supported toolchains:  GCC, Clang, SDCC, ZiLOG ZDS-II (c89), IAR.
     Others?
   - No changes to build system should limit use of NuttX by any user.
@@ -81,7 +81,7 @@ Source: Oxford Dictionary of the English Language
 
 ## NuttX Branding
 
-  - The official name of authentic Nuttx will always be "NuttX".
+  - The official name of authentic NuttX will always be "NuttX".
   - This name is trademarked and may not be used by other OSs or forks of
     NuttX.
 
