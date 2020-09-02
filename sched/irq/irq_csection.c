@@ -646,15 +646,6 @@ bool irq_cpu_locked(int cpu)
       return false;
     }
 
-#if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
-  /* If the global lockcount has been incremented then simply return true */
-
-  if (g_global_lockcount > 0)
-    {
-      return true;
-    }
-#endif
-
   /* Test if g_cpu_irqlock is locked.  We don't really need to use check
    * g_cpu_irqlock to do this, we can use the g_cpu_set.
    *

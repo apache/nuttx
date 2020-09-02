@@ -89,7 +89,6 @@ config ARCH_CHIP_IMX6
 	select BOOT_RUNFROMSDRAM
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
-	select ARCH_GLOBAL_IRQDISABLE
 	---help---
 		Freescale iMX.6 architectures (Cortex-A9)
 
@@ -132,7 +131,6 @@ config ARCH_CHIP_LC823450
 	select ARCH_HAVE_HEAPCHECK
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_I2CRESET
-	select ARCH_GLOBAL_IRQDISABLE
 	---help---
 		ON Semiconductor LC823450 architectures (ARM dual Cortex-M3)
 
@@ -428,7 +426,6 @@ config ARCH_CHIP_CXD56XX
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_HEAPCHECK
 	select ARCH_HAVE_MULTICPU
-	select ARCH_GLOBAL_IRQDISABLE
 	select ARCH_HAVE_SDIO if MMCSD
 	select ARCH_HAVE_MATH_H
 	---help---

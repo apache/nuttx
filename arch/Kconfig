@@ -277,15 +277,6 @@ config ARCH_HAVE_RTC_SUBSECONDS
 	bool
 	default n
 
-config ARCH_GLOBAL_IRQDISABLE
-	bool
-	default n
-	---help---
-		Indicates that disabling interrupts on one CPU will either (1) disable
-		all interrupts globally on all CPUs, or (2) will disable interprocessor
-		interrupts as well so that no context switches can occur on the CPU
-		that disabled "local" interrupts.
-
 config ARCH_HAVE_SYSCALL_HOOKS
 	bool
 	default n

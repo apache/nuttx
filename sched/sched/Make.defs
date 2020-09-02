@@ -86,11 +86,7 @@ endif
 
 ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_tasklistlock.c
-ifeq ($(CONFIG_ARCH_GLOBAL_IRQDISABLE),y)
 CSRCS += sched_thistask.c
-else ifeq ($(CONFIG_ARCH_HAVE_FETCHADD),y)
-CSRCS += sched_thistask.c
-endif
 endif
 
 ifeq ($(CONFIG_SCHED_INSTRUMENTATION_BUFFER),y)

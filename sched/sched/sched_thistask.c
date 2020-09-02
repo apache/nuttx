@@ -54,7 +54,6 @@
 FAR struct tcb_s *this_task(void)
 {
   FAR struct tcb_s *tcb;
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
   irqstate_t flags;
 
   /* If the CPU supports suppression of interprocessor interrupts, then
@@ -63,20 +62,6 @@ FAR struct tcb_s *this_task(void)
    */
 
   flags = up_irq_save();
-#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
-  /* Global locking is supported and, hence, sched_lock() will provide the
-   * necessary protection.
-   */
-
-  sched_lock();
-#else
-  /* REVISIT:  Otherwise, there is no protection available.  sched_lock() and
-   * enter_critical section are not viable options here (because both depend
-   * on this_task()).
-   */
-
-#  warning "Missing critical section"
-#endif
 
   /* Obtain the TCB which is currently running on this CPU */
 
@@ -84,11 +69,7 @@ FAR struct tcb_s *this_task(void)
 
   /* Enable local interrupts */
 
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
   up_irq_restore(flags);
-#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
-  sched_unlock();
-#endif
   return tcb;
 }
 
