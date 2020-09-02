@@ -55,4 +55,12 @@ config DRIVER_NOTERAM_BUFSIZE
 	---help---
 		The size of the in-memory, circular instrumentation buffer (in bytes).
 
+config DRIVER_NOTECTL
+	bool "Scheduler instrumentation filter control driver"
+	default n
+	depends on SCHED_INSTRUMENTATION_FILTER
+	---help---
+		If this option is selected, the instrumentation filter control device
+		/dev/notectl is provided.
+
 endif

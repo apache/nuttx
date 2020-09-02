@@ -97,6 +97,7 @@
 #define _NXTERMBASE     (0x2900) /* NxTerm character driver ioctl commands */
 #define _RFIOCBASE      (0x2a00) /* RF devices ioctl commands */
 #define _RPTUNBASE      (0x2b00) /* Remote processor tunnel ioctl commands */
+#define _NOTECTLBASE    (0x2c00) /* Note filter control ioctl commands*/
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -526,6 +527,11 @@
 
 #define _RPTUNIOCVALID(c)   (_IOC_TYPE(c)==_RPTUNBASE)
 #define _RPTUNIOC(nr)       _IOC(_RPTUNBASE,nr)
+
+/* Notectl drivers **********************************************************/
+
+#define _NOTECTLIOCVALID(c) (_IOC_TYPE(c) == _NOTECTLBASE)
+#define _NOTECTLIOC(nr)     _IOC(_NOTECTLBASE, nr)
 
 /* Wireless driver network ioctl definitions ********************************/
 
