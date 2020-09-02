@@ -332,7 +332,7 @@ and, in ELF environments, another is the PLT (Procedure Lookup Table.
 For example, if your C code generated (ARM) assembly language like this
 without PIC:
 
-.. code-block:: c-objdump
+.. code-block:: asm
 
           ldr     r1, .L0         /* Fetch the offset to 'x' */
           ldr     r0, [r10, r1]   /* Load the value of 'x' with PIC offset */
@@ -342,7 +342,7 @@ without PIC:
 Then when PIC is enabled (say with the -fpic compiler option), it will
 generate code like this:
 
-.. code-block:: c-objdump
+.. code-block:: asm
 
           ldr     r1, .L0         /* Fetch the offset to the GOT entry */
           ldr     r1, [r10, r1]   /* Fetch the (relocated) address of 'x' from the GOT */
