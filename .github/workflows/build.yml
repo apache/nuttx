@@ -89,6 +89,8 @@ jobs:
           ref: ${{ steps.gittargets.outputs.os_ref }}
           path: sources/nuttx
           fetch-depth: 1
+      - name: Checkout nuttx repo tags
+        run: git -C sources/nuttx fetch --tags
 
       - name: Checkout apps repo
         uses: actions/checkout@v2
@@ -168,15 +170,6 @@ jobs:
 
       - name: Export NuttX Repo SHA
         run:  echo "::set-env name=nuttx_sha::`git -C sources/nuttx rev-parse HEAD`"
-      - name: Refresh Git Credentials
-        uses: actions/checkout@v2
-        with:
-          repository: apache/incubator-nuttx
-          ref: ${{ env.nuttx_sha }}
-          path: sources/nuttx
-          fetch-depth: 1
-      - name: Get Tags for NuttX Repo
-        run: git -C sources/nuttx fetch --tags
       - name: Run builds
         uses: ./sources/testing/.github/actions/ci-container
         env:
@@ -224,15 +217,6 @@ jobs:
 
       - name: Export NuttX Repo SHA
         run:  echo "::set-env name=nuttx_sha::`git -C sources/nuttx rev-parse HEAD`"
-      - name: Refresh Git Credentials
-        uses: actions/checkout@v2
-        with:
-          repository: apache/incubator-nuttx
-          ref: ${{ env.nuttx_sha }}
-          path: sources/nuttx
-          fetch-depth: 1
-      - name: Get Tags for NuttX Repo
-        run: git -C sources/nuttx fetch --tags
       - name: Run Builds
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
