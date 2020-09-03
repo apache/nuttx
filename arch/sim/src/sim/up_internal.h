@@ -216,6 +216,15 @@ extern volatile uint8_t g_cpu_paused[CONFIG_SMP_NCPUS];
 
 void *up_doirq(int irq, void *regs);
 
+#ifdef CONFIG_SIM_UCONTEXT_PREEMPTION
+void *up_create_context(void **ucontext_sp, void *prev_ucontext,
+    void (*entry_point)(void));
+void up_destroy_context(void *current_ucontext, void *ucontext_sp,
+    void *next_ucontext, int cpu_id);
+void up_swap_context(void *old_ucontext, void *activate_ucontext);
+void up_set_context(void *current_context);
+#endif
+
 /* up_setjmp32.S ************************************************************/
 
 int  up_setjmp(void *jb);

@@ -76,11 +76,15 @@ typedef int xcpt_reg_t;
 
 struct xcptcontext
 {
-  void *sigdeliver; /* Actual type is sig_deliver_t */
+  void *sigdeliver;
 
+#ifdef CONFIG_SIM_UCONTEXT_PREEMPTION
+  void *ucontext_buffer; /* Actual type is ucontext_t  */
+  void *ucontext_sp;     /* The ucontext stack pointer */
+#else
   xcpt_reg_t regs[XCPTCONTEXT_REGS];
-};
 #endif
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -108,9 +112,6 @@ extern "C"
 irqstate_t up_irq_save(void);
 void up_irq_restore(irqstate_t flags);
 
-#undef EXTERN
-#ifdef __cplusplus
-}
 #endif
 
 #endif /* !__ASSEMBLY__ */

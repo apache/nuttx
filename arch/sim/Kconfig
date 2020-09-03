@@ -485,4 +485,10 @@ config SIM_HCISOCKET
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
 
+config SIM_UCONTEXT_PREEMPTION
+	bool "Preempt tasks using ucontext API"
+	default false
+	---help---
+		Save and restore the task context using ucontext API.
+
 endif # ARCH_SIM

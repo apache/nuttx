@@ -65,9 +65,12 @@
 
 void up_exit(int status)
 {
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *tcb = this_task();
+#ifdef CONFIG_SIM_UCONTEXT_PREEMPTION
+  FAR struct tcb_s *prev_tcb = tcb;
+#endif
 
-  sinfo("TCB=%p exiting\n", this_task());
+  sinfo("TCB=%p exiting\n", tcb);
 
   /* Destroy the task at the head of the ready to run list. */
 
@@ -94,7 +97,14 @@ void up_exit(int status)
 
   /* Then switch contexts */
 
+#ifdef CONFIG_SIM_UCONTEXT_PREEMPTION
+  up_destroy_context(prev_tcb->xcp.ucontext_buffer,
+                     prev_tcb->xcp.ucontext_sp,
+                     tcb->xcp.ucontext_buffer,
+                     this_cpu());
+#else
   up_longjmp(tcb->xcp.regs, 1);
+#endif
 
   /* The function does not return */
 

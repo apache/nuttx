@@ -116,7 +116,11 @@ int up_cpu_paused(int cpu)
    * this is really the previously running task restarting!
    */
 
-  if (up_setjmp(rtcb->xcp.regs) == 0)
+#ifdef CONFIG_SIM_UCONTEXT_PREEMPTION
+  FAR struct tcb_s *prev_tcb = rtcb;
+#else
+  if (!up_setjmp(rtcb->xcp.regs))
+#endif
     {
       /* Unlock the g_cpu_paused spinlock to indicate that we are in the
        * paused state
@@ -163,7 +167,12 @@ int up_cpu_paused(int cpu)
 
       /* Then switch contexts */
 
+#ifdef CONFIG_SIM_UCONTEXT_PREEMPTION
+      up_swap_context(prev_tcb->xcp.ucontext_buffer,
+          rtcb->xcp.ucontext_buffer);
+#else
       up_longjmp(rtcb->xcp.regs, 1);
+#endif
     }
 
   return OK;

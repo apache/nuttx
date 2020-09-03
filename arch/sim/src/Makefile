@@ -97,6 +97,14 @@ ifeq ($(CONFIG_SPINLOCK),y)
   HOSTSRCS += up_testset.c
 endif
 
+ifeq ($(CONFIG_SIM_UCONTEXT_PREEMPTION),y)
+  HOSTSRCS += up_ucontext.c
+ifeq ($(CONFIG_HOST_MACOS), y)
+  HOSTCFLAGS += -Wno-deprecated-declarations
+  HOSTCFLAGS += -pthread
+endif
+endif
+
 ifeq ($(CONFIG_SMP),y)
   CSRCS += up_smpsignal.c up_cpuidlestack.c
   REQUIREDOBJS += up_smpsignal$(OBJEXT)

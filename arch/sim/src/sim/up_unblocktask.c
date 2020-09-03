@@ -101,7 +101,11 @@ void up_unblock_task(FAR struct tcb_s *tcb)
        * this is really the previously running task restarting!
        */
 
+#ifdef CONFIG_SIM_UCONTEXT_PREEMPTION
+      FAR struct tcb_s *prev_tcb = rtcb;
+#else
       if (!up_setjmp(rtcb->xcp.regs))
+#endif
         {
           /* Restore the exception context of the new task that is ready to
            * run (probably tcb).  This is the new rtcb at the head of the
@@ -129,7 +133,19 @@ void up_unblock_task(FAR struct tcb_s *tcb)
 
           /* Then switch contexts */
 
+#ifdef CONFIG_SIM_UCONTEXT_PREEMPTION
+          if (prev_tcb == rtcb)
+            {
+              up_set_context(rtcb->xcp.ucontext_buffer);
+            }
+          else
+            {
+              up_swap_context(prev_tcb->xcp.ucontext_buffer,
+                              rtcb->xcp.ucontext_buffer);
+            }
+#else
           up_longjmp(rtcb->xcp.regs, 1);
+#endif
         }
     }
 }
