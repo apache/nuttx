@@ -91,7 +91,7 @@ check_patch() {
 }
 
 check_commit() {
-  diffs=`git show $1`
+  diffs=`git diff $1`
   check_ranges <<< "$diffs"
 }
 

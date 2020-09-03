@@ -33,7 +33,7 @@ jobs:
       run: |
         echo "::add-matcher::nuttx/.github/nxstyle.json"
         cd nuttx
-        commits=`git log -1 --merges --pretty=format:%P | awk -F" " '{ print $1 ".." $2 }'`
+        commits="${{ github.event.pull_request.base.sha }}..HEAD"
         git log --oneline $commits
         echo "../nuttx/tools/checkpatch.sh -g $commits"
         ../nuttx/tools/checkpatch.sh -g $commits
