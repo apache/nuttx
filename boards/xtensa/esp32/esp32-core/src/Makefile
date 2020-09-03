@@ -45,6 +45,14 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += esp32_appinit.c
 endif
 
+ifeq ($(CONFIG_ESP32_SPI),y)
+CSRCS += esp32_spi.c
+endif
+
+ifeq ($(CONFIG_MMCSD),y)
+CSRCS += esp32_mmcsd.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
 

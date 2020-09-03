@@ -81,6 +81,15 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_MMCSD
+  ret = esp32_mmcsd_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n", ret);
+      return ret;
+    }
+#endif
+
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.
