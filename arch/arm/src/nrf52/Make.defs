@@ -89,7 +89,7 @@ ifeq ($(CONFIG_ARCH_CHIP_NRF52832),y)
 CHIP_CSRCS += nrf52832_errdata.c
 endif
 
-CHIP_CSRCS += nrf52_timerisr.c
+CHIP_CSRCS += nrf52_systimer.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += nrf52_userspace.c nrf52_mpuinit.c
