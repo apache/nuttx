@@ -221,4 +221,4 @@ jobs:
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
           cd sources/testing
-          ./cibuild.sh -i -x testlist/${{matrix.boards}}.dat
+          ./cibuild.sh -i -c -x testlist/${{matrix.boards}}.dat
