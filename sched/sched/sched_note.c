@@ -29,6 +29,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <time.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
@@ -117,7 +118,13 @@ static void note_common(FAR struct tcb_s *tcb,
                         FAR struct note_common_s *note,
                         uint8_t length, uint8_t type)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
+  struct timespec ts;
+
+  clock_systime_timespec(&ts);
+#else
   uint32_t systime    = (uint32_t)clock_systime_ticks();
+#endif
 
   /* Save all of the common fields */
 
@@ -130,12 +137,23 @@ static void note_common(FAR struct tcb_s *tcb,
   note->nc_pid[0]     = (uint8_t)(tcb->pid & 0xff);
   note->nc_pid[1]     = (uint8_t)((tcb->pid >> 8) & 0xff);
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
+  note->nc_systime_nsec[0] = (uint8_t)(ts.tv_nsec         & 0xff);
+  note->nc_systime_nsec[1] = (uint8_t)((ts.tv_nsec >> 8)  & 0xff);
+  note->nc_systime_nsec[2] = (uint8_t)((ts.tv_nsec >> 16) & 0xff);
+  note->nc_systime_nsec[3] = (uint8_t)((ts.tv_nsec >> 24) & 0xff);
+  note->nc_systime_sec[0] = (uint8_t)(ts.tv_sec         & 0xff);
+  note->nc_systime_sec[1] = (uint8_t)((ts.tv_sec >> 8)  & 0xff);
+  note->nc_systime_sec[2] = (uint8_t)((ts.tv_sec >> 16) & 0xff);
+  note->nc_systime_sec[3] = (uint8_t)((ts.tv_sec >> 24) & 0xff);
+#else
   /* Save the LS 32-bits of the system timer in little endian order */
 
   note->nc_systime[0] = (uint8_t)(systime         & 0xff);
   note->nc_systime[1] = (uint8_t)((systime >> 8)  & 0xff);
   note->nc_systime[2] = (uint8_t)((systime >> 16) & 0xff);
   note->nc_systime[3] = (uint8_t)((systime >> 24) & 0xff);
+#endif
 }
 
 /****************************************************************************
