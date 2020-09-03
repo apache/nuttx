@@ -178,11 +178,11 @@ void up_idle(void)
 
   /* Sleep until an interrupt occurs to save power
    *
-   * REVISIT: The SysTick's clock will only tick when the CPU is
+   * The SysTick's clock will only tick when the CPU is
    * running (not in WFE/WFI) or when the system is in debug interface mode.
    */
 
-#if 0
+#ifndef CONFIG_NRF52_SYSTIMER_SYSTICK
   BEGIN_IDLE();
   asm("WFI");
   END_IDLE();

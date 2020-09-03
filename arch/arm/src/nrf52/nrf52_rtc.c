@@ -77,6 +77,8 @@ static int nrf52_rtc_start(FAR struct nrf52_rtc_dev_s *dev);
 static int nrf52_rtc_stop(FAR struct nrf52_rtc_dev_s *dev);
 static int nrf52_rtc_clear(FAR struct nrf52_rtc_dev_s *dev);
 static int nrf52_rtc_trgovrflw(FAR struct nrf52_rtc_dev_s *dev);
+static int nrf52_rtc_getcounter(FAR struct nrf52_rtc_dev_s *dev,
+                                FAR uint32_t *cc);
 static int nrf52_rtc_setcc(FAR struct nrf52_rtc_dev_s *dev, uint8_t i,
                            uint32_t cc);
 static int nrf52_rtc_getcc(FAR struct nrf52_rtc_dev_s *dev, uint8_t i,
@@ -104,6 +106,7 @@ struct nrf52_rtc_ops_s nrf52_rtc_ops =
   .stop       = nrf52_rtc_stop,
   .clear      = nrf52_rtc_clear,
   .trgovrflw  = nrf52_rtc_trgovrflw,
+  .getcounter = nrf52_rtc_getcounter,
   .setcc      = nrf52_rtc_setcc,
   .getcc      = nrf52_rtc_getcc,
   .setpre     = nrf52_rtc_setpre,
@@ -367,6 +370,17 @@ static int nrf52_rtc_trgovrflw(FAR struct nrf52_rtc_dev_s *dev)
 
   nrf52_rtc_putreg(dev, NRF52_RTC_TASKS_TRIGOVRFLW_OFFSET,
                    RTC_TASKS_TRIGOVRFLW);
+
+  return OK;
+}
+
+static int nrf52_rtc_getcounter(FAR struct nrf52_rtc_dev_s *dev,
+                                FAR uint32_t *ctr)
+{
+  DEBUGASSERT(dev);
+  DEBUGASSERT(ctr);
+
+  *ctr = nrf52_rtc_getreg(dev, NRF52_RTC_COUNTER_OFFSET);
 
   return OK;
 }
