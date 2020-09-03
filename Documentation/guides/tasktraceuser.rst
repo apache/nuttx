@@ -52,6 +52,10 @@ The following configurations are configurable parameters for trace.
   - If enabled, stop overwriting old notes in the circular buffer when the buffer is full by default.
     This is useful to keep instrumentation data of the beginning of a system boot.
 
+- ``CONFIG_SCHED_INSTRUMENTATION_HIRES``
+
+  - If enabled, use higher resolution system timer for instrumentation.
+
 After the configuration, rebuild the NuttX kernel and application.
 
 If the trace function is enabled, "``trace``" :doc:`../components/nsh/builtin` will be available.

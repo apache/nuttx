@@ -157,7 +157,13 @@ struct note_common_s
   uint8_t nc_cpu;              /* CPU thread/task running on */
 #endif
   uint8_t nc_pid[2];           /* ID of the thread/task */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
+  uint8_t nc_systime_sec[4];   /* Time when note was buffered (sec) */
+  uint8_t nc_systime_nsec[4];  /* Time when note was buffered (nsec) */
+#else
   uint8_t nc_systime[4];       /* Time when note was buffered */
+#endif
 };
 
 /* This is the specific form of the NOTE_START note */

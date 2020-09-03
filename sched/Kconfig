@@ -990,6 +990,12 @@ config SCHED_INSTRUMENTATION_IRQHANDLER
 
 			void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 
+config SCHED_INSTRUMENTATION_HIRES
+	bool "Use Hi-Res RTC for instrumentation"
+	default n
+	---help---
+		Use higher resolution system timer for instrumentation.
+
 config SCHED_INSTRUMENTATION_FILTER
 	bool "Instrumenation filter"
 	default n
