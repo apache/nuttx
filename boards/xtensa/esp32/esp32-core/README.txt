@@ -771,6 +771,17 @@ NOTES:
        crash in the waitpid() test.  At the time of the crash, there is
        extensive memory corruption and a user exception occurs (cause=28).
 
+  mmcsdspi:
+
+    This config tests the SPI driver by connecting an SD Card reader over SPI.
+    SPI2 is used and kept with the default IOMUX pins, i.e.:
+        CS   --> 15
+        SCK  --> 14
+        MOSI --> 13
+        MISO --> 12
+    Once booted the following command is used to mount a FAT file system:
+        mount -t vfat /dev/mmcsd0 /mnt
+
 Things to Do
 ============
 
