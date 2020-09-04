@@ -32,18 +32,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS
-
-#  ifndef CONFIG_SCHED_TICKLESS_ALARM
-#    error CONFIG_SCHED_TICKLESS_ALARM must be set to use CONFIG_SCHED_TICKLESS
-#  endif
-
-#  ifndef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-#    error CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP must be set to use CONFIG_SCHED_TICKLESS
-#  endif
-
-#endif
-
 #define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
 #define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
 #define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
