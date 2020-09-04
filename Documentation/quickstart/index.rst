@@ -1,16 +1,28 @@
 .. todo::
-  This should be a brief introduction to how NuttX works and how to get it running. A widely used board could be targeted to create a brief demonstration on how to clone, configure, build, flash and run NuttX.
-  For now, the content that is here presented is what remains of the old Porting Guide which is not already in another section of this documentation.
 
-==========
-Quickstart
-==========
+===============
+Getting Started
+===============
 
-The present Quickstart guide is a work in progress and only contains some basic information. In the meantime you can look at NuttX main `README <https://github.com/apache/incubator-nuttx/blob/master/README.md>`_ file which contains some information that will help you get started.
+This section describes how to get started with NuttX. :ref:`quickstart/quickstart:Quickstart` is for
+experienced embedded developers, and quickly outlines the basic of getting NuttX configured and
+compiled. Use this if you are experienced with FreeRTOS, Zephyr, or a similar RTOS.
+
+The remaining sections are detailed instructions aimed at beginners for getting the necessary
+compilers and other tools installed, then compiling NuttX and running on your hardware. There are sections
+on configuring NuttX with more features than just the minimum, and a section on debugging. For reference
+there is also a description of the code organization and some details about what happens when running ``make``
+to build NuttX.
 
 .. toctree::
   :maxdepth: 1
   
+  quickstart.rst
+  install.rst
+  compiling.rst
+  running.rst
+  configuring.rst
+  debugging.rst
   organization.rst
-  config_build.rst
-  
+  build_and_make.rst
+
