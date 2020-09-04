@@ -189,12 +189,6 @@ squash before submitting the Pull Request:
 
 #. Rebase onto the upstream code
 
-   * Your favorite text editor will start and shows the commands for the interactive rebasing.
-   * Change the "pick" to "squash" for all the commits you want to squash.
-   * For the series of commits to squash, keep the first one with "pick".
-   * Once you save and exist your editor will start again to merge all the commit messages.
-   * Add a commit message that best describes your change then save and exit.
-
     .. code-block:: bash
 
        $ git rebase upstream/master
