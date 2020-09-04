@@ -1,8 +1,11 @@
 .. include:: /substitutions.rst
 .. _making-changes:
 
-Making Changes
-==============
+Making Changes Using Git
+========================
+
+The Apache NuttX project uses the `Git version control system <https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control>`_
+to track changes, and the source code is hosted on `GitHub <https://www.github.com>`_.
 
 If you want to make changes to NuttX, for your own personal use, or to submit them back to project to improve NuttX,
 that's easy. For the purposes of this guide, you'll need a `GitHub <https://www.github.com>`_ account, since
@@ -24,8 +27,6 @@ Here's how to do it:
 
    If you don't have a `GitHub <https://www.github.com>`_ account, it's free to
    sign up.
-   |br|
-   |br|
 
 
 #. Fork the Project
