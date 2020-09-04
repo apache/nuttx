@@ -1,8 +1,14 @@
+.. include:: /substitutions.rst
+.. _organization:
+
 ===================
 Directory Structure
 ===================
 
-**Directory Structure**. The general directory layout for NuttX is
+This is included for reference, and it's not necessary to know
+all the details at first.
+
+The general directory layout for NuttX is
 very similar to the directory structure of the Linux kernel -- at
 least at the most superficial layers. At the top level is the main
 makefile and a series of sub-directories identified below and
@@ -62,10 +68,12 @@ specified by several settings in the NuttX configuration file.
    board and is selected via the
    ``CONFIG_ARCH_BOARD="stm32f4discovery"`` configuration setting.
 
-Documentation
-=============
+``nuttx/Documentation``
+=======================
 
-General documentation for the NuttX OS resides in this directory.
+This directory holds the NuttX documentation. It's made with
+the `Sphinx documentation system <https://www.sphinx-doc.org>`_. See the
+README.md file for information on how to build it.
 
 ``nuttx/arch``
 ==============
@@ -221,8 +229,8 @@ Current architecture/chip directories are summarized below:
    At present, this includes the Zilog z80, ez80Acclaim! and
    z8Encore! Microcontrollers.
 
-nuttx/binfmt
-============
+``nuttx/binfmt``
+================
 
 The ``binfmt/`` subdirectory contains logic for loading binaries
 in the file system into memory in a form that can be used to
@@ -499,3 +507,7 @@ The top-level ``Makefile`` in the ``$(TOPDIR)`` directory contains
 all of the top-level control logic to build NuttX. Use of this
 ``Makefile`` to build NuttX is described
 `below <#buildingnuttx>`__.
+
+----
+
+Next up is :ref:`build_and_make`.
