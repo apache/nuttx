@@ -614,6 +614,18 @@ void stm32_lowsetup(void)
   /* Enable and configure the selected console device */
 
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+  /* Ensure the USART is disabled because some bits of the following
+   * registers cannot be modified otherwise.
+   *
+   * Although the USART is expected to be disabled at power on reset, this
+   * might not be the case if we boot from a serial bootloader that does not
+   * clean up properly.
+   */
+
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
+  cr &= ~USART_CR1_UE;
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
+
   /* Configure CR2 */
 
   cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
