@@ -102,7 +102,7 @@ LINKLIBS = $(patsubst staging\\%,%,$(NUTTXLIBS))
 # Export tool definitions
 
 MKEXPORT = tools\mkexport.bat
-MKEXPORT_ARGS = -w$(CONFIG_CYGWIN_WINTOOL) -t "$(TOPDIR)"
+MKEXPORT_ARGS = -t "$(TOPDIR)"
 
 ifneq ($(CONFIG_BUILD_FLAT),y)
 MKEXPORT_ARGS += -u
