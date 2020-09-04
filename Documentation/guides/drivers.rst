@@ -22,16 +22,14 @@ modification.
   * Note that you'll have to compare the datasheet to the header and code files to see if there are differences; there
     will usually be some differences between architectures, and they can be significant.
 
-* Find a similar driver in U-Boot source code:
+* Find a similar driver in U-Boot, Zephyr or BSD Unix (OpenBSD, FreeBSD, NetBSD) source code:
 
-  * Only for inspiration, you can't copy code because of license incompatibility.
+  * Only for inspiration, you can't copy code because of license incompatibility and Apache Foundation restrictions.
+    (Apache License 2.0 and BSD code can come in with a software grant agreement from the original authors; this can
+    sometimes be hard to get. Ask on the mailing list if you're unsure.)
   * But you can debug to see how the driver works.
   * `U-Boot <https://www.denx.de/wiki/U-Boot>`_ drivers are often easier to understand than BSD Unix drivers because
     U-Boot is simpler.
-
-* Find a similar driver in Zephyr or BSD Unix (OpenBSD, FreeBSD, NetBSD):
-
-  * If you find one, you can borrow code directly (Apache 2.0 and BSD licenses are compatible).
 
 * Understanding how the driver works
 
