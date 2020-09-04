@@ -39,7 +39,8 @@
 
 #include <stdint.h>
 #include <pthread.h>
-#include <semaphore.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include <signal.h>
 #include <sched.h>
 #include <errno.h>
@@ -52,8 +53,10 @@
 
 struct sim_cpuinfo_s
 {
-  int cpu;    /* CPU number */
-  sem_t done; /* For synchronization */
+  int cpu;                       /* CPU number */
+  pthread_cond_t cpu_init_done;  /* For synchronization */
+  pthread_mutex_t cpu_init_lock;
+  bool is_cpu_initialized;
 };
 
 /****************************************************************************
@@ -145,7 +148,12 @@ static void *sim_idle_trampoline(void *arg)
 
   /* Let up_cpu_start() continue */
 
-  sem_post(&cpuinfo->done);
+  pthread_mutex_lock(&cpuinfo->cpu_init_lock);
+
+  cpuinfo->is_cpu_initialized = true;
+  pthread_cond_signal(&cpuinfo->cpu_init_done);
+
+  pthread_mutex_unlock(&cpuinfo->cpu_init_lock);
 
   /* up_cpu_started() is logically a part of this function but needs to be
    * inserted in the path because in needs to access NuttX domain definition.
@@ -324,11 +332,10 @@ int up_cpu_start(int cpu)
   /* Initialize the CPU info */
 
   cpuinfo.cpu = cpu;
-  ret = sem_init(&cpuinfo.done, 0, 0);
-  if (ret != 0)
-    {
-      return -errno;  /* REVISIT:  That is a host errno value. */
-    }
+  cpuinfo.is_cpu_initialized = false;
+
+  pthread_mutex_init(&cpuinfo.cpu_init_lock, NULL);
+  pthread_cond_init(&cpuinfo.cpu_init_done, NULL);
 
   /* Start the CPU emulation thread.  This is analogous to starting the CPU
    * in a multi-CPU hardware model.
@@ -339,19 +346,23 @@ int up_cpu_start(int cpu)
   if (ret != 0)
     {
       ret = -ret;  /* REVISIT:  That is a host errno value. */
-      goto errout_with_sem;
+      goto errout_with_cond;
     }
 
   /* This will block until the pthread post the semaphore */
 
-  ret = sem_wait(&cpuinfo.done);
-  if (ret != 0)
+  pthread_mutex_lock(&cpuinfo.cpu_init_lock);
+
+  while (!cpuinfo.is_cpu_initialized)
     {
-      ret = -errno;  /* REVISIT:  That is a host errno value. */
+      pthread_cond_wait(&cpuinfo.cpu_init_done, &cpuinfo.cpu_init_lock);
     }
 
-errout_with_sem:
-  sem_destroy(&cpuinfo.done);
+  pthread_mutex_unlock(&cpuinfo.cpu_init_lock);
+
+errout_with_cond:
+  pthread_mutex_destroy(&cpuinfo.cpu_init_lock);
+  pthread_cond_destroy(&cpuinfo.cpu_init_done);
   return ret;
 }
 
