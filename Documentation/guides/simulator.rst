@@ -25,14 +25,6 @@ Compiling
 
    Here we'll use the ``sim:nsh`` basic NuttX Shell configuration.
 
-   Here we'll use the ``sim:tcpblaster`` configuration because it comes with networking
-   that is ready to use.
-
-    .. code-block:: console
-
-       $ cd nuttx
-       $ ./tools/configure.sh sim:tcpblaster
-
     .. code-block:: console
 
        $ cd nuttx
