@@ -11,7 +11,9 @@ application, or other communication protocols. It's also handy for trying out Ap
 having a piece of embedded hardware.
 
 This guide assumes you're on Linux. It works on Windows and Mac too— if you know how,
-submit a PR the NuttX Companion to update this guide!
+submit a PR to improve this guide!
+
+.. todo:: Add Mac and Windows instructions
 
 Compiling
 ---------
@@ -21,35 +23,85 @@ Compiling
    There are a lot of simulator configurations available that set you up to test various
    operating system features.
 
+   Here we'll use the ``sim:nsh`` basic NuttX Shell configuration.
+
    Here we'll use the ``sim:tcpblaster`` configuration because it comes with networking
    that is ready to use.
 
-    .. code-block:: bash
+    .. code-block:: console
 
        $ cd nuttx
        $ ./tools/configure.sh sim:tcpblaster
 
+    .. code-block:: console
+
+       $ cd nuttx
+       $ ./tools/configure.sh sim:nsh
+
 #. Compile
 
-    .. code-block:: bash
+    .. code-block:: console
 
-       $ make clean; make
+       $ make
 
-Running
--------
+#. Run the simulator:
+
+    .. code-block:: console
+
+       $ ./nuttx
+       login: admin
+       password: Administrator
+       User Logged-in!
+
+       NuttShell (NSH) NuttX-9.1.0
+       MOTD: username=admin password=Administrator
+       nsh> help
+       help usage:  help [-v] [<cmd>]
+
+         [         cp        exit      losetup   mv        rmdir     true
+         ?         cmp       false     ls        mw        set       uname
+         basename  dirname   free      mb        poweroff  sh        unset
+         break     dd        help      mkdir     ps        sleep     usleep
+         cat       echo      hexdump   mkfatfs   pwd       test      xd
+         cd        exec      kill      mh        rm        time
+
+       Builtin Apps:
+         hello  nsh
+
+       nsh>
+
+#. Stop the simulator:
+
+    .. code-block:: console
+
+       nsh> poweroff
+       $
+       $ # we're back at the Linux prompt.
+
+Accessing the Network
+---------------------
+
+#. Here we'll use the ``sim:tcpblaster`` configuration because it comes with networking
+   that is ready to use.
+
+    .. code-block:: console
+
+       $ make distclean
+       $ ./tools/configure.sh sim:tcpblaster
+       $ make
 
 #. Give the Simulator Privileges
 
    On recent Linux distributions, you need to give the ``nuttx`` program the capabilities
    (similar to permissions) to access the network:
 
-    .. code-block:: bash
+    .. code-block:: console
 
        $ sudo setcap cap_net_admin+ep ./nuttx
 
 #. Run the simulator:
 
-    .. code-block:: bash
+    .. code-block:: console
 
        $ ./nuttx
 
@@ -57,14 +109,14 @@ Running
 
    On Apache NuttX:
 
-    .. code-block:: bash
+    .. code-block:: console
 
        nsh> ifup eth0
 
    On Linux, first you need to find your main network interface— this will usually either
    be an ethernet or wireless network adapter. Do this:
 
-    .. code-block:: bash
+    .. code-block:: console
 
        $ ifconfig
        lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
@@ -92,7 +144,7 @@ Running
    Then, on Linux do this to set up the tap network interface and route that will let
    the Apache Nuttx simulator access the network:
 
-    .. code-block:: bash
+    .. code-block:: console
 
        $ sudo ./tools/simhostroute.sh wlp0s20f3 on
        $ ping -c 1 10.0.1.2  # nuttx system
@@ -108,7 +160,7 @@ Running
    First let's ping the network interface of our Linux host to prove we can see the
    gateway to the Internet:
 
-    .. code-block:: bash
+    .. code-block:: console
 
        nsh> ping -c 1 10.0.1.1
        nsh> ping -c 1 10.0.1.1
@@ -119,7 +171,7 @@ Running
     Now let's ping one of Google's DNS servers to prove we can access the rest of the
     Internet:
 
-    .. code-block:: bash
+    .. code-block:: console
 
        nsh> ping -c 1 8.8.8.8
        PING 8.8.8.8 56 bytes of data
@@ -131,9 +183,9 @@ Running
 Stopping
 --------
 
-The only really effective way to stop the simulator is kill it from another terminal:
+If you don't have an nsh prompt, the only effective way to stop the simulator is kill it from another terminal:
 
-    .. code-block:: bash
+    .. code-block:: console
 
        $ pkill nuttx
 
