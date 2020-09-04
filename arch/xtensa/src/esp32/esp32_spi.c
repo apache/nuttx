@@ -1052,7 +1052,7 @@ static void esp32_spi_poll_exchange(FAR struct esp32_spi_priv_s *priv,
 
   for (i = 0 ; i < nwords; i++)
     {
-      uint32_t w_wd = 0;
+      uint32_t w_wd = 0xffff;
       uint32_t r_wd;
 
       if (txbuffer)
