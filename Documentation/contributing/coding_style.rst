@@ -1,7 +1,7 @@
-=================
 .. include:: /substitutions.rst
 .. _coding-standard:
 
+=================
 C Coding Standard
 =================
 
