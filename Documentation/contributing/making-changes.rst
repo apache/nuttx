@@ -202,6 +202,56 @@ squash before submitting the Pull Request:
 
        $ git checkout my-branch
 
+#. Fetch the upstream code
+
+    .. code-block:: bash
+
+       $ git fetch upstream
+
+#. Rebase onto the upstream code
+
+   * Your favorite text editor will start and shows the commands for the interactive rebasing.
+   * Change the "pick" to "squash" for all the commits you want to squash.
+   * For the series of commits to squash, keep the first one with "pick".
+   * Once you save and exist your editor will start again to merge all the commit messages.
+   * Add a commit message that best describes your change then save and exit.
+
+    .. code-block:: bash
+
+       $ git rebase upstream/master
+
+#. Push to your remote
+
+   This needs to a force push with ``-f``.
+
+    .. code-block:: bash
+
+       $ git push -u my-branch -f
+
+#. Create a GitHub Pull Request
+
+   A Pull Request is how you ask your upstream to review and merge your changes.
+
+   Here's `GitHub's instructions for creating a Pull Request <https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request>`_.
+
+#. Get Pull Request feedback and implement changes
+
+   Get suggestions for improvements from reviewers, make changes, and push them to the branch. Once the reviewers are
+   happy, they may suggest squashing and merging again to make a single commit. In this case you would repeat steps
+   1 through 6.
+
+Alternative to Rebasing
+~~~~~~~~~~~~~~~~~~~~~~~
+
+This is an alternative way to do it if you don't want to rebase.
+
+#. Check out my branch
+
+    .. code-block:: bash
+
+       $ git checkout my-branch
+
+
 #. Rename it to ``my-branch-old`` to save it, because we're going to create new clean branch to push:
 
     .. code-block:: bash
@@ -240,8 +290,6 @@ squash before submitting the Pull Request:
 
    Here's `GitHub's instructions for creating a Pull Request <https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request>`_.
 
-   |br|
-
 #. Get Pull Request feedback and implement changes
 
    Get suggestions for improvements from reviewers, make changes, and push them to the branch. Once the reviewers are
@@ -253,5 +301,5 @@ Git Resources
 
 * `Git Cheat Sheet (by GitHub) <https://github.github.com/training-kit/downloads/github-git-cheat-sheet.pdf>`_
 * `Git Book (online) <https://git-scm.com/book/en/v2>`_
-* `NuttX Code Contribution Workflow <https://cwiki.apache.org/confluence/display/NUTTX/Code+Contribution+Workflow>`_ –
-  All the details are here if you need them!
+* `NuttX Code Contribution Workflow (draft) <https://cwiki.apache.org/confluence/display/NUTTX/Code+Contribution+Workflow>`_
+  – All the details are here if you need them!
