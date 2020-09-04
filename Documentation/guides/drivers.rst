@@ -179,12 +179,12 @@ code implements the necessary algorithms often helps one understand how the driv
       in a header file that your code will use to operate on the registers. Refer to other driver header files for
       examples.
 
-`Logic analyzers <https://en.wikipedia.org/wiki/Logic_analyzer>`_
------------------------------------------------------------------
+Logic Analyzers
+---------------
 
 For drivers that involve input and output (I/O), especially that involve complex protocols like SD Cards, SPI, I2C,
-etc., actually seeing the waveform that goes in and out the chip's pins is extremely helpful. Logic analyzers can
-capture that information and display it graphically, allowing you to see if the driver is doing the right thing
+etc., actually seeing the waveform that goes in and out the chip's pins is extremely helpful. `Logic Analyzers <https://en.wikipedia.org/wiki/Logic_analyzer>`_
+can capture that information and display it graphically, allowing you to see if the driver is doing the right thing
 on the wire.
 
 DMA Debugging
@@ -203,9 +203,4 @@ DMA Debugging
 * printf debugging register states can also help here.
 * Remember that logging can change the timing of any algorithms you might be using, so things may start or stop
   working when logging is added or removed. Definitely test with logging disabled.
-
-
-
-
-
 
