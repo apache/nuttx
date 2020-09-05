@@ -6,38 +6,49 @@ Debugging
 
 Finding and fixing bugs is an important part of the hardware and software development process. Sometimes you also need
 to use debugging techniques to understand how the system works. Two tools that are helpful are debug logging and
-debugging using the Gnu Debugger (gdb).
+debugging using the GNU Debugger (gdb).
 
 Debug Logging
 -------------
 
-NuttX has a powerful logging facility with ``info``, ``warn``, and ``error`` levels. You can enable debugging for your
-build for the ``net`` feature (TCP/IP stack) by putting the following lines in your ``.config`` file:
+NuttX has a powerful system logging facility (syslog) with ``info``, ``warn``, and ``error`` levels. You can enable
+debugging for your build for the subsystem or feature by using the ``menuconfig`` system.
 
-    ::
+.. code-block:: console
 
-       CONFIG_DEBUG_ALERT=y
-       CONFIG_DEBUG_FEATURES=y
-       CONFIG_DEBUG_ERROR=y
-       CONFIG_DEBUG_WARN=y
-       CONFIG_DEBUG_INFO=y
-       CONFIG_DEBUG_ASSERTIONS=y
-       CONFIG_DEBUG_NET=y
-       CONFIG_DEBUG_NET_ERROR=y
-       CONFIG_DEBUG_NET_WARN=y
-       CONFIG_DEBUG_NET_INFO=y
-       CONFIG_DEBUG_SYMBOLS=y
-       CONFIG_DEBUG_NOOPT=y
-       CONFIG_SYSLOG_TIMESTAMP=y
+   $ make menuconfig
 
-Note that turning all these to ``y`` will produce an incredible amount of logging output. Set the level you want and
-the area you're interested in to ``y``, and the rest to ``n``, and then recompile. You can see the full list of
-debug feature areas in the file `debug.h <https://github.com/apache/incubator-nuttx/blob/master/include/debug.h>`__.
+The debug options are available under ``Build Setup`` > ``Debug Options``. You will most likely have to enable the
+following options:
 
-Timestamps can be enabled by setting ``CONFIG_SYSLOG_TIMESTAMP=y``.
+* ``Enable Debug Features`` — selecting this will turn on subsystem-level debugging options, they will become visible
+  on the page below. You can then select the ones you want.
+* ``Enable Error Output`` — this will only log errors.
+* ``Enable Warnings Output`` — this will log warnings and errors.
+* ``Enable Informational Debug Output`` — this will produce informational output, warnings, and errors.
+
+You can then select from the subsystems that are available, Network, Scheduler, USB, etc. Note that you will need to
+separately enable the subsystem elsewhere in the ``menuconfig`` system. To see the ``CONFIG`` define that is set,
+use the arrow keys to highlight the subsystem (for instance, ``Network Debug Features``) and type '?'. This will show
+you that the C macro that is set is called ``CONFIG_DEBUG_NET``. ``debug.h`` defines the ``netinfo()`` logging
+function that will log output if this macro is set. You can search the source code for ``netinfo`` to see how it is
+used.
+
+.. image:: ../_static/images/menuconfig-debug.png
+    :width: 800px
+    :align: center
+    :alt: Screenshot of menuconfig system main screen
+
+Note that enabling all these will produce an incredible amount of logging output. Enable the level you want and
+the area you're interested in, and leave the rest disabled, save the config, and then recompile. You can see the full
+list of debug feature logging functions in the file
+`debug.h <https://github.com/apache/incubator-nuttx/blob/master/include/debug.h>`__.
+
+Syslog timestamps can be enabled in the ``menuconfig`` system using ``Device Drivers`` > ``System Logging`` > ``Prepend
+timestamp to syslog message`` (``CONFIG_SYSLOG_TIMESTAMP``).
 
 You may need to do a little bit of experimenting to find the combination of logging settings that work for the problem
-you're trying to solve. See the file `debug.h <https://github.com/starcat-io/incubator-nuttx/blob/master/include/debug.h>`_
+you're trying to solve. See the file `debug.h <https://github.com/apache/incubator-nuttx/blob/master/include/debug.h>`_
 for available debug settings that are available. This can also be configured via the ``menuconfig`` system.
 
 There are also subsystems that enable USB trace debugging, and you can log to memory too, if you need the logging to be
@@ -49,63 +60,33 @@ Changing Debug Settings Quickly
 You can use the ``kconfig-tweak`` script that comes with the ``kconfig-frontends`` tools to quickly change debug settings,
 for instance turning them on or off before doing a build:
 
-.. code-block:: bash
+.. code-block:: console
 
    $ kconfig-tweak --disable CONFIG_DEBUG_NET
+   $ make olddefconfig  # needed to have the kconfig system check the config
    $ kconfig-tweak --enable CONFIG_DEBUG_NET
+   $ make olddefconfig
 
 You can put a bunch of these into a simple script to configure the logging the way you want:
 
-.. code-block:: bash
+.. code-block:: console
 
    #!/bin/bash
 
-   $ kconfig-tweak --disable CONFIG_DEBUG_ALERT
-   $ kconfig-tweak --disable CONFIG_DEBUG_FEATURES
-   $ kconfig-tweak --disable CONFIG_DEBUG_ERROR
-   $ kconfig-tweak --disable CONFIG_DEBUG_WARN
-   $ kconfig-tweak --disable CONFIG_DEBUG_INFO
-   $ kconfig-tweak --disable CONFIG_DEBUG_ASSERTIONS
-   $ kconfig-tweak --disable CONFIG_DEBUG_NET
-   $ kconfig-tweak --disable CONFIG_DEBUG_NET_ERROR
-   $ kconfig-tweak --disable CONFIG_DEBUG_NET_WARN
-   $ kconfig-tweak --disable CONFIG_DEBUG_NET_INFO
-   $ kconfig-tweak --disable CONFIG_DEBUG_SYMBOLS
-   $ kconfig-tweak --disable CONFIG_DEBUG_NOOPT
-   $ kconfig-tweak --disable CONFIG_SYSLOG_TIMESTAMP
-
-Custom Debug Logging
---------------------
-
-Sometimes you need to see debug logs specific to your feature, and you don't want the rest of the built-in logs
-because they're either not relevant or have too much information. Debugging using logs is surprisingly powerful.
-
-
-You can add your own custom debug logging by adding the following lines to
-`debug.h <https://github.com/apache/incubator-nuttx/blob/master/include/debug.h>`__:
-
-.. code-block:: c
-
-   /* after the CONFIG_DEBUG_WATCHDOG_INFO block near line 721 */
-   #ifdef CONFIG_DEBUG_CUSTOM_INFO
-   #  define custinfo    _info
-   #else
-   #  define custinfo    _none
-   #endif
-
-You need to add the following line to your ``.config`` file:
-
-.. code-block:: c
-
-   CONFIG_DEBUG_CUSTOM_INFO=y
-
-You would use it like this:
-
-.. code-block:: c
-
-   /* Custom debug logging */
-   custinfo("This is a custom log message.");
-   custinfo("Custom log data: %d", my-integer-variable);
+   kconfig-tweak --disable CONFIG_DEBUG_ALERT
+   kconfig-tweak --disable CONFIG_DEBUG_FEATURES
+   kconfig-tweak --disable CONFIG_DEBUG_ERROR
+   kconfig-tweak --disable CONFIG_DEBUG_WARN
+   kconfig-tweak --disable CONFIG_DEBUG_INFO
+   kconfig-tweak --disable CONFIG_DEBUG_ASSERTIONS
+   kconfig-tweak --disable CONFIG_DEBUG_NET
+   kconfig-tweak --disable CONFIG_DEBUG_NET_ERROR
+   kconfig-tweak --disable CONFIG_DEBUG_NET_WARN
+   kconfig-tweak --disable CONFIG_DEBUG_NET_INFO
+   kconfig-tweak --disable CONFIG_DEBUG_SYMBOLS
+   kconfig-tweak --disable CONFIG_DEBUG_NOOPT
+   kconfig-tweak --disable CONFIG_SYSLOG_TIMESTAMP
+   make oldconfig
 
 
 JTAG Debugging

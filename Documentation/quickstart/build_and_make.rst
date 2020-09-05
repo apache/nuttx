@@ -19,9 +19,9 @@ The ``$(TOPDIR)`` directory holds:
 
 That directory also holds:
 
--  The makefile fragment ```.config`` <#boardconfigsubdirs>`__
+-  The makefile fragment :ref:`.config <nuttx_boards>`
    that describes the current configuration, and
--  The makefile fragment ```Make.defs`` <#boardconfigsubdirs>`__
+-  The makefile fragment :ref:`Make.defs <nuttx_boards>`
    that provides customized build targets.
 
 Environment Variables
@@ -31,8 +31,7 @@ The specific environmental definitions
 are unique for each board but should include, as a minimum,
 updates to the ``PATH`` variable to include the full path to the
 architecture-specific toolchain identified in
-```Make.defs`` <#boardconfigsubdirs>`__.
-
+:ref:`Make.defs <nuttx_boards>`.
 
 First Time Make
 ---------------

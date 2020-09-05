@@ -80,7 +80,7 @@ modification.
       * stack frame printf
       * thread printf
 
-    * `GDB — the Gnu Debugger <https://www.gnu.org/software/gdb/>`_
+    * `GDB — the GNU Debugger <https://www.gnu.org/software/gdb/>`_
 
       GDB is a great tool. In this guide we've already used it to load our program and run it. But it can do a lot
       more. You can single-step through code, examine variables and memory, set breakpoints, and more. I generally use
