@@ -72,6 +72,7 @@ struct tiva_lowerhalf_s
   struct tiva_gptm32config_s config; /* Persistent timer configuration */
   TIMER_HANDLE handle;               /* Contained timer handle */
   tccb_t callback;                   /* Current user interrupt callback */
+  void *arg;                         /* Callback argument */
   uint32_t clkin;                    /* Input clock frequency */
   uint32_t timeout;                  /* The current timeout value (us) */
   uint32_t clkticks;                 /* Actual clock ticks for current
