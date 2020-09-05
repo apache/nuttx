@@ -70,7 +70,7 @@ has your configuration options selected.
 
    Here's what you should see:
 
-   .. image:: ../images/menuconfig.png
+   .. image:: ../_static/images/menuconfig.png
        :width: 800px
        :align: center
        :alt: Screenshot of menuconfig system main screen
@@ -88,8 +88,6 @@ has your configuration options selected.
    Now let's save. Use the right and left arrow keys to select the ``Exit`` menu item at the
    bottom of the screen. Hit ``<return>`` to select it, hit ``<return>`` again, and again, finally
    hitting ``<return>`` in the ``Save Configuration`` dialog box.
-   |br|
-   |br|
 
 #. Make the New Configuration
 

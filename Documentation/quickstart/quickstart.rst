@@ -15,11 +15,10 @@ computer, you're using an ARM microcontroller on your embedded board, and you're
    `ARM <https://en.wikipedia.org/wiki/ARM_architecture>`_ CPU. If it isn't, you'll need a different tool chain.
 
    You can download a toolchain from
-   `ARM Embedded Gnu Toolchain <https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm>`_
+   `ARM Embedded GNU Toolchain <https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm>`_
    for your embedded processor's CPU. You can also use a toolchain shipped with your OS for the `none-eabi` target, such as `gcc-arm-none-eabi` in Linux.
 
-
-In the following example, we download ``gcc-arm-none-eabi`` version 9.0 and unpack it into ``/opt/gcc`:
+   In the following example, we download ``gcc-arm-none-eabi`` version 9.0 and unpack it into ``/opt/gcc``:
 
    .. code-block:: console
 
@@ -28,17 +27,19 @@ In the following example, we download ``gcc-arm-none-eabi`` version 9.0 and unpa
       $ cd /opt/gcc
       $ wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2
       $ tar xf gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2
-      
-Then, add the toolchain ``bin/`` directory to your path:
 
-.. code-block:: console
+   Then, add the toolchain ``bin/`` directory to your path:
+
+   .. code-block:: console
 
       $ echo "export PATH=/opt/gcc/gcc-arm-none-eabi-9-2019-q4-major/bin:$PATH" >> ~/.bashrc
 
-If you are using any other shell, the procedure is similar by editing the corresponding rc file.
+   If you are using any other shell, the procedure is similar by editing the corresponding rc file.
 
 #. Download Apache NuttX
-The next step is to download NuttX main repository along the application repository. The latter is technically optional in a very minimal configurations but should be included in normal configuration since it includes the NuttX shell.
+
+   The next step is to download NuttX main repository along the application repository. The latter is technically optional in a very minimal configurations but should be included in normal configuration since it includes the NuttX shell.
+
    .. code-block:: console
 
       $ mkdir nuttx
@@ -105,7 +106,7 @@ The next step is to download NuttX main repository along the application reposit
 
       $ make menuconfig
 
-Use your arrows to navigate the menu and ``ENTER`` key to enable/disable options. To exit and save your configuration, go back to the main menu, choose ``<Exit>`` and select "yes" when asked if you want to save.
+   Use your arrows to navigate the menu and ``ENTER`` key to enable/disable options. To exit and save your configuration, go back to the main menu, choose ``<Exit>`` and select "yes" when asked if you want to save.
 
 #. Compile Apache NuttX
 

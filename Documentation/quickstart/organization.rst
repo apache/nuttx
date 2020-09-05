@@ -241,6 +241,8 @@ execute them.
 
 The ``audio/`` subdirectory contains the NuttX audio sub-system.
 
+.. _nuttx_boards:
+
 ``nuttx/boards``
 ================
 

@@ -22,10 +22,10 @@ You can load code, start, stop, step through the program, and examine variables 
 
        $ JLinkGDBServer -device ATSAMA5D27 -if JTAG -speed 1000 -JTAGConf -1,-1
 
-#. Launch the Gnu Debugger
+#. Launch the GNU Debugger
 
    In another terminal window, launch the GDB for your platform. In the case of this guide, this came with the
-   ARM Embedded Gnu Toolchain we downloaded in the Install step.
+   ARM Embedded GNU Toolchain we downloaded in the Install step.
 
     .. code-block:: bash
 
