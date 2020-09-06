@@ -208,6 +208,7 @@ config ARCH_CHIP_MOXART
 config ARCH_CHIP_NRF52
 	bool "Nordic NRF52"
 	select ARCH_CORTEXM4
+	select ARCH_HAVE_TICKLESS
 	#select ARCH_HAVE_MPU
 	#select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
