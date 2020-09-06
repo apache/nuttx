@@ -76,7 +76,9 @@ CSRCS += nrf52_highpri.c
 endif
 
 ifeq ($(CONFIG_TIMER),y)
+ifeq ($(CONFIG_NRF52_TIMER),y)
 CSRCS += nrf52_timer.c
+endif
 endif
 
 include $(TOPDIR)/boards/Board.mk
