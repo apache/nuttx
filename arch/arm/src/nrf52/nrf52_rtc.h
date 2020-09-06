@@ -39,6 +39,7 @@
 #define NRF52_RTC_STOP(d)                 ((d)->ops->stop(d))
 #define NRF52_RTC_CLEAR(d)                ((d)->ops->clear(d))
 #define NRF52_RTC_TRGOVRFLW(d)            ((d)->ops->trgovrflw(d))
+#define NRF52_RTC_GETCOUNTER(d, c)        ((d)->ops->getcounter(d, c))
 #define NRF52_RTC_SETCC(d, i, cc)         ((d)->ops->setcc(d, i, cc))
 #define NRF52_RTC_GETCC(d, i, cc)         ((d)->ops->setcc(d, i, cc))
 #define NRF52_RTC_SETPRE(d, pre)          ((d)->ops->setpre(d, pre))
@@ -96,6 +97,7 @@ struct nrf52_rtc_ops_s
 
   /* RTC operations */
 
+  CODE int (*getcounter)(FAR struct nrf52_rtc_dev_s *dev, FAR uint32_t *cc);
   CODE int (*setcc)(FAR struct nrf52_rtc_dev_s *dev, uint8_t i, uint32_t cc);
   CODE int (*getcc)(FAR struct nrf52_rtc_dev_s *dev, uint8_t i,
                     FAR uint32_t *cc);
