@@ -180,7 +180,7 @@ int nrf52_bringup(void)
     }
 #endif /* CONFIG_LPWAN_SX127X */
 
-#ifdef CONFIG_TIMER
+#if defined(CONFIG_TIMER) && defined(CONFIG_NRF52_TIMER)
   /* Configure TIMER driver */
 
   ret = nrf52_timer_driver_setup("/dev/timer0", NRF52_TIMER);
