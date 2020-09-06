@@ -291,6 +291,57 @@ endif # NRF52_USE_LFCLK
 
 endmenu # Clock Configuration
 
+menu "System Timer"
+
+config NRF52_SYSTIMER
+  bool
+  default y
+
+choice
+  prompt "System Timer Source"
+  default NRF52_SYSTIMER_SYSTICK
+  ---help---
+    Choose which hardware resource will drive NuttX
+    system time
+
+config NRF52_SYSTIMER_SYSTICK
+  bool "SysTick"
+  select TIMER_ARCH
+  select TIMER
+  select ARMV7M_SYSTICK
+  ---help---
+    Use ARM SysTick. It can be used for tickless and
+    non-tickless mode.
+
+    NOTE: nRF52 implementation of WFE/WFI involves is
+    incompatible with SysTick. This means that if
+    you choose this option, WFE/WFI will not be used
+    in idle loop.
+
+config NRF52_SYSTIMER_RTC
+  bool "RTC"
+  select NRF52_RTC
+  select SCHED_TICKLESS
+  select SCHED_TICKLESS_ALARM
+  select NRF52_USE_LFCLK
+  ---help---
+    Use RTC timer in tickless mode.
+
+endchoice
+
+if NRF52_SYSTIMER_RTC
+
+config NRF52_SYSTIMER_RTC_INSTANCE
+  int "RTC timer instance"
+  default 0
+  range 0 2
+  ---help---
+    Which RTC instance to use to drive the system timer
+
+endif
+
+endmenu # System Timer
+
 config NRF52_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
 	default y

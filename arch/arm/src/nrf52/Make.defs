@@ -45,11 +45,19 @@ endif
 CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_copyfullstate.c
 CMN_CSRCS += arm_createstack.c arm_doirq.c arm_exit.c arm_hardfault.c
 CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
-CMN_CSRCS += arm_memfault.c arm_mdelay.c arm_modifyreg8.c arm_modifyreg16.c
+CMN_CSRCS += arm_memfault.c arm_modifyreg8.c arm_modifyreg16.c
 CMN_CSRCS += arm_modifyreg32.c arm_releasepending.c arm_releasestack.c
 CMN_CSRCS += arm_reprioritizertr.c arm_schedulesigaction.c arm_sigdeliver.c
 CMN_CSRCS += arm_stackframe.c arm_svcall.c arm_trigger_irq.c arm_udelay.c
 CMN_CSRCS += arm_unblocktask.c arm_usestack.c arm_vfork.c arm_systemreset.c
+
+ifeq ($(CONFIG_NRF52_SYSTIMER_SYSTICK),y)
+CMN_CSRCS += arm_systick.c nrf52_systick.c
+else
+ifeq ($(CONFIG_NRF52_SYSTIMER_RTC),y)
+CMN_CSRCS += nrf52_tickless_rtc.c arm_mdelay.c
+endif
+endif
 
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_ASRCS += arm_lazyexception.S
@@ -83,12 +91,6 @@ CHIP_CSRCS += nrf52_uid.c
 
 ifeq ($(CONFIG_ARCH_CHIP_NRF52832),y)
 CHIP_CSRCS += nrf52832_errdata.c
-endif
-
-ifneq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += nrf52_timerisr.c
-else
-CHIP_CSRCS += nrf52_tickless.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)

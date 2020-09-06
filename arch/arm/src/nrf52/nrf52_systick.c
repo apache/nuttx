@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nrf52/nrf52_timerisr.c
+ * arch/arm/src/nrf52/nrf52_systick.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,67 +46,16 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "nvic.h"
-#include "clock/clock.h"
-#include "arm_internal.h"
-#include "arm_arch.h"
+#include <nuttx/timers/arch_timer.h>
+#include "systick.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The SysTick clock may be clocked internally either by the by the system
- * clock (CLKSOURCE==1) or by the SysTick function clock (CLKSOURCE==0).
- * The SysTick Function clock is equal to:
- *
- *   Fsystick = Fmainclk / SYSTICKCLKDIV
- *
- * Both the divider value (BOARD_SYSTICKCLKDIV) and the resulting SysTick
- * function clock frequency (Fsystick, BOARD_SYSTICK_CLOCK)
- *
- * The desired timer interrupt frequency is provided by the definition
- * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
- * system clock ticks per second.  That value is a user configurable setting
- * that defaults to 100 (100 ticks per second = 10 MS interval).
- *
- *    reload = (Fsystick / CLK_TICK) - 1
- *
- * Tips for selecting BOARD_SYSTICKCLKDIV:  The resulting reload value
- * should be as large as possible, but must be less than 2^24:
- *
- *   SYSTICKDIV > Fmainclk / CLK_TCK / 2^24
- */
-
-#define SYSTICK_RELOAD ((BOARD_SYSTICK_CLOCK / CLK_TCK) - 1)
-
-/* The size of the reload field is 24 bits.  Verify that the reload value
- * will fit in the reload register.
- */
-
-#if SYSTICK_RELOAD > 0x00ffffff
-#  error SYSTICK_RELOAD exceeds the range of the RELOAD register
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Function:  nrf52_timerisr
- *
- * Description:
- *   The timer ISR will perform a variety of services for various portions
- *   of the systems.
- *
- ****************************************************************************/
-
-static int nrf52_timerisr(int irq, uint32_t *regs, void *arg)
-{
-  /* Process timer interrupt */
-
-  nxsched_process_timer();
-  return 0;
-}
 
 /****************************************************************************
  * Public Functions
@@ -123,26 +72,7 @@ static int nrf52_timerisr(int irq, uint32_t *regs, void *arg)
 
 void up_timer_initialize(void)
 {
-  uint32_t regval;
+  /* Use SysTick to drive system timer  */
 
-  regval  = getreg32(NVIC_SYSTICK_CTRL);
-  regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
-  putreg32(regval, NVIC_SYSTICK_CTRL);
-
-  /* Configure SysTick to interrupt at the requested rate */
-
-  putreg32(SYSTICK_RELOAD, NVIC_SYSTICK_RELOAD);
-
-  /* Attach the timer interrupt vector */
-
-  irq_attach(NRF52_IRQ_SYSTICK, (xcpt_t)nrf52_timerisr, NULL);
-
-  /* Enable SysTick interrupts */
-
-  putreg32((NVIC_SYSTICK_CTRL_CLKSOURCE | NVIC_SYSTICK_CTRL_TICKINT |
-            NVIC_SYSTICK_CTRL_ENABLE), NVIC_SYSTICK_CTRL);
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(NRF52_IRQ_SYSTICK);
+  up_timer_set_lowerhalf(systick_initialize(true, BOARD_SYSTICK_CLOCK, -1));
 }
