@@ -22,12 +22,18 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
+ifeq ($(CONFIG_STM32_DFU),y)
+  LDSCRIPT = ld.script.dfu
+else
+  LDSCRIPT = ld.script
+endif
+
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   # Windows-native toolchains
-  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)ld.script}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
 else
   # Linux/Cygwin-native toolchain
-  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)ld.script
+  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
