@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/note/note_driver.h
+ * include/nuttx/note/noteram_driver.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NOTE_NOTE_DRIVER_H
-#define __INCLUDE_NUTTX_NOTE_NOTE_DRIVER_H
+#ifndef __INCLUDE_NUTTX_NOTE_NOTERAM_DRIVER_H
+#define __INCLUDE_NUTTX_NOTE_NOTERAM_DRIVER_H
 
 /****************************************************************************
  * Included Files
@@ -42,11 +42,11 @@
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 
 /****************************************************************************
- * Name: note_register
+ * Name: noteram_register
  *
  * Description:
- *   Register sched note related drivers at /dev folder that can be used by
- *   an application to read or filter the note data.
+ *   Register RAM note driver at /dev/note that can be used by an
+ *   application to read note data from the circular note buffer.
  *
  * Input Parameters:
  *   None.
@@ -56,10 +56,10 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DRIVER_NOTE
-int note_register(void);
+#ifdef CONFIG_DRIVER_NOTERAM
+int noteram_register(void);
 #endif
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
 
-#endif /* __INCLUDE_NUTTX_NOTE_NOTE_DRIVER_H */
+#endif /* __INCLUDE_NUTTX_NOTE_NOTERAM_DRIVER_H */
