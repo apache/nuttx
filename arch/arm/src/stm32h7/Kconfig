@@ -1684,6 +1684,16 @@ config STM32H7_DMACAPABLE
 		Drivers then may use this information to determine if they should
 		attempt the DMA or fall back to a different transfer method.
 
+config STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED
+	bool "Do not disqualify DMA capability based on cache alignment"
+	depends on STM32H7_DMACAPABLE && ARMV7M_DCACHE && !ARMV7M_DCACHE_WRITETHROUGH
+	default n
+	---help---
+		This option configures the stm32_dmacapable to not disqualify
+		DMA operations on memory that is not dcache aligned based solely
+		on the starting addresss and byte count.
+		Use this when ALL buffer extents are known to be aligned, but the
+		the count does not use the complete buffer.
 
 menu "Timer Configuration"
 
