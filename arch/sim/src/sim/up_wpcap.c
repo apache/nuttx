@@ -51,6 +51,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <syslog.h>
 #include <malloc.h>
 
 #include <netinet/in.h>
@@ -123,7 +124,7 @@ static pcap_sendpacket_t  pcap_sendpacket;
 
 static void error_exit(char *message)
 {
-  printf("error_exit: %s\r\n", message);
+  syslog(LOG_INFO, "error_exit: %s\n", message);
   exit(EXIT_FAILURE);
 }
 
@@ -139,7 +140,8 @@ static void init_pcap(struct in_addr addr)
 
   while (interfaces != NULL)
     {
-      printf("init_pcap: found interface: %s\r\n", interfaces->description);
+      syslog(LOG_INFO, "init_pcap: found interface: %s\n",
+              interfaces->description);
 
       if (interfaces->addresses != NULL &&
           interfaces->addresses->addr != NULL &&
@@ -148,7 +150,7 @@ static void init_pcap(struct in_addr addr)
           struct in_addr interface_addr;
           interface_addr =
             ((struct sockaddr_in *)interfaces->addresses->addr)->sin_addr;
-          printf("init_pcap: with address: %s\r\n",
+          syslog(LOG_INFO, ("init_pcap: with address: %s\n",
                  inet_ntoa(interface_addr));
 
           if (interface_addr.s_addr == addr.s_addr)
@@ -200,7 +202,7 @@ static void set_ethaddr(struct in_addr addr)
       char buffer[256];
       WideCharToMultiByte(CP_ACP, 0, adapters->Description, -1,
                           buffer, sizeof(buffer), NULL, NULL);
-      printf("set_ethaddr: found adapter: %s\r\n", buffer);
+      syslog(LOG_INFO, "set_ethaddr: found adapter: %s\n", buffer);
 
       if (adapters->FirstUnicastAddress != NULL &&
           adapters->FirstUnicastAddress->Address.lpSockaddr != NULL &&
@@ -211,7 +213,7 @@ static void set_ethaddr(struct in_addr addr)
           adapter_addr =
             ((struct sockaddr_in *)adapters->FirstUnicastAddress->Address.
              lpSockaddr)->sin_addr;
-          printf("set_ethaddr: with address: %s\r\n",
+          syslog(LOG_INFO, "set_ethaddr: with address: %s\n",
                  inet_ntoa(adapter_addr));
 
           if (adapter_addr.s_addr == addr.s_addr)
@@ -221,7 +223,7 @@ static void set_ethaddr(struct in_addr addr)
                   error_exit("ip addr does not belong to an ethernet card");
                 }
 
-              printf("set_ethaddr: %02X-%02X-%02X-%02X-%02X-%02X\r\n",
+              syslog(LOG_INFO, "set_ethaddr:%02X-%02X-%02X-%02X-%02X-%02X\n",
                  adapters->PhysicalAddress[0], adapters->PhysicalAddress[1],
                  adapters->PhysicalAddress[2], adapters->PhysicalAddress[3],
                  adapters->PhysicalAddress[4], adapters->PhysicalAddress[5]);
@@ -250,7 +252,7 @@ void wpcap_init(void)
   FARPROC dlladdr;
 
   addr.s_addr = htonl(WCAP_IPADDR);
-  printf("wpcap_init: IP address: %s\r\n", inet_ntoa(addr));
+  syslog(LOG_INFO, "wpcap_init: IP address: %s\n", inet_ntoa(addr));
 
   wpcap = LoadLibrary("wpcap.dll");
   dlladdr = GetProcAddress(wpcap, "pcap_findalldevs");

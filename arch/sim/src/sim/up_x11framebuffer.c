@@ -40,6 +40,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <syslog.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <sys/ipc.h>
@@ -86,7 +87,11 @@ static int b_useshm;
 static inline int up_x11createframe(void)
 {
   XGCValues gcval;
-  char *argv[2] = { "nuttx", NULL };
+  char *argv[2] =
+    {
+      "nuttx", NULL
+    };
+
   char *winName = "NuttX";
   char *iconName = "NX";
   XTextProperty winprop;
@@ -96,7 +101,7 @@ static inline int up_x11createframe(void)
   g_display = XOpenDisplay(NULL);
   if (g_display == NULL)
     {
-      printf("Unable to open display.\r\n");
+      syslog(LOG_ERR, "Unable to open display.\n");
       return -1;
     }
 
@@ -276,7 +281,7 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
 
       if (!g_image)
         {
-          fprintf(stderr, "Unable to create g_image.\r\n");
+          syslog(LOG_ERR, "Unable to create g_image.\n");
           return -1;
         }
 
@@ -334,7 +339,7 @@ shmerror:
 
       if (g_image == NULL)
         {
-          fprintf(stderr, "Unable to create g_image\r\n");
+          syslog(LOG_ERR, "Unable to create g_image\n");
           return -1;
         }
 
@@ -435,7 +440,7 @@ int up_x11cmap(unsigned short first, unsigned short len,
 
       if (!XAllocColor(g_display, cMap, &color))
         {
-          fprintf(stderr, "Failed to allocate color%d\r\n", ndx);
+          syslog(LOG_ERR, "Failed to allocate color%d\n", ndx);
           return -1;
         }
     }
