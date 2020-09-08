@@ -54,6 +54,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <syslog.h>
 #include <time.h>
 
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
@@ -111,9 +112,9 @@ static struct rtentry ghostroute;
 static inline void dump_ethhdr(const char *msg, unsigned char *buf,
                                int buflen)
 {
-  printf("TAPDEV: %s %d bytes\r\n", msg, buflen);
-  printf("        %02x:%02x:%02x:%02x:%02x:%02x "
-         "%02x:%02x:%02x:%02x:%02x:%02x %02x%02x\r\n",
+  syslog(LOG_INFO, "TAPDEV: %s %d bytes\n", msg, buflen);
+  syslog(LOG_INFO, "        %02x:%02x:%02x:%02x:%02x:%02x "
+         "%02x:%02x:%02x:%02x:%02x:%02x %02x%02x\n",
          buf[0], buf[1], buf[2], buf[3], buf[4],  buf[5],
          buf[6], buf[7], buf[8], buf[9], buf[10], buf[11],
 #ifdef CONFIG_ENDIAN_BIG
@@ -175,7 +176,7 @@ void tapdev_init(void)
   tapdevfd = open(DEVTAP, O_RDWR, 0644);
   if (tapdevfd < 0)
     {
-      printf("TAPDEV: open failed: %d\r\n", -tapdevfd);
+      syslog(LOG_ERR, "TAPDEV: open failed: %d\n", -tapdevfd);
       return;
     }
 
@@ -186,7 +187,7 @@ void tapdev_init(void)
   ret = ioctl(tapdevfd, TUNSETIFF, (unsigned long) &ifr);
   if (ret < 0)
     {
-      printf("TAPDEV: ioctl failed: %d\r\n", -ret);
+      syslog(LOG_ERR, "TAPDEV: ioctl failed: %d\n", -ret);
       close(tapdevfd);
       return;
     }
@@ -203,7 +204,7 @@ void tapdev_init(void)
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if (sockfd < 0)
     {
-      printf("TAPDEV: Can't open socket: %d\r\n", -sockfd);
+      syslog(LOG_ERR, "TAPDEV: Can't open socket: %d\n", -sockfd);
       close(tapdevfd);
       return;
     }
@@ -217,8 +218,8 @@ void tapdev_init(void)
   ret = ioctl(sockfd, SIOCBRADDIF, &ifr);
   if (ret < 0)
     {
-      printf("TAPDEV: ioctl failed (can't add interface %s to "
-             "bridge %s): %d\r\n",
+      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't add interface %s to "
+             "bridge %s): %d\n",
              gdevname, CONFIG_SIM_NET_BRIDGE_DEVICE, -ret);
       close(sockfd);
       close(tapdevfd);
@@ -229,8 +230,8 @@ void tapdev_init(void)
   close(sockfd);
   if (ret < 0)
     {
-      printf("TAPDEV: ioctl failed (can't get MTU "
-             "from %s): %d\r\n", gdevname, -ret);
+      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't get MTU "
+             "from %s): %d\n", gdevname, -ret);
       close(tapdevfd);
       return;
     }
@@ -282,7 +283,7 @@ unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
   ret = read(gtapdevfd, buf, buflen);
   if (ret < 0)
     {
-      printf("TAPDEV: read failed: %d\r\n", -ret);
+      syslog(LOG_ERR, "TAPDEV: read failed: %d\n", -ret);
       return 0;
     }
 
@@ -300,12 +301,12 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
     }
 
 #ifdef TAPDEV_DEBUG
-  printf("tapdev_send: sending %d bytes\r\n", buflen);
+  syslog(LOG_INFO, "tapdev_send: sending %d bytes\n", buflen);
 
   gdrop++;
   if (gdrop % 8 == 7)
     {
-      printf("TAPDEV: Dropped a packet!\r\n");
+      syslog(LOG_ERR, "TAPDEV: Dropped a packet!\n");
       return;
     }
 #endif
@@ -313,7 +314,7 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
   ret = write(gtapdevfd, buf, buflen);
   if (ret < 0)
     {
-      printf("TAPDEV: write failed: %d\r\n", -ret);
+      syslog(LOG_ERR, "TAPDEV: write failed: %d\n", -ret);
       exit(1);
     }
 
@@ -340,7 +341,7 @@ void tapdev_ifup(in_addr_t ifaddr)
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if (sockfd < 0)
     {
-      printf("TAPDEV: Can't open socket: %d\r\n", -sockfd);
+      syslog(LOG_ERR, "TAPDEV: Can't open socket: %d\n", -sockfd);
       return;
     }
 
@@ -351,8 +352,8 @@ void tapdev_ifup(in_addr_t ifaddr)
   ret = ioctl(sockfd, SIOCGIFFLAGS, (unsigned long)&ifr);
   if (ret < 0)
     {
-      printf("TAPDEV: ioctl failed "
-             "(can't get interface flags): %d\r\n", -ret);
+      syslog(LOG_ERR, "TAPDEV: ioctl failed "
+             "(can't get interface flags): %d\n", -ret);
       close(sockfd);
       return;
     }
@@ -361,8 +362,8 @@ void tapdev_ifup(in_addr_t ifaddr)
   ret = ioctl(sockfd, SIOCSIFFLAGS, (unsigned long)&ifr);
   if (ret < 0)
     {
-      printf("TAPDEV: ioctl failed "
-             "(can't set interface flags): %d\r\n", -ret);
+      syslog(LOG_ERR, "TAPDEV: ioctl failed "
+             "(can't set interface flags): %d\n", -ret);
       close(sockfd);
       return;
     }
@@ -383,7 +384,8 @@ void tapdev_ifup(in_addr_t ifaddr)
   ret = ioctl(sockfd, SIOCADDRT, (unsigned long)&ghostroute);
   if (ret < 0)
     {
-      printf("TAPDEV: ioctl failed (can't add host route): %d\r\n", -ret);
+      syslog(LOG_ERR, "TAPDEV: ioctl failed
+              (can't add host route): %d\n", -ret);
       close(sockfd);
       return;
     }
@@ -410,15 +412,15 @@ void tapdev_ifdown(void)
       sockfd = socket(AF_INET, SOCK_DGRAM, 0);
       if (sockfd < 0)
         {
-          printf("TAPDEV: Can't open socket: %d\r\n", -sockfd);
+          syslog(LOG_ERR, "TAPDEV: Can't open socket: %d\n", -sockfd);
           return;
         }
 
       ret = ioctl(sockfd, SIOCDELRT, (unsigned long)&ghostroute);
       if (ret < 0)
         {
-          printf("TAPDEV: ioctl failed "
-                 "(can't delete host route): %d\r\n", -ret);
+          syslog(LOG_ERR, "TAPDEV: ioctl failed "
+                 "(can't delete host route): %d\n", -ret);
         }
 
       close(sockfd);

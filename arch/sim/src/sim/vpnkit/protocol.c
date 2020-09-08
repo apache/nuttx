@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <syslog.h>
 
 #include "protocol.h"
 
@@ -55,7 +56,7 @@
  ****************************************************************************/
 
 #define ERROR(fmt, ...) \
-        fprintf(stderr, "up_vpnkit: " fmt "\r\n", ##__VA_ARGS__)
+        syslog(LOG_ERR, "up_vpnkit: " fmt "\n", ##__VA_ARGS__)
 
 /****************************************************************************
  * Public Data

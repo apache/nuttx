@@ -40,10 +40,12 @@
 #ifdef VFAT_STANDALONE
 # include <stdio.h>
 # include <stdlib.h>
+# include <syslog.h>
 # include <zlib.h>
 #else
 # include <nuttx/config.h>
 
+# include <syslog.h>
 # include <stdlib.h>
 # include <debug.h>
 # include <zlib.h>
@@ -58,7 +60,7 @@
  ****************************************************************************/
 
 #ifdef VFAT_STANDALONE
-# define serr(format, ...) printf(format, ##__VA_ARGS__)
+# define serr(format, ...) syslog(LOG_ERR, format, ##__VA_ARGS__)
 # define kmm_malloc(size)   malloc(size)
 # define kmm_free(mem)     free(mem)
 #endif
@@ -410,12 +412,12 @@ int main(int argc, char **argv, char **envp)
   int check;
 
   cmf = g_vfatdata[0];
-  printf("CMF=%02x: CM=%d CINFO=%d\n", cmf, cmf & 0x0f, cmf >> 4);
+  syslog(LOG_INFO, "CMF=%02x: CM=%d CINFO=%d\n", cmf, cmf & 0x0f, cmf >> 4);
 
   flg   = g_vfatdata[1];
   fdict = (flg >> 5) & 1;
 
-  printf("FLG=%02x: FCHECK=%d FDICT=%d FLEVEL=%d\n",
+  syslog(LOG_INFO, "FLG=%02x: FCHECK=%d FDICT=%d FLEVEL=%d\n",
          flg, flg & 0x1f, fdict, flg >> 6);
 
   /* The FCHECK value must be such that CMF and FLG, when viewed as
@@ -426,19 +428,19 @@ int main(int argc, char **argv, char **envp)
   check = cmf * 256 + flg;
   if (check % 31 != 0)
     {
-      printf("Fails check: %04x is not a multiple of 31\n", check);
+      syslog(LOG_INFO, "Fails check: %04x is not a multiple of 31\n", check);
     }
 
   deviceimage = up_deviceimage();
   if (deviceimage)
     {
-      printf("Inflate SUCCEEDED\n");
+      syslog(LOG_INFO, "Inflate SUCCEEDED\n");
       kmm_free(deviceimage);
       return 0;
     }
   else
     {
-      printf("Inflate FAILED\n");
+      syslog(LOG_INFO, "Inflate FAILED\n");
       return 1;
     }
 }

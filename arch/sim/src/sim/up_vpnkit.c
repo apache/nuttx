@@ -33,6 +33,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <syslog.h>
 #include <unistd.h>
 
 #include "up_internal.h"
@@ -43,9 +44,9 @@
  ****************************************************************************/
 
 #define ERROR(fmt, ...) \
-        fprintf(stderr, "up_vpnkit: " fmt "\r\n", ##__VA_ARGS__)
+        syslog(LOG_ERR, "up_vpnkit: " fmt "\n", ##__VA_ARGS__)
 #define INFO(fmt, ...) \
-        fprintf(stderr, "up_vpnkit: " fmt "\r\n", ##__VA_ARGS__)
+        syslog(LOG_ERR, "up_vpnkit: " fmt "\n", ##__VA_ARGS__)
 #define DEBUG(fmt, ...)
 
 /****************************************************************************

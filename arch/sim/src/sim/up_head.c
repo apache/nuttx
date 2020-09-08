@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
+#include <syslog.h>
 #include <assert.h>
 
 #include <nuttx/init.h>
@@ -112,10 +113,10 @@ void up_assert(const char *filename, int line)
   /* Show the location of the failed assertion */
 
 #ifdef CONFIG_SMP
-  fprintf(stderr, "CPU%d: Assertion failed at file:%s line: %d\r\n",
+  syslog(LOG_ERR, "CPU%d: Assertion failed at file:%s line: %d\n",
           up_cpu_index(), filename, line);
 #else
-  fprintf(stderr, "Assertion failed at file:%s line: %d\r\n",
+  syslog(LOG_ERR, "Assertion failed at file:%s line: %d\n",
           filename, line);
 #endif
 
