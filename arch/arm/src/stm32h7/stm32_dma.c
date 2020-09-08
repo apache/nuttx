@@ -1536,7 +1536,9 @@ static bool stm32_sdma_capable(FAR stm32_dmacfg_t *cfg)
         {
           dmainfo("stm32_dmacapable: dcache unaligned "
                   "maddr:0x%08x mend:0x%08x\n", cfg->maddr, mend);
-          return false;
+#if !defined(CONFIG_STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
+      return false;
+#endif
         }
     }
 #  endif
@@ -2059,7 +2061,9 @@ static bool stm32_bdma_capable(FAR stm32_dmacfg_t *cfg)
     {
       dmainfo("stm32_dmacapable: dcache unaligned maddr:0x%08x "
               "mend:0x%08x\n", cfg->maddr, mend);
+#if !defined(CONFIG_STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;
+#endif
     }
 #  endif
 
