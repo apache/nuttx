@@ -3,11 +3,19 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-menu "Note Driver Support"
-
-config DRIVER_NOTE
-	bool "Scheduler instrumentation driver"
+menuconfig DRIVER_NOTE
+	bool "Note Driver Support"
+	depends on SCHED_INSTRUMENTATION
 	default n
+
+if DRIVER_NOTE
+
+choice
+	prompt "Note driver selection"
+	default DRIVER_NOTERAM
+
+config DRIVER_NOTERAM
+	bool "Note RAM driver"
 	depends on !SCHED_INSTRUMENTATION_CSECTION && (!SCHED_INSTRUMENTATION_SPINLOCK || !SMP)
 	---help---
 		If this option is selected, then in-memory buffering logic is
@@ -33,12 +41,18 @@ config DRIVER_NOTE
 		sched_note_get() causes several additional entries to be added from
 		the note buffer in order to remove one entry.
 
-config SCHED_NOTE_BUFSIZE
-	int "Instrumentation buffer size"
-	depends on DRIVER_NOTE
+config DRIVER_NOTEARCH
+	bool "Note Arch driver"
+	---help---
+		The note driver is provided by arch specific code.
+
+endchoice
+
+config DRIVER_NOTERAM_BUFSIZE
+	int "Note RAM buffer size"
+	depends on DRIVER_NOTERAM
 	default 2048
 	---help---
-		The size of the in-memory, circular instrumentation buffer (in
-		bytes).
+		The size of the in-memory, circular instrumentation buffer (in bytes).
 
-endmenu
+endif

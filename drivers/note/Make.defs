@@ -22,5 +22,9 @@ ifeq ($(CONFIG_DRIVER_NOTE),y)
   CSRCS += note_driver.c
 endif
 
+ifeq ($(CONFIG_DRIVER_NOTERAM),y)
+  CSRCS += noteram_driver.c
+endif
+
 DEPPATH += --dep-path note
 VPATH += :note
