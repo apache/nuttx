@@ -69,7 +69,9 @@ void up_enable_irq(int irq);
 void up_disable_irq(int irq);
 void  rtc_prd_interrupt(void);
 static uint32_t rtc_dec2bcd(uint8_t value);
+#if defined (CONFIG_RTC_HIRES) || defined (CONFIG_RTC_ALARM) || defined (CONFIG_RTC_DATETIME)
 static int rtc_bcd2dec(uint32_t value);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -236,10 +238,12 @@ static uint32_t rtc_dec2bcd(uint8_t value)
  *
  ****************************************************************************/
 
+#if defined (CONFIG_RTC_HIRES) || defined (CONFIG_RTC_ALARM) || defined (CONFIG_RTC_DATETIME)
 static int rtc_bcd2dec(uint32_t value)
 {
   return (int) ((((value & 0xf0) >> 4) * 10) + (value & 0x0f));
 }
+#endif
 
 /****************************************************************************
  * Name: rtc_interrupt
