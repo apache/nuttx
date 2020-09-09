@@ -92,7 +92,11 @@ static const struct file_operations g_noteram_fops =
 
 static struct noteram_info_s g_noteram_info =
 {
+#ifdef CONFIG_DRIVER_NOTERAM_DEFAULT_NOOVERWRITE
+  .ni_overwrite = NOTERAM_MODE_OVERWRITE_DISABLE
+#else
   .ni_overwrite = NOTERAM_MODE_OVERWRITE_ENABLE
+#endif
 };
 
 #ifdef CONFIG_SMP
