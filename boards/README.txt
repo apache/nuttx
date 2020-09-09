@@ -1,10 +1,8 @@
 Board-Specific Configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This directory contains the board support for logic for all boards supported
-by NuttX.  This directory is retained in a separate repository and is a Sub-
-Module of NuttX and will appear as nuttx/boards when the NuttX repository
-is cloned.
+This directory contains the board support logic for all boards supported
+by NuttX.
 
 The nuttx/boards directory is a part of the internal OS.  It should contain
 only OS bring-up logic and driver initialization logic.  THERE SHOULD BE NO
