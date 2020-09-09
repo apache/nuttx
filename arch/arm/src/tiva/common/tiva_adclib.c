@@ -12,7 +12,8 @@
  * The Tivaware sample code has a BSD compatible license that requires this
  * copyright notice:
  *
- * Copyright (c) 2005-2014 Texas Instruments Incorporated.  All rights reserved.
+ * Copyright (c) 2005-2014 Texas Instruments Incorporated.
+ * All rights reserved.
  * Software License Agreement
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -392,7 +393,6 @@ uint8_t tiva_adc_get_ain(uint8_t adc, uint8_t sse, uint8_t step)
 
 void tiva_adc_irq_attach(uint8_t adc, uint8_t sse, xcpt_t isr)
 {
-
   uint32_t ret = 0;
   int irq = sse2irq[SSE_IDX(adc, sse)];
 
@@ -504,9 +504,10 @@ int tiva_adc_enable(uint8_t adc, bool state)
  *  TM4C123 - Select either MOSC or PIOSC. Both result in 16 MHz operation,
  *  however the PIOSC allows the ADC to operate in deep sleep mode.
  *
- *  TM4C129 - For the 129, there is still a selection between various internal
- *  clocks, however the output frequency is variable (16 MHz - 32 MHz); so it
- *  is much more intuitive to allow the clock variable be a frequency value.
+ *  TM4C129 - For the 129, there is still a selection between various
+ *  internal clocks, however the output frequency is variable
+ *  (16 MHz - 32 MHz); so it is much more intuitive to allow the clock
+ *  variable be a frequency value.
  *
  ****************************************************************************/
 
@@ -514,9 +515,10 @@ void tiva_adc_clock(uint32_t freq)
 {
 #if defined(CONFIG_ARCH_CHIP_TM4C123)
   /* For the TM4C123, the ADC clock source does not affect the frequency, it
-   * runs at 16 MHz regardless. You end up selecting between the MOSC (default)
-   * or the PIOSC. The PIOSC allows the ADC to operate even in deep sleep mode.
-   * Since this is the case, the clock value for the TM4C123 is always 16 MHz
+   * runs at 16 MHz regardless. You end up selecting between the MOSC
+   * (default) or the PIOSC. The PIOSC allows the ADC to operate even in deep
+   * sleep mode. Since this is the case, the clock value for the TM4C123 is
+   * always 16 MHz.
    */
 
   uintptr_t ccreg = (TIVA_ADC0_BASE + TIVA_ADC_CC_OFFSET);
@@ -680,7 +682,7 @@ uint8_t tiva_adc_sse_enable(uint8_t adc, uint8_t sse, bool state)
       modifyreg32(actssreg, (1 << sse), 0);
     }
 
-  return (getreg32(actssreg) & 0xF);
+  return (getreg32(actssreg) & 0xf);
 }
 
 /****************************************************************************
@@ -711,7 +713,8 @@ void tiva_adc_sse_trigger(uint8_t adc, uint8_t sse, uint32_t trigger)
   modifyreg32(emuxreg, ADC_EMUX_MASK(sse), trig);
 
   /* NOTE: PWM triggering needs an additional register to be set (ADC_TSSEL)
-   * A platform specific IOCTL command is provided to configure the triggering.
+   * A platform specific IOCTL command is provided to configure the
+   * triggering.
    */
 }
 
@@ -821,9 +824,9 @@ void tiva_adc_sse_clear_int(uint8_t adc, uint8_t sse)
  * Name: tiva_adc_sse_data
  *
  * Description:
- *   Retrieves data from the FIFOs for all steps in the given sample sequencer.
- *   The input data buffer MUST be as large or larger than the sample sequencer.
- *   otherwise
+ *   Retrieves data from the FIFOs for all steps in the given sample
+ *   sequencer. The input data buffer MUST be as large or larger than the
+ *   sample sequencer.
  *
  * Input Parameters:
  *   adc - peripheral state
@@ -934,7 +937,8 @@ void tiva_adc_sse_register_chn(uint8_t adc, uint8_t sse, uint8_t chn,
  *
  ****************************************************************************/
 
-void tiva_adc_sse_differential(uint8_t adc, uint8_t sse, uint8_t chn, uint32_t diff)
+void tiva_adc_sse_differential(uint8_t adc, uint8_t sse, uint8_t chn,
+                               uint32_t diff)
 {
 #ifdef CONFIG_TIVA_ADC_DIFFERENTIAL
 #  error CONFIG_TIVA_ADC_DIFFERENTIAL unsupported!!
@@ -969,7 +973,8 @@ void tiva_adc_sse_sample_hold_time(uint8_t adc, uint8_t sse,
                                  uint8_t chn, uint32_t shold)
 {
   uintptr_t sstshreg = (TIVA_ADC_BASE(adc) + TIVA_ADC_SSTSH(sse));
-  modifyreg32(sstshreg, ADC_SSTSH_MASK(sse), (shold << ADC_SSTSH_SHIFT(sse)));
+  modifyreg32(sstshreg, ADC_SSTSH_MASK(sse),
+              (shold << ADC_SSTSH_SHIFT(sse)));
 }
 #endif
 
@@ -988,8 +993,8 @@ void tiva_adc_sse_sample_hold_time(uint8_t adc, uint8_t sse,
  *      -*Comparator/Differential select: The analog input is differentially
  *       sampled. The corresponding ADCSSMUXn nibble must be set to the pair
  *       number "i", where the paired inputs are "2i and 2i+1". Because the
- *       temperature sensor does not have a differential option, this bit must
- *       not be set when the TS3 bit is set.
+ *       temperature sensor does not have a differential option, this bit
+ *       must not be set when the TS3 bit is set.
  *
  *  *Comparator/Differential functionality is unsupported and ignored.
  *
@@ -1001,7 +1006,8 @@ void tiva_adc_sse_sample_hold_time(uint8_t adc, uint8_t sse,
  *
  ****************************************************************************/
 
-void tiva_adc_sse_step_cfg(uint8_t adc, uint8_t sse, uint8_t chn, uint8_t cfg)
+void tiva_adc_sse_step_cfg(uint8_t adc, uint8_t sse, uint8_t chn,
+                           uint8_t cfg)
 {
   uintptr_t ssctlreg = (TIVA_ADC_BASE(adc) + TIVA_ADC_SSCTL(sse));
   uint32_t ctlcfg = cfg << ADC_SSCTL_SHIFT(chn) & ADC_SSCTL_MASK(chn);
@@ -1086,7 +1092,7 @@ void tiva_adc_dump_reg_cfg(uint8_t adc, uint8_t sse)
   ainfo("SSTSH  [0x%08x]=0x%08x\n", sstshreg, sstsh);
 #endif
   ainfo("SSCTL  [0x%08x]=0x%08x\n", ssctlreg, ssctl);
-
 }
+
 #endif /* CONFIG_DEBUG_ANALOG */
 #endif /* CONFIG_TIVA_ADC0 || CONFIG_TIVA_ADC1 */
