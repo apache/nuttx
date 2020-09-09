@@ -156,7 +156,7 @@ static void up_idlepm(void)
  * Name: up_idle
  *
  * Description:
- *   up_idle() is the logic that will be executed when their is no other
+ *   up_idle() is the logic that will be executed when there is no other
  *   ready-to-run task.  This is processor idle time and will continue until
  *   some interrupt occurs to cause a context switch from the idle task.
  *
@@ -187,9 +187,9 @@ void up_idle(void)
    * "2.17.11 Ethernet DMA not working after WFI/WFE instruction
    *  Description
    *  If a WFI/WFE instruction is executed to put the system in sleep mode
-   *    while the Ethernet MAC master clock on the AHB bus matrix is ON and all
-   *    remaining masters clocks are OFF, the Ethernet DMA will be not able to
-   *    perform any AHB master accesses during sleep mode."
+   *    while the Ethernet MAC master clock on the AHB bus matrix is ON and
+   *    all remaining masters clocks are OFF, the Ethernet DMA will be not
+   *    able to perform any AHB master accesses during sleep mode."
    *
    *  Workaround
    *    Enable DMA1 or DMA2 clocks in the RCC_AHBENR register before
