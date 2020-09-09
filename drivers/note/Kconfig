@@ -55,6 +55,15 @@ config DRIVER_NOTERAM_BUFSIZE
 	---help---
 		The size of the in-memory, circular instrumentation buffer (in bytes).
 
+config DRIVER_NOTERAM_DEFAULT_NOOVERWRITE
+	bool "Disable overwrite by default"
+	depends on DRIVER_NOTERAM
+	default n
+	---help---
+		Disables overwriting old notes in the circular buffer when the buffer
+		is full by default. This is useful to keep instrumentation data of the
+		beginning of a system boot.
+
 config DRIVER_NOTECTL
 	bool "Scheduler instrumentation filter control driver"
 	default n

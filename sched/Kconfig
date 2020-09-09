@@ -1000,6 +1000,16 @@ config SCHED_INSTRUMENTATION_FILTER
 		The filter logic can be configured by sched_note_filter APIs defined in
 		include/nuttx/sched_note.h.
 
+config SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	hex "Default instrumentation filter mode"
+	depends on SCHED_INSTRUMENTATION_FILTER
+	default 0x7
+	---help---
+		Default mode of the instrumentation filter logic.
+			Bit 0 = Enable instrumentation
+			Bit 1 = Enable syscall instrumentation
+			Bit 2 = Enable IRQ instrumentation
+
 endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring
 
