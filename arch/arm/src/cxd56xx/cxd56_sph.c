@@ -300,9 +300,13 @@ int cxd56_sphinitialize(FAR const char *devname)
   int ret;
   int i;
 
-  /* No. 0-2 and 15 semaphores are reserved by other system. */
+  /* No. 0-2 and (14)-15 semaphores are reserved by other system. */
 
+#ifdef CONFIG_CXD56_TESTSET
+  for (i = 3; i < 14; i++)
+#else
   for (i = 3; i < 15; i++)
+#endif
     {
       ret = cxd56_sphdevinit(devname, i);
       if (ret != OK)

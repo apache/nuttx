@@ -36,7 +36,11 @@
 ############################################################################
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
-CMN_ASRCS += arm_testset.S vfork.S
+CMN_ASRCS += vfork.S
+
+ifneq ($(CONFIG_CXD56_TESTSET),y)
+CMN_ASRCS += arm_testset.S
+endif
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
@@ -110,6 +114,9 @@ CHIP_CSRCS += cxd56_cpuidlestack.c
 CHIP_CSRCS += cxd56_cpuindex.c
 CHIP_CSRCS += cxd56_cpupause.c
 CHIP_CSRCS += cxd56_cpustart.c
+ifeq ($(CONFIG_CXD56_TESTSET),y)
+CHIP_CSRCS += cxd56_testset.c
+endif
 endif
 
 ifeq ($(CONFIG_CXD56_UART0),y)
