@@ -87,5 +87,14 @@ int esp32_bringup(void);
 
 int esp32_mmcsd_initialize(int minor);
 
+/****************************************************************************
+ * Name: esp32_spiflash_init
+ *
+ * Description:
+ *   Initialize the SPIFLASH and register the MTD device.
+ ****************************************************************************/
+
+int esp32_spiflash_init(void);
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H */

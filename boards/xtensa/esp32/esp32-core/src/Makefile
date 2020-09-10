@@ -53,6 +53,10 @@ ifeq ($(CONFIG_MMCSD),y)
 CSRCS += esp32_mmcsd.c
 endif
 
+ifeq ($(CONFIG_ESP32_SPIFLASH),y)
+CSRCS += esp32_spiflash.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
 
