@@ -916,7 +916,7 @@ config SCHED_INSTRUMENTATION
 
 if SCHED_INSTRUMENTATION
 
-config SCHED_INSTRUMENTATION_EXTENAL
+config SCHED_INSTRUMENTATION_EXTERNAL
 	bool "System performance monitor endpoints are external"
 	default n
 	---help---
