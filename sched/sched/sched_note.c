@@ -142,7 +142,7 @@ static void note_spincommon(FAR struct tcb_s *tcb,
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_spinlock_s));
+  sched_note_add(&note, sizeof(struct note_spinlock_s));
 }
 #endif
 
@@ -207,7 +207,7 @@ void sched_note_start(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, length);
+  sched_note_add(&note, length);
 }
 
 void sched_note_stop(FAR struct tcb_s *tcb)
@@ -231,7 +231,7 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_stop_s));
+  sched_note_add(&note, sizeof(struct note_stop_s));
 }
 
 void sched_note_suspend(FAR struct tcb_s *tcb)
@@ -257,7 +257,7 @@ void sched_note_suspend(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_suspend_s));
+  sched_note_add(&note, sizeof(struct note_suspend_s));
 }
 
 void sched_note_resume(FAR struct tcb_s *tcb)
@@ -281,7 +281,7 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_resume_s));
+  sched_note_add(&note, sizeof(struct note_resume_s));
 }
 
 #ifdef CONFIG_SMP
@@ -308,7 +308,7 @@ void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_start_s));
+  sched_note_add(&note, sizeof(struct note_cpu_start_s));
 }
 
 void sched_note_cpu_started(FAR struct tcb_s *tcb)
@@ -333,7 +333,7 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_started_s));
+  sched_note_add(&note, sizeof(struct note_cpu_started_s));
 }
 
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
@@ -359,7 +359,7 @@ void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_pause_s));
+  sched_note_add(&note, sizeof(struct note_cpu_pause_s));
 }
 
 void sched_note_cpu_paused(FAR struct tcb_s *tcb)
@@ -384,7 +384,7 @@ void sched_note_cpu_paused(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_paused_s));
+  sched_note_add(&note, sizeof(struct note_cpu_paused_s));
 }
 
 void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
@@ -410,7 +410,7 @@ void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_resume_s));
+  sched_note_add(&note, sizeof(struct note_cpu_resume_s));
 }
 
 void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
@@ -435,7 +435,7 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_resumed_s));
+  sched_note_add(&note, sizeof(struct note_cpu_resumed_s));
 }
 #endif
 
@@ -464,7 +464,7 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_preempt_s));
+  sched_note_add(&note, sizeof(struct note_preempt_s));
 }
 #endif
 
@@ -495,7 +495,7 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_csection_s));
+  sched_note_add(&note, sizeof(struct note_csection_s));
 }
 #endif
 
@@ -549,7 +549,7 @@ void sched_note_syscall_enter(int nr, int argc, ...)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_syscall_enter_s));
+  sched_note_add(&note, sizeof(struct note_syscall_enter_s));
 }
 
 void sched_note_syscall_leave(int nr, uintptr_t result)
@@ -578,7 +578,7 @@ void sched_note_syscall_leave(int nr, uintptr_t result)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_syscall_leave_s));
+  sched_note_add(&note, sizeof(struct note_syscall_leave_s));
 }
 #endif
 

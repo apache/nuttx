@@ -338,7 +338,7 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 #endif
 
 /****************************************************************************
- * Name: note_add
+ * Name: sched_note_add
  *
  * Description:
  *   Add the variable length note to the transport layer
@@ -355,7 +355,7 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
  *
  ****************************************************************************/
 
-void note_add(FAR const uint8_t *note, uint8_t notelen);
+void sched_note_add(FAR const void *note, size_t notelen);
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 
