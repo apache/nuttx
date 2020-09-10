@@ -389,7 +389,7 @@ static ssize_t note_read(FAR struct file *filep, FAR char *buffer,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: note_add
+ * Name: sched_note_add
  *
  * Description:
  *   Add the variable length note to the transport layer
@@ -406,8 +406,9 @@ static ssize_t note_read(FAR struct file *filep, FAR char *buffer,
  *
  ****************************************************************************/
 
-void note_add(FAR const uint8_t *note, uint8_t notelen)
+void sched_note_add(FAR const void *note, size_t notelen)
 {
+  FAR const char *buf = note;
   unsigned int head;
   unsigned int next;
 
@@ -439,7 +440,7 @@ void note_add(FAR const uint8_t *note, uint8_t notelen)
 
       /* Save the next byte at the head index */
 
-      g_note_info.ni_buffer[head] = *note++;
+      g_note_info.ni_buffer[head] = *buf++;
 
       head = next;
       notelen--;
