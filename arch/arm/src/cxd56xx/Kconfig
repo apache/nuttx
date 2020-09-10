@@ -1284,4 +1284,11 @@ config CXD56_GEOFENCE
 
 endif
 
+config CXD56_TESTSET
+	bool "Use custom testset for spinlock"
+	default n
+	depends on SPINLOCK
+	---help---
+		Use custom testset based on hardware semaphore
+
 endmenu
