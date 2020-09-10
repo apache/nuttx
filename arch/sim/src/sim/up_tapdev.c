@@ -384,8 +384,8 @@ void tapdev_ifup(in_addr_t ifaddr)
   ret = ioctl(sockfd, SIOCADDRT, (unsigned long)&ghostroute);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: ioctl failed
-              (can't add host route): %d\n", -ret);
+      syslog(LOG_ERR, "TAPDEV: ioctl failed"
+              "(can't add host route): %d\n", -ret);
       close(sockfd);
       return;
     }
