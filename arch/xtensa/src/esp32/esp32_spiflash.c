@@ -425,16 +425,7 @@ static int esp32_read_status(FAR struct esp32_spiflash_s *priv,
   esp32_spiflash_chip_t *chip = priv->chip;
   uint32_t regval;
   uint32_t flags;
-  bool direct = priv->dummies[1] == 0;
-
-  if (priv->dummies[1] == 0)
-    {
-      direct = true;
-    }
-  else
-    {
-      direct = false;
-    }
+  bool direct = (priv->dummies[1] == 0);
 
   do
     {
