@@ -36,6 +36,7 @@
 
 #include "sched/sched.h"
 
+#if !defined(CONFIG_SCHED_INSTRUMENTATION_EXTENAL)
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -610,3 +611,4 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
   note_add((FAR const uint8_t *)&note, sizeof(struct note_irqhandler_s));
 }
 #endif
+#endif /* CONFIG_SCHED_INSTRUMENTATION_EXTENAL */
