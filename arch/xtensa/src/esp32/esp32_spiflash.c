@@ -95,21 +95,45 @@ struct esp32_spiflash_s
  * Private Functions Prototypes
  ****************************************************************************/
 
+/* SPI helpers */
+
+static inline void spi_set_reg(struct esp32_spiflash_s *priv,
+                               int offset, uint32_t value);
+static inline uint32_t spi_get_reg(struct esp32_spiflash_s *priv,
+                                   int offset);
+static inline void spi_set_regbits(struct esp32_spiflash_s *priv,
+                                   int offset, uint32_t bits);
+static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
+                                     int offset, uint32_t bits);
+static inline void spi_memcpy(void *d, const void *s, uint32_t n);
+
+/* Flash helpers */
+
+static void esp32_set_read_opt(FAR struct esp32_spiflash_s *priv);
+static void esp32_set_write_opt(struct esp32_spiflash_s *priv);
+static int esp32_read_status(FAR struct esp32_spiflash_s *priv,
+                             uint32_t *status);
+static int esp32_wait_idle(FAR struct esp32_spiflash_s *priv);
+static int esp32_enable_write(FAR struct esp32_spiflash_s *priv);
+static int esp32_erasesector(FAR struct esp32_spiflash_s *priv,
+                             uint32_t addr, uint32_t size);
+static int esp32_writedata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
+                           const uint8_t *buffer, uint32_t size);
+static int esp32_readdata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
+                          uint8_t *buffer, uint32_t size);
+
+/* MTD driver methods */
+
 static int esp32_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                        size_t nblocks);
-
 static ssize_t esp32_read(FAR struct mtd_dev_s *dev, off_t offset,
                           size_t nbytes, FAR uint8_t *buffer);
-
 static ssize_t esp32_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                            size_t nblocks, FAR uint8_t *buffer);
-
 static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
                            size_t nbytes, FAR const uint8_t *buffer);
-
 static ssize_t esp32_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                             size_t nblocks, FAR const uint8_t *buffer);
-
 static int esp32_ioctl(FAR struct mtd_dev_s *dev, int cmd,
                        unsigned long arg);
 
@@ -131,7 +155,7 @@ static struct esp32_spiflash_s s_esp32_spiflash1 =
             .bwrite = esp32_bwrite,
             .read   = esp32_read,
             .ioctl  = esp32_ioctl,
-#if defined(CONFIG_MTD_BYTE_WRITE)
+#ifdef CONFIG_MTD_BYTE_WRITE
             .write  = esp32_write,
 #endif
             .name   = "esp32_mainflash"
@@ -149,7 +173,7 @@ static struct esp32_spiflash_s s_esp32_spiflash1 =
  * Name: spi_set_reg
  *
  * Description:
- *   Set the contents of the SPI register at offset
+ *   Set the content of the SPI register at offset
  *
  * Input Parameters:
  *   priv   - Private SPI device structure
@@ -171,14 +195,14 @@ static inline void spi_set_reg(struct esp32_spiflash_s *priv,
  * Name: spi_get_reg
  *
  * Description:
- *   Get the contents of the SPI register at offset
+ *   Get the content of the SPI register at offset
  *
  * Input Parameters:
  *   priv   - Private SPI device structure
  *   offset - Offset to the register of interest
  *
  * Returned Value:
- *   The contents of the register
+ *   The content of the register
  *
  ****************************************************************************/
 
@@ -260,7 +284,9 @@ static inline void spi_memcpy(void *d, const void *s, uint32_t n)
   const uint8_t *src = (const uint8_t *)s;
 
   while (n--)
-    *dest++ = *src++;
+    {
+      *dest++ = *src++;
+    }
 }
 
 /****************************************************************************
@@ -375,7 +401,7 @@ static void esp32_set_read_opt(FAR struct esp32_spiflash_s *priv)
 }
 
 /****************************************************************************
- * Name: esp32_set_read_opt
+ * Name: esp32_set_write_opt
  *
  * Description:
  *   Set SPI Flash to be direct read mode. Due to different SPI I/O mode
@@ -463,7 +489,7 @@ static int esp32_read_status(FAR struct esp32_spiflash_s *priv,
  * Name: esp32_wait_idle
  *
  * Description:
- *   Wait for SPI Flash to be idle state.
+ *   Wait for SPI Flash to be in an idle state.
  *
  * Input Parameters:
  *   spi - ESP32 SPI Flash chip data
