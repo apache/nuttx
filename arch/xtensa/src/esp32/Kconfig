@@ -111,7 +111,7 @@ config ESP32_SPI
 	default n
 
 config ESP32_SPIFLASH
-	bool
+	bool "SPI Flash"
 	default n
 	select MTD
 	select MTD_BYTE_WRITE
