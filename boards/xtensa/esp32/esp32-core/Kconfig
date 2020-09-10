@@ -44,4 +44,23 @@ config ESP32CORE_FLASH_IMAGE
 	---help---
 		Create flash_image.bin mainly used for QEMU.
 
+choice
+  prompt "SPIFLASH File System"
+  default ESP32_SPIFLASH_SMARTFS
+  depends on ESP32_SPIFLASH
+
+  config ESP32_SPIFLASH_SMARTFS
+        bool "SmartFS"
+        depends on FS_SMARTFS
+  config ESP32_SPIFLASH_NXFFS
+        bool "NXFFS"
+        depends on FS_NXFFS
+  config ESP32_SPIFLASH_SPIFFS
+        bool "SPIFFS"
+        depends on FS_SPIFFS
+  config ESP32_SPIFLASH_LITTLEFS
+        bool "LittleFS"
+        depends on FS_LITTLEFS
+endchoice
+
 endif # ARCH_BOARD_ESP32CORE
