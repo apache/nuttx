@@ -170,13 +170,6 @@ jobs:
 
       - name: Export NuttX Repo SHA
         run:  echo "::set-env name=nuttx_sha::`git -C sources/nuttx rev-parse HEAD`"
-      - name: Restore ccache
-        id: ccache
-        uses: actions/cache@v2
-        with:
-          path: ccache
-          key: ccache-${{ runner.os }}-${{matrix.boards}}-${{ github.run_id }}
-          restore-keys: ccache-${{ runner.os }}-${{matrix.boards}}-
       - name: Run builds
         uses: ./sources/testing/.github/actions/ci-container
         env:
@@ -185,11 +178,10 @@ jobs:
           run: |
             echo "::add-matcher::sources/nuttx/.github/gcc.json"
             export CCACHE_DIR=`pwd`/ccache
+            mkdir $CCACHE_DIR
             cd sources/testing
             ./cibuild.sh -c -x testlist/${{matrix.boards}}.dat
             ccache -s
-            ccache -M 400M
-            ccache -c
 
   macOS:
     runs-on: macos-10.15
@@ -228,19 +220,11 @@ jobs:
 
       - name: Export NuttX Repo SHA
         run:  echo "::set-env name=nuttx_sha::`git -C sources/nuttx rev-parse HEAD`"
-      - name: Restore ccache
-        id: ccache
-        uses: actions/cache@v2
-        with:
-          path: ccache
-          key: ccache-${{ runner.os }}-${{matrix.boards}}-${{ github.run_id }}
-          restore-keys: ccache-${{ runner.os }}-${{matrix.boards}}-
       - name: Run Builds
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
           export CCACHE_DIR=`pwd`/ccache
+          mkdir $CCACHE_DIR
           cd sources/testing
           ./cibuild.sh -i -c -x testlist/${{matrix.boards}}.dat
           ccache -s
-          ccache -M 400M
-          ccache -c
