@@ -280,6 +280,7 @@ static enum pkt_type_e _spi_err_to_pkt_type(enum spi_status_e s)
         break;
 
       default:
+        r = TYPE_UNMATCH;
         ASSERT(false);
     }
 
@@ -304,6 +305,7 @@ static uint8_t _cid_to_uint8(char c)
     }
   else
     {
+      ret = 0xff;
       ASSERT(false);
     }
 
