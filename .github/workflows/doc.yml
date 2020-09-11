@@ -31,6 +31,7 @@ jobs:
     - uses: ammaraskar/sphinx-action@master
       with:
         docs-folder: "Documentation/"
+        build-command: "make html linkcheck"
     - uses: actions/upload-artifact@v2
       with:
         name: sphinx-docs
