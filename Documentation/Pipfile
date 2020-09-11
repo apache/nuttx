@@ -9,6 +9,7 @@ verify_ssl = true
 m2r2 = "*"
 sphinx_rtd_theme = "*"
 Sphinx = "*"
+sphinx-tabs = "*"
 
 [requires]
 python_version = "3"
