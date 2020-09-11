@@ -782,6 +782,18 @@ NOTES:
     Once booted the following command is used to mount a FAT file system:
         mount -t vfat /dev/mmcsd0 /mnt
 
+  spiflash:
+
+    This config tests the external SPI that comes with an ESP32 module connected
+    through SPI1.
+
+    By default a SmartFS file system is selected.
+    Once booted you can use the following commands to mount the file system:
+        mksmartfs /dev/smart0
+        mount -t smartfs /dev/smart0 /mnt
+
+    Note that mksmartfs is only needed the first time.
+
 Things to Do
 ============
 
