@@ -920,7 +920,16 @@ config SCHED_INSTRUMENTATION_EXTERNAL
 	bool "System performance monitor endpoints are external"
 	default n
 	---help---
-		Monitor only CPUs in the bitset.  Bit 0=CPU0, Bit1=CPU1, etc.
+		When this option is enabled, the board specific logic must implment all
+		callbacks listed in SCHED_INSTRUMENTATION, SCHED_INSTRUMENTATION_CSECTION,
+		SCHED_INSTRUMENTATION_SPINLOCKS, SCHED_INSTRUMENTATION_SYSCALL and
+		SCHED_INSTRUMENTATION_IRQHANDLER. Otherwise the common code will implement
+		these callbacks and packet the arguments into note_ struct. Then the board
+		-specific logic just need to implement one callback:
+
+		  void sched_note_add(FAR const void *note, size_t notelen);
+
+		and send the data to the suitable transport hardware.
 
 config SCHED_INSTRUMENTATION_CPUSET
 	hex "CPU bit set"
