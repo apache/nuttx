@@ -145,6 +145,25 @@ In case you need to leave a TODO note in the documentation to point that somethi
 which is available via the ``sphinx.ext.todo`` extension. This will let the reader of the documentation also know that the documentation
 is not yet finished somewhere and may further motivate a contribution.
 
+User Indications
+----------------
+
+To indicate a keypress, menu action or GUI button selection, use the following:
+
+.. code-block:: RST
+
+  Go into menu :menuselection:`File --> Save As`, click :guilabel:`&OK` or press :kbd:`Enter`.
+
+which would render as:
+
+Go into menu :menuselection:`File --> Save As`, click :guilabel:`&OK` or press :kbd:`Enter`.
+
+Tabbed examples
+---------------
+
+To indicate different instructions/examples for different scenarios (for example, different Operating
+Systems) use the `tabs <https://github.com/executablebooks/sphinx-tabs>`_ extension (see link for examples).
+
 Tips
 ====
 

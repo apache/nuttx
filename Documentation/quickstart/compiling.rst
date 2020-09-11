@@ -1,57 +1,82 @@
 .. include:: /substitutions.rst
 .. _compiling:
 
+=========
 Compiling
 =========
 
-Now that we've installed Apache NuttX prerequisites and downloaded the source code, we are ready to compile the source code
-into an executable binary file that can be run on the embedded board.
+Now that we've installed Apache NuttX prerequisites and downloaded the source code,
+we are ready to compile the source code into an executable binary file that can
+be run on the embedded board.
 
-#. List Possible Apache NuttX Base Configurations
+Initialize Configuration
+========================
 
-   Find your hardware and a good starting application in the list of base configurations. In the application list,
-   ``nsh`` is the Apache NuttX Shell, an interactive commandline that's a good starting place if you're new.
+The first step is to initialize NuttX configuration for a given board, based from
+a pre-existing configuration. To list all supported configurations you can do:
 
-    .. code-block:: bash
+    .. code-block:: console
 
        $ cd nuttx
        $ ./tools/configure.sh -L | less
+       
+The output is in the format ``<board name>:<board configuration>``. You will see that
+generally all boards support the ``nsh`` configuration which is a good sarting point
+since it enables booting into the interactive command line
+:doc:`/components/nsh/index`.
 
-#. Initialize Configuration
+To choose a configuration you pass the ``<board name>:<board configuration>`` option
+to ``configure.sh`` and indicate your host platform, such as:
 
-   Pick one of the board:application base configuration pairs from the list, and feed it to the
-   configuration script. The ``-l`` tells use that we're on Linux. macOS and Windows builds are
-   possible, this guide doesn't cover them yet.
-
-    .. code-block:: bash
+    .. code-block:: console
 
        $ cd nuttx
-       $ # this is the basic layout of the command:
-       $ # ./tools/configure.sh -l <board-name>:<config-dir>
-       $ # for example:
-       $ ./tools/configure.sh -l sama5d2-xult:nsh
+       $ ./tools/configure.sh -l stm32f4discovery:nsh
+       
+The ``-l`` tells use that we're on Linux (macOS and Windows builds are
+possible). Use the ``-h`` argument to see all available options.
 
-#. Customize Your Configuration (Optional)
+Customize Your Configuration (Optional)
+=======================================
 
-   This step is optional. Right now, this is mainly to get familiar with how it works– you don't need to change
-   any of the options now, but knowing how to do this will come in handy later.
+This step is optional. Right now, this is mainly to get familiar with how it
+works– you don't need to change any of the options now, but knowing how
+to do this will come in handy later.
 
-   There are a lot of options. We'll cover a few of them here. Don't worry about the complexity– you don't have to use most of the options.
+There are a lot of options. We'll cover a few of them here.
+Don't worry about the complexity– you don't have to use most of the options.
 
-    .. code-block:: bash
+.. code-block:: console
 
-       $ make menuconfig
+   $ cd nuttx/
+   $ make menuconfig
+   
+.. todo::
+  Explain some useful options.
 
-#. Compile NuttX
+Build NuttX
+===========
 
-    .. code-block:: bash
+We can now build NuttX. To do so, you can simply run:
 
-       $ make clean; make
+  .. code-block:: console
 
-#. Install the Executable Program on Your Board
+     $ cd nuttx/
+     $ make make
+     
+The build will complete by generating the binary outputs
+inside `nuttx` directory. Typically this includes the `nuttx`
+ELF file (suitable for debugging using `gdb`) and a `nuttx.bin`
+file that can be flashed to the board.     
+     
+To clean the build, you can do:
 
-   This step is a bit more complicated, depending on your board. It's covered in the section
-   :ref:`Running Apache NuttX <running>`.
+  .. code-block:: console
+
+     $ make clean
+     
+It is recommended that after manually modifying the configuration you first clean
+before building.
 
 ----
 

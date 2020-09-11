@@ -52,25 +52,22 @@ computer, you're using an ARM microcontroller on your embedded board, and you're
 
    NuttX is configured using ``kconfig`` system via an interactive menu system (``menuconfig``). It also includes the ``kconfig-tweak`` utility that can be used to quickly change debug settings without going into the menu system.
 
+   .. tabs::
+      
+      .. code-tab:: console Ubuntu 20.04 LTS and later
 
-   On Ubuntu 20.04 LTS and later, you can do:
+         $ apt install kconfig-frontends
 
-   .. code-block:: console
+      .. code-tab:: console MacOS, Ubuntu 18.04 LTS and earlier
 
-      $ apt install kconfig-frontends
-
-   On MacOS, and Ubuntu 18.04 LTS and earlier, you need to install manually:
-
-   .. code-block:: console
-
-      $ cd tools/kconfig-frontends
-      $ # on MacOS do the following:
-      $ patch < ../kconfig-macos.diff -p 1
-      $ ./configure --enable-mconf --disable-shared --enable-static --disable-gconf --disable-qconf --disable-nconf
-      $ # on Linux do the following:
-      $  ./configure --enable-mconf --disable-nconf --disable-gconf --disable-qconf
-      $ make
-      $ make install
+         $ cd tools/kconfig-frontends
+         $ # on MacOS do the following:
+         $ patch < ../kconfig-macos.diff -p 1
+         $ ./configure --enable-mconf --disable-shared --enable-static --disable-gconf --disable-qconf --disable-nconf
+         $ # on Linux do the following:
+         $  ./configure --enable-mconf --disable-nconf --disable-gconf --disable-qconf
+         $ make
+         $ make install
 
 #. List Possible Apache NuttX Base Configurations
 
@@ -106,8 +103,8 @@ computer, you're using an ARM microcontroller on your embedded board, and you're
 
       $ make menuconfig
 
-   Use your arrows to navigate the menu and ``ENTER`` key to enable/disable options. To exit and save your configuration, go back to the main menu, choose ``<Exit>`` and select "yes" when asked if you want to save.
-
+   Use your arrows to navigate the menu and :kbd:`Enter` key to enable/disable options. To exit and save your configuration, go back to the main menu, choose ``<Exit>`` and select "yes" when asked if you want to save.
+   
 #. Compile Apache NuttX
 
    .. code-block:: bash

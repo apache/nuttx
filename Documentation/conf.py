@@ -53,6 +53,7 @@ extensions = [
     "m2r2",
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.todo',
+    'sphinx_tabs.tabs'
 ]
 
 source_suffix = [ '.rst', '.md' ]
