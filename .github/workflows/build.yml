@@ -108,20 +108,13 @@ jobs:
           path: sources/testing
           fetch-depth: 1
 
-      - name: Create Source Bundle
-        run: tar -czf sources.tar.gz sources
+      - name: Tar sources
+        run: tar zcf sources.tar.gz sources
       - name: Archive Source Bundle
         uses: actions/upload-artifact@v1
         with:
           name: source-bundle
           path: sources.tar.gz
-
-      - name: Cache Source
-        id: cache-source
-        uses: actions/cache@v2
-        with:
-          path: sources
-          key: build-sources-${{ github.run_id }}
 
   Linux:
     needs: Fetch-Source
@@ -134,25 +127,13 @@ jobs:
         boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, avr-mips-riscv-x86-xtensa, sim]
 
     steps:
-      - name: Fetch Cached Source
-        id: cache-source
-        uses: actions/cache@v2
-        with:
-          path: sources-cache
-          key: build-sources-${{ github.run_id }}
-      - name: Prevent Updating Source Cache
-        if: steps.cache-source.outputs.cache-hit == 'true'
-        run: mv sources-cache sources
       - name: Download Source Artifact
-        if: steps.cache-source.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v1
         with:
           name: source-bundle
-          path: ./
-      - name: Extract Source Artifact
-        if: steps.cache-source.outputs.cache-hit != 'true'
-        run: tar -xf sources.tar.gz
-
+          path: .
+      - name: Extract sources
+        run: tar zxf sources.tar.gz
       - name: Docker Login
         uses: azure/docker-login@v1
         with:
@@ -190,25 +171,13 @@ jobs:
       matrix:
         boards: [arm-12, avr-mips-riscv-x86-xtensa, sim]
     steps:
-      - name: Fetch Cached Source
-        id: cache-source
-        uses: actions/cache@v2
-        with:
-          path: sources-cache
-          key: build-sources-${{ github.run_id }}
-      - name: Prevent Updating Source Cache
-        if: steps.cache-source.outputs.cache-hit == 'true'
-        run: mv sources-cache sources
       - name: Download Source Artifact
-        if: steps.cache-source.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v1
         with:
           name: source-bundle
-          path: ./
-      - name: Extract Source Artifact
-        if: steps.cache-source.outputs.cache-hit != 'true'
-        run: tar -xf sources.tar.gz
-
+          path: .
+      - name: Extract sources
+        run: tar zxf sources.tar.gz
       - name: Restore Tools Cache
         id: cache-tools
         uses: actions/cache@v2
