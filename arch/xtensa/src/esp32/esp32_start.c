@@ -109,9 +109,9 @@ void IRAM_ATTR __start(void)
     }
 #endif
 
-  /* Move the stack to a known location.  Although we were give a stack
+  /* Move the stack to a known location.  Although we were given a stack
    * pointer at start-up, we don't know where that stack pointer is
-   * positioned respect to our memory map.  The only safe option is to
+   * positioned with respect to our memory map.  The only safe option is to
    * switch to a well-known IDLE thread stack.
    */
 

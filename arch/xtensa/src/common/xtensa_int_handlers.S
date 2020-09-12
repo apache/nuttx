@@ -87,7 +87,7 @@
 1:
 	addi	\aout, \ain, -1				/* aout = ain - 1 */
 	and		\ain, \ain, \aout			/* ain  = ain & aout */
-	bnez	\ain, 1b					/* Repeat until ain == 0 */
+	bnez	\ain, 1b					    /* Repeat until ain == 0 */
 	addi	\aout, \aout, 1				/* Return aout + 1 */
 	.endm
 
