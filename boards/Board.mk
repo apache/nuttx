@@ -105,12 +105,7 @@ $(CXXOBJS) $(LINKOBJS): %$(OBJEXT): %.cxx
 	$(call COMPILEXX, $<, $@)
 
 libboard$(LIBEXT): $(OBJS) $(CXXOBJS)
-ifneq ($(OBJS),)
-	$(call ARCHIVE, $@, $(OBJS))
-endif
-ifneq ($(CXXOBJS),)
-	$(call ARCHIVE, $@, $(CXXOBJS))
-endif
+	$(call ARCHIVE, $@, $(OBJS) $(CXXOBJS))
 
 .depend: Makefile $(SRCS) $(CXXSRCS) $(RCSRCS) $(TOPDIR)$(DELIM).config
 ifneq ($(ZDSVERSION),)
