@@ -106,6 +106,13 @@ else
 endif
 
 LDFLAGS += -nostartfiles -nodefaultlibs
+
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  LDFLAGS += -Map="${shell cygpath -w $(TOPDIR)/nuttx.map}" --cref
+else
+  LDFLAGS += -Map=$(TOPDIR)/nuttx.map --cref
+endif
+
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
