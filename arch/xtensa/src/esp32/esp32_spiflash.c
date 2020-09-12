@@ -121,6 +121,14 @@ static int esp32_writedata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
                            const uint8_t *buffer, uint32_t size);
 static int esp32_readdata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
                           uint8_t *buffer, uint32_t size);
+#if 0
+static int esp32_read_highstatus(FAR struct esp32_spiflash_s *priv,
+                                 uint32_t *status);
+#endif
+#if 0
+static int esp32_write_status(FAR struct esp32_spiflash_s *priv,
+                              uint32_t status);
+#endif
 
 /* MTD driver methods */
 
@@ -536,8 +544,9 @@ static int esp32_wait_idle(FAR struct esp32_spiflash_s *priv)
  *
  ****************************************************************************/
 
-int esp32_read_highstatus(FAR struct esp32_spiflash_s *priv,
-                          uint32_t *status)
+#if 0
+static int esp32_read_highstatus(FAR struct esp32_spiflash_s *priv,
+                                 uint32_t *status)
 {
   uint32_t regval;
 
@@ -555,6 +564,7 @@ int esp32_read_highstatus(FAR struct esp32_spiflash_s *priv,
 
   return 0;
 }
+#endif
 
 /****************************************************************************
  * Name: esp32_write_status
@@ -571,7 +581,9 @@ int esp32_read_highstatus(FAR struct esp32_spiflash_s *priv,
  *
  ****************************************************************************/
 
-int esp32_write_status(FAR struct esp32_spiflash_s *priv, uint32_t status)
+#if 0
+static int esp32_write_status(FAR struct esp32_spiflash_s *priv,
+                              uint32_t status)
 {
   if (esp32_wait_idle(priv))
     {
@@ -592,6 +604,7 @@ int esp32_write_status(FAR struct esp32_spiflash_s *priv, uint32_t status)
 
   return 0;
 }
+#endif
 
 /****************************************************************************
  * Name: esp32_enable_write
