@@ -72,7 +72,7 @@ static spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
  *   cpu - The index of the CPU to be queried
  *
  * Returned Value:
- *   true   = a pause request is pending.
+ *   true  = a pause request is pending.
  *   false = no pasue request is pending.
  *
  ****************************************************************************/
@@ -88,9 +88,9 @@ bool up_cpu_pausereq(int cpu)
  * Description:
  *   Handle a pause request from another CPU.  Normally, this logic is
  *   executed from interrupt handling logic within the architecture-specific
- *   However, it is sometimes necessary necessary to perform the pending
- *   pause operation in other contexts where the interrupt cannot be taken
- *   in order to avoid deadlocks.
+ *   However, it is sometimes necessary to perform the pending pause
+ *   operation in other contexts where the interrupt cannot be taken in
+ *   order to avoid deadlocks.
  *
  *   This function performs the following operations:
  *
@@ -186,7 +186,7 @@ void xtensa_pause_handler(void)
   int cpu = up_cpu_index();
 
   /* Check for false alarms.  Such false could occur as a consequence of
-   * some deadlock breaking logic that might have already serviced the SG2
+   * some deadlock breaking logic that might have already serviced the
    * interrupt by calling up_cpu_paused.
    */
 
@@ -228,9 +228,9 @@ int up_cpu_pause(int cpu)
 
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
-  /* Take the both spinlocks.  The g_cpu_wait spinlock will prevent the SGI2
+  /* Take both spinlocks.  The g_cpu_wait spinlock will prevent the interrupt
    * handler from returning until up_cpu_resume() is called; g_cpu_paused
-   * is a handshake that will prefent this function from returning until
+   * is a handshake that will prevent this function from returning until
    * the CPU is actually paused.
    */
 
@@ -240,7 +240,7 @@ int up_cpu_pause(int cpu)
   spin_lock(&g_cpu_wait[cpu]);
   spin_lock(&g_cpu_paused[cpu]);
 
-  /* Execute SGI2 */
+  /* Execute the intercpu interrupt */
 
   ret = xtensa_intercpu_interrupt(cpu, CPU_INTCODE_PAUSE);
   if (ret < 0)
@@ -276,8 +276,8 @@ int up_cpu_pause(int cpu)
  *   state of the task at the head of the g_assignedtasks[cpu] list, and
  *   resume normal tasking.
  *
- *   This function is called after up_cpu_pause in order resume operation of
- *   the CPU after modifying its g_assignedtasks[cpu] list.
+ *   This function is called after up_cpu_pause in order to resume operation
+ *   of the CPU after modifying its g_assignedtasks[cpu] list.
  *
  * Input Parameters:
  *   cpu - The index of the CPU being re-started.
@@ -297,7 +297,7 @@ int up_cpu_resume(int cpu)
 
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
-  /* Release the spinlock.  Releasing the spinlock will cause the SGI2
+  /* Release the spinlock.  Releasing the spinlock will cause the interrupt
    * handler on 'cpu' to continue and return from interrupt to the newly
    * established thread.
    */
