@@ -141,12 +141,12 @@ static int esp32_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  * Private Data
  ****************************************************************************/
 
-static const struct esp32_spiflash_config_s s_esp32_spiflash1_config =
+static const struct esp32_spiflash_config_s g_esp32_spiflash1_config =
 {
   .reg_base = REG_SPI_BASE(1)
 };
 
-static struct esp32_spiflash_s s_esp32_spiflash1 =
+static struct esp32_spiflash_s g_esp32_spiflash1 =
 {
   .mtd =
           {
@@ -160,7 +160,7 @@ static struct esp32_spiflash_s s_esp32_spiflash1 =
 #endif
             .name   = "esp32_mainflash"
           },
-  .config = &s_esp32_spiflash1_config,
+  .config = &g_esp32_spiflash1_config,
   .chip = &g_rom_flashchip,
   .dummies = g_rom_spiflash_dummy_len_plus
 };
@@ -1146,7 +1146,7 @@ static int esp32_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 
 FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(void)
 {
-  struct esp32_spiflash_s *priv = &s_esp32_spiflash1;
+  struct esp32_spiflash_s *priv = &g_esp32_spiflash1;
   esp32_spiflash_chip_t *chip = priv->chip;
   FAR struct mtd_dev_s *mtd_part;
   uint32_t blocks;
@@ -1203,7 +1203,7 @@ FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(void)
 
 FAR struct mtd_dev_s *esp32_spiflash_get_mtd(void)
 {
-  struct esp32_spiflash_s *priv = &s_esp32_spiflash1;
+  struct esp32_spiflash_s *priv = &g_esp32_spiflash1;
 
   return &priv->mtd;
 }
