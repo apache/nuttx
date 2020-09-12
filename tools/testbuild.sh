@@ -161,6 +161,8 @@ function makefunc {
   if ! ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" ${JOPTION} $@ 1>/dev/null; then
     fail=1
   fi
+
+  return $fail
 }
 
 # Clean up after the last build
@@ -193,6 +195,8 @@ function distclean {
       fi
     fi
   fi
+
+  return $fail
 }
 
 # Configure for the next build
@@ -225,6 +229,8 @@ function configure {
 
     makefunc olddefconfig
   fi
+
+  return $fail
 }
 
 # Perform the next build
@@ -251,6 +257,8 @@ function build {
       fail=1
     fi
   fi
+
+  return $fail
 }
 
 # Coordinate the steps for the next build test

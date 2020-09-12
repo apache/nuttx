@@ -161,7 +161,7 @@ jobs:
             export CCACHE_DIR=`pwd`/ccache
             mkdir $CCACHE_DIR
             cd sources/testing
-            ./cibuild.sh -c -x testlist/${{matrix.boards}}.dat
+            ./cibuild.sh -c testlist/${{matrix.boards}}.dat
             ccache -s
 
   macOS:
@@ -195,5 +195,5 @@ jobs:
           export CCACHE_DIR=`pwd`/ccache
           mkdir $CCACHE_DIR
           cd sources/testing
-          ./cibuild.sh -i -c -x testlist/${{matrix.boards}}.dat
+          ./cibuild.sh -i -c testlist/${{matrix.boards}}.dat
           ccache -s
