@@ -344,7 +344,7 @@ int stmpe811_gpioread(STMPE811_HANDLE handle, uint8_t pinconfig, bool *value)
 
 #ifndef CONFIG_STMPE811_GPIOINT_DISABLE
 int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig,
-                       stmpe811_handler_t handler)
+                        stmpe811_handler_t handler)
 {
   FAR struct stmpe811_dev_s *priv = (FAR struct stmpe811_dev_s *)handle;
   int pin = (pinconfig & STMPE811_GPIO_PIN_MASK) >> STMPE811_GPIO_PIN_SHIFT;

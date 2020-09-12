@@ -51,4 +51,20 @@ ifeq ($(CONFIG_I2C),y)
 CSRCS += nrf52_i2c.c
 endif
 
+ifeq ($(CONFIG_NRF52_SPI_MASTER),y)
+CSRCS += nrf52_spi.c
+endif
+
+ifeq ($(CONFIG_LCD_ILI9341),y)
+CSRCS += nrf52_ili9341_lcd.c
+endif
+
+ifeq ($(CONFIG_NRF52_FEATHER_KB_FEATHERWING),y)
+CSRCS += nrf52_fw_stmpe811.c
+endif
+
+ifeq ($(CONFIG_KB_FEATHERWING_KEYBOARD),y)
+CSRCS += nrf52_spq10kbd.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

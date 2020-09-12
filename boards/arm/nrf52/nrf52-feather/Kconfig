@@ -5,4 +5,59 @@
 
 if ARCH_BOARD_NRF52_FEATHER
 
-endif
+menuconfig NRF52_FEATHER_KB_FEATHERWING
+	bool "Keyboard FeatherWing"
+    default n
+    ---help---
+        Enable support for the SolderParty FeatherWing
+        https://www.solder.party/docs/keyboard-featherwing/
+
+if NRF52_FEATHER_KB_FEATHERWING
+config KB_FEATHERWING_LCD
+    bool "LCD"
+    select SPI
+    select NRF52_SPI0_MASTER
+    select LCD
+    select LCD_ILI9341
+    select LCD_ILI9341_IFACE0
+    default n
+    ---help---
+        Enable the LCD display with ILI9341 controller
+
+config KB_FEATHERWING_LCD_TOUCH
+    bool "Touch Controller"
+    select INPUT_STMPE811
+    default n
+
+config KB_FEATHERWING_NEOPIXEL
+    bool "NeoPixel"
+    select SPI
+    select NRF52_SPI2_MASTER
+    select WS2812
+    default n
+    ---help---
+        Enable the single NeoPixel on the top of the display 
+
+config KB_FEATHERWING_KEYBOARD
+    bool "QWERTY Keyboard and Buttons"
+    default n
+    select INPUT
+    select INPUT_SPQ10KBD
+    select SPQ10KBD_DJOY
+    select NRF52_I2C1_MASTER
+    ---help---
+        Enable support BB QWERTY Keyboard with buttons
+
+config KB_FEATHERWING_SDCARD
+    bool "SD Card"
+    select SPI
+    select NRF52_SPI0_MASTER
+    select MMCSD
+    select MMCSD_SPI
+    default n
+    ---help---
+        Enable support SD Card slot
+
+endif # NRF52_FEATHER_KB_FEATHERWING
+
+endif # ARCH_BOARD_NRF52_FEATHER

@@ -41,7 +41,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C
+#if defined(CONFIG_I2C) && defined(CONFIG_I2C_DRIVER)
 int nrf52_i2c_register(int bus)
 {
   struct i2c_master_s *i2c;
@@ -88,7 +88,7 @@ int nrf52_i2ctool(void)
 #endif
 
 #ifdef CONFIG_NRF52_I2C1_MASTER
-  ret = nrf52_i2c_register(0);
+  ret = nrf52_i2c_register(1);
 #endif
   return ret;
 }

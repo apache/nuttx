@@ -103,12 +103,39 @@
  * driver can set up the UART for the serial console properly.
  */
 
-#define BOARD_UART0_RX_PIN  (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(8))
-#define BOARD_UART0_TX_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(6))
+#define BOARD_UART0_RX_PIN \
+    (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(8))
+#define BOARD_UART0_TX_PIN \
+    (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(6))
 
 /* I2C Pins *****************************************************************/
 
-#define BOARD_I2C0_SCL_PIN (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN(26))
-#define BOARD_I2C0_SDA_PIN (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(25))
+#define BOARD_I2C0_SCL_PIN \
+    (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN(26))
+#define BOARD_I2C0_SDA_PIN \
+    (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(25))
+
+#define BOARD_I2C1_SCL_PIN \
+    (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN(26))
+#define BOARD_I2C1_SDA_PIN \
+    (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(25))
+
+/* SPI Pins *****************************************************************/
+
+#define BOARD_SPI0_SCK_PIN \
+    (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN(12))
+#define BOARD_SPI0_MOSI_PIN \
+    (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN(13))
+#define BOARD_SPI0_MISO_PIN \
+    (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(14))
+
+/* We only use the SPI MOSI line, but SPIM hardware requires the clock be
+ * Attached to a physical pin. MOSI can be disabled.
+ */
+
+#define BOARD_SPI2_SCK_PIN \
+    (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN(16))
+#define BOARD_SPI2_MOSI_PIN \
+    (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN(7))
 
 #endif /* __BOARDS_ARM_NRF52_NRF52_FEATHER_INCLUDE_BOARD_H */
