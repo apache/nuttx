@@ -75,8 +75,10 @@ To clean the build, you can do:
 
      $ make clean
      
-It is recommended that after manually modifying the configuration you first clean
-before building.
+.. warning::
+  At the moment it is recommended that after modifying the
+  configuration you first clean before building again. This
+  is currently worked on.
 
 ----
 
