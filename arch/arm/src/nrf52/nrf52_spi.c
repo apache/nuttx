@@ -166,7 +166,7 @@ static const struct spi_ops_s g_spi0ops =
 #  endif
   .status            = nrf52_spi0status,
 #  ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = nrf52_spi1cmddata,
+  .cmddata           = nrf52_spi0cmddata,
 #  endif
   .send              = nrf52_spi_send,
 #  ifdef CONFIG_SPI_EXCHANGE
@@ -256,7 +256,7 @@ static const struct spi_ops_s g_spi2ops =
 #  endif
   .status            = nrf52_spi2status,
 #  ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = nrf52_spi1cmddata,
+  .cmddata           = nrf52_spi2cmddata,
 #  endif
   .send              = nrf52_spi_send,
 #  ifdef CONFIG_SPI_EXCHANGE
@@ -301,7 +301,7 @@ static const struct spi_ops_s g_spi3ops =
 #  endif
   .status            = nrf52_spi3status,
 #  ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = nrf52_spi1cmddata,
+  .cmddata           = nrf52_spi3cmddata,
 #  endif
   .send              = nrf52_spi_send,
 #  ifdef CONFIG_SPI_EXCHANGE
