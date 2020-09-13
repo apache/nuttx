@@ -79,11 +79,7 @@ int symlink(FAR const char *path1, FAR const char *path2)
   int errcode;
   int ret;
 
-  /* Both paths must be absolute.  We need only check path1 here. path2 will
-   * be checked by inode find.
-   */
-
-  if (path1 == NULL || *path1 != '/')
+  if (path1 == NULL)
     {
       errcode = EINVAL;
       goto errout;

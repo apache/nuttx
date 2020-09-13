@@ -42,6 +42,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <limits.h>
 #include <assert.h>
 #include <errno.h>
@@ -60,6 +61,7 @@ static int _inode_linktarget(FAR struct inode *node,
                              FAR struct inode_search_s *desc);
 #endif
 static int _inode_search(FAR struct inode_search_s *desc);
+static FAR const char *_inode_getcwd(void);
 
 /****************************************************************************
  * Public Data
@@ -405,8 +407,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
         }
     }
 
-  /* The node may or may not be null as per one of the following four cases
-   * cases:
+  /* The node may or may not be null as per one of the following four cases:
    *
    * With node = NULL
    *
@@ -428,6 +429,29 @@ static int _inode_search(FAR struct inode_search_s *desc)
   desc->parent  = above;
   desc->relpath = relpath;
   return ret;
+}
+
+/****************************************************************************
+ * Name: _inode_getcwd
+ *
+ * Description:
+ *   Return the current working directory
+ *
+ ****************************************************************************/
+
+static FAR const char *_inode_getcwd(void)
+{
+  FAR const char *pwd = "";
+
+#ifndef CONFIG_DISABLE_ENVIRON
+  pwd = getenv("PWD");
+  if (pwd == NULL)
+    {
+      pwd = CONFIG_LIB_HOMEDIR;
+    }
+#endif
+
+  return pwd;
 }
 
 /****************************************************************************
@@ -467,7 +491,20 @@ int inode_search(FAR struct inode_search_s *desc)
    * node if node is a symbolic link.
    */
 
-  DEBUGASSERT(desc != NULL);
+  DEBUGASSERT(desc != NULL && desc->path != NULL);
+
+  /* Convert the relative path to the absolute path */
+
+  if (*desc->path != '/')
+    {
+      asprintf(&desc->buffer, "%s/%s", _inode_getcwd(), desc->path);
+      if (desc->buffer == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      desc->path = desc->buffer;
+    }
 
   ret = _inode_search(desc);
 
