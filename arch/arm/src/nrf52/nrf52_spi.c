@@ -858,7 +858,7 @@ static void nrf52_spi_1b_workaround(FAR struct spi_dev_s *dev, bool enable)
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
  *   rxbuffer - A pointer to a buffer in which to receive data
- *   nwords   - the length of data to be exchaned in units of words.
+ *   nwords   - the length of data to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.
  *
@@ -873,6 +873,15 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
 {
   FAR struct nrf52_spidev_s *priv = (FAR struct nrf52_spidev_s *)dev;
   uint32_t regval = 0;
+
+  if (nwords > 0xff)
+    {
+      /* MAXCNT register can only hold 8bits */
+
+      spierr("SPI transfer max of 255 bytes, %d requested\n")
+      DEBUGASSERT(false);
+      return;
+    }
 
 #ifdef CONFIG_NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
   if (nwords <= 1)
@@ -893,6 +902,10 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
       regval = nwords;
       nrf52_spi_putreg(priv, NRF52_SPIM_RXDMAXCNT_OFFSET, regval);
     }
+  else
+    {
+      nrf52_spi_putreg(priv, NRF52_SPIM_RXDMAXCNT_OFFSET, 0);
+    }
 
   if (txbuffer != NULL)
     {
@@ -905,6 +918,10 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
 
       regval = nwords;
       nrf52_spi_putreg(priv, NRF52_SPIM_TXDMAXCNT_OFFSET, regval);
+    }
+  else
+    {
+      nrf52_spi_putreg(priv, NRF52_SPIM_TXDMAXCNT_OFFSET, 0);
     }
 
   /* SPI start */
@@ -924,6 +941,11 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
 
   nxsem_wait(&priv->sem_isr);
 #endif
+
+  if (nrf52_spi_getreg(priv, NRF52_SPIM_TXDAMOUNT_OFFSET) != nwords)
+    {
+      spierr("Incomplete transfer wrote %d expected %d\n", regval, nwords);
+    }
 
   /* SPI stop */
 
