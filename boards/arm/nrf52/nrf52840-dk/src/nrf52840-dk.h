@@ -180,5 +180,29 @@ int nrf52_lpwaninitialize(void);
 int nrf52_timer_driver_setup(FAR const char *devpath, int timer);
 #endif
 
+/****************************************************************************
+ * Name: nrf52_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int nrf52_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: nrf52_adc_setup
+ *
+ * Description:
+ *   Initialize ADC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int nrf52_adc_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF52_NRF52840_DK_SRC_NRF52840_DK_H */

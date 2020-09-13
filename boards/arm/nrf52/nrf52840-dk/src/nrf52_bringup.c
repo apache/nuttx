@@ -192,6 +192,30 @@ int nrf52_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_PWM
+  /* Configure PWM driver */
+
+  ret = nrf52_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize PWM driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Configure ADC driver */
+
+  ret = nrf52_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize ADC driver: %d\n",
+             ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
