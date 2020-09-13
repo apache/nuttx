@@ -59,7 +59,9 @@
 
 #define SYSCTL_PERIPH_INDEX(a)  (((a) >> 28) & 0xf)
 
-/* This macro constructs the peripheral bit mask from the peripheral number. */
+/* This macro constructs the peripheral bit mask from the peripheral
+ * number.
+ */
 
 #define SYSCTL_PERIPH_MASK(a)   (((a) & 0xffff) << (((a) & 0x001f0000) >> 16))
 #define SYSCTL_PERIPH_EEPROM0   0xf0005800  /* REVISIT:  What is this? */
@@ -115,8 +117,9 @@ static int tiva_eeprom_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                              size_t nblocks);
 static ssize_t tiva_eeprom_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                                  size_t nblocks, FAR uint8_t *buf);
-static ssize_t tiva_eeprom_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                                  size_t nblocks, FAR const uint8_t *buf);
+static ssize_t tiva_eeprom_bwrite(FAR struct mtd_dev_s *dev,
+                                  off_t startblock, size_t nblocks,
+                                  FAR const uint8_t *buf);
 static ssize_t tiva_eeprom_read(FAR struct mtd_dev_s *dev, off_t offset,
                                 size_t nbytes, FAR uint8_t *buf);
 #ifdef CONFIG_MTD_BYTE_WRITE
@@ -191,10 +194,10 @@ static inline void tiva_delay(uint32_t delay)
  *   register reads/writes.
  *
  *   NOTE: It takes five clock cycles after the write to enable a peripheral
- *   before the the peripheral is actually enabled.  During this time, attempts
- *   to access the peripheral result in a bus fault.  Care should be taken
- *   to ensure that the peripheral is not accessed during this brief time
- *   period.
+ *   before the the peripheral is actually enabled.  During this time,
+ *   attempts to access the peripheral result in a bus fault.  Care should be
+ *   taken to ensure that the peripheral is not accessed during this brief
+ *   time period.
  *
  * Input Parameters:
  *   peripheral - The peripheral to enable.
@@ -217,7 +220,8 @@ static void tiva_eeprom_enable(unsigned long peripheral)
     {
       /* Enable this peripheral. */
 
-      regaddr = PERIPHADDR(TIVA_SYSCON_RCGC_BASE + ((peripheral & 0xff00) >> 8),
+      regaddr = PERIPHADDR(TIVA_SYSCON_RCGC_BASE +
+                           ((peripheral & 0xff00) >> 8),
                            peripheral & 0xff);
       putreg32(1, regaddr);
     }
@@ -238,10 +242,10 @@ static void tiva_eeprom_enable(unsigned long peripheral)
  * Description:
  *   Performs a software reset of the EEPROM peripheral.
  *
- *   This function performs a software reset of the specified peripheral.  An
- *   individual peripheral reset signal is asserted for a brief period and then
- *   de-asserted, returning the internal state of the peripheral to its reset
- *   condition.
+ *   This function performs a software reset of the specified peripheral.
+ *   An individual peripheral reset signal is asserted for a brief period
+ *   and then de-asserted, returning the internal state of the peripheral to
+ *   its reset condition.
  *
  * Input Parameters:
  *   peripheral - The peripheral to reset.
@@ -295,10 +299,10 @@ static void tiva_eeprom_waitdone(void)
  * Name:tiva_eeprom_sectormask_set
  *
  * Description:
- *   This function implements a workaround for a bug in Blizzard rev A silicon.
- *   It ensures that only the 1KB flash sector containing a given EEPROM
- *   address is erased if an erase/copy operation is required as a result of
- *   a following EEPROM write.
+ *   This function implements a workaround for a bug in Blizzard rev A
+ *   silicon. It ensures that only the 1KB flash sector containing a given
+ *   EEPROM address is erased if an erase/copy operation is required as a
+ *   result of a following EEPROM write.
  *
  ****************************************************************************/
 
@@ -380,7 +384,7 @@ static void tiva_eeprom_sectormask_clear(void)
 static ssize_t tiva_eeprom_write(FAR struct mtd_dev_s *dev, off_t offset,
                                  size_t nbytes, FAR const uint8_t *buf)
 {
-  FAR uint32_t *data = (uint32_t*)buf;
+  FAR uint32_t *data = (uint32_t *)buf;
   size_t remaining;
   uint32_t status;
   uint32_t regval;
@@ -401,7 +405,7 @@ static ssize_t tiva_eeprom_write(FAR struct mtd_dev_s *dev, off_t offset,
   /* Convert the byte count to a word count. */
 
   remaining = nbytes >> 2;
-  nbytes   &= ~3;;
+  nbytes   &= ~3;
 
   /* Write each word in turn. */
 
@@ -502,7 +506,7 @@ static ssize_t tiva_eeprom_write(FAR struct mtd_dev_s *dev, off_t offset,
 static ssize_t tiva_eeprom_read(FAR struct mtd_dev_s *dev, off_t offset,
                                 size_t nbytes, FAR uint8_t *buf)
 {
-  FAR uint32_t *data = (uint32_t*)buf;
+  FAR uint32_t *data = (uint32_t *)buf;
   size_t remaining;
   uint32_t regval;
 
@@ -585,20 +589,20 @@ static int tiva_eeprom_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  * Description:
  *  Performs any necessary recovery in case of power failures during write.
  *
- *  This function must be called after tiva_eeprom_enable() and before
- *  the EEPROM is accessed.  It is used to check for errors in the EEPROM state
- *  such as from power failure during a previous write operation.  The function
- *  detects these errors and performs as much recovery as possible.
+ *  This function must be called after tiva_eeprom_enable() and before the
+ *  EEPROM is accessed.  It is used to check for errors in the EEPROM state
+ *  such as from power failure during a previous write operation.  The
+ *  function detects these errors and performs as much recovery as possible.
  *
- *  If -ENODEV is returned, the EEPROM was unable to recover its
- *  state.  If power is stable when this occurs, this indicates a fatal
- *  error and is likely an indication that the EEPROM memory has exceeded its
- *  specified lifetime write/erase specification.  If the supply voltage is
- *  unstable when this return code is observed, retrying the operation once the
+ *  If -ENODEV is returned, the EEPROM was unable to recover its state.  If
+ *  power is stable when this occurs, this indicates a fatal error and is
+ *  likely an indication that the EEPROM memory has exceeded its specified
+ *  lifetime write/erase specification.  If the supply voltage is unstable
+ *  when this return code is observed, retrying the operation once the
  *  voltage is stabilized may clear the error.
  *
- *  Failure to call this function after a reset may lead to incorrect operation
- *  or permanent data loss if the EEPROM is later written.
+ *  Failure to call this function after a reset may lead to incorrect
+ *  operation or permanent data loss if the EEPROM is later written.
  *
  * Returned Value:
  *   Returns OK if no errors were detected or -ENODEV if the EEPROM
