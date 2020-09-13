@@ -182,9 +182,7 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
   DEBUGASSERT(path != NULL && inode != NULL);
   *inode = NULL;
 
-  /* Handle paths that are interpreted as the root directory */
-
-  if (path[0] == '\0' || path[0] != '/')
+  if (path[0] == '\0')
     {
       return -EINVAL;
     }

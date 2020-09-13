@@ -231,14 +231,6 @@ FAR DIR *opendir(FAR const char *path)
       goto errout;
     }
 
-  /* We don't know what to do with relative paths */
-
-  if (*path != '/')
-    {
-      ret = ENOTDIR;
-      goto errout_with_semaphore;
-    }
-
   /* Find the node matching the path. */
 
   ret = inode_search(&desc);
