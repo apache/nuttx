@@ -117,16 +117,16 @@ static void pwm_dump(FAR const char *msg, FAR const struct pwm_info_s *info,
   int i;
 #endif
 
-  pwminfo("%s: frequency: %d", msg, info->frequency);
+  pwminfo("%s: frequency: %d\n", msg, info->frequency);
 
 #ifdef CONFIG_PWM_MULTICHAN
   for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
     {
-      pwminfo(" channel: %d duty: %08x",
+      pwminfo(" channel: %d duty: %08x\n",
               info->channels[i].channel, info->channels[i].duty);
     }
 #else
-  pwminfo(" duty: %08x", info->duty);
+  pwminfo(" duty: %08x\n", info->duty);
 #endif
 
 #ifdef CONFIG_PWM_PULSECOUNT
