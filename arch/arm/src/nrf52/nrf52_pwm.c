@@ -693,7 +693,7 @@ FAR struct pwm_lowerhalf_s *nrf52_pwminitialize(int pwm)
 #ifdef CONFIG_NRF52_PWM2
       case 2:
         {
-          lower = &g_nrf52_pwm;
+          lower = &g_nrf52_pwm2;
           break;
         }
 #endif
@@ -701,7 +701,7 @@ FAR struct pwm_lowerhalf_s *nrf52_pwminitialize(int pwm)
 #ifdef CONFIG_NRF52_PWM3
       case 3:
         {
-          lower = &g_nrf52_pwm;
+          lower = &g_nrf52_pwm3;
           break;
         }
 #endif
