@@ -81,4 +81,12 @@ CSRCS += nrf52_timer.c
 endif
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += nrf52_pwm.c
+endif
+
+ifeq ($(CONFIG_ADC),y)
+CSRCS += nrf52_adc.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

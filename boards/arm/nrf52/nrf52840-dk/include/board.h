@@ -152,4 +152,32 @@
 #define BOARD_I2C0_SCL_PIN (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(27))
 #define BOARD_I2C0_SDA_PIN (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(26))
 
+/* PWM Pins *****************************************************************/
+
+/* PWM 0:
+ *   PWM0 CH0 - P1.1
+ *   PWM0 CH1 - P1.2
+ *   PWM0 CH2 - P1.3
+ *   PWM0 CH3 - P1.4
+ */
+
+#define NRF52_PWM0_CH0_PIN (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(1))
+#define NRF52_PWM0_CH1_PIN (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(2))
+#define NRF52_PWM0_CH2_PIN (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(3))
+#define NRF52_PWM0_CH3_PIN (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(4))
+
+/* ADC Pins *****************************************************************/
+
+/* ADC
+ *   ADC CH0 - P0.03 - AIN1
+ *   ADC CH1 - P0.04 - AIN2
+ *   ADC CH2 - P0.28 - AIN4
+ *   ADC CH3 - P0.29 - AIN5
+ */
+
+#define NRF52_ADC_CH0_PIN (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(3))
+#define NRF52_ADC_CH1_PIN (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(4))
+#define NRF52_ADC_CH2_PIN (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(28))
+#define NRF52_ADC_CH3_PIN (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(29))
+
 #endif /* __BOARDS_ARM_NRF52_NRF52840_DK_INCLUDE_BOARD_H */
