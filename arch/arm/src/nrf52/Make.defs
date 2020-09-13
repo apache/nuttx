@@ -151,3 +151,7 @@ endif
 ifeq ($(CONFIG_NRF52_PWM),y)
 CHIP_CSRCS += nrf52_pwm.c
 endif
+
+ifeq ($(CONFIG_NRF52_SAADC),y)
+CHIP_CSRCS += nrf52_adc.c
+endif

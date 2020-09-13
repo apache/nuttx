@@ -535,3 +535,61 @@ config NRF52_PWM3_CHANNEL
 endif # !NRF52_PWM_MULTICHAN
 
 endmenu # PWM configuration
+
+menu "SAADC Configuration"
+
+if NRF52_SAADC
+
+choice
+  prompt "SAADC trigger selection"
+  default NRF52_SAADC_TASK
+  ---help---
+    Choose mode for sample rate control
+
+config NRF52_SAADC_TASK
+  bool "SAADC Task trigger"
+
+config NRF52_SAADC_TIMER
+  bool "SAADC Timer trigger"
+
+endchoice # SAADC trigger selection
+
+if NRF52_SAADC_TIMER
+
+config NRF52_SAADC_TIMER_CC
+	int "SAADC Timer CC"
+	default 0
+	range 80 2047
+
+endif #NRF52_SAADC_TIMER
+
+config NRF52_SAADC_OVERSAMPLE
+	int "SAADC oversample"
+	default 0
+	range 0 8
+	---help---
+		SAADC oversample control
+
+config NRF52_SAADC_RESOLUTION
+	int "SAADC resolution"
+	default 0
+	range 0 3
+	---help---
+		SAADC resolution 0 - 8 bits, 1 - 10 bits, 2 - 12 bits, 3 - 14 bits
+
+config NRF52_SAADC_CHANNELS
+	int "SAADC channels"
+	default 8
+	range 0 8
+	---help---
+		SAADC channels
+
+config NRF52_SAADC_LIMITS
+	bool "SAADC limits enable"
+	default n
+	---help---
+		SAADC limist enable
+
+endif # NRF52_SAADC
+
+endmenu # SAADC Configuration
