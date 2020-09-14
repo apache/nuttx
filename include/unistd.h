@@ -308,6 +308,7 @@ EXTERN int       optopt; /* Unrecognized option character */
 
 pid_t   vfork(void);
 pid_t   getpid(void);
+pid_t   gettid(void);
 void    _exit(int status) noreturn_function;
 unsigned int sleep(unsigned int seconds);
 int     usleep(useconds_t usec);
