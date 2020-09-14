@@ -123,9 +123,7 @@ endif
 
 depend: .depend
 
-ifneq ($(BOARD_CONTEXT),y)
-context:
-endif
+context::
 
 clean:
 	$(call DELFILE, libboard$(LIBEXT))
