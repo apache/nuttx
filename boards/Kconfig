@@ -1364,13 +1364,22 @@ config ARCH_BOARD_SABRE_6QUAD
 		board featuring the iMX 6Quad CPU.
 
 config ARCH_BOARD_SAMA5D2_XULT
-	bool "Atmel SAMA5D2 Xplained Ultra development board"
+    bool "Atmel SAMA5D2 Xplained Ultra development board"
+    depends on ARCH_CHIP_ATSAMA5D27
+    select ARCH_HAVE_LEDS
+    select ARCH_HAVE_BUTTONS
+    select ARCH_HAVE_IRQBUTTONS
+    ---help---
+        The port of NuttX to the Atmel SAMA5D2-XULT development board
+
+config ARCH_BOARD_GIANT_BOARD
+	bool "Groboards Giant Board (SAMA5D27C-D1G)"
 	depends on ARCH_CHIP_ATSAMA5D27
+    select SAMA5D27_GIANT_BOARD_492MHZ
 	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		The port of NuttX to the Atmel SAMA5D2-XULT development board
+	    This options selects support for NuttX on the Groboards Giant Board,
+	    featuring the SAMA5D27C-D1G SIP with 128MB DDR2 RAM.
 
 config ARCH_BOARD_SAMA5D3X_EK
 	bool "Atmel SAMA5D3x-EK development board"
@@ -2268,7 +2277,8 @@ config ARCH_BOARD
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
-	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
+    default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
+    default "giant-board"              if ARCH_BOARD_GIANT_BOARD
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
 	default "sama5d3-xplained"         if ARCH_BOARD_SAMA5D3_XPLAINED
 	default "sama5d4-ek"               if ARCH_BOARD_SAMA5D4_EK
@@ -2588,6 +2598,9 @@ source "boards/arm/sam34/sam4s-xplained-pro/Kconfig"
 endif
 if ARCH_BOARD_SAMA5D2_XULT
 source "boards/arm/sama5/sama5d2-xult/Kconfig"
+endif
+if ARCH_BOARD_GIANT_BOARD
+source "boards/arm/sama5/giant-board/Kconfig"
 endif
 if ARCH_BOARD_SAMA5D3X_EK
 source "boards/arm/sama5/sama5d3x-ek/Kconfig"
