@@ -47,6 +47,12 @@ USERLIBS =
 
 NUTTXLIBS += staging$(DELIM)libdrivers$(LIBEXT)
 
+# External code support
+
+ifeq ($(EXTERNALDIR),external)
+  NUTTXLIBS += staging$(DELIM)libexternal$(LIBEXT)
+endif
+
 # Add libraries for board support
 
 NUTTXLIBS += staging$(DELIM)libboards$(LIBEXT)

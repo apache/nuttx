@@ -46,3 +46,4 @@
 core
 Make*.dep
 uImage
+/external
