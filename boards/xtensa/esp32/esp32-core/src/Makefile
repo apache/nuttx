@@ -57,7 +57,7 @@ ifeq ($(CONFIG_ESP32_SPIFLASH),y)
 CSRCS += esp32_spiflash.c
 endif
 
-SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template
+SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
 
 BOARD_CONTEXT = y
