@@ -89,4 +89,19 @@ config NCP5623C
 		Enable support for the onsemi NCP5623C LED driver which can be
 		utilized to drive up to 3 LED's.
 
+config WS2812
+	bool "WS2812 LED Driver"
+	default n
+	select SPI
+	---help---
+		Enable support for the Worldsemi WS2812 LED driver which commonly
+		found in LED strips.
+		NOTE: This device is a one wire device and has no CS or RESET
+		line it must have exclusive use of the bus!
+
+config WS2812_FREQUENCY
+	int "WS2812 LED Driver SPI Frequency"
+	default 8000000
+	depends on WS2812
+
 endmenu # LED Support
