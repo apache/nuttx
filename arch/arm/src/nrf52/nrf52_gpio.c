@@ -177,6 +177,13 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
   unsigned int port;
   unsigned int pin;
 
+  /* Check if the "pin" is disabled */
+
+  if ((cfgset & GPIO_FUNC_MASK) == GPIO_DISABLED)
+    {
+      return OK;
+    }
+
   /* Verify that this hardware supports the select GPIO port */
 
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
@@ -232,6 +239,11 @@ int nrf52_gpio_unconfig(nrf52_pinset_t cfgset)
   unsigned int port;
   uint32_t offset;
 
+  if ((cfgset & GPIO_FUNC_MASK) == GPIO_DISABLED)
+    {
+      return OK;
+    }
+
   /* Get port and pin number */
 
   pin  = GPIO_PIN_DECODE(cfgset);
@@ -261,6 +273,11 @@ void nrf52_gpio_write(nrf52_pinset_t pinset, bool value)
   unsigned int pin;
   unsigned int port;
   uint32_t offset;
+
+  if ((pinset & GPIO_FUNC_MASK) == GPIO_DISABLED)
+    {
+      return;
+    }
 
   /* Get port and pin number */
 
@@ -297,6 +314,11 @@ bool nrf52_gpio_read(nrf52_pinset_t pinset)
   unsigned int pin;
   uint32_t regval;
   uint32_t offset;
+
+  if ((pinset & GPIO_FUNC_MASK) == GPIO_DISABLED)
+    {
+      return false;
+    }
 
   /* Get port and pin number */
 

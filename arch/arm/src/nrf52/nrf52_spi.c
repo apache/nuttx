@@ -423,6 +423,14 @@ static int nrf52_spi_init(FAR struct nrf52_spidev_s *priv)
 
   pin  = GPIO_PIN_DECODE(priv->sck_pin);
   port = GPIO_PORT_DECODE(priv->sck_pin);
+  if ((priv->sck_pin & GPIO_FUNC_MASK) == GPIO_DISABLED)
+    {
+      /* The SCK pin MUST be connected to a physical pin */
+
+      spierr("SPI CLK pin cannot be disconnected!\n");
+      DEBUGASSERT(false);
+      return -EINVAL;
+    }
 
   regval = (pin << SPIM_PSELSCK_PIN_SHIFT);
   regval |= (port << SPIM_PSELSCK_PORT_SHIFT);
@@ -432,9 +440,12 @@ static int nrf52_spi_init(FAR struct nrf52_spidev_s *priv)
 
   pin  = GPIO_PIN_DECODE(priv->mosi_pin);
   port = GPIO_PORT_DECODE(priv->mosi_pin);
+  if ((priv->mosi_pin & GPIO_FUNC_MASK) != GPIO_DISABLED)
+    {
+      regval = (pin << SPIM_PSELMOSI_PIN_SHIFT);
+      regval |= (port << SPIM_PSELMOSI_PORT_SHIFT);
+    }
 
-  regval = (pin << SPIM_PSELMOSI_PIN_SHIFT);
-  regval |= (port << SPIM_PSELMOSI_PORT_SHIFT);
   nrf52_spi_putreg(priv, NRF52_SPIM_PSELMOSI_OFFSET, regval);
 
   /* According to manual we have to write 0 to MOSI pin */
@@ -445,9 +456,13 @@ static int nrf52_spi_init(FAR struct nrf52_spidev_s *priv)
 
   pin   = GPIO_PIN_DECODE(priv->miso_pin);
   port  = GPIO_PORT_DECODE(priv->miso_pin);
+  regval = SPIM_PSELMISO_CONNECTED;  /* Disconnect */
+  if ((priv->miso_pin & GPIO_FUNC_MASK) != GPIO_DISABLED)
+    {
+      regval = (pin << SPIM_PSELMISO_PIN_SHIFT);
+      regval |= (port << SPIM_PSELMISO_PORT_SHIFT);
+    }
 
-  regval = (pin << SPIM_PSELMISO_PIN_SHIFT);
-  regval |= (port << SPIM_PSELMISO_PORT_SHIFT);
   nrf52_spi_putreg(priv, NRF52_SPIM_PSELMISO_OFFSET, regval);
 
   /* NOTE: Chip select pin must be configured by board-specific logic */

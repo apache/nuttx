@@ -77,6 +77,7 @@
 #define GPIO_FUNC_MASK          (0x03 << GPIO_FUNC_SHIFT)
 #  define GPIO_INPUT            (0x00 << GPIO_FUNC_SHIFT)  /* 00000 GPIO input pin */
 #  define GPIO_OUTPUT           (0x01 << GPIO_FUNC_SHIFT)  /* 00001 GPIO output pin */
+#  define GPIO_DISABLED         (0x02 << GPIO_FUNC_SHIFT)  /* 00010 GPIO disabled pin */
 
 /* Pin Sense bits:
  *
