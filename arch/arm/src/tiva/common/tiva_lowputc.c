@@ -235,7 +235,8 @@ void arm_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait until the TX FIFO is not full */
 
-  while ((getreg32(TIVA_CONSOLE_BASE + TIVA_UART_FR_OFFSET) & UART_FR_TXFF) != 0);
+  while ((getreg32(TIVA_CONSOLE_BASE + TIVA_UART_FR_OFFSET) &
+         UART_FR_TXFF) != 0);
 
   /* Then send the character */
 
