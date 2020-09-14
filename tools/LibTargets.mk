@@ -106,6 +106,12 @@ drivers$(DELIM)libdrivers$(LIBEXT): pass2dep
 staging$(DELIM)libdrivers$(LIBEXT): drivers$(DELIM)libdrivers$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
+external$(DELIM)libexternal$(LIBEXT): pass2dep
+	$(Q) $(MAKE) -C external libexternal$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+
+staging$(DELIM)libexternal$(LIBEXT): external$(DELIM)libexternal$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
 binfmt$(DELIM)libbinfmt$(LIBEXT): pass2dep
 	$(Q) $(MAKE) -C binfmt libbinfmt$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
