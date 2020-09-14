@@ -28,9 +28,17 @@ MEMORY
 
   iram0_0_seg (RX) :     org = 0x40080000, len = 0x20000
 
-  /* Even though the segment name is iram, it is actually mapped to flash */
+  /* Even though the segment name is iram, it is actually mapped to flash.
+   *
+   * NOTE: (0x20 offset above is a convenience for the app binary image
+   * generation.
+   * Flash cache has 64KB pages. The .bin file which is flashed to the chip
+   * has a 0x18 byte file header, and each segment has a 0x08 byte segment
+   * header. Setting this offset makes it simple to meet the flash cache MMU's
+   * constraint that (paddr % 64KB == vaddr % 64KB).)
+   */
 
-  iram0_2_seg (RX) :     org = 0x400D0018, len = 0x330000
+  iram0_2_seg (RX) :     org = 0x400d0020, len = 0x330000 - 0x20
 
   /* Shared data RAM, excluding memory reserved for ROM bss/data/stack.
    * Enabling Bluetooth & Trace Memory features in menuconfig will decrease
@@ -42,7 +50,7 @@ MEMORY
 
   /* Flash mapped constant data */
 
-  drom0_0_seg (R) :      org = 0x3f400010, len = 0x800000
+  drom0_0_seg (R) :      org = 0x3f400020, len = 0x400000 - 0x20
 
   /* RTC fast memory (executable). Persists over deep sleep. */
 
