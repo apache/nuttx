@@ -74,6 +74,12 @@ ifeq ($(CONFIG_NCP5623C),y)
   LEDVPATH = :leds
 endif
 
+ifeq ($(CONFIG_WS2812),y)
+  CSRCS += ws2812.c
+  LEDDEPATH = --dep-path leds
+  LEDVPATH = :leds
+endif
+
 # Include LED build support (if any LED drivers were selected)
 
 DEPPATH += $(LEDDEPATH)
