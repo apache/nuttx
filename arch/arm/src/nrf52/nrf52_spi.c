@@ -229,7 +229,7 @@ static struct nrf52_spidev_s g_spi1dev =
     &g_spi1ops
   },
 
-  .base      = NRF52_SPIM0_BASE,
+  .base      = NRF52_SPIM1_BASE,
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
   .irq       = NRF52_IRQ_SPI_TWI_1,
 #endif
@@ -274,7 +274,7 @@ static struct nrf52_spidev_s g_spi2dev =
     &g_spi2ops
   },
 
-  .base      = NRF52_SPIM0_BASE,
+  .base      = NRF52_SPIM2_BASE,
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
   .irq       = NRF52_IRQ_SPI2,
 #endif
@@ -319,7 +319,7 @@ static struct nrf52_spidev_s g_spi3dev =
     &g_spi3ops
   },
 
-  .base      = NRF52_SPIM0_BASE,
+  .base      = NRF52_SPIM3_BASE,
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
   .irq       = NRF52_IRQ_SPI3,
 #endif
