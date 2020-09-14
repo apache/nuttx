@@ -36,7 +36,7 @@
 
 # Add the internal C files to the build
 
-CSRCS += lib_stream.c lib_utsname.c
+CSRCS += lib_stream.c lib_umask.c lib_utsname.c
 CSRCS += lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c
 
 ifneq ($(CONFIG_STDIO_DISABLE_BUFFERING),y)
