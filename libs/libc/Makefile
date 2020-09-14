@@ -137,21 +137,21 @@ $(COBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.c
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
-	$(Q) $(MAKE) -C zoneinfo all TOPDIR=$(TOPDIR) BIN=$(BIN)
+	$(Q) $(MAKE) -C zoneinfo all BIN=$(BIN)
 endif
 
 # C library for the kernel phase of the two-pass kernel build
 
 ifneq ($(BIN),$(KBIN))
 $(KBIN):
-	$(Q) $(MAKE) $(KBIN) BIN=$(KBIN) BINDIR=kbin TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) $(KBIN) BIN=$(KBIN) BINDIR=kbin EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 # Context
 
 context:
 ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
-	$(Q) $(MAKE) -C zoneinfo context TOPDIR=$(TOPDIR) BIN=$(BIN)
+	$(Q) $(MAKE) -C zoneinfo context BIN=$(BIN)
 endif
 
 # Dependencies
@@ -162,7 +162,7 @@ ifneq ($(CONFIG_BUILD_FLAT),y)
 	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >kbin/Make.dep
 endif
 ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
-	$(Q) $(MAKE) -C zoneinfo depend TOPDIR=$(TOPDIR) BIN=$(BIN)
+	$(Q) $(MAKE) -C zoneinfo depend BIN=$(BIN)
 endif
 	$(Q) touch $@
 
@@ -171,9 +171,9 @@ depend: .depend
 # Clean most derived files, retaining the configuration
 
 clean:
-	$(Q) $(MAKE) -C bin  clean TOPDIR=$(TOPDIR)
-	$(Q) $(MAKE) -C kbin clean TOPDIR=$(TOPDIR)
-	$(Q) $(MAKE) -C zoneinfo clean TOPDIR=$(TOPDIR) BIN=$(BIN)
+	$(Q) $(MAKE) -C bin  clean
+	$(Q) $(MAKE) -C kbin clean
+	$(Q) $(MAKE) -C zoneinfo clean BIN=$(BIN)
 	$(call DELFILE, $(BIN))
 	$(call DELFILE, $(KBIN))
 	$(call CLEAN)
@@ -181,9 +181,9 @@ clean:
 # Deep clean -- removes all traces of the configuration
 
 distclean: clean
-	$(Q) $(MAKE) -C bin  distclean TOPDIR=$(TOPDIR)
-	$(Q) $(MAKE) -C kbin distclean TOPDIR=$(TOPDIR)
-	$(Q) $(MAKE) -C zoneinfo distclean TOPDIR=$(TOPDIR) BIN=$(BIN)
+	$(Q) $(MAKE) -C bin  distclean
+	$(Q) $(MAKE) -C kbin distclean
+	$(Q) $(MAKE) -C zoneinfo distclean BIN=$(BIN)
 	$(call DELFILE, exec_symtab.c)
 	$(call DELFILE, bin/Make.dep)
 	$(call DELFILE, kbin/Make.dep)

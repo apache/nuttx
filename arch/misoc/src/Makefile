@@ -117,7 +117,7 @@ libarch$(LIBEXT): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 board/libboard$(LIBEXT):
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
@@ -143,7 +143,7 @@ export_startup: board/libboard$(LIBEXT) $(STARTUP_OBJS)
 
 .depend: Makefile chip/Make.defs $(SRCS) $(TOPDIR)$(DELIM).config
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" depend
+	$(Q) $(MAKE) -C board depend
 endif
 	$(Q) $(MKDEP) --dep-path chip --dep-path common --dep-path $(ARCH_SUBDIR) \
 	 "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
@@ -153,14 +153,14 @@ depend: .depend
 
 clean:
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" clean
+	$(Q) $(MAKE) -C board clean
 endif
 	$(call DELFILE, libarch$(LIBEXT))
 	$(call CLEAN)
 
 distclean: clean
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" distclean
+	$(Q) $(MAKE) -C board distclean
 endif
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)

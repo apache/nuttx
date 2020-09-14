@@ -271,7 +271,7 @@ libarch$(LIBEXT): $(NUTTXOBJS)
 # that are not hardware-related.
 
 board/libboard$(LIBEXT):
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 # A partially linked object containing only NuttX code (no interface to host OS)
 # Change the names of most symbols that conflict with libc symbols.
@@ -318,7 +318,7 @@ export_startup: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS)
 
 .depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
+		$(MAKE) -C board depend ; \
 	fi
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(ASRCS) $(CSRCS) >Make.dep
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(HOSTCFLAGS) -- $(HOSTSRCS) >>Make.dep
@@ -328,7 +328,7 @@ depend: .depend
 
 clean:
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
+		$(MAKE) -C board clean ; \
 	fi
 	$(call DELFILE, nuttx.ld)
 	$(call DELFILE, nuttx.rel)
@@ -338,7 +338,7 @@ clean:
 
 distclean: clean
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" distclean ; \
+		$(MAKE) -C board distclean ; \
 	fi
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)

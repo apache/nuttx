@@ -79,7 +79,7 @@ libarch$(LIBEXT): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 board/libboard$(LIBEXT):
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 ifeq ($(COMPILER),zneocc.exe)
 nuttx.linkcmd: $(LINKCMDTEMPLATE)
@@ -111,10 +111,10 @@ nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT) nuttx.linkcmd
 
 .depend: Makefile chip/Make.defs $(DEPSRCS) $(TOPDIR)$(DELIM).config
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-	$(Q) if exist board$(DELIM)Makefile ( $(MAKE) -C board TOPDIR="$(TOPDIR)" depend )
+	$(Q) if exist board$(DELIM)Makefile ( $(MAKE) -C board depend )
 else
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
+		$(MAKE) -C board depend ; \
 	fi
 endif
 	$(Q) $(MKDEP) --dep-path chip --dep-path common "$(CC)" -- $(CFLAGS) -- $(DEPSRCS) >Make.dep
@@ -140,10 +140,10 @@ depend: .depend
 
 clean:
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-	$(Q) if exist board$(DELIM)Makefile ( $(MAKE) -C board TOPDIR="$(TOPDIR)" clean )
+	$(Q) if exist board$(DELIM)Makefile ( $(MAKE) -C board clean )
 else
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
+		$(MAKE) -C board clean ; \
 	fi
 endif
 ifeq ($(COMPILER),zneocc.exe)
@@ -157,10 +157,10 @@ endif
 
 distclean: clean
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-	$(Q) if exist board$(DELIM)Makefile ( $(MAKE) -C board TOPDIR="$(TOPDIR)" distclean )
+	$(Q) if exist board$(DELIM)Makefile ( $(MAKE) -C board distclean )
 else
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" distclean ; \
+		$(MAKE) -C board distclean ; \
 	fi
 endif
 	$(call DELFILE, Make.dep)
