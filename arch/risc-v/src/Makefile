@@ -155,7 +155,7 @@ $(KBIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 board/libboard$(LIBEXT):
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
 	$(Q) echo "LD: nuttx"
@@ -186,7 +186,7 @@ endif
 
 .depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" depend
+	$(Q) $(MAKE) -C board depend
 endif
 	$(Q) $(MKDEP) $(patsubst %,--dep-path %,$(subst :, ,$(VPATH))) \
 	 "$(CC)" -- $(CFLAGS) -- $(SRCS) > Make.dep
@@ -196,7 +196,7 @@ depend: .depend
 
 clean:
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" clean
+	$(Q) $(MAKE) -C board clean
 endif
 	$(call DELFILE, $(KBIN))
 	$(call DELFILE, $(BIN))
@@ -205,7 +205,7 @@ endif
 
 distclean: clean
 ifeq ($(BOARDMAKE),y)
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" distclean
+	$(Q) $(MAKE) -C board distclean
 endif
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)

@@ -118,7 +118,7 @@ dirlinks: $(DUMMY_KCONFIG)
 
 context: $(DUMMY_KCONFIG)
 ifeq ($(BOARD_INSTALLED),y)
-	$(Q) $(MAKE) -C $(BOARDDIR) TOPDIR="$(TOPDIR)" context
+	$(Q) $(MAKE) -C $(BOARDDIR) context
 endif
 
 clean_context:

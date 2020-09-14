@@ -414,10 +414,10 @@ bdf-convert.c
 
        genfontsources:
          ifeq ($(CONFIG_NXFONT_SANS23X27),y)
-          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=1 EXTRAFLAGS=$(EXTRAFLAGS)
+          @$(MAKE) -C nxfonts -f Makefile.sources NXFONTS_FONTID=1 EXTRAFLAGS=$(EXTRAFLAGS)
         endif
          ifeq ($(CONFIG_NXFONT_MYFONT),y)
-          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRAFLAGS=$(EXTRAFLAGS)
+          @$(MAKE) -C nxfonts -f Makefile.sources NXFONTS_FONTID=2 EXTRAFLAGS=$(EXTRAFLAGS)
         endif
 
     6. nuttx/libnx/nxfonts/Make.defs.  Set the make variable NXFSET_CSRCS.
