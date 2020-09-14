@@ -168,6 +168,8 @@ int fstat(int fd, FAR struct stat *buf);
 int chmod(FAR const char *path, mode_t mode);
 int fchmod(int fd, mode_t mode);
 
+mode_t umask(mode_t mask);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
