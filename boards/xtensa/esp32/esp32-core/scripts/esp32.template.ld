@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-core/scripts/esp32.template
+ * boards/xtensa/esp32/esp32-core/scripts/esp32.template.ld
  * ESP32 Linker Script Memory Layout
  *
  * This file describes the memory layout (memory blocks) as virtual
