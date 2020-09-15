@@ -65,39 +65,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
   struct inode_search_s newdesc;
   FAR struct inode *newinode;
   FAR char *subdir = NULL;
-  FAR const char *name;
   int ret;
-
-  /* Special case the root directory.  There is no root inode and there is
-   * no name for the root.  inode_find() will fail to the find the root
-   * inode -- because there isn't one.
-   */
-
-  name = newpath;
-  while (*name == '/')
-    {
-      name++;
-    }
-
-  if (*name == '\0')
-    {
-      FAR char *subdirname;
-
-      /* In the newpath is the root directory, the target of the rename must
-       * be a directory entry under the root.
-       */
-
-      subdirname = basename((FAR char *)oldpath);
-
-      asprintf(&subdir, "/%s", subdirname);
-      if (subdir == NULL)
-        {
-          ret = -ENOMEM;
-          goto errout;
-        }
-
-      newpath = subdir;
-    }
 
   /* According to POSIX, any old inode at this path should be removed
    * first, provided that it is not a directory.
