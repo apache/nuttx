@@ -607,6 +607,7 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
 
   /* Add the note to circular buffer */
 
-  note_add((FAR const uint8_t *)&note, sizeof(struct note_irqhandler_s));
+  sched_note_add((FAR const uint8_t *)&note,
+                 sizeof(struct note_irqhandler_s));
 }
 #endif
