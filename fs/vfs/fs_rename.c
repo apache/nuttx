@@ -173,6 +173,7 @@ next_subdir:
            * over again.  A nasty goto is used because I am lazy.
            */
 
+          RELEASE_SEARCH(&newdesc);
           goto next_subdir;
         }
       else
@@ -265,6 +266,8 @@ errout_with_sem:
   inode_semgive();
 
 errout:
+  RELEASE_SEARCH(&newdesc);
+
   if (subdir != NULL)
     {
       kmm_free(subdir);
