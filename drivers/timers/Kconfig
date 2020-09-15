@@ -326,6 +326,14 @@ config WATCHDOG_AUTOMONITOR_TIMEOUT
 	int "Auto-monitor reset timeout(second)"
 	default 60
 
+config WATCHDOG_AUTOMONITOR_PING_INTERVAL
+	int "Auto-monitor keep a live interval"
+	default WATCHDOG_AUTOMONITOR_TIMEOUT
+	range 1 WATCHDOG_AUTOMONITOR_TIMEOUT
+	---help---
+		If the interval is same as WATCHDOG_AUTOMONITOR_TIMEOUT
+		the default value will change to (WATCHDOG_AUTOMONITOR_TIMEOUT / 2).
+
 choice
 	prompt "Auto-monitor keepalive by"
 	default WATCHDOG_AUTOMONITOR_BY_TIMER
