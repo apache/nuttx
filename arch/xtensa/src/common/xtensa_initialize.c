@@ -105,7 +105,7 @@ void up_initialize(void)
    * with the power management subsystem).
    */
 
-  up_pminitialize();
+  xtensa_pminitialize();
 #endif
 
 #ifdef CONFIG_ARCH_DMA

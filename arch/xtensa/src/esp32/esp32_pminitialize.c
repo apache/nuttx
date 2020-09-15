@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/include/xtensa/core_macros.h
+ * arch/xtensa/src/esp32/esp32_pminitialize.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,26 +18,38 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_INCUDE_XTENSA_CORE_MACRO_H
-#define __ARCH_XTENSA_INCUDE_XTENSA_CORE_MACRO_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <arch/chip/core-isa.h>
-#include <arch/chip/tie.h>
+#include <nuttx/config.h>
+#include <nuttx/power/pm.h>
+
+#include "esp32_pm.h"
+
+#ifdef CONFIG_PM
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
-#define XTHAL_GET_CCOUNT()              ({ int __ccount; \
-                                        __asm__ __volatile__("rsr.ccount %0":\
-                                        "=a"(__ccount)); __ccount; })
+/****************************************************************************
+ * Name: xtensa_pminitialize
+ *
+ * Description:
+ *   Initialize the power management subsystem.
+ *
+ ****************************************************************************/
 
-# define XTHAL_SET_CCOUNT(v)             do { int __ccount = (int)(v); \
-                                         __asm__ __volatile__("wsr.ccount %0" :: "a"(__ccount):"memory");\
-                                         } while(0)
+void xtensa_pminitialize(void)
+{
+  /* Initialize RTC parameters */
 
-#endif /* __ARCH_XTENSA_INCUDE_XTENSA_CORE_H */
+  esp32_pminit();
+
+  /* Then initialize the NuttX power management subsystem proper */
+
+  pm_initialize();
+}
+
+#endif /* CONFIG_PM */
