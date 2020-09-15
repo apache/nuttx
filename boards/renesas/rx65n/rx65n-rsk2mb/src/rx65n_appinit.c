@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 #include <nuttx/board.h>
+#include "rx65n_rsk2mb.h"
 
 #ifdef CONFIG_LIB_BOARDCTL
 

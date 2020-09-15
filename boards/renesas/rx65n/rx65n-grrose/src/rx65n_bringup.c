@@ -106,6 +106,7 @@ static int rtc_driver_initialize(void)
 
 int rx65n_bringup(void)
 {
+#if defined (HAVE_RTC_DRIVER) || defined (CONFIG_FS_PROCFS)
   int ret;
 #ifdef HAVE_RTC_DRIVER
   ret = rtc_driver_initialize();
@@ -127,6 +128,7 @@ int rx65n_bringup(void)
              ret, errno);
     }
 
+#endif
 #endif
 
 #ifdef CONFIG_RX65N_SBRAM
