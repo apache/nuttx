@@ -181,4 +181,6 @@
                                                IOMUX_SPEED_LOW )
 #define IOMUX_USBOTG_OC_DEFAULT               (IOMUX_PULL_UP_100K)
 
+#define IOMUX_ADC_DEFAULT                     (0)
+
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_IOMUXC_H */

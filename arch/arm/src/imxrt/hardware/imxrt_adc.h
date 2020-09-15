@@ -194,10 +194,10 @@
 #define ADC_CFG_ADSTS_SHIFT                  (8)        /* Bits: 8-9  Defines the sample time duration. */
 #define ADC_CFG_ADSTS_MASK                   (3 << ADC_CFG_ADSTS_SHIFT)
 #  define ADC_CFG_ADSTS(n)                   ((uint32_t)(n) << ADC_CFG_ADSTS_SHIFT)
-#  define ADC_CFG_ADSTS_2_12                 (0 << ADC_CFG_ADSTS_SHIFT)  /* Sample period (ADC clocks) = 2 if ADLSMP=0b, 12 if ADLSMP=1b  */
-#  define ADC_CFG_ADSTS_4_16                 (1 << ADC_CFG_ADSTS_SHIFT)  /* Sample period (ADC clocks) = 4 if ADLSMP=0b, 16 if ADLSMP=1b  */
-#  define ADC_CFG_ADSTS_6_20                 (2 << ADC_CFG_ADSTS_SHIFT)  /* Sample period (ADC clocks) = 6 if ADLSMP=0b, 20 if ADLSMP=1b  */
-#  define ADC_CFG_ADSTS_8_24                 (3 << ADC_CFG_ADSTS_SHIFT)  /* Sample period (ADC clocks) = 8 if ADLSMP=0b, 24 if ADLSMP=1b  */
+#  define ADC_CFG_ADSTS_3_13                 (0 << ADC_CFG_ADSTS_SHIFT)  /* Sample period (ADC clocks) = 3 if ADLSMP=0b, 13 if ADLSMP=1b  */
+#  define ADC_CFG_ADSTS_5_17                 (1 << ADC_CFG_ADSTS_SHIFT)  /* Sample period (ADC clocks) = 5 if ADLSMP=0b, 17 if ADLSMP=1b  */
+#  define ADC_CFG_ADSTS_7_21                 (2 << ADC_CFG_ADSTS_SHIFT)  /* Sample period (ADC clocks) = 7 if ADLSMP=0b, 21 if ADLSMP=1b  */
+#  define ADC_CFG_ADSTS_9_25                 (3 << ADC_CFG_ADSTS_SHIFT)  /* Sample period (ADC clocks) = 9 if ADLSMP=0b, 25 if ADLSMP=1b  */
 #define ADC_CFG_ADHSC                        (1 << 10)  /* Bit: 10 High Speed Configuration*/
 #define ADC_CFG_REFSEL_SHIFT                 (11)       /* Bits: 11-12  Voltage Reference Selection */
 #define ADC_CFG_REFSEL_MASK                  (3 << ADC_CFG_REFSEL_SHIFT)
