@@ -54,27 +54,10 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_MMCSD_NSLOTS
-#  ifdef CONFIG_CPP_HAVE_WARNING
-#    warning "CONFIG_MMCSD_NSLOTS not defined"
-#  endif
-#  define CONFIG_MMCSD_NSLOTS 1
-#endif
-
-#define MMCSD_IDMODE_CLOCK           (400000)
-
 #if !defined(CONFIG_MMCSD_READONLY)
 #  define MMCSD_MODE 0666
 #else
 #  define MMCSD_MODE 0444
-#endif
-
-#ifndef CONFIG_MMCSD_SPICLOCK
-#  define CONFIG_MMCSD_SPICLOCK 20000000
-#endif
-
-#ifndef CONFIG_MMCSD_SPIMODE
-#  define CONFIG_MMCSD_SPIMODE SPIDEV_MODE0
 #endif
 
 #ifndef CONFIG_MMCSD_SECTOR512
@@ -1656,8 +1639,8 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   /* Clock Freq. Identification Mode < 400kHz */
 
-  slot->spispeed = MMCSD_IDMODE_CLOCK;
-  SPI_SETFREQUENCY(spi, MMCSD_IDMODE_CLOCK);
+  slot->spispeed = CONFIG_MMCSD_IDMODE_CLOCK;
+  SPI_SETFREQUENCY(spi, CONFIG_MMCSD_IDMODE_CLOCK);
 
   /* Set the maximum access time out */
 
@@ -2034,7 +2017,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
   /* Bind the SPI port to the slot */
 
   slot->spi      = spi;
-  slot->spispeed = MMCSD_IDMODE_CLOCK;
+  slot->spispeed = CONFIG_MMCSD_IDMODE_CLOCK;
 
   /* Get exclusive access to the SPI bus and make sure that SPI is properly
    * configured for the MMC/SD card
