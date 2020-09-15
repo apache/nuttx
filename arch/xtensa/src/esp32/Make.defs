@@ -57,7 +57,7 @@ CMN_CSRCS += xtensa_unblocktask.c xtensa_usestack.c
 # Configuration-dependent common XTENSA files
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-  CMN_CSRCS += xtensa_idle.c
+  CMN_CSRCS += esp32_idle.c
 endif
 
 ifeq ($(CONFIG_DEBUG_ALERT),y)
@@ -88,6 +88,15 @@ CHIP_CSRCS += esp32_gpio.c esp32_intdecode.c esp32_irq.c esp32_region.c
 CHIP_CSRCS += esp32_timerisr.c
 CHIP_CSRCS += esp32_user.c
 CHIP_CSRCS += esp32_dma.c
+
+ifeq ($(CONFIG_PM),y)
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+CHIP_CSRCS += esp32_pminitialize.c
+endif
+CHIP_CSRCS += esp32_pm.c
+endif
+
+CHIP_CSRCS += esp32_rtc.c
 
 ifeq ($(CONFIG_ESP32_I2C),y)
 CHIP_CSRCS += esp32_i2c.c

@@ -110,13 +110,13 @@
  * used when _f is not left shifted by _f##_S
  */
 
-#define REG_GET_FIELD(_r, _f) ((REG_READ(_r) >> (_f##_S)) & (_f))
+#define REG_GET_FIELD(_r, _f) ((REG_READ(_r) >> (_f##_S)) & (_f##_V))
 
 /* Set field to register,
  * used when _f is not left shifted by _f##_S
  */
 
-#define REG_SET_FIELD(_r, _f, _v) (REG_WRITE((_r),((REG_READ(_r) & ~((_f) << (_f##_S)))|(((_v) & (_f))<<(_f##_S)))))
+#define REG_SET_FIELD(_r, _f, _v) (REG_WRITE((_r),((REG_READ(_r) & ~((_f##_V) << (_f##_S)))|(((_v) & (_f##_V))<<(_f##_S)))))
 
 /* Set field value from a variable,
  * used when _f is not left shifted by _f##_S
@@ -207,6 +207,7 @@
 #define DR_REG_GPIO_SD_BASE                     0x3ff44f00
 #define DR_REG_FE2_BASE                         0x3ff45000
 #define DR_REG_FE_BASE                          0x3ff46000
+#define DR_REG_FRC_TIMER_BASE                   0x3ff47000
 #define DR_REG_RTCCNTL_BASE                     0x3ff48000
 #define DR_REG_RTCIO_BASE                       0x3ff48400
 #define DR_REG_SARADC_BASE                      0x3ff48800
@@ -214,9 +215,9 @@
 #define DR_REG_RTCMEM0_BASE                     0x3ff61000
 #define DR_REG_RTCMEM1_BASE                     0x3ff62000
 #define DR_REG_RTCMEM2_BASE                     0x3ff63000
-#define DR_REG_HINF_BASE                        0x3ff4B000
-#define DR_REG_UHCI1_BASE                       0x3ff4C000
-#define DR_REG_I2S_BASE                         0x3ff4F000
+#define DR_REG_HINF_BASE                        0x3ff4b000
+#define DR_REG_UHCI1_BASE                       0x3ff4c000
+#define DR_REG_I2S_BASE                         0x3ff4f000
 #define DR_REG_UART1_BASE                       0x3ff50000
 #define DR_REG_BT_BASE                          0x3ff51000
 #define DR_REG_I2C_EXT_BASE                     0x3ff53000
@@ -226,20 +227,22 @@
 #define DR_REG_PCNT_BASE                        0x3ff57000
 #define DR_REG_SLC_BASE                         0x3ff58000
 #define DR_REG_LEDC_BASE                        0x3ff59000
-#define DR_REG_EFUSE_BASE                       0x3ff5A000
-#define DR_REG_SPI_ENCRYPT_BASE                 0x3ff5B000
-#define DR_REG_PWM_BASE                         0x3ff5E000
-#define DR_REG_TIMERGROUP0_BASE                 0x3ff5F000
+#define DR_REG_EFUSE_BASE                       0x3ff5a000
+#define DR_REG_SPI_ENCRYPT_BASE                 0x3ff5b000
+#define DR_REG_NRX_BASE                         0x3ff5cc00
+#define DR_REG_BB_BASE                          0x3ff5d000
+#define DR_REG_PWM_BASE                         0x3ff5e000
+#define DR_REG_TIMERGROUP0_BASE                 0x3ff5f000
 #define DR_REG_TIMERGROUP1_BASE                 0x3ff60000
 #define DR_REG_SPI2_BASE                        0x3ff64000
 #define DR_REG_SPI3_BASE                        0x3ff65000
 #define DR_REG_I2C1_EXT_BASE                    0x3ff67000
 #define DR_REG_SDMMC_BASE                       0x3ff68000
 #define DR_REG_EMAC_BASE                        0x3ff69000
-#define DR_REG_PWM1_BASE                        0x3ff6C000
-#define DR_REG_I2S1_BASE                        0x3ff6D000
-#define DR_REG_UART2_BASE                       0x3ff6E000
-#define DR_REG_PWM2_BASE                        0x3ff6F000
+#define DR_REG_PWM1_BASE                        0x3ff6c000
+#define DR_REG_I2S1_BASE                        0x3ff6d000
+#define DR_REG_UART2_BASE                       0x3ff6e000
+#define DR_REG_PWM2_BASE                        0x3ff6f000
 #define DR_REG_PWM3_BASE                        0x3ff70000
 #define PERIPHS_SPI_ENCRYPT_BASEADDR            DR_REG_SPI_ENCRYPT_BASE
 
@@ -316,6 +319,10 @@
 #define ETS_MMU_IA_INTR_SOURCE                  66 /* Interrupt of MMU Invalid Access, LEVEL */
 #define ETS_MPU_IA_INTR_SOURCE                  67 /* Interrupt of MPU Invalid Access, LEVEL */
 #define ETS_CACHE_IA_INTR_SOURCE                68 /* Interrupt of Cache Invalied Access, LEVEL */
+
+#define EFUSE_BLK0_RDATA4_REG                   (DR_REG_EFUSE_BASE + 0x010)
+#define EFUSE_BLK0_RDATA3_REG                   (DR_REG_EFUSE_BASE + 0x00c)
+#define GPIO_STRAP_REG                          (DR_REG_GPIO_BASE + 0x0038)
 
 /* Interrupt cpu using table */
 
@@ -418,6 +425,9 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
 #define I2C_WRITEREG_RTC(block, reg_add, indata) \
       rom_i2c_writeReg(block, block##_HOSTID,  reg_add, indata)
 
+#define I2C_READREG_RTC(block, reg_add) \
+      rom_i2c_readReg(block, block##_HOSTID,  reg_add)
+
 /* BBPLL configuration values */
 
 #define BBPLL_ENDIV5_VAL_320M       0x43
@@ -432,8 +442,82 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
 #define BBPLL_BBADC_CAL_7_0_VAL     0x00
 
 #define EFUSE_BLK0_RDATA5_REG       (DR_REG_EFUSE_BASE + 0x014)
+
+/* EFUSE_RD_VOL_LEVEL_HP_INV: RO; bitpos:[23:22] */
+
+/* description: This field stores the voltage level for
+ * CPU to run at 240 MHz, or for flash/PSRAM to run at 80 MHz.
+ * 0x0: level 7; 0x1: level 6; 0x2: level 5; 0x3: level 4. (RO)
+ */
+
 #define EFUSE_RD_VOL_LEVEL_HP_INV   0x03
+#define EFUSE_RD_VOL_LEVEL_HP_INV_M ((EFUSE_RD_VOL_LEVEL_HP_INV_V) << (EFUSE_RD_VOL_LEVEL_HP_INV_S))
+#define EFUSE_RD_VOL_LEVEL_HP_INV_V 0x03
 #define EFUSE_RD_VOL_LEVEL_HP_INV_S 22
+
+/* EFUSE_RD_SDIO_FORCE : RO ;bitpos:[16] ;default: 1'b0 ; */
+
+/* description: read for sdio_force */
+
+#define EFUSE_RD_SDIO_FORCE         (BIT(16))
+#define EFUSE_RD_SDIO_FORCE_M       (BIT(16))
+#define EFUSE_RD_SDIO_FORCE_V       0x1
+#define EFUSE_RD_SDIO_FORCE_S       16
+
+/* EFUSE_RD_XPD_SDIO_REG : RO ;bitpos:[14] ;default: 1'b0 ; */
+
+/* description: read for XPD_SDIO_REG */
+
+#define EFUSE_RD_XPD_SDIO_REG       (BIT(14))
+#define EFUSE_RD_XPD_SDIO_REG_M     (BIT(14))
+#define EFUSE_RD_XPD_SDIO_REG_V     0x1
+#define EFUSE_RD_XPD_SDIO_REG_S     14
+
+/* EFUSE_RD_SDIO_TIEH : RO ;bitpos:[15] ;default: 1'b0 ; */
+
+/* description: read for SDIO_TIEH */
+
+#define EFUSE_RD_SDIO_TIEH         (BIT(15))
+#define EFUSE_RD_SDIO_TIEH_M       (BIT(15))
+#define EFUSE_RD_SDIO_TIEH_V       0x1
+#define EFUSE_RD_SDIO_TIEH_S       15
+
+/* EFUSE_RD_BLK3_PART_RESERVE : R/W ; bitpos:[14] ; default: 1'b0; */
+
+/* description: If set, this bit indicates that
+ * BLOCK3[143:96] is reserved for internal use
+ */
+
+#define EFUSE_RD_BLK3_PART_RESERVE   (BIT(14))
+#define EFUSE_RD_BLK3_PART_RESERVE_M ((EFUSE_RD_BLK3_PART_RESERVE_V) << (EFUSE_RD_BLK3_PART_RESERVE_S))
+#define EFUSE_RD_BLK3_PART_RESERVE_V 0x1
+#define EFUSE_RD_BLK3_PART_RESERVE_S 14
+
+/* EFUSE_RD_SDIO_DREFH : RO ;bitpos:[9:8] ;default: 2'b0 ; */
+
+#define EFUSE_RD_SDIO_DREFH         0x00000003
+#define EFUSE_RD_SDIO_DREFH_M       ((EFUSE_RD_SDIO_DREFH_V) << (EFUSE_RD_SDIO_DREFH_S))
+#define EFUSE_RD_SDIO_DREFH_V       0x3
+#define EFUSE_RD_SDIO_DREFH_S       8
+
+/* EFUSE_RD_SDIO_DREFM : RO ;bitpos:[11:10] ;default: 2'b0 ; */
+
+#define EFUSE_RD_SDIO_DREFM         0x00000003
+#define EFUSE_RD_SDIO_DREFM_M       ((EFUSE_RD_SDIO_DREFM_V) << (EFUSE_RD_SDIO_DREFM_S))
+#define EFUSE_RD_SDIO_DREFM_V       0x3
+#define EFUSE_RD_SDIO_DREFM_S       10
+
+/* Note: EFUSE_ADC_VREF and SDIO_DREFH/M/L share the same address space.
+ * Newer versions of ESP32 come with EFUSE_ADC_VREF already burned,
+ * therefore SDIO_DREFH/M/L is only available in older versions of ESP32
+ */
+
+/* EFUSE_RD_SDIO_DREFL : RO ;bitpos:[13:12] ;default: 2'b0 ; */
+
+#define EFUSE_RD_SDIO_DREFL         0x00000003
+#define EFUSE_RD_SDIO_DREFL_M       ((EFUSE_RD_SDIO_DREFL_V) << (EFUSE_RD_SDIO_DREFL_S))
+#define EFUSE_RD_SDIO_DREFL_V       0x3
+#define EFUSE_RD_SDIO_DREFL_S       12
 
 #define REG_TIMG_BASE(i)            (DR_REG_TIMERGROUP0_BASE + i*0x1000)
 #define TIMG_RTCCALICFG_REG(i)      (REG_TIMG_BASE(i) + 0x0068)
@@ -463,6 +547,8 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
 /* RTC_CNTL_DIG_DBIAS_WAK : R/W ;bitpos:[13:11] ;default: 3'd4 ; */
 
 #define RTC_CNTL_DIG_DBIAS_WAK      0x00000007
+#define RTC_CNTL_DIG_DBIAS_WAK_M    ((RTC_CNTL_DIG_DBIAS_WAK_V) << (RTC_CNTL_DIG_DBIAS_WAK_S))
+#define RTC_CNTL_DIG_DBIAS_WAK_V    0x7
 #define RTC_CNTL_DIG_DBIAS_WAK_S    11
 
 /* RTC_CNTL_SOC_CLK_SEL : R/W ;bitpos:[28:27] ;default: 2'd0 ;
@@ -470,6 +556,8 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
  */
 
 #define RTC_CNTL_SOC_CLK_SEL        0x00000003
+#define RTC_CNTL_SOC_CLK_SEL_M      ((RTC_CNTL_SOC_CLK_SEL_V) << (RTC_CNTL_SOC_CLK_SEL_S))
+#define RTC_CNTL_SOC_CLK_SEL_V      0x3
 #define RTC_CNTL_SOC_CLK_SEL_S      27
 #define RTC_CNTL_SOC_CLK_SEL_XTL    0
 #define RTC_CNTL_SOC_CLK_SEL_PLL    1
@@ -492,6 +580,9 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
 #else
 #define DIG_DBIAS_80M_160M          RTC_CNTL_DBIAS_1V10
 #endif
+#define DIG_DBIAS_240M              RTC_CNTL_DBIAS_HP_VOLT
+#define DIG_DBIAS_XTAL              RTC_CNTL_DBIAS_1V10
+#define DIG_DBIAS_2M                RTC_CNTL_DBIAS_1V00
 
 #define DIG_DBIAS_240M              RTC_CNTL_DBIAS_HP_VOLT
 #define DIG_DBIAS_XTAL              RTC_CNTL_DBIAS_1V10
@@ -535,5 +626,127 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
 #define MHZ (1000000)
 #define RTC_PLL_FREQ_320M           320
 #define RTC_PLL_FREQ_480M           480
+
+/* TIMG_RTC_CALI_CLK_SEL : R/W ;bitpos:[14:13] ;default: 2'h1 ; */
+
+#define TIMG_RTC_CALI_CLK_SEL       0x00000003
+#define TIMG_RTC_CALI_CLK_SEL_M     ((TIMG_RTC_CALI_CLK_SEL_V) << (TIMG_RTC_CALI_CLK_SEL_S))
+#define TIMG_RTC_CALI_CLK_SEL_V     0x3
+#define TIMG_RTC_CALI_CLK_SEL_S     13
+
+/* TIMG_RTC_CALI_START_CYCLING : R/W ;bitpos:[12] ;default: 1'd1 ; */
+
+#define TIMG_RTC_CALI_START_CYCLING    (BIT(12))
+#define TIMG_RTC_CALI_START_CYCLING_M  (BIT(12))
+#define TIMG_RTC_CALI_START_CYCLING_V  0x1
+#define TIMG_RTC_CALI_START_CYCLING_S  12
+
+/* TIMG_RTC_CALI_START : R/W ;bitpos:[31] ;default: 1'h0 ; */
+
+#define TIMG_RTC_CALI_START         (BIT(31))
+#define TIMG_RTC_CALI_START_M       (BIT(31))
+#define TIMG_RTC_CALI_START_V       0x1
+#define TIMG_RTC_CALI_START_S       31
+
+/* TIMG_RTC_CALI_MAX : R/W ;bitpos:[30:16] ;default: 15'h1 ; */
+
+#define TIMG_RTC_CALI_MAX           0x00007fff
+#define TIMG_RTC_CALI_MAX_M         ((TIMG_RTC_CALI_MAX_V) << (TIMG_RTC_CALI_MAX_S))
+#define TIMG_RTC_CALI_MAX_V         0x7fff
+#define TIMG_RTC_CALI_MAX_S         16
+
+/* TIMG_RTC_CALI_VALUE : RO ;bitpos:[31:7] ;default: 25'h0 ; */
+
+#define TIMG_RTC_CALI_VALUE         0x01ffffff
+#define TIMG_RTC_CALI_VALUE_M       ((TIMG_RTC_CALI_VALUE_V) << (TIMG_RTC_CALI_VALUE_S))
+#define TIMG_RTC_CALI_VALUE_V       0x1ffffff
+#define TIMG_RTC_CALI_VALUE_S       7
+
+/* TIMG_RTC_CALI_RDY : RO ;bitpos:[15] ;default: 1'h0 ; */
+
+#define TIMG_RTC_CALI_RDY           (BIT(15))
+#define TIMG_RTC_CALI_RDY_M         (BIT(15))
+#define TIMG_RTC_CALI_RDY_V         0x1
+#define TIMG_RTC_CALI_RDY_S         15
+
+#define TIMG_RTCCALICFG1_REG(i)     (REG_TIMG_BASE(i) + 0x006c)
+
+/* Some of the baseband control registers.
+ * PU/PD fields defined here are used in sleep related functions.
+ */
+
+#define BBPD_CTRL                   (DR_REG_BB_BASE + 0x0054)
+#define BB_FFT_FORCE_PU             (BIT(3))
+#define BB_FFT_FORCE_PU_M           (BIT(3))
+#define BB_FFT_FORCE_PU_V           1
+#define BB_FFT_FORCE_PU_S           3
+#define BB_FFT_FORCE_PD             (BIT(2))
+#define BB_FFT_FORCE_PD_M           (BIT(2))
+#define BB_FFT_FORCE_PD_V           1
+#define BB_FFT_FORCE_PD_S           2
+#define BB_DC_EST_FORCE_PU          (BIT(1))
+#define BB_DC_EST_FORCE_PU_M        (BIT(1))
+#define BB_DC_EST_FORCE_PU_V        1
+#define BB_DC_EST_FORCE_PU_S        1
+#define BB_DC_EST_FORCE_PD          (BIT(0))
+#define BB_DC_EST_FORCE_PD_M        (BIT(0))
+#define BB_DC_EST_FORCE_PD_V        1
+#define BB_DC_EST_FORCE_PD_S        0
+
+/* Some of the WiFi RX control registers.
+ * PU/PD fields defined here are used in sleep related functions.
+ */
+
+#define NRXPD_CTRL                  (DR_REG_NRX_BASE + 0x00d4)
+#define NRX_RX_ROT_FORCE_PU         (BIT(5))
+#define NRX_RX_ROT_FORCE_PU_M       (BIT(5))
+#define NRX_RX_ROT_FORCE_PU_V       1
+#define NRX_RX_ROT_FORCE_PU_S       5
+#define NRX_RX_ROT_FORCE_PD         (BIT(4))
+#define NRX_RX_ROT_FORCE_PD_M       (BIT(4))
+#define NRX_RX_ROT_FORCE_PD_V       1
+#define NRX_RX_ROT_FORCE_PD_S       4
+#define NRX_VIT_FORCE_PU            (BIT(3))
+#define NRX_VIT_FORCE_PU_M          (BIT(3))
+#define NRX_VIT_FORCE_PU_V          1
+#define NRX_VIT_FORCE_PU_S          3
+#define NRX_VIT_FORCE_PD            (BIT(2))
+#define NRX_VIT_FORCE_PD_M          (BIT(2))
+#define NRX_VIT_FORCE_PD_V          1
+#define NRX_VIT_FORCE_PD_S          2
+#define NRX_DEMAP_FORCE_PU          (BIT(1))
+#define NRX_DEMAP_FORCE_PU_M        (BIT(1))
+#define NRX_DEMAP_FORCE_PU_V        1
+#define NRX_DEMAP_FORCE_PU_S        1
+#define NRX_DEMAP_FORCE_PD          (BIT(0))
+#define NRX_DEMAP_FORCE_PD_M        (BIT(0))
+#define NRX_DEMAP_FORCE_PD_V        1
+#define NRX_DEMAP_FORCE_PD_S        0
+
+/* Some of the RF frontend control registers.
+ * PU/PD fields defined here are used in sleep related functions.
+ */
+
+#define FE_GEN_CTRL                 (DR_REG_FE_BASE + 0x0090)
+#define FE_IQ_EST_FORCE_PU          (BIT(5))
+#define FE_IQ_EST_FORCE_PU_M        (BIT(5))
+#define FE_IQ_EST_FORCE_PU_V        1
+#define FE_IQ_EST_FORCE_PU_S        5
+#define FE_IQ_EST_FORCE_PD          (BIT(4))
+#define FE_IQ_EST_FORCE_PD_M        (BIT(4))
+#define FE_IQ_EST_FORCE_PD_V        1
+#define FE_IQ_EST_FORCE_PD_S        4
+
+#define FE2_TX_INTERP_CTRL          (DR_REG_FE2_BASE + 0x00f0)
+#define FE2_TX_INF_FORCE_PU         (BIT(10))
+#define FE2_TX_INF_FORCE_PU_M       (BIT(10))
+#define FE2_TX_INF_FORCE_PU_V       1
+#define FE2_TX_INF_FORCE_PU_S       10
+#define FE2_TX_INF_FORCE_PD         (BIT(9))
+#define FE2_TX_INF_FORCE_PD_M       (BIT(9))
+#define FE2_TX_INF_FORCE_PD_V       1
+#define FE2_TX_INF_FORCE_PD_S       9
+
+#define PIN_CTRL                    (DR_REG_IO_MUX_BASE +0x00)
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_SOC_H */

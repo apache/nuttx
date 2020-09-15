@@ -40,6 +40,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <stdbool.h>
@@ -340,6 +342,14 @@ void up_usbuninitialize(void);
 #else
 # define up_usbinitialize()
 # define up_usbuninitialize()
+#endif
+
+/* Power management *********************************************************/
+
+#ifdef CONFIG_PM
+void xtensa_pminitialize(void);
+#else
+#  define xtensa_pminitialize()
 #endif
 
 /* Debug ********************************************************************/

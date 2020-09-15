@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/include/xtensa/core_macros.h
+ * arch/xtensa/src/esp32/esp32_i2s.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,26 +18,30 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_INCUDE_XTENSA_CORE_MACRO_H
-#define __ARCH_XTENSA_INCUDE_XTENSA_CORE_MACRO_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <arch/chip/core-isa.h>
-#include <arch/chip/tie.h>
+#ifndef __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_I2S_H
+#define __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_I2S_H
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "esp32_soc.h"
 
-#define XTHAL_GET_CCOUNT()              ({ int __ccount; \
-                                        __asm__ __volatile__("rsr.ccount %0":\
-                                        "=a"(__ccount)); __ccount; })
+#define REG_I2S_BASE( i )       (DR_REG_I2S_BASE + ((i)*0x1e000))
+#define I2S_PD_CONF_REG(i)      (REG_I2S_BASE(i) + 0x00a4)
 
-# define XTHAL_SET_CCOUNT(v)             do { int __ccount = (int)(v); \
-                                         __asm__ __volatile__("wsr.ccount %0" :: "a"(__ccount):"memory");\
-                                         } while(0)
+/* I2S_PLC_MEM_FORCE_PU : R/W ;bitpos:[3] ;default: 1'h1 ; */
 
-#endif /* __ARCH_XTENSA_INCUDE_XTENSA_CORE_H */
+#define I2S_PLC_MEM_FORCE_PU    (BIT(3))
+#define I2S_PLC_MEM_FORCE_PU_M  (BIT(3))
+#define I2S_PLC_MEM_FORCE_PU_V  0x1
+#define I2S_PLC_MEM_FORCE_PU_S  3
+
+/* I2S_FIFO_FORCE_PU : R/W ;bitpos:[1] ;default: 1'h1 ; */
+
+#define I2S_FIFO_FORCE_PU       (BIT(1))
+#define I2S_FIFO_FORCE_PU_M     (BIT(1))
+#define I2S_FIFO_FORCE_PU_V     0x1
+#define I2S_FIFO_FORCE_PU_S     1
+
+#endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_I2S_H */
