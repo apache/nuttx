@@ -163,6 +163,10 @@ config IMXRT_LPSPI
 	bool
 	default n
 
+config IMXRT_ADC
+    bool
+    default n
+
 config IMXRT_ENC
 	bool
 	default n
@@ -517,6 +521,20 @@ menuconfig IMXRT_LPSPI4
 	select IMXRT_LPSPI
 
 endmenu # LPSPI Peripherals
+
+menu "ADC Peripherals"
+
+menuconfig IMXRT_ADC1
+    bool "ADC1"
+    default n
+    select IMXRT_ADC
+
+menuconfig IMXRT_ADC2
+    bool "ADC2"
+    default n
+    select IMXRT_ADC
+
+endmenu
 
 config IMXRT_SEMC
 	bool "Smart External Memory Controller (SEMC)"

@@ -167,3 +167,7 @@ endif
 ifeq ($(CONFIG_IMXRT_USBDEV),y)
 CHIP_CSRCS += imxrt_usbdev.c
 endif
+
+ifeq ($(CONFIG_IMXRT_ADC),y)
+CHIP_CSRCS += imxrt_adc.c
+endif
