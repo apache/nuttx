@@ -39,7 +39,9 @@
 
 void r_cgc_create(void)
 {
+#ifdef CONFIG_RX65N_RTC
   volatile uint8_t i;
+#endif
 #if ((24 * RX_CLK_1MHz) == RX_RESONATOR)
   /* Set main clock control registers */
 
