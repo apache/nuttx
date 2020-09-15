@@ -58,7 +58,8 @@
  ****************************************************************************/
 
 static inline int statroot(FAR struct stat *buf);
-int stat_recursive(FAR const char *path, FAR struct stat *buf, int resolve);
+static int stat_recursive(FAR const char *path,
+                          FAR struct stat *buf, int resolve);
 
 /****************************************************************************
  * Private Functions
@@ -93,7 +94,8 @@ static inline int statroot(FAR struct stat *buf)
  *
  ****************************************************************************/
 
-int stat_recursive(FAR const char *path, FAR struct stat *buf, int resolve)
+static int stat_recursive(FAR const char *path,
+                          FAR struct stat *buf, int resolve)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
