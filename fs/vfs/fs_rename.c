@@ -513,7 +513,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Verify that the old inode is a valid mountpoint. */
 
-  if (INODE_IS_MOUNTPT(oldinode))
+  if (INODE_IS_MOUNTPT(oldinode) && *olddesc.relpath != '\0')
     {
       ret = mountptrename(oldpath, oldinode, olddesc.relpath, newpath);
     }
