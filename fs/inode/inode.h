@@ -284,6 +284,16 @@ void inode_free(FAR struct inode *node);
 const char *inode_nextname(FAR const char *name);
 
 /****************************************************************************
+ * Name: inode_root_reserve
+ *
+ * Description:
+ *   Reserve the root node for the pseudo file system.
+ *
+ ****************************************************************************/
+
+void inode_root_reserve(void);
+
+/****************************************************************************
  * Name: inode_reserve
  *
  * Description:

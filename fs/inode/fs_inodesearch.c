@@ -1,7 +1,8 @@
 /****************************************************************************
  * fs/inode/fs_inodesearch.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2016-2017 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -255,24 +256,6 @@ static int _inode_search(FAR struct inode_search_s *desc)
       return -EINVAL;
     }
 
-  /* Skip over the leading '/' */
-
-  while (*name == '/')
-    {
-      name++;
-    }
-
-  /* Special case the root directory.  There is no root inode and there is
-   * no name for the root.
-   */
-
-  if (*name == '\0')
-    {
-      /* This is a bug.  I don't know how to handle this case yet. */
-
-      return -ENOSYS;
-    }
-
   /* Traverse the pseudo file system node tree until either (1) all nodes
    * have been examined without finding the matching node, or (2) the
    * matching node is found.
@@ -347,7 +330,8 @@ static int _inode_search(FAR struct inode_search_s *desc)
                   /* If this intermediate inode in the is a soft link, then
                    * (1) get the name of the full path of the soft link, (2)
                    * recursively look-up the inode referenced by the soft
-                   * link, and (3) continue searching with that inode instead.
+                   * link, and (3) continue searching with that inode
+                   * instead.
                    */
 
                   status = _inode_linktarget(node, desc);

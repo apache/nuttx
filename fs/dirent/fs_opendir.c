@@ -218,7 +218,6 @@ FAR DIR *opendir(FAR const char *path)
   FAR const char *relpath = NULL;
 #endif
   FAR char *alloc = NULL;
-  bool isroot = false;
   int len;
   int ret;
 
@@ -277,32 +276,24 @@ FAR DIR *opendir(FAR const char *path)
       goto errout_with_alloc;
     }
 
-  if (path == NULL || *path == '\0' || strcmp(path, "/") == 0)
+  /* We don't know what to do with relative paths */
+
+  if (*path != '/')
     {
-      inode   = g_root_inode;
-      isroot  = true;
+      ret = ENOTDIR;
+      goto errout_with_semaphore;
     }
-  else
+
+  /* Find the node matching the path. */
+
+  ret = inode_search(&desc);
+  if (ret >= 0)
     {
-      /* We don't know what to do with relative paths */
-
-      if (*path != '/')
-        {
-          ret = ENOTDIR;
-          goto errout_with_semaphore;
-        }
-
-      /* Find the node matching the path. */
-
-      ret = inode_search(&desc);
-      if (ret >= 0)
-        {
-          inode   = desc.node;
-          DEBUGASSERT(inode != NULL);
+      inode   = desc.node;
+      DEBUGASSERT(inode != NULL);
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-          relpath = desc.relpath;
+      relpath = desc.relpath;
 #endif
-        }
     }
 
   /* Did we get an inode? */
@@ -335,25 +326,10 @@ FAR DIR *opendir(FAR const char *path)
 
   dir->fd_position = 0;      /* This is the position in the read stream */
 
-  /* First, handle the special case of the root inode.  This must be
-   * special-cased here because the root inode might ALSO be a mountpoint.
-   */
-
-  if (isroot)
-    {
-      /* Whatever payload the root inode carries, the root inode is always
-       * a directory inode in the pseudo-file system
-       */
-
-      open_pseudodir(inode, dir);
-    }
-
-  /* Is this a node in the pseudo filesystem? Or a mountpoint?  If the node
-   * is the root (isroot == TRUE), then this is a special case.
-   */
+  /* Is this a node in the pseudo filesystem? Or a mountpoint? */
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-  else if (INODE_IS_MOUNTPT(inode))
+  if (INODE_IS_MOUNTPT(inode))
     {
       /* Yes, the node is a file system mountpoint */
 
@@ -367,8 +343,8 @@ FAR DIR *opendir(FAR const char *path)
           goto errout_with_direntry;
         }
     }
-#endif
   else
+#endif
     {
       /* The node is part of the root pseudo file system.  Does the inode
        * have a child? If so that the child would be the 'root' of a list
