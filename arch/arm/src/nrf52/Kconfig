@@ -139,6 +139,11 @@ config NRF52_SPI1_MASTER
 	default n
 	select NRF52_SPI_MASTER
 
+config NRF52_SPI2_MASTER
+	bool "SPI2 Master"
+	default n
+	select NRF52_SPI_MASTER
+
 config NRF52_SPI3_MASTER
 	bool "SPI3 Master"
 	default n
