@@ -50,7 +50,6 @@
         (d)->peer     = NULL; \
         (d)->parent   = NULL; \
         (d)->relpath  = NULL; \
-        (d)->linktgt  = NULL; \
         (d)->buffer   = NULL; \
         (d)->nofollow = (n); \
       } \
@@ -97,7 +96,6 @@
  *  relpath  - INPUT:  (not used)
  *             OUTPUT: If the returned inode is a mountpoint, this is the
  *                     relative path from the mountpoint.
- *  linktgt  - INPUT:  (not used)
  *             OUTPUT: If a symobolic link into a mounted file system is
  *                     detected while traversing the path, then the link
  *                     will be converted to a mountpoint inode if the
@@ -122,7 +120,6 @@ struct inode_search_s
   FAR struct inode *parent;  /* Node "above" the found inode */
   FAR const char *relpath;   /* Relative path into the mountpoint */
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  FAR const char *linktgt;   /* Target of symbolic link if linked to a directory */
   FAR char *buffer;          /* Path expansion buffer */
   bool nofollow;             /* true: Don't follow terminal soft link */
 #endif

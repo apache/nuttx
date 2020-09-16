@@ -151,9 +151,9 @@ static int _inode_compare(FAR const char *fname, FAR struct inode *node)
  * Name: _inode_linktarget
  *
  * Description:
- *   If the inode is a soft link, then (1) get the name of the full path of
- *   the soft link, (2) recursively look-up the inode referenced by the soft
- *   link, and (3) return the inode referenced by the soft link.
+ *   If the inode is a soft link, then (1) recursively look-up the inode
+ *   referenced by the soft link, and (2) return the inode referenced by
+ *   the soft link.
  *
  * Assumptions:
  *   The caller holds the g_inode_sem semaphore
@@ -170,11 +170,7 @@ static int _inode_linktarget(FAR struct inode *node,
 
   DEBUGASSERT(desc != NULL && node != NULL);
 
-  /* An infinite loop is avoided only by the loop count.
-   *
-   * REVISIT:  The ELOOP error should be reported to the application in that
-   * case but there is no simple mechanism to do that.
-   */
+  /* An infinite loop is avoided only by the loop count. */
 
   save = desc->nofollow;
   while (INODE_IS_SOFTLINK(node))
@@ -206,7 +202,6 @@ static int _inode_linktarget(FAR struct inode *node,
 
       node = desc->node;
       DEBUGASSERT(node != NULL);
-      desc->linktgt = link;
     }
 
   desc->nofollow = save;
@@ -328,9 +323,8 @@ static int _inode_search(FAR struct inode_search_s *desc)
                   int status;
 
                   /* If this intermediate inode in the is a soft link, then
-                   * (1) get the name of the full path of the soft link, (2)
-                   * recursively look-up the inode referenced by the soft
-                   * link, and (3) continue searching with that inode
+                   * (1) recursively look-up the inode referenced by the
+                   * soft link, and (2) continue searching with that inode
                    * instead.
                    */
 
@@ -365,11 +359,32 @@ static int _inode_search(FAR struct inode_search_s *desc)
                                */
 
                               node    = newnode;
-                              above   = NULL;
-                              left    = NULL;
-                              relpath = name;
-
+                              above   = desc->parent;
+                              left    = desc->peer;
                               ret     = OK;
+
+                              if (*desc->relpath != '\0')
+                                {
+                                  char *buffer = NULL;
+
+                                  asprintf(&buffer,
+                                           "%s/%s", desc->relpath, name);
+                                  if (buffer != NULL)
+                                    {
+                                      kmm_free(desc->buffer);
+                                      desc->buffer = buffer;
+                                      relpath = buffer;
+                                    }
+                                  else
+                                    {
+                                      ret = -ENOMEM;
+                                    }
+                                }
+                              else
+                                {
+                                  relpath = name;
+                                }
+
                               break;
                             }
 
@@ -453,9 +468,6 @@ int inode_search(FAR struct inode_search_s *desc)
    */
 
   DEBUGASSERT(desc != NULL);
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  desc->linktgt = NULL;
-#endif
 
   ret = _inode_search(desc);
 
@@ -473,12 +485,6 @@ int inode_search(FAR struct inode_search_s *desc)
 
       if (!desc->nofollow && INODE_IS_SOFTLINK(node))
         {
-          /* Save some things we need that will be clobbered by the call to
-           * _inode_linktgt().
-           */
-
-          FAR const char *relpath = desc->relpath; /* Will always be "" here */
-
           /* The terminating inode is a valid soft link:  Return the inode,
            * corresponding to link target.  _inode_linktarget() will follow
            * a link (or a series of links to links) and will return the
@@ -493,71 +499,6 @@ int inode_search(FAR struct inode_search_s *desc)
                */
 
               return ret;
-            }
-
-          /* The dereferenced node might be a mountpoint */
-
-          node = desc->node;
-          DEBUGASSERT(node != NULL && desc->linktgt != NULL);
-
-          if (INODE_IS_MOUNTPT(node))
-            {
-              /* Yes... set up for the MOUNTPOINT logic below. */
-
-              desc->relpath = relpath;
-            }
-        }
-
-      /* Handle a special case.  This special occurs with either (1)
-       * inode_search() terminates early because it encountered a MOUNTPOINT
-       * at an intermediate node in the path, or (2) inode_search()
-       * terminates because it reached the terminal node and 'nofollow' is
-       * false and the above logic converted the symbolic link to a
-       * MOUNTPOINT.
-       *
-       * We can detect the special cases because desc->linktgt will be
-       * non-NULL.
-       */
-
-      if (desc->linktgt != NULL && INODE_IS_MOUNTPT(node))
-        {
-          FAR char *buffer;
-
-          /* There would be no problem in this case if the link was to
-           * either to the root directory of the MOUNTPOINT or to a
-           * regular file within the mounted volume.  However, there
-           * is a problem if the symbolic link is to a directory within
-           * the mounted volume.  In that case, the 'relpath' will be
-           * relative to the symbolic link and not to the MOUNTPOINT.
-           *
-           * We will handle the worst case by creating the full path
-           * excluding the symbolic link and performing the look-up
-           * again.
-           */
-
-          if (desc->relpath != NULL && *desc->relpath != '\0')
-            {
-              asprintf(&buffer, "%s/%s",
-                       desc->linktgt, desc->relpath);
-            }
-          else
-            {
-              buffer = strdup(desc->linktgt);
-            }
-
-          if (buffer == NULL)
-            {
-              ret = -ENOMEM;
-            }
-          else
-            {
-              /* Reset the search description and perform the search again. */
-
-              RELEASE_SEARCH(desc);
-              SETUP_SEARCH(desc, buffer, false);
-              desc->buffer = buffer;
-
-              ret = _inode_search(desc);
             }
         }
     }
