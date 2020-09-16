@@ -212,7 +212,8 @@ void sam_sdram_config(void)
 
   /* SAMA5D27D1G uses Winbond W971GG6SB 1GB DDR2 RAM
    *
-   * See datasheet http://ww1.microchip.com/downloads/en/DeviceDoc/SAMA5D2-Plus-DDR2-LPDDR2-System-in-Package-(SIP)-60001484b.pdf
+   * See datasheet http://ww1.microchip.com/downloads/en/DeviceDoc/
+   *     SAMA5D2-Plus-DDR2-LPDDR2-System-in-Package-(SIP)-60001484b.pdf
    *
    */
 
