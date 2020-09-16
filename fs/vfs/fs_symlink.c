@@ -89,8 +89,8 @@ int symlink(FAR const char *path1, FAR const char *path2)
       goto errout;
     }
 
-  /* Check that no inode exists at the 'path1' and that the path up to
-   * 'path1' does not lie on a mounted volume.
+  /* Check that no inode exists at the 'path2' and that the path up to
+   * 'path2' does not lie on a mounted volume.
    */
 
   SETUP_SEARCH(&desc, path2, false);
