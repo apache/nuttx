@@ -642,8 +642,13 @@ boards/arm/imx6/sabre-6quad
   featuring the iMX 6Quad CPU.
 
 boards/arm/sama5/sama5d2-xult
-  This is the  port of NuttX to the Atmel SAMA5D2-Xplained Ultra development
-  board.  This board features the Atmel SAMA5D27.  See http://www.atmel.com.
+  This is the  port of NuttX to the Microchip SAMA5D2-Xplained Ultra development
+  board.  This board features the Microchip SAMA5D27. See
+  https://www.microchip.com/Developmenttools/ProductDetails/ATSAMA5D2C-XULT
+
+boards/arm/sama5/giant-board
+  This is the port of NuttX to the Groboards Giant Board board. This board
+  features the Atmel SAMA5D27C-D1G. See http://groboards.com/giant-board.
 
 boards/arm/sama5/sama5d3x-ek
   This is the  port of NuttX to the Atmel SAMA5D3x-EK development boards
