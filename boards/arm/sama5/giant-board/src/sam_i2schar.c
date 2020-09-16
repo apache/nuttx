@@ -86,7 +86,7 @@ int i2schar_devinit(void)
       i2s = sam_ssc_initialize(CONFIG_GIANT_BOARD_SSC_PORT);
       if (!i2s)
         {
-          _err("ERROR: Failed to get the SAMA5 SSC/I2S driver for SSC%d\n",
+          auderr("ERROR: Failed to get the SAMA5 SSC/I2S driver for SSC%d\n",
               CONFIG_GIANT_BOARD_SSC_PORT);
           return -ENODEV;
         }
