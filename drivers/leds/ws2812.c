@@ -134,7 +134,7 @@ static inline void ws2812_configspi(FAR struct spi_dev_s *spi)
    * There is no CS on this device we just use MOSI and it is exclusive
    */
 
-  SPI_LOCK(priv->spi, true);  /* Exclusive use of the bus */
+  SPI_LOCK(spi, true);  /* Exclusive use of the bus */
   SPI_SETMODE(spi, SPIDEV_MODE3);
   SPI_SETBITS(spi, 8);
   SPI_HWFEATURES(spi, 0);
