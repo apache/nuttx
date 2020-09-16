@@ -255,8 +255,11 @@
 #define _SC_XOPEN_UNIX                   0x0079
 #define _SC_XOPEN_VERSION                0x007a
 
-#define _SC_NPROCESSORS_CONF             0x007b
-#define _SC_NPROCESSORS_ONLN             0x007c
+#define _SC_PHYS_PAGES                   0x007b
+#define _SC_AVPHYS_PAGES                 0x007c
+
+#define _SC_NPROCESSORS_CONF             0x007d
+#define _SC_NPROCESSORS_ONLN             0x007e
 
 /* The following symbolic constants must be defined for file streams: */
 
