@@ -106,7 +106,8 @@ config SAMA5D27_SDMMC1_MOUNT_MOUNTPOINT
 	depends on SAMA5_SDMMC1
 
 config SAMA5D27_SDMMC1_MOUNT_FSTYPE
-	string "SDMMC1 file system type" default "vfat"
+	string "SDMMC1 file system type"
+	default "vfat"
 	depends on SAMA5_SDMMC1
 
 config MMCSD_HAVE_CARDDETECT
