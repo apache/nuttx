@@ -325,6 +325,25 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_POLLED
           while (nrf52_i2c_getreg(priv,
                                   NRF52_TWIM_EVENTS_LASTTX_OFFSET) != 1);
+          while (1)
+            {
+              regval = nrf52_i2c_getreg(priv,
+                                        NRF52_TWIM_ERRORSRC_OFFSET) & 0x7;
+              if (regval != 0)
+                {
+                  i2cerr("Error SRC: %x\n", regval);
+                  ret = -1;
+                  nrf52_i2c_putreg(priv,
+                                  NRF52_TWIM_ERRORSRC_OFFSET, 0x7);
+                  goto errout;
+                }
+
+              if (nrf52_i2c_getreg(priv,
+                                  NRF52_TWIM_EVENTS_LASTTX_OFFSET) == 1)
+                {
+                  break;
+                }
+            }
 
           /* Clear event */
 
@@ -357,8 +376,25 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
           /* Wait for last RX done */
 
 #ifdef CONFIG_I2C_POLLED
-          while (nrf52_i2c_getreg(priv,
-                                  NRF52_TWIM_EVENTS_LASTRX_OFFSET) != 1);
+        while (1)
+          {
+            regval = nrf52_i2c_getreg(priv,
+                                      NRF52_TWIM_ERRORSRC_OFFSET) & 0x7;
+            if (regval != 0)
+              {
+                i2cerr("Error SRC: %x\n", regval);
+                ret = -1;
+                nrf52_i2c_putreg(priv,
+                                 NRF52_TWIM_ERRORSRC_OFFSET, 0x7);
+                goto errout;
+              }
+
+            if (nrf52_i2c_getreg(priv,
+                                 NRF52_TWIM_EVENTS_LASTRX_OFFSET) == 1)
+              {
+                break;
+              }
+          }
 
           /* Clear event */
 
@@ -387,8 +423,25 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
   /* Wait for stop event */
 
 #ifdef CONFIG_I2C_POLLED
-  while (nrf52_i2c_getreg(priv,
-                          NRF52_TWIM_EVENTS_STOPPED_OFFSET) != 1);
+  while (1)
+    {
+      regval = nrf52_i2c_getreg(priv,
+                                NRF52_TWIM_ERRORSRC_OFFSET) & 0x7;
+      if (regval != 0)
+        {
+          i2cerr("Error SRC: %x\n", regval);
+          ret = -1;
+          nrf52_i2c_putreg(priv,
+                           NRF52_TWIM_ERRORSRC_OFFSET, 0x7);
+          goto errout;
+        }
+
+      if (nrf52_i2c_getreg(priv,
+                           NRF52_TWIM_EVENTS_STOPPED_OFFSET) == 1)
+        {
+          break;
+        }
+    }
 
   /* Clear event */
 
