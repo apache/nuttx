@@ -94,8 +94,8 @@
  *   alarm.  A callback function will be executed when the alarm goes off
  *
  * CONFIG_RTC_PERIODIC - Enable if the RTC hardware supports setting a
- *  periodic wakeup. A callback function will be executed when the wakeup happens.
- *  This is an experimental feature.
+ *  periodic wakeup. A callback function will be executed when the wakeup
+ *  happens. This is an experimental feature.
  *
  * CONFIG_RTC_DRIVER - Enable building the upper-half RTC driver
  */
@@ -150,8 +150,8 @@
 
 /* RTC_HAVE_SET_TIME checks if RTC's time had been set
  *
- * Argument: A writable reference to a bool to receive true/false return value
- *           of the check.
+ * Argument: A writable reference to a bool to receive true/false return
+ *           value of the check.
  */
 
 #define RTC_HAVE_SET_TIME  _RTCIOC(0x0003)
@@ -166,8 +166,8 @@
 
 /* RTC_SET_RELATIVE sets the alarm time relative to the current time.
  *
- * Argument: A read-only reference to a struct rtc_setrelative_s containing the
- *           new relative alarm time to be set.
+ * Argument: A read-only reference to a struct rtc_setrelative_s containing
+ *           the new relative alarm time to be set.
  */
 
 #define RTC_SET_RELATIVE   _RTCIOC(0x0005)
@@ -188,8 +188,8 @@
 
 /* RTC_SET_PERIODIC set a periodic wakeup.
  *
- * Argument: A read-only reference to a struct rtc_setperiodic_s containing the
- *           new wakeup period to be set.
+ * Argument: A read-only reference to a struct rtc_setperiodic_s containing
+ *           the new wakeup period to be set.
  */
 
 #define RTC_SET_PERIODIC     _RTCIOC(0x0008)
@@ -221,22 +221,24 @@
  *
  * The fields in this structure have the same meaning and ranges as for the
  * tm structure described in gmtime().  Further, it is REQUIRED that the
- * structure be cast compatible with struct tm!  They must be interchangeable.
+ * structure be cast compatible with struct tm! They must be interchangeable.
  */
 
 struct rtc_time
 {
-  int tm_sec;     /* Seconds (0-61, allows for leap seconds) */
-  int tm_min;     /* Minutes (0-59) */
-  int tm_hour;    /* Hours (0-23) */
-  int tm_mday;    /* Day of the month (1-31) */
-  int tm_mon;     /* Month (0-11) */
-  int tm_year;    /* Years since 1900 */
-  int tm_wday;    /* Day of the week (0-6) (unused) */
-  int tm_yday;    /* Day of the year (0-365) (unused) */
-  int tm_isdst;   /* Non-0 if daylight savings time is in effect (unused) */
+  int tm_sec;          /* Seconds (0-61, allows for leap seconds) */
+  int tm_min;          /* Minutes (0-59) */
+  int tm_hour;         /* Hours (0-23) */
+  int tm_mday;         /* Day of the month (1-31) */
+  int tm_mon;          /* Month (0-11) */
+  int tm_year;         /* Years since 1900 */
+  int tm_wday;         /* Day of the week (0-6) (unused) */
+  int tm_yday;         /* Day of the year (0-365) (unused) */
+  int tm_isdst;        /* Non-0 if daylight savings time is in effect (unused) */
+  long tm_gmtoff;      /* Offset from UTC in seconds */
+  const char *tm_zone; /* Timezone abbreviation. */
 #if defined(CONFIG_RTC_HIRES) || defined(CONFIG_ARCH_HAVE_RTC_SUBSECONDS)
-  long tm_nsec;   /* Nanosecond (0-999999999) */
+  long tm_nsec;        /* Nanosecond (0-999999999) */
 #endif
 };
 

@@ -355,6 +355,7 @@ FAR struct tm *gmtime_r(FAR const time_t *timep, FAR struct tm *result)
                                             clock_isleapyear(year));
   result->tm_isdst  = 0;
   result->tm_gmtoff = 0;
+  result->tm_zone   = NULL;
 
   return result;
 }

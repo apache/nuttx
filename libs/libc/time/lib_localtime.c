@@ -1975,6 +1975,7 @@ static struct tm *timesub(FAR const time_t * const timep,
   tmp->tm_mday = (int)(idays + 1);
   tmp->tm_isdst = 0;
   tmp->tm_gmtoff = offset;
+  tmp->tm_zone = tzname[0];
 
   return tmp;
 }
