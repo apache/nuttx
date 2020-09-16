@@ -2277,8 +2277,8 @@ config ARCH_BOARD
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
-    default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
-    default "giant-board"              if ARCH_BOARD_GIANT_BOARD
+	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
+	default "giant-board"              if ARCH_BOARD_GIANT_BOARD
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
 	default "sama5d3-xplained"         if ARCH_BOARD_SAMA5D3_XPLAINED
 	default "sama5d4-ek"               if ARCH_BOARD_SAMA5D4_EK
