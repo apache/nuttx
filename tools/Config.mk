@@ -138,7 +138,7 @@ endif
 # Process board-specific directories
 
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
-	CUSTOM_DIR = $(patsubst "%",%,$(CONFIG_ARCH_BOARD_CUSTOM_DIR))
+  CUSTOM_DIR = $(patsubst "%",%,$(CONFIG_ARCH_BOARD_CUSTOM_DIR))
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
   BOARD_DIR ?= $(TOPDIR)$(DELIM)$(CUSTOM_DIR)
 else
