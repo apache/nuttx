@@ -96,7 +96,7 @@ int i2schar_devinit(void)
       ret = i2schar_register(i2s, CONFIG_GIANT_BOARD_I2SCHAR_MINOR);
       if (ret < 0)
         {
-          aerr("ERROR: i2schar_register failed: %d\n", ret);
+          auderr("ERROR: i2schar_register failed: %d\n", ret);
           return ret;
         }
 
