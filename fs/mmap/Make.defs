@@ -33,10 +33,10 @@
 #
 ############################################################################
 
-CSRCS += fs_mmap.c
+CSRCS += fs_mmap.c fs_munmap.c
 
 ifeq ($(CONFIG_FS_RAMMAP),y)
-CSRCS += fs_munmap.c fs_rammap.c
+CSRCS += fs_rammap.c
 endif
 
 # Include MMAP build support

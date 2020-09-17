@@ -174,16 +174,13 @@ int msync(FAR void *addr, size_t len, int flags);
 int munlock(FAR const void *addr, size_t len);
 int munlockall(void);
 
-#ifdef CONFIG_FS_RAMMAP
 int munmap(FAR void *start, size_t length);
-#else
-#  define munmap(start, length)
-#endif
 
 int posix_madvise(FAR void *addr, size_t len, int advice);
 int posix_mem_offset(FAR const void *addr, size_t len, FAR off_t *off,
                      FAR size_t *contig_len, FAR int *fildes);
-int posix_typed_mem_get_info(int fildes, FAR struct posix_typed_mem_info *info);
+int posix_typed_mem_get_info(int fildes,
+                             FAR struct posix_typed_mem_info *info);
 int posix_typed_mem_open(FAR const char *name, int oflag, int tflag);
 int shm_open(FAR const char *name, int oflag, mode_t mode);
 int shm_unlink(FAR const char *name);
