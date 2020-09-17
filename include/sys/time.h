@@ -387,6 +387,49 @@ int setitimer(int which, FAR const struct itimerval *value,
 int utimes(FAR const char *path, const struct timeval times[2]);
 
 /****************************************************************************
+ * Name: futimes
+ *
+ * Description:
+ *  futimens() update the timestamps of a file with nanosecond precision.
+ *  This contrasts with the historical utime(2) and utimes(2), which permit
+ *  only second and microsecond precision, respectively, when setting file
+ *  timestamps. With futimens() the file whose timestamps are to be updated
+ *  is specified via an open file descriptor, fd.
+ *
+ * Input Parameters:
+ *   fd  - Specifies the fd to be modified
+ *   times - Specifies the time value to set
+ *
+ * Returned Value:
+ *   On success, futimens() return 0.
+ *   On error, -1 is returned and errno is set to indicate the error.
+ *
+ ****************************************************************************/
+
+int futimes(int fd, const struct timeval tv[2]);
+
+/****************************************************************************
+ * Name: futimes
+ *
+ * Description:
+ *  futimens() update the timestamps of a file with nanosecond precision.
+ *  This contrasts with the historical utime(2) and utimes(2), which permit
+ *  only second and microsecond precision, respectively, when setting file
+ *  timestamps.
+ *
+ * Input Parameters:
+ *   fd  - Specifies the fd to be modified
+ *   times - Specifies the time value to set
+ *
+ * Returned Value:
+ *   On success, futimens() return 0.
+ *   On error, -1 is returned and errno is set to indicate the error.
+ *
+ ****************************************************************************/
+
+int futimens(int fd, const struct timespec times[2]);
+
+/****************************************************************************
  * Name: gethrtime
  *
  * Description:
