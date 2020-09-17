@@ -29,13 +29,21 @@
 #include <stdint.h>
 #include <debug.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/errno.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/init.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/mtd/mtd.h>
 
 #include "xtensa.h"
+#include "xtensa_attr.h"
+
+#include "hardware/esp32_soc.h"
 #include "hardware/esp32_spi.h"
+#include "hardware/esp32_dport.h"
 #include "rom/esp32_spiflash.h"
 
 /****************************************************************************
@@ -80,7 +88,7 @@ struct esp32_spiflash_s
 
   /* Port configuration */
 
-  const struct esp32_spiflash_config_s *config;
+  struct esp32_spiflash_config_s *config;
 
   /* SPI Flash data */
 
@@ -89,7 +97,19 @@ struct esp32_spiflash_s
   /* SPI Flash communication dummy number */
 
   uint8_t *dummies;
+
+  /* Enxusre exculisve access to the driver */
+
+  sem_t exclsem;
 };
+
+/****************************************************************************
+ * ROM function prototypes
+ ****************************************************************************/
+
+void Cache_Flush(int cpu);
+void Cache_Read_Enable(int cpu);
+void Cache_Read_Disable(int cpu);
 
 /****************************************************************************
  * Private Functions Prototypes
@@ -105,22 +125,31 @@ static inline void spi_set_regbits(struct esp32_spiflash_s *priv,
                                    int offset, uint32_t bits);
 static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
                                      int offset, uint32_t bits);
-static inline void spi_memcpy(void *d, const void *s, uint32_t n);
+static inline void IRAM_ATTR spi_memcpy(void *d, const void *s, uint32_t n);
+
+/* Misc. helpers */
+
+static inline irqstate_t IRAM_ATTR esp32_spiflash_opstart(
+  FAR struct esp32_spiflash_s *priv, int *cpu);
+static inline void IRAM_ATTR esp32_spiflash_opdone(
+  FAR struct esp32_spiflash_s *priv, irqstate_t flags, int cpu);
 
 /* Flash helpers */
 
-static void esp32_set_read_opt(FAR struct esp32_spiflash_s *priv);
-static void esp32_set_write_opt(struct esp32_spiflash_s *priv);
-static int esp32_read_status(FAR struct esp32_spiflash_s *priv,
-                             uint32_t *status);
-static int esp32_wait_idle(FAR struct esp32_spiflash_s *priv);
-static int esp32_enable_write(FAR struct esp32_spiflash_s *priv);
-static int esp32_erasesector(FAR struct esp32_spiflash_s *priv,
-                             uint32_t addr, uint32_t size);
-static int esp32_writedata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
-                           const uint8_t *buffer, uint32_t size);
-static int esp32_readdata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
-                          uint8_t *buffer, uint32_t size);
+static void IRAM_ATTR esp32_set_read_opt(FAR struct esp32_spiflash_s *priv);
+static void IRAM_ATTR esp32_set_write_opt(struct esp32_spiflash_s *priv);
+static int  IRAM_ATTR  esp32_read_status(FAR struct esp32_spiflash_s *priv,
+                                         uint32_t *status);
+static int IRAM_ATTR esp32_wait_idle(FAR struct esp32_spiflash_s *priv);
+static int IRAM_ATTR esp32_enable_write(FAR struct esp32_spiflash_s *priv);
+static int IRAM_ATTR esp32_erasesector(FAR struct esp32_spiflash_s *priv,
+                                       uint32_t addr, uint32_t size);
+static int IRAM_ATTR esp32_writedata(FAR struct esp32_spiflash_s *priv,
+                                     uint32_t addr,
+                                     const uint8_t *buffer, uint32_t size);
+static int IRAM_ATTR esp32_readdata(FAR struct esp32_spiflash_s *priv,
+                                    uint32_t addr,
+                                    uint8_t *buffer, uint32_t size);
 #if 0
 static int esp32_read_highstatus(FAR struct esp32_spiflash_s *priv,
                                  uint32_t *status);
@@ -149,7 +178,7 @@ static int esp32_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  * Private Data
  ****************************************************************************/
 
-static const struct esp32_spiflash_config_s g_esp32_spiflash1_config =
+static struct esp32_spiflash_config_s g_esp32_spiflash1_config =
 {
   .reg_base = REG_SPI_BASE(1)
 };
@@ -236,8 +265,8 @@ static inline uint32_t spi_get_reg(struct esp32_spiflash_s *priv,
  *
  ****************************************************************************/
 
-static inline void spi_set_regbits(struct esp32_spiflash_s *priv,
-                                   int offset, uint32_t bits)
+static inline void IRAM_ATTR spi_set_regbits(struct esp32_spiflash_s *priv,
+                                             int offset, uint32_t bits)
 {
   uint32_t tmp = getreg32(priv->config->reg_base + offset);
 
@@ -286,7 +315,7 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
  *
  ****************************************************************************/
 
-static inline void spi_memcpy(void *d, const void *s, uint32_t n)
+static inline void IRAM_ATTR spi_memcpy(void *d, const void *s, uint32_t n)
 {
   uint8_t *dest = (uint8_t *)d;
   const uint8_t *src = (const uint8_t *)s;
@@ -295,6 +324,76 @@ static inline void spi_memcpy(void *d, const void *s, uint32_t n)
     {
       *dest++ = *src++;
     }
+}
+
+/****************************************************************************
+ * Name: esp32_spiflash_opstart
+ *
+ * Description:
+ *   Prepare for an SPIFLASH operartion.
+ *
+ ****************************************************************************/
+
+static inline irqstate_t IRAM_ATTR esp32_spiflash_opstart(
+  FAR struct esp32_spiflash_s *priv, int *cpu)
+{
+  irqstate_t flags;
+#ifdef CONFIG_SMP
+  int other;
+#endif
+ 
+  flags = enter_critical_section();
+
+  *cpu = up_cpu_index();
+#ifdef CONFIG_SMP
+  other = *cpu ? 0 : 1;
+#endif
+
+  DEBUGASSERT(*cpu == 0 || *cpu == 1);
+#ifdef CONFIG_SMP
+  DEBUGASSERT(other == 0 || other == 1);
+#endif
+
+  Cache_Read_Disable(*cpu);
+#ifdef CONFIG_SMP
+  Cache_Read_Disable(other);
+#endif
+
+  return flags;
+}
+
+/****************************************************************************
+ * Name: esp32_spiflash_opdone
+ *
+ * Description:
+ *   Undo all the steps of opstart.
+ *
+ ****************************************************************************/
+
+static inline void IRAM_ATTR esp32_spiflash_opdone(
+  FAR struct esp32_spiflash_s *priv, irqstate_t flags, int cpu)
+{
+#ifdef CONFIG_SMP
+  int other;
+#endif
+
+#ifdef CONFIG_SMP
+  other = cpu ? 0 : 1;
+#endif
+
+  DEBUGASSERT(cpu == 0 || cpu == 1);
+#ifdef CONFIG_SMP
+  DEBUGASSERT(other == 0 || other == 1);
+#endif
+
+  Cache_Flush(cpu);
+  Cache_Read_Enable(cpu);
+#ifdef CONFIG_SMP
+  Cache_Flush(other);
+  Cache_Read_Enable(other);
+#endif
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -313,7 +412,7 @@ static inline void spi_memcpy(void *d, const void *s, uint32_t n)
  *
  ****************************************************************************/
 
-static void esp32_set_read_opt(FAR struct esp32_spiflash_s *priv)
+static void IRAM_ATTR esp32_set_read_opt(FAR struct esp32_spiflash_s *priv)
 {
   uint32_t regval;
   uint32_t ctrl;
@@ -424,7 +523,7 @@ static void esp32_set_read_opt(FAR struct esp32_spiflash_s *priv)
  *
  ****************************************************************************/
 
-static void esp32_set_write_opt(struct esp32_spiflash_s *priv)
+static void IRAM_ATTR esp32_set_write_opt(struct esp32_spiflash_s *priv)
 {
   uint32_t addrbits;
   uint32_t regval;
@@ -449,12 +548,12 @@ static void esp32_set_write_opt(struct esp32_spiflash_s *priv)
  *   status - status buffer pointer
  *
  * Returned Value:
- *   0 if success or a negative value if fail.
+ *   OK if success or a negative value if fail.
  *
  ****************************************************************************/
 
-static int esp32_read_status(FAR struct esp32_spiflash_s *priv,
-                             uint32_t *status)
+static int IRAM_ATTR esp32_read_status(FAR struct esp32_spiflash_s *priv,
+                                       uint32_t *status)
 {
   esp32_spiflash_chip_t *chip = priv->chip;
   uint32_t regval;
@@ -490,7 +589,7 @@ static int esp32_read_status(FAR struct esp32_spiflash_s *priv,
 
   *status = regval;
 
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -503,11 +602,11 @@ static int esp32_read_status(FAR struct esp32_spiflash_s *priv,
  *   spi - ESP32 SPI Flash chip data
  *
  * Returned Value:
- *   0 if success or a negative value if fail.
+ *   OK if success or a negative value if fail.
  *
  ****************************************************************************/
 
-static int esp32_wait_idle(FAR struct esp32_spiflash_s *priv)
+static int IRAM_ATTR esp32_wait_idle(FAR struct esp32_spiflash_s *priv)
 {
   uint32_t status;
 
@@ -521,12 +620,12 @@ static int esp32_wait_idle(FAR struct esp32_spiflash_s *priv)
       ;
     }
 
-  if (esp32_read_status(priv, &status))
+  if (esp32_read_status(priv, &status) != OK)
     {
       return -EIO;
     }
 
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -616,7 +715,7 @@ static int esp32_write_status(FAR struct esp32_spiflash_s *priv,
  *   spi    - ESP32 SPI Flash chip data
  *
  * Returned Value:
- *   0 if success or a negative value if fail.
+ *   OK if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -625,7 +724,7 @@ static int esp32_enable_write(FAR struct esp32_spiflash_s *priv)
   uint32_t flags;
   uint32_t regval;
 
-  if (esp32_wait_idle(priv))
+  if (esp32_wait_idle(priv) != OK)
     {
       return -EIO;
     }
@@ -639,7 +738,7 @@ static int esp32_enable_write(FAR struct esp32_spiflash_s *priv)
 
   do
     {
-      if (esp32_read_status(priv, &regval))
+      if (esp32_read_status(priv, &regval) != OK)
         {
           return -EIO;
         }
@@ -648,7 +747,7 @@ static int esp32_enable_write(FAR struct esp32_spiflash_s *priv)
     }
   while (flags != ESP_ROM_SPIFLASH_WRENABLE_FLAG);
 
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -666,22 +765,25 @@ static int esp32_enable_write(FAR struct esp32_spiflash_s *priv)
  *
  ****************************************************************************/
 
-static int esp32_erasesector(FAR struct esp32_spiflash_s *priv,
-                             uint32_t addr, uint32_t size)
+static int IRAM_ATTR esp32_erasesector(FAR struct esp32_spiflash_s *priv,
+                                       uint32_t addr, uint32_t size)
 {
-  int ret;
   uint32_t offset;
+  int me;
+  uint32_t flags;
 
-  if (esp32_wait_idle(priv))
+  if (esp32_wait_idle(priv) != OK)
     {
       return -EIO;
     }
 
   for (offset = 0; offset < size; offset += MTD_ERASESIZE(priv))
     {
-      ret = esp32_enable_write(priv);
-      if (ret)
+      flags = esp32_spiflash_opstart(priv, &me);
+
+      if (esp32_enable_write(priv) != OK)
         {
+          esp32_spiflash_opdone(priv, flags, me);
           return -EIO;
         }
 
@@ -692,10 +794,13 @@ static int esp32_erasesector(FAR struct esp32_spiflash_s *priv,
           ;
         }
 
-      if (esp32_wait_idle(priv))
+      if (esp32_wait_idle(priv) != OK)
         {
+          esp32_spiflash_opdone(priv, flags, me);
           return -EIO;
         }
+
+      esp32_spiflash_opdone(priv, flags, me);
     }
 
   return 0;
@@ -726,16 +831,23 @@ static int esp32_writedata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
   uint32_t bytes;
   uint32_t tmp;
   uint32_t res;
+  const uint8_t  *tmpbuff = buffer;
+  int ret = OK;
+  int me;
+  uint32_t flags;
 
-  if (esp32_wait_idle(priv))
+  if (esp32_wait_idle(priv) != OK)
     {
       return -EIO;
     }
 
   while (size > 0)
     {
-      if (esp32_enable_write(priv))
+      flags = esp32_spiflash_opstart(priv, &me);
+
+      if (esp32_enable_write(priv) != OK)
         {
+          esp32_spiflash_opdone(priv, flags, me);
           return -EIO;
         }
 
@@ -758,9 +870,9 @@ static int esp32_writedata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
         {
           res = MIN(4, bytes - i);
 
-          spi_memcpy(&tmp, buffer, res);
+          spi_memcpy(&tmp, tmpbuff, res);
           spi_set_reg(priv, SPI_W0_OFFSET + i, tmp);
-          buffer += res;
+          tmpbuff += res;
         }
 
       spi_set_reg(priv, SPI_RD_STATUS_OFFSET, 0);
@@ -770,16 +882,19 @@ static int esp32_writedata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
           ;
         }
 
-      if (esp32_wait_idle(priv))
+      if (esp32_wait_idle(priv) != OK)
         {
+          esp32_spiflash_opdone(priv, flags, me);
           return -EIO;
         }
 
       addr += bytes;
       size -= bytes;
+
+      esp32_spiflash_opdone(priv, flags, me);
     }
 
-  return 0;
+  return ret;
 }
 
 /****************************************************************************
@@ -795,7 +910,7 @@ static int esp32_writedata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
  *   size   - data number
  *
  * Returned Value:
- *   0 if success or a negative value if fail.
+ *   OK if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -807,14 +922,19 @@ static int esp32_readdata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
   uint32_t bytes;
   uint32_t tmp;
   uint32_t res;
+  uint8_t  *tmpbuff = buffer;
+  int me;
+  uint32_t flags;
 
-  if (esp32_wait_idle(priv))
+  if (esp32_wait_idle(priv) != OK)
     {
       return -EIO;
     }
 
   while (size > 0)
     {
+      flags = esp32_spiflash_opstart(priv, &me);
+
       bytes = MIN(size, SPI_FLASH_READ_BUF_SIZE);
       regval = ((bytes << 3) - 1) << SPI_USR_MISO_DBITLEN_S;
       spi_set_reg(priv, SPI_MISO_DLEN_OFFSET, regval);
@@ -834,15 +954,17 @@ static int esp32_readdata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
           res = MIN(4, bytes - i);
 
           tmp = spi_get_reg(priv, SPI_W0_OFFSET + i);
-          spi_memcpy(buffer, &tmp, res);
-          buffer += res;
+          spi_memcpy(tmpbuff, &tmp, res);
+          tmpbuff += res;
         }
 
       addr += bytes;
       size -= bytes;
+
+      esp32_spiflash_opdone(priv, flags, me);
     }
 
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -865,7 +987,6 @@ static int esp32_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                        size_t nblocks)
 {
   int ret;
-  uint32_t flags;
   FAR struct esp32_spiflash_s *priv = MTD2PRIV(dev);
   uint32_t addr = startblock * MTD_ERASESIZE(priv);
   uint32_t size = nblocks * MTD_ERASESIZE(priv);
@@ -879,14 +1000,18 @@ static int esp32_erase(FAR struct mtd_dev_s *dev, off_t startblock,
   finfo("esp32_erase(%p, %d, %d)\n", dev, startblock, nblocks);
 #endif
 
-  flags = enter_critical_section();
+  ret = nxsem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   esp32_set_write_opt(priv);
   ret = esp32_erasesector(priv, addr, size);
 
-  leave_critical_section(flags);
+  nxsem_post(&priv->exclsem);
 
-  if (!ret)
+  if (ret == OK)
     {
       ret = nblocks;
     }
@@ -919,21 +1044,38 @@ static ssize_t esp32_read(FAR struct mtd_dev_s *dev, off_t offset,
                           size_t nbytes, FAR uint8_t *buffer)
 {
   int ret;
-  uint32_t flags;
+  uint8_t *tmpbuff = buffer;
   FAR struct esp32_spiflash_s *priv = MTD2PRIV(dev);
 
 #ifdef CONFIG_ESP32_SPIFLASH_DEBUG
   finfo("esp32_read(%p, 0x%x, %d, %p)\n", dev, offset, nbytes, buffer);
 #endif
 
-  flags = enter_critical_section();
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+  if (esp32_ptr_extram(buffer))
+    {
+      tmpbuff = up_imm_malloc(nbytes);
+      if (tmpbuff == NULL)
+        {
+          return (ssize_t)-ENOMEM;
+        }
+    }
+#endif
+
+  /* Acquire the semaphore. */
+
+  ret = nxsem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      goto error_with_buffer;
+    }
 
   esp32_set_read_opt(priv);
-  ret = esp32_readdata(priv, offset, buffer, nbytes);
+  ret = esp32_readdata(priv, offset, tmpbuff, nbytes);
 
-  leave_critical_section(flags);
+  nxsem_post(&priv->exclsem);
 
-  if (!ret)
+  if (ret == OK)
     {
       ret = nbytes;
     }
@@ -942,7 +1084,16 @@ static ssize_t esp32_read(FAR struct mtd_dev_s *dev, off_t offset,
   finfo("esp32_read()=%d\n", ret);
 #endif
 
-  return ret;
+error_with_buffer:
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+  if (esp32_ptr_extram(buffer))
+    {
+      memcpy(buffer, tmpbuff, (ret == OK) ? nbytes : 0);
+      up_imm_free(tmpbuff);
+    }
+#endif
+
+  return (ssize_t)ret;
 }
 
 /****************************************************************************
@@ -1009,7 +1160,7 @@ static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
                            size_t nbytes, FAR const uint8_t *buffer)
 {
   int ret;
-  uint32_t flags;
+  uint8_t *tmpbuff = (uint8_t *)buffer;
   FAR struct esp32_spiflash_s *priv = MTD2PRIV(dev);
 
   ASSERT(buffer);
@@ -1019,19 +1170,35 @@ static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
       return -EINVAL;
     }
 
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+  if (esp32_ptr_extram(buffer))
+    {
+      tmpbuff = up_imm_malloc(nbytes);
+      if (tmpbuff == NULL)
+        {
+          return (ssize_t)-ENOMEM;
+        }
+    }
+#endif
+
 #ifdef CONFIG_ESP32_SPIFLASH_DEBUG
   finfo("esp32_write(%p, 0x%x, %d, %p)\n", dev, offset, nbytes, buffer);
 #endif
 
-  flags = enter_critical_section();
+  /* Acquire the semaphore. */
+
+  ret = nxsem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      goto error_with_buffer;
+    }
 
   esp32_set_write_opt(priv);
+  ret = esp32_writedata(priv, offset, tmpbuff, nbytes);
 
-  ret = esp32_writedata(priv, offset, buffer, nbytes);
+  nxsem_post(&priv->exclsem);
 
-  leave_critical_section(flags);
-
-  if (!ret)
+  if (ret == OK)
     {
       ret = nbytes;
     }
@@ -1040,7 +1207,15 @@ static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
   finfo("esp32_write()=%d\n", ret);
 #endif
 
-  return ret;
+error_with_buffer:
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+  if (esp32_ptr_extram(buffer))
+    {
+      up_imm_free(tmpbuff);
+    }
+#endif
+
+  return (ssize_t)ret;
 }
 
 /****************************************************************************
@@ -1165,6 +1340,10 @@ FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(void)
   uint32_t blocks;
   uint32_t startblock;
   uint32_t size;
+
+  /* Initiliaze the mutex */
+
+  nxsem_init(&priv->exclsem, 0, 1);
 
   ASSERT((ESP32_MTD_OFFSET + ESP32_MTD_SIZE) <= chip->chip_size);
   ASSERT((ESP32_MTD_OFFSET % chip->sector_size) == 0);

@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <errno.h>
 #include <debug.h>
 #include <time.h>
@@ -57,7 +58,7 @@
 #include "rom/esp32_gpio.h"
 
 /****************************************************************************
- * Private Types
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* SPI DMA RX/TX description number */
@@ -76,6 +77,14 @@
 /* SPI Default speed (limited by clock divider) */
 
 #define SPI_FREQ_DEFAULT  400000
+
+#ifndef MIN
+#  define  MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
 /* SPI Device hardware configuration */
 
@@ -157,8 +166,7 @@ struct esp32_spi_priv_s
 static int esp32_spi_lock(FAR struct spi_dev_s *dev, bool lock);
 #ifndef CONFIG_ESP32_SPI_UDCS
 static void esp32_spi_select(FAR struct spi_dev_s *dev,
-                             uint32_t devid,
-                             bool selected);
+                             uint32_t devid, bool selected);
 #endif
 static uint32_t esp32_spi_setfrequency(FAR struct spi_dev_s *dev,
                                        uint32_t frequency);
@@ -411,8 +419,7 @@ static inline uint32_t esp32_spi_get_reg(struct esp32_spi_priv_s *priv,
  ****************************************************************************/
 
 static inline void esp32_spi_set_regbits(struct esp32_spi_priv_s *priv,
-                                         int offset,
-                                         uint32_t bits)
+                                         int offset, uint32_t bits)
 {
   uint32_t tmp = getreg32(priv->config->reg_base + offset);
 
@@ -436,8 +443,7 @@ static inline void esp32_spi_set_regbits(struct esp32_spi_priv_s *priv,
  ****************************************************************************/
 
 static inline void esp32_spi_reset_regbits(struct esp32_spi_priv_s *priv,
-                                           int offset,
-                                           uint32_t bits)
+                                           int offset, uint32_t bits)
 {
   uint32_t tmp = getreg32(priv->config->reg_base + offset);
 
@@ -550,7 +556,7 @@ static int esp32_spi_sem_waitdone(FAR struct esp32_spi_priv_s *priv)
  * Name: esp32_spi_select
  *
  * Description:
- *   Enable/disable the SPI chip select.   The implementation of this method
+ *   Enable/disable the SPI chip select.  The implementation of this method
  *   must include handshaking:  If a device is selected, it must hold off
  *   all other attempts to select the device until the device is deselected.
  *
@@ -560,8 +566,8 @@ static int esp32_spi_sem_waitdone(FAR struct esp32_spi_priv_s *priv)
  *   the function will do nothing.
  *
  * Input Parameters:
- *   priv   - Private SPI device structure
- *   devid  - Identifies the device to select
+ *   priv     - Private SPI device structure
+ *   devid    - Identifies the device to select
  *   selected - true: slave selected, false: slave de-selected
  *
  * Returned Value:
@@ -571,8 +577,7 @@ static int esp32_spi_sem_waitdone(FAR struct esp32_spi_priv_s *priv)
 
 #ifndef CONFIG_ESP32_SPI_UDCS
 static void esp32_spi_select(FAR struct spi_dev_s *dev,
-                             uint32_t devid,
-                             bool selected)
+                             uint32_t devid, bool selected)
 {
 #ifdef CONFIG_ESP32_SPI_SWCS
   FAR struct esp32_spi_priv_s *priv = (FAR struct esp32_spi_priv_s *)dev;
@@ -861,10 +866,42 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
                                    uint32_t nwords)
 {
   uint32_t bytes = nwords * (priv->nbits / 8);
-  uint8_t *tp = (uint8_t *)txbuffer;
-  uint8_t *rp = (uint8_t *)rxbuffer;
+  uint8_t *tp;
+  uint8_t *rp;
   uint32_t n;
   uint32_t regval;
+
+  /* If the buffer comes from PSRAM, allocate a new one from DRAM */
+
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+  if (esp32_ptr_extram(txbuffer))
+    {
+      tp = up_imm_malloc(bytes);
+      if (tp == NULL)
+        {
+          return;
+        }
+    }
+  else
+#endif
+    {
+      tp = (uint8_t *)txbuffer;
+    }
+
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+  if (esp32_ptr_extram(rxbuffer))
+    {
+      rp = up_imm_malloc(bytes);
+      if (rp == NULL)
+        {
+          goto error_with_tp;
+        }
+    }
+  else
+#endif
+    {
+      rp = (uint8_t *)rxbuffer;
+    }
 
   if (!tp)
     {
@@ -924,6 +961,22 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       tp += n;
       rp += n;
     }
+
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+  if (esp32_ptr_extram(rxbuffer))
+    {
+      memcpy(rxbuffer, rp, bytes);
+      up_imm_free(rp);
+    }
+#endif
+
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+error_with_tp:
+  if (esp32_ptr_extram(txbuffer))
+    {
+      up_imm_free(tp);
+    }
+#endif
 }
 
 /****************************************************************************
