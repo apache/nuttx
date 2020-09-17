@@ -26,6 +26,8 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
+#include <malloc.h>
+
 #include "xtensa.h"
 
 #if CONFIG_XTENSA_USE_SEPERATE_IMEM
@@ -116,4 +118,19 @@ bool up_imm_heapmember(FAR void *mem)
 {
   return mm_heapmember(&g_iheap, mem);
 }
+
+/****************************************************************************
+ * Name: up_imm_mallinfo
+ *
+ * Description:
+ *   mallinfo returns a copy of updated current heap information for the
+ *   user heap.
+ *
+ ****************************************************************************/
+
+int up_imm_mallinfo(FAR struct mallinfo *info)
+{
+  return mm_mallinfo(&g_iheap, info);
+}
+
 #endif /* CONFIG_XTENSA_USE_SEPERATE_IMEM */

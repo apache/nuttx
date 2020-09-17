@@ -92,11 +92,15 @@ extern "C"
 #endif
 
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+
+struct mallinfo; /* Forward reference, see malloc.h */
+
 void      up_imm_initialize(void);
 FAR void *up_imm_malloc(size_t size);
 void      up_imm_free(FAR void *mem);
 FAR void *up_imm_memalign(size_t alignment, size_t size);
 bool up_imm_heapmember(FAR void *mem);
+int up_imm_mallinfo(FAR struct mallinfo *info);
 #endif
 
 #undef EXTERN
