@@ -47,10 +47,6 @@ ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHCPUFLAGS += -fvisibility=hidden
 ARCHCPUFLAGSXX += -fvisibility=hidden
 
-ifeq ($(CONFIG_HOST_MACOS),y)
-  LDLINKFLAGS += -keep_private_externs
-endif
-
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
 ARCHCPUFLAGS += -fno-common
