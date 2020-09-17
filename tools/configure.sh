@@ -33,6 +33,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+set -e
+
 WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
