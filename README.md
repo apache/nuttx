@@ -2051,6 +2051,8 @@ Below is a guide to the available README files in the NuttX source tree:
      |   |   |- sama5/
      |   |   |   |- sama5d2-xult/
      |   |   |   |   `- README.txt
+     |   |   |   |- giant-board/
+     |   |   |   |   `- README.md
      |   |   |   |- sama5d3x-ek/
      |   |   |   |   `- README.txt
      |   |   |   |- sama5d3-xplained/
