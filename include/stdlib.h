@@ -235,7 +235,7 @@ lldiv_t   lldiv(long long number, long long denom);
 
 /* Temporary files */
 
-int       mktemp(FAR char *path_template);
+FAR char *mktemp(FAR char *path_template);
 int       mkstemp(FAR char *path_template);
 
 /* Sorting */
