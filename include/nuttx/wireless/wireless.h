@@ -572,4 +572,11 @@ struct  iw_scan_req
   struct iw_freq  channel_list[IW_MAX_FREQUENCIES];
 };
 
+/*
+ * A Wireless Event. Contains basically the same data as the ioctl...
+ */
+
+#define IW_EV_LEN(field) \
+  (offsetof(struct iw_event, u) + sizeof(((union iwreq_data *)0)->field))
+
 #endif /* __INCLUDE_NUTTX_WIRELESS_WIRELESS_H */
