@@ -73,6 +73,18 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+#  define UMM_MALLOC(s)      up_imm_malloc(s)
+#  define UMM_MEMALIGN(a,s)  up_imm_memalign(a,s)
+#  define UMM_FREE(p)        up_imm_free(p)
+#  define UMM_HEAPMEMEBER(p) up_imm_heapmember(p)
+#else
+#  define UMM_MALLOC(s)      kumm_malloc(s)
+#  define UMM_MEMALIGN(a,s)  kumm_memalign(a,s)
+#  define UMM_FREE(p)        kumm_free(p)
+#  define UMM_HEAPMEMEBER(p) umm_heapmember(p)
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -183,7 +195,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
           /* Use the user-space allocator if this is a task or pthread */
 
           tcb->stack_alloc_ptr =
-            (uint32_t *)kumm_memalign(TLS_STACK_ALIGN, stack_size);
+            (uint32_t *)UMM_MEMALIGN(TLS_STACK_ALIGN, stack_size);
         }
 
 #else /* CONFIG_TLS_ALIGNED */
@@ -199,7 +211,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-          tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
+          tcb->stack_alloc_ptr = (uint32_t *)UMM_MALLOC(stack_size);
         }
 #endif /* CONFIG_TLS_ALIGNED */
 
