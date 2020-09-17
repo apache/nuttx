@@ -149,6 +149,10 @@ CHIP_CSRCS += esp32_tim_lowerhalf.c
 endif
 endif
 
+ifeq ($(CONFIG_XTENSA_IMEM_PROCFS),y)
+CHIP_CSRCS += esp32_procfs_imm.c
+endif
+
 ifeq ($(CONFIG_ARCH_USE_MODULE_TEXT),y)
 CHIP_CSRCS += esp32_modtext.c
 CMN_ASRCS += xtensa_loadstore.S

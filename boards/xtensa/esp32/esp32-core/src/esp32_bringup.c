@@ -48,6 +48,7 @@
 #  include <nuttx/timers/timer.h>
 #endif
 
+#include "esp32_procfs_imm.h"
 #include "esp32-core.h"
 
 /****************************************************************************
@@ -92,6 +93,21 @@ int esp32_bringup(void)
 {
   int ret;
 
+#ifdef CONFIG_XTENSA_IMEM_PROCFS
+  /* Register the internal memory procfs entry.
+   * This must be done before the procfs is mounted.
+   */
+
+  ret = imm_procfs_register();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register internal memory to PROCFS: %d\n",
+             ret);
+    }
+
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -101,6 +117,7 @@ int esp32_bringup(void)
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
 #endif
+
 
 #ifdef CONFIG_MMCSD
   ret = esp32_mmcsd_initialize(0);
