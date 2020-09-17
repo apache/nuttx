@@ -23,9 +23,8 @@
 #define CONCAT_(x, y) x##y
 #define CONCAT(x, y)  CONCAT_(x, y)
 
-#if defined(CONFIG_HOST_MACOS)
-  #define NXSYMBOLS(s) _##s
-#elif defined(CONFIG_HOST_WINDOWS) && defined(CONFIG_SIM_CYGWIN_DECORATED)
+#if defined(CONFIG_HOST_MACOS) || \
+    (defined(CONFIG_HOST_WINDOWS) && defined(CONFIG_SIM_CYGWIN_DECORATED))
   #define NXSYMBOLS(s) _##s NX##s
 #else
   #define NXSYMBOLS(s) s NX##s
