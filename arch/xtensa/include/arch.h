@@ -91,6 +91,14 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+void      up_imm_initialize(void);
+FAR void *up_imm_malloc(size_t size);
+void      up_imm_free(FAR void *mem);
+FAR void *up_imm_memalign(size_t alignment, size_t size);
+bool up_imm_heapmember(FAR void *mem);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

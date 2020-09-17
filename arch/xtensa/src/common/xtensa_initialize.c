@@ -108,6 +108,12 @@ void up_initialize(void)
   xtensa_pminitialize();
 #endif
 
+  /* Initialize the internal heap */
+
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+  up_imm_initialize();
+#endif
+
 #ifdef CONFIG_ARCH_DMA
   /* Initialize the DMA subsystem if the weak function xtensa_dma_initialize
    * has been brought into the build
@@ -208,5 +214,6 @@ void up_initialize(void)
   /* Initialize USB -- device and/or host */
 
   up_usbinitialize();
+
   board_autoled_on(LED_IRQSENABLED);
 }

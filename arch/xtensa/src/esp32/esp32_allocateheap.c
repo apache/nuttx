@@ -77,8 +77,13 @@
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+  *heap_start = (FAR void *)&_sheap + CONFIG_XTENSA_IMEM_REGION_SIZE;
+  *heap_size = (size_t)((uintptr_t)&_eheap - (uintptr_t)*heap_start);
+#else
   *heap_start = (FAR void *)&_sheap;
   *heap_size = (size_t)((uintptr_t)&_eheap - (uintptr_t)&_sheap);
+#endif
 }
 
 /****************************************************************************

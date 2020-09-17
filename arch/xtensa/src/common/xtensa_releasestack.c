@@ -48,6 +48,22 @@
 #include "xtensa.h"
 
 /****************************************************************************
+ * Pre-processor Macros
+ ****************************************************************************/
+
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+#  define UMM_MALLOC(s)      up_imm_malloc(s)
+#  define UMM_MEMALIGN(a,s)  up_imm_memalign(a,s)
+#  define UMM_FREE(p)        up_imm_free(p)
+#  define UMM_HEAPMEMEBER(p) up_imm_heapmember(p)
+#else
+#  define UMM_MALLOC(s)      kumm_malloc(s)
+#  define UMM_MEMALIGN(a,s)  kumm_memalign(a,s)
+#  define UMM_FREE(p)        kumm_free(p)
+#  define UMM_HEAPMEMEBER(p) umm_heapmember(p)
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -103,9 +119,9 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype)
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-          if (umm_heapmember(dtcb->stack_alloc_ptr))
+          if (UMM_HEAPMEMEBER(dtcb->stack_alloc_ptr))
             {
-              kumm_free(dtcb->stack_alloc_ptr);
+              UMM_FREE(dtcb->stack_alloc_ptr);
             }
         }
 
