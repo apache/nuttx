@@ -64,12 +64,6 @@
 
 #undef CONFIG_STMPE811_REFCNT
 
-/* No support for the SPI interface yet */
-
-#ifdef CONFIG_STMPE811_SPI
-#  error "Only the STMPE811 I2C interface is supported by this driver"
-#endif
-
 /* Driver support ***************************************************************************/
 
 /* This format is used to construct the /dev/input[n] device driver path.  It defined here
