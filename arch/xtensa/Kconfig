@@ -95,18 +95,18 @@ config XTENSA_CP_INITSET
 		coprocessor with the same bit layout as for the CPENABLE register.
 
 config XTENSA_USE_SEPERATE_IMEM
-  bool "Use a seperate heap for internal memory"
-  default n
+	bool "Use a seperate heap for internal memory"
+	default n
 
 config XTENSA_IMEM_REGION_SIZE
-  hex "DRAM region size for internal use"
-  depends on XTENSA_USE_SEPERATE_IMEM
+	hex "DRAM region size for internal use"
+	depends on XTENSA_USE_SEPERATE_IMEM
 	range 0x2000 0x28000
-  default 0x28000
+	default 0x28000
 
 config XTENSA_IMEM_PROCFS
-  bool "Internal memory PROCFS support"
-  default n
+	bool "Internal memory PROCFS support"
+	default n
 	depends on XTENSA_USE_SEPERATE_IMEM && !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
 
 source arch/xtensa/src/lx6/Kconfig

@@ -32,6 +32,9 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
+
+#include "xtensa_attr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -773,5 +776,23 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
 #define FE2_TX_INF_FORCE_PD_S       9
 
 #define PIN_CTRL                    (DR_REG_IO_MUX_BASE +0x00)
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32_ptr_extram
+ *
+ * Description:
+ *   Check if the buffer comes from the external RAM
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32_ptr_extram(const void *p)
+{
+  return ((intptr_t)p >= SOC_EXTRAM_DATA_LOW &&
+          (intptr_t)p < SOC_EXTRAM_DATA_HIGH);
+}
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_SOC_H */
