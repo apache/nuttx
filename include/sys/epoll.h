@@ -100,6 +100,19 @@ struct epoll_event
 };
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -112,5 +125,10 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
                 int maxevents, int timeout, FAR const sigset_t *sigmask);
 
 void epoll_close(int epfd);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* __INCLUDE_SYS_EPOLL_H */
