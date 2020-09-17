@@ -230,7 +230,7 @@ static int dat31r5sp_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct attenuator_control *att =
             (FAR struct attenuator_control *)((uintptr_t)arg);
-          DEBUGASSERT(ptr != NULL);
+          DEBUGASSERT(att != NULL);
           dat31r5sp_set_attenuation(priv, att->attenuation);
         }
         break;
