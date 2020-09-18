@@ -93,7 +93,6 @@ static void stmpe811_worker(FAR void *arg)
 
   /* Get the global interrupt status */
 
-  regval =  stmpe811_getreg8(priv, STMPE811_INT_EN);
   regval =  stmpe811_getreg8(priv, STMPE811_INT_STA);
 
   /* Check for a touchscreen interrupt */
