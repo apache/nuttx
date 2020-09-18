@@ -123,4 +123,46 @@ uint8_t nrf52_spi3status(FAR struct spi_dev_s *dev, uint32_t devid);
 int nrf52_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
+/****************************************************************************
+ * Name: nrf52_spi0/1/2/3register
+ *
+ * Description:
+ *   If the board supports a card detect callback to inform the SPI-based
+ *   MMC/SD driver when an SD card is inserted or removed, then
+ *   CONFIG_SPI_CALLBACK should be defined and the following function(s) must
+ *   be implemented.  These functions implements the registercallback method
+ *   of the SPI interface (see include/nuttx/spi/spi.h for details)
+ *
+ * Input Parameters:
+ *   dev -      Device-specific state data
+ *   callback - The function to call on the media change
+ *   arg -      A caller provided value to return with the callback
+ *
+ * Returned Value:
+ *   0 on success; negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_CALLBACK
+#ifdef CONFIG_NRF52_SPI0_MASTER
+int nrf52_spi0register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
+#endif
+
+#ifdef CONFIG_NRF52_SPI1_MASTER
+int nrf52_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
+#endif
+
+#ifdef CONFIG_NRF52_SPI2_MASTER
+int nrf52_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
+#endif
+
+#ifdef CONFIG_NRF52_SPI3_MASTER
+int nrf52_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+                       FAR void *arg);
+#endif
+#endif
+
 #endif /* __ARCH_ARM_SRC_NRF52_NRF52_SPI_H */
