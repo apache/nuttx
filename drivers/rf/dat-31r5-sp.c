@@ -189,7 +189,8 @@ static int dat31r5sp_close(FAR struct file *filep)
  *   Write is not permited, only IOCTLs.
  ****************************************************************************/
 
-static ssize_t dat31r5sp_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t dat31r5sp_write(FAR struct file *filep,
+                               FAR const char *buffer,
                                size_t buflen)
 {
   return -ENOSYS;
@@ -218,7 +219,9 @@ static ssize_t dat31r5sp_read(FAR struct file *filep, FAR char *buffer,
  *   single attenuator.
  ****************************************************************************/
 
-static int dat31r5sp_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int dat31r5sp_ioctl(FAR struct file *filep,
+                           int cmd,
+                           unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct dat31r5sp_dev_s *priv = inode->i_private;
@@ -269,7 +272,8 @@ int dat31r5sp_register(FAR const char *devpath,
 
   /* Initialize the DAT-31R5-SP+ device structure */
 
-  priv = (FAR struct dat31r5sp_dev_s *)kmm_malloc(sizeof(struct dat31r5sp_dev_s));
+  priv = (FAR struct dat31r5sp_dev_s *)
+      kmm_malloc(sizeof(struct dat31r5sp_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");
