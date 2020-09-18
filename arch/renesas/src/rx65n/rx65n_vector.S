@@ -398,7 +398,7 @@ _uprx65n_start_handler:
   trampoline  RX65N_RXI2_IRQ, _uprx65_rxi2_handler
   trampoline  RX65N_TXI2_IRQ, _uprx65_txi2_handler
 #endif
-#if defined(CONFIG_ICU) || defined(CONFIG_RX65N_ICU)
+#if defined(CONFIG_RX65N_ICU)
   trampoline RX65N_IRQ0_IRQ,  _uprx65_irq0_handler
   trampoline RX65N_IRQ1_IRQ,  _uprx65_irq1_handler
   trampoline RX65N_IRQ2_IRQ,  _uprx65_irq2_handler
@@ -951,7 +951,7 @@ __int_vector_table:
   .long   _uprx65_invalid_handler
   .long   _uprx65_invalid_handler
 #endif
-#if defined(CONFIG_ICU) || defined(CONFIG_RX65N_ICU)
+#if defined(CONFIG_RX65N_ICU)
   .long   _uprx65_irq0_handler
   .long   _uprx65_irq1_handler
   .long   _uprx65_irq2_handler
