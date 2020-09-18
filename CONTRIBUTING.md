@@ -24,17 +24,17 @@ it is very important you follow these guidelines:
       and the rest added to the description. Use it as a
       starting point to describe your PR.
 
-  * Your should follow [NuttX C Coding Standard](https://nuttx.apache.org/docs/latest/contributing/coding_style.html)
-  
+  * You should follow [NuttX C Coding Standard](https://nuttx.apache.org/docs/latest/contributing/coding_style.html)
+
     * Your code will be automatically checked by GitHub
       Continuous Integration (CI) system. If you see the
       "check" step fails, it is possible that this happens
       due to style errors.
 
-    * Note that we require you to solve this issues
+    * Note that we require you to solve these issues
       and adapt all modified files even if you didn't
       introduce the problem yourself (this way, every
-      contribution gets us closer to compliance)
+      contribution gets us closer to compliance).
 
 ## For more information
 
