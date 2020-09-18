@@ -410,6 +410,23 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BOARDCTL_NETCONF
+      /*  CMD:           BOARDIOC_NETCONF
+       *  DESCRIPTION:   Provide network configuration settings
+       *  ARG:           A pointer to writable netconf structure which to
+       *                 receive the netconf.
+       *  CONFIGURATION: CONFIG_BOARDIOC_NETCONF
+       *  DEPENDENCIES:  Board logic must provide the board_get_netconf()
+       *                 interface.
+       */
+
+      case BOARDIOC_NETCONF:
+        {
+          ret = board_get_netconf((struct boardioc_netconf_s *) arg);
+        }
+        break;
+#endif
+
 #ifdef CONFIG_BOARDCTL_MKRD
       /* CMD:           BOARDIOC_MKRD
        * DESCRIPTION:   Create a RAM disk

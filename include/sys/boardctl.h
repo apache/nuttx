@@ -81,6 +81,13 @@
  * CONFIGURATION: CONFIG_LIB_BOARDCTL
  * DEPENDENCIES:  Board logic must provide board_app_initialize()
  *
+ * CMD:           BOARDIOC_NETCONF
+ * DESCRIPTION:   Provide network configuration settings
+ * ARG:           A pointer to a writable netconf structure which to receive
+ *                the netconf.
+ * CONFIGURATION: CONFIG_BOARDIOC_NETCONF
+ * DEPENDENCIES:  Board logic must provide the board_get_netconf() interface.
+ *
  * CMD:           BOARDIOC_POWEROFF
  * DESCRIPTION:   Power off the board
  * ARG:           Integer value providing power off status information
@@ -215,6 +222,7 @@
 #define BOARDIOC_NXTERM            _BOARDIOC(0x000f)
 #define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x0010)
 #define BOARDIOC_TESTSET           _BOARDIOC(0x0011)
+#define BOARDIOC_NETCONF           _BOARDIOC(0x0012)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -250,6 +258,26 @@ struct boardioc_pm_ctrl_s
   uint32_t state;
   uint32_t count;
   uint32_t priority;
+};
+#endif
+
+#ifdef CONFIG_BOARDCTL_NETCONF
+/* Describes the network configuration */
+
+enum boardioc_netconf_e
+{
+  BOARDIOC_NETCONF_DHCP     = 0x1, /* Use DHCP */
+  BOARDIOC_NETCONF_STATIC   = 0x2, /* Use static IP */
+  BOARDIOC_NETCONF_FALLBACK = 0x3, /* Use DHCP with fall back static IP */
+};
+
+struct boardioc_netconf_s
+{
+  enum boardioc_netconf_e flags; /* Configure for static and/or DHCP */
+  uint32_t ipaddr;
+  uint32_t netmask;
+  uint32_t dnsaddr;
+  uint32_t default_router;
 };
 #endif
 
@@ -432,10 +460,10 @@ extern "C"
  *   to "correct" but awkward implementations.
  *
  *   boardctl() is non-standard OS interface to alleviate the problem.  It
- *   basically circumvents the normal device driver ioctl interlace and allows
- *   the application to perform direct IOCTL-like calls to the board-specific
- *   logic.  It is especially useful for setting up board operational and
- *   test configurations.
+ *   basically circumvents the normal device driver ioctl interlace and
+ *   allows the application to perform direct IOCTL-like calls to the
+ *   board-specific logic.  It is especially useful for setting up board
+ *   operational and test configurations.
  *
  * Input Parameters:
  *   cmd - Identifies the board command to be executed

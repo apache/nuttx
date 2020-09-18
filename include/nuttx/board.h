@@ -275,6 +275,28 @@ int board_reset(int status);
 #endif
 
 /****************************************************************************
+ * Name: board_get_netconf
+ *
+ * Description:
+ *   Populates the values if the boardioc_netconf_s to configure the
+ *   network.
+ *
+ *
+ * Input Parameters:
+ *   netconf - A reference to a writable memory location provided by the
+ *     caller to receive the board boardioc_netconf_s.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_NETCONF
+int board_get_netconf(struct boardioc_netconf_s *netconf);
+#endif
+
+/****************************************************************************
  * Name: board_uniqueid
  *
  * Description:

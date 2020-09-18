@@ -3118,6 +3118,14 @@ config BOARDCTL_UNIQUEID_SIZE
 		Provides the size of the memory buffer that must be provided by the
 		caller of board_uniqueid() in which to receive the board unique ID.
 
+config BOARDCTL_NETCONF
+	bool "Return board network configuration"
+	default n
+	---help---
+		Enables support for the BOARDIOC_NETCONF boardctl() command.
+		Architecture specific logic must provide the board_get_netconf()
+		interface.
+
 config BOARDCTL_MKRD
 	bool "Enable application space creation of RAM disks"
 	default n
