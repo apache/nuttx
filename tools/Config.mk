@@ -458,7 +458,8 @@ define CLEAN
 endef
 else
 define CLEAN
-	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp
+	$(call DELFILE, $(wildcard $(foreach obj, $(OBJS), $(addsuffix /$(obj), $(subst :, ,$(VPATH))))))
+	$(call DELFILE, *$(OBJEXT) *$(LIBEXT) *~ .*.swp)
 endef
 endif
 
