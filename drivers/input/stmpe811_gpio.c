@@ -194,7 +194,7 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
         }
       else
         {
-          regval &= pinmask;
+          regval &= ~pinmask;
         }
 
       stmpe811_putreg8(priv, STMPE811_GPIO_FE, regval);
@@ -202,13 +202,13 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
       /* Set up the rising edge detection */
 
      regval = stmpe811_getreg8(priv, STMPE811_GPIO_RE);
-      if ((pinconfig & STMPE811_GPIO_FALLING) != 0)
+      if ((pinconfig & STMPE811_GPIO_RISING) != 0)
         {
           regval |= pinmask;
         }
       else
         {
-          regval &= pinmask;
+          regval &= ~pinmask;
         }
 
       stmpe811_putreg8(priv, STMPE811_GPIO_RE, regval);
@@ -443,6 +443,15 @@ void stmpe811_gpioworker(FAR struct stmpe811_dev_s *priv)
            */
 
           stmpe811_putreg8(priv, STMPE811_GPIO_INTSTA, pinmask);
+
+          /* Must also clear the edge detection status bit
+           * this is _not documented_ as being required but is used in
+           * the SDK and without it a second interrupt will never trigger.
+           * Yep you have to "clear" _both_ the edge detection status and
+           * GPIO interrupt status register even in level mode.
+           */
+
+          stmpe811_putreg8(priv, STMPE811_GPIO_ED, pinmask);
         }
     }
 }
