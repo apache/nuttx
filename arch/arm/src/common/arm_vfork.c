@@ -225,16 +225,15 @@ pid_t up_vfork(const struct vfork_s *context)
 
 #  endif
 
-#elif defined(CONFIG_ARCH_CORTEXR4) || defined(CONFIG_ARCH_CORTEXR5) || \
-      defined(CONFIG_ARCH_CORTEXR7)
+#elif defined(CONFIG_ARCH_ARMV7R)
 #  ifdef CONFIG_BUILD_PROTECTED
 
           child->cmn.xcp.syscall[index].cpsr =
             parent->xcp.syscall[index].cpsr;
 
 #  endif
-#elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4) || \
-      defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM7)
+#elif defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
+      defined(CONFIG_ARCH_ARMV8M)
 
           child->cmn.xcp.syscall[index].excreturn =
             parent->xcp.syscall[index].excreturn;

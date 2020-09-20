@@ -45,7 +45,7 @@ else ifeq ($(CONFIG_ARCH_ARMV7M),y)     # ARMv7-M
 ARCH_SUBDIR = armv7-m
 else ifeq ($(CONFIG_ARCH_ARMV8M),y)     # ARMv8-M
 ARCH_SUBDIR = armv8-m
-else ifeq ($(CONFIG_ARCH_CORTEXM0),y)   # Cortex-M0 is ARMv6-M
+else ifeq ($(CONFIG_ARCH_ARMV6M),y)     # ARMv6-M
 ARCH_SUBDIR = armv6-m
 else                                    # ARM9, ARM7TDMI, etc.
 ARCH_SUBDIR = arm
