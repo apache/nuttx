@@ -54,6 +54,8 @@
 #  include <arch/armv7-r/spinlock.h>
 #elif defined(CONFIG_ARCH_ARMV7M)
 #  include <arch/armv7-m/spinlock.h>
+#elif defined(CONFIG_ARCH_ARMV8M)
+#  include <arch/armv8-m/spinlock.h>
 #elif defined(CONFIG_ARCH_ARMV6M)
 #  include <arch/armv6-m/spinlock.h>
 #else
