@@ -704,7 +704,7 @@ config ARCH_CORTEXM35P
 
 config ARCH_FAMILY
 	string
-	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM926EJS || ARCH_ARM920T
+	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ
 	default "armv6-m"	if ARCH_ARMV6M
 	default "armv7-a"	if ARCH_ARMV7A
 	default "armv7-m"	if ARCH_ARMV7M
