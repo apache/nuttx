@@ -100,8 +100,12 @@ struct bt_dev_s g_btdev;
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
 static FAR struct bt_conn_cb_s *g_callback_list;
 static bt_le_scan_cb_t *g_scan_dev_found_cb;
+#else
+static struct bt_hci_cb_s *g_hci_cb;
+#endif
 
 /* Lists of pending received messages.  One for low priority input that is
  * processed on the low priority work queue and one for high priority
@@ -229,6 +233,7 @@ static FAR struct bt_buf_s *
   return buf;
 }
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
 static void bt_connected(FAR struct bt_conn_s *conn)
 {
   FAR struct bt_conn_cb_s *cb;
@@ -982,6 +987,7 @@ static void hci_event(FAR struct bt_buf_s *buf)
 
   bt_buf_release(buf);
 }
+#endif
 
 /****************************************************************************
  * Name: hci_tx_kthread
@@ -1075,6 +1081,7 @@ static void hci_rx_work(FAR void *arg)
 
       /* TODO: Hook monitor callback */
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
       switch (buf->type)
         {
           case BT_ACL_IN:
@@ -1090,6 +1097,9 @@ static void hci_rx_work(FAR void *arg)
             bt_buf_release(buf);
             break;
         }
+#else
+      g_hci_cb->received(buf, g_hci_cb->context);
+#endif
     }
 }
 
@@ -1131,6 +1141,7 @@ static void priority_rx_work(FAR void *arg)
           continue;
         }
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
       bt_buf_consume(buf, sizeof(struct bt_hci_evt_hdr_s));
 
       switch (hdr->evt)
@@ -1151,11 +1162,15 @@ static void priority_rx_work(FAR void *arg)
             wlerr("Unknown event 0x%02x\n", hdr->evt);
             break;
         }
+#else
+      UNUSED(hdr);
 
-      bt_buf_release(buf);
+      g_hci_cb->received(buf, g_hci_cb->context);
+#endif
     }
 }
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
 static void read_local_features_complete(FAR struct bt_buf_s *buf)
 {
   FAR struct bt_hci_rp_read_local_features_s *rp = (FAR void *)buf->data;
@@ -1433,6 +1448,7 @@ static int hci_initialize(void)
   nxsem_init(&g_btdev.le_pkts_sem, 0, g_btdev.le_pkts);
   return 0;
 }
+#endif
 
 /* threads, fifos and semaphores initialization */
 
@@ -1496,6 +1512,7 @@ int bt_initialize(void)
       return ret;
     }
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
   ret = hci_initialize();
   if (ret < 0)
     {
@@ -1503,7 +1520,10 @@ int bt_initialize(void)
       return ret;
     }
 
-  return bt_l2cap_init();
+  ret = bt_l2cap_init();
+#endif
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1582,6 +1602,8 @@ void bt_driver_unregister(FAR const struct bt_driver_s *btdev)
  *
  ****************************************************************************/
 
+/* TODO: rename to bt_receive? */
+
 void bt_hci_receive(FAR struct bt_buf_s *buf)
 {
   FAR struct bt_hci_evt_hdr_s *hdr;
@@ -1651,6 +1673,8 @@ void bt_hci_receive(FAR struct bt_buf_s *buf)
         }
     }
 }
+
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
 
 /****************************************************************************
  * Name: bt_hci_cmd_create
@@ -2143,3 +2167,27 @@ FAR const char *bt_addr_le_str(FAR const bt_addr_le_t *addr)
   return str;
 }
 #endif /* CONFIG_DEBUG_WIRELESS_ERROR */
+
+#else
+
+/****************************************************************************
+ * Name: bt_hci_cb_register
+ *
+ * Description:
+ *   Register callbacks to handle RAW HCI packets
+ *
+ * Input Parameters:
+ *   cb - Instance of the callback structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void bt_hci_cb_register(FAR struct bt_hci_cb_s *cb)
+{
+  g_hci_cb = cb;
+}
+
+#endif
+

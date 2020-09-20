@@ -105,7 +105,7 @@ ssize_t psock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -EBADF;
     }
 
-  /* Let logic specific to this address family handle the sendfrom()
+  /* Let logic specific to this address family handle the sendmsg()
    * operation.
    */
 

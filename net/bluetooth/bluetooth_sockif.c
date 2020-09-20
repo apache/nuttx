@@ -294,6 +294,7 @@ static int bluetooth_connect(FAR struct socket *psock,
       btaddr = (FAR struct sockaddr_l2 *)addr;
       memcpy(&conn->bc_raddr, &btaddr->l2_bdaddr, sizeof(bt_addr_t));
       conn->bc_channel = btaddr->l2_cid;
+      conn->bc_proto = psock->s_proto;
     }
   else
     {
@@ -485,6 +486,8 @@ static int bluetooth_l2cap_bind(FAR struct socket *psock,
 
   conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
 
+  conn->bc_proto = psock->s_proto;
+
   /* Find the device associated with the requested address */
 
   radio = bluetooth_find_device(conn, &iaddr->l2_bdaddr);
@@ -549,6 +552,7 @@ static int bluetooth_hci_bind(FAR struct socket *psock,
 
   conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
 
+  conn->bc_proto = psock->s_proto;
   conn->bc_channel = hciaddr->hci_channel;
   conn->bc_ldev = hciaddr->hci_dev;
 
@@ -766,6 +770,7 @@ static ssize_t bluetooth_send(FAR struct socket *psock, FAR const void *buf,
                               size_t len, int flags)
 {
   ssize_t ret;
+
   DEBUGASSERT(psock != NULL || buf != NULL);
 
   /* Only SOCK_RAW is supported */
@@ -871,7 +876,7 @@ static ssize_t bluetooth_hci_send(FAR struct socket *psock,
                                   FAR const void *buf,
                                   size_t len, int flags)
 {
-#warning Missing logic
+  /* We only support sendto() for HCI sockets */
 
   return -EPFNOSUPPORT;
 }
@@ -905,9 +910,9 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
 {
   ssize_t ret;
 
-  /* Only SOCK_RAW on L2CAP is supported */
+  /* Only SOCK_RAW is supported */
 
-  if (psock->s_type == SOCK_RAW && psock->s_proto == BTPROTO_L2CAP)
+  if (psock->s_type == SOCK_RAW)
     {
       /* Raw packet send */
 

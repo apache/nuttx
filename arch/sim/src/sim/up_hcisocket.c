@@ -120,6 +120,8 @@ static int bthcisock_send(FAR const struct bt_driver_s *dev,
       return -1;
     }
 
+  bt_buf_release(buf);
+
   return buf->len;
 }
 
@@ -197,7 +199,7 @@ int bthcisock_loop()
        * to copy from
        */
 
-      read_buf = bt_buf_alloc(BT_DUMMY, NULL, 0);
+      read_buf = bt_buf_alloc(BT_DUMMY, NULL, BLUETOOTH_H4_HDRLEN);
       if (read_buf == NULL)
         {
           wlerr("ERROR: Failed to allocate buffer\n");
