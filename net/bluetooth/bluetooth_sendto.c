@@ -66,7 +66,7 @@ struct bluetooth_sendto_s
   FAR struct socket *is_sock;           /* Points to the parent socket structure */
   FAR struct devif_callback_s *is_cb;   /* Reference to callback instance */
   bt_addr_t is_destaddr;                /* Frame destination address */
-  uint8_t is_channel;                   /* Frame destination channel */
+  uint16_t is_channel;                  /* Frame destination channel */
   sem_t is_sem;                         /* Used to wake up the waiting thread */
   FAR const uint8_t *is_buffer;         /* User buffer of data to send */
   size_t is_buflen;                     /* Number of bytes in the is_buffer */
@@ -117,6 +117,7 @@ static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
 
       BLUETOOTH_ADDRCOPY(&meta.bm_raddr, &pstate->is_destaddr);
       meta.bm_channel = pstate->is_channel;
+      meta.bm_proto = pstate->is_sock->s_proto;
 
       /* Get the Bluetooth MAC header length */
 
@@ -235,7 +236,6 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
                                FAR const struct sockaddr *to,
                                socklen_t tolen)
 {
-  FAR struct sockaddr_l2 *destaddr;
   FAR struct radio_driver_s *radio;
   FAR struct bluetooth_conn_s *conn;
   struct bluetooth_sendto_s state;
@@ -262,10 +262,31 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Get the device driver that will service this transfer */
 
-  radio = bluetooth_find_device(conn, &conn->bc_laddr);
-  if (radio == NULL)
+  if (psock->s_proto == BTPROTO_L2CAP)
     {
-      return -ENODEV;
+      radio = bluetooth_find_device(conn, &conn->bc_laddr);
+      if (radio == NULL)
+        {
+          return -ENODEV;
+        }
+    }
+  else if (psock->s_proto == BTPROTO_HCI)
+    {
+      /* TODO: should actually look among BT devices */
+
+      radio =
+          (FAR struct radio_driver_s *)netdev_findbyindex(conn->bc_ldev + 1);
+
+      DEBUGASSERT(radio->r_dev.d_lltype == NET_LL_BLUETOOTH);
+
+      if (radio == NULL)
+        {
+          return -ENODEV;
+        }
+    }
+  else
+    {
+      return -EOPNOTSUPP;
     }
 
   /* Perform the send operation */
@@ -290,9 +311,22 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Copy the destination address */
 
-  destaddr = (FAR struct sockaddr_l2 *)to;
-  memcpy(&state.is_destaddr, &destaddr->l2_bdaddr,
-         sizeof(bt_addr_t));
+  if (psock->s_proto == BTPROTO_L2CAP)
+    {
+      FAR struct sockaddr_l2 *destaddr = (FAR struct sockaddr_l2 *)to;
+      memcpy(&state.is_destaddr, &destaddr->l2_bdaddr,
+             sizeof(bt_addr_t));
+    }
+  else if (psock->s_proto == BTPROTO_HCI)
+    {
+      FAR struct sockaddr_hci *destaddr = (FAR struct sockaddr_hci *)to;
+      state.is_channel = destaddr->hci_channel;
+    }
+  else
+    {
+      ret = -EOPNOTSUPP;
+      goto err_with_net;
+    }
 
   if (len > 0)
     {
@@ -348,6 +382,12 @@ ssize_t psock_bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
   /* Return the number of bytes actually sent */
 
   return state.is_sent;
+
+err_with_net:
+  nxsem_destroy(&state.is_sem);
+  net_unlock();
+
+  return ret;
 }
 
 #endif /* CONFIG_NET_BLUETOOTH */

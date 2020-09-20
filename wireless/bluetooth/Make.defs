@@ -37,9 +37,17 @@ ifeq ($(CONFIG_WIRELESS_BLUETOOTH),y)
 
 # Include Bluetooth support
 
-CSRCS += bt_atomic.c bt_att.c bt_buf.c bt_conn.c bt_gatt.c bt_hcicore.c
-CSRCS += bt_ioctl.c bt_keys.c bt_l2cap.c bt_netdev.c bt_queue.c bt_smp.c
+CSRCS += bt_buf.c bt_netdev.c bt_queue.c bt_hcicore.c
+
+ifeq ($(CONFIG_WIRELESS_BLUETOOTH_HOST),y)
+
+# Host-layer
+
+CSRCS += bt_atomic.c bt_att.c  bt_conn.c bt_gatt.c
+CSRCS += bt_ioctl.c bt_keys.c bt_l2cap.c bt_smp.c
 CSRCS += bt_uuid.c
+
+endif
 
 DEPPATH += --dep-path bluetooth
 VPATH += :bluetooth

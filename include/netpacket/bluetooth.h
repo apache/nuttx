@@ -74,6 +74,9 @@
  *   is made, the first unused channel for the relevant bdaddr will be
  *   allocated and may be discovered using the getsockname(2) call.
  *
+ * BTPROTO_NONE
+ *   This is to be used internally to indicate unconfigured protocol. Not
+ * to be used on sockets by user.
  */
 
 #define BTPROTO_L2CAP   0
@@ -84,6 +87,7 @@
 #define BTPROTO_CMTP    5
 #define BTPROTO_HIDP    6
 #define BTPROTO_AVDTP   7
+#define BTPROTO_NONE    255
 
 /* HCI socket options (SOL_HCI, see include/sys/socket.h):
  *
@@ -241,6 +245,19 @@
                                          * (IPSP), Bluetooth SIG */
 #define BT_PSM_OTS              0x0025  /* Object Transfer Service (OTS),
                                          * Bluetooth SIG  */
+
+/* Channels for a BTPROTO_HCI socket */
+
+#define HCI_CHANNEL_RAW         0x0
+#define HCI_CHANNEL_USER        0x1
+
+/* Packets types send over the network layer for BTPROTO_HCI */
+
+#define HCI_COMMAND_PKT         0x01
+#define HCI_ACLDATA_PKT         0x02
+#define HCI_SCODATA_PKT         0x03
+#define HCI_EVENT_PKT           0x04
+#define HCI_VENDOR_PKT          0xff
 
 /****************************************************************************
  * Public Type Definitions

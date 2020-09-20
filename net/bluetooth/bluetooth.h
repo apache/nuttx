@@ -97,6 +97,7 @@ struct bluetooth_conn_s
 #if CONFIG_NET_BLUETOOTH_BACKLOG > 0
   uint8_t bc_backlog;                         /* Number of frames in RX queue */
 #endif
+  uint8_t bc_proto;                           /* Protocol */
 
   /* Queue of incoming packets */
 

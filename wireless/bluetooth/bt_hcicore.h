@@ -72,10 +72,11 @@
 
 struct bt_dev_s
 {
-  /* Local Bluetooth Device Address */
+    /* Local Bluetooth Device Address */
 
-  bt_addr_t bdaddr;
+    bt_addr_t bdaddr;
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
   /* Controller version & manufacturer information */
 
   uint8_t hci_version;
@@ -104,6 +105,7 @@ struct bt_dev_s
   uint8_t le_pkts;
   uint16_t le_mtu;
   sem_t le_pkts_sem;
+#endif
 
   /* Number of commands controller can accept */
 
@@ -127,6 +129,7 @@ struct bt_dev_s
   FAR const struct bt_driver_s *btdev;
 };
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
 /* Connection callback structure */
 
 struct bt_conn_s; /* Forward reference */
@@ -138,7 +141,18 @@ struct bt_conn_cb_s
   CODE void (*connected)(FAR struct bt_conn_s *conn, FAR void *context);
   CODE void (*disconnected)(FAR struct bt_conn_s *conn, FAR void *context);
 };
+#else
+/* RAW HCI packets callbacks */
 
+struct bt_hci_cb_s
+{
+  FAR void *context;
+
+  CODE void (*received)(FAR struct bt_buf_s *buf, FAR void *context);
+};
+#endif
+
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
 /****************************************************************************
  * Name: bt_le_scan_cb_t
  *
@@ -160,6 +174,7 @@ struct bt_conn_cb_s
 typedef CODE void bt_le_scan_cb_t(FAR const bt_addr_le_t *addr, int8_t rssi,
                                   uint8_t adv_type,
                                   FAR const uint8_t *adv_data, uint8_t len);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -171,6 +186,7 @@ extern struct bt_dev_s g_btdev;
  * Inline Functions
  ****************************************************************************/
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
 static inline int bt_addr_cmp(FAR const bt_addr_t *a, FAR const bt_addr_t *b)
 {
   return memcmp(a, b, sizeof(*a));
@@ -231,6 +247,8 @@ static inline bool bt_addr_le_is_identity(FAR const bt_addr_le_t *addr)
 
 struct bt_eir_s; /* Forward reference */
 
+#endif
+
 /****************************************************************************
  * Name: bt_initialize
  *
@@ -284,6 +302,7 @@ int bt_driver_register(FAR const struct bt_driver_s *btdev);
 
 void bt_driver_unregister(FAR const struct bt_driver_s *btdev);
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
 /****************************************************************************
  * Name: bt_hci_cmd_create
  *
@@ -409,5 +428,24 @@ int bt_le_scan_update(void);
  ****************************************************************************/
 
 void bt_conn_cb_register(FAR struct bt_conn_cb_s *cb);
+#else
+
+/****************************************************************************
+ * Name: bt_hci_cb_register
+ *
+ * Description:
+ *   Register callbacks to handle RAW HCI packets
+ *
+ * Input Parameters:
+ *   cb - Instance of the callback structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void bt_hci_cb_register(FAR struct bt_hci_cb_s *cb);
+
+#endif
 
 #endif /* __WIRELESS_BLUETOOTH_BT_HDICORE_H */
