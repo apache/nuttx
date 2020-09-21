@@ -1,7 +1,5 @@
-#!/usr/bin/python
-# -*- coding:utf-8 -*-
-#
-# nuttx/tools/parsecallstack.py
+#!/usr/bin/env python
+# tools/parsecallstack.py
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -24,35 +22,25 @@ import argparse
 
 def parse_args():
 
-    parser = argparse.ArgumentParser("\n\
-        parsecallstack.py -c cputype -f filename\n\
-        This file can get the call stack when you get the log with the\n\
-        register values from R0 to R15, together with the stack dump.\n\n\
-        Then you can get a file with name callstack.cmm, run this file in\n\
-        Trace32 simulator, load the symbol accoring to the indication,\n\
-        the call stack will pop up.\n\n\
-        Trace32 software is avaliable at: https://www.lauterbach.com\n")
+    parser = argparse.ArgumentParser("""
+        parsecallstack.py -c CPUTYPE -f FILENAME\n\
+        This file can get the call stack when you get the log with the
+        register values from R0 to R15, together with the stack dump.\n
+        Then you will get a file with name callstack.cmm, run this file
+        in Trace32, load the symbol accoring to the indication, the call
+        stack will pop up.\n
+        Trace32 software is avaliable at: https://www.lauterbach.com
+        """)
 
     parser.add_argument("-f", "--filename", action = "store",
         help = "log file with registers and stack information")
     parser.add_argument("-c", "--cputype", action = "store",
-        help = "It supports ARM family CPU such as:\n\
-            \"CortexM0\"\n\
-            \"CortexM1\"\n\
-            \"CortexM3\"\n\
-            \"CortexM4\"\n\
-            \"CortexM7\"\n\
-            \"CortexM23\"\n\
-            \"CortexM33\"\n\
-            \"CortexM35P\"\n\
-            \"CortexR5\"\n\
-            \"CortexR7\"\n\
-            \"CortexA5\"\n\
-            \"CortexA7\"\n\
-            ")
-    args = parser.parse_args()
+        help = '''It supports ARM family CPU such as:
+            "CortexM0" "CortexM1"  "CortexM3"  "CortexM4"
+            "CortexM7" "CortexM23" "CortexM33" "CortexM35P"
+            "CortexR5" "CortexR7"  "CortexA5"  "CortexA7"''')
 
-    return args
+    return parser.parse_args()
 
 def get_regs(filename):
 
@@ -87,45 +75,33 @@ def get_stackvalue(filename):
 
 def generate_cmm(cpu, regs, stackvalue):
 
-    dir = os.getcwd()
-    filename = dir + "\\callstack.cmm"
-
+    filename = os.path.join(os.getcwd(), 'callstack.cmm')
     with open(filename, mode='w') as fl:
         # Select the CPU and symbol.
-        fl.write("SYStem.CPU " + cpu + "\n")
+        fl.write("SYStem.CPU %d\n" % cpu)
         fl.write("SYS.M UP\n")
         fl.write("Data.LOAD *\n")
         fl.write("\n")
 
         # Set R0-R15.
         for num in range(len(regs)):
-            fl.write("Register.Set R" + str(num) + " 0x" + regs[num] +'\n')
-        fl.write('\n')
+            fl.write("Register.Set R%d 0x%s\n" % num, regs[num])
+        fl.write("\n")
 
         # Recover the value in stack.
-        sp = int("0x" + stackvalue[0], 16)
+        sp = int(stackvalue[0], 16)
         for num in range(len(stackvalue) - 1):
             address = hex(sp + num * 4)
             value = stackvalue[num + 1]
-            fl.write("Data.Set ZSD:" + str(address) + " %LE %Long 0x"
-                + str(value) +'\n')
-        fl.write('\n')
+            fl.write("Data.Set ZSD:%d %%LE %%Long 0x%d\n" % address, value)
+        fl.write("\n")
 
         # Show the call stack.
-        fl.write("data.view %sYmbol.long " + str(hex(sp)) + '\n')
-        fl.write("frame.view /Locals /Caller" +'\n')
+        fl.write("data.view %%sYmbol.long %x\n" % sp)
+        fl.write("frame.view /Locals /Caller\n")
 
 if __name__ == "__main__":
-    try:
-        args = parse_args()
-        filename = args.filename
-        cpu = args.cputype
-        if (os.path.isfile(filename)):
-            regs = get_regs(filename)
-            stackvalue = get_stackvalue(filename)
-            generate_cmm(cpu, regs, stackvalue)
-        else:
-            print("The file is not exist!")
-
-    except TypeError:
-        print("Please provide the log file!")
+    args = parse_args()
+    regs = get_regs(args.filename)
+    stackvalue = get_stackvalue(args.filename)
+    generate_cmm(args.cpu, regs, stackvalue)
