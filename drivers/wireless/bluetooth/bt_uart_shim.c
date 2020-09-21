@@ -434,7 +434,7 @@ static int hcicollecttask(int argc, FAR char **argv)
 FAR void *bt_uart_shim_getdevice(FAR char *path)
 {
   FAR struct hciuart_state_s *s;
-  int f2;
+  int ret;
 
   /* Get the memory for this shim instance */
 
@@ -448,18 +448,13 @@ FAR void *bt_uart_shim_getdevice(FAR char *path)
 
   s = &g_n->state;
 
-  f2 = open(path, O_RDWR | O_BINARY);
-
-  if (f2 < 0)
+  ret = file_open(&s->f, path, O_RDWR | O_BINARY);
+  if (ret < 0)
     {
       kmm_free(g_n);
       g_n = 0;
       return 0;
     }
-
-  /* Detach the file and give it somewhere to be kept */
-
-  s->h = file_detach(f2, &s->f);
 
   /* Hook the routines in */
 
