@@ -57,8 +57,12 @@ behavior that is closer to normal timing, then you can define
 CONFIG_SIM_WALLTIME=y in your configuration file.  This configuration setting
 will cause the sim target's IDLE loop to delay on each call so that the system
 "timer interrupt" is called at a rate approximately correct for the system
-timer tick rate.  With this definition in the configuration, sleep() behavior
-is more or less normal.
+timer tick rate.  This option can be enabled with CONFIG_SIM_WALLTIME_SIGNAL
+which will drive the entire simulation by using a host timer that ticks at
+CONFIG_USEC_PER_TICK.  This option will no longer deliver 'tick' events
+from Idle task and it will generate them from the host signal handler.
+Another option is to use CONFIG_SIM_WALLTIME_SLEEP which will enable the
+tick events to be delayed from the Idle task by using a host sleep call.
 
 Debugging
 ^^^^^^^^^

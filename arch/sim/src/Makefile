@@ -83,6 +83,7 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
 endif
 
+HOSTCFLAGS += -DCONFIG_USEC_PER_TICK=$(CONFIG_USEC_PER_TICK)
 HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c
 STDLIBS += -lpthread
 ifneq ($(CONFIG_HOST_MACOS),y)
@@ -101,7 +102,6 @@ ifeq ($(CONFIG_SMP),y)
   CSRCS += up_smpsignal.c up_cpuidlestack.c
   REQUIREDOBJS += up_smpsignal$(OBJEXT)
   HOSTCFLAGS += -DCONFIG_SMP=1 -DCONFIG_SMP_NCPUS=$(CONFIG_SMP_NCPUS)
-  HOSTCFLAGS += -DCONFIG_USEC_PER_TICK=$(CONFIG_USEC_PER_TICK)
 ifeq ($(CONFIG_SIM_WALLTIME),y)
   HOSTCFLAGS += -DCONFIG_SIM_WALLTIME=1
 endif

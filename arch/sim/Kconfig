@@ -98,8 +98,16 @@ config SIM_X8664_MICROSOFT
 endchoice
 
 config SIM_WALLTIME
-	bool "Execution simulation in near real-time"
+	bool "Run the simulation at a fixed cadence in near real-time"
 	default n
+
+if SIM_WALLTIME
+choice
+	prompt "Simulation at a fixed cadence in near real-time"
+	default SIM_WALLTIME_SLEEP
+
+config SIM_WALLTIME_SLEEP
+	bool "Execution the simulation in near real-time using host sleep"
 	---help---
 		NOTE:  In order to facility fast testing, the sim target's IDLE loop, by default,
 		calls the system timer "interrupt handler" as fast as possible.  As a result, there
@@ -110,6 +118,18 @@ config SIM_WALLTIME
 		on each call so that the system "timer interrupt" is called at a rate approximately
 		correct for the system timer tick rate.  With this definition in the configuration,
 		sleep() behavior is more or less normal.
+
+config SIM_WALLTIME_SIGNAL
+	bool "Execute the simulation using a host timer"
+	---help---
+		Run the NuttX simulation using a host timer that delivers periodic SIGALRM
+		events at a tick rate specified by CONFIG_USEC_PER_TICK. Enabling this option
+		will generate the timer 'tick' events from the host timer at a fixed rate.
+		The simulated 'tick' events from Idle task are no longer sent.
+
+endchoice
+
+endif
 
 config SIM_NETDEV
 	bool "Simulated Network Device"
