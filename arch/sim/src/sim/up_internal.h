@@ -232,6 +232,7 @@ void  host_free_shmem(void *mem);
 uint64_t host_gettime(bool rtc);
 void host_sleep(uint64_t nsec);
 void host_sleepuntil(uint64_t nsec);
+int host_settimer(int *irq);
 
 /* up_simsmp.c **************************************************************/
 

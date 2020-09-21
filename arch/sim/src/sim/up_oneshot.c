@@ -58,7 +58,8 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure describes the state of the oneshot timer lower-half driver */
+/* This structure describes the state of the oneshot timer lower-half driver.
+ */
 
 struct sim_oneshot_lowerhalf_s
 {
@@ -115,6 +116,33 @@ static const struct oneshot_operations_s g_oneshot_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sim_timer_update
+ *
+ * Description:
+ *   Ths function is called periodically to deliver the tick events to the
+ *   NuttX simulation.
+ *
+ ****************************************************************************/
+
+static void sim_timer_update(void)
+{
+  static const struct timespec tick =
+  {
+    .tv_sec  = 0,
+    .tv_nsec = NSEC_PER_TICK,
+  };
+
+  FAR sq_entry_t *entry;
+
+  clock_timespec_add(&g_current, &tick, &g_current);
+
+  for (entry = sq_peek(&g_oneshot_list); entry; entry = sq_next(entry))
+    {
+      sim_process_tick(entry);
+    }
+}
 
 /****************************************************************************
  * Name: sim_process_tick
@@ -299,6 +327,28 @@ static int sim_current(FAR struct oneshot_lowerhalf_s *lower,
   return OK;
 }
 
+#ifdef CONFIG_SIM_WALLTIME_SIGNAL
+/****************************************************************************
+ * Name: sim_alarm_handler
+ *
+ * Description:
+ *   The signal handler is called periodically and is used to deliver TICK
+ *   events to the OS.
+ *
+ * Input Parameters:
+ *   sig - the signal number
+ *   si  - the signal information
+ *   old_ucontext - the previous context
+ *
+ ****************************************************************************/
+
+static int sim_alarm_handler(int irq, FAR void *context, FAR void *arg)
+{
+  sim_timer_update();
+  return OK;
+}
+#endif /* CONFIG_SIM_WALLTIME_SIGNAL */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -357,6 +407,17 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
 
 void up_timer_initialize(void)
 {
+#ifdef CONFIG_SIM_WALLTIME_SIGNAL
+  int host_alarm_irq;
+
+  host_settimer(&host_alarm_irq);
+
+  /* Enable the alarm handler and attach the interrupt to the NuttX logic */
+
+  up_enable_irq(host_alarm_irq);
+  irq_attach(host_alarm_irq, sim_alarm_handler, NULL);
+#endif
+
   up_alarm_set_lowerhalf(oneshot_initialize(0, 0));
 }
 
@@ -376,25 +437,15 @@ void up_timer_initialize(void)
 
 void up_timer_update(void)
 {
-  static const struct timespec tick =
-  {
-    .tv_sec  = 0,
-    .tv_nsec = NSEC_PER_TICK,
-  };
+#ifdef CONFIG_SIM_WALLTIME_SLEEP
 
-  FAR sq_entry_t *entry;
-
-  clock_timespec_add(&g_current, &tick, &g_current);
-
-#ifdef CONFIG_SIM_WALLTIME
   /* Wait a bit so that the timing is close to the correct rate. */
 
   host_sleepuntil(g_current.tv_nsec +
     (uint64_t)g_current.tv_sec * NSEC_PER_SEC);
 #endif
 
-  for (entry = sq_peek(&g_oneshot_list); entry; entry = sq_next(entry))
-    {
-      sim_process_tick(entry);
-    }
+#ifndef CONFIG_SIM_WALLTIME_SIGNAL
+  sim_timer_update();
+#endif
 }
