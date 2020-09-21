@@ -107,8 +107,8 @@ static uint16_t setsockopt_event(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
-                                 int level, int option, FAR const void *value,
-                                 socklen_t value_len)
+                                 int level, int option,
+                                 FAR const void *value, socklen_t value_len)
 {
   struct usrsock_request_setsockopt_s req =
   {
@@ -174,7 +174,8 @@ static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
  *
  ****************************************************************************/
 
-int usrsock_setsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
+int usrsock_setsockopt(FAR struct usrsock_conn_s *conn,
+                       int level, int option,
                        FAR const void *value, FAR socklen_t value_len)
 {
   struct usrsock_reqstate_s state =
@@ -192,7 +193,7 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn, int level, int option,
     {
       /* Invalid state or closed by daemon. */
 
-      ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
+      ninfo("usockid=%d; setsockopt() with uninitialized usrsock.\n",
             conn->usockid);
 
       ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
