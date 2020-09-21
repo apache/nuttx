@@ -248,7 +248,7 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     {
       /* Invalid state or closed by daemon. */
 
-      ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
+      ninfo("usockid=%d; recvfrom() with uninitialized usrsock.\n",
             conn->usockid);
 
       ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
