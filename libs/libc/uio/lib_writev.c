@@ -52,9 +52,10 @@
  * Description:
  *   The writev() function is equivalent to write(), except as described
  *   below. The writev() function will gather output data from the 'iovcnt'
- *   buffers specified by the members of the 'iov' array: iov[0], iov[1], ...,
- *   iov[iovcnt-1]. The 'iovcnt' argument is valid if greater than 0 and less
- *   than or equal to IOV_MAX, as defined in limits.h.
+ *   buffers specified by the members of the 'iov' array:
+ *   iov[0], iov[1], ..., iov[iovcnt-1].
+ *   The 'iovcnt' argument is valid if greater than 0 and less than or equal
+ *   to IOV_MAX, as defined in limits.h.
  *
  *   Each iovec entry specifies the base address and length of an area in
  *   memory from which data should be written. The writev() function always
@@ -98,10 +99,6 @@ ssize_t writev(int fildes, FAR const struct iovec *iov, int iovcnt)
   /* Get the current file position in case we have to reset it */
 
   pos = lseek(fildes, 0, SEEK_CUR);
-  if (pos == (off_t)-1)
-    {
-      return ERROR;
-    }
 
   /* Process each entry in the struct iovec array */
 
@@ -126,17 +123,21 @@ ssize_t writev(int fildes, FAR const struct iovec *iov, int iovcnt)
 
               if (nwritten < 0)
                 {
-                  /* Save the errno value */
+                  if (pos != (off_t)-1)
+                    {
+                      /* Save the errno value */
 
-                  int save = get_errno();
+                      int save = get_errno();
 
-                  /* Restore the file position */
+                      /* Restore the file position */
 
-                  lseek(fildes, pos, SEEK_SET);
+                      lseek(fildes, pos, SEEK_SET);
 
-                  /* Restore the errno value */
+                      /* Restore the errno value */
 
-                  set_errno(save);
+                      set_errno(save);
+                    }
+
                   return ERROR;
                 }
 
