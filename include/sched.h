@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <strings.h>
 
 #include <nuttx/sched.h>
 
@@ -90,7 +91,7 @@
 
 /* int CPU_COUNT(FAR const cpu_set_t *set); */
 
-#  define CPU_COUNT(s) sched_cpu_count(s)
+#  define CPU_COUNT(s) popcountl(*s)
 
 /* void CPU_AND(FAR cpu_set_t *destset, FAR const cpu_set_t *srcset1,
  *              FAR const cpu_set_t *srcset2);
