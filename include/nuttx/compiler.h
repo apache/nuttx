@@ -60,8 +60,9 @@
  */
 
 #if __GNUC__ >= 4
-#  define CONFIG_HAVE_BUILTIN_CTZ 1
-#  define CONFIG_HAVE_BUILTIN_CLZ 1
+#  define CONFIG_HAVE_BUILTIN_CTZ      1
+#  define CONFIG_HAVE_BUILTIN_CLZ      1
+#  define CONFIG_HAVE_BUILTIN_POPCOUNT 1
 #endif
 
 /* C++ support */

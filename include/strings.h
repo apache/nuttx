@@ -89,6 +89,10 @@ int flsl(long j);
 int flsll(long long j);
 #endif
 
+unsigned int popcount(unsigned int j);
+unsigned int popcountl(unsigned long j);
+unsigned int popcountll(unsigned long long j);
+
 FAR char *index(FAR const char *s, int c);
 FAR char *rindex(FAR const char *s, int c);
 
