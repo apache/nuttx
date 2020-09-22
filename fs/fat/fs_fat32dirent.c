@@ -2656,6 +2656,11 @@ int fat_finddirentry(FAR struct fat_mountpt_s *fs,
           return -ENOTDIR;
         }
 
+      if (*path == '\0')
+        {
+          return OK;
+        }
+
       /* Get the cluster number of this directory */
 
       cluster =
