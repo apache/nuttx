@@ -75,6 +75,8 @@
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
+#define up_savestate(regs)    up_copystate(regs, (uint32_t *)g_current_regs)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
