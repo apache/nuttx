@@ -44,7 +44,7 @@
 #define NRF52_TIM_SHORTS(d, s, i, e)      ((d)->ops->shorts(d, s, i, e))
 #define NRF52_TIM_COUNT(d)                ((d)->ops->count(d))
 #define NRF52_TIM_SETCC(d, i, cc)         ((d)->ops->setcc(d, i, cc))
-#define NRF52_TIM_GETCC(d, i, cc)         ((d)->ops->setcc(d, i, cc))
+#define NRF52_TIM_GETCC(d, i, cc)         ((d)->ops->getcc(d, i, cc))
 #define NRF52_TIM_SETPRE(d, pre)          ((d)->ops->setpre(d, pre))
 #define NRF52_TIM_SETISR(d, hnd, arg)     ((d)->ops->setisr(d, hnd, arg))
 #define NRF52_TIM_ENABLEINT(d, s)         ((d)->ops->enableint(d, s))
