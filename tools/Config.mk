@@ -317,7 +317,7 @@ endef
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 define ARCHIVE_ADD
-	@echo "AR (add): $(notdir $1) $(2)"
+	@echo "AR (add): ${shell basename $(1)} $(2)"
 	$(Q) $(AR) $1 $(2)
 endef
 
@@ -325,7 +325,7 @@ endef
 # created from scratch
 
 define ARCHIVE
-	@echo "AR (create): $(notdir $1) $(2)"
+	@echo "AR (create): ${shell basename $(1)} $(2)"
 	$(Q) $(RM) $1
 	$(Q) $(AR) $1 $(2)
 endef
