@@ -332,6 +332,15 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
                       fmt++;
                     }
                 }
+              else if (fmt_char(fmt) == 'j')
+                {
+                  /* Same as long long if available. Otherwise, long. */
+#ifdef CONFIG_LIBC_LONG_LONG
+                  modifier = LL_MOD;
+#else
+                  modifier = L_MOD;
+#endif
+                }
               else if (fmt_char(fmt) == 'h' || fmt_char(fmt) == 'H')
                 {
                   modifier = H_MOD;
