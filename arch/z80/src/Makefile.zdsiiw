@@ -140,6 +140,10 @@ export_startup: board$(DELIM)libboard$(LIBEXT) $(STARTUP_OBJS)
 
 depend: .depend
 
+context::
+
+clean_context::
+
 clean:
 	$(Q) if exist board$(DELIM)Makefile ( $(MAKE) -C board clean )
 	$(call DELFILE, nuttx.linkcmd)
