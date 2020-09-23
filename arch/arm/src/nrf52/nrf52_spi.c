@@ -172,8 +172,8 @@ static const struct spi_ops_s g_spi0ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf52_spi_exchange,
 #  else
-  .sendlock          = nrf52_spi_sendblock,
-  .recvblock         = nrf52_spi_recvblock
+  .sndblock          = nrf52_spi_sndblock,
+  .recvblock         = nrf52_spi_recvblock,
 #  endif
 #ifdef CONFIG_SPI_TRIGGER
   .trigger           = nrf52_spi_trigger,
@@ -181,7 +181,7 @@ static const struct spi_ops_s g_spi0ops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = nrf52_spi0register,  /* Provided externally */
 #else
-  .registercallback  = 0,                   /* Not implemented */
+  .registercallback  = NULL,                /* Not implemented */
 #endif
 };
 
@@ -225,8 +225,8 @@ static const struct spi_ops_s g_spi1ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf52_spi_exchange,
 #  else
-  .sendlock          = nrf52_spi_sendblock,
-  .recvblock         = nrf52_spi_recvblock
+  .sndlock           = nrf52_spi_sndblock,
+  .recvblock         = nrf52_spi_recvblock,
 #  endif
 #ifdef CONFIG_SPI_TRIGGER
   .trigger           = nrf52_spi_trigger,
@@ -234,7 +234,7 @@ static const struct spi_ops_s g_spi1ops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = nrf52_spi1register,  /* Provided externally */
 #else
-  .registercallback  = 0,                   /* Not implemented */
+  .registercallback  = NULL,                /* Not implemented */
 #endif
 };
 
@@ -278,8 +278,8 @@ static const struct spi_ops_s g_spi2ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf52_spi_exchange,
 #  else
-  .sendlock          = nrf52_spi_sendblock,
-  .recvblock         = nrf52_spi_recvblock
+  .sndlock           = nrf52_spi_sndblock,
+  .recvblock         = nrf52_spi_recvblock,
 #  endif
 #ifdef CONFIG_SPI_TRIGGER
   .trigger           = nrf52_spi_trigger,
@@ -287,7 +287,7 @@ static const struct spi_ops_s g_spi2ops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = nrf52_spi2register,  /* Provided externally */
 #else
-  .registercallback  = 0,                   /* Not implemented */
+  .registercallback  = NULL,                /* Not implemented */
 #endif
 };
 
@@ -331,8 +331,8 @@ static const struct spi_ops_s g_spi3ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf52_spi_exchange,
 #  else
-  .sendlock          = nrf52_spi_sendblock,
-  .recvblock         = nrf52_spi_recvblock
+  .sndlock           = nrf52_spi_sndblock,
+  .recvblock         = nrf52_spi_recvblock,
 #  endif
 #ifdef CONFIG_SPI_TRIGGER
   .trigger           = nrf52_spi_trigger,
@@ -340,7 +340,7 @@ static const struct spi_ops_s g_spi3ops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = nrf52_spi3register,  /* Provided externally */
 #else
-  .registercallback  = 0,                   /* Not implemented */
+  .registercallback  = NULL,                /* Not implemented */
 #endif
 };
 
@@ -1057,7 +1057,7 @@ static void nrf52_spi_recvblock(FAR struct spi_dev_s *dev,
                                 size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
-  return nrf52_spi_exchange(dev, txbuffer, NULL, nwords);
+  return nrf52_spi_exchange(dev, rxbuffer, NULL, nwords);
 }
 #endif /* CONFIG_SPI_EXCHANGE */
 
