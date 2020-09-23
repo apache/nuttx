@@ -208,6 +208,10 @@ export_startup: board\libboard$(LIBEXT) $(STARTUP_OBJS)
 
 depend: .depend
 
+context::
+
+clean_context::
+
 clean:
 	$(Q) if exist board\Makefile ( $(MAKE) -C board clean )
 	$(call DELFILE, asm_mem.h)

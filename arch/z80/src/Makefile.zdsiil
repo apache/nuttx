@@ -158,6 +158,10 @@ export_startup: board$(DELIM)libboard$(LIBEXT) $(STARTUP_OBJS)
 
 depend: .depend
 
+context::
+
+clean_context::
+
 clean:
 	$(Q) if [ -e board$(DELIM)Makefile ]; then \
 		$(MAKE) -C board clean ; \

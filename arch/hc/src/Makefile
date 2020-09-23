@@ -34,7 +34,7 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
-include chip/Make.defs
+-include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_HC12),y)
 ARCH_SUBDIR = hc12
@@ -164,6 +164,10 @@ endif
 	$(Q) touch $@
 
 depend: .depend
+
+context::
+
+clean_context::
 
 clean:
 ifeq ($(BOARDMAKE),y)

@@ -19,7 +19,7 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
-include chip/Make.defs
+-include chip/Make.defs
 
 COMPILER = ${shell basename "$(CC)"}
 ARCHSRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
@@ -137,6 +137,10 @@ endif
 # Dependencies
 
 depend: .depend
+
+context::
+
+clean_context::
 
 clean:
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)

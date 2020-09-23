@@ -34,7 +34,7 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
-include chip/Make.defs
+-include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_MOR1KX),y)          # OpenRISC mor1kx
 ARCH_SUBDIR = mor1kx
@@ -190,6 +190,10 @@ endif
 	$(Q) touch $@
 
 depend: .depend
+
+context::
+
+clean_context::
 
 clean:
 ifeq ($(BOARDMAKE),y)

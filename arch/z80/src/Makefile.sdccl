@@ -216,6 +216,10 @@ export_startup: board/libboard$(LIBEXT) $(STARTUP_OBJS)
 
 depend: .depend
 
+context::
+
+clean_context::
+
 clean:
 	$(Q) if [ -e board/Makefile ]; then \
 		$(MAKE) -C board clean ; \

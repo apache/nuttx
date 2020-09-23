@@ -53,7 +53,7 @@
 #   CONFIG_BUILD_KERNEL is selected, then applications are not build at all.
 
 CLEANDIRS :=
-CCLEANDIRS := boards $(APPDIR) graphics
+CCLEANDIRS := boards $(APPDIR) graphics $(ARCH_SRC)
 KERNDEPDIRS :=
 USERDEPDIRS :=
 
@@ -77,7 +77,7 @@ ifeq ($(EXTERNALDIR),external)
   KERNDEPDIRS += external
 endif
 
-CONTEXTDIRS = boards fs $(APPDIR)
+CONTEXTDIRS = boards fs $(APPDIR) $(ARCH_SRC)
 CLEANDIRS += pass1
 
 ifeq ($(CONFIG_BUILD_FLAT),y)
