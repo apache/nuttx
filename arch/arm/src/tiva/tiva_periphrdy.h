@@ -49,6 +49,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* We determine if a peripheral is ready by testing a bit (b) in system control
  * register (a).
  */
