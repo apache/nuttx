@@ -163,16 +163,16 @@ define _save_tcb_armv7e-m
   set $tcb.xcp.regs[8] = $r10
   set $tcb.xcp.regs[9] = $r11
   # TODO: EXC_RETURN (protected)
-  set $tcb.xcp.regs[10] = $r0
-  set $tcb.xcp.regs[11] = $r1
-  set $tcb.xcp.regs[12] = $r2
-  set $tcb.xcp.regs[13] = $r3
-  set $tcb.xcp.regs[14] = $r12
-  set $tcb.xcp.regs[15] = $lr
-  set $tcb.xcp.regs[16] = $pc
+  set $tcb.xcp.regs[11] = $r0
+  set $tcb.xcp.regs[12] = $r1
+  set $tcb.xcp.regs[13] = $r2
+  set $tcb.xcp.regs[14] = $r3
+  set $tcb.xcp.regs[15] = $r12
+  set $tcb.xcp.regs[16] = $lr
+  set $tcb.xcp.regs[17] = $pc
   # TODO: xPSR
 
-  set $_pc_reg_idx = 16
+  set $_pc_reg_idx = 17
 end
 
 define _switch_tcb_armv7e-m
@@ -188,13 +188,13 @@ define _switch_tcb_armv7e-m
   set $r10 = $tcb.xcp.regs[8]
   set $r11 = $tcb.xcp.regs[9]
   # TODO: EXC_RETURN (protected)
-  set $r0 = $tcb.xcp.regs[10]
-  set $r1 = $tcb.xcp.regs[11]
-  set $r2 = $tcb.xcp.regs[12]
-  set $r3 = $tcb.xcp.regs[13]
-  set $r12 = $tcb.xcp.regs[14]
-  set $lr = $tcb.xcp.regs[15]
-  set $pc = $tcb.xcp.regs[16]
+  set $r0 = $tcb.xcp.regs[11]
+  set $r1 = $tcb.xcp.regs[12]
+  set $r2 = $tcb.xcp.regs[13]
+  set $r3 = $tcb.xcp.regs[14]
+  set $r12 = $tcb.xcp.regs[15]
+  set $lr = $tcb.xcp.regs[16]
+  set $pc = $tcb.xcp.regs[17]
   # TODO: xPSR
 end
 
