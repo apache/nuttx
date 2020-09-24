@@ -1363,18 +1363,10 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           case TIOCSCTTY:
             {
-              /* Check if the ISIG flag is set in the termios c_lflag to enable
-               * this feature.  This flag is set automatically for a serial console
-               * device.
-               */
+              /* Save the PID of the recipient of the SIGINT signal. */
 
-             if ((dev->tc_lflag & ISIG) != 0)
-               {
-                  /* Save the PID of the recipient of the SIGINT signal. */
-
-                  dev->pid = (pid_t)arg;
-                  DEBUGASSERT((unsigned long)(dev->pid) == arg);
-               }
+              dev->pid = (pid_t)arg;
+              DEBUGASSERT((unsigned long)(dev->pid) == arg);
             }
             break;
 #endif
@@ -1421,17 +1413,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               dev->tc_iflag = termiosp->c_iflag;
               dev->tc_oflag = termiosp->c_oflag;
               dev->tc_lflag = termiosp->c_lflag;
-
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
-              /* If the ISIG flag has been cleared in c_lflag, then un-
-               * register the controlling terminal.
-               */
-
-              if ((dev->tc_lflag & ISIG) == 0)
-                {
-                  dev->pid = (pid_t)-1;
-                }
-#endif
             }
             break;
         }

@@ -373,9 +373,11 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
   int signo = 0;
 
-  /* Check if the SIGINT character is anywhere in the newly received DMA buffer. */
+  /* Check if the SIGINT character is anywhere in the newly received DMA
+   * buffer.
+   */
 
-  if (dev->pid >= 0)
+  if (dev->pid >= 0 && (dev->tc_lflag & ISIG))
     {
       signo = uart_recvchars_signo(dev);
     }
