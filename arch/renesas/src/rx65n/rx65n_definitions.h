@@ -432,7 +432,7 @@
 
 /* Bit: 20: Transmit Descriptor Empty Flag */
 
-#define ETHD_EESR_TDE        (1<20)
+#define ETHD_EESR_TDE        (1 << 20)
 
 /* Ether PSR register */
 
@@ -450,8 +450,8 @@
 
 /* Transmit Interrupt Setting Register's bit */
 
-#define ETHD_TRIMD_TIS        (1)    /* Transmit Interrupt is enabled */
-#define ETHD_TRIMD_TIM        (1<<4) /* Write-back complete interrupt mode */
+#define ETHD_TRIMD_TIS        (1)      /* Transmit Interrupt is enabled */
+#define ETHD_TRIMD_TIM        (1 << 4) /* Write-back complete interrupt mode */
 
 /* Receive Method Control Register's bit */
 
@@ -463,13 +463,13 @@
 
 /* FIFO Depth Register's bit */
 
-#define ETHD_FDR_RFD         (7)     /* Receive FIFO Depth */
-#define ETHD_FDR_TFD         (7<<8)  /* Transmit FIFO Depth */
+#define ETHD_FDR_RFD         (7)       /* Receive FIFO Depth */
+#define ETHD_FDR_TFD         (7 << 8)  /* Transmit FIFO Depth */
 
 /* ETHERC/EDMAC Transmit/Receive Status Copy Enable Register's bit */
 
-#define ETHD_TRSCER_RRFCE     (1<<4)  /* RRF Flag Copy Enable */
-#define ETHD_TRSCER_RMAFCE    (1<<7)  /* RMAF Flag Copy Enable */
+#define ETHD_TRSCER_RRFCE     (1 << 4)  /* RRF Flag Copy Enable */
+#define ETHD_TRSCER_RMAFCE    (1 << 7)  /* RMAF Flag Copy Enable */
 
 /* Broadcast Frame Receive Count Setting Register's field */
 
@@ -477,10 +477,10 @@
 
 /* PHY Interface Register's bit and values */
 
-#define ETH_PIR_MDC              (1)     /* MII/RMII Management Data Clock */
-#define ETH_PIR_MMD              (1<<1)  /* MII/RMII Management Mode */
-#define ETH_PIR_MDO              (1<<2)  /* MII/RMII Management Data-Out */
-#define ETH_PIR_MDI              (1<<3)  /* MII/RMII Management Data-In */
+#define ETH_PIR_MDC              (1)          /* MII/RMII Management Data Clock */
+#define ETH_PIR_MMD              (1 << 1)     /* MII/RMII Management Mode */
+#define ETH_PIR_MDO              (1 << 2)     /* MII/RMII Management Data-Out */
+#define ETH_PIR_MDI              (1 << 3)     /* MII/RMII Management Data-In */
 
 #define ETH_PIR_RESET_ALL        (0x00000000) /* Reset All Flags of PIR */
 #define ETH_PIR_SET_MDC          (0x00000001) /* Setting MDC of PIR */
@@ -593,6 +593,855 @@
 /* StandBy RAM Address */
 
 #define RX65N_SBRAM_BASE  0x000a4000
+
+/* USB Related definitions */
+
+#define RX65N_NUSBHOST   1
+
+/* USB Registers */
+
+/* USB Peripheral base address */
+
+#define RX65N_MSTPCRB_START_STOP_USB    (1 << 19)
+#define RX65N_USB_BASE                  (0x000a0000UL)
+
+/* Different USB registers with corresponding offset */
+
+/* USB System Configuration register and its bit fields */
+
+#define RX65N_USB_SYSCFG                ((volatile short *) (RX65N_USB_BASE + 0x0000UL))
+#define RX65N_USB_SYSCFG_SCKE           (1U << 10)
+#define RX65N_USB_SYSCFG_DCFM           (1U << 6)
+#define RX65N_USB_SYSCFG_DRPD           (1U << 5)
+#define RX65N_USB_SYSCFG_DPRPU          (1U << 4)
+#define RX65N_USB_SYSCFG_USBE           (1U << 0)
+
+#define RX65N_USB_SYSSTS0               ((volatile short *) (RX65N_USB_BASE + 0x0004UL))
+#define USB_FS_JSTS                     (0x0001u)   /* Full-Speed J State */
+#define USB_LNST                        (0x0003u)   /* b1-0: D+, D- line status */
+#define RX65N_USB_SYSSTS0_LNST          (3)
+#define RX65N_USB_SYSSTS0_IDMON         (1U << 2)
+#define RX65N_USB_SYSSTS0_SOFEA         (1U << 5)
+#define RX65N_USB_SYSSTS0_HTACT         (1U << 6)
+#define RX65N_USB_SYSSTS0_OVCMON        (0xc000U)
+
+/* SE1 */
+
+#define RX65N_USB_SYSSTS0_LNST_SE1      (0x3u)
+
+/* Full speed K state */
+
+#define RX65N_USB_SYSSTS0_LNST_FS_KSTS  (0x2u)
+
+/* Full speed J State */
+
+#define RX65N_USB_SYSSTS0_LNST_FS_JSTS  (0x1u)
+
+/* Low speed K state */
+
+#define RX65N_USB_SYSSTS0_LNST_LS_KSTS  (0x2u)
+
+/* Low speed J State */
+
+#define RX65N_USB_SYSSTS0_LNST_LS_JSTS  (0x2u)
+
+/* SE0 */
+
+#define RX65N_USB_SYSSTS0_LNST_SE0      (0x0u)
+
+#define USB_ATTACH                      (0x0040)
+#define USB_ATTACHL                     (0x0041)
+#define USB_ATTACHF                     (0x0042)
+#define USB_DETACH                      (0x0043)
+#define USB_RESUME                      (0x0044)
+#define USB_SUSPEND                     (0x0045)
+
+/* Definitions used to pass on the information from interrupt to worker
+ * function
+ */
+
+#define USB_PROCESS_ATTACHED_INT         (0x0050)
+#define USB_PROCESS_DETACHED_INT         (0x0051)
+#define USB_PROCESS_BRDY_INT             (0x0052)
+#define USB_PROCESS_BEMP_INT             (0x0053)
+#define USB_PROCESS_NRDY_INT             (0x0054)
+#define USB_PROCESS_SACK_INT             (0x0055)
+#define USB_PROCESS_SIGN_INT             (0x0056)
+
+#define USB_UACTON                       (1)
+#define USB_UACTOFF                      (0)
+#define USB_VBON                         (1)
+#define USB_VBOFF                        (0)
+
+#define USB_UNDECID                      (0x0000U) /* Undecided */
+
+/* USB Device State Control register 0 and its bit fields */
+
+#define RX65N_USB_DVSTCTR0                      ((volatile short *) (RX65N_USB_BASE + 0x0008UL))
+#define RX65N_USB_DVSTCTR0_HNPBTOA              (1U << 11)
+#define RX65N_USB_DVSTCTR0_EXICEN               (1U << 10)
+#define RX65N_USB_DVSTCTR0_VBUSEN               (1U << 9)
+#define RX65N_USB_DVSTCTR0_WKUP                 (1U << 8)
+#define RX65N_USB_DVSTCTR0_RWUPE                (1U << 7)
+#define RX65N_USB_DVSTCTR0_USBRST               (1U << 6)
+#define RX65N_USB_DVSTCTR0_RESUME               (1U << 5)
+#define RX65N_USB_DVSTCTR0_UACT                 (1U << 4)
+#define RX65N_USB_DVSTCTR0_RHST                 (0x7U)
+#define USB_RHST                                (RX65N_USB_DVSTCTR0_RHST)
+#define RX65N_USB_DVSTCTR0_SPEED_LOW            (1)
+#define RX65N_USB_DVSTCTR0_SPEED_FULL           (2)
+#define RX65N_USB_DVSTCTR0_RESET_IN_PROGRESS    (4)
+
+/*      USB CFIFO Port Register and its bit fields */
+
+#define RX65N_USB_CFIFO             ((volatile short *) (RX65N_USB_BASE + 0x0014UL))
+
+/*      USB D0FIFO Port Register and its bit fields */
+
+#define RX65N_USB_D0FIFO            ((volatile short *) (RX65N_USB_BASE + 0x0018UL))
+
+/*      USB D1FIFO Port Register and its bit fields */
+
+#define RX65N_USB_D1FIFO            ((volatile short *) (RX65N_USB_BASE + 0x001cUL))
+
+/*      USB CFIFO Port Select Register and its bit fields */
+
+#define RX65N_USB_CFIFOSEL              ((volatile short *) (RX65N_USB_BASE + 0x0020UL))
+#define RX65N_USB_CFIFOSEL_RCNT         (1U << 15)
+#define USB_RCNT                        (RX65N_USB_CFIFOSEL_RCNT)
+#define RX65N_USB_CFIFOSEL_REW          (1U << 14)
+#define RX65N_USB_CFIFOSEL_MBW_8        (0U << 10)
+#define RX65N_USB_CFIFOSEL_MBW_16       (1U << 10)
+#define RX65N_USB_CFIFOSEL_BIGEND       (1U << 8)
+#define RX65N_USB_CFIFOSEL_ISEL         (1U << 5)
+#define USB_ISEL                        (RX65N_USB_CFIFOSEL_ISEL)
+#define RX65N_USB_CFIFOSEL_CURPIPE_MASK (0xfU)
+#define USB_CURPIPE                     (RX65N_USB_CFIFOSEL_CURPIPE_MASK)
+
+/*      USB CFIFO Port Control Register */
+
+#define RX65N_USB_CFIFOCTR              ((volatile short *) (RX65N_USB_BASE + 0x0022UL))
+
+/* Common bit field values for CFIFOCTR, D0FIFOCTR and D1FIFOCTR registers */
+
+#define RX65N_USB_FIFOCTR_BVAL          (1U << 15)
+#define USB_BVAL                        (RX65N_USB_FIFOCTR_BVAL)
+#define RX65N_USB_FIFOCTR_BCLR          (1U << 14)
+#define RX65N_USB_FIFOCTR_FRDY          (1U << 13)
+#define RX65N_USB_FIFOCTR_DTLN          (0xfff)
+
+/*      USB D0FIFO and D1FIFO port select and control registers */
+
+#define RX65N_USB_D0FIFOSEL             ((volatile short *) (RX65N_USB_BASE + 0x0028UL))
+#define RX65N_USB_D0FIFOSEL_MBW_16      (1U << 10)
+#define RX65N_USB_D0FIFOCTR             ((volatile short *) (RX65N_USB_BASE + 0x002aUL))
+#define RX65N_USB_D1FIFOSEL             ((volatile short *) (RX65N_USB_BASE + 0x002cUL))
+#define RX65N_USB_D1FIFOSEL_MBW_16      (1U << 10)
+#define RX65N_USB_D1FIFOCTR             ((volatile short *) (RX65N_USB_BASE + 0x002eUL))
+
+#define RX65N_USB_USING_CFIFO           (0)
+#define RX65N_USB_USING_D0FIFO          (1)
+#define RX65N_USB_USING_D1FIFO          (2)
+
+#define USB_CUSE                        (RX65N_USB_USING_CFIFO)
+#define USB_D0USE                       (RX65N_USB_USING_D0FIFO)
+#define USB_D1USE                       (RX65N_USB_USING_D1FIFO)
+
+#define USB_ERROR                       (0xffUL)
+#define RX65N_USB_FIFO_ERROR            (0xffUL)
+#define USB_TRUE                        (1UL)
+#define USB_FALSE                       (0UL)
+#define USB_YES                         (1UL)
+#define USB_NO                          (0UL)
+
+/* FIFO read / write result */
+
+#define USB_FIFOERROR                       (USB_ERROR)   /* FIFO not ready */
+#define USB_WRITEEND                        (0x0000u)     /* End of write (but packet may not be outputting) */
+#define USB_WRITESHRT                       (0x0001u)     /* End of write (send short packet) */
+#define USB_WRITING                         (0x0002u)     /* Write continues */
+#define USB_READEND                         (0x0000u)     /* End of read */
+#define USB_READSHRT                        (0x0001u)     /* Insufficient (receive short packet) */
+#define USB_READING                         (0x0002u)     /* Read continues */
+#define USB_READOVER                        (0x0003u)     /* Buffer size over */
+
+/* Pipe define table end code */
+
+#define USB_PDTBLEND                        (0xffffu) /* End of table */
+
+/* Transfer status Type */
+
+#define USB_CTRL_END                        (0u)
+#define USB_DATA_NONE                       (1u)
+#define USB_DATA_WAIT                       (2u)
+#define USB_DATA_OK                         (3u)
+#define USB_DATA_SHT                        (4u)
+#define USB_DATA_OVR                        (5u)
+#define USB_DATA_STALL                      (6u)
+#define USB_DATA_ERR                        (7u)
+#define USB_DATA_STOP                       (8u)
+#define USB_DATA_TMO                        (9u)
+#define USB_CTRL_READING                    (17u)
+#define USB_CTRL_WRITING                    (18u)
+#define USB_DATA_READING                    (19u)
+#define USB_DATA_WRITING                    (20u)
+
+/* Utr member (segment) */
+
+#define USB_TRAN_CONT                       (0x00u)
+#define USB_TRAN_END                        (0x80u)
+
+/* USB common bit fields for D0 and D1 FIFO select register */
+
+#define RX65N_USB_DFIFOSEL_RCNT         (1U << 15)
+#define RX65N_USB_DFIFOSEL_REW          (1U << 14)
+#define RX65N_USB_DFIFOSEL_DCLRM        (1U << 13)
+#define RX65N_USB_DFIFOSEL_DREQE        (1U << 12)
+#define RX65N_USB_DFIFOSEL_MBW_8        (0U << 10)
+#define USB_MBW_8                       (RX65N_USB_DFIFOSEL_MBW_8)
+#define RX65N_USB_DFIFOSEL_MBW_16       (1U << 10)
+#define USB_MBW_16                      (RX65N_USB_DFIFOSEL_MBW_16)
+#define USB0_CFIFO_MBW                  (USB_MBW_16)
+#define USB0_D0FIFO_MBW                 (USB_MBW_16)
+#define USB0_D1FIFO_MBW                 (USB_MBW_16)
+#define RX65N_USB_DFIFOSEL_BIGEND       (1U << 8)
+#define RX65N_USB_DFIFOSEL_CURPIPE_MASK (0xf)
+
+/*      USB Interrupt Enable Register 0 and its bit fields      */
+
+#define RX65N_USB_INTENB0               ((volatile short *) (RX65N_USB_BASE + 0x0030UL))
+#define RX65N_USB_INTENB0_BEMPE         (1U << 10)
+#define RX65N_USB_INTENB0_BRDYE         (1U << 8)
+#define RX65N_USB_INTENB0_VBSE          (1U << 15)
+#define RX65N_USB_INTENB0_RSME          (1U << 14)
+#define RX65N_USB_INTENB0_SOFE          (1U << 13)
+#define RX65N_USB_INTENB0_DVSE          (1U << 12)
+#define RX65N_USB_INTENB0_CTRE          (1U << 11)
+#define RX65N_USB_INTENB0_BEMPE         (1U << 10)
+#define RX65N_USB_INTENB0_NRDYE         (1U << 9)
+#define RX65N_USB_INTENB0_BRDYE         (1U << 8)
+
+/*      USB Interrupt Enable Register 1 and its bit fields      */
+
+#define RX65N_USB_INTENB1               ((volatile short *) (RX65N_USB_BASE + 0x0032UL))
+#define RX65N_USB_INTENB1_OVRCRE        (1U << 15)
+#define RX65N_USB_INTENB1_BCHGE         (1U << 14)
+#define RX65N_USB_INTENB1_DTCHE         (1U << 12)
+#define RX65N_USB_INTENB1_ATTCHE        (1U << 11)
+
+#define RX65N_USB_INTENB1_EOFERRE       (1U << 6)
+#define RX65N_USB_INTENB1_SIGNE         (1U << 5)
+#define RX65N_USB_INTENB1_SACKE         (1U << 4)
+
+/*      BRDY Interrupt Enable Register  */
+
+#define RX65N_USB_BRDYENB               ((volatile short *) (RX65N_USB_BASE + 0x0036UL))
+
+/* Bit fields of pipe selection/ control registers. These bit fields are
+ * generic
+ */
+
+#define USB_PIPE1                                       (1)
+#define USB_PIPE2                                       (2)
+#define USB_PIPE3                                       (3)
+#define USB_PIPE4                                       (4)
+#define USB_PIPE5                                       (5)
+#define USB_PIPE6                                       (6)
+#define USB_PIPE7                                       (7)
+#define USB_PIPE8                                       (8)
+#define USB_PIPE9                                       (9)
+#define USB_MIN_PIPE_NO                                 (1u)
+#define USB_MAX_PIPE_NO                                 (9)
+
+/* Details of pipe number for obtaining the pipe */
+
+/* Start Pipe No */
+
+#define USB_MIN_PIPE_NUM        (1u)
+
+/* Max device */
+#define USB_MAXPIPE_BULK        (5u)
+#define USB_MAXPIPE_ISO         (2u)
+#define USB_MAX_PIPE_NUM        (9u)
+
+#define USB_BULK_PIPE_START     (1u)
+#define USB_BULK_PIPE_END       (5u)
+#define USB_INT_PIPE_START      (6u)
+#define USB_INT_PIPE_END        (9u)
+#define USB_ISO_PIPE_START      (1u)
+#define USB_ISO_PIPE_END        (2u)
+
+/* Endpoint Descriptor  Define */
+#define USB_EP_IN                (0x80u)   /* In Endpoint */
+#define USB_EP_OUT               (0x00u)   /* Out Endpoint */
+#define USB_EP_CTRL              (0x00u)
+#define USB_EP_ISO               (0x01u)   /* Isochronous Transfer */
+#define USB_EP_BULK              (0x02u)   /* Bulk Transfer */
+#define USB_EP_INT               (0x03u)   /* Interrupt Transfer */
+
+#define USB_BITSET(x)            ((uint16_t)((uint16_t)1 << (x)))
+
+/* BRDY Interrupt Enable/Status Register */
+
+#define USB_BRDY9               (0x0200u)   /* b9: PIPE9 */
+#define USB_BRDY8               (0x0100u)   /* b8: PIPE8 */
+#define USB_BRDY7               (0x0080u)   /* b7: PIPE7 */
+#define USB_BRDY6               (0x0040u)   /* b6: PIPE6 */
+#define USB_BRDY5               (0x0020u)   /* b5: PIPE5 */
+#define USB_BRDY4               (0x0010u)   /* b4: PIPE4 */
+#define USB_BRDY3               (0x0008u)   /* b3: PIPE3 */
+#define USB_BRDY2               (0x0004u)   /* b2: PIPE2 */
+#define USB_BRDY1               (0x0002u)   /* b1: PIPE1 */
+#define USB_BRDY0               (0x0001u)   /* b1: PIPE0 */
+
+/* NRDY Interrupt Enable/Status Register */
+
+#define USB_NRDY9               (0x0200u)   /* b9: PIPE9 */
+#define USB_NRDY8               (0x0100u)   /* b8: PIPE8 */
+#define USB_NRDY7               (0x0080u)   /* b7: PIPE7 */
+#define USB_NRDY6               (0x0040u)   /* b6: PIPE6 */
+#define USB_NRDY5               (0x0020u)   /* b5: PIPE5 */
+#define USB_NRDY4               (0x0010u)   /* b4: PIPE4 */
+#define USB_NRDY3               (0x0008u)   /* b3: PIPE3 */
+#define USB_NRDY2               (0x0004u)   /* b2: PIPE2 */
+#define USB_NRDY1               (0x0002u)   /* b1: PIPE1 */
+#define USB_NRDY0               (0x0001u)   /* b1: PIPE0 */
+
+/* BEMP Interrupt Enable/Status Register */
+
+#define USB_BEMP9               (0x0200u)   /* b9: PIPE9 */
+#define USB_BEMP8               (0x0100u)   /* b8: PIPE8 */
+#define USB_BEMP7               (0x0080u)   /* b7: PIPE7 */
+#define USB_BEMP6               (0x0040u)   /* b6: PIPE6 */
+#define USB_BEMP5               (0x0020u)   /* b5: PIPE5 */
+#define USB_BEMP4               (0x0010u)   /* b4: PIPE4 */
+#define USB_BEMP3               (0x0008u)   /* b3: PIPE3 */
+#define USB_BEMP2               (0x0004u)   /* b2: PIPE2 */
+#define USB_BEMP1               (0x0002u)   /* b1: PIPE1 */
+#define USB_BEMP0               (0x0001u)   /* b0: PIPE0 */
+
+/* Control Transfer Stage */
+
+#define USB_IDLEST                          (0u)  /* Idle */
+#define USB_SETUPNDC                        (1u)  /* Setup Stage No Data Control */
+#define USB_SETUPWR                         (2u)  /* Setup Stage Control Write */
+#define USB_SETUPRD                         (3u)  /* Setup Stage Control Read */
+#define USB_DATAWR                          (4u)  /* Data Stage Control Write */
+#define USB_DATARD                          (5u)  /* Data Stage Control Read */
+#define USB_STATUSRD                        (6u)  /* Status stage */
+#define USB_STATUSWR                        (7u)  /* Status stage */
+#define USB_SETUPWRCNT                      (17u) /* Setup Stage Control Write */
+#define USB_SETUPRDCNT                      (18u) /* Setup Stage Control Read */
+#define USB_DATAWRCNT                       (19u) /* Data Stage Control Write */
+#define USB_DATARDCNT                       (20u) /* Data Stage Control Read */
+
+#define RX65N_USB_PIPE_ALL                  (0x3ff)
+
+/*      USB NRDY Interrupt Enable Register      */
+
+#define RX65N_USB_NRDYENB                       ((volatile short *) (RX65N_USB_BASE + 0x0038UL))
+
+/*      USB BEMP Interrupt Enable Register      */
+
+#define RX65N_USB_BEMPENB                       ((volatile short *) (RX65N_USB_BASE + 0x003aUL))
+
+/*      USB SOF Output Configuration Register and its bit fields        */
+
+#define RX65N_USB_SOFCFG                ((volatile short *) (RX65N_USB_BASE + 0x003cUL))
+#define RX65N_USB_SOFCFG_TRNENSEL       (1U << 8)
+#define RX65N_USB_SOFCFG_BRDYM          (1U << 6)
+#define USB_SUREQ                       (0x4000u)   /* b14: Send USB request  */
+
+#define RX65N_USB_SOFCFG_EDGESTS        (1U << 4)
+
+/*      USB Interrupt Status Register 0 and its bit fields      */
+
+#define RX65N_USB_INTSTS0               ((volatile short *) (RX65N_USB_BASE + 0x0040UL))
+#define RX65N_USB_INTSTS0_VBINT         (1U << 15)
+#define RX65N_USB_INTSTS0_RESM          (1U << 14)
+#define RX65N_USB_INTSTS0_SOFR          (1U << 13)
+#define RX65N_USB_INTSTS0_DVST          (1U << 12)
+#define USB_DVSQ                        (0x0070u)   /* b6-4: Device state */
+#define RX65N_USB_INTSTS0_CTRT          (1U << 11)
+#define USB_CTSQ                        (0x0007u)   /* b2-0: Control transfer stage */
+#define USB_CS_SQER                     (0x0006u)   /* Sequence error */
+#define USB_CS_WRND                     (0x0005u)   /* Ctrl write nodata status stage */
+#define USB_CS_WRSS                     (0x0004u)   /* Ctrl write status stage */
+#define USB_CS_WRDS                     (0x0003u)   /* Ctrl write data stage */
+#define USB_CS_RDSS                     (0x0002u)   /* Ctrl read status stage */
+#define USB_CS_RDDS                     (0x0001u)   /* Ctrl read data stage */
+#define USB_CS_IDST                     (0x0000u)   /* Idle or setup stage */
+#define USB_DS_SPD_CNFG                 (0x0070u)   /* Suspend Configured */
+#define USB_DS_SPD_ADDR                 (0x0060u)   /* Suspend Address */
+#define USB_DS_SPD_DFLT                 (0x0050u)   /* Suspend Default */
+#define USB_DS_SPD_POWR                 (0x0040u)   /* Suspend Powered */
+#define USB_DS_SUSP                     (0x0040u)   /* Suspend */
+#define USB_DS_CNFG                     (0x0030u)   /* Configured */
+#define USB_DS_ADDS                     (0x0020u)   /* Address */
+#define USB_DS_DFLT                     (0x0010u)   /* Default */
+#define USB_DS_POWR                     (0x0000u)   /* Powered */
+
+#define RX65N_USB_INTSTS0_CTRT          (1U << 11)
+#define RX65N_USB_INTSTS0_BEMP          (1U << 10)
+#define RX65N_USB_INTSTS0_NRDY          (1U << 9)
+#define RX65N_USB_INTSTS0_BRDY          (1U << 8)
+#define RX65N_USB_INTSTS0_VBSTS         (1U << 7)
+#define RX65N_USB_INTSTS0_VALID         (1U << 3)
+#define RX65N_USB_INTSTS0_DVSQ_MASK     (7U << 4)
+#define RX65N_USB_INTSTS0_CTSQ_MASK     (7)
+#define RX65N_USB_INTSTS0_ALL_CLEAR     (0U)
+#define INTSTS0_BIT_VALUES_TO_DETECT    (0x9d00)
+#define USB_DATA_STOP                   (8u)
+#define USB_MIN_PIPE_NO                 (1u)
+#define USB_MAXPIPE_NUM                 (9u)
+#define USB_ACLRM                       (0x0200u)
+#define USB_PID_BUF                     (0x0001u)   /* BUF */
+#define USB_PIPE0                       (0x0u)
+#define USB_PBUSY                       (0x0020u)   /* b5: pipe busy */
+#define USB_TRENB                       (0x0200u)
+#define USB_TRCLR                       (0x0100u)
+#define USB_NULL                        (0x0u)
+#define USB_RSME                        (0x4000u)
+#define USB_RESM                        (0x4000u)   /* b14: Resume interrupt */
+#define USB_VALID                       (0x0008u)   /* b3: Setup packet detect flag */
+#define USB_BMREQUESTTYPETYPE           (0x0060u)   /* b6-5: Type */
+#define USB_CLASS                       (0x0020u)
+#define USB_MBW                         (0x0C00u)   /* b10: Maximum bit width for FIFO access */
+#define USB0_CFIFO_MBW                  (USB_MBW_16)
+#define USB_DATA_ERR                    (7u)
+#define USB_DATA_OVR                    (5u)
+#define USB_PID                         (0x0003u)   /* b1-0: Response PID */
+#define USB_CCPL                        (0x0004u)   /* b2: Enable control transfer complete */
+#define USB_BCLR                        (0x4000u)   /* b14: Buffer clear */
+#define USB_FRDY                        (0x2000u)   /* b13: FIFO ready */
+#define USB_MAXP                        (0x007Fu)   /* b6-0: Maxpacket size of default control pipe */
+#define USB_MXPS                        (0x07FFu)   /* b10-0: Maxpacket size */
+#define USB_WRITESHRT                   (0x0001u)   /* End of write (send short packet) */
+#define USB_WRITING                     (0x0002u)   /* Write continues */
+#define USB0_CFIFO8                     (USB0.CFIFO.BYTE.L)
+#define USB0_D0FIFO8                    (USB0.D0FIFO.BYTE.L)
+#define USB0_D1FIFO8                    (USB0.D1FIFO.BYTE.L)
+#define USB0_CFIFO16                    (USB0.CFIFO.WORD)
+#define USB0_D0FIFO16                   (USB0.D0FIFO.WORD)
+#define USB0_D1FIFO16                   (USB0.D1FIFO.WORD)
+#define USB_WRITEEND                    (0x0000u)     
+#define USB_CTRL_END                    (0u)
+#define USB_BREQUEST                    (0xFF00u)
+#define USB_BRDY0                       (0x0001u)     /* b1: PIPE0 */
+#define USB_READEND                     (0x0000u)     /* End of read */
+#define USB_READSHRT                    (0x0001u)     /* Insufficient (receive short packet) */
+#define USB_READING                     (0x0002u)     /* Read continues */
+#define USB_READOVER                    (0x0003u)     /* Buffer size over */
+#define USB_DTLN                        (0x0FFFu)     /* b11-0: FIFO data length */
+#define USB_VENDOR                      (0x0040u)
+#define USB_WRITE                       (1)
+#define USB_QOVR                        (0xd5)
+#define USB_DIRFIELD                    (0x0010u)   /* Transfer direction select */
+#define USB_DIR_H_OUT                   (0x0010u)
+#define USB_BEMP0                       (0x0001u)   /* b0: PIPE0 */
+#define BEMPSTS_MASK                    (0x03FFu)   /* BEMPSTS Reserved bit mask */
+#define USB_BEMP                        (0x0400u)   /* b10: Buffer empty interrupt */
+#define USB_BUF2FIFO                    (0x0010u)   /* Buffer --> FIFO */
+#define USB_FIFO2BUF                    (0x0000u)
+#define USB_BITSET(x)                   ((uint16_t)((uint16_t)1 << (x)))
+#define USB_READ                        (0)
+#define USB_DATA_STALL                  (6u)
+#define USB_INBUFM                      (0x4000u)   /* b14: IN buffer monitor (Only for PIPE1 to 5) */
+#define USB_DATA_NONE                   (1u)
+#define USB_DATA_OK                     (3u)
+#define USB_DATA_SHT                    (4u)
+#define USB_GS_REMOTEWAKEUP             (0x0002u)
+#define USB_EPNUMFIELD                  (0x000Fu)   /* Endpoint number select */
+#define USB_GS_HALT                     (0x0001u)
+#define USB_GS_SELFPOWERD               (1)
+#define USB_GS_BUSPOWERD                (0)
+#define USB_MAX_EP_NO                   (15u)       /* EP0 EP1 ... EP15 */
+#define USB_ENDPOINT_HALT               (0x0000u)
+#define USB_OVRN                        (0x8000u)   /* b15: Overrun error */
+#define USB_DREQE                       (0x1000u)   /* b12: DREQ output enable */
+
+/*      USB Interrupt Status Register 0 and its bit fields      */
+
+#define RX65N_USB_INTSTS1               ((volatile short *) (RX65N_USB_BASE + 0x0042UL))
+#define RX65N_USB_INTSTS1_OVRCRE        (1U << 15)
+#define RX65N_USB_INTSTS1_BCHG          (1U << 14)
+#define RX65N_USB_INTSTS1_DTCH          (1U << 12)
+#define RX65N_USB_INTSTS1_ATTCH         (1U << 11)
+#define RX65N_USB_INTSTS1_EOFERR        (1U << 6)
+#define RX65N_USB_INTSTS1_SIGN          (1U << 5)
+#define RX65N_USB_INTSTS1_SACK          (1U << 4)
+#define RX65N_USB_INTSTS1_ALL_CLEAR     (0U)
+
+/*      USB DCP Control Register and its bit fields     */
+
+#define RX65N_USB_DCPCTR                ((volatile short *) (RX65N_USB_BASE + 0x0060UL))
+#define RX65N_USB_DCPCTR_BSTS           (1U << 15)
+#define RX65N_USB_DCPCTR_SUREQ          (1U << 14)
+#define RX65N_USB_DCPCTR_SUREQCLR       (1U << 11)
+#define USB_SUREQCLR                    (RX65N_USB_DCPCTR_SUREQCLR)
+#define RX65N_USB_DCPCTR_SQCLR          (1U << 8)
+#define USB_SQCLR                       (RX65N_USB_DCPCTR_SQCLR)
+#define RX65N_USB_DCPCTR_SQSET          (1U << 7)
+#define RX65N_USB_DCPCTR_SQMON          (1U << 6)
+#define RX65N_USB_DCPCTR_PBUSY          (1U << 5)
+#define RX65N_USB_DCPCTR_CCPL           (1U << 2)
+#define RX65N_USB_DCPCTR_PID_MASK       (3UL)
+#define RX65N_USB_DCPCTR_PIDNAK         (0UL)
+#define RX65N_USB_DCPCTR_PIDBUF         (1UL)
+#define RX65N_USB_DCPCTR_PIDSTALL       (2UL)
+#define RX65N_USB_DCPCTR_PIDSTALL2      (3UL)
+
+/*      USB PIPE 1 to 9 Control Registers       */
+
+#define RX65N_USB_PIPE1CTR              ((volatile short *) (RX65N_USB_BASE + 0x0070UL))
+#define RX65N_USB_PIPE2CTR              ((volatile short *) (RX65N_USB_BASE + 0x0072UL))
+#define RX65N_USB_PIPE3CTR              ((volatile short *) (RX65N_USB_BASE + 0x0074UL))
+#define RX65N_USB_PIPE4CTR              ((volatile short *) (RX65N_USB_BASE + 0x0076UL))
+#define RX65N_USB_PIPE5CTR              ((volatile short *) (RX65N_USB_BASE + 0x0078UL))
+#define RX65N_USB_PIPE6CTR              ((volatile short *) (RX65N_USB_BASE + 0x007aUL))
+#define RX65N_USB_PIPE7CTR              ((volatile short *) (RX65N_USB_BASE + 0x007cUL))
+#define RX65N_USB_PIPE8CTR              ((volatile short *) (RX65N_USB_BASE + 0x007eUL))
+#define RX65N_USB_PIPE9CTR              ((volatile short *) (RX65N_USB_BASE + 0x0080UL))
+
+/* USB Pipe 1 to 9 control register bit fields */
+
+#define RX65N_USB_PIPECTR_BSTS          (1U << 15)
+#define RX65N_USB_PIPECTR_INBUFM        (1U << 14)
+#define RX65N_USB_PIPECTR_ATREPM        (1U << 10)
+#define RX65N_USB_PIPECTR_ACLRM         (1U << 9)
+#define RX65N_USB_PIPECTR_SQCLR         (1U << 8)
+#define RX65N_USB_PIPECTR_SQSET         (1U << 7)
+#define RX65N_USB_PIPECTR_SQMON         (1U << 6)
+#define RX65N_USB_PIPECTR_PBUSY         (1U << 5)
+#define RX65N_USB_PIPECTR_PID_MASK      (3)
+#define RX65N_USB_PIPECTR_PIDNAK        (0)
+#define RX65N_USB_PIPECTR_PIDBUF        (1)
+#define RX65N_USB_PIPECTR_PIDSTALL      (2)
+#define RX65N_USB_PIPECTR_PIDSTALL2     (3)
+#define RX65N_USB_PIPECTR_DATA1         (1U << 7)
+#define RX65N_USB_PIPECTR_DATA0         (1U << 8)
+
+/* USB PIPE 1 to 5 (Transaction Counter Enable) and
+ * (Transaction Counter Register) Registers
+ */
+
+#define RX65N_USB_PIPE1TRE              ((volatile short *) (RX65N_USB_BASE + 0x0090UL))
+#define RX65N_USB_PIPE1TRN              ((volatile short *) (RX65N_USB_BASE + 0x0092UL))
+#define RX65N_USB_PIPE2TRE              ((volatile short *) (RX65N_USB_BASE + 0x0094UL))
+#define RX65N_USB_PIPE2TRN              ((volatile short *) (RX65N_USB_BASE + 0x0096UL))
+#define RX65N_USB_PIPE3TRE              ((volatile short *) (RX65N_USB_BASE + 0x0098UL))
+#define RX65N_USB_PIPE3TRN              ((volatile short *) (RX65N_USB_BASE + 0x009aUL))
+#define RX65N_USB_PIPE4TRE              ((volatile short *) (RX65N_USB_BASE + 0x009cUL))
+#define RX65N_USB_PIPE4TRN              ((volatile short *) (RX65N_USB_BASE + 0x009eUL))
+#define RX65N_USB_PIPE5TRE              ((volatile short *) (RX65N_USB_BASE + 0x00a0UL))
+#define RX65N_USB_PIPE5TRN              ((volatile short *) (RX65N_USB_BASE + 0x00a2UL))
+
+/* USB PIPE 1 to 5 Transaction Counter Enable register bit fields       */
+
+#define RX65N_USB_PIPETRE_TRENB         (1U << 9)
+#define RX65N_USB_PIPETRE_TRCLR         (1U << 8)
+
+/*      USB Device Address 0 to 5 Configuration Register */
+
+#define RX65N_USB_DEVADD0               ((volatile short *) (RX65N_USB_BASE + 0x00d0UL))
+#define RX65N_USB_DEVADD1               ((volatile short *) (RX65N_USB_BASE + 0x00d2UL))
+#define RX65N_USB_DEVADD2               ((volatile short *) (RX65N_USB_BASE + 0x00d4UL))
+#define RX65N_USB_DEVADD3               ((volatile short *) (RX65N_USB_BASE + 0x00d6UL))
+#define RX65N_USB_DEVADD4               ((volatile short *) (RX65N_USB_BASE + 0x00d8UL))
+#define RX65N_USB_DEVADD5               ((volatile short *) (RX65N_USB_BASE + 0x00daUL))
+#define RX65N_USB_DEVSPD                (3 << 6)
+
+#define USB_MAXDEVADDR                  (5u)
+#define USB_DEVICE_0                    (0x0000u) /* Device address 0 */
+#define USB_DEVICE_1                    (0x1000u) /* Device address 1 */
+#define USB_DEVICE_2                    (0x2000u) /* Device address 2 */
+#define USB_DEVICE_3                    (0x3000u) /* Device address 3 */
+#define USB_DEVICE_4                    (0x4000u) /* Device address 4 */
+#define USB_DEVICE_5                    (0x5000u) /* Device address 5 */
+#define USB_DEVICE_6                    (0x6000u) /* Device address 6 */
+#define USB_DEVICE_7                    (0x7000u) /* Device address 7 */
+#define USB_DEVICE_8                    (0x8000u) /* Device address 8 */
+#define USB_DEVICE_9                    (0x9000u) /* Device address 9 */
+#define USB_DEVICE_A                    (0xa000u) /* Device address A */
+#define USB_NODEVICE                    (0xf000u) /* No device */
+#define USB_DEVADDRBIT                  (12u)
+
+/* Device Address bit fields    */
+
+#define RX65N_USB_DEVADD_SPEED_LOW      (1U << 6)
+#define RX65N_USB_DEVADD_SPEED_FULL     (2U << 6)
+#define RX65N_USB_DEVADD_SPEED_HIGH     (3U << 6)
+
+/*      USB PHY Cross Point Adjustment Register and its bit fields      */
+
+#define RX65N_USB_PHYSLEW               ((volatile int *) (RX65N_USB_BASE + 0x00f0UL))
+
+/* PHY Cross Point Adjustment, note that Hardware Manual to be
+ * updated(0xe->0x5)
+ */
+#define RX65N_USB_PHYSLEW_SLEW_SLEWR00  (1U << 0)
+#define RX65N_USB_PHYSLEW_SLEW_SLEWR01  (1U << 1)
+#define RX65N_USB_PHYSLEW_SLEW_SLEWF00  (1U << 2)
+#define RX65N_USB_PHYSLEW_SLEW_SLEWF01  (1U << 3)
+
+/* USB Deep Standby USB Transceiver Control/Pin Monitoring Register */
+
+#define RX65N_USB_DPUSR0R               ((volatile int *)(RX65N_USB_BASE + 0x0400UL))
+
+/*      USB Deep Standby USB Suspend/Resume Interrupt Register  */
+
+#define RX65N_USB_DPUSR1R               ((volatile int *)(RX65N_USB_BASE + 0x0404UL))
+
+#define RX65N_USB_BRDYENB               ((volatile short *) (RX65N_USB_BASE + 0x0036UL))
+#define RX65N_USB_NRDYENB               ((volatile short *) (RX65N_USB_BASE + 0x0038UL))
+
+/*      USB BEMP Interrupt Enable Register      */
+
+#define RX65N_USB_BEMPENB               ((volatile short *) (RX65N_USB_BASE + 0x003aUL))
+
+/*      USB Frame Number Register and its bit fields    */
+
+#define RX65N_USB_FRMNUM                ((volatile short *) (RX65N_USB_BASE + 0x004cUL))
+#define RX65N_USB_FRMNUM_OVRN           (1U << 15)
+#define RX65N_USB_FRMNUM_CRCE           (1U << 14)
+#define RX65N_USB_FRMNUM_FRNM_MASK      (0x7ffU)
+
+/*      USB Device State Change Register and its bit fields     */
+
+#define RX65N_USB_DVCHGR                    ((volatile short *) (RX65N_USB_BASE + 0x004eUL))
+
+#define RX65N_USB_PIPESEL                   ((volatile short *) (RX65N_USB_BASE + 0x0064UL))
+#define RX65N_USB_PIPESEL_NO_PIPE           (0x000fUL)
+
+#define RX65N_USB_PIPECFG                   ((volatile short *) (RX65N_USB_BASE + 0x0068UL))
+#define RX65N_USB_PIPECFG_TYPE_MASK         (0xc000)
+#define RX65N_USB_PIPECFG_TYPE_BIT_USED     (0)
+#define RX65N_USB_PIPECFG_TYPE_BULK         (1U << 14)
+#define RX65N_USB_PIPECFG_TYPE_INTERRUPT    (2U << 14)
+#define RX65N_USB_PIPECFG_TYPE_ISOCHRONOUS  (3U << 14)
+#define RX65N_USB_PIPECFG_BFRE              (1U << 10)
+#define RX65N_USB_PIPECFG_DBLB              (1U << 9)
+#define RX65N_USB_PIPECFG_SHTNAK            (1U << 7)
+#define RX65N_USB_PIPECFG_DIR               (1U << 4)
+#define RX65N_USB_PIPECFG_EPNUM_MASK        (0xfU)
+
+#define RX65N_USB_PIPEMAXP                  ((volatile short *) (RX65N_USB_BASE + 0x006cUL))
+#define RX65N_USB_PIPEMAXP_DEVSELMASK       (0xfU << 12)
+#define RX65N_USB_PIPEMAXP_DEVSEL_SHIFT     (12U)
+#define RX65N_USB_PIPEMAXP_MXPSMASK         (0x1ff)
+
+#define RX65N_USB_PIPEPERI                  ((volatile short *) (RX65N_USB_BASE + 0x006eUL))
+
+/*      USB BRDY Interrupt Status Register      */
+
+#define RX65N_USB_BRDYSTS               ((volatile short *) (RX65N_USB_BASE + 0x0046UL))
+
+/*      USB NRDY Interrupt Status Register      */
+
+#define RX65N_USB_NRDYSTS               ((volatile short *) (RX65N_USB_BASE + 0x0048UL))
+
+/*      USB BEMP Interrupt Status Register      */
+
+#define RX65N_USB_BEMPSTS               ((volatile short *) (RX65N_USB_BASE + 0x004aUL))
+
+#define RX65N_USB_DVSTCTR0              ((volatile short *) (RX65N_USB_BASE + 0x0008UL))
+#define USB_HSMODE                      (0x0003u)   /* Hi-Speed mode */
+#define USB_FSMODE                      (0x0002u)   /* Full-Speed mode */
+#define USB_LSMODE                      (0x0001u)   /* Low-Speed mode */
+#define USB_HSPROC                      (0x0004u)   /* HS handshake processing */
+#define USB_HSCONNECT                   (0x00C0u)   /* Hi-Speed connect */
+#define USB_FSCONNECT                   (0x0080u)   /* Full-Speed connect */
+#define USB_LSCONNECT                   (0x0040u)   /* Low-Speed connect */
+#define USB_NOCONNECT                   (0x0000u)
+
+#define RX65N_USB_DCPCFG                ((volatile short *) (RX65N_USB_BASE + 0x005cUL))
+#define RX65N_USB_DCPCFG_DIR            (1U << 4)
+
+#define RX65N_USB_DCPMAXP               ((volatile short *) (RX65N_USB_BASE + 0x005eUL))
+#define RX65N_USB_DCPMAXP_DEVADDR_SHIFT (12U)
+#define RX65N_USB_DCPMAXP_DEVADDR_MASK  (0xf000U)
+#define RX65N_USB_DCPMAXP_MXPS_MASK     (0x007fU)
+
+#define USB_DCPMAXP                     (64u)
+
+#define RX65N_USB_USBREQ                ((volatile short *) (RX65N_USB_BASE + 0x0054UL))
+
+/*      USB Request Value Register      */
+
+#define RX65N_USB_USBVAL                ((volatile short *) (RX65N_USB_BASE + 0x0056UL))
+
+/*      USB Request Index Register      */
+
+#define RX65N_USB_USBINDX               ((volatile short *) (RX65N_USB_BASE + 0x0058UL))
+
+/*      USB Request Length Register     */
+
+#define RX65N_USB_USBLENG               ((volatile short *) (RX65N_USB_BASE + 0x005aUL))
+
+/* Endpoint Descriptor  Define */
+#define USB_EP_IN                       (0x80u)   /* In Endpoint */
+#define USB_EP_OUT                      (0x00u)   /* Out Endpoint */
+#define USB_EP_ISO                      (0x01u)   /* Isochronous Transfer */
+#define USB_EP_BULK                     (0x02u)   /* Bulk Transfer */
+#define USB_EP_INT                      (0x03u)   /* Interrupt Transfer */
+
+#define USB_PIPE_DIR_IN                 (0u)
+#define USB_PIPE_DIR_OUT                (1u)
+#define USB_PIPE_DIR_MAX                (2u)
+
+#define USB_CFG_PCDC_BULK_IN            (USB_PIPE1)
+#define USB_CFG_PCDC_BULK_OUT           (USB_PIPE2)
+#define USB_CFG_PCDC_INT_IN             (USB_PIPE6)
+
+/* USB pipe number */
+#define USB_PIPE0                       (0x0u)
+
+/* Pipe configuration table define */
+#define USB_EPL                         (6u)        /* Pipe configuration table length */
+#define USB_TYPFIELD                    (0xC000u)   /* Transfer type */
+#define USB_PERIODIC                    (0x8000u)   /* Periodic pipe */
+#define USB_TYPFIELD_ISO                (0xC000u)   /* Isochronous */
+#define USB_TYPFIELD_INT                (0x8000u)   /* Interrupt */
+#define USB_TYPFIELD_BULK               (0x4000u)   /* Bulk */
+#define USB_NOUSE                       (0x0000u)   /* Not configuration */
+#define USB_BFREFIELD                   (0x0400u)   /* Buffer ready interrupt mode select */
+#define USB_BFREON                      (0x0400u)
+#define USB_BFREOFF                     (0x0000u)
+#define USB_DBLBFIELD                   (0x0200u)   /* Double buffer mode select */
+#define USB_CFG_DBLBON                  (0x0200u)
+#define USB_CFG_DBLBOFF                 (0x0000u)
+#define USB_CNTMDFIELD                  (0x0100u)   /* Continuous transfer mode select */
+#define USB_CFG_CNTMDON                 (0x0100u)
+#define USB_CFG_CNTMDOFF                (0x0000u)
+#define USB_CFG_DBLB                    (USB_CFG_DBLBON)
+#define USB_DIR_P_IN                    (0x0010u)   /* PERI IN */
+#define USB_DIR_H_IN                    (0x0000u)
+#define USB_SHTNAKFIELD                 (0x0080u)   /* Transfer end NAK */
+#define USB_DIR_P_OUT                   (0x0000u)   /* PERI OUT */
+#define USB_BRDY                        (0x0100u)   /* b8: Buffer ready interrupt */
+#define BRDYSTS_MASK                    (0x03FFu)   /* BRDYSTS Reserved bit mask */
+#define RX65N_USB_INTSTS0_NRDY          (1U << 9)
+#define RX65N_PIPENUM_WRITE             (1)
+#define RX65N_USB_MAXP                  (64)
+#define RX65N_USBI0_SOURCE              (0x3eu)
+#define RX65N_USBI0_PRIORITY            (0x0f)
+#define RX65N_PHYSLEW_VALUE             (0x5)
+
+#define RX65N_USB_PFKUSB_ENABLED        (1U << 4)
+#define RX65N_USB_PFKUSB_MODE_HOST      (1)
+#define RX65N_USB_INTERRUPT_STATUS_MASK (0x3ffU)
+
+/* Supported USBMCLK frequency for S7G2 and S5D9.  */
+
+#define RX65N_USB_MAIN_OSC_24MHz                     (24000000U)
+#define RX65N_USB_MAIN_OSC_20MHz                     (20000000U)
+#define RX65N_USB_MAIN_OSC_12MHz                     (12000000U)
+
+/* Bit fields */
+
+#define RX65N_USB_SYSSTS0_LNST_J_STATE_FS            (1U)
+#define RX65N_USB_SYSSTS0_LNST_J_STATE_LS            (2U)
+#define RX65N_USB_PLLSTA_PLLLOCK                     (1U << 0)
+#define RX65N_USB_PHYSET_HSEB                        (1U << 15)
+#define RX65N_USB_PHYSET_REPSTART                    (1U << 11)
+#define RX65N_USB_PHYSET_REPSEL                      (1U << 8)
+#define RX65N_USB_PHYSET_CLKSEL_1                    (1U << 5)
+#define RX65N_USB_PHYSET_CLKSEL_0                    (1U << 4)
+#define RX65N_USB_PHYSET_CDPEN                       (1U << 3)
+#define RX65N_USB_PHYSET_PLLRESET                    (1U << 1)
+#define RX65N_USB_PHYSET_DIRPD                       (1U << 0)
+#define RX65N_USB_PIPEBUF_SIZEMASK                   (0x1fU << 10)
+#define RX65N_USB_PIPEBUF_BUFNMBMASK                 (0xffU << 10)
+#define RX65N_USB_PIPEBUF_SHIFT                      (10U)
+
+/* Possibly below are used for differentiating Control/ D0 or D1 pipe... */
+
+#define RX65N_USB_FIFO_D0                            (0UL)
+#define RX65N_USB_FIFO_D1                            (1UL)
+#define RX65N_USB_FIFO_C                             (2UL)
+#define RX65N_USB_DEVADD_UPPHUB_SHIFT                (11U)
+#define RX65N_USB_DEVADD_HUBPORT_SHIFT               (8U)
+#define RX65N_USB_USBMC_VDCEN                        (1U << 7)
+
+/* Define Synergy HCOR command/status bitmaps.  */
+
+#define RX65N_USB_DCP                                (0)
+#define RX65N_USB_DCPCTR_DATA1                       (1U << 7)
+#define RX65N_USB_DCPCTR_DATA0                       (1U << 8)
+
+/* Define Synergy fifo definition.  */
+
+#define RX65N_USB_PIPE0_SIZE                         (256)
+#define RX65N_USB_PIPE_NB_BUFFERS                    (64)
+
+/* Define Synergy static definition.  */
+
+#define RX65N_USB_AVAILABLE_BANDWIDTH                (2304UL)
+
+/* The macro above is used for checking the available bandwidth for periodic
+ * transfers(Isochronous and Interrupt)
+ * Maximum bandwidth is calculated as
+ * {2048byes(2x ISO PIPEs) + 256bytes(4x INT PIPEs)} for high-speed operation
+ */
+#define RX65N_USB_INIT_DELAY                         (1000)
+#define RX65N_USB_RESET_RETRY                        (1000)
+#define RX65N_USB_RESET_DELAY                        (10)
+#define RX65N_USB_PORT_RESET_RETRY                   (50)
+#define RX65N_USB_FORCE_PORT_RESET_RETRY             (50)
+#define RX65N_USB_FORCE_PORT_RESET_DELAY             (1)
+#define RX65N_USB_CHECK_PORT_RESET_RETRY             (500)
+#define RX65N_USB_PORT_RESET_DELAY                   (300)
+#define RX65N_USB_PORT_RESET_RECOVERY_DELAY          (100)
+
+/* Define Synergy initialization values.  */
+
+#define RX65N_USB_COMMAND_STATUS_RESET               (0)
+#define RX65N_USB_INIT_RESET_DELAY                   (10)
+#define RX65N_USB_MAX_BUF_SIZE                       (64)
+#define RX65N_USB_BUF_BLOCK_SIZE                     (64)
+#define RX65N_USB_MAX_BUF_SIZE_PIPE1_to_2_FS         (256)
+#define RX65N_USB_MAX_BUF_SIZE_PIPE3_to_9_FS         (64)
+#define RX65N_USB_MAX_BUF_SIZE_PIPE1_to_2_HS         (1024)
+#define RX65N_USB_MAX_BUF_SIZE_PIPE3_to_5_HS         (512)
+#define RX65N_USB_MAX_BUF_SIZE_PIPE6_to_9_HS         (64)
+#define RX65N_USB_MAX_BUF_NUM                        (135)
+#define RX65N_USB_PIPE1_BUF_START_NUM                (8)
+
+/* Define Synergy FIFO write completion code.  */
+
+#define RX65N_USB_FIFO_WRITING                       (2)
+#define RX65N_USB_FIFO_WRITE_END                     (3)
+#define RX65N_USB_FIFO_WRITE_SHORT                   (4)
+#define RX65N_USB_FIFO_WRITE_DMA                     (5)
+#define RX65N_USB_FIFO_WRITE_ERROR                   (6)
+
+/* Define Synergy FIFO read completion code.  */
+
+#define RX65N_USB_FIFO_READING                       (2)
+#define RX65N_USB_FIFO_READ_END                      (3)
+#define RX65N_USB_FIFO_READ_SHORT                    (4)
+#define RX65N_USB_FIFO_READ_DMA                      (5)
+#define RX65N_USB_FIFO_READ_ERROR                    (6)
+#define RX65N_USB_FIFO_READ_OVER                     (7)
+#define RX65N_USB_ED_BRDY                            (0x00000001U)
+#define RX65N_USB_ED_NRDY                            (0x00000002U)
+#define RX65N_USB_ED_BEMP                            (0x00000004U)
+#define RX65N_USB_ED_EOFERR                          (0x00000010U)
+#define RX65N_USB_ED_SIGN                            (0x00000020U)
+#define RX65N_USB_ED_SACK                            (0x00000040U)
+#define RX65N_USB_ED_TIMEOUT                         (0x00000080U)
+#define RX65N_USB_LPSTS_SUSPENDM                     (1U << 14)
+
+/* Define Synergy Root hub states.  */
+
+#define RX65N_USB_PORT_ENABLED                       (1)
+#define RX65N_USB_PORT_DISABLED                      (0)
+#define RX65N_USB_PORT_INEOFERR                      (3)
+
+#define RX65N_USB_FRMNUM_VAL                         (0x1111111111)
+
+#define USB_INT_BRDY                                 (0x0001u)
+#define USB_BMREQUESTTYPERECIP                       (0x001Fu)   /* b4-0: Recipient */
 
 /* RIIC related definitions */
 

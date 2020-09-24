@@ -610,6 +610,21 @@ config RX65N_RIIC2_RCV_IN_BYTE_UNITS
 	depends on !RX65N_RIIC2_RCV_CONTINUOUS
 	
 endif #RX65N_RIIC2
+
+config RX65N_USBDEV 
+	bool "USB0 Device"
+	default n
+	depends on USBDEV
+
+if RX65N_USBDEV
+
+config RX65N_TEST_INTEP
+	bool "Testing RX65N Interrupt endpoint"
+	default n
+	depends on SERIAL_IFLOWCONTROL && CDCACM_IFLOWCONTROL
+
+endif #RX65N_USBDEV
+
 endmenu # RX65N Peripheral Selections
 endif
 
