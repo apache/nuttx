@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/tiva_ssi.h
  *
  *   Copyright (C) 2009-2010, 2013, 2016 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_TIVA_SSI_H
 #define __ARCH_ARM_SRC_TIVA_TIVA_SSI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -60,15 +60,15 @@ extern "C"
  * Name: tiva_ssibus_initialize
  *
  * Description:
- *   Initialize common parts the selected SPI port.  Initialization of
- *   chip select GPIOs must have been performed by board specific logic
- *   prior to calling this function.  Specifically:  GPIOs should have
- *   been configured for output, and all chip selects disabled.
+ *   Initialize common parts the selected SPI port.  Initialization of chip
+ *   select GPIOs must have been performed by board specific logic prior to
+ *   calling this function.  Specifically:  GPIOs should have been
+ *   configured for output, and all chip selects disabled.
  *
- *   One GPIO, SS (PB2 on the eZ8F091) is reserved as a chip select.  However,
- *   If multiple devices on on the bus, then multiple chip selects will be
- *   required.  Therefore, all GPIO chip management is deferred to board-
- *   specific logic.
+ *   One GPIO, SS (PB2 on the eZ8F091) is reserved as a chip select.
+ *   However, If multiple devices on on the bus, then multiple chip selects
+ *   will be required.  Therefore, all GPIO chip management is deferred to
+ *   board- specific logic.
  *
  * Input Parameters:
  *   Port number (for hardware that has multiple SSI interfaces)
@@ -85,30 +85,32 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port);
  * The external functions, tiva_ssiselect, tiva_ssistatus, and
  * tiva_ssicmddata must be provided by board-specific logic.  These are
  * implementations of the select, status, and cmddata methods of the SPI
- * interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
- * All other methods (including tiva_ssibus_initialize()) are provided by common
+ * interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All
+ * other methods (including tiva_ssibus_initialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *
  *   1. Provide logic in tiva_boardinitialize() to configure SPI chip select
  *      pins.
  *   2. Provide tiva_ssiselect() and tiva_ssistatus() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration, provide
- *      the tiva_ssicmddata() function in your board-specific logic.  This
- *      functions will perform cmd/data selection operations using GPIOs in
- *      the way your board is configured.
+ *      board-specific logic.  These functions will perform chip selection
+ *      and status operations using GPIOs in the way your board is
+ *      configured.
+ *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration,
+ *      provide the tiva_ssicmddata() function in your board-specific logic.
+ *      This functions will perform cmd/data selection operations using
+ *      GPIOs in the way your board is configured.
  *   4. Add a call to tiva_ssibus_initialize() in your low level application
  *      initialization logic
- *   5. The handle returned by tiva_ssibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   5. The handle returned by tiva_ssibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
 struct spi_dev_s;
-void tiva_ssiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void tiva_ssiselect(FAR struct spi_dev_s *dev, uint32_t devid,
+                    bool selected);
 uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 int tiva_ssicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
