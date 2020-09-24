@@ -89,8 +89,8 @@
 #  define _POSIX_SPORADIC_SERVER 1
 #  define _POSIX_THREAD_SPORADIC_SERVER 1
 #else
-#  undef  _POSIX_SPORADIC_SERVER
-#  undef  _POSIX_THREAD_SPORADIC_SERVER
+#  define _POSIX_SPORADIC_SERVER -1
+#  define _POSIX_THREAD_SPORADIC_SERVER -1
 #endif
 
 /* Execution time constants (not supported) */
