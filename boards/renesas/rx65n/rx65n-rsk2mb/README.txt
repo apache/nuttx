@@ -11,35 +11,8 @@ Contents
   - Serial Console
   - LEDs
   - Networking
-  - IPv6 Integration
-  - HTTP Server Integration on IPv4
-  - DHCP Client Integration on IPv4
-  - DHCP Server Integration on IPv4
-  - FTP Server Integration on IPv4
-  - FTP Client Integration on IPv4
-  - TFTP Client Integration on IPv4
-  - Telnet Server Integration on IPv4
-  - Telnet Client Integration on IPv4
-  - Ustream Socket Integration on IPv4
-  - Udgram Socket Integration on IPv4
-  - SMTP Client Integration on IPv4
-  - Raw Socket Integration
-  - Custom User Socket Integration
-  - IGMPv2 Integration
-  - Inherit telnet server Integration
-  - VNC Server Integration
-  - PPPD Integration
-  - HTTP Client Integration
-  - NTP Client Integration
-  - NFS Client Integration
-  - MLD Integration
-  - ICMPv6 AutoConfig Integration
-  - IP Forwarding Integration for IPv4
-  - DNS Name Resolution Integration for IPv4
-  - LINK MONITOR Integration
   - RTC
-  - Standby RAM
-  - File Systems
+  - USB Device
   - Debugging
 
 Board Features
@@ -58,14 +31,6 @@ Board Features
 See the RX65N RSK2MB website for further information about this board:
 
   - https://www.renesas.com/br/en/products/software-tools/boards-and-kits/starter-kits/renesas-starter-kitplus-for-rx65n-2mb.html
-
-Status/Open Issues
-==================
-Ethernet
----------
-1.Observed instability in Link Management, due to difference in hardware design.(No Separate Interrupt line for PHY)
-2.Currently tested only ping and udpblaster application.
-3. Executed long run ping and udpblaster stress test for 12 hrs. Code is able to execute for 12hrs without any breakage.
 
 Serial Console
 ==============
@@ -146,6 +111,15 @@ Ethernet Connections
   P71           ET0_MDIO
   P54           ET0_LINKSTA
   ------         ---------
+  
+USB Device
+-----------
+
+For the RX65N RSK2MB board, to be used as USB Device, the following Jumper settings need to be done
+
+J7     Short Pin 2 & Pin 3
+J16    Short Pin 1 & Pin 2
+
 NuttX Configurations
 --------------------
 The following configurations, need to be enabled for network.
@@ -222,6 +196,25 @@ The following configurations are to be enabled as part of testing RTC examples.
 CONFIG_EXAMPLES_ALARM
 CONFIG_EXAMPLES_PERIODIC
 CONFIG_EXAMPLES_CARRY
+
+USB Device Configurations
+--------------------------
+The following configurations need to be enabled for USB Device
+
+CONFIG_USBDEV
+CONFIG_CDCACM
+CONFIG_STDIO_BUFFER_SIZE=64
+CONFIG_STDIO_LINEBUFFER
+
+USB Device Testing
+------------------------
+The following testing is executed as part of USB Device testing on RX65N target for GRROSE board
+
+echo "This is a test for USB Device" > /dev/ttyACM0
+
+xd 0 0x20000 > /dev/ttyACM0
+
+The output of the commands mentioned above should be seen on the USB Device COM port on teraterm
 
 Debugging
 ==========

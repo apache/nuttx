@@ -104,6 +104,24 @@ void r_ether_pheriperal_enable(void);
 #endif
 
 /****************************************************************************
+ * Name: r_usbdev_port_enable
+ *
+ * Description:
+ *   USB device port settings
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV
+void r_usbdev_port_enable(void);
+#endif
+
+/****************************************************************************
  * Name: sci1_init_port
  *
  * Description:

@@ -43,6 +43,10 @@
 #  include "rx65n_rtc.h"
 #endif
 
+#ifdef CONFIG_CDCACM
+#  include <nuttx/usb/cdcacm.h>
+#endif
+
 #ifdef HAVE_RIIC_DRIVER
 #  include <nuttx/i2c/i2c_master.h>
 #  include "rx65n_riic.h"
@@ -136,6 +140,19 @@ int rx65n_bringup(void)
 
   (void)rx65n_sbram_int();
 #endif
+
+#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_CONSOLE)
+  /* Initialize CDCACM */
+
+  syslog(LOG_INFO, "Initialize CDCACM device\n");
+
+  ret = cdcacm_initialize(0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: cdcacm_initialize failed: %d\n", ret);
+    }
+#endif /* CONFIG_CDCACM & !CONFIG_CDCACM_CONSOLE */
+
 #ifdef HAVE_RIIC_DRIVER
   FAR struct i2c_master_s *i2c;
 

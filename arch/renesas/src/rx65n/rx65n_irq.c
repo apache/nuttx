@@ -849,9 +849,9 @@ void up_enable_irq(int irq)
     }
 
 #ifdef CONFIG_RX65N_PERIB
-  if (irq == RX65N_INTB176_IRQ)
+  if (irq == RX65N_INTB185_IRQ)
     {
-       ICU.IER[16].BIT.IEN0 = 1;
+       ICU.IER[0x17].BIT.IEN1 = 1;
     }
 
 #endif

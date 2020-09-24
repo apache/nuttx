@@ -77,6 +77,8 @@
 #define _00050000_CGC_BCLK_DIV_32           (0x00050000ul) /* x1/32 */
 #define _00060000_CGC_BCLK_DIV_64           (0x00060000ul) /* x1/64 */
 
+#define _00C00000_CGC_PSTOP0_PSTOP1         (0x00c00000)
+
 /* System Clock (ICLK) */
 
 #define _00000000_CGC_ICLK_DIV_1            (0x00000000ul) /* x1 */
@@ -259,6 +261,8 @@
 #define _0D_CGC_PRIORITY_LEVEL13            (0x0du) /* Level 13 */
 #define _0E_CGC_PRIORITY_LEVEL14            (0x0eu) /* Level 14 */
 #define _0F_CGC_PRIORITY_LEVEL15            (0x0fu) /* Level 15 (highest) */
+
+#define _0001_CGC_LOCO_STOP                 (0x1)
 
 /* Main clock oscillator wait time */
 
