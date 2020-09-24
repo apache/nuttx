@@ -37,6 +37,8 @@
  * Included Files
  ****************************************************************************/
 
+#define _FILE_OFFSET_BITS 64
+
 #include <sys/stat.h>
 
 #include <stdbool.h>
