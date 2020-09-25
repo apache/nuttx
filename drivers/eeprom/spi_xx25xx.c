@@ -730,17 +730,17 @@ static ssize_t ee25xx_write(FAR struct file *filep, FAR const char *buffer,
       len = eedev->size - filep->f_pos;
     }
 
-  /* From this point no failure cannot be detected anymore.
-   * The user should verify the write by rereading memory.
-   */
-
-  ret = len; /* save number of bytes written */
-
   ret = ee25xx_semtake(eedev);
   if (ret < 0)
     {
       return ret;
     }
+
+  /* From this point no failure cannot be detected anymore.
+   * The user should verify the write by rereading memory.
+   */
+
+  ret = len; /* save number of bytes written */
 
   /* Writes can't happen in a row like the read does.
    * The EEPROM is made of pages, and write sequences
