@@ -47,6 +47,9 @@
 #  include <nuttx/usb/cdcacm.h>
 #endif
 
+#ifdef HAVE_DTC_DRIVER
+#  include "rx65n_dtc.h"
+#endif
 #ifdef HAVE_RIIC_DRIVER
 #  include <nuttx/i2c/i2c_master.h>
 #  include "rx65n_riic.h"
@@ -141,6 +144,11 @@ int rx65n_bringup(void)
   (void)rx65n_sbram_int();
 #endif
 
+#ifdef HAVE_DTC_DRIVER
+  /* Initialize DTC */
+
+  (void)rx65n_dtc_initialize();
+#endif
 #if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_CONSOLE)
   /* Initialize CDCACM */
 

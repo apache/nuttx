@@ -1607,6 +1607,34 @@
 
 /* End of RIIC related definitions */
 
+/* Start of DTC interface related definitions */
+
+#if defined(CONFIG_RX65N_DTC)
+  #define HAVE_DTC_DRIVER    1
+#endif
+
+#define RX65N_DTC_BASE       (uint32_t)&DTC
+
+#define DTC_DTCCR_OFFSET     (0x0000)  /* DTC Control Register */
+#define DTC_DTCVBR_OFFSET    (0x0004)  /* DTC Vector Base Register */
+#define DTC_DTCADMOD_OFFSET  (0x0008)  /* DTC Address Mode Register */
+#define DTC_DTCST_OFFSET     (0x000C)  /* DTC Control Register */
+#define DTC_DTCSTS_OFFSET    (0x000E)  /* DTC Status Register */
+#define DTC_DTCIBR_OFFSET    (0x0010)  /* DTC Index Table Base Register */
+#define DTC_DTCOR_OFFSET     (0x0014)  /* DTC Operation Register */
+#define DTC_DTCSQE_OFFSET    (0x0016)  /* DTC Sequence Transfer Enable Register */
+#define DTC_DTCDISP_OFFSET   (0x0018)  /* DTC Address Displacement Register */
+
+/* Bits of register DTCCR */
+
+#define DTC_DTCCR_RRS        (1 << 4)  /* DTC Transfer Information Read Skip Enable*/
+
+/* Bits of register DTCST */
+
+#define DTC_DTCST_DTCST      (1 << 0)  /* DTC Transfer Information Read Skip Enable*/
+
+/* End of DTC related defeinitions */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

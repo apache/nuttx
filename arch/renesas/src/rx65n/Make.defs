@@ -66,3 +66,7 @@ endif
 ifeq ($(CONFIG_I2C),y)
 CHIP_CSRCS += rx65n_riic.c
 endif
+
+ifeq ($(CONFIG_RX65N_DTC),y)
+CHIP_CSRCS += rx65n_dtc.c
+endif
