@@ -1067,12 +1067,12 @@ static struct up_dev_s g_uart5priv =
 #endif
       .recv     =
       {
-        .size   = CONFIG_UART5_RXBUFSIZE,
+        .size   = sizeof(g_uart5rxbuffer),
         .buffer = g_uart5rxbuffer,
       },
       .xmit     =
       {
-        .size   = CONFIG_UART5_TXBUFSIZE,
+        .size   = sizeof(g_uart5txbuffer),
         .buffer = g_uart5txbuffer,
       },
 #if defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
@@ -3124,20 +3124,37 @@ static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   if (status & DMA_SCR_HTIE)
     {
-      priv->dev.dmatx.nbytes = priv->dev.dmatx.length / 2;
+      priv->dev.dmatx.nbytes += priv->dev.dmatx.length / 2;
     }
   else if (status & DMA_SCR_TCIE)
     {
-      priv->dev.dmatx.nbytes = priv->dev.dmatx.length;
+      priv->dev.dmatx.nbytes += priv->dev.dmatx.length;
+      if (priv->dev.dmatx.nlength)
+        {
+          /* Set up DMA on next buffer */
+
+          stm32_dmasetup(priv->txdma,
+                         priv->usartbase + STM32_USART_TDR_OFFSET,
+                         (uint32_t) priv->dev.dmatx.nbuffer,
+                         (size_t) priv->dev.dmatx.nlength,
+                         SERIAL_TXDMA_CONTROL_WORD);
+
+          /* Set length for next next completion */
+
+          priv->dev.dmatx.length  = priv->dev.dmatx.nlength;
+          priv->dev.dmatx.nlength = 0;
+
+          /* Start transmission with the callback on DMA completion */
+
+          stm32_dmastart(priv->txdma, up_dma_txcallback, (void *)priv, false);
+
+          return;
+        }
     }
 
   /* Adjust the pointers */
 
   uart_xmitchars_done(&priv->dev);
-
-  /* Kick off the next DMA to keep the channel as busy as possible */
-
-  uart_xmitchars_dma(&priv->dev);
 }
 #endif
 
@@ -3181,10 +3198,24 @@ static void up_dma_send(struct uart_dev_s *dev)
 
   stm32_dmastop(priv->txdma);
 
+  /* Reset the number sent */
+
+  dev->dmatx.nbytes = 0;
+
   /* Flush the contents of the TX buffer into physical memory */
 
   up_clean_dcache((uintptr_t)dev->dmatx.buffer,
                   (uintptr_t)dev->dmatx.buffer + dev->dmatx.length);
+
+  /* Is this a split transfer */
+
+  if (dev->dmatx.nbuffer)
+    {
+      /* Flush the contents of the next TX buffer into physical memory */
+
+      up_clean_dcache((uintptr_t)dev->dmatx.nbuffer,
+                      (uintptr_t)dev->dmatx.nbuffer + dev->dmatx.nlength);
+    }
 
   /* Make use of setup function to update buffer and its length for next transfer */
 
