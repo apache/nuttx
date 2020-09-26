@@ -58,6 +58,12 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
+/* 32bit alignment macros */
+
+#define INT32_ALIGN_MASK    (3)
+#define INT32_ALIGN_DOWN(a) ((a) & ~INT32_ALIGN_MASK)
+#define INT32_ALIGN_UP(a)   (((a) + INT32_ALIGN_MASK) & ~INT32_ALIGN_MASK)
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -103,10 +109,12 @@
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
   size_t alloc_size;
+  size_t tls_size;
 
-  /* Add the size of the TLS information structure and align */
+  /* Add the size of the TLS information structure and align. */
 
-  alloc_size = STACK_ALIGN_UP(stack_size + sizeof(struct tls_info_s));
+  tls_size   = INT32_ALIGN_UP(sizeof(struct tls_info_s));
+  alloc_size = STACK_ALIGN_UP(stack_size + tls_size);
 
 #ifdef CONFIG_TLS_ALIGNED
   /* The allocated stack size must not exceed the maximum possible for the
@@ -117,9 +125,10 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
   if (alloc_size > TLS_MAXSTACK)
     {
       alloc_size = TLS_MAXSTACK;
-      stack_size = alloc_size - sizeof(struct tls_info_s);
     }
 #endif
+
+  stack_size = alloc_size - tls_size;
 
   /* Is there already a stack allocated of a different size? */
 
@@ -209,7 +218,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       /* Initialize the TLS data structure */
 
-      memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
+      memset(tcb->stack_alloc_ptr, 0, tls_size);
 
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a
@@ -227,29 +236,3 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   return ERROR;
 }
-
-/****************************************************************************
- * Name: arm_stack_color
- *
- * Description:
- *   Write a well know value into the stack
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STACK_COLORATION
-void arm_stack_color(FAR void *stackbase, size_t nbytes)
-{
-  /* Take extra care that we do not write outsize the stack boundaries */
-
-  uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 3) & ~3);
-  uintptr_t stkend = (((uintptr_t)stackbase + nbytes) & ~3);
-  size_t    nwords = (stkend - (uintptr_t)stackbase) >> 2;
-
-  /* Set the entire stack to the coloration value */
-
-  while (nwords-- > 0)
-    {
-      *stkptr++ = STACK_COLOR;
-    }
-}
-#endif
