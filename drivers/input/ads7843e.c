@@ -294,19 +294,6 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
 {
   int i;
 
-  /* If there are threads waiting for read data, then signal one of them
-   * that the read data is available.
-   */
-
-  if (priv->nwaiters > 0)
-    {
-      /* After posting this semaphore, we need to exit because the ADS7843E
-       * is no longer available.
-       */
-
-      nxsem_post(&priv->waitsem);
-    }
-
   /* If there are threads waiting on poll() for ADS7843E data to become
    * available, then wake them up now.  NOTE: we wake up all waiting threads
    * because we do not know that they are going to do.  If they all try to
@@ -322,6 +309,19 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
           iinfo("Report events: %02x\n", fds->revents);
           nxsem_post(fds->sem);
         }
+    }
+
+  /* If there are threads waiting for read data, then signal one of them
+   * that the read data is available.
+   */
+
+  if (priv->nwaiters > 0)
+    {
+      /* After posting this semaphore, we need to exit because the ADS7843E
+       * is no longer available.
+       */
+
+      nxsem_post(&priv->waitsem);
     }
 }
 

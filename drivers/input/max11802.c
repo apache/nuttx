@@ -253,19 +253,6 @@ static void max11802_notify(FAR struct max11802_dev_s *priv)
 {
   int i;
 
-  /* If there are threads waiting for read data, then signal one of them
-   * that the read data is available.
-   */
-
-  if (priv->nwaiters > 0)
-    {
-      /* After posting this semaphore, we need to exit because the sample
-       * is no longer available.
-       */
-
-      nxsem_post(&priv->waitsem);
-    }
-
   /* If there are threads waiting on poll() for MAX11802 data to become
    * available, then wake them up now.  NOTE: we wake up all waiting
    * threads because we do not know that they are going to do.  If they
@@ -281,6 +268,19 @@ static void max11802_notify(FAR struct max11802_dev_s *priv)
           iinfo("Report events: %02x\n", fds->revents);
           nxsem_post(fds->sem);
         }
+    }
+
+  /* If there are threads waiting for read data, then signal one of them
+   * that the read data is available.
+   */
+
+  if (priv->nwaiters > 0)
+    {
+      /* After posting this semaphore, we need to exit because the sample
+       * is no longer available.
+       */
+
+      nxsem_post(&priv->waitsem);
     }
 }
 

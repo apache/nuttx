@@ -321,14 +321,14 @@ int pipecommon_close(FAR struct file *filep)
 
           if (--dev->d_nwriters <= 0)
             {
+              /* Inform poll readers that other end closed. */
+
+              pipecommon_pollnotify(dev, POLLHUP);
+
               while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval < 0)
                 {
                   nxsem_post(&dev->d_rdsem);
                 }
-
-              /* Inform poll readers that other end closed. */
-
-              pipecommon_pollnotify(dev, POLLHUP);
             }
         }
 
@@ -474,6 +474,10 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
       nread++;
     }
 
+  /* Notify all poll/select waiters that they can write to the FIFO */
+
+  pipecommon_pollnotify(dev, POLLOUT);
+
   /* Notify all waiting writers that bytes have been removed from the
    * buffer.
    */
@@ -482,10 +486,6 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
     {
       nxsem_post(&dev->d_wrsem);
     }
-
-  /* Notify all poll/select waiters that they can write to the FIFO */
-
-  pipecommon_pollnotify(dev, POLLOUT);
 
   nxsem_post(&dev->d_bfsem);
   pipe_dumpbuffer("From PIPE:", start, nread);
@@ -582,6 +582,12 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
           nwritten++;
           if ((size_t)nwritten >= len)
             {
+              /* Notify all poll/select waiters that they can read from the
+               * FIFO.
+               */
+
+              pipecommon_pollnotify(dev, POLLIN);
+
               /* Yes.. Notify all of the waiting readers that more data is
                * available.
                */
@@ -590,12 +596,6 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                 {
                   nxsem_post(&dev->d_rdsem);
                 }
-
-              /* Notify all poll/select waiters that they can read from the
-               * FIFO.
-               */
-
-              pipecommon_pollnotify(dev, POLLIN);
 
               /* Return the number of bytes written */
 
@@ -611,6 +611,12 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
 
           if (last < nwritten)
             {
+              /* Notify all poll/select waiters that they can read from the
+               * FIFO.
+               */
+
+              pipecommon_pollnotify(dev, POLLIN);
+
               /* Yes.. Notify all of the waiting readers that more data is
                * available.
                */
@@ -619,12 +625,6 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                 {
                   nxsem_post(&dev->d_rdsem);
                 }
-
-              /* Notify all poll/select waiters that they can read from the
-               * FIFO.
-               */
-
-              pipecommon_pollnotify(dev, POLLIN);
             }
 
           last = nwritten;
