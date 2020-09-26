@@ -381,6 +381,12 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
       dev->counter = 0;
     }
 
+#ifdef CONFIG_EVENT_FD_POLL
+  /* Notify all poll/select waiters */
+
+  eventfd_pollnotify(dev, POLLOUT);
+#endif
+
   /* Notify all waiting writers that counter have been decremented */
 
   eventfd_waiter_sem_t *cur_sem = dev->wrsems;
@@ -391,12 +397,6 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
     }
 
   dev->wrsems = NULL;
-
-#ifdef CONFIG_EVENT_FD_POLL
-  /* Notify all poll/select waiters */
-
-  eventfd_pollnotify(dev, POLLOUT);
-#endif
 
   nxsem_post(&dev->exclsem);
   return sizeof(eventfd_t);
@@ -458,6 +458,12 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
 
   dev->counter = new_counter;
 
+#ifdef CONFIG_EVENT_FD_POLL
+  /* Notify all poll/select waiters */
+
+  eventfd_pollnotify(dev, POLLIN);
+#endif
+
   /* Notify all of the waiting readers */
 
   eventfd_waiter_sem_t *cur_sem = dev->rdsems;
@@ -468,12 +474,6 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
     }
 
   dev->rdsems = NULL;
-
-#ifdef CONFIG_EVENT_FD_POLL
-  /* Notify all poll/select waiters */
-
-  eventfd_pollnotify(dev, POLLIN);
-#endif
 
   nxsem_post(&dev->exclsem);
   return sizeof(eventfd_t);

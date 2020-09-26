@@ -181,20 +181,6 @@ static void up_notify(FAR struct up_dev_s *priv)
 {
   int i;
 
-  /* If there are threads waiting for read data, then signal one of them
-   * that the read data is available.
-   */
-
-  iinfo("contact=%d nwaiters=%d\n", priv->sample.contact, priv->nwaiters);
-  if (priv->nwaiters > 0)
-    {
-      /* After posting this semaphore, we need to exit because
-       * the touchscreen is no longer available.
-       */
-
-      nxsem_post(&priv->waitsem);
-    }
-
   /* If there are threads waiting on poll() for touchscreen data to become
    * available, then wake them up now.  NOTE: we wake up all waiting threads
    * because we do not know what they are going to do.  If they all try to
@@ -210,6 +196,20 @@ static void up_notify(FAR struct up_dev_s *priv)
           iinfo("Report events: %02x\n", fds->revents);
           nxsem_post(fds->sem);
         }
+    }
+
+  /* If there are threads waiting for read data, then signal one of them
+   * that the read data is available.
+   */
+
+  iinfo("contact=%d nwaiters=%d\n", priv->sample.contact, priv->nwaiters);
+  if (priv->nwaiters > 0)
+    {
+      /* After posting this semaphore, we need to exit because
+       * the touchscreen is no longer available.
+       */
+
+      nxsem_post(&priv->waitsem);
     }
 }
 
@@ -239,7 +239,9 @@ static int up_sample(FAR struct up_dev_s *priv,
 
       if (sample->contact == CONTACT_UP)
         {
-          /* Next.. no contract.  Increment the ID so that next contact ID will be unique */
+          /* Next.. no contract.  Increment the ID so that next contact ID
+           * will be unique
+           */
 
           priv->sample.contact = CONTACT_NONE;
           priv->id++;

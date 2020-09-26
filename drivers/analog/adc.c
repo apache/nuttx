@@ -487,6 +487,12 @@ static void adc_notify(FAR struct adc_dev_s *dev)
 {
   FAR struct adc_fifo_s *fifo = &dev->ad_recv;
 
+  /* If there are threads waiting on poll() for data to become available,
+   * then wake them up now.
+   */
+
+  adc_pollnotify(dev, POLLIN);
+
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
    */
@@ -495,12 +501,6 @@ static void adc_notify(FAR struct adc_dev_s *dev)
     {
       nxsem_post(&fifo->af_sem);
     }
-
-  /* If there are threads waiting on poll() for data to become available,
-   * then wake them up now.
-   */
-
-  adc_pollnotify(dev, POLLIN);
 }
 
 /****************************************************************************

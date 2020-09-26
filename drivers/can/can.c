@@ -1326,6 +1326,12 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
           fifo->rx_tail = nexttail;
 
+          /* Notify all poll/select waiters that they can read from the
+           * cd_recv buffer
+           */
+
+          can_pollnotify(dev, POLLIN);
+
           sval = 0;
           if (nxsem_get_value(&fifo->rx_sem, &sval) < 0)
             {
@@ -1349,12 +1355,6 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
             }
 
           errcode = OK;
-
-          /* Notify all poll/select waiters that they can read from the
-           * cd_recv buffer
-           */
-
-          can_pollnotify(dev, POLLIN);
         }
 #ifdef CONFIG_CAN_ERRORS
       else
@@ -1471,6 +1471,12 @@ int can_txdone(FAR struct can_dev_s *dev)
 
       can_xmit(dev);
 
+      /* Notify all poll/select waiters that they can write to the cd_xmit
+       * buffer
+       */
+
+      can_pollnotify(dev, POLLOUT);
+
       /* Are there any threads waiting for space in the TX FIFO? */
 
       if (dev->cd_ntxwaiters > 0)
@@ -1484,12 +1490,6 @@ int can_txdone(FAR struct can_dev_s *dev)
           ret = OK;
         }
     }
-
-  /* Notify all poll/select waiters that they can write to the cd_xmit
-   * buffer
-   */
-
-  can_pollnotify(dev, POLLOUT);
 
   return ret;
 }
