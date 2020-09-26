@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/board.h>
+#include <nuttx/sensors/wtgahrs2.h>
 
 #include "sim.h"
 #include "up_internal.h"
@@ -81,6 +82,18 @@ int board_app_initialize(uintptr_t arg)
 
 #ifdef CONFIG_RPTUN
   up_rptun_init();
+#endif
+
+#ifdef CONFIG_SIM_WTGAHRS2_UARTN
+#if CONFIG_SIM_WTGAHRS2_UARTN == 0
+  wtgahrs2_initialize(CONFIG_SIM_UART0_NAME);
+#elif CONFIG_SIM_WTGAHRS2_UARTN == 1
+  wtgahrs2_initialize(CONFIG_SIM_UART1_NAME);
+#elif CONFIG_SIM_WTGAHRS2_UARTN == 2
+  wtgahrs2_initialize(CONFIG_SIM_UART2_NAME);
+#elif CONFIG_SIM_WTGAHRS2_UARTN == 3
+  wtgahrs2_initialize(CONFIG_SIM_UART3_NAME);
+#endif
 #endif
 
   return 0;
