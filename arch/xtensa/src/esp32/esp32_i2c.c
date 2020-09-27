@@ -152,7 +152,7 @@ struct esp32_i2c_priv_s
   uint8_t msgid;               /* Current message ID */
   ssize_t bytes;               /* Processed data bytes */
 
-  uint8_t  cpuint;             /* CPU interrupt assigned to this I2C */
+  int     cpuint;              /* CPU interrupt assigned to this I2C */
 
   uint32_t error;              /* I2C transform error */
 

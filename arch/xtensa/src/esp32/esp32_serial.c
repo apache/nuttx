@@ -168,7 +168,7 @@ struct esp32_dev_s
   const struct esp32_config_s *config; /* Constant configuration */
   uint32_t baud;                       /* Configured baud */
   uint32_t status;                     /* Saved status bits */
-  uint8_t  cpuint;                     /* CPU interrupt assigned to this UART */
+  int      cpuint;                     /* CPU interrupt assigned to this UART */
   uint8_t  parity;                     /* 0=none, 1=odd, 2=even */
   uint8_t  bits;                       /* Number of bits (5-9) */
   bool     stopbits2;                  /* true: Configure with 2 stop bits instead of 1 */
@@ -711,7 +711,7 @@ static void esp32_detach(struct uart_dev_s *dev)
   /* And release the CPU interrupt */
 
   esp32_free_cpuint(priv->cpuint);
-  priv->cpuint = 0xff;
+  priv->cpuint = -1;
 }
 
 /****************************************************************************

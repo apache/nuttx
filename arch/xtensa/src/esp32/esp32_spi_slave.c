@@ -134,7 +134,7 @@ struct esp32_spislv_priv_s
 
   const struct esp32_spislv_config_s *config; /* Port configuration */
 
-  uint32_t         cpuint;      /* SPI interrupt ID */
+  int              cpuint;      /* SPI interrupt ID */
 
   enum spi_mode_e  mode;        /* Actual SPI hardware mode */
   uint8_t          nbits;       /* Actual SPI send/receive bits once transmission */

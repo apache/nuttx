@@ -208,7 +208,7 @@ struct esp32_emac_s
   struct work_s         timeoutwork; /* For TX timeout work to the work queue */
   struct work_s         pollwork;    /* For deferring poll work to the work queue */
 
-  uint32_t              cpuint;      /* SPI interrupt ID */
+  int                   cpuint;      /* SPI interrupt ID */
 
   sq_queue_t            freeb;       /* The free buffer list */
 

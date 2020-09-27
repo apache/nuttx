@@ -233,7 +233,7 @@ static inline void xtensa_disable_all(void)
  *
  ****************************************************************************/
 
-int esp32_alloc_cpuint(uint32_t intmask)
+static int esp32_alloc_cpuint(uint32_t intmask)
 {
   irqstate_t flags;
   uint32_t *freeints;
