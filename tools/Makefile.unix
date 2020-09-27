@@ -355,6 +355,13 @@ clean_context:
 	$(call DELFILE, include/math.h)
 	$(call DELFILE, include/stdarg.h)
 	$(call DELFILE, include/setjmp.h)
+	$(Q) $(DIRUNLINK) include/arch/board
+	$(Q) $(DIRUNLINK) include/arch/chip
+	$(Q) $(DIRUNLINK) include/arch
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)/board/board
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)/board
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)/chip
+	$(Q) $(DIRUNLINK) $(TOPDIR)/drivers/platform
 
 .clean_context: .config
 	+$(Q) $(MAKE) clean_context
@@ -562,13 +569,6 @@ endif
 	$(call DELFILE, .config-e)
 	$(call DELFILE, .gdbinit)
 	$(call DELFILE, .clean_context)
-	$(Q) $(DIRUNLINK) include/arch/board
-	$(Q) $(DIRUNLINK) include/arch/chip
-	$(Q) $(DIRUNLINK) include/arch
-	$(Q) $(DIRUNLINK) $(ARCH_SRC)/board/board
-	$(Q) $(DIRUNLINK) $(ARCH_SRC)/board
-	$(Q) $(DIRUNLINK) $(ARCH_SRC)/chip
-	$(Q) $(DIRUNLINK) $(TOPDIR)/drivers/platform
 	$(Q) $(MAKE) -C tools -f Makefile.host clean
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
