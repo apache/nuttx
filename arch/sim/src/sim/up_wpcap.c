@@ -54,10 +54,6 @@
 #include <syslog.h>
 #include <malloc.h>
 
-#include <netinet/in.h>
-
-#include "up_internal.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -67,6 +63,17 @@
 #else
 #  define WCAP_IPADDR (0)
 #endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This is normally prototyped in up_internal.h.  However, up_internal.h
+ * cannot be included by this file do to collisions between BSD networking
+ * definitions and Windows network definitions.
+ */
+
+void netdriver_setmacaddr(unsigned char *macaddr);
 
 /****************************************************************************
  * Private Types
@@ -150,7 +157,7 @@ static void init_pcap(struct in_addr addr)
           struct in_addr interface_addr;
           interface_addr =
             ((struct sockaddr_in *)interfaces->addresses->addr)->sin_addr;
-          syslog(LOG_INFO, ("init_pcap: with address: %s\n",
+          syslog(LOG_INFO, "init_pcap: with address: %s\n",
                  inet_ntoa(interface_addr));
 
           if (interface_addr.s_addr == addr.s_addr)
@@ -228,7 +235,7 @@ static void set_ethaddr(struct in_addr addr)
                  adapters->PhysicalAddress[2], adapters->PhysicalAddress[3],
                  adapters->PhysicalAddress[4], adapters->PhysicalAddress[5]);
 
-                 netdriver_setmacaddr(adapters->PhysicalAddress);
+              netdriver_setmacaddr(adapters->PhysicalAddress);
               break;
             }
         }
