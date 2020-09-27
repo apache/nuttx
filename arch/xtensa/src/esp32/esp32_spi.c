@@ -134,7 +134,7 @@ struct esp32_spi_priv_s
 
   sem_t            sem_isr;
 
-  uint32_t         cpuint;      /* SPI interrupt ID */
+  int              cpuint;      /* SPI interrupt ID */
 
   uint32_t         frequency;   /* Requested clock frequency */
   uint32_t         actual;      /* Actual clock frequency */

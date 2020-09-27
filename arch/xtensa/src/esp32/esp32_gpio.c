@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_GPIO_IRQ
-static uint8_t g_gpio_cpuint;
+static int g_gpio_cpuint;
 #endif
 
 static const uint8_t g_pin2func[40] =
