@@ -155,7 +155,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               g_current_regs[REG_EPC]     = (uint32_t)lm32_sigdeliver;
               g_current_regs[REG_INT_CTX] = 0;
 
-
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
                */
