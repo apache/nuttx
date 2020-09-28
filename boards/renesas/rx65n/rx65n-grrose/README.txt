@@ -14,6 +14,9 @@ Contents
   - Contents
   - RTC
   - USB Device
+  - RSPI
+  - RIIC
+  - DTC
   - Debugging
   - Debugging
 
@@ -215,6 +218,13 @@ Configure UDP blaster application as mentioned below :
 CONFIG_EXAMPLES_UDPBLASTER_HOSTIP=0x0a4b1801  (10.75.24.1) ------> Gateway IP
 CONFIG_EXAMPLES_UDPBLASTER_NETMASK=0xfffffe00 (255.255.254.0) --------> Netmask
 CONFIG_EXAMPLES_UDPBLASTER_TARGETIP=0x0a4b189b (10.75.24.155) ---------> Target IP
+
+RSPI
+-----------
+
+For GRROSE board only channel 1 can be tested since RSPI channel1 pinout is only brought out as 
+Pin number 2 and 3 in CN4 is used for MOSIB and MISOB respectively.
+
 RTC
 ==========
 
@@ -250,6 +260,44 @@ echo "This is a test for USB Device" > /dev/ttyACM0
 xd 0 0x20000 > /dev/ttyACM0
 
 The output of the commands mentioned above should be seen on the USB Device COM port on teraterm
+
+RSPI Configurations
+--------------------------
+The following configurations need to be enabled for RSPI
+
+CONFIG_SYSTEM_SPITOOL=y
+
+RSPI Testing
+------------------------
+The following testing is executed as part of RSPI testing on RX65N target for GRROSE board
+
+On GRROSE board only channel 1 can be tested since RSPI channel1 pinout is only brought out.
+
+Following command can be used for testing RSPI communication to slave device.
+spi exch -b 0 -x 4 aabbccdd
+where b is bus number and x is Number of word to exchange.
+
+RIIC Configurations
+--------------------------
+The following configurations need to be enabled for RIIC
+
+CONFIG_SYSTEM_I2CTOOL=y
+
+RIIC Testing
+------------------------
+
+On GRROSE board, none of the RIIC channel pins are brought out in the board so not tested for communication.
+
+DTC Configurations
+--------------------------
+The following configurations need to be enabled for DTC.
+
+CONFIG_SYSTEM_SPITOOL=y
+
+DTC Testing
+------------------------
+
+DTC has been tested using RSPI driver.
 
 Debugging
 ==========

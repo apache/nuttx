@@ -357,6 +357,106 @@ inline void sci8_init_port(void)
 #endif
 
 /****************************************************************************
+ * Name: rspi_pinconfig
+ *
+ * Description: RSPI pinconfiguration for channel
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple SPI interfaces)
+ *
+ * Description:
+ *RSPI pin(SCK,MOSI and MISO) configuration
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RSPI
+void rspi_pinconfig(int bus)
+{
+  /* Set RSPI signal ports to peripheral mode */
+
+  switch (bus)
+    {
+      case RX65N_RSPI_CHANNEL0:
+#ifdef CONFIG_RX65N_RSPI0
+
+        /* Configure RSPCKA */
+
+        MPC.PC5PFS.BYTE = 0x0d;
+        PORTC.PMR.BIT.B5 = 1;
+
+        /* Configure MOSIA */
+
+        MPC.PC6PFS.BYTE = 0x0d; /* This config will block SCI8 function */
+        PORTC.PMR.BIT.B6 = 1;
+
+        /* Configure MISOA */
+
+        MPC.PC7PFS.BYTE = 0x0d; /* This config will block SCI8 function */
+        PORTC.PMR.BIT.B7 = 1;
+
+        /* Configure SSLA0 */
+
+        MPC.PC4PFS.BYTE = 0x0d;
+        PORTC.PMR.BIT.B4 = 1;
+#endif
+        break;
+
+      case RX65N_RSPI_CHANNEL1:
+#ifdef CONFIG_RX65N_RSPI1
+
+        /* Configure RSPCKB */
+
+        MPC.PE5PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B5 = 1;
+
+        /* Configure MOSIB */
+
+        MPC.PE6PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B6 = 1;
+
+        /* Configure MISOB */
+
+        MPC.PE7PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B7 = 1;
+
+        /* Configure SSLB0 */
+
+        MPC.PE4PFS.BYTE = 0x0d;
+        PORTE.PMR.BIT.B4 = 1;
+#endif
+        break;
+
+    case RX65N_RSPI_CHANNEL2:
+#ifdef CONFIG_RX65N_RSPI2
+
+        /* Configure RSPCKC */
+
+        MPC.PD3PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B3 = 1;
+
+        /* Configure MOSIC */
+
+        MPC.PD1PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B1 = 1;
+
+        /* Configure MISOC */
+
+        MPC.PD2PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B2 = 1;
+
+        /* Configure SSLC0 */
+
+        MPC.PD4PFS.BYTE = 0x0d;
+        PORTD.PMR.BIT.B4 = 1;
+#endif
+        break;
+
+      default:
+        break;
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: riic0_init_port
  *
  * Description:

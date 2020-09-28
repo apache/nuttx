@@ -13,6 +13,9 @@ Contents
   - Networking
   - RTC
   - USB Device
+  - RSPI
+  - RIIC
+  - DTC
   - Debugging
 
 Board Features
@@ -180,6 +183,16 @@ Configure UDP blaster application as mentioned below :
 CONFIG_EXAMPLES_UDPBLASTER_HOSTIP=0x0a4b1801  (10.75.24.1) ------> Gateway IP
 CONFIG_EXAMPLES_UDPBLASTER_NETMASK=0xfffffe00 (255.255.254.0) --------> Netmask
 CONFIG_EXAMPLES_UDPBLASTER_TARGETIP=0x0a4b189b (10.75.24.155) ---------> Target IP
+
+RSPI
+-----------
+
+For RX65N RSK2MB board, Following pin is configured for all channels in JA3.
+Channel0: Pin number 7 and 8 in JA3 is used for MOSIA and MISOA respectively
+Channel1: Pin number 35 and 36 in JA3 is used for MOSIB and MISOB respectively
+Channel2: Pin number 18 and 19 in JA3 is used for MOSIC and MISOC respectively
+and for enabling these pin need to select DSW-SEL0 by making off SW4-4
+
 RTC
 ==========
 
@@ -215,6 +228,49 @@ echo "This is a test for USB Device" > /dev/ttyACM0
 xd 0 0x20000 > /dev/ttyACM0
 
 The output of the commands mentioned above should be seen on the USB Device COM port on teraterm
+
+RSPI Configurations
+--------------------------
+The following configurations need to be enabled for RSPI
+
+CONFIG_SYSTEM_SPITOOL=y
+
+RSPI Testing
+------------------------
+The following testing is executed as part of RSPI testing on RX65N target for RSK2MB board
+
+On RSK2MB board, all three channels 0, 1 and 2 has been brought out and tested.
+
+Following command can be used for testing RSPI communication to slave device.
+spi exch -b 0 -x 4 aabbccdd
+where b is bus number and x is Number of word to exchange.
+
+RIIC Configurations
+--------------------------
+The following configurations need to be enabled for RIIC.
+
+CONFIG_SYSTEM_I2CTOOL=y
+
+RIIC Testing
+------------------------
+The following testing is executed as part of RIIC testing on RX65N target for RSK2MB board
+
+On RSK2MB board only channel 0 can be tested.
+
+Following command can be used for testing RIIC communication with slave device.
+i2c set -b 0 -a 53 -r 0 10
+where b is bus number, a is the slave address, r is the register address and 10 is the value to be written.
+
+DTC Configurations
+--------------------------
+The following configurations need to be enabled for DTC.
+
+CONFIG_SYSTEM_SPITOOL=y
+
+DTC Testing
+------------------------
+
+DTC has been tested using RSPI driver.
 
 Debugging
 ==========

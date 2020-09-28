@@ -63,6 +63,10 @@ ifeq ($(CONFIG_USBDEV),y)
 CHIP_CSRCS += rx65n_usbdev.c
 endif
 
+ifeq ($(CONFIG_RX65N_RSPI),y)
+CHIP_CSRCS += rx65n_rspi.c
+endif
+
 ifeq ($(CONFIG_I2C),y)
 CHIP_CSRCS += rx65n_riic.c
 endif

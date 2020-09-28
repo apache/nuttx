@@ -426,6 +426,74 @@ void up_disable_irq(int irq)
 
 #endif
 #endif
+
+#ifdef CONFIG_RX65N_RSPI0
+  if (irq == RX65N_SPRI0_IRQ)
+    {
+      ICU.IER[0x04].BIT.IEN6 = 0;
+    }
+
+  if (irq == RX65N_SPTI0_IRQ)
+    {
+      ICU.IER[0x04].BIT.IEN7 = 0;
+    }
+
+  if (irq == RX65N_SPEI0_IRQ)
+    {
+      ICU.GENAL0.BIT.EN17 = 0;
+    }
+
+  if (irq == RX65N_SPII0_IRQ)
+    {
+      ICU.GENAL0.BIT.EN16 = 0;
+    }
+#endif
+
+#ifdef CONFIG_RX65N_RSPI1
+  if (irq == RX65N_SPRI1_IRQ)
+    {
+      ICU.IER[0x05].BIT.IEN0 = 0;
+    }
+
+  if (irq == RX65N_SPTI1_IRQ)
+    {
+      ICU.IER[0x05].BIT.IEN1 = 0;
+    }
+
+  if (irq == RX65N_SPEI1_IRQ)
+    {
+      ICU.GENAL0.BIT.EN19 = 0;
+    }
+
+  if (irq == RX65N_SPII1_IRQ)
+    {
+      ICU.GENAL0.BIT.EN18 = 0;
+    }
+#endif
+
+#ifdef CONFIG_RX65N_RSPI2
+  if (irq == RX65N_SPRI2_IRQ)
+    {
+      ICU.IER[13].BIT.IEN4 = 0;
+    }
+
+  if (irq == RX65N_SPTI2_IRQ)
+    {
+      ICU.IER[13].BIT.IEN5 = 0;
+    }
+
+  if (irq == RX65N_SPEI2_IRQ)
+    {
+      ICU.GENAL0.BIT.EN21 = 0;
+    }
+
+  if (irq == RX65N_SPII2_IRQ)
+    {
+      ICU.GENAL0.BIT.EN20 = 0;
+    }
+
+#endif
+
 #ifdef CONFIG_RX65N_RIIC0
   if (irq == RX65N_RIIC0_RXI0_IRQ)
     {
@@ -856,6 +924,74 @@ void up_enable_irq(int irq)
 
 #endif
 #endif
+
+#ifdef CONFIG_RX65N_RSPI0
+  if (irq == RX65N_SPRI0_IRQ)
+    {
+      ICU.IER[0x04].BIT.IEN6 = 1;
+    }
+
+  if (irq == RX65N_SPTI0_IRQ)
+    {
+      ICU.IER[0x04].BIT.IEN7 = 1;
+    }
+
+  if (irq == RX65N_SPEI0_IRQ)
+    {
+      ICU.GENAL0.BIT.EN17 = 1;
+    }
+
+  if (irq == RX65N_SPII0_IRQ)
+    {
+      ICU.GENAL0.BIT.EN16 = 1;
+    }
+#endif
+
+#ifdef CONFIG_RX65N_RSPI1
+  if (irq == RX65N_SPRI1_IRQ)
+    {
+      ICU.IER[0x05].BIT.IEN0 = 1;
+    }
+
+  if (irq == RX65N_SPTI1_IRQ)
+    {
+      ICU.IER[0x05].BIT.IEN1 = 1;
+    }
+
+  if (irq == RX65N_SPEI1_IRQ)
+    {
+      ICU.GENAL0.BIT.EN19 = 1;
+    }
+
+  if (irq == RX65N_SPII1_IRQ)
+    {
+      ICU.GENAL0.BIT.EN18 = 1;
+    }
+#endif
+
+#ifdef CONFIG_RX65N_RSPI2
+  if (irq == RX65N_SPRI2_IRQ)
+    {
+      ICU.IER[13].BIT.IEN4 = 1;
+    }
+
+  if (irq == RX65N_SPTI2_IRQ)
+    {
+      ICU.IER[13].BIT.IEN5 = 1;
+    }
+
+  if (irq == RX65N_SPEI2_IRQ)
+    {
+      ICU.GENAL0.BIT.EN21 = 1;
+    }
+
+  if (irq == RX65N_SPII2_IRQ)
+    {
+      ICU.GENAL0.BIT.EN20 = 1;
+    }
+
+#endif
+
 #ifdef CONFIG_RX65N_RIIC0
   if (irq == RX65N_RIIC0_RXI0_IRQ)
     {
