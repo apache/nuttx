@@ -235,8 +235,8 @@ void xtensa_panic(int xptcode, uint32_t *regs)
  * Name: xtensa_user
  *
  * Description:
- *   PANIC if certain User Exceptions are received received.  All values for
- *   EXCCAUSE are listed below (not all generate PANICs):
+ *   PANIC if certain User Exceptions are received.  All values for EXCCAUSE
+ *   are listed below (not all generate PANICs):
  *
  *   0  IllegalInstructionCause
  *      Illegal instruction

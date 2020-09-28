@@ -233,7 +233,7 @@ static inline void xtensa_disable_all(void)
  *
  ****************************************************************************/
 
-int esp32_alloc_cpuint(uint32_t intmask)
+static int esp32_alloc_cpuint(uint32_t intmask)
 {
   irqstate_t flags;
   uint32_t *freeints;
@@ -375,7 +375,7 @@ int esp32_cpuint_initialize(void)
    *   CPU interrupt bit           IRQ number
    *   --------------------------- ---------------------
    *   ESP32_CPUINT_TIMER0      6  XTENSA_IRQ_TIMER0  0
-   *   SP32_CPUINT_SOFTWARE0    7  Not yet defined
+   *   ESP32_CPUINT_SOFTWARE0   7  Not yet defined
    *   ESP32_CPUINT_PROFILING  11  Not yet defined
    *   ESP32_CPUINT_TIMER1     15  XTENSA_IRQ_TIMER1  1
    *   ESP32_CPUINT_TIMER2     16  XTENSA_IRQ_TIMER2  2
@@ -446,7 +446,7 @@ void up_enable_irq(int cpuint)
  *   priority - Priority of the CPU interrupt (1-5)
  *
  * Returned Value:
- *   On success, the allocated level-sensitive, CPU interrupt numbr is
+ *   On success, the allocated level-sensitive, CPU interrupt number is
  *   returned.  A negated errno is returned on failure.  The only possible
  *   failure is that all level-sensitive CPU interrupts have already been
  *   allocated.

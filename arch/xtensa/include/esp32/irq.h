@@ -332,9 +332,9 @@
  * CPU peripheral interrupts can be a assigned to a CPU interrupt using the
  * PRO_*_MAP_REG or APP_*_MAP_REG.  There are a pair of these registers for
  * each peripheral source.  Multiple peripheral interrupt sources can be
- * mapped to the same.
+ * mapped to the same CPU interrupt.
  *
- * The remaining, five, internal CPU interrupts are:
+ * The remaining, six, internal CPU interrupts are:
  *
  *   6   Timer0    - Priority 1
  *   7   Software  - Priority 1
