@@ -63,7 +63,7 @@
 
 #define PIN_FUNC_GPIO                     2
 
-#define PIN_CTRL                          (DR_REG_IO_MUX_BASE +0x00)
+#define PIN_CTRL                          (DR_REG_IO_MUX_BASE + 0x00)
 #define CLK_OUT3                          0xf
 #define CLK_OUT3_S                        8
 #define CLK_OUT2                          0xf
