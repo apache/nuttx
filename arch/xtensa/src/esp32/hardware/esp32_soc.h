@@ -251,28 +251,29 @@
 #define PERIPHS_SPI_ENCRYPT_BASEADDR            DR_REG_SPI_ENCRYPT_BASE
 
 /* Overall memory map */
-#define SOC_DROM_LOW                            0x3f400000
-#define SOC_DROM_HIGH                           0x3f800000
-#define SOC_DRAM_LOW                            0x3ffae000
-#define SOC_DRAM_HIGH                           0x40000000
-#define SOC_IROM_LOW                            0x400d0000
-#define SOC_IROM_HIGH                           0x40400000
-#define SOC_IROM_MASK_LOW                       0x40000000
-#define SOC_IROM_MASK_HIGH                      0x40064f00
-#define SOC_CACHE_PRO_LOW                       0x40070000
-#define SOC_CACHE_PRO_HIGH                      0x40078000
-#define SOC_CACHE_APP_LOW                       0x40078000
-#define SOC_CACHE_APP_HIGH                      0x40080000
-#define SOC_IRAM_LOW                            0x40080000
-#define SOC_IRAM_HIGH                           0x400a0000
-#define SOC_RTC_IRAM_LOW                        0x400c0000
-#define SOC_RTC_IRAM_HIGH                       0x400c2000
-#define SOC_RTC_DRAM_LOW                        0x3ff80000
-#define SOC_RTC_DRAM_HIGH                       0x3ff82000
-#define SOC_RTC_DATA_LOW                        0x50000000
-#define SOC_RTC_DATA_HIGH                       0x50002000
-#define SOC_EXTRAM_DATA_LOW                     0x3f800000
-#define SOC_EXTRAM_DATA_HIGH                    0x3fc00000
+
+#define SOC_DROM_LOW            0x3f400000
+#define SOC_DROM_HIGH           0x3f800000
+#define SOC_DRAM_LOW            0x3ffae000
+#define SOC_DRAM_HIGH           0x40000000
+#define SOC_IROM_LOW            0x400d0000
+#define SOC_IROM_HIGH           0x40400000
+#define SOC_IROM_MASK_LOW       0x40000000
+#define SOC_IROM_MASK_HIGH      0x40064f00
+#define SOC_CACHE_PRO_LOW       0x40070000
+#define SOC_CACHE_PRO_HIGH      0x40078000
+#define SOC_CACHE_APP_LOW       0x40078000
+#define SOC_CACHE_APP_HIGH      0x40080000
+#define SOC_IRAM_LOW            0x40080000
+#define SOC_IRAM_HIGH           0x400a0000
+#define SOC_RTC_IRAM_LOW        0x400c0000
+#define SOC_RTC_IRAM_HIGH       0x400c2000
+#define SOC_RTC_DRAM_LOW        0x3ff80000
+#define SOC_RTC_DRAM_HIGH       0x3ff82000
+#define SOC_RTC_DATA_LOW        0x50000000
+#define SOC_RTC_DATA_HIGH       0x50002000
+#define SOC_EXTRAM_DATA_LOW     0x3f800000
+#define SOC_EXTRAM_DATA_HIGH    0x3fc00000
 
 /* Interrupt hardware source table
  * This table is decided by hardware, don't touch this.
@@ -414,10 +415,10 @@
 
 /* APB_CTRL_PRE_DIV_CNT : R/W ;bitpos:[9:0] ;default: 10'h0 ; */
 
-#define APB_CTRL_PRE_DIV_CNT        0x000003FF
+#define APB_CTRL_PRE_DIV_CNT        0x000003ff
 #define APB_CTRL_PRE_DIV_CNT_M      ((APB_CTRL_PRE_DIV_CNT_V) << \
                                      (APB_CTRL_PRE_DIV_CNT_S))
-#define APB_CTRL_PRE_DIV_CNT_V      0x3FF
+#define APB_CTRL_PRE_DIV_CNT_V      0x3ff
 #define APB_CTRL_PRE_DIV_CNT_S      0
 
 #define I2C_BBPLL_IR_CAL_DELAY      0
@@ -775,7 +776,7 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
 #define FE2_TX_INF_FORCE_PD_V       1
 #define FE2_TX_INF_FORCE_PD_S       9
 
-#define PIN_CTRL                    (DR_REG_IO_MUX_BASE +0x00)
+#define PIN_CTRL                    (DR_REG_IO_MUX_BASE + 0x00)
 
 /****************************************************************************
  * Inline Functions
