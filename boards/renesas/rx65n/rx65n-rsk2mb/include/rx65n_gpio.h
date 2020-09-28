@@ -49,6 +49,16 @@
   #define RX65N_MAC_ADDRH 0x00000000
 #endif
 
+/* RSPI channel number */
+
+#define RX65N_RSPI_CHANNEL0 0
+#define RX65N_RSPI_CHANNEL1 1
+#define RX65N_RSPI_CHANNEL2 2
+
+/* DSW_SEL0 hardware setting in RSK2MB baord accordingly change this macro */
+
+#define DSW_SEL0_ON 0 /* 1 means ON and 0 means OFF*/
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -192,6 +202,23 @@ void sci8_init_port(void);
 #ifdef CONFIG_RX65N_SCI12
 void sci12_init_port(void);
 #endif
+
+/****************************************************************************
+ * Name: rspi_pinconfig
+ *
+ * Description: RSPI pinconfiguration for channel
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple SPI interfaces)
+ *
+ * Description:
+ *RSPI pin(SCK,MOSI and MISO) configuration
+ ****************************************************************************/
+
+#ifdef CONFIG_RX65N_RSPI
+void rspi_pinconfig(int bus);
+#endif
+
 /****************************************************************************
  * Name: riic0_init_port
  *

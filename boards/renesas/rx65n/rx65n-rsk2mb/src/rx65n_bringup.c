@@ -50,6 +50,12 @@
 #ifdef HAVE_DTC_DRIVER
 #  include "rx65n_dtc.h"
 #endif
+
+#ifdef HAVE_RSPI_DRIVER
+#  include <nuttx/spi/spi_transfer.h>
+#  include "rx65n_rspi.h"
+#endif
+
 #ifdef HAVE_RIIC_DRIVER
 #  include <nuttx/i2c/i2c_master.h>
 #  include "rx65n_riic.h"
@@ -57,6 +63,80 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rx65n_rspi_initialize
+ *
+ * Description:
+ *   Initialize and register the RSPI driver.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_RX65N_RSPI
+static void rx65n_rspi_initialize(void)
+{
+  int ret;
+#ifdef CONFIG_RX65N_RSPI0
+  struct spi_dev_s *rspi0;
+#endif
+#ifdef CONFIG_RX65N_RSPI1
+  struct spi_dev_s *rspi1;
+#endif
+#ifdef CONFIG_RX65N_RSPI2
+  struct spi_dev_s *rspi2;
+#endif
+
+#ifdef CONFIG_RX65N_RSPI0
+  rspi0 = rx65n_rspibus_initialize(0);
+  if (!rspi0)
+    {
+      spierr("ERROR: [boot] FAILED to initialize SPI port 0\n");
+    }
+
+#ifdef CONFIG_SPI_DRIVER
+  ret = spi_register(rspi0, 0);
+  if (ret < 0)
+    {
+      spierr("ERROR: [boot] FAILED to register driver for channel 0\n");
+    }
+#endif
+
+#endif
+
+#ifdef CONFIG_RX65N_RSPI1
+  rspi1 = rx65n_rspibus_initialize(1);
+  if (!rspi1)
+    {
+      spierr("ERROR: [boot] FAILED to initialize SPI port 1\n");
+    }
+
+#ifdef CONFIG_SPI_DRIVER
+  ret = spi_register(rspi1, 1);
+  if (ret < 0)
+    {
+      spierr("ERROR: [boot] FAILED to register driver for channel 1\n");
+    }
+#endif
+
+#endif
+
+#ifdef CONFIG_RX65N_RSPI2
+  rspi2 = rx65n_rspibus_initialize(2);
+  if (!rspi2)
+    {
+      spierr("ERROR: [boot] FAILED to initialize SPI port 2\n");
+    }
+
+#ifdef CONFIG_SPI_DRIVER
+  ret = spi_register(rspi2, 2);
+  if (ret < 0)
+    {
+      spierr("ERROR: [boot] FAILED to register driver for channel 2\n");
+    }
+#endif
+
+#endif
+}
+#endif
 
 /****************************************************************************
  * Name: rtc_driver_initialize
@@ -149,6 +229,11 @@ int rx65n_bringup(void)
 
   (void)rx65n_dtc_initialize();
 #endif
+
+#ifdef CONFIG_RX65N_RSPI
+  (void)rx65n_rspi_initialize();
+#endif
+
 #if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_CONSOLE)
   /* Initialize CDCACM */
 
