@@ -152,7 +152,9 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           else
             {
-              /* Set up to vector to the trampoline with interrupts disabled. */
+              /* Set up to vector to the trampoline with interrupts
+               * disabled.
+               */
 
               z80_sigsetup(tcb, sigdeliver, IRQ_STATE());
 
@@ -164,9 +166,10 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
             }
         }
 
-      /* Otherwise, we are (1) signaling a task is not running from an interrupt
-       * handler or (2) we are not in an interrupt handler and the running task
-       * is signalling some non-running task.
+      /* Otherwise, we are (1) signaling a task is not running
+       * from an interrupt handler or (2) we are not in an
+       * interrupt handler and the running task is signalling
+       * some non-running task.
        */
 
       else

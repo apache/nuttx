@@ -136,9 +136,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           else
             {
-              /* Save registers that must be protected while the signal handler
-               * runs. These will be restored by the signal trampoline after
-               * the signal(s) have been delivered.
+              /* Save registers that must be protected while the signal
+               * handler runs. These will be restored by the signal
+               * trampoline after the signal(s) have been delivered.
                */
 
               tcb->xcp.sigdeliver   = sigdeliver;

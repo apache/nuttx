@@ -140,15 +140,18 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               tcb->xcp.sigdeliver       = sigdeliver;
-              //tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
-              //tcb->xcp.saved_cpsr       = CURRENT_REGS[REG_CPSR];
+              /* tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
+               * tcb->xcp.saved_cpsr       = CURRENT_REGS[REG_CPSR];
+               */
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              //CURRENT_REGS[REG_PC]      = (uint32_t)up_sigdeliver;
-              //CURRENT_REGS[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
+              /* CURRENT_REGS[REG_PC]      = (uint32_t)up_sigdeliver;
+               * CURRENT_REGS[REG_CPSR]    = SVC_MODE | PSR_I_BIT |
+               *                             PSR_F_BIT;
+               */
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -173,14 +176,16 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.sigdeliver       = sigdeliver;
           tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
-          //tcb->xcp.saved_cpsr       = tcb->xcp.regs[REG_CPSR];
+
+          /* tcb->xcp.saved_cpsr       = tcb->xcp.regs[REG_CPSR]; */
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-          //tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
-          //tcb->xcp.regs[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
+          /* tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
+           * tcb->xcp.regs[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
+           */
         }
     }
 
