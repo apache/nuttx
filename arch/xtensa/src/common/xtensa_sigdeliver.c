@@ -90,8 +90,9 @@ void xtensa_sig_deliver(void)
   saved_irqcount = rtcb->irqcount - 1;
   DEBUGASSERT(saved_irqcount >= 0);
 
-  /* Now we need call leave_critical_section() repeatedly to get the irqcount
-   * to zero, freeing all global spinlocks that enforce the critical section.
+  /* Now we need to call leave_critical_section() repeatedly to get the
+   * irqcount to zero, freeing all global spinlocks that enforce the critical
+   * section.
    */
 
   do
