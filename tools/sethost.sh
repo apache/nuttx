@@ -17,6 +17,8 @@
 # under the License.
 #
 
+set -e
+
 progname=$0
 host=
 wenv=

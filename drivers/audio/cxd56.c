@@ -1381,7 +1381,9 @@ static void cxd56_dma_int_handler(void)
           FAR struct ap_buffer_s *apb;
 
           apb = (struct ap_buffer_s *) dq_get(&dev->runningq);
+          spin_unlock_irqrestore(flags);
           dev->dev.upper(dev->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
+          flags = spin_lock_irqsave();
         }
 
       spin_unlock_irqrestore(flags);
@@ -1392,6 +1394,8 @@ static void cxd56_dma_int_handler(void)
 
           if (dev->state != CXD56_DEV_STATE_PAUSED)
             {
+              audinfo("DMA_TRANS pendingq=%d \n",
+                     dq_count(&dev->pendingq));
               msg.msg_id = AUDIO_MSG_STOP;
               msg.u.data = 0;
               ret = nxmq_send(dev->mq, (FAR const char *)&msg,
@@ -2978,10 +2982,22 @@ static int cxd56_resume(FAR struct audio_lowerhalf_s *lower)
   if (dev->state == CXD56_DEV_STATE_PAUSED ||
       dev->state == CXD56_DEV_STATE_BUFFERING)
     {
-      dev->state = CXD56_DEV_STATE_STARTED;
-      cxd56_power_on_analog_output(dev);
-      board_external_amp_mute_control(false);
+      if (dev->state == CXD56_DEV_STATE_PAUSED)
+        {
+          dev->state = CXD56_DEV_STATE_STARTED;
+          cxd56_power_on_analog_output(dev);
+          board_external_amp_mute_control(false);
+        }
+      else
+        {
+          /* NOTE: only power on the analog output
+           * when resumed from buffering
+           */
 
+          cxd56_power_on_analog_output(dev);
+        }
+
+      audinfo("START DMA pendingq=%d \n", dq_count(&dev->pendingq));
       ret = cxd56_start_dma(dev);
       if (ret != OK)
         {
@@ -3059,19 +3075,21 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
   flags = spin_lock_irqsave();
   if (dq_count(&dev->pendingq) == 0)
     {
-      /* Underrun occurred, send user message to start buffering */
+      /* Underrun occurred, stop DMA and change state for buffering */
 
       audwarn("Underrun \n");
-      struct audio_msg_s msg;
-      msg.msg_id = AUDIO_MSG_USER;
-      msg.u.data = 0;
-      ret = nxmq_send(dev->mq, (FAR const char *)&msg,
-                      sizeof(msg), CONFIG_CXD56_MSG_PRIO);
-      if (ret != OK)
+
+      spin_unlock_irqrestore(flags);
+      ret = cxd56_stop_dma(dev);
+      flags = spin_lock_irqsave();
+      audwarn("STOP DMA due to underrun \n");
+      if (ret != CXD56_AUDIO_ECODE_OK)
         {
-          auderr("ERROR: nxmq_send for buffering failed (%d)\n", ret);
-          goto exit;
+          auderr("ERROR: Could not stop DMA transfer (%d)\n", ret);
+          dev->running = false;
         }
+
+      dev->state = CXD56_DEV_STATE_BUFFERING;
     }
   else
     {
@@ -3114,7 +3132,9 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
             {
               /* Turn on amplifier */
 
+              spin_unlock_irqrestore(flags);
               board_external_amp_mute_control(false);
+              flags = spin_lock_irqsave();
 
               /* Mask interrupts */
 
@@ -3129,11 +3149,6 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
 
                   cxd56_int_clear(dev->dma_handle, CXD56_DMA_INT_ERR);
                   cxd56_int_clear(dev->dma_handle, CXD56_DMA_INT_SMP);
-
-                  /* Lock interrupt */
-
-                  up_irq_disable();
-                  sched_lock();
 
                   for (timeout = 0; timeout < CXD56_DMA_TIMEOUT; timeout++)
                     {
@@ -3156,11 +3171,6 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
                   /* Start DMA */
 
                   cxd56_set_dma_running(dev->dma_handle, true);
-
-                  /* Unlock interrupt */
-
-                  sched_unlock();
-                  up_irq_enable();
 
                   /* Wait for 1sample tramsfer */
 
@@ -3230,8 +3240,11 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
               struct audio_msg_s msg;
               msg.msg_id = AUDIO_MSG_STOP;
               msg.u.data = 0;
+
+              spin_unlock_irqrestore(flags);
               ret = nxmq_send(dev->mq, (FAR const char *)&msg,
                               sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+              flags = spin_lock_irqsave();
 
               if (ret != OK)
                 {
@@ -3393,18 +3406,6 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
 
       switch (msg.msg_id)
         {
-          case AUDIO_MSG_USER:
-            ret = cxd56_stop_dma(priv);
-            if (ret != CXD56_AUDIO_ECODE_OK)
-              {
-                auderr("ERROR: Could not stop DMA transfer (%d)\n", ret);
-                priv->running = false;
-              }
-
-            priv->state = CXD56_DEV_STATE_BUFFERING;
-            audinfo("Workerthread paused for buffering.\n");
-            break;
-
           case AUDIO_MSG_STOP:
             ret = cxd56_stop_dma(priv);
             if (ret != CXD56_AUDIO_ECODE_OK)

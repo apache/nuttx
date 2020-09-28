@@ -197,6 +197,23 @@ void r_ether_pheriperal_enable(void)
   MPC.P34PFS.BYTE = 0x11u;
   PORT3.PMR.BIT.B4 = 1u;
 }
+
+#endif
+/****************************************************************************
+ * Name: r_usbdev_port_enable
+ *
+ * Description:
+ * USB Device enabling
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV
+void r_usbdev_port_enable(void)
+{
+  /* Set USB0_VBUS pin */
+
+  MPC.P16PFS.BYTE = 0x11;
+  PORT1.PMR.BIT.B6 = 1;
+}
 #endif
 
 /****************************************************************************

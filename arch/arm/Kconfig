@@ -520,9 +520,14 @@ config ARCH_ARM1176JZ
 		the Classic Arm family. It also introduced TrustZone technology to
 		enable secure execution outside of the reach of malicious code.
 
+config ARCH_ARMV6M
+	bool
+	default n
+
 config ARCH_CORTEXM0
 	bool
 	default n
+	select ARCH_ARMV6M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_HARDFAULT_DEBUG
@@ -699,8 +704,8 @@ config ARCH_CORTEXM35P
 
 config ARCH_FAMILY
 	string
-	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM926EJS || ARCH_ARM920T
-	default "armv6-m"	if ARCH_CORTEXM0
+	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ
+	default "armv6-m"	if ARCH_ARMV6M
 	default "armv7-a"	if ARCH_ARMV7A
 	default "armv7-m"	if ARCH_ARMV7M
 	default "armv7-r"	if ARCH_ARMV7R
@@ -884,7 +889,7 @@ config ARM_LWL_CONSOLE
 		added to other ARM architectures be add up_low_console.c to the
 		architecture Make.defs file.
 
-if ARCH_CORTEXM0
+if ARCH_ARMV6M
 source arch/arm/src/armv6-m/Kconfig
 endif
 if ARCH_ARMV7A

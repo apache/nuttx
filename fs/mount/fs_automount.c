@@ -114,9 +114,9 @@ static int automount_findinode(FAR const char *path)
   struct inode_search_s desc;
   int ret;
 
-  /* Make sure that we were given an absolute path */
+  /* Make sure that we were given a path */
 
-  DEBUGASSERT(path != NULL && path[0] == '/');
+  DEBUGASSERT(path != NULL);
 
   /* Get exclusive access to the in-memory inode tree. */
 

@@ -139,21 +139,27 @@ found in the *Obsoleted* repository.
 ARM Cortex-A5
 =============
 
-Atmel SAMA5D2
--------------
+Microchip SAMA5D2
+-----------------
 
--  **Atmel SAMA5D2 Xplained Ultra development board**. This is the port
-   of NuttX to the Atmel SAMA5D2 Xplained Ultra development board. This
-   board features the Atmel SAMA5D27 microprocessor.
+-  **Microchip SAMA5D2 Xplained Ultra development board**. This is the port
+   of NuttX to the Microchip SAMA5D2 Xplained Ultra development board. This
+   board features the Microchip SAMA5D27 microprocessor.
+   See https://www.microchip.com/Developmenttools/ProductDetails/ATSAMA5D2C-XULT
 
-Atmel SAMA5D3 
--------------
+- **Groboards Giant Board**. This is the port of NuttX to the Groboards
+  Giant Board board. This board features the Microchip SAMA5D27C-D1G.
+  See http://groboards.com/giant-board.
 
-There are ports to two Atmel SAMA5D3 boards:
 
--  **Atmel SAMA5D3\ x-EK development boards**. This is the port of NuttX
-   to the Atmel SAMA5D3\ *x*-EK development boards (where *x*\ =1,3,4,
-   or 5). These boards feature the Atmel SAMA5D3\ *x* microprocessors.
+Microchip SAMA5D3
+-----------------
+
+There are ports to two Microchip SAMA5D3 boards:
+
+-  **Microchip SAMA5D3\ x-EK development boards**. This is the port of NuttX
+   to the Microchip SAMA5D3\ *x*-EK development boards (where *x*\ =1,3,4,
+   or 5). These boards feature the Microchip SAMA5D3\ *x* microprocessors.
    Four different SAMA5D3\ *x*-EK kits are available
 
    -  SAMA5D31-EK with the
@@ -237,9 +243,9 @@ There are ports to two Atmel SAMA5D3 boards:
    `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sama5/sama5d3x-ek/README.txt>`__
    file for further information.
 
-**Atmel SAMA5D3 Xplained development board** This is the port of NuttX
-to the Atmel SAMA5D3 Xplained development board. The board features the
-Atmel SAMA5D36 microprocessor. See the `Atmel
+**Microchip SAMA5D3 Xplained development board** This is the port of NuttX
+to the Microchip SAMA5D3 Xplained development board. The board features the
+Microchip SAMA5D36 microprocessor. See the `Microchip
 Website <http://www.atmel.com/devices/sama5d36.aspx>`__ for additional
 information about this board.
 
@@ -259,14 +265,14 @@ Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sama5/sama5d3-xplained/README.txt>`__
 file for further information.
 
-Atmel SAMA5D4 
--------------
+Microchip SAMA5D4
+-----------------
 
-There is a port in progress on one Atmel SAMA5D4 board:
+There is a port in progress on one Microchip SAMA5D4 board:
 
--  **Atmel SAMA5D4-EK/MB development boards** This is the port of NuttX
-   to the Atmel SAMA5D4-MB Rev C. development board (which should be
-   compatible with the SAMA5D4-EK). These boards feature the Atmel
+-  **Microchip SAMA5D4-EK/MB development boards** This is the port of NuttX
+   to the Microchip SAMA5D4-MB Rev C. development board (which should be
+   compatible with the SAMA5D4-EK). These boards feature the Microchip
    SAMA5D44 microprocessors with compatibility with most of the SAMA5D3
    peripherals.
 
@@ -457,28 +463,28 @@ board that features the MK26Z128VLH4 Cortex-M0+ MCU, 128KB of FLASH and
 `Freescale <http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=FRDM-KL26Z&tid=vanFRDM-KL26Z>`__
 website for further information about this board.
 
-Atmel SAMD20
-------------
+Microchip SAMD20
+----------------
 
-The port of NuttX to the Atmel SAMD20-Xplained Pro
+The port of NuttX to the Microchip SAMD20-Xplained Pro
 development board. This board features the ATSAMD20J18A MCU (Cortex-M0+
 with 256KB of FLASH and 32KB of SRAM).
 
-Atmel SAMD21
-------------
+Microchip SAMD21
+----------------
 
 There two boards supported for the SAMD21:
 
-#. The port of NuttX to the Atmel SAMD21-Xplained Pro development board
+#. The port of NuttX to the Microchip SAMD21-Xplained Pro development board
    added in NuttX-7.11, and
 #. The port of NuttX to the Arduino-M0 contributed by Alan Carvalho de
    Assis in NuttX-8.2. The initial release included *nsh* and *usbnsh*
    configurations.
 
-Atmel SAML21
-------------
+Microchip SAML21
+----------------
 
-The port of NuttX to the Atmel SAML21-Xplained Pro
+The port of NuttX to the Microchip SAML21-Xplained Pro
 development board. This board features the ATSAML21J18A MCU (Cortex-M0+
 with 256KB of FLASH and 32KB of SRAM).
 
@@ -1019,10 +1025,10 @@ STMicro STM32 F207x
    Szafoni in NuttX-7.28. Available configurations include NSH, ADC, and
    PWM.
 
-Atmel SAM3U
------------
+Microchip SAM3U
+---------------
 
-This port uses the `Atmel <http://www.atmel.com/>`__
+This port uses the `Microchip <http://www.atmel.com/>`__
 SAM3U-EK development board that features the SAM3U4E MCU. This port uses
 a GNU arm-nuttx-elf or arm-nuttx-eabi toolchain\* under either Linux or
 Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
@@ -1034,8 +1040,8 @@ DIY toolchain for inux or Cygwin is provided by the NuttX
 `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 package.
 
-Atmel SAM3X
------------
+Microchip SAM3X
+---------------
 
 There are two SAM3X boards supported:
 
@@ -1048,7 +1054,7 @@ There are two SAM3X boards supported:
    board. This board is an Arduino Due *work-alike* with additional
    support for 4 mikroBUS Click boards.
 
-**Development Environments:** See the Atmel SAM3U discussion
+**Development Environments:** See the Microchip SAM3U discussion
 `above. <#at91sam3u>`__
 
 NXP LPC176x
@@ -2242,10 +2248,10 @@ LaunchXL-CC1312R1 board is in place. Board bring-up, however, cannot be
 done until the the basic CC13x2 architecture support is complete,
 hopefully in NuttX-7.29.
 
-Atmel SAM4L
------------
+Microchip SAM4L
+---------------
 
-This port uses the Atmel SAM4L Xplained Pro development
+This port uses the Microchip SAM4L Xplained Pro development
 board. This board features the ATSAM4LC4C MCU running at 48MHz with
 256KB of FLASH and 32KB of internal SRAM.
 
@@ -2283,8 +2289,8 @@ memory allocation for things like stacks and I/O buffers:
 You can see that 22.8KB (71.1%) of the SRAM heap is still available for
 further application development while NSH is running.
 
-Atmel SAM4CM
-------------
+Microchip SAM4CM
+----------------
 
 General architectural support was provided for SAM4CM
 family in NuttX 7.3 This was *architecture-only* support, meaning that
@@ -2294,7 +2300,7 @@ compatible with most of the SAM3/4 drivers (like HSMCI, DMAC, etc.) but
 those have not be verified on hardware as of this writing. This support
 was contributed in part by Max Neklyudov.
 
-**Atmel SAM4CMP-DB**. Support for the SAM4CMP-DB board was contributed
+**Microchip SAM4CMP-DB**. Support for the SAM4CMP-DB board was contributed
 to NuttX by Masayuki Ishikawa in NuttX-7.19. The SAM4CM is a dual-CPU
 part and SMP was included for the ARMv7-M and SAM3/4 families. The
 SAM4CMP-DB board support includes an NSH configuration that operates in
@@ -2302,8 +2308,8 @@ an SMP configuration. Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/sam34/sam4cmp-db/README.txt>`__
 file for further information.
 
-Atmel SAM4E
------------
+Microchip SAM4E
+---------------
 
 General architectural support was provided for the SAM4E
 family in NuttX 6.32. This was *architecture-only* support, meaning that
@@ -2311,32 +2317,32 @@ support for the boards with these chips is available, but no support for
 any publicly available boards was included. This support was contributed
 in part by Mitko.
 
-**Atmel SAM4E-EK**. Board support was added for the SAM4E-EK development
+**Microchip SAM4E-EK**. Board support was added for the SAM4E-EK development
 board in NuttX 7.1. A fully functional NuttShell (NSH) configuration is
 available (see :ref:`NSH <nsh>`). That NSH
 configuration includes networking support and support for an AT25 Serial
 FLASH file system.
 
-Atmel SAM4S
------------
+Microchip SAM4S
+---------------
 
-There are ports to two Atmel SAM4S board:
+There are ports to two Microchip SAM4S board:
 
--  There is a port the Atmel SAM4S Xplained development board. This
+-  There is a port the Microchip SAM4S Xplained development board. This
    board features the ATSAM4S16 MCU running at 120MHz with 1MB of FLASH
    and 128KB of internal SRAM.
 
--  There is also a port to the Atmel SAM4S Xplained *Pro* development
+-  There is also a port to the Microchip SAM4S Xplained *Pro* development
    board. This board features the ATSAM4S32C MCU running at 120MHz with
    2MB of FLASH and 160KB of internal SRAM.
 
-Atmel SAM4E. General architectural support was provided for the SAM4E
+Microchip SAM4E. General architectural support was provided for the SAM4E
 family in NuttX 6.32. This was *architecture-only* support, meaning that
 support for the boards with these chips is available, but no support for
 any publicly available boards was included. This support was contributed
 in part by Mitko.
 
-**Atmel SAM4E-EK**. Board support was added for the SAM4E-EK development
+**Microchip SAM4E-EK**. Board support was added for the SAM4E-EK development
 board in NuttX 7.1. A fully functional NuttShell (NSH) configuration is
 available (see :ref:`NSH <nsh>`). That NSH
 configuration includes networking support and support for an AT25 Serial
@@ -2355,12 +2361,12 @@ package.
 ARM Cortex-M7
 =============
 
-Atmel SAMV71
-------------
+Microchip SAMV71
+----------------
 
-This port uses Atmel SAM V71 Xplained Ultra Evaluation Kit
+This port uses Microchip SAM V71 Xplained Ultra Evaluation Kit
 (SAMV71-XULT). This board features the ATSAMV71Q21 Cortex-M7
-microcontroller. Refer to the `Atmel web
+microcontroller. Refer to the `Microchip web
 site <http://www.atmel.com/tools/atsamv71-xult.aspx>`__ for further
 information about this board.
 
@@ -2414,19 +2420,19 @@ Refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/samv7/samv71-xult/README.txt>`__
 file for further information.
 
-Atmel SAME70
-------------
+Microchip SAME70
+----------------
 
-This port uses Atmel SAM E70 Xplained Evaluation Kit
+This port uses Microchip SAM E70 Xplained Evaluation Kit
 (ATSAME70-XPLD). This board is essentially a lower cost version of the
 SAMV71-XULT board featuring the ATSAME70Q21 Cortex-M7 microcontroller.
-See the `Atmel SAMV71 <#at91samv71>`__ for supported features. Also
+See the `Microchip SAMV71 <#at91samv71>`__ for supported features. Also
 refer to the NuttX board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/samv7/same70-xplained/README.txt>`__
 file for further information.
 
-Atmel SAMD5x/E5x
-----------------
+Microchip SAMD5x/E5x
+--------------------
 
 The port of NuttX to Adafruit Metro M4 development
 board was released with NuttX-7/26. This board is essentially a advanced
@@ -2661,8 +2667,8 @@ use the latest GNU toolchains for this part because as of this writing
 
 
 
-Atmel AVR
-=========
+Microchip AVR
+=============
 
 AVR ATMega
 ----------
@@ -2672,14 +2678,14 @@ AVR ATMega128
 
 This port of NuttX to the Amber Web Server from
 `SoC Robotics <http://www.soc-robotics.com/index.htm>`__ is partially
-completed. The Amber Web Server is based on an Atmel ATMega128.
+completed. The Amber Web Server is based on an Microchip ATMega128.
 
 AVR ATMega1284P
 ---------------
 
 LowPowerLab MoteinoMEGA. This port of NuttX to the MoteinoMEGA from
 `LowPowerLab <http://www.lowpowerlab.com>`__. The MoteinoMEGA is based
-on an Atmel ATMega1284P. See the LowPowerlab
+on an Microchip ATMega1284P. See the LowPowerlab
 `website <https://lowpowerlab.com/shop/index.php?_route_=Moteino/moteinomega>`__
 and the board
 `README <https://bitbucket.org/nuttx/nuttx/src/master/boards/avr/atmega/moteino-mega/README.txt>`__
@@ -2704,7 +2710,7 @@ resources: 64K of FLASH and 4K of SRAM.
 **PJRC Teensy++ 2.0 AT90USB1286**. This is a port of NuttX to the PJRC
 Teensy++ 2.0 board. This board was developed by
 `PJRC <http://pjrc.com/teensy/>`__. The Teensy++ 2.0 is based on an
-Atmel AT90USB1286 MCU.
+Microchip AT90USB1286 MCU.
 
 **AVR-Specific Issues**. The basic AVR port is solid. The biggest issue
 for using AVR is its tiny SRAM memory and its Harvard architecture.
@@ -2735,11 +2741,11 @@ by the NuttX
 `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 package. As a result, that toolchain is recommended.
 
-Atmel AVR32
-===========
+Microchip AVR32
+===============
 
 AV32DEV1. This port uses the www.mcuzone.com AVRDEV1 board based on the
-Atmel AT32UC3B0256 MCU. This port requires a special GNU avr32 toolchain
+Microchip AT32UC3B0256 MCU. This port requires a special GNU avr32 toolchain
 available from atmel.com website. This is a windows native toolchain and
 so can be used only under Cygwin on Windows.
 

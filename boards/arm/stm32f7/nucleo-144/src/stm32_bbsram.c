@@ -364,7 +364,7 @@ int stm32_bbsram_int(void)
       state = (desc.lastwrite.tv_sec || desc.lastwrite.tv_nsec) ?  OK : 1;
 
       syslog(LOG_INFO, "Fault Log info File No %d Length %d flags:0x%02x "
-          "state:%d\n", (unsigned int)desc.fileno, (unsigned int) desc.len,
+          "state:%d\n", (unsigned int)desc.fileno, (unsigned int)desc.len,
           (unsigned int)desc.flags, state);
 
       if (state == OK)
@@ -464,16 +464,8 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
       pdump->info.stacks.user.sp = currentsp;
     }
 
-  if (pdump->info.pid == 0)
-    {
-      pdump->info.stacks.user.top = g_idle_topstack - 4;
-      pdump->info.stacks.user.size = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-  else
-    {
-      pdump->info.stacks.user.top = (uint32_t) rtcb->adj_stack_ptr;
-      pdump->info.stacks.user.size = (uint32_t) rtcb->adj_stack_size;
-    }
+  pdump->info.stacks.user.top = (uint32_t) rtcb->adj_stack_ptr;
+  pdump->info.stacks.user.size = (uint32_t) rtcb->adj_stack_size;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Get the limits on the interrupt stack memory */

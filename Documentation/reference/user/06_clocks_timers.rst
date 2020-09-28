@@ -19,6 +19,7 @@ Clocks and Timers
 - :c:func:`timer_gettime`
 - :c:func:`timer_getoverrun`
 - :c:func:`gettimeofday`
+- :c:func:`gethrtime`
 
 .. c:function:: int clock_settime(clockid_t clockid, const struct timespec *tp)
 
@@ -358,3 +359,12 @@ Clocks and Timers
   :param tzp: A reference to the timezone -- *IGNORED*.
 
   :return: See :c:func:`clock_gettime`.
+
+.. c:function:: hrtime_t gethrtime(void);
+
+  This implementation of ``gethrtime()`` is simply a
+  thin wrapper around :c:func:`clock_gettime`. It simply
+  calls ``clock_gettime()`` using the ``CLOCK_REALTIME`` or ``CLOCK_MONOTONIC``,
+  and converts the result to the required hrtime_t.
+
+  :return: current system time in ns

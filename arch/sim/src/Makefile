@@ -83,6 +83,7 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
 endif
 
+HOSTCFLAGS += -DCONFIG_USEC_PER_TICK=$(CONFIG_USEC_PER_TICK)
 HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c
 STDLIBS += -lpthread
 ifneq ($(CONFIG_HOST_MACOS),y)
@@ -101,7 +102,6 @@ ifeq ($(CONFIG_SMP),y)
   CSRCS += up_smpsignal.c up_cpuidlestack.c
   REQUIREDOBJS += up_smpsignal$(OBJEXT)
   HOSTCFLAGS += -DCONFIG_SMP=1 -DCONFIG_SMP_NCPUS=$(CONFIG_SMP_NCPUS)
-  HOSTCFLAGS += -DCONFIG_USEC_PER_TICK=$(CONFIG_USEC_PER_TICK)
 ifeq ($(CONFIG_SIM_WALLTIME),y)
   HOSTCFLAGS += -DCONFIG_SIM_WALLTIME=1
 endif
@@ -225,9 +225,7 @@ OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 # Override in Make.defs if linker is not 'ld'
 
-ifeq ($(HOSTOS),Darwin)
-  LDUNEXPORTSYMBOLS ?= -unexported_symbols_list nuttx-names.dat
-else
+ifneq ($(HOSTOS),Darwin)
   ARCHSCRIPT += -T nuttx.ld
   LDSTARTGROUP ?= --start-group
   LDENDGROUP ?= --end-group
@@ -271,7 +269,7 @@ libarch$(LIBEXT): $(NUTTXOBJS)
 # that are not hardware-related.
 
 board/libboard$(LIBEXT):
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 # A partially linked object containing only NuttX code (no interface to host OS)
 # Change the names of most symbols that conflict with libc symbols.
@@ -292,14 +290,12 @@ board/libboard$(LIBEXT):
 nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(LINKOBJS) $(HOSTOBJS)
 	$(Q) echo "LD:  nuttx$(EXEEXT)"
 	$(call PREPROCESS, nuttx-names.in, nuttx-names.dat)
-	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP) $(LDUNEXPORTSYMBOLS)
-ifneq ($(HOSTOS),Darwin)
+	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
 	$(Q) $(CC) $(CCLINKFLAGS) -Wl,-verbose 2>&1 | \
 	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' -e 's/__init_array_start/_sinit/g' \
 	         -e 's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
 	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
-endif
 	$(if $(CONFIG_HAVE_CXX),\
 	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS),\
 	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS))
@@ -318,7 +314,7 @@ export_startup: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS)
 
 .depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
+		$(MAKE) -C board depend ; \
 	fi
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(ASRCS) $(CSRCS) >Make.dep
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(HOSTCFLAGS) -- $(HOSTSRCS) >>Make.dep
@@ -328,7 +324,7 @@ depend: .depend
 
 clean:
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
+		$(MAKE) -C board clean ; \
 	fi
 	$(call DELFILE, nuttx.ld)
 	$(call DELFILE, nuttx.rel)
@@ -338,7 +334,7 @@ clean:
 
 distclean: clean
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" distclean ; \
+		$(MAKE) -C board distclean ; \
 	fi
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)

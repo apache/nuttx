@@ -276,6 +276,18 @@ int imxrt_gpio_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: imxrt_adc_initialize
+ *
+ * Description:
+ *   Initialize ADC drivers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_ADC
+int imxrt_adc_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: imxrt_ft5x06_register
  *
  * Description:

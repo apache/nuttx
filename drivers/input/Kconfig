@@ -514,4 +514,36 @@ config NUNCHUCK_NPOLLWAITERS
 
 endif # INPUT_NUNCHUCK
 
+config INPUT_SPQ10KBD
+	bool "Solder Party Q10 BlackBerry Keyboard"
+	default n
+	select I2C
+	---help---
+		Enable the Solder Party Q10 BlackBerry Keyboard support.  This
+		exposes itself as a standard keyboard at /dev/kbdN.
+		This keyboard exists both as a standalone module and integrated
+		into the Solder Party Keyboard FeatherWing.  Information on this
+		can be found at https://www.solder.party/docs/keyboard-pmod/
+
+if INPUT_SPQ10KBD
+
+config SPQ10KBD_DJOY
+    bool "Joystick Interface for Buttons"
+	select DJOYSTICK
+	default n
+
+config SPQ10KBD_REGDBG
+	bool "Keyboard Register Debug"
+	default n
+
+config SPQ10KBD_BUFSIZE
+	int "Keyboard Buffer Size"
+	default 10
+
+config SPQ10KBD_NPOLLWAITERS
+	int "Max Number of Poll Waiters"
+	default 2
+
+endif # INPUT_SPQ10KBD
+
 endif # INPUT

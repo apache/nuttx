@@ -1826,3 +1826,15 @@ endmenu
 menu "Application Configuration"
 source "$APPSDIR/Kconfig"
 endmenu
+
+# Support optionally including external code
+# into the OS build. EXTERNALDIR will be used
+# to either point to 'nuttx/external' or
+# 'nuttx/.external-dummy', if 'nuttx/external'
+# does not contain a Kconfig file
+
+config EXTERNALDIR
+        string
+        option env="EXTERNALDIR"
+
+source "$EXTERNALDIR/Kconfig"

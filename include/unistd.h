@@ -255,8 +255,11 @@
 #define _SC_XOPEN_UNIX                   0x0079
 #define _SC_XOPEN_VERSION                0x007a
 
-#define _SC_NPROCESSORS_CONF             0x007b
-#define _SC_NPROCESSORS_ONLN             0x007c
+#define _SC_PHYS_PAGES                   0x007b
+#define _SC_AVPHYS_PAGES                 0x007c
+
+#define _SC_NPROCESSORS_CONF             0x007d
+#define _SC_NPROCESSORS_ONLN             0x007e
 
 /* The following symbolic constants must be defined for file streams: */
 
@@ -308,6 +311,7 @@ EXTERN int       optopt; /* Unrecognized option character */
 
 pid_t   vfork(void);
 pid_t   getpid(void);
+pid_t   gettid(void);
 void    _exit(int status) noreturn_function;
 unsigned int sleep(unsigned int seconds);
 int     usleep(useconds_t usec);
@@ -327,9 +331,11 @@ ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
 int     ftruncate(int fd, off_t length);
 
+#ifdef CONFIG_SERIAL_TERMIOS
 /* Check if a file descriptor corresponds to a terminal I/O file */
 
 int     isatty(int fd);
+#endif
 
 /* Memory management */
 
@@ -341,6 +347,7 @@ FAR void *sbrk(intptr_t incr);
 /* Special devices */
 
 int     pipe(int fd[2]);
+int     pipe2(int pipefd[2], int flags);
 
 /* Schedule an alarm */
 

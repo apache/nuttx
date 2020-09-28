@@ -269,19 +269,6 @@ void stm32_pwr_disablepvd(void);
 
 #endif /* CONFIG_STM32_ENERGYLITE */
 
-/************************************************************************************
- * Name: stm32_pwr_enableoverdrive
- *
- * Description:
- *   Enable or disable the overdrive mode, allowing clock rates up to 180 MHz.
- *   If not enabled, the max allowed frequency is 168 MHz.
- *
- ************************************************************************************/
-
-#if defined(CONFIG_STM32_HAVE_OVERDRIVE)
-void stm32_pwr_enableoverdrive(bool state);
-#endif
-
 #undef EXTERN
 #if defined(__cplusplus)
 }

@@ -187,7 +187,7 @@ int usrsock_getsockname(FAR struct socket *psock,
     {
       /* Invalid state or closed by daemon. */
 
-      ninfo("usockid=%d; connect() with uninitialized usrsock.\n",
+      ninfo("usockid=%d; getsockname() with uninitialized usrsock.\n",
             conn->usockid);
 
       ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :

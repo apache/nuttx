@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/stat.h>
 #include <unistd.h>
 
 /****************************************************************************
@@ -71,8 +72,8 @@
  * Description:
  *   The access() function shall check the file named by the pathname pointed
  *   to by the path argument for accessibility according to the bit pattern
- *   contained in amode, using the real user ID in place of the effective user
- *   ID and the real group ID in place of the effective group ID.
+ *   contained in amode, using the real user ID in place of the effective
+ *   user ID and the real group ID in place of the effective group ID.
  *   As there are no users in NuttX, the function always succeeds.
  *
  * Input Parameters:
@@ -80,7 +81,8 @@
  *   amode - the access mode
  *
  * Returned Value:
- *   Always OK (zero)
+ *   Return OK (zero) if the caller can access the file with the required
+ *   permission, otherwise return -1.
  *
  * Assumptions:
  *
@@ -88,5 +90,27 @@
 
 int access(FAR const char *path, int amode)
 {
+  struct stat s;
+
+  if (stat(path, &s))
+    {
+      return -1;
+    }
+
+  if (s.st_mode & S_IFDIR)
+    {
+      return 0;
+    }
+
+  if (amode & W_OK)
+    {
+      if (s.st_mode & S_IWUSR)
+        {
+          return 0;
+        }
+
+      return -1;
+    }
+
   return 0;
 }

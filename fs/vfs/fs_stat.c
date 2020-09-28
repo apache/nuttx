@@ -57,25 +57,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline int statroot(FAR struct stat *buf);
-int stat_recursive(FAR const char *path, FAR struct stat *buf, int resolve);
+static int stat_recursive(FAR const char *path,
+                          FAR struct stat *buf, int resolve);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: statroot
- ****************************************************************************/
-
-static inline int statroot(FAR struct stat *buf)
-{
-  /* There is no inode associated with the fake root directory */
-
-  RESET_BUF(buf);
-  buf->st_mode = S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
-  return OK;
-}
 
 /****************************************************************************
  * Name: stat_recursive
@@ -93,7 +80,8 @@ static inline int statroot(FAR struct stat *buf)
  *
  ****************************************************************************/
 
-int stat_recursive(FAR const char *path, FAR struct stat *buf, int resolve)
+static int stat_recursive(FAR const char *path,
+                          FAR struct stat *buf, int resolve)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
@@ -183,13 +171,6 @@ int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve)
   if (*path == '\0')
     {
       return -ENOENT;
-    }
-
-  /* Check for the fake root directory (which has no inode) */
-
-  if (strcmp(path, "/") == 0)
-    {
-      return statroot(buf);
     }
 
   /* The perform the stat() operation on the path.  This is potentially

@@ -61,8 +61,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Memory Map ***************************************************************/
-/* 0x0400:0000 - Beginning of the internal FLASH.   Address of vectors.
+
+/* Memory Map ***************************************************************
+ * 0x0400:0000 - Beginning of the internal FLASH.   Address of vectors.
  *               Mapped as boot memory address 0x0000:0000 at reset.
  * 0x041f:ffff - End of flash region (assuming the max of 2MiB of FLASH).
  * 0x2000:0000 - Start of internal SRAM and start of .data (_sdata)
@@ -132,7 +133,7 @@ void __start(void) __attribute__ ((no_instrument_function));
  *       done, the processor reserves space on the stack for the FP state,
  *       but does not save that state information to the stack.
  *
- *  Software must not change the value of the ASPEN bit or LSPEN bit while either:
+ *  Software must not change the value of the ASPEN bit or LSPEN bit either:
  *   - the CPACR permits access to CP10 and CP11, that give access to the FP
  *     extension, or
  *   - the CONTROL.FPCA bit is set to 1
@@ -166,7 +167,7 @@ static inline void sam_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -196,7 +197,7 @@ static inline void sam_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -316,7 +317,8 @@ void __start(void)
 #ifdef CONFIG_ARMV7M_STACKCHECK
   /* Set the stack limit before we attempt to call any functions */
 
-  __asm__ volatile ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) : );
+  __asm__ volatile("sub r10, sp, %0" : :
+                   "r"(CONFIG_IDLETHREAD_STACKSIZE - 64) :);
 #endif
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be

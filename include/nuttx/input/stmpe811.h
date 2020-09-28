@@ -1,41 +1,27 @@
 /********************************************************************************************
  * include/nuttx/input/stmpe811.h
  *
- *   Copyright (C) 2012, 2015, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
- *   "STMPE811 S-Touch® advanced resistive touchscreen controller with 8-bit
- *    GPIO expander," Doc ID 14489 Rev 6, CD00186725, STMicroelectronics"
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ********************************************************************************************/
+
+/* References:
+ *   "STMPE811 S-Touch advanced resistive touchscreen controller with 8-bit
+ *    GPIO expander," Doc ID 14489 Rev 6, CD00186725, STMicroelectronics"
+ */
 
 #ifndef __INCLUDE_NUTTX_INPUT_STMPE811_H
 #define __INCLUDE_NUTTX_INPUT_STMPE811_H
@@ -56,7 +42,9 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
+
 /* Configuration ****************************************************************************/
+
 /* Prerequisites:  CONFIG_INPUT=y
  *
  * CONFIG_INPUT_STMPE811
@@ -142,6 +130,7 @@
 #endif
 
 /* I2C **************************************************************************************/
+
 /* STMPE811 Address:  The STMPE811 may have 7-bit address 0x41 or 0x44, depending upon the
  * state of the ADDR0 pin.
  */
@@ -158,6 +147,7 @@
 #define STMPE811_I2C_MAXFREQUENCY    400000       /* 400KHz */
 
 /* SPI **************************************************************************************/
+
 /* The device always operates in mode 0 */
 
 #define STMPE811_SPI_MODE            SPIDEV_MODE0 /* Mode 0 */
@@ -166,7 +156,8 @@
 
 #define STMPE811_SPI_MAXFREQUENCY    1000000      /* 1MHz */
 
-/* STMPE811 Registers ************************************************************************/
+/* STMPE811 Registers ***********************************************************************/
+
 /* Register Addresses */
 
 #define STMPE811_CHIP_ID             0x00  /* Device identification (16-bit) */
@@ -192,7 +183,8 @@
 #define STMPE811_ADC_CTRL1           0x20  /* ADC control */
 #define STMPE811_ADC_CTRL2           0x21  /* ADC control */
 #define STMPE811_ADC_CAPT            0x22  /* To initiate ADC data acquisition */
-#define STMPE811_ADC_DATACH(n)       (0x30 + ((n) << 1))  /* ADC channel n (16-bit) */
+#define STMPE811_ADC_DATACH(n)       (0x30 + ((n) << 1))
+                                           /* ADC channel n (16-bit) */
 #define STMPE811_ADC_DATACH0         0x30  /* ADC channel 0 (16-bit) */
 #define STMPE811_ADC_DATACH1         0x32  /* ADC channel 1 (16_bit) */
 #define STMPE811_ADC_DATACH2         0x34  /* ADC channel 2 (16-bit) */
@@ -279,7 +271,7 @@
 
 /* GPIO set/clear/sta/dir/edge/rising/falling/af registers */
 
-#define GPIO_PIN(n)                  (1 << (n))
+#define STMPE811_GPIO_PIN(n)         (1 << (n))
 #define TSC_PIN_SET                  (0xf0)   /* Pins 4-7:  Used by touchscreen */
 
 /* ADC control */
@@ -310,15 +302,15 @@
 
 /* 4-wire touchscreen controller setup */
 
-#define TSC_CTRL_EN                  (1 << 0)  /* Bit 0: Enable TSC */
-#define TSC_CTRL_OP_MOD_SHIFT        (1)       /* Bits 1-3: TSC operating mode */
+#define TSC_CTRL_EN                  (1 << 0)                     /* Bit 0: Enable TSC */
+#define TSC_CTRL_OP_MOD_SHIFT        (1)                          /* Bits 1-3: TSC operating mode */
 #define TSC_CTRL_OP_MOD_MASK         (7 << TSC_CTRL_OP_MOD_SHIFT)
 #  define TSC_CTRL_OP_MOD_XYZ        (0 << TSC_CTRL_OP_MOD_SHIFT) /* 000: X, Y, Z acquisition */
 #  define TSC_CTRL_OP_MOD_XY         (1 << TSC_CTRL_OP_MOD_SHIFT) /* 001: X, Y only */
 #  define TSC_CTRL_OP_MOD_X          (2 << TSC_CTRL_OP_MOD_SHIFT) /* 010: X only */
 #  define TSC_CTRL_OP_MOD_Y          (3 << TSC_CTRL_OP_MOD_SHIFT) /* 011: Y only */
 #  define TSC_CTRL_OP_MOD_Z          (4 << TSC_CTRL_OP_MOD_SHIFT) /* 100: Z only */
-#define TSC_CTRL_TRACK_SHIFT         (4)       /* Bits 4-6: Tracking index */
+#define TSC_CTRL_TRACK_SHIFT         (4)                          /* Bits 4-6: Tracking index */
 #define TSC_CTRL_TRACK_MASK          (7 << TSC_CTRL_TRACK_SHIFT)
 #define TSC_CTRL_TRACK_NONE          (0 << TSC_CTRL_TRACK_SHIFT)
 #define TSC_CTRL_TRACK_4             (1 << TSC_CTRL_TRACK_SHIFT)
@@ -328,7 +320,7 @@
 #define TSC_CTRL_TRACK_64            (5 << TSC_CTRL_TRACK_SHIFT)
 #define TSC_CTRL_TRACK_92            (6 << TSC_CTRL_TRACK_SHIFT)
 #define TSC_CTRL_TRACK_127           (7 << TSC_CTRL_TRACK_SHIFT)
-#define TSC_CTRL_TSC_STA             (1 << 7)  /* Bit 7: TSC status. 1=touch detected */
+#define TSC_CTRL_TSC_STA             (1 << 7)                     /* Bit 7: TSC status. 1=touch detected */
 
 /* Touchscreen controller configuration */
 
@@ -393,6 +385,7 @@
 #define TEMP_CTRL_THRES_RANGE        (1 << 4)  /* Bit 4: temperature threshold enable, 0='>=' 1='<' */
 
 /* GPIO Configuration ***********************************************************************/
+
 /* The STMPE811 GPIO interfaces take an 8-bit bit-encoded parameter to describe the GPIO pin.
  * The following definitions describe the bit-encoding of that parameter.
  *
@@ -648,7 +641,8 @@ int stmpe811_gpioread(STMPE811_HANDLE handle, uint8_t pinconfig, bool *value);
  ********************************************************************************************/
 
 #if !defined(CONFIG_STMPE811_GPIO_DISABLE) && !defined(CONFIG_STMPE811_GPIOINT_DISABLE)
-int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig, stmpe811_handler_t handler);
+int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig,
+                        stmpe811_handler_t handler);
 #endif
 
 /********************************************************************************************
@@ -765,6 +759,7 @@ uint16_t stmpe811_tempread(STMPE811_HANDLE handle);
  *   the nature of the failure.
  *
  ********************************************************************************************/
+
 /* Not implemented */
 
 #undef EXTERN

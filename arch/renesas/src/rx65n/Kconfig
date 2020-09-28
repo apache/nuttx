@@ -340,6 +340,33 @@ config RX65N_RIIC2_RCV_IN_BYTE_UNITS
 	depends on !RX65N_RIIC2_RCV_CONTINUOUS
 	
 endif #RX65N_RIIC2
+
+config RX65N_DTC
+	bool "DTC"
+	default n
+
+if RX65N_DTC
+
+config RX65N_DTC_SEQUENCE_TRANSFER_MODE
+	bool "Sequence transfer mode"
+	depends on !RX65N_DTC_SHORT_ADDRESS_MODE
+	default n
+
+config RX65N_DTC_DISPLACEMENT
+	int "Displacement value"
+	depends on !RX65N_DTC_SHORT_ADDRESS_MODE
+	default 0
+
+config RX65N_DTC_SHORT_ADDRESS_MODE
+	bool "Short address mode"
+	default n
+
+config RX65N_DTC_TRANSFER_DATA_READ_SKIP
+	bool "Transfer data read skip"
+	default y
+
+endif #RX65N_DTC
+
 endmenu # RX65N Peripheral Selections
 endif
 
@@ -610,6 +637,47 @@ config RX65N_RIIC2_RCV_IN_BYTE_UNITS
 	depends on !RX65N_RIIC2_RCV_CONTINUOUS
 	
 endif #RX65N_RIIC2
+
+config RX65N_USBDEV 
+	bool "USB0 Device"
+	default n
+	depends on USBDEV
+
+if RX65N_USBDEV
+
+config RX65N_TEST_INTEP
+	bool "Testing RX65N Interrupt endpoint"
+	default n
+	depends on SERIAL_IFLOWCONTROL && CDCACM_IFLOWCONTROL
+
+endif #RX65N_USBDEV
+
+config RX65N_DTC
+	bool "DTC"
+	default n
+
+if RX65N_DTC
+
+config RX65N_DTC_SEQUENCE_TRANSFER_MODE
+	bool "Sequence transfer mode"
+	depends on !RX65N_DTC_SHORT_ADDRESS_MODE
+	default n
+
+config RX65N_DTC_DISPLACEMENT
+	int "Displacement value"
+	depends on !RX65N_DTC_SHORT_ADDRESS_MODE
+	default 0
+
+config RX65N_DTC_SHORT_ADDRESS_MODE
+	bool "Short address mode"
+	default n
+
+config RX65N_DTC_TRANSFER_DATA_READ_SKIP
+	bool "Transfer data read skip"
+	default y
+
+endif #RX65N_DTC
+
 endmenu # RX65N Peripheral Selections
 endif
 

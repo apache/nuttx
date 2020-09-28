@@ -138,7 +138,7 @@ endif
 # Process board-specific directories
 
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
-	CUSTOM_DIR = $(patsubst "%",%,$(CONFIG_ARCH_BOARD_CUSTOM_DIR))
+  CUSTOM_DIR = $(patsubst "%",%,$(CONFIG_ARCH_BOARD_CUSTOM_DIR))
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
   BOARD_DIR ?= $(TOPDIR)$(DELIM)$(CUSTOM_DIR)
 else
@@ -317,7 +317,7 @@ endef
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 define ARCHIVE_ADD
-	@echo "AR (add): $(notdir $1) $(2)"
+	@echo "AR (add): ${shell basename $(1)} $(2)"
 	$(Q) $(AR) $1 $(2)
 endef
 
@@ -325,7 +325,7 @@ endef
 # created from scratch
 
 define ARCHIVE
-	@echo "AR (create): $(notdir $1) $(2)"
+	@echo "AR (create): ${shell basename $(1)} $(2)"
 	$(Q) $(RM) $1
 	$(Q) $(AR) $1 $(2)
 endef
@@ -491,13 +491,13 @@ endif
 # Invoke make
 
 define MAKE_template
-	+$(Q) $(MAKE) -C $(1) $(2) TOPDIR="$(TOPDIR)" APPDIR="$(APPDIR)"
+	+$(Q) $(MAKE) -C $(1) $(2) APPDIR="$(APPDIR)"
 
 endef
 
 define SDIR_template
 $(1)_$(2):
-	+$(Q) $(MAKE) -C $(1) $(2) TOPDIR="$(TOPDIR)" APPDIR="$(APPDIR)"
+	+$(Q) $(MAKE) -C $(1) $(2) APPDIR="$(APPDIR)"
 
 endef
 

@@ -223,6 +223,16 @@ int imxrt_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_IMXRT_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = imxrt_adc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: imxrt_adc_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_INPUT_FT5X06
   /* Initialize the FT5X06 touchscreen driver */
 

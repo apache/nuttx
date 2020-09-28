@@ -170,13 +170,13 @@ double    strtod(FAR const char *str, FAR char **endptr);
 long double strtold(FAR const char *str, FAR char **endptr);
 #endif
 
-int atoi(FAR const char *nptr);
-long atol(FAR const char *nptr);
+int       atoi(FAR const char *nptr);
+long      atol(FAR const char *nptr);
 #ifdef CONFIG_HAVE_LONG_LONG
 long long atoll(FAR const char *nptr);
 #endif
 #ifdef CONFIG_HAVE_DOUBLE
-double atof(FAR const char *nptr);
+double    atof(FAR const char *nptr);
 #endif
 
 /* Binary to string conversions */
@@ -202,17 +202,17 @@ FAR void *memalign(size_t, size_t);
 FAR void *zalloc(size_t);
 FAR void *calloc(size_t, size_t);
 FAR void *aligned_alloc(size_t, size_t);
-int posix_memalign(FAR void **, size_t, size_t);
+int       posix_memalign(FAR void **, size_t, size_t);
 
 /* Pseudo-Terminals */
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1
 FAR char *ptsname(int fd);
-int ptsname_r(int fd, FAR char *buf, size_t buflen);
+int       ptsname_r(int fd, FAR char *buf, size_t buflen);
 #endif
 
 #ifdef CONFIG_PSEUDOTERM
-int unlockpt(int fd);
+int       unlockpt(int fd);
 
 /* int grantpt(int fd); Not implemented */
 
@@ -221,33 +221,34 @@ int unlockpt(int fd);
 
 /* Arithmetic */
 
-int      abs(int j);
-long int labs(long int j);
+int       abs(int j);
+long int  labs(long int j);
 #ifdef CONFIG_HAVE_LONG_LONG
 long long int llabs(long long int j);
 #endif
 
-div_t    div(int number, int denom);
-ldiv_t   ldiv(long number, long denom);
+div_t     div(int number, int denom);
+ldiv_t    ldiv(long number, long denom);
 #ifdef CONFIG_HAVE_LONG_LONG
-lldiv_t  lldiv(long long number, long long denom);
+lldiv_t   lldiv(long long number, long long denom);
 #endif
 
 /* Temporary files */
 
-int      mktemp(FAR char *path_template);
-int      mkstemp(FAR char *path_template);
+FAR char *mktemp(FAR char *path_template);
+int       mkstemp(FAR char *path_template);
+FAR char *mkdtemp(FAR char *path_template);
 
 /* Sorting */
 
-void     qsort(FAR void *base, size_t nel, size_t width,
-               CODE int (*compar)(FAR const void *, FAR const void *));
+void      qsort(FAR void *base, size_t nel, size_t width,
+                CODE int (*compar)(FAR const void *, FAR const void *));
 
 /* Binary search */
 
-FAR void *bsearch(FAR const void *key, FAR const void *base, size_t nel,
-                  size_t width, CODE int (*compar)(FAR const void *,
-                  FAR const void *));
+FAR void  *bsearch(FAR const void *key, FAR const void *base, size_t nel,
+                   size_t width, CODE int (*compar)(FAR const void *,
+                   FAR const void *));
 
 #undef EXTERN
 #if defined(__cplusplus)

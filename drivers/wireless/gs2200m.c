@@ -3265,7 +3265,7 @@ FAR void *gs2200m_register(FAR const char *devpath,
       goto errout;
     }
 
-  ret = netdev_register(&dev->net_dev, NET_LL_ETHERNET);
+  ret = netdev_register(&dev->net_dev, NET_LL_IEEE80211);
 
   return (FAR void *)dev;
 

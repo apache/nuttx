@@ -64,7 +64,7 @@
 "mq_unlink","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","int","FAR const char *"
 "munmap","sys/mman.h","defined(CONFIG_FS_RAMMAP)","int","FAR void *","size_t"
 "nx_mkfifo","nuttx/drivers/drivers.h","defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0","int","FAR const char *","mode_t","size_t"
-"nx_pipe","nuttx/drivers/drivers.h","defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0","int","int [2]|FAR int *","size_t"
+"nx_pipe","nuttx/drivers/drivers.h","defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0","int","int [2]|FAR int *","size_t","int"
 "nx_task_spawn","nuttx/spawn.h","defined(CONFIG_LIB_SYSCALL) && !defined(CONFIG_BUILD_KERNEL)","int","FAR const struct spawn_syscall_parms_s *"
 "nx_vsyslog","nuttx/syslog/syslog.h","","int","int","FAR const IPTR char *","FAR va_list *"
 "on_exit","stdlib.h","defined(CONFIG_SCHED_ONEXIT)","int","CODE void (*)(int, FAR void *)","FAR void *"

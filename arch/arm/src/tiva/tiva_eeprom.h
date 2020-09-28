@@ -53,20 +53,20 @@
  * Description:
  *  Performs any necessary recovery in case of power failures during write.
  *
- *  This function must be called after tiva_eeprom_enable() and before
- *  the EEPROM is accessed.  It is used to check for errors in the EEPROM state
- *  such as from power failure during a previous write operation.  The function
- *  detects these errors and performs as much recovery as possible.
+ *  This function must be called after tiva_eeprom_enable() and before the
+ *  EEPROM is accessed.  It is used to check for errors in the EEPROM state
+ *  such as from power failure during a previous write operation.  The
+ *  function detects these errors and performs as much recovery as possible.
  *
- *  If -ENODEV is returned, the EEPROM was unable to recover its
- *  state.  If power is stable when this occurs, this indicates a fatal
- *  error and is likely an indication that the EEPROM memory has exceeded its
- *  specified lifetime write/erase specification.  If the supply voltage is
- *  unstable when this return code is observed, retrying the operation once the
+ *  If -ENODEV is returned, the EEPROM was unable to recover its state.  If
+ *  power is stable when this occurs, this indicates a fatal error and is
+ *  likely an indication that the EEPROM memory has exceeded its specified
+ *  lifetime write/erase specification.  If the supply voltage is unstable
+ *  when this return code is observed, retrying the operation once the
  *  voltage is stabilized may clear the error.
  *
- *  Failure to call this function after a reset may lead to incorrect operation
- *  or permanent data loss if the EEPROM is later written.
+ *  Failure to call this function after a reset may lead to incorrect
+ *  operation or permanent data loss if the EEPROM is later written.
  *
  * Returned Value:
  *   Returns OK if no errors were detected or -ENODEV if the EEPROM
@@ -82,8 +82,8 @@ int tiva_eeprom_initialize(void);
  *
  * Description:
  *   Create and initialize an MTD device instance.  MTD devices are not
- *   registered in the file system, but are created as instances that can
- *   be bound to other functions (such as a block or character driver front
+ *   registered in the file system, but are created as instances that can be
+ *   bound to other functions (such as a block or character driver front
  *   end).
  *
  ****************************************************************************/

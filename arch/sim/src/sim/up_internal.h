@@ -126,11 +126,7 @@
 
 /* Size of the simulated heap */
 
-#ifdef CONFIG_MM_SMALL
-#  define SIM_HEAP_SIZE (64*1024)
-#else
-#  define SIM_HEAP_SIZE (4*1024*1024)
-#endif
+#define SIM_HEAP_SIZE (64*1024*1024)
 
 /* File System Definitions **************************************************/
 
@@ -232,6 +228,7 @@ void  host_free_shmem(void *mem);
 uint64_t host_gettime(bool rtc);
 void host_sleep(uint64_t nsec);
 void host_sleepuntil(uint64_t nsec);
+int host_settimer(int *irq);
 
 /* up_simsmp.c **************************************************************/
 

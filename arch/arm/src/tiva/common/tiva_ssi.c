@@ -1204,7 +1204,9 @@ static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev,
   uint32_t enable;
   uint32_t actual;
 
-  /* NOTE that the SSI must be disabled when setting any configuration registers. */
+  /* NOTE that the SSI must be disabled when setting any configuration
+   * registers.
+   */
 
   enable = ssi_disable(priv);
   actual = ssi_setfrequencyinternal(priv, frequency);
@@ -1286,7 +1288,9 @@ static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   uint32_t enable;
 
-  /* NOTE that the SSI must be disabled when setting any configuration registers. */
+  /* NOTE that the SSI must be disabled when setting any configuration
+   * registers.
+   */
 
   enable = ssi_disable(priv);
   ssi_setmodeinternal(priv, mode);
@@ -1334,7 +1338,9 @@ static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits)
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   uint32_t enable;
 
-  /* NOTE that the SSI must be disabled when setting any configuration registers. */
+  /* NOTE that the SSI must be disabled when setting any configuration
+   * registers.
+   */
 
   enable = ssi_disable(priv);
   ssi_setbitsinternal(priv, nbits);
@@ -1631,7 +1637,9 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
 
   ssi_putreg(priv, TIVA_SSI_CR1_OFFSET, 0);
 
-  /* Set all CR0 fields to the reset state. This will also select Freescale SPI mode. */
+  /* Set all CR0 fields to the reset state. This will also select Freescale
+   * SPI mode.
+   */
 
   ssi_putreg(priv, TIVA_SSI_CR0_OFFSET, 0);
 

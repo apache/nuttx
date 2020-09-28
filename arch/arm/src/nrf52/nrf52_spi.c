@@ -172,9 +172,17 @@ static const struct spi_ops_s g_spi0ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf52_spi_exchange,
 #  else
-  .sendlock          = nrf52_spi_sendblock,
-  .recvblock         = nrf52_spi_recvblock
+  .sndblock          = nrf52_spi_sndblock,
+  .recvblock         = nrf52_spi_recvblock,
 #  endif
+#ifdef CONFIG_SPI_TRIGGER
+  .trigger           = nrf52_spi_trigger,
+#endif
+#ifdef CONFIG_SPI_CALLBACK
+  .registercallback  = nrf52_spi0register,  /* Provided externally */
+#else
+  .registercallback  = NULL,                /* Not implemented */
+#endif
 };
 
 static struct nrf52_spidev_s g_spi0dev =
@@ -217,9 +225,17 @@ static const struct spi_ops_s g_spi1ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf52_spi_exchange,
 #  else
-  .sendlock          = nrf52_spi_sendblock,
-  .recvblock         = nrf52_spi_recvblock
+  .sndlock           = nrf52_spi_sndblock,
+  .recvblock         = nrf52_spi_recvblock,
 #  endif
+#ifdef CONFIG_SPI_TRIGGER
+  .trigger           = nrf52_spi_trigger,
+#endif
+#ifdef CONFIG_SPI_CALLBACK
+  .registercallback  = nrf52_spi1register,  /* Provided externally */
+#else
+  .registercallback  = NULL,                /* Not implemented */
+#endif
 };
 
 static struct nrf52_spidev_s g_spi1dev =
@@ -262,9 +278,17 @@ static const struct spi_ops_s g_spi2ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf52_spi_exchange,
 #  else
-  .sendlock          = nrf52_spi_sendblock,
-  .recvblock         = nrf52_spi_recvblock
+  .sndlock           = nrf52_spi_sndblock,
+  .recvblock         = nrf52_spi_recvblock,
 #  endif
+#ifdef CONFIG_SPI_TRIGGER
+  .trigger           = nrf52_spi_trigger,
+#endif
+#ifdef CONFIG_SPI_CALLBACK
+  .registercallback  = nrf52_spi2register,  /* Provided externally */
+#else
+  .registercallback  = NULL,                /* Not implemented */
+#endif
 };
 
 static struct nrf52_spidev_s g_spi2dev =
@@ -307,9 +331,17 @@ static const struct spi_ops_s g_spi3ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf52_spi_exchange,
 #  else
-  .sendlock          = nrf52_spi_sendblock,
-  .recvblock         = nrf52_spi_recvblock
+  .sndlock           = nrf52_spi_sndblock,
+  .recvblock         = nrf52_spi_recvblock,
 #  endif
+#ifdef CONFIG_SPI_TRIGGER
+  .trigger           = nrf52_spi_trigger,
+#endif
+#ifdef CONFIG_SPI_CALLBACK
+  .registercallback  = nrf52_spi3register,  /* Provided externally */
+#else
+  .registercallback  = NULL,                /* Not implemented */
+#endif
 };
 
 static struct nrf52_spidev_s g_spi3dev =
@@ -1025,9 +1057,32 @@ static void nrf52_spi_recvblock(FAR struct spi_dev_s *dev,
                                 size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
-  return nrf52_spi_exchange(dev, txbuffer, NULL, nwords);
+  return nrf52_spi_exchange(dev, rxbuffer, NULL, nwords);
 }
 #endif /* CONFIG_SPI_EXCHANGE */
+
+/****************************************************************************
+ * Name: nrf52_spi_trigger
+ *
+ * Description:
+ *   Trigger a previously configured DMA transfer.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *
+ * Returned Value:
+ *   OK       - Trigger was fired
+ *   -ENOSYS  - Trigger not fired due to lack of DMA or low level support
+ *   -EIO     - Trigger not fired because not previously primed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_TRIGGER
+static int nrf52_spi_trigger(FAR struct spi_dev_s *dev)
+{
+  return -ENOSYS;
+}
+#endif
 
 /****************************************************************************
  * Public Functions

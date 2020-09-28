@@ -82,14 +82,12 @@
 FAR char *tmpnam(FAR char *s)
 {
   static char path[L_tmpnam];
-  int ret;
 
   if (s == NULL)
     {
       s = path;
     }
 
-  snprintf(s, L_tmpnam, "%s/XXXXXX.tmp", P_tmpdir);
-  ret = mktemp(s);
-  return (ret == OK) ? s : NULL;
+  snprintf(s, L_tmpnam, "%s/XXXXXX", P_tmpdir);
+  return mktemp(s);
 }

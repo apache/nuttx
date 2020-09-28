@@ -33,8 +33,8 @@ from board-to-board. Follow the links for the details:
 
        - Atmel AVR
 
-         - :ref:`introduction/detailed_support:Atmel AVR` (8-bit) (5)
-         - :ref:`introduction/detailed_support:Atmel AVR32` (1)
+         - :ref:`introduction/detailed_support:Microchip AVR` (8-bit) (5)
+         - :ref:`introduction/detailed_support:Microchip AVR32` (1)
 
        - Freescale
 
@@ -140,22 +140,22 @@ MCU. Follow the links for the details:
          - :ref:`introduction/detailed_support:AVR ATMega2560` (8-bit AVR)
          - :ref:`introduction/detailed_support:AVR AT90USB64x and AT90USB6128x`
            (8-bit AVR)
-         - :ref:`introduction/detailed_support:Atmel AVR32` (AT32UC3BXXX, 32-bit AVR32)
-         - :ref:`introduction/detailed_support:Atmel SAMD20` (ARM Cortex-M0+)
-         - :ref:`introduction/detailed_support:Atmel SAMD21` (ARM Cortex-M0+)
-         - :ref:`introduction/detailed_support:Atmel SAML21` (ARM Cortex-M0+)
-         - :ref:`introduction/detailed_support:Atmel SAM3U` (ARM Cortex-M3)
-         - :ref:`introduction/detailed_support:Atmel SAM3X` (ARM Cortex-M3)
-         - :ref:`introduction/detailed_support:Atmel SAM4CM` (ARM Cortex-M4)
-         - :ref:`introduction/detailed_support:Atmel SAM4E` (ARM Cortex-M4)
-         - :ref:`introduction/detailed_support:Atmel SAM4L` (ARM Cortex-M4)
-         - :ref:`introduction/detailed_support:Atmel SAM4S` (ARM Cortex-M4)
-         - :ref:`introduction/detailed_support:Atmel SAMD5x/E5x` (ARM Cortex-M4)
-         - :ref:`introduction/detailed_support:Atmel SAME70` (ARM Cortex-M7)
-         - :ref:`introduction/detailed_support:Atmel SAMV71` (ARM Cortex-M7)
-         - :ref:`introduction/detailed_support:Atmel SAMA5D2` (ARM Cortex-A5)
-         - :ref:`introduction/detailed_support:Atmel SAMA5D3` (ARM Cortex-A5)
-         - :ref:`introduction/detailed_support:Atmel SAMA5D4` (ARM Cortex-A5)
+         - :ref:`introduction/detailed_support:Microchip AVR32` (AT32UC3BXXX, 32-bit AVR32)
+         - :ref:`introduction/detailed_support:Microchip SAMD20` (ARM Cortex-M0+)
+         - :ref:`introduction/detailed_support:Microchip SAMD21` (ARM Cortex-M0+)
+         - :ref:`introduction/detailed_support:Microchip SAML21` (ARM Cortex-M0+)
+         - :ref:`introduction/detailed_support:Microchip SAM3U` (ARM Cortex-M3)
+         - :ref:`introduction/detailed_support:Microchip SAM3X` (ARM Cortex-M3)
+         - :ref:`introduction/detailed_support:Microchip SAM4CM` (ARM Cortex-M4)
+         - :ref:`introduction/detailed_support:Microchip SAM4E` (ARM Cortex-M4)
+         - :ref:`introduction/detailed_support:Microchip SAM4L` (ARM Cortex-M4)
+         - :ref:`introduction/detailed_support:Microchip SAM4S` (ARM Cortex-M4)
+         - :ref:`introduction/detailed_support:Microchip SAMD5x/E5x` (ARM Cortex-M4)
+         - :ref:`introduction/detailed_support:Microchip SAME70` (ARM Cortex-M7)
+         - :ref:`introduction/detailed_support:Microchip SAMV71` (ARM Cortex-M7)
+         - :ref:`introduction/detailed_support:Microchip SAMA5D2` (ARM Cortex-A5)
+         - :ref:`introduction/detailed_support:Microchip SAMA5D3` (ARM Cortex-A5)
+         - :ref:`introduction/detailed_support:Microchip SAMA5D4` (ARM Cortex-A5)
 
        - Moxa
 

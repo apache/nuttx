@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/inode/fs_registerreserve.c
+ * fs/inode/fs_inodereserve.c
  *
  *   Copyright (C) 2007-2009, 2011-2012, 2015, 2017 Gregory Nutt. All
  *     rights reserved.
@@ -118,28 +118,32 @@ static void inode_insert(FAR struct inode *node,
       peer->i_peer = node;
     }
 
-  /* If parent is non-null, then it must go at the head of its
-   * list of children.
-   */
-
-  else if (parent)
-    {
-      node->i_peer    = parent->i_child;
-      parent->i_child = node;
-    }
-
-  /* Otherwise, this must be the new root_inode */
+  /* Then it must go at the head of parent's list of children. */
 
   else
     {
-      node->i_peer = g_root_inode;
-      g_root_inode = node;
+      DEBUGASSERT(parent != NULL);
+      node->i_peer    = parent->i_child;
+      parent->i_child = node;
     }
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: inode_root_reserve
+ *
+ * Description:
+ *   Reserve the root inode for the pseudo file system.
+ *
+ ****************************************************************************/
+
+void inode_root_reserve(void)
+{
+  g_root_inode = inode_alloc("");
+}
 
 /****************************************************************************
  * Name: inode_reserve
@@ -178,9 +182,7 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
   DEBUGASSERT(path != NULL && inode != NULL);
   *inode = NULL;
 
-  /* Handle paths that are interpreted as the root directory */
-
-  if (path[0] == '\0' || path[0] != '/')
+  if (path[0] == '\0')
     {
       return -EINVAL;
     }

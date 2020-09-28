@@ -426,20 +426,20 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   while (dev->d_wrndx == dev->d_rdndx)
     {
-      /* If O_NONBLOCK was set, then return EGAIN */
-
-      if (filep->f_oflags & O_NONBLOCK)
-        {
-          nxsem_post(&dev->d_bfsem);
-          return -EAGAIN;
-        }
-
       /* If there are no writers on the pipe, then return end of file */
 
       if (dev->d_nwriters <= 0)
         {
           nxsem_post(&dev->d_bfsem);
           return 0;
+        }
+
+      /* If O_NONBLOCK was set, then return EGAIN */
+
+      if (filep->f_oflags & O_NONBLOCK)
+        {
+          nxsem_post(&dev->d_bfsem);
+          return -EAGAIN;
         }
 
       /* Otherwise, wait for something to be written to the pipe */

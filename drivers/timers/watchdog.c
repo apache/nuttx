@@ -63,10 +63,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_WATCHDOG_AUTOMONITOR
+
 #define WATCHDOG_AUTOMONITOR_TIMEOUT_MSEC \
   (1000 * CONFIG_WATCHDOG_AUTOMONITOR_TIMEOUT)
-#define WATCHDOG_AUTOMONITOR_TIMEOUT_TICK \
-  SEC2TICK(CONFIG_WATCHDOG_AUTOMONITOR_TIMEOUT)
+
+#if (CONFIG_WATCHDOG_AUTOMONITOR_TIMEOUT == \
+    CONFIG_WATCHDOG_AUTOMONITOR_PING_INTERVAL)
+#define WATCHDOG_AUTOMONITOR_PING_INTERVAL \
+  SEC2TICK(CONFIG_WATCHDOG_AUTOMONITOR_TIMEOUT / 2)
+#else
+#define WATCHDOG_AUTOMONITOR_PING_INTERVAL \
+  SEC2TICK(CONFIG_WATCHDOG_AUTOMONITOR_PING_INTERVAL)
+#endif
+
+#endif
 
 /****************************************************************************
  * Private Type Definitions
@@ -151,7 +162,7 @@ static void watchdog_automonitor_timer(wdparm_t arg)
   if (upper->monitor)
     {
       lower->ops->keepalive(lower);
-      wd_start(&upper->wdog, WATCHDOG_AUTOMONITOR_TIMEOUT_TICK / 2,
+      wd_start(&upper->wdog, WATCHDOG_AUTOMONITOR_PING_INTERVAL,
                watchdog_automonitor_timer, (wdparm_t)upper);
     }
 }
@@ -165,7 +176,7 @@ static void watchdog_automonitor_worker(FAR void *arg)
     {
       lower->ops->keepalive(lower);
       work_queue(LPWORK, &upper->work, watchdog_automonitor_worker,
-                 upper, WATCHDOG_AUTOMONITOR_TIMEOUT_TICK / 2);
+                 upper, WATCHDOG_AUTOMONITOR_PING_INTERVAL);
     }
 }
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_IDLE)
@@ -194,11 +205,11 @@ static void watchdog_automonitor_start(FAR struct watchdog_upperhalf_s
 #if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE)
       lower->ops->capture(lower, watchdog_automonitor_capture);
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
-      wd_start(&upper->wdog, WATCHDOG_AUTOMONITOR_TIMEOUT_TICK / 2,
+      wd_start(&upper->wdog, WATCHDOG_AUTOMONITOR_PING_INTERVAL,
                watchdog_automonitor_timer, (wdparm_t)upper);
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
       work_queue(LPWORK, &upper->work, watchdog_automonitor_worker,
-                 upper, WATCHDOG_AUTOMONITOR_TIMEOUT_TICK / 2);
+                 upper, WATCHDOG_AUTOMONITOR_PING_INTERVAL);
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_IDLE)
       upper->idle.notify = watchdog_automonitor_idle;
       pm_register(&upper->idle);

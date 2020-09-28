@@ -108,8 +108,6 @@ static inline void up_color_intstack(void)
 
 void up_initialize(void)
 {
-  FAR struct tcb_s *idle;
-
   /* Colorize the interrupt stack */
 
   up_color_intstack();
@@ -117,13 +115,6 @@ void up_initialize(void)
   /* Add any extra memory fragments to the memory manager */
 
   up_addregion();
-
-  /* Initialize the idle task stack info */
-
-  idle = this_task(); /* It should be idle task */
-  idle->stack_alloc_ptr = _END_BSS;
-  idle->adj_stack_ptr   = (FAR void *)g_idle_topstack;
-  idle->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
 
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function

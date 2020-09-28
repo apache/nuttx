@@ -11,35 +11,10 @@ Contents
   - Serial Console
   - LEDs
   - Networking
-  - IPv6 Integration
-  - HTTP Server Integration on IPv4
-  - DHCP Client Integration on IPv4
-  - DHCP Server Integration on IPv4
-  - FTP Server Integration on IPv4
-  - FTP Client Integration on IPv4
-  - TFTP Client Integration on IPv4
-  - Telnet Server Integration on IPv4
-  - Telnet Client Integration on IPv4
-  - Ustream Socket Integration on IPv4
-  - Udgram Socket Integration on IPv4
-  - SMTP Client Integration on IPv4
-  - Raw Socket Integration
-  - Custom User Socket Integration
-  - IGMPv2 Integration
-  - Inherit telnet server Integration
-  - VNC Server Integration
-  - PPPD Integration
-  - HTTP Client Integration
-  - NTP Client Integration
-  - NFS Client Integration
-  - MLD Integration
-  - ICMPv6 AutoConfig Integration
-  - IP Forwarding Integration for IPv4
-  - DNS Name Resolution Integration for IPv4
-  - LINK MONITOR Integration
+  - Contents
   - RTC
-  - File Systems
-  - Standby RAM
+  - USB Device
+  - Debugging
   - Debugging
 
 Board Features
@@ -60,12 +35,6 @@ Board Features
 See the RX65N GRROSE website for further information about this board:
 
   - http://gadget.renesas.com/en/product/rose.html
-
-Status/Open Issues
-==================
-Ethernet
----------
-
 
 Serial Console
 ==============
@@ -262,6 +231,26 @@ The following configurations are to be enabled as part of testing RTC examples.
 CONFIG_EXAMPLES_ALARM
 CONFIG_EXAMPLES_PERIODIC
 CONFIG_EXAMPLES_CARRY
+
+USB Device Configurations
+--------------------------
+The following configurations need to be enabled for USB Device
+
+CONFIG_USBDEV
+CONFIG_CDCACM
+CONFIG_STDIO_BUFFER_SIZE=64
+CONFIG_STDIO_LINEBUFFER
+
+USB Device Testing
+------------------------
+The following testing is executed as part of USB Device testing on RX65N target for GRROSE board
+
+echo "This is a test for USB Device" > /dev/ttyACM0
+
+xd 0 0x20000 > /dev/ttyACM0
+
+The output of the commands mentioned above should be seen on the USB Device COM port on teraterm
+
 Debugging
 ==========
 
@@ -295,8 +284,3 @@ endif
    Select Motorola SREC format.
 4. Download Renesas flash programmer tool from https://www.renesas.com/in/en/products/software-tools/tools/programmer/renesas-flash-programmer-programming-gui.html#downloads
 5. Refer to the user manual document, for steps to flash NuttX binary using RFP tool.
-Changes Made in NuttX 8.2 Code
-================================
-1. In wd_start.c file, in function wd_expiration(), typecasting is done when the signal handler nxsig_timeout() is invoked.
-2. In rtc.c, (drivers/timers/rtc.c) file, in function rtc_periodic_callback(), alarminfo->active = false is commented.
-The reason being, periodic interrupt should not be disabled. Uncommenting the above mentioned line (alarminfo->active = false), will make the periodic interrupt come only once.

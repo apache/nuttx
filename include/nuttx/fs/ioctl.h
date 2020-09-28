@@ -184,6 +184,12 @@
                                            * OUT: Integer that contains device
                                            *      minor number
                                            */
+#define FIOCLEX         _FIOC(0x000d)     /* IN:  None
+                                           * OUT: None
+                                           */
+#define FIONCLEX        _FIOC(0x000e)     /* IN:  None
+                                           * OUT: None
+                                           */
 
 /* NuttX file system ioctl definitions **************************************/
 

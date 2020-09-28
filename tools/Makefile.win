@@ -20,7 +20,7 @@
 
 export SHELL=cmd
 
-TOPDIR := ${shell echo %CD%}
+export TOPDIR := ${shell echo %CD%}
 include $(TOPDIR)\Make.defs
 -include $(TOPDIR)\.version
 
@@ -47,6 +47,13 @@ ifeq ($(CONFIG_APPS_DIR),)
 CONFIG_APPS_DIR = ..\apps
 endif
 APPDIR := $(realpath ${shell if exist "$(CONFIG_APPS_DIR)\Makefile" echo $(CONFIG_APPS_DIR)})
+
+# External code support
+# If external/ contains a Kconfig, we define the EXTERNALDIR variable to 'external'
+# so that main Kconfig can find it. Otherwise, we redirect it to a dummy Kconfig
+# This is due to kconfig inability to do conditional inclusion.
+
+EXTERNALDIR := $(shell if [ -r $(TOPDIR)\external\Kconfig ]; then echo 'external'; else echo '.external-dummy'; fi)
 
 # CONTEXTDIRS include directories that have special, one-time pre-build
 #   requirements.  Normally this includes things like auto-generation of
@@ -200,7 +207,7 @@ endif
 # tools\mkversion tool is built and used to create include\nuttx\version.h
 
 tools\mkversion$(HOSTEXEEXT):
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" mkversion$(HOSTEXEEXT)
+	$(Q) $(MAKE) -C tools -f Makefile.host mkversion$(HOSTEXEEXT)
 
 $(TOPDIR)\.version:
 	$(Q) echo CONFIG_VERSION_STRING="0" > .version
@@ -217,7 +224,7 @@ include\nuttx\version.h: $(TOPDIR)\.version tools\mkversion$(HOSTEXEEXT) .clean_
 # tools\mkconfig tool is built and used to create include\nuttx\config.h
 
 tools\mkconfig$(HOSTEXEEXT):
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" mkconfig$(HOSTEXEEXT)
+	$(Q) $(MAKE) -C tools -f Makefile.host mkconfig$(HOSTEXEEXT)
 
 include\nuttx\config.h: $(TOPDIR)\.config tools\mkconfig$(HOSTEXEEXT) .clean_context
 	$(Q) tools\mkconfig$(HOSTEXEEXT) $(TOPDIR) > include\nuttx\config.h
@@ -225,7 +232,7 @@ include\nuttx\config.h: $(TOPDIR)\.config tools\mkconfig$(HOSTEXEEXT) .clean_con
 # Targets used to create dependencies
 
 tools\mkdeps$(HOSTEXEEXT):
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" mkdeps$(HOSTEXEEXT)
+	$(Q) $(MAKE) -C tools -f Makefile.host mkdeps$(HOSTEXEEXT)
 
 # dirlinks, and helpers
 #
@@ -292,10 +299,10 @@ ifneq ($(CONFIG_ARCH_CHIP),)
 endif
 
 dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip drivers\platform
-	$(Q) $(MAKE) -C libs/libxx dirlinks TOPDIR="$(TOPDIR)"
-	$(Q) $(MAKE) -C boards dirlinks TOPDIR="$(TOPDIR)"
-	$(Q) $(MAKE) -C openamp dirlinks TOPDIR="$(TOPDIR)"
-	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks TOPDIR="$(TOPDIR)"
+	$(Q) $(MAKE) -C libs/libxx dirlinks 
+	$(Q) $(MAKE) -C boards dirlinks 
+	$(Q) $(MAKE) -C openamp dirlinks
+	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks
 
 # context
 #
@@ -306,7 +313,7 @@ dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(
 
 context: include\nuttx\config.h include\nuttx\version.h include\math.h include\float.h include\stdarg.h include\setjmp.h dirlinks
 	$(Q) mkdir -p staging
-	$(Q) for %%G in ($(CONTEXTDIRS)) do ( $(MAKE) -C %%G TOPDIR="$(TOPDIR)" context )
+	$(Q) for %%G in ($(CONTEXTDIRS)) do ( $(MAKE) -C %%G context )
 
 # clean_context
 #
@@ -314,13 +321,20 @@ context: include\nuttx\config.h include\nuttx\version.h include\math.h include\f
 # and symbolic links created by the context target.
 
 clean_context:
-	$(Q) for %%G in ($(CCLEANDIRS)) do ( if exist %%G\Makefile $(MAKE) -C %%G TOPDIR="$(TOPDIR)" clean_context )
+	$(Q) for %%G in ($(CCLEANDIRS)) do ( if exist %%G\Makefile $(MAKE) -C %%G clean_context )
 	$(call DELFILE, include\nuttx\config.h)
 	$(call DELFILE, include\nuttx\version.h)
 	$(call DELFILE, include\float.h)
 	$(call DELFILE, include\math.h)
 	$(call DELFILE, include\stdarg.h)
 	$(call DELFILE, include\setjmp.h)
+	$(call DIRUNLINK, include\arch\board)
+	$(call DIRUNLINK, include\arch\chip)
+	$(call DIRUNLINK, include\arch)
+	$(call DIRUNLINK, $(ARCH_SRC)\board\board)
+	$(call DIRUNLINK, $(ARCH_SRC)\board)
+	$(call DIRUNLINK, $(ARCH_SRC)\chip)
+	$(call DIRUNLINK, $(TOPDIR)\drivers\platform)
 
 .clean_context: .config
 	+$(Q) $(MAKE) clean_context
@@ -367,9 +381,9 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 		echo "ERROR: No Makefile in CONFIG_PASS1_BUILDIR"; \
 		exit 1; \
 	fi
-	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(LINKLIBS)" USERLIBS="$(USERLIBS)" "$(CONFIG_PASS1_TARGET)"
+	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) LINKLIBS="$(LINKLIBS)" USERLIBS="$(USERLIBS)" "$(CONFIG_PASS1_TARGET)"
 endif
-	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" $(BIN)
+	$(Q) $(MAKE) -C $(ARCH_SRC) EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" $(BIN)
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
 	@echo "CP: $(NUTTXNAME).hex"
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) $(NUTTXNAME).hex
@@ -398,10 +412,10 @@ download: $(BIN)
 # pass2dep: Create pass2 build dependencies
 
 pass1dep: context tools\mkdeps$(HOSTEXEEXT)
-	$(Q) for %%G in ($(USERDEPDIRS)) do ( $(MAKE) -C %%G TOPDIR="$(TOPDIR)" depend )
+	$(Q) for %%G in ($(USERDEPDIRS)) do ( $(MAKE) -C %%G depend )
 
 pass2dep: context tools\mkdeps$(HOSTEXEEXT)
-	$(Q) for %%G in ($(KERNDEPDIRS)) do ( $(MAKE) -C %%G TOPDIR="$(TOPDIR)" EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" depend )
+	$(Q) for %%G in ($(KERNDEPDIRS)) do ( $(MAKE) -C %%G EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" depend )
 
 # Configuration targets
 #
@@ -411,22 +425,22 @@ pass2dep: context tools\mkdeps$(HOSTEXEEXT)
 # misc\tools\README.txt for additional information.
 
 config: apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf Kconfig
+	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-conf Kconfig
 
 oldconfig: apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --oldconfig Kconfig
+	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-conf --oldconfig Kconfig
 
 olddefconfig: apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --olddefconfig Kconfig
+	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-conf --olddefconfig Kconfig
 
 menuconfig: configenv apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-mconf Kconfig
+	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-mconf Kconfig
 
 nconfig: apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-nconf Kconfig
+	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-nconf Kconfig
 
 savedefconfig: apps_preconfig
-	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --savedefconfig defconfig.tmp Kconfig
+	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& set EXTERNALDIR=$(EXTERNALDIR)& kconfig-conf --savedefconfig defconfig.tmp Kconfig
 	$(Q) sed -i -e "/CONFIG_APPS_DIR=/d" defconfig.tmp
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
 	-$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp
@@ -474,7 +488,7 @@ $(foreach SDIR, $(CLEANDIRS), $(eval $(call SDIR_template,$(SDIR),clean)))
 
 subdir_clean: $(foreach SDIR, $(CLEANDIRS), $(SDIR)_clean)
 ifeq ($(CONFIG_BUILD_2PASS),y)
-	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" clean
+	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) clean
 endif
 
 clean: subdir_clean
@@ -495,7 +509,7 @@ subdir_distclean: $(foreach SDIR, $(CLEANDIRS), $(SDIR)_distclean)
 
 distclean: clean subdir_distclean clean_context
 ifeq ($(CONFIG_BUILD_2PASS),y)
-	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" distclean
+	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) distclean
 endif
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, defconfig)
@@ -504,14 +518,7 @@ endif
 	$(call DELFILE, .config.old)
 	$(call DELFILE, .config-e)
 	$(call DELFILE, .clean_context)
-	$(call DIRUNLINK, include\arch\board)
-	$(call DIRUNLINK, include\arch\chip)
-	$(call DIRUNLINK, include\arch)
-	$(call DIRUNLINK, $(ARCH_SRC)\board\board)
-	$(call DIRUNLINK, $(ARCH_SRC)\board)
-	$(call DIRUNLINK, $(ARCH_SRC)\chip)
-	$(call DIRUNLINK, $(TOPDIR)\drivers\platform)
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" clean
+	$(Q) $(MAKE) -C tools -f Makefile.host clean
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps\ directory is included with NuttX,
@@ -529,15 +536,15 @@ endif
 
 apps_preconfig: dirlinks
 ifneq ($(APPDIR),)
-	$(Q) $(MAKE) -C "$(APPDIR)" TOPDIR="$(TOPDIR)" preconfig
+	$(Q) $(MAKE) -C "$(APPDIR)" preconfig
 endif
 
 apps_clean:
 ifneq ($(APPDIR),)
-	$(Q) $(MAKE) -C "$(APPDIR)" TOPDIR="$(TOPDIR)" clean
+	$(Q) $(MAKE) -C "$(APPDIR)" clean
 endif
 
 apps_distclean:
 ifneq ($(APPDIR),)
-	$(Q) $(MAKE) -C "$(APPDIR)" TOPDIR="$(TOPDIR)" distclean
+	$(Q) $(MAKE) -C "$(APPDIR)" distclean
 endif

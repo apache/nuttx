@@ -149,7 +149,7 @@ libarch$(LIBEXT): asm_mem.h $(OBJS)
 # This builds the libboard library in the board/ subdirectory
 
 board/libboard$(LIBEXT):
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 # This target builds the final executable
 
@@ -209,7 +209,7 @@ export_startup: board/libboard$(LIBEXT) $(STARTUP_OBJS)
 
 .depend: Makefile asm_mem.h chip/Make.defs $(DEPSRCS) $(TOPDIR)$(DELIM).config
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
+		$(MAKE) -C board depend ; \
 	fi
 	$(Q) $(MKDEP) --dep-path chip --dep-path common "$(CC)" -- $(CFLAGS) -- $(DEPSRCS) >Make.dep
 	$(Q) touch $@
@@ -218,7 +218,7 @@ depend: .depend
 
 clean:
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" clean ; \
+		$(MAKE) -C board clean ; \
 	fi
 	$(call DELFILE, asm_mem.h)
 	$(call DELFILE, nuttx.*)
@@ -227,7 +227,7 @@ clean:
 
 distclean: clean
 	$(Q) if [ -e board/Makefile ]; then \
-		$(MAKE) -C board TOPDIR="$(TOPDIR)" distclean ; \
+		$(MAKE) -C board distclean ; \
 	fi
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)

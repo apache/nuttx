@@ -613,6 +613,10 @@ void nx_start(void)
     }
 #endif
 
+  /* Initialize the file system (needed to support device drivers) */
+
+  fs_initialize();
+
   /* Initialize the interrupt handling subsystem (if included) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
@@ -679,10 +683,6 @@ void nx_start(void)
       pthread_initialize();
     }
 #endif
-
-  /* Initialize the file system (needed to support device drivers) */
-
-  fs_initialize();
 
 #ifdef CONFIG_NET
   /* Initialize the networking system */

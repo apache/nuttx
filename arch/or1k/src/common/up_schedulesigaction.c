@@ -61,7 +61,7 @@
  *   This function is called by the OS when one or more
  *   signal handling actions have been queued for execution.
  *   The architecture specific code must configure things so
- *   that the 'igdeliver' callback is executed on the thread
+ *   that the 'sigdeliver' callback is executed on the thread
  *   specified by 'tcb' as soon as possible.
  *
  *   This function may be called from interrupt handling logic.
@@ -140,15 +140,18 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               tcb->xcp.sigdeliver       = sigdeliver;
-              //tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
-              //tcb->xcp.saved_cpsr       = CURRENT_REGS[REG_CPSR];
+              /* tcb->xcp.saved_pc         = CURRENT_REGS[REG_PC];
+               * tcb->xcp.saved_cpsr       = CURRENT_REGS[REG_CPSR];
+               */
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              //CURRENT_REGS[REG_PC]      = (uint32_t)up_sigdeliver;
-              //CURRENT_REGS[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
+              /* CURRENT_REGS[REG_PC]      = (uint32_t)up_sigdeliver;
+               * CURRENT_REGS[REG_CPSR]    = SVC_MODE | PSR_I_BIT |
+               *                             PSR_F_BIT;
+               */
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -173,14 +176,16 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.sigdeliver       = sigdeliver;
           tcb->xcp.saved_pc         = tcb->xcp.regs[REG_PC];
-          //tcb->xcp.saved_cpsr       = tcb->xcp.regs[REG_CPSR];
+
+          /* tcb->xcp.saved_cpsr       = tcb->xcp.regs[REG_CPSR]; */
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
            */
 
-          //tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
-          //tcb->xcp.regs[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
+          /* tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
+           * tcb->xcp.regs[REG_CPSR]    = SVC_MODE | PSR_I_BIT | PSR_F_BIT;
+           */
         }
     }
 

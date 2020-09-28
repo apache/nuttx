@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 2, 2020)
+NuttX TODO List (Last updated July 19, 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -295,49 +295,10 @@ o Task/Scheduler (sched/)
   Task:        IDLE THREAD TCB SETUP
   Description: There are issues with setting IDLE thread stacks:
 
-               1. One problem is stack-related data in the IDLE threads TCB.
-                  A solution might be to standardize the use of g_idle_topstack.
-                  That you could add initialization like this in nx_start:
-
-                  @@ -344,6 +347,11 @@ void nx_start(void)
-                     g_idleargv[1]  = NULL;
-                     g_idletcb.argv = g_idleargv;
-
-                  +  /* Set the IDLE task stack size */
-                  +
-                  +  g_idletcb.cmn.adj_stack_size = CONFIG_IDLETHREAD_STACKSIZE;
-                  +  g_idletcb.cmn.stack_alloc_ptr = (void *)(g_idle_topstack - CONFIG_IDLETHREAD_STACKSIZE);
-                  +
-                     /* Then add the idle task's TCB to the head of the ready to run list */
-
-                     dq_addfirst((FAR dq_entry_t *)&g_idletcb, (FAR dq_queue_t *)&g_readytorun);
-
-                  The g_idle_topstack variable is available for almost all architectures:
-
-                  $ find . -name *.h | xargs grep g_idle_top
-                  ./arm/src/common/up_internal.h:EXTERN const uint32_t g_idle_topstack;
-                  ./avr/src/avr/avr.h:extern uint16_t g_idle_topstack;
-                  ./avr/src/avr32/avr32.h:extern uint32_t g_idle_topstack;
-                  ./hc/src/common/up_internal.h:extern uint16_t g_idle_topstack;
-                  ./mips/src/common/up_internal.h:extern uint32_t g_idle_topstack;
-                  ./misoc/src/lm32/lm32.h:extern uint32_t g_idle_topstack;
-                  ./renesas/src/common/up_internal.h:extern uint32_t g_idle_topstack;
-                  ./renesas/src/m16c/chip.h:extern uint32_t g_idle_topstack; /* Start of the heap */
-                  ./risc-v/src/common/up_internal.h:EXTERN uint32_t g_idle_topstack;
-                  ./x86/src/common/up_internal.h:extern uint32_t g_idle_topstack;
-
-                  That omits these architectures: sh1, sim, xtensa, z16, z80,
-                  ez80, and z8.  All would have to support this common
-                  global variable.
-
-                  Also, the stack itself may be 8-, 16-, or 32-bits wide,
-                  depending upon the architecture and do have differing
-                  alignment requirements.
-
-               2. Another problem is colorizing that stack to use with
-                 stack usage monitoring logic.  There is logic in some
-                 start functions to do this in a function called go_nx_start.
-                 It is available in these architectures:
+               The problem is colorizing that stack to use with stack usage
+               monitoring logic.  There is logic in some start functions to
+               do this in a function called go_nx_start.
+               It is available in these architectures:
 
                  ./arm/src/efm32/efm32_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
                  ./arm/src/kinetis/kinetis_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
@@ -349,9 +310,9 @@ o Task/Scheduler (sched/)
                  ./arm/src/tms570/tms570_boot.c:static void go_nx_start(void *pv, unsigned int nbytes)
                  ./arm/src/xmc4/xmc4_start.c:static void go_nx_start(void *pv, unsigned int nbytes)
 
-                 But no others.
-  Status:     Open
-  Priority:   Low, only needed for more complete debug.
+               But no others.
+  Status:      Open
+  Priority:    Low, only needed for more complete debug.
 
   Title:       PRIORITY INHERITANCE WITH SPORADIC SCHEDULER
   Description: The sporadic scheduler manages CPU utilization by a task by

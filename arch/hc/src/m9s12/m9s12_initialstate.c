@@ -47,18 +47,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -79,6 +67,14 @@
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
+
+  /* Initialize the idle thread stack */
+
+  if (tcb->pid == 0)
+    {
+      up_use_stack(tcb, (void *)(g_idle_topstack -
+        CONFIG_IDLETHREAD_STACKSIZE), CONFIG_IDLETHREAD_STACKSIZE);
+    }
 
   /* Initialize the initial exception register context structure */
 
@@ -115,7 +111,7 @@ void up_initial_state(struct tcb_s *tcb)
 # ifdef CONFIG_SUPPRESS_INTERRUPTS
   /* Disable STOP, Mask I- and Z- interrupts */
 
-  xcp->regs[REG_CCR]      = HCS12_CCR_S|HCS12_CCR_X|HCS12_CCR_I;
+  xcp->regs[REG_CCR]      = HCS12_CCR_S | HCS12_CCR_X | HCS12_CCR_I;
 # else
   /* Disable STOP, Enable I- and Z-interrupts */
 

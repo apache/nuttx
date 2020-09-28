@@ -54,7 +54,9 @@
 #  include <arch/armv7-r/spinlock.h>
 #elif defined(CONFIG_ARCH_ARMV7M)
 #  include <arch/armv7-m/spinlock.h>
-#elif defined(CONFIG_ARCH_CORTEXM0)
+#elif defined(CONFIG_ARCH_ARMV8M)
+#  include <arch/armv8-m/spinlock.h>
+#elif defined(CONFIG_ARCH_ARMV6M)
 #  include <arch/armv6-m/spinlock.h>
 #else
 #  include <arch/arm/spinlock.h>
@@ -117,7 +119,7 @@
 typedef uint8_t spinlock_t;
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************

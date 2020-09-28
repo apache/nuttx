@@ -72,6 +72,11 @@ endif
 
 KERNDEPDIRS += sched drivers boards $(ARCH_SRC)
 KERNDEPDIRS += fs binfmt
+
+ifeq ($(EXTERNALDIR),external)
+  KERNDEPDIRS += external
+endif
+
 CONTEXTDIRS = boards fs $(APPDIR)
 CLEANDIRS += pass1
 

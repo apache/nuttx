@@ -194,6 +194,12 @@ int nx_vioctl(int fd, int req, va_list ap)
                                nx_fcntl(fd, F_GETFL) & ~O_NONBLOCK);
               }
             break;
+          case FIOCLEX:
+            ret = nx_fcntl(fd, F_SETFD, nx_fcntl(fd, F_GETFD) | FD_CLOEXEC);
+            break;
+          case FIONCLEX:
+            ret = nx_fcntl(fd, F_SETFD, nx_fcntl(fd, F_GETFD) & ~FD_CLOEXEC);
+            break;
         }
     }
 

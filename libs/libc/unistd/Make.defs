@@ -41,6 +41,10 @@ CSRCS += lib_alarm.c lib_fstatvfs.c lib_statvfs.c lib_sleep.c lib_usleep.c
 CSRCS += lib_seteuid.c lib_setegid.c lib_geteuid.c lib_getegid.c
 CSRCS += lib_setreuid.c lib_setregid.c
 CSRCS += lib_getrusage.c lib_utimes.c
+CSRCS += lib_setrlimit.c lib_getrlimit.c
+CSRCS += lib_setpriority.c lib_getpriority.c
+CSRCS += lib_futimes.c lib_futimens.c
+CSRCS += lib_gettid.c
 
 ifneq ($(CONFIG_SCHED_USER_IDENTITY),y)
 CSRCS += lib_setuid.c lib_setgid.c lib_getuid.c lib_getgid.c
@@ -59,7 +63,7 @@ CSRCS += lib_truncate.c
 endif
 
 ifeq ($(CONFIG_PIPES),y)
-CSRCS += lib_pipe.c
+CSRCS += lib_pipe.c lib_pipe2.c
 endif
 
 CSRCS += lib_gethostname.c lib_sethostname.c

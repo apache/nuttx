@@ -43,6 +43,14 @@
 #  include "rx65n_rtc.h"
 #endif
 
+#ifdef CONFIG_CDCACM
+#  include <nuttx/usb/cdcacm.h>
+#endif
+
+#ifdef HAVE_DTC_DRIVER
+#  include "rx65n_dtc.h"
+#endif
+
 #ifdef HAVE_RIIC_DRIVER
 #  include <nuttx/i2c/i2c_master.h>
 #  include "rx65n_riic.h"
@@ -106,6 +114,7 @@ static int rtc_driver_initialize(void)
 
 int rx65n_bringup(void)
 {
+#if defined (HAVE_RTC_DRIVER) || defined (CONFIG_FS_PROCFS)
   int ret;
 #ifdef HAVE_RTC_DRIVER
   ret = rtc_driver_initialize();
@@ -128,12 +137,31 @@ int rx65n_bringup(void)
     }
 
 #endif
+#endif
 
 #ifdef CONFIG_RX65N_SBRAM
   /* Initialize battery-backed RAM */
 
   (void)rx65n_sbram_int();
 #endif
+
+#ifdef HAVE_DTC_DRIVER
+  /* Initialize DTC */
+
+  (void)rx65n_dtc_initialize();
+#endif
+#if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_CONSOLE)
+  /* Initialize CDCACM */
+
+  syslog(LOG_INFO, "Initialize CDCACM device\n");
+
+  ret = cdcacm_initialize(0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: cdcacm_initialize failed: %d\n", ret);
+    }
+#endif /* CONFIG_CDCACM & !CONFIG_CDCACM_CONSOLE */
+
 #ifdef HAVE_RIIC_DRIVER
   FAR struct i2c_master_s *i2c;
 
