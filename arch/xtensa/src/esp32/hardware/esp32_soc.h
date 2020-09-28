@@ -776,8 +776,6 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
 #define FE2_TX_INF_FORCE_PD_V       1
 #define FE2_TX_INF_FORCE_PD_S       9
 
-#define PIN_CTRL                    (DR_REG_IO_MUX_BASE + 0x00)
-
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
