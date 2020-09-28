@@ -72,8 +72,6 @@
  *
  ****************************************************************************/
 
-#warning REVISIT heap.  Do what with non-heterogeneous memory?
-
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
