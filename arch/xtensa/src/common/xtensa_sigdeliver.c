@@ -155,6 +155,40 @@ void xtensa_sig_deliver(void)
   regs[REG_PS]         = rtcb->xcp.saved_ps;
   rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
+  /* Issue:
+   *
+   * Task1 --> process
+   *       --> xtensa_context_save(S1)
+   *       --> s32i a0, a2, (4 * REG_A0)
+   *       --> rtcb->xcp.regs[REG_A0] = A0
+   *
+   * Task preemption
+   *
+   * Task2 --> Post signal to Task1
+   *       --> Wake up Task1
+   *
+   * Task1 --> xtensa_sig_deliver
+   *       --> up_irq_enable()
+   *       --> Task preemption
+   *
+   * Task preemption --> xtensa_context_save
+   *                 --> rtcb->xcp.regs[REG_A0] = A0 of "xtensa_sig_deliver"
+   *                     = _xtensa_sig_trampoline + 6
+   *                     = "j 1b"
+   *
+   * Process ...
+   *
+   * Task1 --> xtensa_sig_deliver
+   *       --> xtensa_context_restore
+   *       --> xtensa_context_save(S1)
+   *       --> l32i a0, a2, (4 * REG_A0)
+   *       --> a0 = "j 1b"
+   *       --> ret
+   *       --> run "j 1b"
+   */
+
+  rtcb->xcp.regs[REG_A0] = regs[REG_A0];
+
 #ifdef CONFIG_SMP
   /* Restore the saved 'irqcount' and recover the critical section
    * spinlocks.
