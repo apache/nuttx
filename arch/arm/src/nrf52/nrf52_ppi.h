@@ -132,6 +132,19 @@ void nrf52_ppi_set_task2_ep(uint8_t ch, uint32_t task_reg);
 void nrf52_ppi_grp_channel_enable(uint8_t group, uint8_t ch, bool enable);
 
 /****************************************************************************
+ * Name: nrf52_ppi_grp_clear
+ *
+ * Description:
+ *   Clear group (disable all its channels)
+ *
+ * Input Parameters:
+ *   - group: group number
+ *
+ ****************************************************************************/
+
+void nrf52_ppi_grp_clear(uint8_t group);
+
+/****************************************************************************
  * Name: nrf52_ppi_grp_enable
  *
  * Description:
