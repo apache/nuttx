@@ -67,10 +67,12 @@ void nrf52_ppi_channel_enable(uint8_t ch, bool enable)
 
   if (enable)
     {
+      DEBUGASSERT(!(getreg32(NRF52_PPI_CHENSET) & PPI_CHEN_CH(ch)));
       putreg32(PPI_CHEN_CH(ch), NRF52_PPI_CHENSET);
     }
   else
     {
+      DEBUGASSERT(getreg32(NRF52_PPI_CHENSET) & PPI_CHEN_CH(ch));
       putreg32(PPI_CHEN_CH(ch), NRF52_PPI_CHENCLR);
     }
 }
@@ -122,6 +124,17 @@ void nrf52_ppi_grp_channel_enable(uint8_t group, uint8_t ch, bool enable)
 }
 
 /****************************************************************************
+ * Name: nrf52_ppi_grp_clear
+ ****************************************************************************/
+
+void nrf52_ppi_grp_clear(uint8_t group)
+{
+  DEBUGASSERT(group < NRF52_PPI_NUM_GROUPS);
+
+  putreg32(0, NRF52_PPI_CHG(group));
+}
+
+/****************************************************************************
  * Name: nrf52_ppi_grp_enable
  ****************************************************************************/
 
@@ -130,5 +143,5 @@ void nrf52_ppi_grp_enable(uint8_t group, bool enable)
   DEBUGASSERT(group < NRF52_PPI_NUM_GROUPS);
 
   putreg32(1, (enable ? NRF52_PPI_TASK_CHGEN(group) :
-                        NRF52_PPI_TASK_CHGDIS_OFFSET(group)));
+                        NRF52_PPI_TASK_CHGDIS(group)));
 }
