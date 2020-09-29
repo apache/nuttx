@@ -454,10 +454,12 @@ void nrf52_set_format(struct uart_dev_s *dev)
 
 static int nrf52_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
+#ifdef CONFIG_SERIAL_TERMIOS
   struct inode         *inode  = filep->f_inode;
   struct uart_dev_s    *dev    = inode->i_private;
   struct nrf52_dev_s   *priv   = (struct nrf52_dev_s *)dev->priv;
   struct uart_config_s *config = &priv->config;
+#endif
   int                   ret    = OK;
 
   switch (cmd)
