@@ -114,7 +114,8 @@ int epoll_create1(int flags)
 
   if (flags != EPOLL_CLOEXEC)
     {
-      return EINVAL;
+      set_errno(EINVAL);
+      return -1;
     }
 
   return epoll_create(CONFIG_FS_NEPOLL_DESCRIPTORS);
@@ -193,7 +194,8 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
                 }
             }
 
-          return -ENOENT;
+          set_errno(ENOENT);
+          return -1;
         }
 
       case EPOLL_CTL_MOD:
@@ -213,11 +215,13 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
                 }
             }
 
-          return -ENOENT;
+          set_errno(ENOENT);
+          return -1;
         }
     }
 
-  return -EINVAL;
+  set_errno(EINVAL);
+  return -1;
 }
 
 /****************************************************************************
