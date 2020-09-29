@@ -161,11 +161,13 @@ static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
           break;
         }
 
+#ifdef UART_BAUDRATE_31250
       case 31250:
         {
           br = UART_BAUDRATE_31250;
           break;
         }
+#endif
 
       case 38400:
         {
@@ -173,11 +175,13 @@ static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
           break;
         }
 
+#ifdef UART_BAUDRATE_56000
       case 56000:
         {
           br = UART_BAUDRATE_56000;
           break;
         }
+#endif
 
       case 57600:
         {
