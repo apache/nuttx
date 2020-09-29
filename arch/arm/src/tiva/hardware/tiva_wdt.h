@@ -107,6 +107,7 @@
 /* WDT register bitfield definitions ********************************************************/
 
 /* Configuration (32-bit interval value) */
+
 /* Current Count Value (32-bit timer counter value) */
 
 /* Control */
