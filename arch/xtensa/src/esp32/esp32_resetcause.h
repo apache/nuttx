@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-core/src/esp32_reset.c
+ * arch/xtensa/src/esp32/esp32_resetcause.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,45 +19,36 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Included Files
+ * Public Types
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-
-#ifdef CONFIG_BOARDCTL_RESET
+enum esp32_resetcause_e
+{
+  ESP32_RESETCAUSE_SYS_CHIPPOR = 0x01,
+  ESP32_RESETCAUSE_SYS_RWDTSR  = 0x10,
+  ESP32_RESETCAUSE_SYS_BOR     = 0x0f,
+  ESP32_RESETCAUSE_CORE_SOFT   = 0x03,
+  ESP32_RESETCAUSE_CORE_DPSP   = 0x05,
+  ESP32_RESETCAUSE_CORE_MWDT0  = 0x07,
+  ESP32_RESETCAUSE_CORE_MWDT1  = 0x08,
+  ESP32_RESETCAUSE_CORE_RWDT   = 0x09,
+  ESP32_RESETCAUSE_CPU_MWDT0   = 0x0b,
+  ESP32_RESETCAUSE_CPU_SOFT    = 0x0c,
+  ESP32_RESETCAUSE_CPU_RWDT    = 0x0d,
+  ESP32_RESETCAUSE_CPU_PROCPU  = 0x0e
+};
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_reset
+ * Name: esp32_resetcause
  *
  * Description:
- *   Reset board.  Support for this function is required by board-level
- *   logic if CONFIG_BOARDCTL_RESET is selected.
- *
- * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *            meaning of this status information is board-specific.  If not
- *            used by a board, the value zero may be provided in calls to
- *            board_reset().
- *
- * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value in this case is a
- *   board-specific reason for the failure to shutdown.
+ *   Get the cause of the last reset of the given CPU
  *
  ****************************************************************************/
 
-int board_reset(int status)
-{
-  up_systemreset();
+enum esp32_resetcause_e esp32_resetcause(int cpu);
 
-  return 0;
-}
-
-#endif /* CONFIG_BOARDCTL_RESET */
