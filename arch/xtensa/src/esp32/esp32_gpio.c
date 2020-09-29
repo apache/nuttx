@@ -172,10 +172,6 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 
   if ((attr & INPUT) != 0)
     {
-      /* Enable input mode in the IO_MUX. */
-
-      func |= FUN_IE;
-
       if (pin < 32)
         {
           putreg32((1ul << pin), GPIO_ENABLE_W1TC_REG);
@@ -212,6 +208,10 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
   /* Add drivers */
 
   func |= (uint32_t)(2ul << FUN_DRV_S);
+
+  /* Input enable... Required for output as well? */
+
+  func |= FUN_IE;
 
   pinmode = (attr & PINMODE_MASK);
   if (pinmode == INPUT || pinmode == OUTPUT)
