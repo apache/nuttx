@@ -58,6 +58,15 @@ struct iovec
  * Public Function Prototypes
  ****************************************************************************/
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
  * Name: readv()
  *
@@ -137,5 +146,10 @@ ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt);
  ****************************************************************************/
 
 ssize_t writev(int fildes, FAR const struct iovec *iov, int iovcnt);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* __INCLUDE_SYS_UIO_H */
