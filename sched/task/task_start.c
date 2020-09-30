@@ -134,18 +134,18 @@ void nxtask_start(void)
    * we have to switch to user-mode before calling the task.
    */
 
-#ifndef CONFIG_BUILD_FLAT
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
-    {
-      up_task_start(tcb->cmn.entry.main, argc, tcb->argv);
-    }
-  else
+  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
       exitcode = tcb->cmn.entry.main(argc, tcb->argv);
     }
+  else
+    {
+#ifdef CONFIG_BUILD_FLAT
+      nxtask_startup(tcb->cmn.entry.main, argc, tcb->argv);
 #else
-  nxtask_startup(tcb->cmn.entry.main, argc, tcb->argv);
+      up_task_start(tcb->cmn.entry.main, argc, tcb->argv);
 #endif
+    }
 
   /* Call exit() if/when the task returns */
 
