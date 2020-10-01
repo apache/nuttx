@@ -835,6 +835,8 @@ int nx_dup2(int fd1, int fd2);
  *
  ****************************************************************************/
 
+int file_vopen(FAR struct file *filep,
+               FAR const char *path, int oflags, va_list ap);
 int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...);
 
 /****************************************************************************
