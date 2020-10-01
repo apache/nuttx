@@ -149,6 +149,8 @@ static bool handle_irqreq(int cpu)
 
           spin_unlock(&g_cpu_wait[cpu]);
           handled = true;
+
+          break;
         }
     }
 
