@@ -6,7 +6,7 @@ C Coding Standard
 =================
 
 NuttX follows a specific coding style which needs to be followed at all times
-a contribution to be accepted. Please read this document before working on 
+a contribution to be accepted. Please read this document before working on
 new code so that you can follow the style from the start. To check your code
 for conformance to the coding style, you should use the `nxstyle <#nxstyle>`_
 tool included under ``tools/`` in the main NuttX repository.
@@ -18,7 +18,7 @@ General Conventions
 File Organization
 =================
 
-**File Extensions** Use the ``.h`` extension for C header files 
+**File Extensions** Use the ``.h`` extension for C header files
 and ``.c`` for C source files.
 
 **File header**. Every C, C++, make file, or script begins with a file header.
@@ -153,10 +153,10 @@ may be used in the file provided that it is used consistently.
 
 **Line Wrapping**.
 
-.. error:: This is incorrect  
-  
+.. error:: This is incorrect
+
   .. code-block:: c
-  
+
     struct some_long_struct_name_s
     {
       struct some_long_struct_name_s *flink;  /* The forward link to the next instance of struct some_long_struct_name_s in a singly linked list */
@@ -182,7 +182,7 @@ may be used in the file provided that it is used consistently.
 .. hint:: This is correct
 
   .. code-block:: c
-  
+
     struct some_long_struct_name_s
     {
       /* The forward link to the next instance of struct
@@ -212,7 +212,7 @@ may be used in the file provided that it is used consistently.
                                              long_parameter_name_5,
                                              long_parameter_name_6,
                                              long_parameter_name_7,
-                                             long_parameter_name_8);    
+                                             long_parameter_name_8);
 
 **NOTE**: See the discussion of `pointers <#farnear>`__ for
 information about the ``FAR`` qualifier used above.
@@ -229,19 +229,19 @@ exceeded.
 .. note:: This is acceptable
 
   .. code-block:: c
-  
+
     dog = cat;
     monkey = oxen;
-    aardvark = macaque;   
-    
+    aardvark = macaque;
+
 .. hint:: This is preferred
- 
+
   .. code-block:: c
-  
+
     dog      = cat;
     monkey   = oxen;
     aardvark = macaque;
-     
+
 **Block Comments** The final asterisk (``*``) should occur at
 column 78 (or the line width of files with longer lines). Note
 that the final comment delimiter of the block comment is an
@@ -281,10 +281,10 @@ that may be the final line preceding a closing right brace.
 With Labels. No blank line separates the line containing the label
 from a comment.
 
-.. error:: This is incorrect  
- 
+.. error:: This is incorrect
+
   .. code-block:: c
-  
+
       /* set a equal to b */
       a = b;
       /* set b equal to c */
@@ -306,11 +306,11 @@ from a comment.
       here:
 
       /* This is the place */
-      
+
 .. tip:: This is correct
 
   .. code-block:: c
-  
+
       /* Set a equal to b. */
 
       a = b;
@@ -344,7 +344,7 @@ single line. The comment delimiters must lie on the same line.
 .. error:: This is incorrect
 
   .. code-block:: c
-  
+
     /*
      * This is a single line comment
      */
@@ -352,7 +352,7 @@ single line. The comment delimiters must lie on the same line.
 .. tip:: This is correct
 
   .. code-block:: c
-    
+
     /* This is a single line comment. */
 
 **Multi-line comments**. If the comment is too long to fit on a
@@ -368,7 +368,7 @@ preceding line.
 .. error:: This is incorrect
 
   .. code-block:: c
-  
+
     /*
        This is the first line of a multi-line comment.
        This is the second line of a multi-line comment.
@@ -377,11 +377,11 @@ preceding line.
     /* This is the first line of another multi-line comment.  */
     /* This is the second line of another multi-line comment. */
     /* This is the third line of another multi-line comment.  */
-  
+
 .. tip:: This is correct
 
   .. code-block:: c
-  
+
     /* This is the first line of a multi-line comment.
      * This is the second line of a multi-line comment.
      * This is the third line of a multi-line comment.
@@ -396,23 +396,23 @@ comment begins in the same column on each line.
 .. error:: This is incorrect
 
   .. code-block:: c
-  
+
     dog = cat; /* Make the dog be a cat */
     monkey = oxen; /* Make the monkey be an oxen */
     aardvark = macaque; /* Make the aardvark be a macaque */
-  
+
 .. note:: This is acceptable
 
   .. code-block:: c
-  
+
     dog      = cat;     /* Make the dog be a cat. */
     monkey   = oxen;    /* Make the monkey be an oxen. */
-    aardvark = macaque; /* Make the aardvark be a macaque. */  
+    aardvark = macaque; /* Make the aardvark be a macaque. */
 
 .. tip:: This is preferred
 
   .. code-block:: c
-  
+
     /* Make the dog be a cat. */
 
     dog      = cat;
@@ -424,7 +424,7 @@ comment begins in the same column on each line.
     /* Make the aardvark be a macaque. */
 
     aardvark = macaque;
-    
+
 **Comments to the Right of Data Definitions**. Comments to the
 right of a declaration with an enumeration or structure, on the
 other hand, are encouraged, provided that the comments are short
@@ -435,7 +435,7 @@ be achieved without violating the line width).
 .. error:: This is incorrect
 
   .. code-block:: c
-  
+
     struct animals_s
     {
       int dog; /* This is a dog */
@@ -445,11 +445,11 @@ be achieved without violating the line width).
       bool aardvark; /* This is an aardvark */
       bool macaque; /* This is a macaque */
     };
-  
+
 .. note:: This is acceptable
 
   .. code-block:: c
-  
+
     struct animals_s
     {
       int dog;       /* This is a dog. */
@@ -463,7 +463,7 @@ be achieved without violating the line width).
 .. tip:: This is preferred
 
   .. code-block:: c
-  
+
     struct animals_s
     {
       int    dog;      /* This is a dog. */
@@ -492,20 +492,20 @@ comment delimiter must lie on the *same* line with the asterisk.
 .. error:: This is incorrect
 
   .. code-block:: c
-  
+
     dog = cat; /* This assignment will convert what was at one time a lowly dog into a ferocious feline. */
 
 .. note:: This is acceptable
 
   .. code-block:: c
-  
+
     dog = cat;       /* This assignment will convert what was at one time a
                       * lowly dog into a ferocious feline. */
 
 .. tip:: This is preferred
 
   .. code-block:: c
-  
+
     /* This assignment will convert what was at one time a lowly dog into a
      * ferocious feline.
      */
@@ -533,7 +533,7 @@ compatible with C89.
 .. error:: This is incorrect
 
   .. code-block:: c
-  
+
     // This is a structure of animals
     struct animals_s
     {
@@ -548,7 +548,7 @@ compatible with C89.
 .. tip:: This is correct
 
   .. code-block:: c
-  
+
     /* This is a structure of animals. */
 
     struct animals_s
@@ -569,7 +569,7 @@ why the code is not compiled.
 .. error:: This is incorrect
 
   .. code-block:: c
-  
+
     void some_function(void)
     {
       ... compiled code ...
@@ -595,7 +595,7 @@ why the code is not compiled.
 .. tip:: This is correct
 
   .. code-block:: c
-  
+
     void some_function(void)
     {
       ... compiled code ...
@@ -646,7 +646,7 @@ few subtle differences.
 .. error:: This is incorrect
 
   .. code-block:: c
-  
+
     while (true)
       {
         if (valid)
@@ -671,11 +671,11 @@ few subtle differences.
           c = b;
       }
     }
-    
+
 .. tip:: This is correct
 
   .. code-block:: c
-      
+
     while (true)
       {
         if (valid)
@@ -709,7 +709,7 @@ few subtle differences.
           {
             c = b;
           }
-      }  
+      }
 
 **Exception to Indentation Rule for Braces**. The exception is braces
 that following structure, enumeration, union, and function declarations.
@@ -719,7 +719,7 @@ with the beginning of the definition
 .. error:: This is incorrect
 
   .. code-block:: c
-  
+
     enum kinds_of_dogs_e
       {
       ...
@@ -747,11 +747,11 @@ with the beginning of the definition
       {
       ...
       }
-    
+
 .. tip:: This is correct
 
   .. code-block:: c
-      
+
     enum kinds_of_dogs_e
     {
       ...
@@ -797,11 +797,11 @@ indentation levels. TAB characters may not be used for indentation.
 .. error:: This is incorrect
 
   .. code-block:: c
-  
+
     if (x == y) {
 	    dosomething(x);
     }
-    
+
       if (x == y) {
           dosomething(x);
       }
@@ -809,7 +809,7 @@ indentation levels. TAB characters may not be used for indentation.
 .. tip:: This is correct
 
   .. code-block:: c
-  
+
     if (x == y)
       {
         dosomething(x);
@@ -861,7 +861,7 @@ statements should be omitted in those sections (only).
 .. error:: This is incorrect
 
   .. code-block:: c
-  
+
     #ifdef CONFIG_ABC
     #define ABC_THING1 1
     #define ABC_THING2 2
@@ -877,7 +877,7 @@ statements should be omitted in those sections (only).
 .. tip:: This is correct
 
   .. code-block:: c
-  
+
     #ifdef CONFIG_ABC
     #  define ABC_THING1 1
     #  define ABC_THING2 2
@@ -895,9 +895,9 @@ definitions <#idempotence>`__ at the beginning of the header file. This
 conditional compilation does *not* cause any change to the indentation.
 
 .. error:: This is incorrect
- 
+
   .. code-block:: c
-  
+
     #ifndef __INCLUDE_SOMEHEADER_H
     #  define __INCLUDE_SOMEHEADER_H
     ...
@@ -908,9 +908,9 @@ conditional compilation does *not* cause any change to the indentation.
     #endif /* __INCLUDE_SOMEHEADER_H */
 
 .. tip:: This is correct
- 
+
   .. code-block:: c
-  
+
     #ifndef __INCLUDE_SOMEHEADER_H
     #define __INCLUDE_SOMEHEADER_H
     ...
@@ -941,9 +941,9 @@ Parentheses
    to force the correct order of operations in a computed return value.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     int do_foobar ( void )
     {
       int ret = 0;
@@ -958,9 +958,9 @@ Parentheses
     }
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     int do_foobar(void)
     {
       int ret = 0;
@@ -992,24 +992,24 @@ One Definition/Declaration Per Line
 ===================================
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     extern long time, money;
     char **ach, *bch;
     int i, j, k;
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     extern long time;
     extern long money;
     FAR char **ach;
     FAR char *bch;
     int i;
     int j;
-    int k;  
+    int k;
 
 **NOTE**: See the discussion of `pointers <#farnear>`__ for information
 about the ``FAR`` qualifier used above.
@@ -1052,27 +1052,27 @@ any variable that has more than local scope.
    general, is discourage unless there is no other reasonable solution.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     extern int someint;
     static int anotherint;
     uint32_t dwA32BitInt;
     uint32_t gAGlobalVariable;
 
 .. note:: This is acceptable
-  
+
   .. code-block:: c
-  
+
     extern int g_someint;
     static int g_anotherint;
     uint32_t g_a32bitint;
     uint32_t g_aglobal;
 
 .. tip:: This is preferred
-  
+
   .. code-block:: c
-  
+
     struct my_variables_s
     {
       uint32_t a32bitint;
@@ -1113,9 +1113,9 @@ Parameters and Local Variables
    discouraged.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     uint32_t somefunction(int a, uint32_t dwBValue)
     {
       uint32_t this_is_a_long_variable_name = 1;
@@ -1128,11 +1128,11 @@ Parameters and Local Variables
 
       return this_is_a_long_variable_name;
     }
-    
+
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     uint32_t somefunction(int limit, uint32_t value)
     {
       uint32_t ret = 1;
@@ -1145,7 +1145,7 @@ Parameters and Local Variables
 
       return ret;
     }
-  
+
 
 **NOTE:** You will see the local variable named ``ret`` is frequently
 used in the code base for the name of a local variable whose value will
@@ -1173,16 +1173,16 @@ Type Definitions
    discouraged.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     typedef void *myhandle;
     typedef int myInteger;
-    
+
 .. tip:: This is correct
-  
+
   .. code-block:: c
-   
+
     typedef FAR void *myhandle_t;
     typedef int myinteger_t;
 
@@ -1209,8 +1209,8 @@ Structures
    structure may be another structure that is defined only with the
    scope of the containing structure. This practice is acceptable, but
    discouraged.
--  **No un-named structure fields**. Structure may contain other
-   structures as fields. This this case, the structure field must be
+-  **No un-named structure fields**. Structures may contain other
+   structures as fields. In this case, the structure field must be
    named. C11 permits such un-named structure fields within a structure.
    NuttX generally follows C89 and all code outside of architecture
    specific directories must be compatible with C89.
@@ -1272,9 +1272,9 @@ well known like ``uint8_t`` and ``uint32_t`` should also be place in
 either ascending or descending size order.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     typedef struct       /* Un-named structure */
     {
       ...
@@ -1304,9 +1304,9 @@ either ascending or descending size order.
     };
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     struct xyz_info_s
     {
       ...
@@ -1317,17 +1317,17 @@ either ascending or descending size order.
     };
 
 .. warning:: This is discouraged
-  
+
   .. code-block:: c
-  
+
     typedef struct xyz_info_s xzy_info_t;
 
 The use of typedef'ed structures is acceptable but discouraged.
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     struct xyz_info_s
     {
       ...
@@ -1336,11 +1336,11 @@ The use of typedef'ed structures is acceptable but discouraged.
       uint8_t bitc : 1,  /* Bit C */
       ...
     };
-    
+
 .. warning:: This is discouraged
-  
+
   .. code-block:: c
-  
+
     struct abc_s
     {
       ...
@@ -1358,9 +1358,9 @@ The general practice of defining a structure within the scope of another structu
 The following is preferred:
 
 .. tip:: This is preferred
-  
+
   .. code-block:: c
-  
+
     struct abc_s
     {
       ...
@@ -1385,7 +1385,7 @@ formatting <#lines>`__, `use of braces <#braces>`__,
 .. note:: This is acceptable
 
   .. code-block:: c
-     
+
     union xyz_union_u  /* All unions must be named */
     {
       uint8_t  b[4];   /* Byte values. */
@@ -1398,9 +1398,9 @@ formatting <#lines>`__, `use of braces <#braces>`__,
 The use of typedef'ed unions is acceptable but discouraged.
 
 .. tip:: This is preferred
-  
+
   .. code-block:: c
-  
+
     struct xyz_info_s
     {
       ...
@@ -1447,9 +1447,9 @@ formatting <#lines>`__, `use of braces <#braces>`__,
 `indentation <#indentation>`__, and `comments <#comments>`__.
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     enum xyz_state_e
     {
       XYZ_STATE_UNINITIALIZED = 0, /* Uninitialized state. */
@@ -1509,9 +1509,9 @@ formatting <#lines>`__, `indentation <#indentation>`__, and
 `comments <#comments>`__.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     #define max(a,b) a > b ? a : b
 
     #define ADD(x,y) x + y
@@ -1531,12 +1531,12 @@ formatting <#lines>`__, `indentation <#indentation>`__, and
         a = b*value;                                         \
       }
 
-    #define DO_ASSIGN(a,b) a = b  
+    #define DO_ASSIGN(a,b) a = b
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 
     #define ADD(x,y) ((x) + (y))
@@ -1577,17 +1577,17 @@ immediately before the variable name with no intervening spaces. A space
 should precede the asterisk in a cast to a pointer type.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     int somefunction(struct somestruct_s* psomething);
 
     ptr = (struct somestruct_s*)value;
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     int somefunction(FAR struct somestruct_s *something);
 
     ptr = (FAR struct somestruct_s *)value;
@@ -1766,9 +1766,9 @@ Conventions <#general>`__, `Parameters and Local
 Variables <#localvariable>`__, and `Statements <#statements>`__.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     int myfunction(int a, int b)
       {
         int c, d;
@@ -1787,11 +1787,11 @@ Variables <#localvariable>`__, and `Statements <#statements>`__.
 
         return (e / a);
       }
-    
+
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     int myfunction(int a, int b)
     {
       int c;
@@ -1815,7 +1815,7 @@ Variables <#localvariable>`__, and `Statements <#statements>`__.
 
       return e / a;
     }
-  
+
 Returned Values
 ===============
 
@@ -1839,7 +1839,7 @@ particular, must be checked for failures to allocate memory to avoid use
 of NULL pointers.
 
 **********
-Statements                                            
+Statements
 **********
 
 One Statement Per Line
@@ -1859,9 +1859,9 @@ One Statement Per Line
 use of `braces <#braces>`__.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     if (var1 &lt; var2) var1 = var2;
 
     case 5: var1 = var2; break;
@@ -1869,11 +1869,11 @@ use of `braces <#braces>`__.
     var1 = 5; var2 = 6; var3 = 7;
 
     var1 = var2 = var3 = 0;
-  
+
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     if (var1 &lt; var2)
       {
         var1 = var2;
@@ -1902,15 +1902,15 @@ Casts
    value being cast.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     struct something_s *x = (struct something_s*) y;
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     struct something_s *x = (struct something_s *)y;
 
 Operators
@@ -1922,17 +1922,17 @@ Operators
 operator, for readability. As examples:
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     for=bar;
     if(a==b)
     for(i=0;i<5;i++)
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     for = bar;
     if (a == b)
     for (i = 0; i < 5; i++)
@@ -1942,15 +1942,15 @@ operate on only one value), such as ``++``, should *not* have a space
 between the operator and the variable or number they are operating on.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     x ++;
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-      
+
     x++;
 
 **Forbidden Multicharacter Forms**. Many operators are expressed as a
@@ -2001,9 +2001,9 @@ different.
 braces <#braces>`__ and `indentation <#indentation>`__.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     if(var1 < var2) var1 = var2;
 
     if(var > 0)
@@ -2017,11 +2017,11 @@ braces <#braces>`__ and `indentation <#indentation>`__.
       var1 = 0;
     }
     var2 = var1;
-  
+
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     if (var1 < var2)
       {
         var1 = var2;
@@ -2047,7 +2047,7 @@ braces <#braces>`__ and `indentation <#indentation>`__.
 
     var2 = var1;
 
-**Ternary operator** (``<condition> ? <then> : <else>``):  
+**Ternary operator** (``<condition> ? <then> : <else>``):
 
 -  **Only if the expression is short**. Use of this form is only
    appropriate if the entire sequence is short and fits neatly on the
@@ -2062,9 +2062,9 @@ braces <#braces>`__ and `indentation <#indentation>`__.
 `parentheses <#parentheses>`__.
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     int arg1 = arg2 > arg3 ? arg2 : arg3;
     int arg1 = ((arg2 > arg3) ? arg2 : arg3);
 
@@ -2113,9 +2113,9 @@ braces <#braces>`__, `indentation <#indentation>`__, and
 `comments <#comments>`__.
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     switch (...)
       {
         case 1:  /* Example of a comment following a case selector. */
@@ -2170,9 +2170,9 @@ braces <#braces>`__, `indentation <#indentation>`__, and
 `comments <#comments>`__.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     while( notready() )
       {
       }
@@ -2181,9 +2181,9 @@ braces <#braces>`__, `indentation <#indentation>`__, and
     while (*ptr != '\0') ptr++;
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
     while (notready());
 
     ready = true;
@@ -2218,9 +2218,9 @@ braces <#braces>`__, `indentation <#indentation>`__, and
 `comments <#comments>`__.
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-  
+
     do {
       ready = !notready();
     } while (!ready);
@@ -2229,9 +2229,9 @@ braces <#braces>`__, `indentation <#indentation>`__, and
     do ptr++; while (*ptr != '\0');
 
 .. error:: This is incorrect
-  
+
   .. code-block:: c
-   
+
     do
       {
         ready = !notready();
@@ -2267,9 +2267,9 @@ Use of ``goto``
    begin in column 1.
 
 .. tip:: This is correct
-  
+
   .. code-block:: c
-  
+
        FAR struct some_struct_s *ptr;
        int fd;
        int ret;
@@ -2310,7 +2310,7 @@ Use of ``goto``
 
     error:
       return ret;
-    
+
 **NOTE**: See the discussion of `pointers <#farnear>`__ for information
 about the ``FAR`` qualifier used above.
 
@@ -2353,31 +2353,31 @@ method;
 Namespaces, global variable, class, structure, template, and enumeration
 names begin with a capital letter identifying what is being named:
 
- *Namespace Names* 
+ *Namespace Names*
    Namespaces begin with an upper case character but no particular
    character is specified. As an example, ``MyNamespace`` is fully
    compliant.
- *Global Variable Names* 
+ *Global Variable Names*
    Global variables and singletons begin with an upper case '**G**'. For
    example, ``GMyGlobalVariable``. The prefix ``g_`` is never used.
- *Implementation Class Names* 
+ *Implementation Class Names*
    Classes that implement methods begin with an upper case '**C**'. For
    example, ``CMyClass``. A fully qualified method of ``CMyClass`` could
    be ``MyNamespace::CMyClass::myMethod``
- *Pure Virtual Base Class Names* 
+ *Pure Virtual Base Class Names*
    Such base classes begin with an upper case '**I**'. For example,
    ``IMyInterface``.
- *Template Class Names* 
+ *Template Class Names*
    Template classes begin with an upper case '**T**'. For example,
    ``TMyTemplate``.
- *``typedef``'d Type Names* 
+ *``typedef``'d Type Names*
    Currently all such types also begin with an upper case '**T**'. That
    probably needs some resolution to distinguish for template names. The
    suffix ``_t`` is never used.
- *Structure Names* 
+ *Structure Names*
    Structures begin with an upper case '**S**'. For example,
    ``SMyStructure``. The suffix ``_s`` is never used.
- *Enumerations Names* 
+ *Enumerations Names*
    Enumerations begin with an upper case '**E**'. For example,
    ``EMyEnumeration``. The suffix ``_e`` is never used.
 
@@ -2393,7 +2393,7 @@ C Source File Structure
 =======================
 
 
-.. code-block:: c  
+.. code-block:: c
 
    /****************************************************************************
     * <Relative path to the file>
@@ -2422,7 +2422,7 @@ C Source File Structure
 
 *All header files are included here.*
 
-.. code-block:: c  
+.. code-block:: c
 
    /****************************************************************************
     * Pre-processor Definitions
@@ -2432,7 +2432,7 @@ C Source File Structure
 
 
 .. code-block:: c
-  
+
    /****************************************************************************
     * Private Types
     ****************************************************************************/
@@ -2552,7 +2552,7 @@ C Header File Structure
   /****************************************************************************
   * Included Files
   ****************************************************************************/
-  
+
 *All header files are included here.*
 
 .. code-block:: c
@@ -2560,7 +2560,7 @@ C Header File Structure
   /****************************************************************************
   * Pre-processor Definitions
   ****************************************************************************/
-  
+
 *All C pre-processor macros are defined here.*
 
 .. code-block:: c
@@ -2568,17 +2568,17 @@ C Header File Structure
   /****************************************************************************
   * Public Types
   ****************************************************************************/
-  
+
   #ifndef __ASSEMBLY__
 
 *Any types, enumerations, structures or unions are defined here.*
 
 .. code-block:: c
-  
+
   /****************************************************************************
   * Public Data
   ****************************************************************************/
-  
+
   #ifdef __cplusplus
   #define EXTERN extern "C"
   extern "C"

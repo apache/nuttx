@@ -141,7 +141,7 @@ uint32_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, uint32_t ticks,
               tcb->flink->sched_priority >= tcb->sched_priority)
             {
               /* Just resetting the task priority to its current value.
-               * This this will cause the task to be rescheduled behind any
+               * This will cause the task to be rescheduled behind any
                * other tasks at the same priority.
                */
 

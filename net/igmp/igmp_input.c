@@ -178,7 +178,7 @@ void igmp_input(struct net_driver_s *dev)
 
         if (net_ipv4addr_cmp(destipaddr, g_ipv4_allsystems))
           {
-            /* Yes... Now check the if this this is a general or a group
+            /* Yes... Now check the if this is a general or a group
              * specific query.
              *
              * RFC 2236, 2.1.  Type
