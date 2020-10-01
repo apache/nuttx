@@ -105,10 +105,10 @@ static FAR char *unique_chardev(void)
 
       /* Make sure that file name is not in use */
 
-      ret = stat(devbuf, &statbuf);
+      ret = nx_stat(devbuf, &statbuf, 1);
       if (ret < 0)
         {
-          DEBUGASSERT(errno == ENOENT);
+          DEBUGASSERT(ret == -ENOENT);
           return strdup(devbuf);
         }
 
@@ -147,12 +147,11 @@ static FAR char *unique_chardev(void)
  *
  ****************************************************************************/
 
-int block_proxy(FAR const char *blkdev, int oflags)
+int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
 {
   FAR char *chardev;
   bool readonly;
   int ret;
-  int fd;
 
   DEBUGASSERT(blkdev);
 
@@ -183,10 +182,9 @@ int block_proxy(FAR const char *blkdev, int oflags)
   /* Open the newly created character driver */
 
   oflags &= ~(O_CREAT | O_EXCL | O_APPEND | O_TRUNC);
-  fd = nx_open(chardev, oflags);
-  if (fd < 0)
+  ret = file_open(filep, chardev, oflags);
+  if (ret < 0)
     {
-      ret = fd;
       ferr("ERROR: Failed to open %s: %d\n", chardev, ret);
       goto errout_with_bchdev;
     }
@@ -209,7 +207,7 @@ int block_proxy(FAR const char *blkdev, int oflags)
    */
 
   kmm_free(chardev);
-  return fd;
+  return OK;
 
 errout_with_bchdev:
   unlink(chardev);
