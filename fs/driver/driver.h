@@ -119,7 +119,7 @@ int find_blockdriver(FAR const char *pathname, int mountflags,
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT)
-int block_proxy(FAR const char *blkdev, int oflags);
+int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags);
 #endif
 
 /****************************************************************************
