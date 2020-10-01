@@ -213,9 +213,8 @@ int pipecommon_open(FAR struct file *filep)
     {
       dev->d_nwriters++;
 
-      /* If this this is the first writer, then the read semaphore indicates
-       * the number of readers waiting for the first writer.  Wake them all
-       * up.
+      /* If this is the first writer, then the read semaphore indicates the
+       * number of readers waiting for the first writer.  Wake them all up.
        */
 
       if (dev->d_nwriters == 1)

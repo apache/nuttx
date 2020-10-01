@@ -2203,9 +2203,9 @@ static void cxd56_usbdevreset(FAR struct cxd56_usbdev_s *priv)
  * Input Parameters:
  *   ep   - the struct usbdev_ep_s instance obtained from allocep()
  *   desc - A struct usb_epdesc_s instance describing the endpoint
- *   last - true if this this last endpoint to be configured.  Some hardware
- *          needs to take special action when all of the endpoints have been
- *          configured.
+ *   last - true if this is the last endpoint to be configured.  Some
+ *          hardware needs to take special action when all of the endpoints
+ *          have been configured.
  *
  ****************************************************************************/
 

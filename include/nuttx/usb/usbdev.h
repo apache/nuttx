@@ -68,7 +68,7 @@
  *
  * ep   - the struct usbdev_ep_s instance obtained from allocep()
  * desc - A struct usb_epdesc_s instance describing the endpoint
- * last - true if this this last endpoint to be configured.  Some hardware needs
+ * last - true if this is the last endpoint to be configured.  Some hardware needs
  *        to take special action when all of the endpoints have been configured.
  */
 
@@ -152,6 +152,7 @@
 #define DEV_DISCONNECT(dev)        (dev)->ops->pullup ? (dev)->ops->pullup(dev,false) : -EOPNOTSUPP
 
 /* USB Class Driver Helpers *********************************************************/
+
 /* All may be called from interrupt handling logic except bind() and unbind() */
 
 /* Invoked when the driver is bound to a USB device driver. */
@@ -328,8 +329,8 @@ struct usbdev_ops_s
 
   /* Device-specific I/O command support */
 
- CODE int (*ioctl)(FAR struct usbdev_s *dev, unsigned code,
-          unsigned long param);
+  CODE int (*ioctl)(FAR struct usbdev_s *dev, unsigned code,
+                    unsigned long param);
 };
 
 struct usbdev_s
@@ -380,7 +381,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 /************************************************************************************
@@ -406,7 +407,7 @@ int usbdev_register(FAR struct usbdevclass_driver_s *driver);
 
 int usbdev_unregister(FAR struct usbdevclass_driver_s *driver);
 
-/****************************************************************************
+/************************************************************************************
  * Name: usbdev_dma_alloc and usbdev_dma_free
  *
  * Description:
@@ -430,7 +431,7 @@ int usbdev_unregister(FAR struct usbdevclass_driver_s *driver);
  *   does require the size of the allocation to be freed; that would need
  *   to be managed in the board-specific logic.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #if defined(CONFIG_USBDEV_DMA) && defined(CONFIG_USBDEV_DMAMEMORY)
 FAR void *usbdev_dma_alloc(size_t size);

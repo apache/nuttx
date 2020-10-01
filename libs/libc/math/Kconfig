@@ -11,7 +11,7 @@ config LIBM
 	depends on !ARCH_MATH_H
 	select ARCH_FLOAT_H
 	---help---
-		By default, no math library will be provided by NuttX.  In this this
+		By default, no math library will be provided by NuttX.  In this
 		case, it is assumed that (1) no math library is required, or (2) you
 		will be using the math.h and float.h headers file and the libm
 		library provided by your toolchain.

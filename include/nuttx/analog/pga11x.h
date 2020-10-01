@@ -53,7 +53,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Prerequisites:
  *  CONFIG_ADC=y is needed to enable support for analog input devices
  *
@@ -86,11 +88,12 @@
 #endif
 
 /* PGA11x Commands **********************************************************/
+
 /* Write command Gain Selection Bits (PGA112/PGA113)
  *
  * the PGA112 and PGA116 provide binary gain selections (1, 2, 4, 8, 16, 32,
- * 64, 128); the PGA113 and PGA117 provide scope gain selections (1, 2, 5, 10,
- * 20, 50, 100, 200).
+ * 64, 128); the PGA113 and PGA117 provide scope gain selections (1, 2, 5,
+ * 10, 20, 50, 100, 200).
  */
 
 #define PGA11X_GAIN_1          (0) /* Gain=1:   Scope Gain=1 */
@@ -114,17 +117,17 @@
  * 10-channel input MUX.
  */
 
-#define PGA11X_CHAN_VCAL       (0) /* VCAL/CH0 */
-#define PGA11X_CHAN_CH0        (0) /* VCAL/CH0 */
-#define PGA11X_CHAN_CH1        (1) /* CH1 */
-#define PGA11X_CHAN_CH2        (2) /* CH2 (PGA116/PGA117 only) */
-#define PGA11X_CHAN_CH3        (3) /* CH3 (PGA116/PGA117 only) */
-#define PGA11X_CHAN_CH4        (4) /* CH4 (PGA116/PGA117 only) */
-#define PGA11X_CHAN_CH5        (5) /* CH5 (PGA116/PGA117 only) */
-#define PGA11X_CHAN_CH6        (6) /* CH6 (PGA116/PGA117 only) */
-#define PGA11X_CHAN_CH7        (7) /* CH7 (PGA116/PGA117 only) */
-#define PGA11X_CHAN_CH8        (8) /* CH8 (PGA116/PGA117 only) */
-#define PGA11X_CHAN_CH9        (9) /* CH9 (PGA116/PGA117 only) */
+#define PGA11X_CHAN_VCAL       (0)  /* VCAL/CH0 */
+#define PGA11X_CHAN_CH0        (0)  /* VCAL/CH0 */
+#define PGA11X_CHAN_CH1        (1)  /* CH1 */
+#define PGA11X_CHAN_CH2        (2)  /* CH2 (PGA116/PGA117 only) */
+#define PGA11X_CHAN_CH3        (3)  /* CH3 (PGA116/PGA117 only) */
+#define PGA11X_CHAN_CH4        (4)  /* CH4 (PGA116/PGA117 only) */
+#define PGA11X_CHAN_CH5        (5)  /* CH5 (PGA116/PGA117 only) */
+#define PGA11X_CHAN_CH6        (6)  /* CH6 (PGA116/PGA117 only) */
+#define PGA11X_CHAN_CH7        (7)  /* CH7 (PGA116/PGA117 only) */
+#define PGA11X_CHAN_CH8        (8)  /* CH8 (PGA116/PGA117 only) */
+#define PGA11X_CHAN_CH9        (9)  /* CH9 (PGA116/PGA117 only) */
 #define PGA11X_CHAN_CAL1       (12) /* CAL1: connects to GND */
 #define PGA11X_CHAN_CAL2       (13) /* CAL2: connects to 0.9VCAL */
 #define PGA11X_CHAN_CAL3       (14) /* CAL3: connects to 0.1VCAL */
@@ -150,8 +153,8 @@ struct pga11x_usettings_s
 
 /* These structures are used to encode gain and channel settings.  This
  * includes both devices in the case of a daisy-chained configuration.
- * NOTE: This this logic is currently limited to only 2 devices in the
- * daisy-chain.
+ * NOTE: This logic is currently limited to only 2 devices in the daisy-
+ * chain.
  */
 
 struct pga11x_settings_s
@@ -269,7 +272,8 @@ int pga11x_uselect(PGA11X_HANDLE handle, int pos,
  *
  ****************************************************************************/
 
-int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings);
+int pga11x_read(PGA11X_HANDLE handle,
+                FAR struct pga11x_settings_s *settings);
 
 /****************************************************************************
  * Name: pga11x_uread
