@@ -354,7 +354,9 @@ void esp32_gpioirqenable(int irq, gpio_intrtype_t intrtype)
 {
   uintptr_t regaddr;
   uint32_t regval;
+#ifdef CONFIG_SMP
   int cpu;
+#endif
   int pin;
 
   DEBUGASSERT(irq <= ESP32_FIRST_GPIOIRQ && irq <= ESP32_LAST_GPIOIRQ);
@@ -380,18 +382,20 @@ void esp32_gpioirqenable(int irq, gpio_intrtype_t intrtype)
    *   Bit 5: SDIO's extent interrupt enable.
    */
 
+#ifdef CONFIG_SMP
   cpu = up_cpu_index();
-  if (cpu == 0)
-    {
-      /* PRO_CPU */
-
-      regval |= ((1 << 2) << GPIO_PIN_INT_ENA_S);
-    }
-  else
+  if (cpu != 0)
     {
       /* APP_CPU */
 
       regval |= ((1 << 0) << GPIO_PIN_INT_ENA_S);
+    }
+  else
+#endif
+    {
+      /* PRO_CPU */
+
+      regval |= ((1 << 2) << GPIO_PIN_INT_ENA_S);
     }
 
   regval |= (intrtype << GPIO_PIN_INT_TYPE_S);
