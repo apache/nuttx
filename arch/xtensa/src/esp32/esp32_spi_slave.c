@@ -857,26 +857,26 @@ static void esp32_spislv_initialize(FAR struct spi_sctrlr_s *dev)
 
   if (esp32_spi_iomux(priv))
     {
-      esp32_configgpio(config->cs_pin, INPUT_FUNCTION_1 | PULLUP);
-      esp32_configgpio(config->mosi_pin, INPUT_FUNCTION_1 | PULLUP);
-      esp32_configgpio(config->miso_pin, OUTPUT_FUNCTION_1);
-      esp32_configgpio(config->clk_pin, INPUT_FUNCTION_1 | PULLUP);
+      esp32_configgpio(config->cs_pin, INPUT_FUNCTION_2 | PULLUP);
+      esp32_configgpio(config->mosi_pin, INPUT_FUNCTION_2 | PULLUP);
+      esp32_configgpio(config->miso_pin, OUTPUT_FUNCTION_2);
+      esp32_configgpio(config->clk_pin, INPUT_FUNCTION_2 | PULLUP);
     }
   else
     {
-      esp32_configgpio(config->cs_pin, INPUT_FUNCTION_2 | PULLUP);
+      esp32_configgpio(config->cs_pin, INPUT_FUNCTION_3 | PULLUP);
       gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
       gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
 
-      esp32_configgpio(config->mosi_pin, INPUT_FUNCTION_2 | PULLUP);
+      esp32_configgpio(config->mosi_pin, INPUT_FUNCTION_3 | PULLUP);
       gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
       gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
 
-      esp32_configgpio(config->miso_pin, OUTPUT_FUNCTION_2);
+      esp32_configgpio(config->miso_pin, OUTPUT_FUNCTION_3);
       gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
       gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
 
-      esp32_configgpio(config->clk_pin, INPUT_FUNCTION_2 | PULLUP);
+      esp32_configgpio(config->clk_pin, INPUT_FUNCTION_3 | PULLUP);
       gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
       gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
     }
