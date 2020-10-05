@@ -218,10 +218,6 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
     {
       func |= (uint32_t)(2 << MCU_SEL_S);
     }
-  else if ((attr & FUNCTION_MASK) == SPECIAL)
-    {
-      func |= (uint32_t)((((pin) == 1 || (pin) == 3) ? 0 : 1) << MCU_SEL_S);
-    }
   else /* if ((attr & FUNCTION) != 0) */
     {
       func |= (uint32_t)((attr >> FUNCTION_SHIFT) << MCU_SEL_S);
