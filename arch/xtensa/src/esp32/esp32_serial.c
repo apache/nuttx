@@ -528,17 +528,17 @@ static int esp32_setup(struct uart_dev_s *dev)
    * But only one GPIO pad can connect with input signal
    */
 
-  esp32_configgpio(priv->config->txpin, OUTPUT_FUNCTION_2);
+  esp32_configgpio(priv->config->txpin, OUTPUT_FUNCTION_3);
   gpio_matrix_out(priv->config->txpin, priv->config->txsig, 0, 0);
 
-  esp32_configgpio(priv->config->rxpin, INPUT_FUNCTION_2);
+  esp32_configgpio(priv->config->rxpin, INPUT_FUNCTION_3);
   gpio_matrix_in(priv->config->rxpin, priv->config->rxsig, 0);
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  esp32_configgpio(priv->config->rtspin, OUTPUT_FUNCTION_2);
+  esp32_configgpio(priv->config->rtspin, OUTPUT_FUNCTION_3);
   gpio_matrix_out(priv->config->rtspin, priv->config->rtssig, 0, 0);
 
-  esp32_configgpio(priv->config->ctspin, INPUT_FUNCTION_2);
+  esp32_configgpio(priv->config->ctspin, INPUT_FUNCTION_3);
   gpio_matrix_in(priv->config->ctspin, priv->config->ctssig, 0);
 #endif
 

@@ -212,8 +212,8 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 
   func |= FUN_IE;
 
-  /* Select the pad's function.  If no function was given, consider it a normal
-   * input or output (i.e. function2).
+  /* Select the pad's function.  If no function was given, consider it a
+   * normal input or output (i.e. function2).
    */
 
   if ((attr & FUNCTION) != 0)
