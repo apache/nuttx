@@ -66,7 +66,6 @@
 #  define FUNCTION_3        (3 << FUNCTION_SHIFT)
 #  define FUNCTION_4        (4 << FUNCTION_SHIFT)
 #  define FUNCTION_5        (5 << FUNCTION_SHIFT)
-#  define SPECIAL           (7 << FUNCTION_SHIFT)
 
 #define INPUT_PULLUP        (INPUT | PULLUP)
 #define INPUT_PULLDOWN      (INPUT | PULLDOWN)
