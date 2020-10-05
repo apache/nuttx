@@ -161,7 +161,6 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
   uintptr_t regaddr;
   uint32_t func;
   uint32_t cntrl;
-  unsigned int pinmode;
 
   DEBUGASSERT(pin >= 0 && pin <= ESP32_NGPIOS);
 
@@ -213,14 +212,17 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 
   func |= FUN_IE;
 
-  pinmode = (attr & PINMODE_MASK);
-  if (pinmode == INPUT || pinmode == OUTPUT)
-    {
-      func |= (uint32_t)(2 << MCU_SEL_S);
-    }
-  else /* if ((attr & FUNCTION) != 0) */
+  /* Select the pad's function.  If no function was given, consider it a normal
+   * input or output (i.e. function2).
+   */
+
+  if ((attr & FUNCTION) != 0)
     {
       func |= (uint32_t)((attr >> FUNCTION_SHIFT) << MCU_SEL_S);
+    }
+  else
+    {
+      func |= (uint32_t)((2 >> FUNCTION_SHIFT) << MCU_SEL_S);
     }
 
   if ((attr & OPEN_DRAIN) != 0)
