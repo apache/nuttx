@@ -348,6 +348,6 @@ _kernel_exception_vector:
 _user_exception_vector:
 
 	wsr		a0, EXCSAVE_1					/* Preserve a0 */
-	call0	_xtensa_user_handler			/* And jump to user exception handler */
+	call0	_xtensa_user_handler	/* And jump to user exception handler */
 
 	.end	literal_prefix

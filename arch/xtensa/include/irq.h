@@ -298,7 +298,7 @@ irqstate_t xtensa_enable_interrupts(irqstate_t mask);
  * Name: xtensa_disable_interrupts
  *
  * Description:
- *   Disables a set of interrupts. Does not simply set INTENABLE directly,
+ *   Disables a set of interrupts. Does not simply clear INTENABLE directly,
  *   but computes it as a function of the current virtual priority.
  *   Can be called from interrupt handlers.
  *
