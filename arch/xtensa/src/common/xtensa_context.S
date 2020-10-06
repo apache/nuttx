@@ -216,7 +216,7 @@ _xtensa_context_save:
  *
  * Input State:
  *   a0 = The return value to the caller.
- *   a2 = The address of the register state state structure
+ *   a2 = The address of the register state structure
  *
  * Return state:
  *   a0 = The return value to the caller.
@@ -246,7 +246,7 @@ xtensa_context_save:
 	movi	a3, 1							/* Set saved A2 to 1 */
 	s32i	a3, a2, (4 * REG_A2)
 
-	/* Save the rest of the processor state.  For the CALL0 ABI, we can user
+	/* Save the rest of the processor state.  For the CALL0 ABI, we can use
 	 * _xtensa_context_save(),  Otherwise we duplicate the context save here
 	 * to avoid the window spill.
 	 */
@@ -266,8 +266,8 @@ xtensa_context_save:
 /****************************************************************************
  * This implementation of xtensa_context_save for the case of the window ABI.
  * This case is more complex.  For the Window ABI, there is a "hook" that
- * performs the low level state state.  xtensa_context_save() is a simply
- * trampoline function that performs the window oeprations in that
+ * performs the low level state.  xtensa_context_save() is simply a
+ * trampoline function that performs the window operations in that
  * configuration.
  ****************************************************************************/
 
@@ -279,7 +279,7 @@ xtensa_context_save:
  * Input State:
  *   True return value has already been saved
  *   a0 = The return value into xtensa_context_save()
- *   a2 = The address of the register state state structure
+ *   a2 = The address of the register state structure
  *
  * Return state:
  *   a0, a3 modified.
@@ -370,7 +370,7 @@ _xtensa_save_hook:
  *
  * Input State:
  *   a0 = The true return value to the caller.
- *   a2 = The address of the register state state structure
+ *   a2 = The address of the register state structure
  *
  * Return state:
  *   a0, a2, and a3 modified.

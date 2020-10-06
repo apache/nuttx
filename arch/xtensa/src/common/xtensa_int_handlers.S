@@ -135,16 +135,16 @@
 	rsr		a3, INTERRUPT
 	movi	a4, \mask
 	and		a2, a2, a3
-	and		a2, a2, a4					/* a2 = Set of pending, enabled interrupts for this level */
+	and		a2, a2, a4				/* a2 = Set of pending, enabled interrupts for this level */
 	beqz	a2, 1f						/* Nothing to do */
 
-	/* Call xtensa_int_decode with, passing that address of the register save
-	 * area as a parameter (A2).
+	/* Call xtensa_int_decode passing the address of the register save area
+	 * as a parameter (A3).
 	 */
 
-										/* Argument 1: Set of CPU interrupt to dispatch */
-	mov		a3, sp						/* Argument 2: Top of stack = register save area */
-	call0	xtensa_int_decode			/* Call xtensa_int_decode */
+		          						  /* Argument 1: Set of CPU interrupt to dispatch */
+	mov		a3, sp					    /* Argument 2: Top of stack = register save area */
+	call0	xtensa_int_decode	  /* Call xtensa_int_decode */
 
 	/* On return from xtensa_int_decode, a2 will contain the address of the new
 	 * register save area.  Usually this would be the same as the current SP.
@@ -155,34 +155,34 @@
 	mov		a12, a2						/* Switch to the save area of the new thread */
 
 #else
-	/* Get mask of pending, enabled interrupts at this level into a2. */
+	/* Get mask of pending, enabled interrupts at this level into a6. */
 
 	rsr		a6, INTENABLE
 	rsr		a2, INTERRUPT
 	movi	a3, \mask
 	and		a6, a6, a2
-	and		a6, a6, a3					/* a6 = Set of pending, enabled interrupts for this level */
+	and		a6, a6, a3				/* a6 = Set of pending, enabled interrupts for this level */
 	beqz	a6, 1f						/* Nothing to do */
 
-	/* Call xtensa_int_decode with, passing that address of the register save
-	 * area as a parameter (A2).
+	/* Call xtensa_int_decode passing the address of the register save area
+	 * as a parameter (A7).
 	 */
 
-										/* Argument 1: Set of CPU interrupt to dispatch */
-	mov		a7, sp						/* Argument 2: Top of stack = register save area */
-	call4	xtensa_int_decode			/* Call xtensa_int_decode */
+										        /* Argument 1: Set of CPU interrupt to dispatch */
+	mov		a7, sp					  	/* Argument 2: Top of stack = register save area */
+	call4	xtensa_int_decode		/* Call xtensa_int_decode */
 
 	/* On return from xtensa_int_decode, a6 will contain the address of the new
 	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, a2 will instead refer to the TCB
+	 * But in the event of a context switch, a6 will instead refer to the TCB
 	 * register save area.  This may or may not reside on a stack.
 	 */
 
 	mov		a12, a6						/* Switch to the save area of the new thread */
 #endif
 
-
 	/* Done */
+
 1:
 	.endm
 
@@ -247,20 +247,20 @@
 
 _xtensa_level1_handler:
 
-	mov		a0, sp							/* sp == a1 */
-	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
-	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, PS							/* Save interruptee's PS */
+	mov		a0, sp							              /* sp == a1 */
+	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)   /* Allocate interrupt stack frame */
+	s32i	a0, sp, (4 * REG_A1)			        /* Save pre-interrupt SP */
+	rsr		a0, PS						                /* Save interruptee's PS */
 	s32i	a0, sp, (4 * REG_PS)
-	rsr		a0, EPC_1						/* Save interruptee's PC */
+	rsr		a0, EPC_1						              /* Save interruptee's PC */
 	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
+	rsr		a0, EXCSAVE_1					            /* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
 
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	mov		a2, sp							/* Address of state save on stack */
+	mov		a2, sp							      /* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
@@ -278,8 +278,8 @@ _xtensa_level1_handler:
 
 	/* Restore registers in preparation to return from interrupt */
 
-	mov		a2, a12							/* a2 = address of new state save area */
-	call0	_xtensa_context_restore			/* (preserves a2) */
+	mov		a2, a12							      /* a2 = address of new state save area */
+	call0	_xtensa_context_restore		/* (preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
@@ -288,16 +288,16 @@ _xtensa_level1_handler:
 	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_1
 	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-    l32i    sp, a2, (4 * REG_A1)            /* Remove interrupt stack frame */
+  l32i  sp, a2, (4 * REG_A1)      /* Remove interrupt stack frame */
 	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
-	rsync									/* Ensure PS and EPC written */
+	rsync								          	/* Ensure PS and EPC written */
 
 	/* Return from exception. RFE returns from either the UserExceptionVector
 	 * or the KernelExceptionVector.  RFE sets PS.EXCM back to 0, and then
 	 * jumps to the address in EPC[1]. PS.UM and PS.WOE are left unchanged.
 	 */
 
-	rfe										/* And return from "exception" */
+	rfe										          /* And return from "exception" */
 
 /****************************************************************************
  * MEDIUM PRIORITY (LEVEL 2+) INTERRUPT LOW LEVEL HANDLERS.
@@ -567,7 +567,7 @@ _xtensa_level5_handler:
 
 	rfi		5
 
-#endif /* XCHAL_EXCM_LEVEL >= 2 */
+#endif /* XCHAL_EXCM_LEVEL >= 5 */
 
 #if XCHAL_EXCM_LEVEL >= 6
 	.section HANDLER_SECTION, "ax"
@@ -666,7 +666,7 @@ _xtensa_level6_handler:
  *
  ****************************************************************************/
 
-#if XCHAL_INT_NLEVELS >=2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL !=2
+#if XCHAL_INT_NLEVELS >= 2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL != 2
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level2_handler, @function
 	.global		_xtensa_level2_handler
@@ -698,9 +698,9 @@ _xtensa_level2_handler:
 	rfi		2
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >=2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL !=2 */
+#endif /* XCHAL_INT_NLEVELS >= 2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL != 2 */
 
-#if XCHAL_INT_NLEVELS >=3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL !=3
+#if XCHAL_INT_NLEVELS >= 3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL != 3
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level3_handler, @function
 	.global		_xtensa_level3_handler
@@ -728,15 +728,15 @@ _xtensa_level3_handler:
 #else
 	wsr		a0, EXCSAVE_3				/* Save a0 */
 
-	/* Add high priority level 2 interrupt handler code here. */
+	/* Add high priority level 3 interrupt handler code here. */
 
 	rsr		a0, EXCSAVE_3				/* Restore a0 */
 	rfi		3
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >=3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL !=3 */
+#endif /* XCHAL_INT_NLEVELS >= 3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL != 3 */
 
-#if XCHAL_INT_NLEVELS >=4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL !=4
+#if XCHAL_INT_NLEVELS >= 4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL != 4
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level4_handler, @function
 	.global		_xtensa_level4_handler
@@ -764,15 +764,15 @@ _xtensa_level4_handler:
 #else
 	wsr		a0, EXCSAVE_4				/* Save a0 */
 
-	/* Add high priority level 2 interrupt handler code here. */
+	/* Add high priority level 3 interrupt handler code here. */
 
 	rsr		a0, EXCSAVE_4				/* Restore a0 */
 	rfi		4
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >=4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL !=4 */
+#endif /* XCHAL_INT_NLEVELS >= 4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL != 4 */
 
-#if XCHAL_INT_NLEVELS >=5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL !=5
+#if XCHAL_INT_NLEVELS >= 5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL != 5
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level5_handler, @function
 	.global		_xtensa_level5_handler
@@ -800,15 +800,15 @@ _xtensa_level5_handler:
 #else
 	wsr		a0, EXCSAVE_5				/* Save a0 */
 
-	/* Add high priority level 2 interrupt handler code here. */
+	/* Add high priority level 5 interrupt handler code here. */
 
 	rsr		a0, EXCSAVE_5				/* Restore a0 */
 	rfi		5
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >=5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL !=5 */
+#endif /* XCHAL_INT_NLEVELS >= 5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL != 5 */
 
-#if XCHAL_INT_NLEVELS >=6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL !=6
+#if XCHAL_INT_NLEVELS >= 6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL != 6
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level6_handler, @function
 	.global		_xtensa_level6_handler
@@ -836,10 +836,10 @@ _xtensa_level6_handler:
 #else
 	wsr		a0, EXCSAVE_6				/* Save a0 */
 
-	/* Add high priority level 2 interrupt handler code here. */
+	/* Add high priority level 6 interrupt handler code here. */
 
 	rsr		a0, EXCSAVE_6				/* Restore a0 */
 	rfi		6
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >=6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL !=6 */
+#endif /* XCHAL_INT_NLEVELS >= 6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL != 6 */
