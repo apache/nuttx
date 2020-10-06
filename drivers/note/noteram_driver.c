@@ -310,7 +310,7 @@ static ssize_t noteram_get(FAR uint8_t *buffer, size_t buflen)
   /* Get the read index of the circular buffer */
 
   read    = g_noteram_info.ni_read;
-  DEBUGASSERT(tail < CONFIG_DRIVER_NOTERAM_BUFSIZE);
+  DEBUGASSERT(read < CONFIG_DRIVER_NOTERAM_BUFSIZE);
 
   /* Get the length of the note at the read index */
 
@@ -392,7 +392,7 @@ static ssize_t noteram_size(void)
   /* Get the read index of the circular buffer */
 
   read = g_noteram_info.ni_read;
-  DEBUGASSERT(read < CONFIG_SCHED_NOTE_BUFSIZE);
+  DEBUGASSERT(read < CONFIG_DRIVER_NOTERAM_BUFSIZE);
 
   /* Get the length of the note at the read index */
 
