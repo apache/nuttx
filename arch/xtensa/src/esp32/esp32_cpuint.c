@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_irq.c
+ * arch/xtensa/src/esp32/esp32_cpuint.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -242,7 +242,7 @@ static int esp32_alloc_cpuint(uint32_t intmask)
   int cpuint;
   int ret = -ENOMEM;
 
-  /* Check if there are is CPU interrupts with the requested properties
+  /* Check if there are CPU interrupts with the requested properties
    * available.
    */
 
@@ -416,7 +416,7 @@ void up_disable_irq(int cpuint)
  * Name: up_enable_irq
  *
  * Description:
- *   Ensable the CPU interrupt specified by 'cpuint'
+ *   Enable the CPU interrupt specified by 'cpuint'
  *
  ****************************************************************************/
 
@@ -504,7 +504,7 @@ int esp32_alloc_edgeint(int priority)
  * Name:  esp32_free_cpuint
  *
  * Description:
- *   Free a previoulsy allocated CPU interrupt
+ *   Free a previously allocated CPU interrupt
  *
  * Input Parameters:
  *   The CPU interrupt number to be freed
@@ -551,7 +551,7 @@ void esp32_free_cpuint(int cpuint)
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
- *   periphid - The peripheral number from ira.h to be assigned to
+ *   periphid - The peripheral number from irq.h to be assigned to
  *              a CPU interrupt.
  *   cpuint   - The CPU interrupt to receive the peripheral interrupt
  *              assignment.

@@ -198,6 +198,7 @@
 #define TIMER_CLK_FREQ                          (80000000 >> 4) /* 80MHz divided by 16 */
 #define SPI_CLK_DIV                             4
 #define TICKS_PER_US_ROM                        26              /* CPU is 80MHz */
+#define TB_CLK_FREQ                             APB_CLK_FREQ
 
 #define DR_REG_DPORT_BASE                       0x3ff00000
 #define DR_REG_UART_BASE                        0x3ff40000
