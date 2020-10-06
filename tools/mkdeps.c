@@ -514,7 +514,7 @@ static void parse_args(int argc, char **argv)
        * this happens normally in some configurations
        */
 
-      printf("# No files specified for dependency generataion\n");
+      printf("# No files specified for dependency generation\n");
       exit(EXIT_SUCCESS);
     }
 
