@@ -31,6 +31,10 @@ config ESP32_UART
 	bool
 	default n
 
+config ESP32_TIMER
+	bool
+	default n
+
 config ESP32_BT
 	bool "Bluetooth"
 	default n
@@ -140,32 +144,32 @@ config XTENSA_TIMER2
 	default n
 
 config ESP32_TIMER0
-	bool "64-bit Timer 0"
+	bool "64-bit Timer 0 (Group 0 Timer 0)"
 	default n
-	depends on EXPERIMENTAL
+	select ESP32_TIMER
 	---help---
-		No yet implemented
+		Enables Timer
 
 config ESP32_TIMER1
-	bool "64-bit Timer 1"
+	bool "64-bit Timer 1 (Group 0 Timer 1)"
 	default n
-	depends on EXPERIMENTAL
+	select ESP32_TIMER
 	---help---
-		No yet implemented
+		Enables Timer
 
 config ESP32_TIMER2
-	bool "64-bit Timer 2"
+	bool "64-bit Timer 2 (Group 1 Timer 0)"
 	default n
-	depends on EXPERIMENTAL
+	select ESP32_TIMER
 	---help---
-		No yet implemented
+		Enables Timer
 
 config ESP32_TIMER3
-	bool "64-bit Timer 3"
+	bool "64-bit Timer 3 (Group 1 Timer 1)"
 	default n
-	depends on EXPERIMENTAL
+	select ESP32_TIMER
 	---help---
-		No yet implemented
+		Enables Timer
 
 config ESP32_MWDT0
 	bool "Timer 0 Watchdog"

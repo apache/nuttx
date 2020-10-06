@@ -144,7 +144,7 @@ void esp32_free_cpuint(int cpuint);
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
- *   periphid - The peripheral number from ira.h to be assigned to
+ *   periphid - The peripheral number from irq.h to be assigned to
  *              a CPU interrupt.
  *   cpuint   - The CPU interrupt to receive the peripheral interrupt
  *              assignment.

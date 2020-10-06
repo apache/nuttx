@@ -42,12 +42,33 @@
 #include <sys/types.h>
 #include <sys/mount.h>
 #include <syslog.h>
+#include <debug.h>
+
+#ifdef CONFIG_TIMER
+#  include <nuttx/timers/timer.h>
+#endif
 
 #include "esp32-core.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32_TIMER0
+#define ESP32_TIMER0 (0)
+#endif
+
+#ifdef CONFIG_ESP32_TIMER1
+#define ESP32_TIMER1 (1)
+#endif
+
+#ifdef CONFIG_ESP32_TIMER2
+#define ESP32_TIMER2 (2)
+#endif
+
+#ifdef CONFIG_ESP32_TIMER3
+#define ESP32_TIMER3 (3)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -92,6 +113,49 @@ int esp32_bringup(void)
 
 #ifdef CONFIG_ESP32_SPIFLASH
   ret = esp32_spiflash_init();
+#endif
+
+#ifdef CONFIG_TIMER
+  /* Configure TIMER driver */
+#ifdef CONFIG_ESP32_TIMER0
+  ret = esp32_timer_driver_setup("/dev/timer0", ESP32_TIMER0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32_TIMER1
+  ret = esp32_timer_driver_setup("/dev/timer1", ESP32_TIMER1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32_TIMER2
+  ret = esp32_timer_driver_setup("/dev/timer2", ESP32_TIMER2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32_TIMER3
+  ret = esp32_timer_driver_setup("/dev/timer3", ESP32_TIMER3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+    }
+#endif
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

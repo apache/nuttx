@@ -181,8 +181,9 @@
  *   0x03c0     Double exception
  *
  * REVISIT: In more architectures supported by NuttX, exception errors
- * tie into the normal interrupt handling via special IRQ numbers.  I
- * is still to be determined what will be done for the ESP32.
+ * tie into the normal interrupt handling via special IRQ numbers.
+ * It is still to be determined what will be done for the ESP32.
+ *
  */
 
 /* IRQ numbers for internal interrupts that are dispatched like peripheral
