@@ -60,12 +60,12 @@
 #define OPEN_DRAIN          (1 << 5)
 #define FUNCTION_SHIFT      6
 #define FUNCTION_MASK       (7 << FUNCTION_SHIFT)
-#  define FUNCTION_1        (0 << FUNCTION_SHIFT)
-#  define FUNCTION_2        (1 << FUNCTION_SHIFT)
-#  define FUNCTION_3        (2 << FUNCTION_SHIFT)
-#  define FUNCTION_4        (3 << FUNCTION_SHIFT)
-#  define FUNCTION_5        (4 << FUNCTION_SHIFT)
-#  define FUNCTION_6        (5 << FUNCTION_SHIFT)
+#  define FUNCTION_1        (1 << FUNCTION_SHIFT)
+#  define FUNCTION_2        (2 << FUNCTION_SHIFT)
+#  define FUNCTION_3        (3 << FUNCTION_SHIFT)
+#  define FUNCTION_4        (4 << FUNCTION_SHIFT)
+#  define FUNCTION_5        (5 << FUNCTION_SHIFT)
+#  define FUNCTION_6        (6 << FUNCTION_SHIFT)
 
 #define INPUT_PULLUP        (INPUT | PULLUP)
 #define INPUT_PULLDOWN      (INPUT | PULLDOWN)
