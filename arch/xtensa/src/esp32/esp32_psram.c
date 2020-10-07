@@ -1191,24 +1191,24 @@ static void IRAM_ATTR psram_gpio_config(psram_io_t *psram_io,
     {
       /* flash clock signal should come from IO MUX. */
 
-      esp32_configgpio(psram_io->flash_clk_io, OUTPUT_FUNCTION_1);
+      esp32_configgpio(psram_io->flash_clk_io, OUTPUT_FUNCTION_2);
     }
   else
     {
       /* flash clock signal should come from GPIO matrix. */
 
-      esp32_configgpio(psram_io->flash_clk_io, OUTPUT_FUNCTION_2);
+      esp32_configgpio(psram_io->flash_clk_io, OUTPUT_FUNCTION_3);
     }
 
-  esp32_configgpio(psram_io->flash_cs_io, OUTPUT | FUNCTION_2);
-  esp32_configgpio(psram_io->psram_cs_io, OUTPUT | FUNCTION_2);
-  esp32_configgpio(psram_io->psram_clk_io, OUTPUT | FUNCTION_2);
-  esp32_configgpio(psram_io->psram_spiq_sd0_io, OUTPUT | INPUT | FUNCTION_2);
-  esp32_configgpio(psram_io->psram_spid_sd1_io, OUTPUT | INPUT | FUNCTION_2);
+  esp32_configgpio(psram_io->flash_cs_io, OUTPUT | FUNCTION_3);
+  esp32_configgpio(psram_io->psram_cs_io, OUTPUT | FUNCTION_3);
+  esp32_configgpio(psram_io->psram_clk_io, OUTPUT | FUNCTION_3);
+  esp32_configgpio(psram_io->psram_spiq_sd0_io, OUTPUT | INPUT | FUNCTION_3);
+  esp32_configgpio(psram_io->psram_spid_sd1_io, OUTPUT | INPUT | FUNCTION_3);
   esp32_configgpio(psram_io->psram_spihd_sd2_io, OUTPUT | INPUT | \
-                   FUNCTION_2);
+                   FUNCTION_3);
   esp32_configgpio(psram_io->psram_spiwp_sd3_io, OUTPUT | INPUT | \
-                   FUNCTION_2);
+                   FUNCTION_3);
 
 #if 0
   uint32_t flash_id = g_rom_flashchip.device_id;
