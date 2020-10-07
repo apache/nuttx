@@ -151,8 +151,10 @@ static uint16_t pcm_leuint32(uint32_t value);
 #  define pcm_leuint32(v) (v)
 #endif
 
+#ifndef CONFIG_AUDIO_FORMAT_RAW
 static inline bool pcm_validwav(FAR const struct wav_header_s *wav);
 static bool pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data);
+#endif
 
 #ifndef CONFIG_AUDIO_EXCLUDE_FFORWARD
 static void pcm_subsample_configure(FAR struct pcm_decode_s *priv,
@@ -326,7 +328,7 @@ static uint16_t pcm_leuint32(uint32_t value)
  *   Return true if this is a valid WAV file header
  *
  ****************************************************************************/
-
+#ifndef CONFIG_AUDIO_FORMAT_RAW
 static inline bool pcm_validwav(FAR const struct wav_header_s *wav)
 {
   return (wav->hdr.chunkid  == WAV_HDR_CHUNKID  &&
@@ -423,6 +425,7 @@ static bool pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data)
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: pcm_subsample_configure
@@ -1083,71 +1086,68 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   audinfo("curbyte=%d nbytes=%d nmaxbytes=%d bytesleft=%d\n",
           apb->curbyte, apb->nbytes, apb->nmaxbytes, bytesleft);
 
-  if (bytesleft >= sizeof(struct wav_header_s))
+  /* Parse and verify the candidate PCM WAV file header */
+
+#ifndef CONFIG_AUDIO_FORMAT_RAW
+  if (bytesleft >= sizeof(struct wav_header_s) &&
+      pcm_parsewav(priv, &apb->samp[apb->curbyte]))
     {
-      /* Parse and verify the candidate PCM WAV file header */
+      struct audio_caps_s caps;
 
-      if (pcm_parsewav(priv, &apb->samp[apb->curbyte]))
-        {
-          struct audio_caps_s caps;
+      /* Configure the lower level for the number of channels, bitrate,
+       * and sample bitwidth.
+       */
 
-          /* Configure the lower level for the number of channels, bitrate,
-           * and sample bitwidth.
-           */
+      DEBUGASSERT(priv->samprate < 65535);
 
-          DEBUGASSERT(priv->samprate < 65535);
+      caps.ac_len            = sizeof(struct audio_caps_s);
+      caps.ac_type           = AUDIO_TYPE_OUTPUT;
+      caps.ac_channels       = priv->nchannels;
 
-          caps.ac_len            = sizeof(struct audio_caps_s);
-          caps.ac_type           = AUDIO_TYPE_OUTPUT;
-          caps.ac_channels       = priv->nchannels;
-
-          caps.ac_controls.hw[0] = (uint16_t)priv->samprate;
-          caps.ac_controls.b[2]  = priv->bpsamp;
+      caps.ac_controls.hw[0] = (uint16_t)priv->samprate;
+      caps.ac_controls.b[2]  = priv->bpsamp;
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-          ret = lower->ops->configure(lower, priv->session, &caps);
+      ret = lower->ops->configure(lower, priv->session, &caps);
 #else
-          ret = lower->ops->configure(lower, &caps);
+      ret = lower->ops->configure(lower, &caps);
 #endif
-          if (ret < 0)
-            {
-              auderr("ERROR: Failed to set PCM configuration: %d\n", ret);
-              return ret;
-            }
-
-          /* Bump up the data offset */
-
-          apb->curbyte += sizeof(struct wav_header_s);
-
-#ifndef CONFIG_AUDIO_EXCLUDE_FFORWARD
-          audinfo("Begin streaming: apb=%p curbyte=%d nbytes=%d\n",
-                  apb, apb->curbyte, apb->nbytes);
-
-          /* Perform any necessary sub-sampling operations */
-
-          pcm_subsample(priv, apb);
-#endif
-
-          /* Then give the audio buffer to the lower driver */
-
-          audinfo(
-               "Pass to lower enqueuebuffer: apb=%p curbyte=%d nbytes=%d\n",
-                apb, apb->curbyte, apb->nbytes);
-
-          ret = lower->ops->enqueuebuffer(lower, apb);
-          if (ret == OK)
-            {
-              /* Now we are streaming.  Unless for some reason there is only
-               * one audio buffer in the audio stream.  In that case, this
-               * will be marked as the final buffer
-               */
-
-              priv->streaming = ((apb->flags & AUDIO_APB_FINAL) == 0);
-              return OK;
-            }
+      if (ret < 0)
+        {
+          auderr("ERROR: Failed to set PCM configuration: %d\n", ret);
+          return ret;
         }
 
-      auderr("ERROR: Invalid PCM WAV file\n");
+      /* Bump up the data offset */
+
+      apb->curbyte += sizeof(struct wav_header_s);
+#endif
+#ifndef CONFIG_AUDIO_EXCLUDE_FFORWARD
+      audinfo("Begin streaming: apb=%p curbyte=%d nbytes=%d\n",
+              apb, apb->curbyte, apb->nbytes);
+
+      /* Perform any necessary sub-sampling operations */
+
+      pcm_subsample(priv, apb);
+#endif
+
+      /* Then give the audio buffer to the lower driver */
+
+      audinfo(
+           "Pass to lower enqueuebuffer: apb=%p curbyte=%d nbytes=%d\n",
+            apb, apb->curbyte, apb->nbytes);
+
+      ret = lower->ops->enqueuebuffer(lower, apb);
+      if (ret == OK)
+        {
+          /* Now we are streaming.  Unless for some reason there is only
+           * one audio buffer in the audio stream.  In that case, this
+           * will be marked as the final buffer
+           */
+
+          priv->streaming = ((apb->flags & AUDIO_APB_FINAL) == 0);
+          return OK;
+        }
 
       /* The normal protocol for streaming errors is as follows:
        *
@@ -1171,10 +1171,12 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 #endif
     }
 
+#ifndef CONFIG_AUDIO_FORMAT_RAW
   /* This is not a WAV file! */
 
   auderr("ERROR: Invalid PCM WAV file\n");
   return -EINVAL;
+#endif
 }
 
 /****************************************************************************
