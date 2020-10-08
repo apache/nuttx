@@ -1820,6 +1820,7 @@ PROVIDE ( Xthal_intlevel = 0x3ff9c2b4 );
 PROVIDE ( xthal_memcpy = 0x4000c0bc );
 PROVIDE ( xthal_set_ccompare = 0x4000c058 );
 PROVIDE ( xthal_set_intclear = 0x4000c1ec );
+PROVIDE ( esp_rom_spiflash_config_clk = 0x40062bc8 );
 PROVIDE ( _xtos_alloca_handler = 0x40000010 );
 PROVIDE ( _xtos_cause3_handler = 0x40000dd8 );
 PROVIDE ( _xtos_c_handler_table = 0x3ffe0548 );

@@ -794,6 +794,21 @@ NOTES:
 
     Note that mksmartfs is only needed the first time.
 
+  psram:
+
+    This config tests the PSRAM driver over SPIRAM interface.
+    You can use the ramtest command to test the PSRAM memory. We are testing
+    only 64KB on this example (64 * 1024), but you can change this number to
+    2MB or 4MB depending on PSRAM chip used on your board:
+
+        nsh> ramtest -w 0x3F800000 65536
+        RAMTest: Marching ones: 3f800000 65536 
+        RAMTest: Marching zeroes: 3f800000 65536 
+        RAMTest: Pattern test: 3f800000 65536 55555555 aaaaaaaa
+        RAMTest: Pattern test: 3f800000 65536 66666666 99999999 
+        RAMTest: Pattern test: 3f800000 65536 33333333 cccccccc 
+        RAMTest: Address-in-address test: 3f800000 65536
+
 Things to Do
 ============
 
