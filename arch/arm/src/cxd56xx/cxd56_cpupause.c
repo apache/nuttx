@@ -210,6 +210,13 @@ bool up_cpu_pausereq(int cpu)
 
 int up_cpu_paused(int cpu)
 {
+  /* Fistly, check if this IPI is to enable/disable IRQ */
+
+  if (handle_irqreq(cpu))
+    {
+      return OK;
+    }
+
   FAR struct tcb_s *tcb = this_task();
 
   /* Update scheduler parameters */
@@ -282,13 +289,6 @@ int arm_pause_handler(int irq, void *c, FAR void *arg)
   /* Clear SW_INT for APP_DSP(cpu) */
 
   putreg32(0, CXD56_CPU_P2_INT + (4 * cpu));
-
-  /* Check if this IPI is to enable/disable IRQ */
-
-  if (handle_irqreq(cpu))
-    {
-      return OK;
-    }
 
   /* Check for false alarms.  Such false could occur as a consequence of
    * some deadlock breaking logic that might have already serviced the SG2
