@@ -112,35 +112,18 @@ static int gs2200m_irq_attach(xcpt_t handler, FAR void *arg)
 
 static void gs2200m_irq_enable(void)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = enter_critical_section();
 
   wlinfo("== ec:%d called=%d \n", _enable_count, _n_called++);
 
   if (0 == _enable_count)
     {
-#ifdef CONFIG_SMP
-      bool unlock = false;
-
-      if (0 != up_cpu_index())
-        {
-          unlock = true;
-          spin_unlock_irqrestore(flags);
-        }
-#endif
-
       cxd56_gpioint_enable(PIN_UART2_CTS);
-
-#ifdef CONFIG_SMP
-      if (unlock)
-        {
-          flags = spin_lock_irqsave();
-        }
-#endif
     }
 
   _enable_count++;
 
-  spin_unlock_irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -149,7 +132,7 @@ static void gs2200m_irq_enable(void)
 
 static void gs2200m_irq_disable(void)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = enter_critical_section();
 
   wlinfo("== ec:%d called=%d \n", _enable_count, _n_called++);
 
@@ -157,27 +140,10 @@ static void gs2200m_irq_disable(void)
 
   if (0 == _enable_count)
     {
-#ifdef CONFIG_SMP
-      bool unlock = false;
-
-      if (0 != up_cpu_index())
-        {
-          unlock = true;
-          spin_unlock_irqrestore(flags);
-        }
-#endif
-
       cxd56_gpioint_disable(PIN_UART2_CTS);
-
-#ifdef CONFIG_SMP
-      if (unlock)
-        {
-          flags = spin_lock_irqsave();
-        }
-#endif
     }
 
-  spin_unlock_irqrestore(flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -186,7 +152,7 @@ static void gs2200m_irq_disable(void)
 
 static uint32_t gs2200m_dready(int *ec)
 {
-  irqstate_t flags = spin_lock_irqsave();
+  irqstate_t flags = enter_critical_section();
 
   uint32_t r = cxd56_gpio_read(PIN_UART2_CTS);
 
@@ -197,7 +163,7 @@ static uint32_t gs2200m_dready(int *ec)
       *ec = _enable_count;
     }
 
-  spin_unlock_irqrestore(flags);
+  leave_critical_section(flags);
   return r;
 }
 
