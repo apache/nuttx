@@ -28,6 +28,10 @@
 
 #include  "sched/sched.h"
 
+#ifdef CONFIG_SMP
+#  include "irq/irq.h"
+#endif
+
 #include "signal/signal.h"
 #include "task/task.h"
 
@@ -140,7 +144,36 @@ int nxtask_exit(void)
    */
 
   nxsched_add_blocked(dtcb, TSTATE_TASK_INACTIVE);
+
+#ifdef CONFIG_SMP
+  /* NOTE:
+   * During nxtask_terminate(), enter_critical_section() will be called
+   * to deallocate tcb. However, this would aquire g_cpu_irqlock if
+   * rtcb->irqcount = 0, event though we are in critical section.
+   * To prevent from aquiring, increment rtcb->irqcount here.
+   */
+
+  if (rtcb->irqcount == 0)
+    {
+      spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+                  &g_cpu_irqlock);
+    }
+
+  rtcb->irqcount++;
+#endif
+
   ret = nxtask_terminate(dtcb->pid, true);
+
+#ifdef CONFIG_SMP
+  rtcb->irqcount--;
+
+  if (rtcb->irqcount == 0)
+    {
+      spin_clrbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
+                  &g_cpu_irqlock);
+    }
+#endif
+
   rtcb->task_state = TSTATE_TASK_RUNNING;
 
   /* Decrement the lockcount on rctb. */
