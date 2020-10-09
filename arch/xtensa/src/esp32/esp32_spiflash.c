@@ -341,7 +341,7 @@ static inline irqstate_t IRAM_ATTR esp32_spiflash_opstart(
 #ifdef CONFIG_SMP
   int other;
 #endif
- 
+
   flags = enter_critical_section();
 
   *cpu = up_cpu_index();

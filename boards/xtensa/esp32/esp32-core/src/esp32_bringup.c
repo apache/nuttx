@@ -118,7 +118,6 @@ int esp32_bringup(void)
     }
 #endif
 
-
 #ifdef CONFIG_MMCSD
   ret = esp32_mmcsd_initialize(0);
   if (ret < 0)
