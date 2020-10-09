@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/tiva/chip.h
  *
  *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
@@ -33,20 +33,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_TIVA_CHIP_H
 #define __ARCH_ARM_INCLUDE_TIVA_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Get customizations for each supported chip */
 
@@ -125,7 +125,8 @@
 #  define TIVA_NAES            0  /* No AES module */
 #  define TIVA_NDES            0  /* No DES module */
 #  define TIVA_NHASH           0  /* No SHA1/MD5 hash module */
-#elif defined(CONFIG_ARCH_CHIP_LM3S9B96) || defined(CONFIG_ARCH_CHIP_LM3S9B92)
+#elif defined(CONFIG_ARCH_CHIP_LM3S9B96) || \
+      defined(CONFIG_ARCH_CHIP_LM3S9B92)
 #  define LM3S                 1  /* LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
@@ -199,7 +200,8 @@
 #  define TIVA_NAES            0  /* No AES module */
 #  define TIVA_NDES            0  /* No DES module */
 #  define TIVA_NHASH           0  /* No SHA1/MD5 hash module */
-#elif defined(CONFIG_ARCH_CHIP_TM4C123GH6PGE) || defined(CONFIG_ARCH_CHIP_TM4C123GH6PZ) || \
+#elif defined(CONFIG_ARCH_CHIP_TM4C123GH6PGE) || \
+      defined(CONFIG_ARCH_CHIP_TM4C123GH6PZ) || \
       defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB)
 #  undef  LM3S                    /* Not LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
@@ -411,11 +413,11 @@
 #  error "Capabilities not specified for this TIVA/Stellaris chip"
 #endif
 
-/* The TIVA/Stellaris only supports 8 priority levels.  The hardware priority
- * mechanism will only look at the upper N bits of the 8-bit priority level
- * (where N is 3 for the Tiva/Stellaris family), so any prioritization must be
- * performed in those bits.  The default priority level is set to the middle
- * value
+/* The TIVA/Stellaris only supports 8 priority levels.  The hardware
+ * priority mechanism will only look at the upper N bits of the 8-bit
+ * priority level (where N is 3 for the Tiva/Stellaris family), so any
+ * prioritization must be performed in those bits.  The default priority
+ * level is set to the middle value
  */
 
 #define NVIC_SYSH_PRIORITY_MIN     0xe0 /* Bits [7:5] set in minimum priority */
@@ -423,13 +425,13 @@
 #define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
 #define NVIC_SYSH_PRIORITY_STEP    0x20 /* Three bits of interrupt priority used */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes
