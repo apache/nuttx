@@ -44,6 +44,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
+#  include <sys/types.h>
 #  include <stdbool.h>
 #endif
 
