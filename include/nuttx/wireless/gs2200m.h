@@ -79,6 +79,7 @@ struct gs2200m_connect_msg
 {
   char     cid;
   uint8_t  type;
+  uint16_t lport;
   char     addr[17];
   char     port[6];
 };

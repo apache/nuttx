@@ -1778,9 +1778,10 @@ errout:
  * NOTE: See 7.5.1.1 Create TCP Clients and 7.5.1.2 Create UDP Client
  ****************************************************************************/
 
-static enum pkt_type_e gs2200m_create_clnt(FAR struct gs2200m_dev_s *dev,
-                                           FAR char *address, FAR char *port,
-                                           int type, FAR char *cid)
+static enum pkt_type_e
+gs2200m_create_clnt(FAR struct gs2200m_dev_s *dev,
+                    FAR struct gs2200m_connect_msg *msg,
+                    FAR char *cid)
 {
   enum pkt_type_e  r;
   struct pkt_dat_s pkt_dat;
@@ -1790,13 +1791,24 @@ static enum pkt_type_e gs2200m_create_clnt(FAR struct gs2200m_dev_s *dev,
 
   *cid = 'z'; /* Invalidate cid */
 
-  if (SOCK_STREAM == type)
+  if (SOCK_STREAM == msg->type)
     {
-      snprintf(cmd, sizeof(cmd), "AT+NCTCP=%s,%s\r\n", address, port);
+      snprintf(cmd, sizeof(cmd), "AT+NCTCP=%s,%s\r\n",
+               msg->addr, msg->port);
     }
-  else if (SOCK_DGRAM == type)
+  else if (SOCK_DGRAM == msg->type)
     {
-      snprintf(cmd, sizeof(cmd), "AT+NCUDP=%s,%s\r\n", address, port);
+      if (0 == msg->lport)
+        {
+          snprintf(cmd, sizeof(cmd), "AT+NCUDP=%s,%s\r\n",
+                   msg->addr, msg->port);
+        }
+
+      else
+        {
+          snprintf(cmd, sizeof(cmd), "AT+NCUDP=%s,%s,%d\r\n",
+                   msg->addr, msg->port, msg->lport);
+        }
     }
   else
     {
@@ -2220,7 +2232,7 @@ static int gs2200m_ioctl_connect(FAR struct gs2200m_dev_s *dev,
 
   /* Create TCP or UDP connection */
 
-  type = gs2200m_create_clnt(dev, msg->addr, msg->port, msg->type, &cid);
+  type = gs2200m_create_clnt(dev, msg, &cid);
 
   msg->type = type;
 
