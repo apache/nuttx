@@ -9,3 +9,4 @@ Guides
   usbtrace.rst
   simulator.rst
   drivers.rst
+  tasktrace.rst
