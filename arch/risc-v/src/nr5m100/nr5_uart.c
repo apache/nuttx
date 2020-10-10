@@ -62,13 +62,13 @@ struct nr5_uart_buffer_s
 
 struct nr5_uart_regs_s
 {
-   uint32_t* pbaud;        /* Data status port */
-   uint32_t* pstat;        /* Data status port */
-   uint8_t*  ptx;          /* Data TX port */
-   uint8_t*  prx;          /* Data RX port */
-   uint32_t* pintctrl;     /* Interrupt enable control */
-   int       rxirq;        /* IRQ number */
-   int       txirq;        /* IRQ number */
+  uint32_t *pbaud;        /* Data status port */
+  uint32_t *pstat;        /* Data status port */
+  uint8_t  *ptx;          /* Data TX port */
+  uint8_t  *prx;          /* Data RX port */
+  uint32_t *pintctrl;     /* Interrupt enable control */
+  int       rxirq;        /* IRQ number */
+  int       txirq;        /* IRQ number */
 };
 
 struct nr5_uart_s
@@ -183,8 +183,9 @@ void nr5_uart_init(int uart)
     {
       /* Attach the ISR and enable the IRQ with the EPIC */
 
-      //irq_attach(dev->regs->rxirq, &nr5_uart_rx_isr, NULL);
-      //up_enable_irq(dev->regs->rxirq);
+      /* irq_attach(dev->regs->rxirq, &nr5_uart_rx_isr, NULL); */
+
+      /* up_enable_irq(dev->regs->rxirq); */
 
       /* Set the baud rate */
 
@@ -195,7 +196,7 @@ void nr5_uart_init(int uart)
 
       /* Now enable the RX IRQ in the UART peripheral */
 
-      //*dev->regs->pintctrl = NR5_UART_CTRL_ENABLE_RX_IRQ;
+      /* *dev->regs->pintctrl = NR5_UART_CTRL_ENABLE_RX_IRQ; */
     }
 }
 
@@ -208,11 +209,11 @@ uint8_t nr5_uart_get_rx()
   up_disableints();
   if (g_nr5_uart1.rxbuf->head != g_nr5_uart1.rxbuf->tail)
     {
-      struct nr5_uart_buffer_s *pBuf = g_nr5_uart1.rxbuf;
+      struct nr5_uart_buffer_s *pbuf = g_nr5_uart1.rxbuf;
 
-      rxdata = pBuf->buffer[pBuf->tail++];
-      if (pBuf->tail == pBuf->size)
-        pBuf->tail = 0;
+      rxdata = pbuf->buffer[pbuf->tail++];
+      if (pbuf->tail == pbuf->size)
+        pbuf->tail = 0;
     }
 
   up_enableints();
@@ -223,11 +224,11 @@ uint8_t nr5_uart_get_rx()
 
 int nr5_uart_test_rx_avail()
 {
-  struct nr5_uart_buffer_s *pBuf = g_nr5_uart1.rxbuf;
+  struct nr5_uart_buffer_s *pbuf = g_nr5_uart1.rxbuf;
   int  avail;
 
   up_disableints();
-  avail= !(pBuf->head == pBuf->tail);
+  avail = !(pbuf->head == pbuf->tail);
   up_enableints();
 
   /* If no RX data available then halt the processor until an interrupt */
@@ -244,19 +245,19 @@ int nr5_uart_test_rx_avail()
 
 int nr5_uart_test_tx_empty()
 {
-   return *g_nr5_uart1.regs->pstat & NR5_UART_STATUS_TX_EMPTY;
+  return *g_nr5_uart1.regs->pstat & NR5_UART_STATUS_TX_EMPTY;
 }
 
 /* Routine to send TX byte to console UART. */
 
 void nr5_uart_put_tx(uint8_t ch)
 {
-   /* Wait for TX to be empty */
+  /* Wait for TX to be empty */
 
-   while (!(*g_nr5_uart1.regs->pstat & NR5_UART_STATUS_TX_EMPTY))
-      ;
+  while (!(*g_nr5_uart1.regs->pstat & NR5_UART_STATUS_TX_EMPTY))
+     ;
 
-   /* Write to TX */
+  /* Write to TX */
 
-   *g_nr5_uart1.regs->ptx = ch;
+  *g_nr5_uart1.regs->ptx = ch;
 }

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/risc-v/src/nr5m100/nr5_timer.h
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
@@ -33,24 +33,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_RISCV_SRC_NR5M100_NR5_TIMER_H
 #define __ARCH_RISCV_SRC_NR5M100_NR5_TIMER_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/nr5m1xx_timer.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Helpers **************************************************************************/
+ ****************************************************************************/
+
+/* Helpers ******************************************************************/
 
 #define NR5_TIMER_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
 #define NR5_TIMER_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
@@ -61,9 +62,9 @@
 #define NR5_TIMER_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
 #define NR5_TIMER_ACKINT(d,s)           ((d)->ops->ackint(d,s))
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -95,7 +96,6 @@ typedef enum
   NR5_TIM_MODE_CK_MED         = 0x0010,
   NR5_TIM_MODE_CK_SYS         = 0x0020,
   NR5_TIM_MODE_CK_EXT         = 0x0030,
-
 } nr5_timer_mode_t;
 
 /* Timer Operations */
@@ -112,7 +112,8 @@ struct nr5_timer_ops_s
 
   /* Timer Interrupt Operations */
 
-  int  (*setisr)(FAR struct nr5_timer_dev_s *dev, xcpt_t handler, void *arg, int source);
+  int  (*setisr)(FAR struct nr5_timer_dev_s *dev, xcpt_t handler, void *arg,
+                 int source);
   void (*enableint)(FAR struct nr5_timer_dev_s *dev, int source);
   void (*disableint)(FAR struct nr5_timer_dev_s *dev, int source);
   void (*ackint)(FAR struct nr5_timer_dev_s *dev, int source);
@@ -125,9 +126,9 @@ struct nr5_timer_dev_s
   struct nr5_timer_ops_s *ops;
 };
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /* Power-up timer and get its structure */
 
@@ -145,7 +146,8 @@ int nr5_timer_deinit(FAR struct nr5_timer_dev_s *dev);
  *   register the timer drivers at 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the timer device. This should be of the form /dev/timer0
+ *   devpath - The full path to the timer device. This should be of the form
+ *             /dev/timer0
  *   timer - the timer number.
  *
  * Returned Value:
