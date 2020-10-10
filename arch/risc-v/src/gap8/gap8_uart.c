@@ -34,7 +34,7 @@
  *
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  *  This UART IP has no flow control. So ioctl is limited.
  *  Note that here we don't use the uDMA to send multiple bytes, because
  *  Nuttx serial drivers don't have abstraction for puts().
@@ -157,7 +157,7 @@ static struct gap8_uart_t gap8_uarts[GAP8_NR_UART] =
   {
     .udma =
     {
-      .regs  = (UDMA_reg_t *)UART,
+      .regs  = (udma_reg_t *)UART,
       .id    = GAP8_UDMA_ID_UART,
       .on_tx = uart_tx_isr,
       .tx_arg = &g_uart0port,
@@ -197,7 +197,7 @@ static uart_dev_t g_uart0port =
   {
     .size    = CONFIG_UART_TXBUFSIZE,
     .buffer  = g_uart1txbuffer,
-   },
+  },
   .ops       = &g_uart_ops,
   .priv      = &gap8_uarts[0],
 };
@@ -246,7 +246,7 @@ static void uart_rx_isr(void *arg)
 static int up_setup(struct uart_dev_s *dev)
 {
   struct gap8_uart_t *the_uart = (struct gap8_uart_t *)dev->priv;
-  UART_reg_t *uartreg = (UART_reg_t *)the_uart->udma.regs;
+  uart_reg_t *uartreg = (uart_reg_t *)the_uart->udma.regs;
   uint32_t cfgreg = 0;
 
   if (the_uart->is_initialized == 0)
@@ -303,14 +303,15 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
+ *   Configure the UART to operation in interrupt driven mode. This method is
  *   called when the serial port is opened.  Normally, this is just after the
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
  *   RX and TX interrupts are not enabled by the attach method (unless the
  *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   interrupts are not enabled until the txint() and rxint() methods are
+ *   called.
  *
  ****************************************************************************/
 
@@ -331,7 +332,7 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
+ *   closed normally just before the shutdown method is called. The exception
  *   is the serial console which is never shutdown.
  *
  ****************************************************************************/
