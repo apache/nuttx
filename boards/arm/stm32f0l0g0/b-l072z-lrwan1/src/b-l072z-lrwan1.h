@@ -133,7 +133,8 @@ int stm32_bringup(void);
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Nucleo-H743ZI board.
+ *   Called to configure SPI chip select GPIO pins for the B-L072Z-LRWAN1
+ *   board.
  *
  ****************************************************************************/
 
@@ -141,11 +142,12 @@ int stm32_bringup(void);
 void stm32_spidev_initialize(void);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_lpwaninitialize
  *
  * Description:
  *   Initialize SX127X LPWAN interaface.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_LPWAN_SX127X

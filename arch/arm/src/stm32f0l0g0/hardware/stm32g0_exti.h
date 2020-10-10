@@ -39,21 +39,21 @@
 
 /* Register Offsets *****************************************************************/
 
-#define STM32_EXTI_RTSR1_OFFSET     0x0000  /* Rising Trigger selection register 1 */
-#define STM32_EXTI_FTSR1_OFFSET     0x0004  /* Falling Trigger selection register 1 */
-#define STM32_EXTI_SWIER1_OFFSET    0x0008  /* Software interrupt event register 1 */
-#define STM32_EXTI_RPR1_OFFSET      0x000c  /* Rising edge pending register 1 */
-#define STM32_EXTI_FPR1_OFFSET      0x0010  /* Falling edge pending register 1 */
+#define STM32_EXTI_RTSR1_OFFSET     0x0000                    /* Rising Trigger selection register 1 */
+#define STM32_EXTI_FTSR1_OFFSET     0x0004                    /* Falling Trigger selection register 1 */
+#define STM32_EXTI_SWIER1_OFFSET    0x0008                    /* Software interrupt event register 1 */
+#define STM32_EXTI_RPR1_OFFSET      0x000c                    /* Rising edge pending register 1 */
+#define STM32_EXTI_FPR1_OFFSET      0x0010                    /* Falling edge pending register 1 */
 
 #define STM32_EXTI_EXTICR_OFFSET(p) (0x0060 + ((p) & 0x000c)) /* Registers are displaced by 4! */
-#define STM32_EXTI_EXTICR1_OFFSET   0x0060  /* External interrupt selection register 1 */
-#define STM32_EXTI_EXTICR2_OFFSET   0x0064  /* External interrupt selection register 2 */
-#define STM32_EXTI_EXTICR3_OFFSET   0x0068  /* External interrupt selection register 3 */
-#define STM32_EXTI_EXTICR4_OFFSET   0x006c  /* External interrupt selection register 4 */
-#define STM32_EXTI_IMR1_OFFSET      0x0080  /* CPU wakeup with interrupt mask register 1 */
-#define STM32_EXTI_EMR1_OFFSET      0x0084  /* CPU wakeup with event mask register 1 */
-#define STM32_EXTI_IMR2_OFFSET      0x0090  /* CPU wakeup with interrupt mask register 2 */
-#define STM32_EXTI_EMR2_OFFSET      0x0094  /* CPU wakeup with event mask register 2 */
+#define STM32_EXTI_EXTICR1_OFFSET   0x0060                    /* External interrupt selection register 1 */
+#define STM32_EXTI_EXTICR2_OFFSET   0x0064                    /* External interrupt selection register 2 */
+#define STM32_EXTI_EXTICR3_OFFSET   0x0068                    /* External interrupt selection register 3 */
+#define STM32_EXTI_EXTICR4_OFFSET   0x006c                    /* External interrupt selection register 4 */
+#define STM32_EXTI_IMR1_OFFSET      0x0080                    /* CPU wakeup with interrupt mask register 1 */
+#define STM32_EXTI_EMR1_OFFSET      0x0084                    /* CPU wakeup with event mask register 1 */
+#define STM32_EXTI_IMR2_OFFSET      0x0090                    /* CPU wakeup with interrupt mask register 2 */
+#define STM32_EXTI_EMR2_OFFSET      0x0094                    /* CPU wakeup with event mask register 2 */
 
 /* Register Addresses ***************************************************************/
 
@@ -76,7 +76,7 @@
 #define EXTI_EXTICR_PORTB           (1)       /* 0001: PB[x] pin */
 #define EXTI_EXTICR_PORTC           (2)       /* 0010: PC[x] pin */
 #define EXTI_EXTICR_PORTD           (3)       /* 0011: PD[x] pin */
-                                                /* 0100: Reserved */
+                                              /* 0100: Reserved */
 #define EXTI_EXTICR_PORTF           (5)       /* 0100: PF[x] pin */
 
 #define EXTI_EXTICR_PORT_MASK       (0xff)

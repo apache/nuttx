@@ -165,7 +165,8 @@ static int sx127x_pa_select(bool enable)
   if (enable == false)
     {
       ret = -EINVAL;
-      wlerr("Module supports only PA_BOOST pin, so PA_SELECT must be enabled!\n");
+      wlerr("Module supports only PA_BOOST pin, "
+            "so PA_SELECT must be enabled!\n");
     }
 
   return ret;

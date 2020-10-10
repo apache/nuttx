@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_STM32_ADC_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_STM32_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -34,10 +34,11 @@
 
 #include "hardware/stm32_adc.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 /* Timer ADC trigger not supported yet */
 
@@ -72,9 +73,10 @@
 #  define ADC1_EXTSEL_T2TRGO  ADC12_CFGR1_EXTSEL_TRG2
 #  define ADC1_EXTSEL_T3TRGO  ADC12_CFGR1_EXTSEL_TRG3
 #  define ADC1_EXTSEL_T15TRGO ADC12_CFGR1_EXTSEL_TRG4
-                              /* TRG5 reserved */
-                              /* TRG6 reserved */
-                              /* TRG7 reserved */
+                              /* TRG5 reserved
+                               * TRG6 reserved
+                               * TRG7 reserved
+                               */
 #elif defined(CONFIG_STM32F0L0G0_STM32L0)
                               /* TRG0 reserved */
 #  define ADC1_EXTSEL_T21CC2  ADC12_CFGR1_EXTSEL_TRG1
@@ -98,6 +100,7 @@
 #endif
 
 /* EXTSEL configuration *****************************************************/
+
 /* TODO */
 
 /* ADC interrupts ***********************************************************/
@@ -112,7 +115,7 @@
 #define ADC_ISR_ALLINTS (ADC_ISR_EOC | ADC_ISR_AWD | ADC_ISR_OVR)
 #define ADC_IER_ALLINTS (ADC_IER_EOC | ADC_IER_AWD | ADC_IER_OVR)
 
-/* ADC registers ***********************************************************/
+/* ADC registers ************************************************************/
 
 #define STM32_ADC_DMAREG_OFFSET      STM32_ADC_CFGR1_OFFSET
 #define ADC_DMAREG_DMA               ADC_CFGR1_DMAEN
@@ -144,14 +147,15 @@
 #define ADC_DUMP_REGS(adc)                           \
         (adc)->llops->dump_regs(adc)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* On STM32F42xx and STM32F43xx devices,VBAT and temperature sensor are connected
- * to the same ADC internal channel (ADC1_IN18). Only one conversion, either
- * temperature sensor or VBAT, must be selected at a time. When both conversion are
- * enabled simultaneously, only the VBAT conversion is performed.
+/* On STM32F42xx and STM32F43xx devices,VBAT and temperature sensor are
+ * connected to the same ADC internal channel (ADC1_IN18). Only one
+ * conversion, either temperature sensor or VBAT, must be selected at a time.
+ * When both conversion are enabled simultaneously, only the VBAT conversion
+ * is performed.
  */
 
 enum adc_io_cmds_e
@@ -198,7 +202,9 @@ typedef struct adc_channel_s
 {
   uint8_t channel:5;
 
-  /* Sampling time individually for each channel. It differs between families */
+  /* Sampling time individually for each channel.
+   * It differs between families
+   */
 
   uint8_t sample_time:3;
 } adc_channel_t;
@@ -256,7 +262,8 @@ struct stm32_adc_ops_s
 
   /* Register buffer for ADC DMA transfer */
 
-  int (*regbuf_reg)(FAR struct stm32_adc_dev_s *dev, uint16_t *buffer, uint8_t len);
+  int (*regbuf_reg)(FAR struct stm32_adc_dev_s *dev, uint16_t *buffer,
+                    uint8_t len);
 
   /* Start/stop regular conversion */
 
@@ -278,9 +285,9 @@ struct stm32_adc_ops_s
 
 #endif /* CONFIG_STM32F0L0G0_ADC_LL_OPS */
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -311,12 +318,13 @@ struct adc_dev_s;
 struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
                                       int channels);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adc_llops_get
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32F0L0G0_ADC_LL_OPS
-FAR const struct stm32_adc_ops_s *stm32_adc_llops_get(FAR struct adc_dev_s *dev);
+FAR const struct stm32_adc_ops_s
+*stm32_adc_llops_get(FAR struct adc_dev_s *dev);
 #endif
 
 #undef EXTERN

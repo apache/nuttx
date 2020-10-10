@@ -48,7 +48,8 @@ static ssize_t smps_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static ssize_t smps_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen);
-static int     smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     smps_ioctl(FAR struct file *filep, int cmd,
+                          unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -93,8 +94,8 @@ static int smps_open(FAR struct file *filep)
   if (ret >= 0)
     {
       /* Increment the count of references to the device.  If this the first
-       * time that the driver has been opened for this device, then initialize
-       * the device.
+       * time that the driver has been opened for this device, then
+       * initialize the device.
        */
 
       tmp = dev->ocount + 1;
@@ -106,7 +107,9 @@ static int smps_open(FAR struct file *filep)
         }
       else
         {
-          /* Check if this is the first time that the driver has been opened. */
+          /* Check if this is the first time that the driver has been
+           * opened.
+           */
 
           if (tmp == 1)
             {
@@ -167,7 +170,7 @@ static int smps_close(FAR struct file *filep)
 
           /* Free the IRQ and disable the SMPS device */
 
-          flags = enter_critical_section();       /* Disable interrupts */
+          flags = enter_critical_section();      /* Disable interrupts */
           dev->ops->shutdown(dev);               /* Disable the SMPS */
           leave_critical_section(flags);
 
@@ -182,7 +185,8 @@ static int smps_close(FAR struct file *filep)
  * Name: smps_read
  ****************************************************************************/
 
-static ssize_t smps_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t smps_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen)
 {
   return 1;
 }
@@ -239,7 +243,9 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               goto errout;
             }
 
-          /* When constan current mode, then output current must be provided */
+          /* When constan current mode, then output current must be
+           * provided
+           */
 
           if (smps->opmode == SMPS_OPMODE_CC && smps->param.i_out <= 0)
             {
@@ -249,7 +255,9 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               goto errout;
             }
 
-          /* When constan voltage mode, then output voltage must be provided */
+          /* When constan voltage mode, then output voltage must be
+           * provided
+           */
 
           if (smps->opmode == SMPS_OPMODE_CV && smps->param.v_out <= 0)
             {
@@ -462,7 +470,8 @@ errout:
  * Name: smps_register
  ****************************************************************************/
 
-int smps_register(FAR const char *path, FAR struct smps_dev_s *dev, FAR void *lower)
+int smps_register(FAR const char *path, FAR struct smps_dev_s *dev,
+                  FAR void *lower)
 {
   int ret;
 
