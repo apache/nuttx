@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/risc-v/include/gap8/irq.h
  * GAP8 event system
  *
@@ -32,34 +32,35 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
-/************************************************************************************
- *  GAP8 features a FC controller and a 8-core cluster. IRQ from peripherals have
- *  unique ID, which are dispatched to the FC or cluster by the SOC event unit, and
- *  then by the FC event unit or cluster event unit, and finally to FC or cluster.
- *  Peripherals share the same IRQ entry.
- ************************************************************************************/
+ ****************************************************************************/
+
+/****************************************************************************
+ *  GAP8 features a FC controller and a 8-core cluster. IRQ from peripherals
+ *  have unique ID, which are dispatched to the FC or cluster by the SOC
+ *  event unit, and then by the FC event unit or cluster event unit, and
+ *  finally to FC or cluster. Peripherals share the same IRQ entry.
+ ****************************************************************************/
 
 #ifndef __ARCH_RISC_V_INCLUDE_GAP8_IRQ_H
 #define __ARCH_RISC_V_INCLUDE_GAP8_IRQ_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <arch/irq.h>
 #include <stdint.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-Processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Unique ID in SOC domain */
 
 /* uDMA data events.
  *  Each peripheral has a uDMA_ID.
- *  Each peripheral also has RX and TX event ID, which happen to be 2*uDMA_ID and
- *  2*uDMA_ID+1.
+ *  Each peripheral also has RX and TX event ID, which happen to be 2*uDMA_ID
+ *  and 2*uDMA_ID+1.
  */
 
 #define GAP8_EVENT_UDMA_LVDS_RX              0
@@ -150,7 +151,8 @@
 #define GAP8_IRQ_RESERVED     60
 
 /* Cluster domain IRQ ID */
-// TODO
+
+/* TODO */
 
 /* RISCY core exception vectors */
 
@@ -159,14 +161,15 @@
 #define GAP8_IRQ_SYSCALL   34
 
 /* Total number of IRQs.
- * 32 ISRs + reset-handler + illegal-instruction-handler + system-call-handler
+ * 32 ISRs + reset-handler + illegal-instruction-handler +
+ * system-call-handler
  */
 
 #define NR_IRQS 35
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* SOC_EU - SOC domain event unit */
 
@@ -183,9 +186,9 @@ typedef struct
   volatile uint32_t ERR_MASK_LSB;    /* error mask LSB register      */
   volatile uint32_t TIMER_SEL_HI;    /* timer high register          */
   volatile uint32_t TIMER_SEL_LO;    /* timer low register           */
-} SOC_EU_reg_t;
+} soc_eu_reg_t;
 
-#define SOC_EU  ((SOC_EU_reg_t *)0x1A106000U)
+#define SOC_EU  ((soc_eu_reg_t *)0x1A106000U)
 
 /* FCEU - FC domain event unit */
 
@@ -208,18 +211,18 @@ typedef struct
   volatile uint32_t EVENT_WAIT;         /* event wait register              */
   volatile uint32_t EVENT_WAIT_CLEAR;   /* event wait clear register        */
   volatile uint32_t MASK_SEC_IRQ;       /* mask sec irq register            */
-} FCEU_reg_t;
+} fceu_reg_t;
 
-#define FCEU  ((FCEU_reg_t*)0x00204000U)
+#define FCEU  ((fceu_reg_t*)0x00204000U)
 
 /* Current interrupt event ID */
 
 typedef struct
 {
   volatile uint32_t CURRENT_EVENT;  /* current event register */
-} SOC_EVENT_reg_t;
+} soc_event_reg_t;
 
-#define SOC_EVENTS ((SOC_EVENT_reg_t*)0x00200F00UL)
+#define SOC_EVENTS ((soc_event_reg_t*)0x00200F00UL)
 
 /* event trigger and mask */
 
@@ -230,19 +233,20 @@ typedef struct
   volatile uint32_t TRIGGER_WAIT[8]; /* trigger wait register */
   volatile uint32_t _reserved1[8];   /* Offset: 0x60 (R/W)  Empty Registers */
   volatile uint32_t TRIGGER_CLR[8];  /* trigger clear register */
-} EU_SW_EVENTS_TRIGGER_reg_t;
+} eu_sw_events_trigger_reg_t;
 
-#define EU_SW_EVNT_TRIG ((EU_SW_EVENTS_TRIGGER_reg_t*)0x00204100UL)
+#define EU_SW_EVNT_TRIG ((eu_sw_events_trigger_reg_t*)0x00204100UL)
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: up_disable_event
  *
  * Description:
- *   Disable the specific event. Note that setting 1 means to disable an event...
+ *   Disable the specific event. Note that setting 1 means to disable an
+ *   event...
  *
  ****************************************************************************/
 
@@ -250,7 +254,7 @@ static inline void up_disable_event(int event)
 {
   if (event >= 32)
     {
-      SOC_EU->FC_MASK_MSB |= (1 << (event-32));
+      SOC_EU->FC_MASK_MSB |= (1 << (event - 32));
     }
   else
     {
@@ -262,7 +266,8 @@ static inline void up_disable_event(int event)
  * Name: up_enable_event
  *
  * Description:
- *   Enable the specific event. Note that setting 0 means to enable an event...
+ *   Enable the specific event. Note that setting 0 means to enable an
+ *   event...
  *
  ****************************************************************************/
 
@@ -270,7 +275,7 @@ static inline void up_enable_event(int event)
 {
   if (event >= 32)
     {
-      SOC_EU->FC_MASK_MSB &= ~(1 << (event-32));
+      SOC_EU->FC_MASK_MSB &= ~(1 << (event - 32));
     }
   else
     {
@@ -344,7 +349,8 @@ static inline uint32_t _current_privilege(void)
 
 static inline uint32_t up_irq_save(void)
 {
-  uint32_t oldstat, newstat;
+  uint32_t oldstat;
+  uint32_t newstat;
 
   if (_current_privilege())
     {
@@ -400,7 +406,8 @@ static inline void up_irq_restore(uint32_t pri)
 
 static inline uint32_t up_irq_enable(void)
 {
-  uint32_t oldstat, newstat;
+  uint32_t oldstat;
+  uint32_t newstat;
 
   if (_current_privilege())
     {
@@ -436,8 +443,8 @@ static inline void gap8_sleep_wait_sw_evnt(uint32_t event_mask)
   FCEU->MASK_AND = event_mask;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_RISC_V_INCLUDE_GAP8_IRQ_H */
