@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_SPI_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_SPI_H
 
 /****************************************************************************
  * Included Files
- ***************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets for SPI master (SPIM) **********************************/
+/* Register offsets for SPI master (SPIM) ***********************************/
 
 #define NRF52_SPIM_TASK_START_OFFSET      (0x0010) /* Start SPI transaction */
 #define NRF52_SPIM_TASK_STOP_OFFSET       (0x0014) /* Stop SPI transaction */
@@ -69,7 +69,7 @@
 #define NRF52_SPIM_DCXCNT_OFFSET          (0x0570) /* DCX configuration */
 #define NRF52_SPIM_ORC_OFFSET             (0x05c0) /* ORC */
 
-/* Register offsets for SPI slave (SPIS) ***********************************/
+/* Register offsets for SPI slave (SPIS) ************************************/
 
 #define NRF52_SPIS_SHORTS_OFFSET          (0x0200) /* Shortcuts between local events and tasks */
 #define NRF52_SPIS_INTENSET_OFFSET        (0x0304) /* Enable interrupt */
@@ -93,7 +93,7 @@
 #define NRF52_SPIS_DEF_OFFSET             (0x055c) /* Default character */
 #define NRF52_SPIS_ORC_OFFSET             (0x05c0) /* Over-read character */
 
-/* Register Bitfield Definitions for SPIM **********************************/
+/* Register Bitfield Definitions for SPIM ***********************************/
 
 /* TASKS_START Register */
 
@@ -235,7 +235,7 @@
 #define SPIM_PSELDCX_PORT_MASK      (0x1 << SPIM_PSELDCX_PORT_SHIFT)
 #define SPIM_PSELDCX_CONNECTED      (1 << 31) /* Bit 31: Connection */
 
-/* Register Bitfield Definitions for SPIS *******************************************************/
+/* Register Bitfield Definitions for SPIS ***********************************/
 
 /* TODO */
 

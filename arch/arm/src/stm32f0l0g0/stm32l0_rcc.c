@@ -486,7 +486,8 @@ static void stm32_stdclockconfig(void)
   putreg32(regval, STM32_RCC_APB1ENR);
 
   /* Go to the high performance voltage range 1 if necessary.  In this mode,
-   * the PLL VCO frequency can be up to 96MHz.  USB and SDIO can be supported.
+   * the PLL VCO frequency can be up to 96MHz.
+   * USB and SDIO can be supported.
    *
    * Range 1: PLLVCO up to 96MHz in range 1 (1.8V)
    * Range 2: PLLVCO up to 48MHz in range 2 (1.5V) (default)
@@ -601,25 +602,26 @@ static void stm32_stdclockconfig(void)
 #if (STM32_SYSCLK_SW != RCC_CFGR_SW_MSI)
   /* Increasing the CPU frequency (in the same voltage range):
    *
-   * After reset, the used clock is the MSI (2 MHz) with 0 WS configured in the
-   * FLASH_ACR register. 32-bit access is enabled and prefetch is disabled.
-   * ST strongly recommends to use the following software sequences to tune the
-   * number of wait states needed to access the Flash memory with the CPU
-   * frequency.
+   * After reset, the used clock is the MSI (2 MHz) with 0 WS configured in
+   * the FLASH_ACR register. 32-bit access is enabled and prefetch is
+   * disabled. ST strongly recommends to use the following software sequences
+   * to tune the number of wait states needed to access the Flash memory with
+   * the CPU frequency.
    *
    *   - Program the 64-bit access by setting the ACC64 bit in Flash access
    *     control register (FLASH_ACR)
    *   - Check that 64-bit access is taken into account by reading FLASH_ACR
    *   - Program 1 WS to the LATENCY bit in FLASH_ACR
-   *   - Check that the new number of WS is taken into account by reading FLASH_ACR
+   *   - Check that the new number of WS is taken into account by reading
+   *     FLASH_ACR
    *   - Modify the CPU clock source by writing to the SW bits in the Clock
    *     configuration register (RCC_CFGR)
-   *   - If needed, modify the CPU clock prescaler by writing to the HPRE bits in
-   *     RCC_CFGR
-   *   - Check that the new CPU clock source or/and the new CPU clock prescaler
-   *     value is/are taken into account by reading the clock source status (SWS
-   *     bits) or/and the AHB prescaler value (HPRE bits), respectively, in the
-   *     RCC_CFGR register
+   *   - If needed, modify the CPU clock prescaler by writing to the HPRE
+   *     bits in RCC_CFGR
+   *   - Check that the new CPU clock source or/and the new CPU clock
+   *     prescaler value is/are taken into account by reading the clock
+   *     source status (SWS bits) or/and the AHB prescaler value (HPRE bits),
+   *     respectively, in the RCC_CFGR register
    */
 
   regval = getreg32(STM32_FLASH_ACR);
@@ -670,8 +672,8 @@ static void stm32_stdclockconfig(void)
 #if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
 
   /* Set the PLL divider and multiplier.  NOTE:  The PLL needs to be disabled
-   * to do these operation.  We know this is the case here because pll_reset()
-   * was previously called by stm32_clockconfig().
+   * to do these operation.  We know this is the case here because
+   * pll_reset() was previously called by stm32_clockconfig().
    */
 
   regval  = getreg32(STM32_RCC_CFGR);
@@ -730,7 +732,6 @@ static void stm32_stdclockconfig(void)
 
   stm32_rcc_enablelse();
 #endif
-
 }
 #endif
 

@@ -21,8 +21,7 @@
 #ifndef __INCLUDE_NUTTX_DRIVERS_POWER_SMPS_H
 #define __INCLUDE_NUTTX_DRIVERS_POWER_SMPS_H
 
-/*
- * The SMPS (switched-mode power supply) driver is split into two parts:
+/* The SMPS (switched-mode power supply) driver is split into two parts:
  *
  * 1) An "upper half", generic driver that provides the common SMPS interface
  *    to application level code, and
@@ -65,7 +64,7 @@ enum smps_opmode_e
   SMPS_OPMODE_INIT       = 0,        /* Initial mode */
   SMPS_OPMODE_CC         = 1,        /* Constant current mode */
   SMPS_OPMODE_CV         = 2,        /* Constant voltage mode */
-  SMPS_OPMODE_CP         = 3         /* Constant power mode*/
+  SMPS_OPMODE_CP         = 3         /* Constant power mode */
 };
 
 /* SMPS state */

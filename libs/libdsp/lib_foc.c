@@ -258,7 +258,9 @@ void foc_process(FAR struct foc_data_s *foc,
 
   inv_park_transform(angle, &foc->v_dq, &foc->v_ab);
 
-  /* Normalize the alpha-beta voltage to get the alpha-beta modulation voltage */
+  /* Normalize the alpha-beta voltage to get the alpha-beta modulation
+   * voltage
+   */
 
   foc->v_ab_mod.a = foc->v_ab.a * foc->vab_mod_scale;
   foc->v_ab_mod.b = foc->v_ab.b * foc->vab_mod_scale;

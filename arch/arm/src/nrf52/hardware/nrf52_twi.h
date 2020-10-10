@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_TWI_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_TWI_H
 
 /****************************************************************************
  * Included Files
- ***************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets for TWI master (TWIM) **********************************/
+/* Register offsets for TWI master (TWIM) ***********************************/
 
 #define NRF52_TWIM_TASKS_STARTRX_OFFSET     0x0000 /* Start TWIM receive sequence */
 #define NRF52_TWIM_TASKS_STARTTX_OFFSET     0x0008 /* Start TWIM transmit sequence */
@@ -65,7 +65,7 @@
 #define NRF52_TWIM_TXLIST_OFFSET            0x0550 /* TX EasyDMA list type */
 #define NRF52_TWIM_ADDRESS_OFFSET           0x0588 /* TWIM address */
 
-/* Register offsets for TWI slave (TWIS) ***********************************/
+/* Register offsets for TWI slave (TWIS) ************************************/
 
 #define NRF52_TWIS_TASKS_STOP_OFFSET        0x0014 /* Stop TWIS transaction */
 #define NRF52_TWIS_TASKS_SUSPEND_OFFSET     0x001c /* Suspend TWIS transaction */
@@ -100,7 +100,7 @@
 #define NRF52_TWIS_CONFIG_OFFSET            0x0594 /* Configuration register for the address match mechanism */
 #define NRF52_TWIS_ORC_OFFSET               0x05c0 /* Over-read character */
 
-/* Register Bitfield Definitions for TWIM **********************************/
+/* Register Bitfield Definitions for TWIM ***********************************/
 
 /* SHORTS Register */
 
@@ -181,7 +181,7 @@
 #define TWIM_ADDRESS_SHIFT                  (0)        /* Bits 0-6: Address used in the TWI transfer */
 #define TWIM_ADDRESS_MASK                   (0x7f << TWIM_ADDRESS_SHIFT)
 
-/* Register Bitfield Definitions for TWIS *******************************************************/
+/* Register Bitfield Definitions for TWIS ***********************************/
 
 /* TODO */
 

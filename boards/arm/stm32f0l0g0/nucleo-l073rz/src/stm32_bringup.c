@@ -61,7 +61,7 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y && CONFIG_NSH_ARCHINIT:
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/
@@ -125,7 +125,8 @@ int stm32_bringup(void)
   ret = stm32_wlinitialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver: %d\n",
+             ret);
     }
 #endif /* CONFIG_WL_NRF24L01 */
 
@@ -133,7 +134,8 @@ int stm32_bringup(void)
   ret = stm32_lpwaninitialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver: %d\n",
+             ret);
     }
 #endif /* CONFIG_LPWAN_SX127X */
 

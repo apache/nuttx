@@ -21,8 +21,7 @@
 #ifndef __INCLUDE_NUTTX_DRIVERS_POWER_POWERLED_H
 #define __INCLUDE_NUTTX_DRIVERS_POWER_POWERLED_H
 
-/*
- * The powerled driver is split into two parts:
+/* The powerled driver is split into two parts:
  *
  * 1) An "upper half", generic driver that provides the common high power LED
  *    interface to application level code, and
@@ -80,7 +79,7 @@ enum powerled_state_e
 
 enum powerled_fault_e
 {
-  POWERLED_FAULT_OVERHEAT = (1<<0) /* Overheat fault */
+  POWERLED_FAULT_OVERHEAT = (1 << 0) /* Overheat fault */
 };
 
 /* This structure describes converter state */
@@ -98,7 +97,7 @@ struct powerled_limits_s
   bool  lock;                      /* This bit must be set after
                                     * limits configuration.
                                     */
-  float current;                    /* Max current for LED */
+  float current;                   /* Max current for LED */
 };
 
 /* Powerled parameters */
@@ -131,8 +130,8 @@ struct powerled_s
   FAR void                   *priv;       /* Private data */
 };
 
-/* Powerled operations used to call from the upper-half, generic powerled driver
- * into lower-half, platform-specific logic.
+/* Powerled operations used to call from the upper-half, generic powerled
+ * driver into lower-half, platform-specific logic.
  */
 
 struct powerled_dev_s;
@@ -187,12 +186,14 @@ struct powerled_ops_s
 
   /* Lower-half logic may support platform-specific ioctl commands */
 
-  CODE int (*ioctl)(FAR struct powerled_dev_s *dev, int cmd, unsigned long arg);
+  CODE int (*ioctl)(FAR struct powerled_dev_s *dev, int cmd,
+                    unsigned long arg);
 };
 
-/* Powerled device structure used by the driver. The caller of powerled_register
- * must allocate and initialize this structure. The calling logic need
- * provide 'ops', 'priv' and 'lower' elements.
+/* Powerled device structure used by the driver.
+ * The caller of powerled_register must allocate and initialize this
+ * structure. The calling logic need provide 'ops', 'priv' and 'lower'
+ * elements.
  */
 
 struct powerled_dev_s
@@ -202,7 +203,7 @@ struct powerled_dev_s
   uint8_t                     ocount;    /* The number of times the device
                                           * has been opened
                                           */
-  sem_t                       closesem;   /* Locks out new opens while close
+  sem_t                       closesem;  /* Locks out new opens while close
                                           * is in progress
                                           */
 

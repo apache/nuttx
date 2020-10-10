@@ -107,74 +107,74 @@
 
 /* Clock configuration register */
 
-#define RCC_CFGR_SW_SHIFT           (0)       /* Bits 0-2: System clock Switch */
+#define RCC_CFGR_SW_SHIFT           (0)                      /* Bits 0-2: System clock Switch */
 #define RCC_CFGR_SW_MASK            (7 << RCC_CFGR_SW_SHIFT)
 #  define RCC_CFGR_SW_HSI           (0 << RCC_CFGR_SW_SHIFT) /* 000: HSI selected as system clock */
 #  define RCC_CFGR_SW_HSE           (1 << RCC_CFGR_SW_SHIFT) /* 001: HSE selected as system clock */
 #  define RCC_CFGR_SW_PLL           (2 << RCC_CFGR_SW_SHIFT) /* 010: PLL selected as system clock */
 #  define RCC_CFGR_SW_LSI           (3 << RCC_CFGR_SW_SHIFT) /* 011: LSI selected as system clock */
 #  define RCC_CFGR_SW_LSE           (4 << RCC_CFGR_SW_SHIFT) /* 100: LSE selected as system clock */
-#define RCC_CFGR_SWS_SHIFT          (3)       /* Bits 3-5: System Clock Switch Status */
+#define RCC_CFGR_SWS_SHIFT          (3)                      /* Bits 3-5: System Clock Switch Status */
 #define RCC_CFGR_SWS_MASK           (3 << RCC_CFGR_SWS_SHIFT)
 #  define RCC_CFGR_SWS_HSI          (0 << RCC_CFGR_SWS_SHIFT) /* 000: HSI oscillator used as system clock */
 #  define RCC_CFGR_SWS_HSE          (1 << RCC_CFGR_SWS_SHIFT) /* 001: HSE oscillator used as system clock */
 #  define RCC_CFGR_SWS_PLL          (2 << RCC_CFGR_SWS_SHIFT) /* 010: PLL oscillator used as system clock */
 #  define RCC_CFGR_SWS_LSI          (3 << RCC_CFGR_SWS_SHIFT) /* 011: LSI used as system clock */
 #  define RCC_CFGR_SWS_LSE          (4 << RCC_CFGR_SWS_SHIFT) /* 100: LSE used as system clock */
-#define RCC_CFGR_HPRE_SHIFT         (8)       /* Bits 8-11: AHB prescaler */
+#define RCC_CFGR_HPRE_SHIFT         (8)                       /* Bits 8-11: AHB prescaler */
 #define RCC_CFGR_HPRE_MASK          (0x0f << RCC_CFGR_HPRE_SHIFT)
-#  define RCC_CFGR_HPRE_SYSCLK      (0 << RCC_CFGR_HPRE_SHIFT) /* 0xxx: SYSCLK not divided */
-#  define RCC_CFGR_HPRE_SYSCLKd2    (8 << RCC_CFGR_HPRE_SHIFT) /* 1000: SYSCLK divided by 2 */
-#  define RCC_CFGR_HPRE_SYSCLKd4    (9 << RCC_CFGR_HPRE_SHIFT) /* 1001: SYSCLK divided by 4 */
+#  define RCC_CFGR_HPRE_SYSCLK      (0 << RCC_CFGR_HPRE_SHIFT)  /* 0xxx: SYSCLK not divided */
+#  define RCC_CFGR_HPRE_SYSCLKd2    (8 << RCC_CFGR_HPRE_SHIFT)  /* 1000: SYSCLK divided by 2 */
+#  define RCC_CFGR_HPRE_SYSCLKd4    (9 << RCC_CFGR_HPRE_SHIFT)  /* 1001: SYSCLK divided by 4 */
 #  define RCC_CFGR_HPRE_SYSCLKd8    (10 << RCC_CFGR_HPRE_SHIFT) /* 1010: SYSCLK divided by 8 */
 #  define RCC_CFGR_HPRE_SYSCLKd16   (11 << RCC_CFGR_HPRE_SHIFT) /* 1011: SYSCLK divided by 16 */
 #  define RCC_CFGR_HPRE_SYSCLKd64   (12 << RCC_CFGR_HPRE_SHIFT) /* 1100: SYSCLK divided by 64 */
 #  define RCC_CFGR_HPRE_SYSCLKd128  (13 << RCC_CFGR_HPRE_SHIFT) /* 1101: SYSCLK divided by 128 */
 #  define RCC_CFGR_HPRE_SYSCLKd256  (14 << RCC_CFGR_HPRE_SHIFT) /* 1110: SYSCLK divided by 256 */
 #  define RCC_CFGR_HPRE_SYSCLKd512  (15 << RCC_CFGR_HPRE_SHIFT) /* 1111: SYSCLK divided by 512 */
-#define RCC_CFGR_PPRE1_SHIFT        (12)       /* Bits 12-14: APB Low speed prescaler (APB1) */
+#define RCC_CFGR_PPRE1_SHIFT        (12)                        /* Bits 12-14: APB Low speed prescaler (APB1) */
 #define RCC_CFGR_PPRE1_MASK         (7 << RCC_CFGR_PPRE1_SHIFT)
 #  define RCC_CFGR_PPRE1_HCLK       (0 << RCC_CFGR_PPRE1_SHIFT) /* 0xx: HCLK not divided */
 #  define RCC_CFGR_PPRE1_HCLKd2     (4 << RCC_CFGR_PPRE1_SHIFT) /* 100: HCLK divided by 2 */
 #  define RCC_CFGR_PPRE1_HCLKd4     (5 << RCC_CFGR_PPRE1_SHIFT) /* 101: HCLK divided by 4 */
 #  define RCC_CFGR_PPRE1_HCLKd8     (6 << RCC_CFGR_PPRE1_SHIFT) /* 110: HCLK divided by 8 */
 #  define RCC_CFGR_PPRE1_HCLKd16    (7 << RCC_CFGR_PPRE1_SHIFT) /* 111: HCLK divided by 16 */
-                                              /* Bits 15-23: Reserved */
-#define RCC_CFGR_MCOSEL_SHIFT       (24)      /* Bits 24-26: Microcontroller clock output selection */
+                                                                /* Bits 15-23: Reserved */
+#define RCC_CFGR_MCOSEL_SHIFT       (24)                        /* Bits 24-26: Microcontroller clock output selection */
 #define RCC_CFGR_MCOSEL_MASK        (7 << RCC_CFGR_MCOSEL_SHIFT)
-                                              /* Bit 27: Reserved */
-#define RCC_CFGR_MCOPRE_SHIFT       (28)      /* Bits 28-30: Microcontroller clock output selection */
+                                                                /* Bit 27: Reserved */
+#define RCC_CFGR_MCOPRE_SHIFT       (28)                        /* Bits 28-30: Microcontroller clock output selection */
 #define RCC_CFGR_MCOPRE_MASK        (7 << RCC_CFGR_MCOPRE_SHIFT)
 
 #define RCC_CFGR_RESET              0x00000000
 
 /* PLL clock configuration register */
 
-#define RCC_PLLCFG_PLLSRC_SHIFT    (0)      /* Bits 0-1: PLL entry clock source */
+#define RCC_PLLCFG_PLLSRC_SHIFT    (0)                              /* Bits 0-1: PLL entry clock source */
 #define RCC_PLLCFG_PLLSRC_MASK     (3 << RCC_PLLCFG_PLLSRC_SHIFT)
 #  define RCC_PLLCFG_PLLSRC_NOCLK  (0 << RCC_PLLCFG_PLLSRC_SHIFT)
 #  define RCC_PLLCFG_PLLSRC_HSI    (2 << RCC_PLLCFG_PLLSRC_SHIFT)
 #  define RCC_PLLCFG_PLLSRC_HSE    (3 << RCC_PLLCFG_PLLSRC_SHIFT)
-                                            /* Bits 2-3: Reserved */
-#define RCC_PLLCFG_PLLM_SHIFT      (4)      /* Bits 4-6: Division factor M of the PLL input clock divider */
+                                                                    /* Bits 2-3: Reserved */
+#define RCC_PLLCFG_PLLM_SHIFT      (4)                              /* Bits 4-6: Division factor M of the PLL input clock divider */
 #define RCC_PLLCFG_PLLM_MASK       (7 << RCC_PLLCFG_PLLM_SHIFT)
 #define RCC_PLLCFG_PLLM(n)         ((n-1) << RCC_PLLCFG_PLLM_SHIFT)
-                                             /* Bit 7: Reserved */
-#define RCC_PLLCFG_PLLN_SHIFT      (8)       /* Bits 8-14: PLL frequency multiplication factor N */
+                                                                    /* Bit 7: Reserved */
+#define RCC_PLLCFG_PLLN_SHIFT      (8)                              /* Bits 8-14: PLL frequency multiplication factor N */
 #define RCC_PLLCFG_PLLN_MASK       (0x7f << RCC_PLLCFG_PLLN_SHIFT)
 #define RCC_PLLCFG_PLLN(n)         ((n) << RCC_PLLCFG_PLLN_SHIFT)
-                                             /* Bit 15: Reserved */
-#define RCC_PLLCFG_PLLPEN          (1 << 16) /* Bit 16: PLLPCLK clock output enable */
-#define RCC_PLLCFG_PLLP_SHIFT      (17)      /* Bits 17-21: PLL VCO division factor P for PLLPCLK clock output */
+                                                                    /* Bit 15: Reserved */
+#define RCC_PLLCFG_PLLPEN          (1 << 16)                        /* Bit 16: PLLPCLK clock output enable */
+#define RCC_PLLCFG_PLLP_SHIFT      (17)                             /* Bits 17-21: PLL VCO division factor P for PLLPCLK clock output */
 #define RCC_PLLCFG_PLLP_MASK       (0x1f << RCC_PLLCFG_PLLP_SHIFT)
 #define RCC_PLLCFG_PLLP(n)         ((n-1) << RCC_PLLCFG_PLLP_SHIFT) /* n=2,...,32 */
-                                             /* Bits 22-23: Reserved */
-#define RCC_PLLCFG_PLLQEN          (1 << 24) /* Bit 24: PLLQCLK clock output enable */
-#define RCC_PLLCFG_PLLQ_SHIFT      (25)      /* Bits 25-27: Division factor Q of the PLL input clock divider */
+                                                                    /* Bits 22-23: Reserved */
+#define RCC_PLLCFG_PLLQEN          (1 << 24)                        /* Bit 24: PLLQCLK clock output enable */
+#define RCC_PLLCFG_PLLQ_SHIFT      (25)                             /* Bits 25-27: Division factor Q of the PLL input clock divider */
 #define RCC_PLLCFG_PLLQ_MASK       (7 << RCC_PLLCFG_PLLQ_SHIFT)
 #define RCC_PLLCFG_PLLQ(n)         ((n-1) << RCC_PLLCFG_PLLQ_SHIFT)
-#define RCC_PLLCFG_PLLREN          (1 << 28) /* Bit 28: PLLRCLK clock output enable */
-#define RCC_PLLCFG_PLLR_SHIFT      (29)      /* Bits 29-31: Division factor R of the PLL input clock divider */
+#define RCC_PLLCFG_PLLREN          (1 << 28)                        /* Bit 28: PLLRCLK clock output enable */
+#define RCC_PLLCFG_PLLR_SHIFT      (29)                             /* Bits 29-31: Division factor R of the PLL input clock divider */
 #define RCC_PLLCFG_PLLR_MASK       (7 << RCC_PLLCFG_PLLR_SHIFT)
 #define RCC_PLLCFG_PLLR(n)         ((n-1) << RCC_PLLCFG_PLLR_SHIFT)
 

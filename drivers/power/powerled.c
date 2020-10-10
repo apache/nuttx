@@ -44,7 +44,8 @@
 
 static int     powerled_open(FAR struct file *filep);
 static int     powerled_close(FAR struct file *filep);
-static int     powerled_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     powerled_ioctl(FAR struct file *filep, int cmd,
+                              unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -89,8 +90,8 @@ static int powerled_open(FAR struct file *filep)
   if (ret >= 0)
     {
       /* Increment the count of references to the device.  If this the first
-       * time that the driver has been opened for this device, then initialize
-       * the device.
+       * time that the driver has been opened for this device, then
+       * initialize the device.
        */
 
       tmp = dev->ocount + 1;
@@ -102,7 +103,9 @@ static int powerled_open(FAR struct file *filep)
         }
       else
         {
-          /* Check if this is the first time that the driver has been opened. */
+          /* Check if this is the first time that the driver has been
+           * opened.
+           */
 
           if (tmp == 1)
             {
@@ -163,7 +166,7 @@ static int powerled_close(FAR struct file *filep)
 
           /* Free the IRQ and disable the POWERLED device */
 
-          flags = enter_critical_section();       /* Disable interrupts */
+          flags = enter_critical_section();      /* Disable interrupts */
           dev->ops->shutdown(dev);               /* Disable the POWERLED */
           leave_critical_section(flags);
 
@@ -189,7 +192,9 @@ static int powerled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       case PWRIOC_START:
         {
-          /* Allow powerled start only when limits set and structure is locked */
+          /* Allow powerled start only when limits set and structure is
+           * locked
+           */
 
           if (powerled->limits.lock == false ||
               powerled->limits.current <= 0)
@@ -330,7 +335,8 @@ static int powerled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
 
           if (params->brightness < 0.0 || params->brightness > 100.0 ||
-              params->frequency < 0.0 || params->duty < 0.0 || params->duty > 100.0)
+              params->frequency < 0.0 || params->duty < 0.0 ||
+              params->duty > 100.0)
             {
               pwrerr("ERROR: powerled invalid parameters %f %f %f\n",
                      params->brightness, params->frequency, params->duty);

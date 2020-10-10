@@ -289,7 +289,7 @@ struct sx127x_lower_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 int sx127x_register(FAR struct spi_dev_s *spi,

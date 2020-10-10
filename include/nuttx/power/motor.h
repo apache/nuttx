@@ -21,11 +21,10 @@
 #ifndef __INCLUDE_NUTTX_DRIVERS_POWER_MOTOR_H
 #define __INCLUDE_NUTTX_DRIVERS_POWER_MOTOR_H
 
-/*
- * The motor driver is split into two parts:
+/* The motor driver is split into two parts:
  *
- * 1) An "upper half", generic driver that provides the common motor interface
- *    to application level code, and
+ * 1) An "upper half", generic driver that provides the common motor
+ *    interface to application level code, and
  * 2) A "lower half", platform-specific driver that implements the low-level
  *    functionality eg.:
  *      - timer controls to implement the PWM signals,
@@ -200,7 +199,7 @@ struct motor_params_s
   float speed;                       /* Motor speed */
 #endif
 #ifdef CONFIG_MOTOR_HAVE_TORQUE
-  float torque;                      /* Motor torque (rotary motor)*/
+  float torque;                      /* Motor torque (rotary motor) */
 #endif
 #ifdef CONFIG_MOTOR_HAVE_FORCE
   float force;                       /* Motor force (linear motor) */

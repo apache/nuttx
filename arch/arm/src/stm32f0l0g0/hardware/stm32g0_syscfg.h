@@ -110,33 +110,33 @@
 
 /* SYSCFG memory remap register */
 
-#define SYSCFG_CFGR1_MEMMODE_SHIFT     (0)       /* Bits 1:0 MEM_MODE: Memory mapping selection */
+#define SYSCFG_CFGR1_MEMMODE_SHIFT     (0)                               /* Bits 1:0 MEM_MODE: Memory mapping selection */
 #define SYSCFG_CFGR1_MEMMODE_MASK      (3 << SYSCFG_CFGR1_MEMMODE_SHIFT)
 #  define SYSCFG_CFGR1_MEMMODE_FLASH   (0 << SYSCFG_CFGR1_MEMMODE_SHIFT) /* 00: Main Flash at 0x00000000 */
 #  define SYSCFG_CFGR1_MEMMODE_SYSTEM  (1 << SYSCFG_CFGR1_MEMMODE_SHIFT) /* 01: System Flash at 0x00000000 */
 #  define SYSCFG_CFGR1_MEMMODE_SRAM    (3 << SYSCFG_CFGR1_MEMMODE_SHIFT) /* 11: Embedded SRAM at 0x00000000 */
-                                                 /* Bit 2: Reserved */
-#define SYSCFG_CFGR1_PA11_RMP          (1 << 3)  /* Bit 3: PA11 remapping bit */
-#define SYSCFG_CFGR1_PA12_RMP          (1 << 4)  /* Bit 4: PA12 remapping bit */
-#define SYSCFG_CFGR1_IRPOL             (1 << 5)  /* Bit 5: IR output polarity selection */
-#define SYSCFG_CFGR1_IRMOD_SHIFT       (6)       /* Bits 6-7: IR Modulation Envelope signal selection */
+                                                                         /* Bit 2: Reserved */
+#define SYSCFG_CFGR1_PA11_RMP          (1 << 3)                          /* Bit 3: PA11 remapping bit */
+#define SYSCFG_CFGR1_PA12_RMP          (1 << 4)                          /* Bit 4: PA12 remapping bit */
+#define SYSCFG_CFGR1_IRPOL             (1 << 5)                          /* Bit 5: IR output polarity selection */
+#define SYSCFG_CFGR1_IRMOD_SHIFT       (6)                               /* Bits 6-7: IR Modulation Envelope signal selection */
 #define SYSCFG_CFGR1_IRMOD_MASK        (3 << SYSCFG_CFGR1_IRMOD_SHIFT)
-#  define SYSCFG_CFGR1_IRMOD_TIM16     (0 << SYSCFG_CFGR1_IRMOD_SHIFT) /* 00: TIM16 selected */
-#  define SYSCFG_CFGR1_IRMOD_USART1    (1 << SYSCFG_CFGR1_IRMOD_SHIFT) /* 01: USART1 selected */
-#  define SYSCFG_CFGR1_IRMOD_USART4    (2 << SYSCFG_CFGR1_IRMOD_SHIFT) /* 10: USART1 selected */
-#define SYSCFG_CFGR1_BOOSTEN           (1 << 8)  /* Bit 8: IO analog switch voltage booster enable */
-#define SYSCFG_CFGR1_UCPD1STROBE       (1 << 9)  /* Bit 9: UCPD1 pull-down configuration strobe */
-#define SYSCFG_CFGR1_UCPD2STROBE       (1 << 10) /* Bit 10: UCPD2 pull-down configuration strobe */
-                                                 /* Bits 11-15: Reserved */
-#define SYSCFG_CFGR1_I2CPB6FMP         (1 << 16) /* Bit 16: */
-#define SYSCFG_CFGR1_I2CPB7FMP         (1 << 17) /* Bit 17: */
-#define SYSCFG_CFGR1_I2CPB8FMP         (1 << 18) /* Bit 18: */
-#define SYSCFG_CFGR1_I2CPB9FMP         (1 << 19) /* Bit 19: */
-#define SYSCFG_CFGR1_I2C1FMP           (1 << 20) /* Bit 20: */
-#define SYSCFG_CFGR1_I2C2FMP           (1 << 21) /* Bit 21: */
-#define SYSCFG_CFGR1_I2CPA9FMP         (1 << 22) /* Bit 22: */
-#define SYSCFG_CFGR1_I2CPA10FMP        (1 << 23) /* Bit 23: */
-                                                 /* Bits 24-31: Reserved */
+#  define SYSCFG_CFGR1_IRMOD_TIM16     (0 << SYSCFG_CFGR1_IRMOD_SHIFT)  /* 00: TIM16 selected */
+#  define SYSCFG_CFGR1_IRMOD_USART1    (1 << SYSCFG_CFGR1_IRMOD_SHIFT)  /* 01: USART1 selected */
+#  define SYSCFG_CFGR1_IRMOD_USART4    (2 << SYSCFG_CFGR1_IRMOD_SHIFT)  /* 10: USART1 selected */
+#define SYSCFG_CFGR1_BOOSTEN           (1 << 8)                         /* Bit 8: IO analog switch voltage booster enable */
+#define SYSCFG_CFGR1_UCPD1STROBE       (1 << 9)                         /* Bit 9: UCPD1 pull-down configuration strobe */
+#define SYSCFG_CFGR1_UCPD2STROBE       (1 << 10)                        /* Bit 10: UCPD2 pull-down configuration strobe */
+                                                                        /* Bits 11-15: Reserved */
+#define SYSCFG_CFGR1_I2CPB6FMP         (1 << 16)                        /* Bit 16: */
+#define SYSCFG_CFGR1_I2CPB7FMP         (1 << 17)                        /* Bit 17: */
+#define SYSCFG_CFGR1_I2CPB8FMP         (1 << 18)                        /* Bit 18: */
+#define SYSCFG_CFGR1_I2CPB9FMP         (1 << 19)                        /* Bit 19: */
+#define SYSCFG_CFGR1_I2C1FMP           (1 << 20)                        /* Bit 20: */
+#define SYSCFG_CFGR1_I2C2FMP           (1 << 21)                        /* Bit 21: */
+#define SYSCFG_CFGR1_I2CPA9FMP         (1 << 22)                        /* Bit 22: */
+#define SYSCFG_CFGR1_I2CPA10FMP        (1 << 23)                        /* Bit 23: */
+                                                                        /* Bits 24-31: Reserved */
 
 /* SYSCFG interrupt line 0 status register */
 
