@@ -68,10 +68,10 @@
 #define K210_IRQ_SAMISALIGNED  (6) /* Store/AMO Address Misaligned */
 #define K210_IRQ_SAFAULT       (7) /* Store/AMO Access Fault */
 #define K210_IRQ_ECALLU        (8) /* Environment Call from U-mode */
-                                    /* 9-10: Reserved */
+                                   /* 9-10: Reserved */
 
 #define K210_IRQ_ECALLM       (11) /* Environment Call from M-mode */
-                                    /* 12-15: Reserved */
+                                   /* 12-15: Reserved */
 
 /* IRQ 16- : (async event:interrupt=1) */
 
