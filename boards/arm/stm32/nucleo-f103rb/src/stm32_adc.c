@@ -56,6 +56,7 @@
 #endif
 
 /* The number of ADC channels in the conversion list */
+
 /* TODO DMA */
 
 #define ADC1_NCHANNELS 3
@@ -174,6 +175,7 @@ int stm32_adc_setup(void)
   if (!initialized)
     {
       /* DEV1 */
+
       /* Configure the pins as analog inputs for the selected channels */
 
       for (i = 0; i < DEV1_NCHANNELS; i++)
@@ -202,6 +204,7 @@ int stm32_adc_setup(void)
 #ifdef DEV2_PORT
 
       /* DEV2 */
+
       /* Configure the pins as analog inputs for the selected channels */
 
       for (i = 0; i < DEV2_NCHANNELS; i++)
@@ -229,7 +232,6 @@ int stm32_adc_setup(void)
 #endif
 
       initialized = true;
-
     }
 
   return OK;

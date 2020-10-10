@@ -52,7 +52,7 @@
 int stm32_hrtim_setup(void)
 {
   static bool initialized = false;
-  struct hrtim_dev_s* hrtim = NULL;
+  struct hrtim_dev_s *hrtim = NULL;
   int ret;
 
   if (!initialized)

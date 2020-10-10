@@ -114,7 +114,7 @@
 
 /* Flash Access Control Register (ACR) Bank 1 or 2 */
 
-#define FLASH_ACR_LATENCY_SHIFT        (0)        /* Bits 0-3: Latency */
+#define FLASH_ACR_LATENCY_SHIFT        (0)                              /* Bits 0-3: Latency */
 #define FLASH_ACR_LATENCY_MASK         (15 << FLASH_ACR_LATENCY_SHIFT)
 #  define FLASH_ACR_LATENCY(n)         ((n) << FLASH_ACR_LATENCY_SHIFT) /* n wait states */
 #  define FLASH_ACR_LATENCY_0          (0 << FLASH_ACR_LATENCY_SHIFT)   /* 0000: Zero wait states */
@@ -133,27 +133,29 @@
 #  define FLASH_ACR_LATENCY_13         (13 << FLASH_ACR_LATENCY_SHIFT)  /* 1101: Thirteen wait states */
 #  define FLASH_ACR_LATENCY_14         (14 << FLASH_ACR_LATENCY_SHIFT)  /* 1110: Fourteen wait states */
 #  define FLASH_ACR_LATENCY_15         (15 << FLASH_ACR_LATENCY_SHIFT)  /* 1111: Fifteen wait states */
-#define FLASH_ACR_WRHIGHFREQ_SHIFT     (4)        /* Bitd 4-5: Flash signal delay */
+#define FLASH_ACR_WRHIGHFREQ_SHIFT     (4)                              /* Bitd 4-5: Flash signal delay */
 #define FLASH_ACR_WRHIGHFREQ_MASK      (3 << FLASH_ACR_WRHIGHFREQ_SHIFT)
 #  define FLASH_ACR_WRHIGHFREQ(n)      ((n) << FLASH_ACR_WRHIGHFREQ_SHIFT)
 
 /* Flash Control Register (CR) Bank 1 or 2 (if different) */
 
-#define FLASH_CR_LOCK                  (1 << 0)   /* Bit 0:  Lock */
-#define FLASH_CR_PG                    (1 << 1)   /* Bit 1:  Programming */
-#define FLASH_CR_SER                   (1 << 2)   /* Bit 2:  Sector erase */
-#define FLASH_CR_BER                   (1 << 3)   /* Bit 3: Bank erase */
-#define FLASH_CR_PSIZE_SHIFT           (4)        /* Bits 4-5: Program size */
+#define FLASH_CR_LOCK                  (1 << 0)                    /* Bit 0:  Lock */
+#define FLASH_CR_PG                    (1 << 1)                    /* Bit 1:  Programming */
+#define FLASH_CR_SER                   (1 << 2)                    /* Bit 2:  Sector erase */
+#define FLASH_CR_BER                   (1 << 3)                    /* Bit 3: Bank erase */
+#define FLASH_CR_PSIZE_SHIFT           (4)                         /* Bits 4-5: Program size */
 #define FLASH_CR_PSIZE_MASK            (3 << FLASH_CR_PSIZE_SHIFT)
 #  define FLASH_CR_PSIZE_X8            (0 << FLASH_CR_PSIZE_SHIFT) /* 00: x8 */
 #  define FLASH_CR_PSIZE_X16           (1 << FLASH_CR_PSIZE_SHIFT) /* 01: x16 */
 #  define FLASH_CR_PSIZE_X32           (2 << FLASH_CR_PSIZE_SHIFT) /* 10: x32 */
 #  define FLASH_CR_PSIZE_X64           (3 << FLASH_CR_PSIZE_SHIFT) /* 11: x64 */
-#define FLASH_CR_FW                    (1 << 6)   /* Bit 6: Force write */
-#define FLASH_CR_START                 (1 << 7)   /* Bit 7: Erase start */
-#define FLASH_CR_SNB_SHIFT             (8)        /* Bits 8-10: Sector number */
+#define FLASH_CR_FW                    (1 << 6)                    /* Bit 6: Force write */
+#define FLASH_CR_START                 (1 << 7)                    /* Bit 7: Erase start */
+#define FLASH_CR_SNB_SHIFT             (8)                         /* Bits 8-10: Sector number */
 #define FLASH_CR_SNB_MASK              (15 << FLASH_CR_SNB_SHIFT)  /* Used to clear FLASH_CR_SNB bits */
+
 #  define FLASH_CR_SNB(n)              ((uint32_t)((n) & 0x7) << FLASH_CR_SNB_SHIFT) /* Sector n, n=0..7 */
+
                                                   /* Bits 11-13: Reserved */
 #define FLASH_CR_SPSS2                 (1 << 14)  /* Bit 14: Bank1 Reserved, Bank 2 special sector selection bit */
 #define FLASH_CR_CRCEN                 (1 << 15)  /* Bit 15: CRC control enable */

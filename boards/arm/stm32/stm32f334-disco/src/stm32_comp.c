@@ -66,7 +66,7 @@
 int stm32_comp_setup(void)
 {
   static bool initialized = false;
-  struct comp_dev_s* comp = NULL;
+  struct comp_dev_s *comp = NULL;
   int ret;
 
   if (!initialized)

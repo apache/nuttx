@@ -50,7 +50,7 @@
 int stm32_opamp_setup(void)
 {
   static bool initialized = false;
-  struct opamp_dev_s* opamp = NULL;
+  struct opamp_dev_s *opamp = NULL;
   int ret;
 
   if (!initialized)

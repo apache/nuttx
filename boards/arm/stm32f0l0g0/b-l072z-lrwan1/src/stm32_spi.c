@@ -127,8 +127,8 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
 #ifdef CONFIG_LPWAN_SX127X
       case SPIDEV_LPWAN(0):
         {
-          piinfo("SX127X device %s\n",
-                 selected ? "asserted" : "de-asserted");
+          spiinfo("SX127X device %s\n",
+                  selected ? "asserted" : "de-asserted");
 
           /* Set the GPIO low to select and high to de-select */
 

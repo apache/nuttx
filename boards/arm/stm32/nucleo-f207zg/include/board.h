@@ -60,10 +60,14 @@
  *
  * Formulae:
  *
- *   VCO input frequency        = PLL input clock frequency / PLLM, 2 <= PLLM <= 63
- *   VCO output frequency       = VCO input frequency × PLLN,       50 <= PLLN <= 432
- *   PLL output clock frequency = VCO frequency / PLLP,             PLLP = 2, 4, 6, or 8
- *   USB OTG FS clock frequency = VCO frequency / PLLQ,             2 <= PLLQ <= 15
+ *   VCO input frequency        =
+ *     PLL input clock frequency / PLLM, 2 <= PLLM <= 63
+ *   VCO output frequency       =
+ *     VCO input frequency × PLLN,       50 <= PLLN <= 432
+ *   PLL output clock frequency =
+ *     VCO frequency / PLLP,             PLLP = 2, 4, 6, or 8
+ *   USB OTG FS clock frequency =
+ *     VCO frequency / PLLQ,             2 <= PLLQ <= 15
  *
  * We will configure like this
  *
@@ -123,11 +127,13 @@
 #define STM32_APB1_TIM14_CLKIN  (2*STM32_PCLK1_FREQUENCY)
 
 /* LED definitions **********************************************************/
-/* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a Blue
- * LED and LD3 a Red LED, that can be controlled by software. The following
- * definitions assume the default Solder Bridges are installed.
+
+/* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED,
+ * LD2 a Blue LED and LD3 a Red LED, that can be controlled by software.
+ * The following definitions assume the default Solder Bridges are installed.
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs
+ * in any way.
  * The following definitions are used to access individual LEDs.
  */
 
@@ -149,13 +155,14 @@
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c. The LEDs are used to encode
+ * OS-related events as follows:
  *
  *
  *   SYMBOL                     Meaning                      LED state
  *                                                        Red   Green Blue
- *   ----------------------  --------------------------  ------ ------ ----*/
+ *   ----------------------  --------------------------  ------ ------ ----
+ */
 
 #define LED_STARTED        0 /* NuttX has been started   OFF    OFF   OFF  */
 #define LED_HEAPALLOCATE   1 /* Heap has been allocated  OFF    OFF   ON   */
@@ -168,8 +175,10 @@
 #define LED_IDLE           8 /* MCU is is sleep mode     ON     OFF   OFF  */
 
 /* Button definitions *******************************************************/
+
 /* The NUCLEO board supports one button:  Pushbutton B1, labeled "User", is
- * connected to GPIO PC13.  A high value will be sensed when the button is depressed.
+ * connected to GPIO PC13.  A high value will be sensed when the button is
+ * depressed.
  */
 
 #define BUTTON_USER      0
@@ -178,6 +187,7 @@
 #define BUTTON_USER_BIT  (1 << BUTTON_USER)
 
 /* Alternate function pin selections ****************************************/
+
 /* USART3 (Nucleo Virtual Console) */
 
 #define GPIO_USART3_RX     GPIO_USART3_RX_3  /* PD9 */
@@ -195,6 +205,7 @@
 #define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3N_3    /* PE12 */
 
 /* DMA channels *************************************************************/
+
 /* ADC */
 
 #define ADC1_DMA_CHAN DMAMAP_ADC1_1

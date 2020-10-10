@@ -43,16 +43,19 @@
 
 /* Clocking *****************************************************************/
 
-/* Four different clock sources can be used to drive the system clock (SYSCLK):
+/* Four different clock sources can be used to drive the system clock
+ * (SYSCLK):
  *
  * - HSI high-speed internal oscillator clock
  *   Generated from an internal 16 MHz RC oscillator
- * - HSE high-speed external oscillator clock. 8 MHz from MCO output of ST-LINK.
+ * - HSE high-speed external oscillator clock. 8 MHz from MCO output of
+ *   ST-LINK.
  * - PLL clock
  * - MSI multispeed internal oscillator clock
- *   The MSI clock signal is generated from an internal RC oscillator. Seven frequency
- *   ranges are available: 65.536 kHz, 131.072 kHz, 262.144 kHz, 524.288 kHz, 1.048 MHz,
- *   2.097 MHz (default value) and 4.194 MHz.
+ *   The MSI clock signal is generated from an internal RC oscillator.
+ *   Seven frequency ranges are available: 65.536 kHz, 131.072 kHz,
+ *   262.144 kHz, 524.288 kHz, 1.048 MHz, 2.097 MHz (default value)
+ *   and 4.194 MHz.
  *
  * The devices have the following two secondary clock sources
  * - LSI low-speed internal RC clock
@@ -82,13 +85,15 @@
  *   MHz frequency. This is required to provide a 48 MHz clock to the USB or
  *   SDIO (SDIOCLK or USBCLK = PLLVCO/2).
  * SYSCLK
- *   The system clock is derived from the PLL VCO divided by the output division factor.
+ *   The system clock is derived from the PLL VCO divided by the output
+ *   division factor.
  * Limitations:
  *   96 MHz as PLLVCO when the product is in range 1 (1.8V),
  *   48 MHz as PLLVCO when the product is in range 2 (1.5V),
  *   24 MHz when the product is in range 3 (1.2V).
  *   Output division to avoid exceeding 32 MHz as SYSCLK.
- *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as PLL source).
+ *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as
+ *   PLL source).
  */
 
 #if 1
@@ -104,8 +109,8 @@
 #define STM32_PLL_FREQUENCY     (6*STM32_HSI_FREQUENCY) /* PLL VCO Frequency is 96MHz */
 #endif
 
-/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO output
- * frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
+/* Use the PLL and set the SYSCLK source to be the divided down PLL VCO
+ * output frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
  */
 
 #define STM32_SYSCLK_SW         RCC_CFGR_SW_PLL
@@ -132,6 +137,7 @@
 /* TODO: Timers */
 
 /* LED definitions **********************************************************/
+
 /* The Nucleo L152RE board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -185,6 +191,7 @@
 #define LED_PANIC        1
 
 /* Button definitions *******************************************************/
+
 /* The Nucleo L152RE supports two buttons; only one button is controllable
  * by software:
  *

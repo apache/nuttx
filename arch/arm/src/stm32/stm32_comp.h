@@ -172,25 +172,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
-* Name: stm32_compinitialize
-*
-* Description:
-*   Initialize the COMP.
-*
-* Input Parameters:
-*   intf - The COMP interface number.
-*
-* Returned Value:
-*   Valid COMP device structure reference on success; a NULL on failure.
-*
-* Assumptions:
-*   1. Clock to the COMP block has enabled,
-*   2. Board-specific logic has already configured
-*
-****************************************************************************/
+/************************************************************************************
+ * Name: stm32_compinitialize
+ *
+ * Description:
+ *   Initialize the COMP.
+ *
+ * Input Parameters:
+ *   intf - The COMP interface number.
+ *
+ * Returned Value:
+ *   Valid COMP device structure reference on success; a NULL on failure.
+ *
+ * Assumptions:
+ *   1. Clock to the COMP block has enabled,
+ *   2. Board-specific logic has already configured
+ *
+ ************************************************************************************/
 
-FAR struct comp_dev_s* stm32_compinitialize(int intf);
+FAR struct comp_dev_s *stm32_compinitialize(int intf);
 
 #undef EXTERN
 #ifdef __cplusplus
