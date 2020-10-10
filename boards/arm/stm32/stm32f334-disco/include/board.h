@@ -56,7 +56,9 @@
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768            /* X2 on board */
 
-/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is 8MHz (XTAL) x 9 = 72MHz */
+/* PLL source is HSE/1, PLL multipler is 9:
+ *   PLL frequency is 8MHz (XTAL) x 9 = 72MHz
+ */
 
 #define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
 #define STM32_CFGR_PLLXTPRE     0
@@ -137,8 +139,9 @@
 #define BOARD_LED3_BIT   (1 << BOARD_LED3)
 #define BOARD_LED4_BIT   (1 << BOARD_LED4)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
- * stm32f334-disco.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on
+ * board the stm32f334-disco.  The following definitions describe how NuttX
+ * controls the LEDs:
  */
 
 #define LED_STARTED       0  /* LED1 */
@@ -151,6 +154,7 @@
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
 /* Button definitions *******************************************************/
+
 /* The STM32F334-DISCO supports two buttons; only one button is controllable
  * by software:
  *
@@ -165,6 +169,7 @@
 #define BUTTON_USER_BIT  (1 << BUTTON_USER)
 
 /* Alternate function pin selections ****************************************/
+
 /* CAN */
 
 #define GPIO_CAN1_RX GPIO_CAN_RX_2

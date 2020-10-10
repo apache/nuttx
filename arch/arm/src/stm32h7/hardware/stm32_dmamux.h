@@ -54,18 +54,18 @@
 #define STM32_DMAMUX_C13CR_OFFSET    STM32_DMAMUX_CXCR_OFFSET(13)
 #define STM32_DMAMUX_C14CR_OFFSET    STM32_DMAMUX_CXCR_OFFSET(14)
 #define STM32_DMAMUX_C15CR_OFFSET    STM32_DMAMUX_CXCR_OFFSET(15)
-                                            /* 0x040-0x07C: Reserved */
-#define STM32_DMAMUX_CSR_OFFSET      0x0080 /* DMAMUX12 request line multiplexer interrupt channel status register */
-#define STM32_DMAMUX_CFR_OFFSET      0x0084 /* DMAMUX12 request line multiplexer interrupt clear flag register */
-                                            /* 0x088-0x0FC: Reserved */
+                                                        /* 0x040-0x07C: Reserved */
+#define STM32_DMAMUX_CSR_OFFSET      0x0080             /* DMAMUX12 request line multiplexer interrupt channel status register */
+#define STM32_DMAMUX_CFR_OFFSET      0x0084             /* DMAMUX12 request line multiplexer interrupt clear flag register */
+                                                        /* 0x088-0x0FC: Reserved */
 #define STM32_DMAMUX_RGXCR_OFFSET(x) (0x0100+0x004*(x)) /* DMAMUX12 request generator channel x configuration register */
 #define STM32_DMAMUX_RG0CR_OFFSET    STM32_DMAMUX_RGXCR_OFFSET(0)
 #define STM32_DMAMUX_RG1CR_OFFSET    STM32_DMAMUX_RGXCR_OFFSET(1)
 #define STM32_DMAMUX_RG2CR_OFFSET    STM32_DMAMUX_RGXCR_OFFSET(2)
 #define STM32_DMAMUX_RG3CR_OFFSET    STM32_DMAMUX_RGXCR_OFFSET(3)
-#define STM32_DMAMUX_RGSR_OFFSET     0x0140 /* DMAMUX12 request generator interrupt status register */
-#define STM32_DMAMUX_RGCFR_OFFSET    0x0144 /* DMAMUX12 request generator interrupt clear flag register */
-                                            /* 0x148-0x3FC: Reserved */
+#define STM32_DMAMUX_RGSR_OFFSET     0x0140             /* DMAMUX12 request generator interrupt status register */
+#define STM32_DMAMUX_RGCFR_OFFSET    0x0144             /* DMAMUX12 request generator interrupt clear flag register */
+                                                        /* 0x148-0x3FC: Reserved */
 
 /* Register Addresses ***************************************************************/
 
@@ -155,8 +155,9 @@
 
 /* DMAMUX12 request generator channel x configuration register */
 
-#define DMAMUX_RGCR_SIGID_SHIFT    (0)  /* Bits 0-4: Signal identifiaction */
-                                        /* WARNING: different length for DMAMUX1 and DMAMUX2 !*/
+#define DMAMUX_RGCR_SIGID_SHIFT    (0)  /* Bits 0-4: Signal identifiaction
+                                         * WARNING: different length for DMAMUX1 and DMAMUX2 !
+                                         */
 #define DMAMUX_RGCR_SIGID_MASK     (0x1f << DMAMUX_RGCR_SIGID_SHIFT)
 #define DMAMUX_RGCR_OIE            (8)  /* Bit 8: Trigger overrun interrupt enable */
 #define DMAMUX_RGCR_GE             (16) /* Bit 16: DMA request generator channel X enable*/
@@ -184,6 +185,10 @@
 #define DMAMAP_MAP(d,c)           ((d) << 8 | c)
 #define DMAMAP_CONTROLLER(m)      ((m) >> 8 & 0x07)
 #define DMAMAP_REQUEST(m)         ((m) >> 0 & 0xff)
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
 
 /* Import DMAMUX map */
 

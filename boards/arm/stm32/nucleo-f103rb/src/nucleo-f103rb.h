@@ -32,6 +32,7 @@
  ****************************************************************************/
 
 /* LED definitions **********************************************************/
+
 /* The Nucleo F103RB board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -55,6 +56,7 @@
 #define LED_DRIVER_PATH "/dev/userleds"
 
 /* Button definitions *******************************************************/
+
 /* The Nucleo F103RB supports two buttons; only one button is controllable
  * by software:
  *

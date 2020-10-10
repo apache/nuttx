@@ -31,7 +31,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* DMAMUX1 mapping ****************************************************/
+/* DMAMUX1 mapping ******************************************************************/
 
 /* NOTE: DMAMUX1 channels 0 to 7 are connected to DMA1 channels 0 to 7.
  *       DMAMUX1 channels 8 to 15 are connected to DMA2 channels 0 to 7.
@@ -154,7 +154,7 @@
 #define DMAMUX1_ADC3           (115)
 /* DMAMUX1 116-127: Reserved */
 
-/* DMAMUX2 mapping ****************************************************/
+/* DMAMUX2 mapping ******************************************************************/
 
 /* NOTE: DMAMUX2 channels 0 to 7 are connected to BDMA channels 0 to 7 */
 

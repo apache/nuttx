@@ -53,6 +53,7 @@
 #define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
 
 /* PWM definitions **********************************************************/
+
 /* The STM32F334-DISCO has no real on-board PWM devices, but the board can be
  * configured to output a pulse train using variously unused pins on the
  * board for PWM output (see board.h for details of pins).
@@ -95,7 +96,8 @@ void weak_function stm32_spidev_initialize(void);
  *   Configure the timer driver.
  *
  * Input Parameters:
- *   devpath - The full path to the timer device.  This should be of the form /dev/timer0
+ *   devpath - The full path to the timer device.
+ *             This should be of the form /dev/timer0
  *   timer   - The timer's number.
  *
  * Returned Value:

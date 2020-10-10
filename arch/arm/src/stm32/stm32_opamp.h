@@ -121,6 +121,7 @@ enum stm32_opamp2_vpsel_e
 {
 #ifndef CONFIG_STM32_STM32F33XX
   /* TODO: STM32F303xB/C and STM32F358C devices only */
+
   OPAMP2_VPSEL_PD14,
 #endif
   OPAMP2_VPSEL_PB14,
@@ -186,25 +187,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
-* Name: stm32_opampinitialize
-*
-* Description:
-*   Initialize the OPAMP.
-*
-* Input Parameters:
-*   intf - The OPAMP interface number.
-*
-* Returned Value:
-*   Valid OPAMP device structure reference on success; a NULL on failure.
-*
-* Assumptions:
-*   1. Clock to the OPAMP block has enabled,
-*   2. Board-specific logic has already configured
-*
-****************************************************************************/
+/************************************************************************************
+ * Name: stm32_opampinitialize
+ *
+ * Description:
+ *   Initialize the OPAMP.
+ *
+ * Input Parameters:
+ *   intf - The OPAMP interface number.
+ *
+ * Returned Value:
+ *   Valid OPAMP device structure reference on success; a NULL on failure.
+ *
+ * Assumptions:
+ *   1. Clock to the OPAMP block has enabled,
+ *   2. Board-specific logic has already configured
+ *
+ ************************************************************************************/
 
-FAR struct opamp_dev_s* stm32_opampinitialize(int intf);
+FAR struct opamp_dev_s *stm32_opampinitialize(int intf);
 
 #undef EXTERN
 #ifdef __cplusplus

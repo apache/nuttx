@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32h7/nucleo-h743zi/src/stm32_lsm6dsl.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -33,7 +33,7 @@
 #include <nucleo-h743zi.h>
 #include <nuttx/sensors/lsm6dsl.h>
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -41,15 +41,16 @@
 #  error "LSM6DSL driver requires CONFIG_STM32H7_I2C1 to be enabled"
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_lsm6dsl_initialize
  *
  * Description:
  *   Initialize I2C-based LSM6DSL.
+ *
  ****************************************************************************/
 
 int stm32_lsm6dsl_initialize(char *devpath)
@@ -70,12 +71,14 @@ int stm32_lsm6dsl_initialize(char *devpath)
       return -ENODEV;
     }
 
-  sninfo("INFO: Initializing LMS6DSL accelero-gyro sensor over I2C%d\n", ret);
+  sninfo("INFO: Initializing LMS6DSL accelero-gyro sensor over I2C%d\n",
+         ret);
 
   ret = lsm6dsl_sensor_register(devpath, i2c, LSM6DSLACCEL_ADDR1);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to initialize LMS6DSL accelero-gyro driver %s\n", devpath);
+      snerr("ERROR: Failed to initialize LMS6DSL accelero-gyro driver %s\n",
+            devpath);
       return -ENODEV;
     }
 
