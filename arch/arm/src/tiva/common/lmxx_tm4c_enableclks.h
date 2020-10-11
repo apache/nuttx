@@ -49,6 +49,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Clocks are enabled or disabled by setting or clearing a bit (b) in a system
  * control register (a))
  */
