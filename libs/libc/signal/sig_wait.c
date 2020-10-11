@@ -91,7 +91,7 @@ int sigwait(FAR const sigset_t *set, FAR int *sig)
 
   DEBUGASSERT(set != NULL && sig != NULL);
 
-  /* The standard sigwait() function behaves that same as sigwainfo() with
+  /* The standard sigwait() function behaves that same as sigwaitinfo() with
    * the info argument set to NULL.
    */
 
