@@ -86,9 +86,9 @@
  * Name: tiva_delay
  *
  * Description:
- *   Wait for the newly selected oscillator(s) to settle.  This is tricky because
- *   the time that we wait can be significant and is determined by the previous
- *   clock setting, not the one that we are configuring.
+ *   Wait for the newly selected oscillator(s) to settle.  This is tricky
+ *   because the time that we wait can be significant and is determined by
+ *   the previous clock setting, not the one that we are configuring.
  *
  ****************************************************************************/
 
@@ -104,9 +104,9 @@ static inline void tiva_delay(uint32_t delay)
  * Name: tiva_oscdelay
  *
  * Description:
- *   Wait for the newly selected oscillator(s) to settle.  This is tricky because
- *   the time that we wait can be significant and is determined by the previous
- *   clock setting, not the one that we are configuring.
+ *   Wait for the newly selected oscillator(s) to settle.  This is tricky
+ *   because the time that we wait can be significant and is determined by
+ *   the previous clock setting, not the one that we are configuring.
  *
  ****************************************************************************/
 
@@ -210,21 +210,21 @@ void tiva_clock_reconfigure(uint32_t newrcc, uint32_t newrcc2)
     {
       uint32_t dummy;
 
-      /* According to TM4C123GH6PM datasheet page 231 item 5.3 we must perform
-       * the following steps to initialize and configure TM4C123G chip to use
-       * a PLL based system clock.
+      /* According to TM4C123GH6PM datasheet page 231 item 5.3 we must
+       * perform the following steps to initialize and configure TM4C123G
+       * chip to use a PLL based system clock.
        *
-       * 1. Bypass the PLL and system clock divider by setting the BYPASS bit
-       *    and clearing the USESYS bit in the RCC register.
+       * 1. Bypass the PLL and system clock divider by setting the BYPASS
+       *    bit and clearing the USESYS bit in the RCC register.
        *
        * 2. Select the crystal value (XTAL) and oscillator source (OSCSRC),
        *    and clear the PWRDN bit in RCC/RCC2. Setting the XTAL field
-       *    automatically pulls valid PLL configuration data for the appropriate
-       *    crystal, and clearing the PWRDN bit powers and enables the PLL and
-       *    its output.
+       *    automatically pulls valid PLL configuration data for the
+       *    appropriate crystal, and clearing the PWRDN bit powers and
+       *    enables the PLL and its output.
        *
-       * 3. Select the desired system divider (SYSDIV) in RCC/RCC2 and set the
-       *    USESYS bit in RCC. The SYSDIV field determines the system
+       * 3. Select the desired system divider (SYSDIV) in RCC/RCC2 and set
+       *    the USESYS bit in RCC. The SYSDIV field determines the system
        *    frequency for the microcontroller.
        *
        * 4. Wait for the PLL to lock by polling the PLLLRIS bit in the Raw
@@ -262,9 +262,9 @@ void tiva_clock_reconfigure(uint32_t newrcc, uint32_t newrcc2)
       /* Write the new RCC/RCC2 values.
        *
        * LM4F120 Data Sheet:  "Write the RCC register prior to writing the
-       * RCC2 register. If a subsequent write to the RCC register is required,
-       * include another register access after writing the RCC register and
-       * before writing the RCC2 register."
+       * RCC2 register. If a subsequent write to the RCC register is
+       * required, include another register access after writing the RCC
+       * register and before writing the RCC2 register."
        */
 
       putreg32(rcc, TIVA_SYSCON_RCC);
@@ -272,7 +272,9 @@ void tiva_clock_reconfigure(uint32_t newrcc, uint32_t newrcc2)
       UNUSED(dummy);
       putreg32(rcc2, TIVA_SYSCON_RCC2);
 
-      /* Wait for the new crystal value and oscillator source to take effect */
+      /* Wait for the new crystal value and oscillator source to take
+       * effect
+       */
 
       tiva_delay(16);
 
@@ -311,8 +313,10 @@ void tiva_clock_reconfigure(uint32_t newrcc, uint32_t newrcc2)
         }
     }
 #else
-  if (((rcc & SYSCON_RCC_MOSCDIS) != 0 && (newrcc & SYSCON_RCC_MOSCDIS) == 0) ||
-      ((rcc & SYSCON_RCC_IOSCDIS) != 0 && (newrcc & SYSCON_RCC_IOSCDIS) == 0))
+  if (((rcc & SYSCON_RCC_MOSCDIS) != 0 &&
+       (newrcc & SYSCON_RCC_MOSCDIS) == 0) ||
+      ((rcc & SYSCON_RCC_IOSCDIS) != 0 &&
+       (newrcc & SYSCON_RCC_IOSCDIS) == 0))
     {
       /* Temporarily bypass the PLL and system clock dividers */
 
@@ -328,9 +332,10 @@ void tiva_clock_reconfigure(uint32_t newrcc, uint32_t newrcc2)
       rcc &= (~RCC_OSCMASK | (newrcc & RCC_OSCMASK));
       putreg32(rcc, TIVA_SYSCON_RCC);
 
-      /* Wait for the newly selected oscillator(s) to settle.  This is tricky because
-       * the time that we wait can be significant and is determined by the previous
-       * clock setting, not the one that we are configuring.
+      /* Wait for the newly selected oscillator(s) to settle.  This is
+       * tricky because the time that we wait can be significant and is
+       * determined by the previous clock setting, not the one that we are
+       * configuring.
        */
 
       tiva_oscdelay(rcc, rcc2);
@@ -356,11 +361,15 @@ void tiva_clock_reconfigure(uint32_t newrcc, uint32_t newrcc2)
       putreg32(rcc, TIVA_SYSCON_RCC);
       putreg32(rcc2, TIVA_SYSCON_RCC2);
 
-      /* Wait for the new crystal value and oscillator source to take effect */
+      /* Wait for the new crystal value and oscillator source to take
+       * effect
+       */
 
       tiva_delay(16);
 
-      /* Set the requested system divider and disable the non-selected osciallators */
+      /* Set the requested system divider and disable the non-selected
+       * osciallators
+       */
 
       rcc  &= ~RCC_DIVMASK;
       rcc  |= (newrcc & RCC_DIVMASK);
@@ -413,8 +422,8 @@ void tiva_clock_configure(void)
   putreg32(SYSCON_LPDOPCTL_2750MV, TIVA_SYSCON_LDOPCTL);
 #endif
 
-  /* Set the clocking to run with the default settings provided in the board.h
-   * header file
+  /* Set the clocking to run with the default settings provided in the
+   * board.h header file
    */
 
   tiva_clock_reconfigure(TIVA_RCC_VALUE, TIVA_RCC2_VALUE);
