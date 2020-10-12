@@ -46,6 +46,8 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "kinetis.h"
+
 #include "freedom-k64f.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
