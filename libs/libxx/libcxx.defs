@@ -21,10 +21,10 @@
 VERSION=11.0.0
 
 $(TOPDIR)/include/libcxx:
-	$(Q) wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$(VERSION)-rc1/libcxx-$(VERSION)rc1.src.tar.xz
-	$(Q) tar -xf libcxx-$(VERSION)rc1.src.tar.xz
-	$(Q) $(DELFILE) libcxx-$(VERSION)rc1.src.tar.xz
-	$(Q) mv libcxx-$(VERSION)rc1.src libcxx
+	$(Q) wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$(VERSION)/libcxx-$(VERSION).src.tar.xz
+	$(Q) tar -xf libcxx-$(VERSION).src.tar.xz
+	$(Q) $(DELFILE) libcxx-$(VERSION).src.tar.xz
+	$(Q) mv libcxx-$(VERSION).src libcxx
 	$(Q) patch -p0 < 0001-libcxx-Port-to-NuttX-https-nuttx.apache.org-RTOS.patch
 	$(Q) $(DIRLINK) $(CURDIR)/libcxx/include $(TOPDIR)/include/libcxx
 
