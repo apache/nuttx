@@ -52,6 +52,16 @@
 #include "esp32_gpio.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Interrupt stack definitions for SMP */
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#  define INTSTACK_ALLOC (CONFIG_SMP_NCPUS * INTSTACK_SIZE)
+#endif
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -73,6 +83,24 @@ volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
 volatile uint32_t *g_current_regs[1];
 
 #endif
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+/* In the SMP configuration, we will need custom interrupt stacks.
+ * These definitions provide the aligned stack allocations.
+ */
+
+static uint32_t g_intstackalloc[INTSTACK_ALLOC >> 2];
+
+/* These definitions provide the "top" of the push-down stacks. */
+
+uintptr_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
+{
+  (uintptr_t)g_intstackalloc + INTSTACK_SIZE,
+#if CONFIG_SMP_NCPUS > 1
+  (uintptr_t)g_intstackalloc + (2 * INTSTACK_SIZE),
+#endif /* CONFIG_SMP_NCPUS > 1 */
+};
+#endif /* defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15 */
 
 /****************************************************************************
  * Private Functions
@@ -164,3 +192,33 @@ void up_irqinitialize(void)
   up_irq_enable();
 #endif
 }
+
+/****************************************************************************
+ * Name: xtensa_intstack_base
+ *
+ * Description:
+ *   Return a pointer to the "base" of the correct interrupt stack for the
+ *   given CPU.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+uintptr_t xtensa_intstack_base(void)
+{
+  return g_cpu_intstack_top[up_cpu_index()];
+}
+
+/****************************************************************************
+ * Name: xtensa_intstack_alloc
+ *
+ * Description:
+ *   Return a pointer to the "alloc" the correct interrupt stack allocation
+ *   for the current CPU.
+ *
+ ****************************************************************************/
+
+uintptr_t xtensa_intstack_alloc(void)
+{
+  return g_cpu_intstack_top[up_cpu_index()] - INTSTACK_SIZE;
+}
+#endif
