@@ -51,6 +51,7 @@
 
 #include "xtensa.h"
 #include "sched/sched.h"
+#include "chip_macros.h"
 
 #ifdef CONFIG_STACK_COLORATION
 
@@ -200,13 +201,16 @@ ssize_t up_check_stack_remain(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 size_t up_check_intstack(void)
 {
-  return do_stackcheck((uintptr_t)&g_intstackalloc,
-                       (CONFIG_ARCH_INTERRUPTSTACK & ~15));
+#ifdef CONFIG_SMP
+  return do_stackcheck(xtensa_intstack_alloc(), INTSTACK_SIZE);
+#else
+  return do_stackcheck((uintptr_t)&g_intstackalloc, INTSTACK_SIZE);
+#endif
 }
 
 size_t up_check_intstack_remain(void)
 {
-  return (CONFIG_ARCH_INTERRUPTSTACK & ~15) - up_check_intstack();
+  return INTSTACK_SIZE - up_check_intstack();
 }
 #endif
 

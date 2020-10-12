@@ -76,7 +76,7 @@
  .type      g_intstackalloc, @object
  .type      g_intstackbase, @object
 g_intstackalloc:
- .skip      ((CONFIG_ARCH_INTERRUPTSTACK + 15) & ~15)
+ .skip      INTSTACK_SIZE
 g_intstackbase:
  .size      g_intstackalloc, .-g_intstackalloc
 #endif
@@ -108,13 +108,13 @@ g_intstackbase:
  * Name: setintstack
  *
  * Description:
- *   Set the current stack pointer to the  "top" the interrupt stack.  Single CPU
+ *   Set the current stack pointer to the "top" the interrupt stack.  Single CPU
  *   case.  Must be provided by MCU-specific logic in the SMP case.
  *
  ************************************************************************************/
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-	.macro	setintstack
+	.macro	setintstack tmp1 tmp2
 	movi		a1, g_intstackbase
 	.endm
 #endif
@@ -296,7 +296,7 @@ _xtensa_level1_handler:
   /* Switch to an interrupt stack if we have one */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-  setintstack
+  setintstack a13 a14
 #endif
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */

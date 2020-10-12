@@ -87,8 +87,13 @@
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
+#else
+#  define INTSTACK_ALIGNMENT    16
+#  define INTSTACK_ALIGN_MASK   (INTSTACK_ALIGNMENT - 1)
+#  define INTSTACK_ALIGNDOWN(s) ((s) & ~INTSTACK_ALIGN_MASK)
+#  define INTSTACK_ALIGNUP(s)   (((s) + INTSTACK_ALIGN_MASK) & ~INTSTACK_ALIGN_MASK)
+#  define INTSTACK_SIZE         INTSTACK_ALIGNUP(CONFIG_ARCH_INTERRUPTSTACK)
 #endif
-
 
 /* An IDLE thread stack size for CPU0 must be defined */
 
@@ -177,7 +182,7 @@ extern volatile uint32_t *g_current_regs[1];
 
 #endif
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
 /* The (optional) interrupt stack */
 
 extern uint32_t g_intstackalloc; /* Allocated interrupt stack */

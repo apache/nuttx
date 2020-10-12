@@ -57,6 +57,7 @@
 #include <arch/board/board.h>
 
 #include "xtensa.h"
+#include "chip_macros.h"
 
 /****************************************************************************
  * Private Functions
@@ -74,12 +75,19 @@
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
 static inline void xtensa_color_intstack(void)
 {
-  ssize_t size;
+#ifdef CONFIG_SMP
+  uint32_t *ptr = (uint32_t *)xtensa_intstack_alloc();
+#else
   uint32_t *ptr = (uint32_t *)&g_intstackalloc;
+#endif
+  ssize_t size;
 
-  for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
-       size > 0;
-       size -= sizeof(uint32_t))
+#ifdef CONFIG_SMP
+  for (size = INTSTACK_SIZE * CONFIG_SMP_NCPUS;
+#else
+  for (size = INTSTACK_SIZE;
+#endif
+       size > 0; size -= sizeof(uint32_t))
     {
       *ptr++ = INTSTACK_COLOR;
     }

@@ -37,6 +37,7 @@
 
 #include "sched/sched.h"
 #include "xtensa.h"
+#include "chip_macros.h"
 
 #ifdef CONFIG_DEBUG_ALERT
 
@@ -186,8 +187,12 @@ void xtensa_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
+#ifdef CONFIG_SMP
+  istackbase = (uint32_t)xtensa_intstack_base();
+#else
   istackbase = (uint32_t)&g_intstackbase;
-  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
+#endif
+  istacksize = INTSTACK_SIZE;
 
   /* Show interrupt stack info */
 
@@ -208,18 +213,22 @@ void xtensa_dumpstate(void)
       /* Yes.. dump the interrupt stack */
 
       xtensa_stackdump(sp, istackbase);
-
-      /* Extract the user stack pointer which should lie
-       * at the base of the interrupt stack.
-       */
-
-      sp = g_intstackbase - sizeof(uint32_t);
-      _alert("sp:     %08x\n", sp);
     }
   else if (CURRENT_REGS)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
       xtensa_stackdump(istackbase - istacksize, istackbase);
+    }
+
+  /* Extract the user stack pointer if we are in an interrupt handler.
+   * If we are not in an interrupt handler.  Then sp is the user stack
+   * pointer (and the above range check should have failed).
+   */
+
+  if (CURRENT_REGS)
+    {
+      sp = CURRENT_REGS[REG_A1];
+      _alert("sp:     %08x\n", sp);
     }
 
   /* Show user stack info */
