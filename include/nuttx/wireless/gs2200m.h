@@ -94,6 +94,7 @@ struct gs2200m_bind_msg
 
 struct gs2200m_accept_msg
 {
+  struct sockaddr_in addr;
   char     cid;
   uint8_t  type;
 };
