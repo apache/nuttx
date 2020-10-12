@@ -2450,6 +2450,8 @@ static int gs2200m_ioctl_accept(FAR struct gs2200m_dev_s *dev,
                                 FAR struct gs2200m_accept_msg *msg)
 {
   FAR struct pkt_dat_s *pkt_dat;
+  struct gs2200m_name_msg nmsg;
+  enum pkt_type_e r;
   uint8_t c;
   char s_cid;
   char c_cid;
@@ -2485,6 +2487,15 @@ static int gs2200m_ioctl_accept(FAR struct gs2200m_dev_s *dev,
     {
       _notif_q_push(dev, c_cid);
     }
+
+  /* Obtain remote address info */
+
+  nmsg.local = 0;
+  nmsg.cid = msg->cid;
+  r = gs2200m_get_cstatus(dev, &nmsg);
+  ASSERT(TYPE_OK == r);
+
+  msg->addr = nmsg.addr;
 
   wlinfo("+++ end: type=%d (msg->cid=%c) \n", msg->type, msg->cid);
 
