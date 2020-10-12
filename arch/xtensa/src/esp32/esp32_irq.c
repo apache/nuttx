@@ -142,12 +142,6 @@ void up_irqinitialize(void)
 
   esp32_cpuint_initialize();
 
-#if defined(CONFIG_STACK_COLORATION) && defined(HAVE_INTERRUPTSTACK)
-  /* Colorize the interrupt stack for debug purposes */
-
-#warning Missing logic
-#endif
-
   /* Attach and enable internal interrupts */
 
 #ifdef CONFIG_SMP

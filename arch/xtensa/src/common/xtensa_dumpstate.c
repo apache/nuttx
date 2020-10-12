@@ -163,7 +163,7 @@ void xtensa_dumpstate(void)
   uint32_t sp = xtensa_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
-#ifdef HAVE_INTERRUPTSTACK
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   uint32_t istackbase;
   uint32_t istacksize;
 #endif
@@ -185,10 +185,9 @@ void xtensa_dumpstate(void)
 
   /* Get the limits on the interrupt stack memory */
 
-#warning REVISIT interrupt stack
-#ifdef HAVE_INTERRUPTSTACK
-  istackbase = (uint32_t)&g_intstack[INTERRUPT_STACKWORDS - 1];
-  istacksize = INTERRUPTSTACK_SIZE;
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+  istackbase = (uint32_t)&g_intstackbase;
+  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
 
   /* Show interrupt stack info */
 
@@ -214,7 +213,7 @@ void xtensa_dumpstate(void)
        * at the base of the interrupt stack.
        */
 
-      sp = &g_instack[INTERRUPTSTACK_SIZE - sizeof(uint32_t)];
+      sp = g_intstackbase - sizeof(uint32_t);
       _alert("sp:     %08x\n", sp);
     }
   else if (CURRENT_REGS)
