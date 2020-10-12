@@ -877,10 +877,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
   if (esp32_ptr_extram(txbuffer))
     {
       tp = up_imm_malloc(bytes);
-      if (tp == NULL)
-        {
-          return;
-        }
+      DEBUGASSERT(tp != NULL);
     }
   else
 #endif
@@ -892,10 +889,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
   if (esp32_ptr_extram(rxbuffer))
     {
       rp = up_imm_malloc(bytes);
-      if (rp == NULL)
-        {
-          goto error_with_tp;
-        }
+      DEBUGASSERT(rp != NULL);
     }
   else
 #endif
@@ -971,7 +965,6 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
 #endif
 
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
-error_with_tp:
   if (esp32_ptr_extram(txbuffer))
     {
       up_imm_free(tp);
