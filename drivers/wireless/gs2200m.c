@@ -2674,7 +2674,15 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
                dev->net_dev.d_mac.ether.ether_addr_octet, 6);
         break;
 
-      case SIOCSIFADDR:
+      case SIOCGIFADDR:
+        getreq = true;
+        memcpy(&inaddr->sin_addr,
+               &dev->net_dev.d_ipaddr,
+               sizeof(dev->net_dev.d_ipaddr)
+               );
+        break;
+
+    case SIOCSIFADDR:
         memcpy(&dev->net_dev.d_ipaddr,
                &inaddr->sin_addr, sizeof(inaddr->sin_addr)
                );
