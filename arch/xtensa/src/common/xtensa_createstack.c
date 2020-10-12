@@ -54,6 +54,7 @@
 #include <arch/board/board.h>
 
 #include "xtensa.h"
+#include "xtensa_mm.h"
 
 /****************************************************************************
  * Pre-processor Macros
@@ -72,18 +73,6 @@
 #define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
-#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
-#  define UMM_MALLOC(s)      up_imm_malloc(s)
-#  define UMM_MEMALIGN(a,s)  up_imm_memalign(a,s)
-#  define UMM_FREE(p)        up_imm_free(p)
-#  define UMM_HEAPMEMEBER(p) up_imm_heapmember(p)
-#else
-#  define UMM_MALLOC(s)      kumm_malloc(s)
-#  define UMM_MEMALIGN(a,s)  kumm_memalign(a,s)
-#  define UMM_FREE(p)        kumm_free(p)
-#  define UMM_HEAPMEMEBER(p) umm_heapmember(p)
-#endif
 
 /****************************************************************************
  * Public Functions
