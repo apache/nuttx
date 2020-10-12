@@ -226,6 +226,7 @@
 
 #define BUTTON_SW2        0
 #define BUTTON_SW3        1
+#define NUM_BUTTONS       2
 
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 #define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
