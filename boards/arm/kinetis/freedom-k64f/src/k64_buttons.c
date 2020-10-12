@@ -108,7 +108,7 @@ uint32_t board_buttons(void)
       ret |= BUTTON_SW3_BIT;
     }
 
-  return ret
+  return ret;
 }
 
 /****************************************************************************
