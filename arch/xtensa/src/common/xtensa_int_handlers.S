@@ -68,6 +68,19 @@
 #include "chip_macros.h"
 #include "xtensa_timer.h"
 
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+ .data
+ .align     16
+ .global    g_intstackalloc
+ .global    g_intstackbase
+ .type      g_intstackalloc, @object
+ .type      g_intstackbase, @object
+g_intstackalloc:
+ .skip      ((CONFIG_ARCH_INTERRUPTSTACK + 15) & ~15)
+g_intstackbase:
+ .size      g_intstackalloc, .-g_intstackalloc
+#endif
+
 /****************************************************************************
  * Assembly Language Macros
  ****************************************************************************/
@@ -91,6 +104,21 @@
 	addi	\aout, \aout, 1				/* Return aout + 1 */
 	.endm
 
+/************************************************************************************
+ * Name: setintstack
+ *
+ * Description:
+ *   Set the current stack pointer to the  "top" the interrupt stack.  Single CPU
+ *   case.  Must be provided by MCU-specific logic in the SMP case.
+ *
+ ************************************************************************************/
+
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+	.macro	setintstack
+	movi		a1, g_intstackbase
+	.endm
+#endif
+
 /****************************************************************************
  * Macro dispatch_c_isr level mask
  *
@@ -112,6 +140,7 @@
  * Entry Conditions/Side Effects:
  *   level - interrupt level
  *   mask  - interrupt bitmask for this level
+ *   a12   - register save area
  *
  * Exit Conditions:
  *   This macro will use registers a0 and a2-a5 and a12.
@@ -121,12 +150,6 @@
  ****************************************************************************/
 
 	.macro	dispatch_c_isr	level mask
-
-	/* Initially the register save area is in SP, but that could change as
-	 * a consequence of context switching.
-	 */
-
-	mov		a12, sp						/* Address of save area */
 
 #ifdef __XTENSA_CALL0_ABI__
 	/* Get mask of pending, enabled interrupts at this level into a2. */
@@ -143,7 +166,7 @@
 	 */
 
 		          						  /* Argument 1: Set of CPU interrupt to dispatch */
-	mov		a3, sp					    /* Argument 2: Top of stack = register save area */
+	mov		a3, a12					    /* Argument 2: Top of stack = register save area */
 	call0	xtensa_int_decode	  /* Call xtensa_int_decode */
 
 	/* On return from xtensa_int_decode, a2 will contain the address of the new
@@ -169,7 +192,7 @@
 	 */
 
 										        /* Argument 1: Set of CPU interrupt to dispatch */
-	mov		a7, sp					  	/* Argument 2: Top of stack = register save area */
+	mov		a7, a12					  	/* Argument 2: Top of stack = register save area */
 	call4	xtensa_int_decode		/* Call xtensa_int_decode */
 
 	/* On return from xtensa_int_decode, a6 will contain the address of the new
@@ -262,6 +285,19 @@ _xtensa_level1_handler:
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							      /* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
+
+  /* Save current SP before (possibly) overwriting it, it's the register save
+   * area. This value will be used later by dispatch_c_isr to retrive the
+   * register save area.
+   */
+
+  mov  a12, sp
+
+  /* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+  setintstack
+#endif
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 

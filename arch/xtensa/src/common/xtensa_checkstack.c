@@ -197,16 +197,16 @@ ssize_t up_check_stack_remain(void)
   return up_check_tcbstack_remain(this_task());
 }
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
 size_t up_check_intstack(void)
 {
   return do_stackcheck((uintptr_t)&g_intstackalloc,
-                       (CONFIG_ARCH_INTERRUPTSTACK & ~3));
+                       (CONFIG_ARCH_INTERRUPTSTACK & ~15));
 }
 
 size_t up_check_intstack_remain(void)
 {
-  return (CONFIG_ARCH_INTERRUPTSTACK & ~3) - up_check_intstack();
+  return (CONFIG_ARCH_INTERRUPTSTACK & ~15) - up_check_intstack();
 }
 #endif
 
