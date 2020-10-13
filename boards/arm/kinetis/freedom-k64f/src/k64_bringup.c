@@ -88,6 +88,12 @@ int k64_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_KINETIS_I2C0)
+  /* Initialize I2C buses */
+
+  k64_i2cdev_initialize();
+#endif
+
 #ifdef HAVE_MMCSD
   /* Initialize the SDHC driver */
 
@@ -109,7 +115,7 @@ int k64_bringup(void)
 
       if (ret < 0)
         {
-          syslog(LOG_ERR,"ERROR: Failed to mount %s: %d\n",
+          syslog(LOG_ERR, "ERROR: Failed to mount %s: %d\n",
                  CONFIG_FRDMK64F_SDHC_MOUNT_MOUNTPOINT, errno);
         }
     }

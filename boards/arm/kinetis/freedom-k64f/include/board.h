@@ -269,4 +269,15 @@
 #define PIN_UART3_RX      PIN_UART3_RX_2
 #define PIN_UART3_TX      PIN_UART3_TX_2
 
+/* I2C Bus 0
+ *
+ *  Pin Name   K64   Name
+ *  ---- ----- ------ ---------
+ *   11  SCL    PTE24  2C0_SCL
+ *   12  SDA    PTE25  2C0_SDA
+ */
+
+#define PIN_I2C0_SCL      PIN_I2C0_SCL_4
+#define PIN_I2C0_SDA      PIN_I2C0_SDA_4
+
 #endif /* __BOARDS_ARM_FREEDOM_K64F_INCLUDE_BOARD_H */
