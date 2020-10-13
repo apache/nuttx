@@ -97,6 +97,14 @@ config XTENSA_CP_INITSET
 config XTENSA_USE_SEPERATE_IMEM
 	bool "Use a seperate heap for internal memory"
 	default n
+	help
+		This is a seperate internal heap that's used by drivers when certain operations
+		are not possible with the provided buffer(s).
+		Mainly, when the provided buffer comes from external RAM and a DMA or flash 
+		operation is going to be performed.
+
+		This seperate heap will be part of the internal DRAM.  It starts right after .data
+		and ends at the configurable size given by the OPTION XTENSA_IMEM_REGION_SIZE.
 
 config XTENSA_IMEM_REGION_SIZE
 	hex "DRAM region size for internal use"
