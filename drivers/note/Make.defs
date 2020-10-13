@@ -26,6 +26,10 @@ ifeq ($(CONFIG_DRIVER_NOTERAM),y)
   CSRCS += noteram_driver.c
 endif
 
+ifeq ($(CONFIG_DRIVER_NOTELOG),y)
+  CSRCS += notelog_driver.c
+endif
+
 ifeq ($(CONFIG_DRIVER_NOTECTL),y)
   CSRCS += notectl_driver.c
 endif

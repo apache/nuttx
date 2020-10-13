@@ -46,6 +46,12 @@ config DRIVER_NOTEARCH
 	---help---
 		The note driver is provided by arch specific code.
 
+config DRIVER_NOTELOG
+	bool "Note syslog driver"
+	select SCHED_INSTRUMENTATION_EXTERNAL
+	---help---
+		The note driver output to syslog.
+
 endchoice
 
 config DRIVER_NOTERAM_BUFSIZE
