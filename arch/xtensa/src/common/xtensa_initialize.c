@@ -111,7 +111,7 @@ void up_initialize(void)
   /* Initialize the internal heap */
 
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
-  up_imm_initialize();
+  xtensa_imm_initialize();
 #endif
 
 #ifdef CONFIG_ARCH_DMA

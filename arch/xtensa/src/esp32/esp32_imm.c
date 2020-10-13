@@ -30,7 +30,7 @@
 
 #include "xtensa.h"
 
-#if CONFIG_XTENSA_USE_SEPERATE_IMEM
+#if CONFIG_XTENSA_USE_SEPARATE_IMEM
 
 /****************************************************************************
  * Private Data
@@ -43,14 +43,14 @@ struct mm_heap_s g_iheap;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_imm_initialize
+ * Name: xtensa_imm_initialize
  *
  * Description:
  *   Initialize the internal heap.
  *
  ****************************************************************************/
 
-void up_imm_initialize(void)
+void xtensa_imm_initialize(void)
 {
   void  *start;
   size_t size;
@@ -61,33 +61,33 @@ void up_imm_initialize(void)
 }
 
 /****************************************************************************
- * Name: up_imm_malloc
+ * Name: xtensa_imm_malloc
  *
  * Description:
  *   Allocate memory from the internal heap.
  *
  ****************************************************************************/
 
-FAR void *up_imm_malloc(size_t size)
+FAR void *xtensa_imm_malloc(size_t size)
 {
   return mm_malloc(&g_iheap, size);
 }
 
 /****************************************************************************
- * Name: up_imm_free
+ * Name: xtensa_imm_free
  *
  * Description:
  *   Free memory from the internal heap.
  *
  ****************************************************************************/
 
-void up_imm_free(FAR void *mem)
+void xtensa_imm_free(FAR void *mem)
 {
   mm_free(&g_iheap, mem);
 }
 
 /****************************************************************************
- * Name: up_imm_memalign
+ * Name: xtensa_imm_memalign
  *
  * Description:
  *   memalign requests more than enough space from malloc, finds a region
@@ -99,13 +99,13 @@ void up_imm_free(FAR void *mem)
  *
  ****************************************************************************/
 
-FAR void *up_imm_memalign(size_t alignment, size_t size)
+FAR void *xtensa_imm_memalign(size_t alignment, size_t size)
 {
   return mm_memalign(&g_iheap, alignment, size);
 }
 
 /****************************************************************************
- * Name: up_imm_heapmember
+ * Name: xtensa_imm_heapmember
  *
  * Description:
  *   Check if an address lies in the internal heap.
@@ -118,13 +118,13 @@ FAR void *up_imm_memalign(size_t alignment, size_t size)
  *
  ****************************************************************************/
 
-bool up_imm_heapmember(FAR void *mem)
+bool xtensa_imm_heapmember(FAR void *mem)
 {
   return mm_heapmember(&g_iheap, mem);
 }
 
 /****************************************************************************
- * Name: up_imm_mallinfo
+ * Name: xtensa_imm_mallinfo
  *
  * Description:
  *   mallinfo returns a copy of updated current heap information for the
@@ -132,9 +132,9 @@ bool up_imm_heapmember(FAR void *mem)
  *
  ****************************************************************************/
 
-int up_imm_mallinfo(FAR struct mallinfo *info)
+int xtensa_imm_mallinfo(FAR struct mallinfo *info)
 {
   return mm_mallinfo(&g_iheap, info);
 }
 
-#endif /* CONFIG_XTENSA_USE_SEPERATE_IMEM */
+#endif /* CONFIG_XTENSA_USE_SEPARATE_IMEM */

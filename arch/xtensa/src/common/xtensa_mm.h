@@ -35,10 +35,10 @@
  ****************************************************************************/
 
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
-#  define UMM_MALLOC(s)      up_imm_malloc(s)
-#  define UMM_MEMALIGN(a,s)  up_imm_memalign(a,s)
-#  define UMM_FREE(p)        up_imm_free(p)
-#  define UMM_HEAPMEMEBER(p) up_imm_heapmember(p)
+#  define UMM_MALLOC(s)      xtensa_imm_malloc(s)
+#  define UMM_MEMALIGN(a,s)  xtensa_imm_memalign(a,s)
+#  define UMM_FREE(p)        xtensa_imm_free(p)
+#  define UMM_HEAPMEMEBER(p) xtensa_imm_heapmember(p)
 #else
 #  define UMM_MALLOC(s)      kumm_malloc(s)
 #  define UMM_MEMALIGN(a,s)  kumm_memalign(a,s)
