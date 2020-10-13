@@ -81,28 +81,28 @@ config XTENSA_CP_INITSET
 		is provided by CONFIG_XTENSA_CP_INITSET.  Each bit corresponds to one
 		coprocessor with the same bit layout as for the CPENABLE register.
 
-config XTENSA_USE_SEPERATE_IMEM
-	bool "Use a seperate heap for internal memory"
+config XTENSA_USE_SEPARATE_IMEM
+	bool "Use a separate heap for internal memory"
 	default n
 	help
-		This is a seperate internal heap that's used by drivers when certain operations
+		This is a separate internal heap that's used by drivers when certain operations
 		are not possible with the provided buffer(s).
 		Mainly, when the provided buffer comes from external RAM and a DMA or flash 
 		operation is going to be performed.
 
-		This seperate heap will be part of the internal DRAM.  It starts right after .data
+		This separate heap will be part of the internal DRAM.  It starts right after .data
 		and ends at the configurable size given by the OPTION XTENSA_IMEM_REGION_SIZE.
 
 config XTENSA_IMEM_REGION_SIZE
 	hex "DRAM region size for internal use"
-	depends on XTENSA_USE_SEPERATE_IMEM
+	depends on XTENSA_USE_SEPARATE_IMEM
 	range 0x2000 0x28000
 	default 0x28000
 
 config XTENSA_IMEM_PROCFS
 	bool "Internal memory PROCFS support"
 	default n
-	depends on XTENSA_USE_SEPERATE_IMEM && !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
+	depends on XTENSA_USE_SEPARATE_IMEM && !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
 
 source arch/xtensa/src/lx6/Kconfig
 if ARCH_CHIP_ESP32

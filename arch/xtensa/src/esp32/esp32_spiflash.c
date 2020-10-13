@@ -1054,7 +1054,7 @@ static ssize_t esp32_read(FAR struct mtd_dev_s *dev, off_t offset,
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
   if (esp32_ptr_extram(buffer))
     {
-      tmpbuff = up_imm_malloc(nbytes);
+      tmpbuff = xtensa_imm_malloc(nbytes);
       if (tmpbuff == NULL)
         {
           return (ssize_t)-ENOMEM;
@@ -1089,7 +1089,7 @@ error_with_buffer:
   if (esp32_ptr_extram(buffer))
     {
       memcpy(buffer, tmpbuff, (ret == OK) ? nbytes : 0);
-      up_imm_free(tmpbuff);
+      xtensa_imm_free(tmpbuff);
     }
 #endif
 
@@ -1173,7 +1173,7 @@ static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
   if (esp32_ptr_extram(buffer))
     {
-      tmpbuff = up_imm_malloc(nbytes);
+      tmpbuff = xtensa_imm_malloc(nbytes);
       if (tmpbuff == NULL)
         {
           return (ssize_t)-ENOMEM;
@@ -1213,7 +1213,7 @@ error_with_buffer:
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
   if (esp32_ptr_extram(buffer))
     {
-      up_imm_free(tmpbuff);
+      xtensa_imm_free(tmpbuff);
     }
 #endif
 

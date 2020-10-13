@@ -205,7 +205,7 @@ static ssize_t imm_read(FAR struct file *filep, FAR char *buffer,
   priv = (FAR struct imm_file_s *)filep->f_priv;
   DEBUGASSERT(priv);
 
-  up_imm_mallinfo(&mem);
+  xtensa_imm_mallinfo(&mem);
 
   remaining = buflen;
   totalsize = 0;

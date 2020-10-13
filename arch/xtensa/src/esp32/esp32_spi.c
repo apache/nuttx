@@ -880,7 +880,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
   if (esp32_ptr_extram(txbuffer))
     {
-      alloctp = up_imm_malloc(bytes);
+      alloctp = xtensa_imm_malloc(bytes);
       DEBUGASSERT(alloctp != NULL);
       memcpy(alloctp, txbuffer, bytes);
       tp = alloctp;
@@ -894,7 +894,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
   if (esp32_ptr_extram(rxbuffer))
     {
-      allocrp = up_imm_malloc(bytes);
+      allocrp = xtensa_imm_malloc(bytes);
       DEBUGASSERT(allocrp != NULL);
       rp = allocrp;
     }
@@ -967,14 +967,14 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
   if (esp32_ptr_extram(rxbuffer))
     {
       memcpy(rxbuffer, allocrp, bytes);
-      up_imm_free(allocrp);
+      xtensa_imm_free(allocrp);
     }
 #endif
 
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
   if (esp32_ptr_extram(txbuffer))
     {
-      up_imm_free(alloctp);
+      xtensa_imm_free(alloctp);
     }
 #endif
 }
