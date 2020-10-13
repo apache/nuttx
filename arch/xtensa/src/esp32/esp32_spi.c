@@ -870,14 +870,20 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
   uint8_t *rp;
   uint32_t n;
   uint32_t regval;
+#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+  uint8_t *alloctp;
+  uint8_t *allocrp;
+#endif
 
   /* If the buffer comes from PSRAM, allocate a new one from DRAM */
 
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
   if (esp32_ptr_extram(txbuffer))
     {
-      tp = up_imm_malloc(bytes);
-      DEBUGASSERT(tp != NULL);
+      alloctp = up_imm_malloc(bytes);
+      DEBUGASSERT(alloctp != NULL);
+      memcpy(alloctp, txbuffer, bytes);
+      tp = alloctp;
     }
   else
 #endif
@@ -888,8 +894,9 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
   if (esp32_ptr_extram(rxbuffer))
     {
-      rp = up_imm_malloc(bytes);
-      DEBUGASSERT(rp != NULL);
+      allocrp = up_imm_malloc(bytes);
+      DEBUGASSERT(allocrp != NULL);
+      rp = allocrp;
     }
   else
 #endif
@@ -959,15 +966,15 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
   if (esp32_ptr_extram(rxbuffer))
     {
-      memcpy(rxbuffer, rp, bytes);
-      up_imm_free(rp);
+      memcpy(rxbuffer, allocrp, bytes);
+      up_imm_free(allocrp);
     }
 #endif
 
 #ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
   if (esp32_ptr_extram(txbuffer))
     {
-      up_imm_free(tp);
+      up_imm_free(alloctp);
     }
 #endif
 }
