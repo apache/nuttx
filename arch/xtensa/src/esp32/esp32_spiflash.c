@@ -1178,6 +1178,8 @@ static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
         {
           return (ssize_t)-ENOMEM;
         }
+
+      memcpy(tmpbuff, buffer, nbytes);
     }
 #endif
 
