@@ -175,6 +175,7 @@ PROVIDE ( ets_efuse_read_op = 0x40008600 );
 PROVIDE ( ets_get_cpu_frequency = 0x4000855c );
 PROVIDE ( ets_get_detected_xtal_freq = 0x40008588 );
 PROVIDE ( ets_get_xtal_scale = 0x4000856c );
+PROVIDE ( ets_update_cpu_frequency_rom = 0x40008550 );
 PROVIDE ( ets_install_putc1 = 0x40007d18 );
 PROVIDE ( ets_install_putc2 = 0x40007d38 );
 PROVIDE ( ets_install_uart_printf = 0x40007d28 );

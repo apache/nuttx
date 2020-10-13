@@ -49,6 +49,14 @@
 #  define CONFIG_PM_ALARM_NSEC 0
 #endif
 
+#ifndef CONFIG_PM_SLEEP_WAKEUP_SEC
+#  define CONFIG_PM_SLEEP_WAKEUP_SEC 20
+#endif
+
+#ifndef CONFIG_PM_SLEEP_WAKEUP_NSEC
+#  define CONFIG_PM_SLEEP_WAKEUP_NSEC 0
+#endif
+
 #define PM_IDLE_DOMAIN 0 /* Revisit */
 #endif
 
@@ -102,6 +110,8 @@ static void up_idlepm(void)
           oldstate = newstate;
         }
 
+      spin_unlock_irqrestore(flags);
+
       /* MCU-specific power management logic */
 
       switch (newstate)
@@ -114,29 +124,34 @@ static void up_idlepm(void)
 
         case PM_STANDBY:
           {
-            /* Configure the RTC alarm to Auto Wake the system */
+            /* Enter Force-sleep mode */
 
-            esp32_pmstart(CONFIG_PM_ALARM_SEC * 1000000 +
+            esp32_pmstandby(CONFIG_PM_ALARM_SEC * 1000000 +
                                   CONFIG_PM_ALARM_NSEC / 1000);
-
-            /* Resume normal operation */
-
-            pm_relax(PM_IDLE_DOMAIN, PM_STANDBY);
           }
           break;
 
         case PM_SLEEP:
           {
-            pm_changestate(PM_IDLE_DOMAIN, PM_NORMAL);
-            newstate = PM_NORMAL;
+            /* Enter Deep-sleep mode */
+
+            esp32_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
+                                CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
           }
           break;
 
         default:
           break;
         }
+    }
+  else
+    {
+      if (oldstate == PM_NORMAL)
+        {
+          /* Relax normal operation */
 
-      spin_unlock_irqrestore(flags);
+          pm_relax(PM_IDLE_DOMAIN, PM_NORMAL);
+        }
     }
 }
 #else
