@@ -2,35 +2,20 @@
  * arch/arm/src/stm32h7/hardware/stm32_otg.h
  * based on stm32f7/chip/stm32_otg.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ************************************************************************************/
 
@@ -40,9 +25,11 @@
 /************************************************************************************
  * Included Files
  ************************************************************************************/
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* General definitions */
 
 #define OTG_EPTYPE_CTRL               (0) /* Control */
@@ -56,7 +43,8 @@
 #define OTG_PID_MDATA                 (3) /* Non-control */
 #define OTG_PID_SETUP                 (3) /* Control */
 
-/* Register Offsets ****************************************************************/
+/* Register Offsets *****************************************************************/
+
 /* Core global control and status registers */
 
 #define STM32_OTG_GOTGCTL_OFFSET      0x0000 /* Control and status register */
@@ -148,7 +136,7 @@
 #define STM32_OTG_DFIFO_DEP_OFFSET(n) (0x1000 + ((n) << 12))
 #define STM32_OTG_DFIFO_HCH_OFFSET(n) (0x1000 + ((n) << 12))
 
-/* Register Addresses **************************************************************/
+/* Register Addresses ***************************************************************/
 
 #define STM32_OTG_GOTGCTL             (STM32_OTG_BASE+STM32_OTG_GOTGCTL_OFFSET)
 #define STM32_OTG_GOTGINT             (STM32_OTG_BASE+STM32_OTG_GOTGINT_OFFSET)
@@ -229,7 +217,8 @@
 #define STM32_OTG_DFIFO_DEP(n)        (STM32_OTG_BASE+STM32_OTG_DFIFO_DEP_OFFSET(n))
 #define STM32_OTG_DFIFO_HCH(n)        (STM32_OTG_BASE+STM32_OTG_DFIFO_HCH_OFFSET(n))
 
-/* Register Bitfield Definitions ***************************************************/
+/* Register Bitfield Definitions ****************************************************/
+
 /* Core global control and status registers */
 
 /* Control and status register */
@@ -256,6 +245,7 @@
                                                 /* Bits 21-31: Reserved */
 
 /* Interrupt register */
+
                                                 /* Bits 1-0 Reserved */
 #define OTG_GOTGINT_SEDET             (1 << 2)  /* Bit 2: Session end detected */
                                                 /* Bits 3-7: Reserved */
@@ -278,6 +268,7 @@
 #define OTG_GAHBCFG_TXFELVL           (1 << 7)  /* Bit 7: TxFIFO empty level */
 #define OTG_GAHBCFG_PTXFELVL          (1 << 8)  /* Bit 8: Periodic TxFIFO empty level */
                                                 /* Bits 20-31: Reserved */
+
 /* USB configuration register */
 
 #define OTG_GUSBCFG_TOCAL_SHIFT       (0)       /* Bits 0-2: FS timeout calibration */
@@ -305,23 +296,24 @@
 #define OTG_GUSBCFG_FHMOD             (1 << 29) /* Bit 29: Force host mode */
 #define OTG_GUSBCFG_FDMOD             (1 << 30) /* Bit 30: Force device mode */
                                                 /* Bit 31: Reserved */
+
 /* Reset register */
 
-#define OTG_GRSTCTL_CSRST             (1 << 0)  /* Bit 0: Core soft reset */
-#define OTG_GRSTCTL_PSRST             (1 << 1)  /* Bit 1: Partial soft reset */
-                                                /* Bits 2-3 Reserved */
-#define OTG_GRSTCTL_RXFFLSH           (1 << 4)  /* Bit 4: RxFIFO flush */
-#define OTG_GRSTCTL_TXFFLSH           (1 << 5)  /* Bit 5: TxFIFO flush */
-#define OTG_GRSTCTL_TXFNUM_SHIFT      (6)       /* Bits 6-10: TxFIFO number */
+#define OTG_GRSTCTL_CSRST             (1 << 0)                          /* Bit 0: Core soft reset */
+#define OTG_GRSTCTL_PSRST             (1 << 1)                          /* Bit 1: Partial soft reset */
+                                                                        /* Bits 2-3 Reserved */
+#define OTG_GRSTCTL_RXFFLSH           (1 << 4)                          /* Bit 4: RxFIFO flush */
+#define OTG_GRSTCTL_TXFFLSH           (1 << 5)                          /* Bit 5: TxFIFO flush */
+#define OTG_GRSTCTL_TXFNUM_SHIFT      (6)                               /* Bits 6-10: TxFIFO number */
 #define OTG_GRSTCTL_TXFNUM_MASK       (31 << OTG_GRSTCTL_TXFNUM_SHIFT)
 #  define OTG_GRSTCTL_TXFNUM_HNONPER  (0 << OTG_GRSTCTL_TXFNUM_SHIFT)   /* Non-periodic TxFIFO flush in host mode */
 #  define OTG_GRSTCTL_TXFNUM_HPER     (1 << OTG_GRSTCTL_TXFNUM_SHIFT)   /* Periodic TxFIFO flush in host mode */
 #  define OTG_GRSTCTL_TXFNUM_HALL     (16 << OTG_GRSTCTL_TXFNUM_SHIFT)  /* Flush all the transmit FIFOs in host mode.*/
 #  define OTG_GRSTCTL_TXFNUM_D(n)     ((n) << OTG_GRSTCTL_TXFNUM_SHIFT) /* TXFIFO n flush in device mode, n=0-15 */
 #  define OTG_GRSTCTL_TXFNUM_DALL     (16 << OTG_GRSTCTL_TXFNUM_SHIFT)  /* Flush all the transmit FIFOs in device mode.*/
-                                                /* Bits 11-29: Reserved */
-#define OTG_GRSTCTL_DMAREQ            (1 << 30) /* Bit 30: DMA request signal enabled */
-#define OTG_GRSTCTL_AHBIDL            (1 << 31) /* Bit 31: AHB master idle */
+                                                                        /* Bits 11-29: Reserved */
+#define OTG_GRSTCTL_DMAREQ            (1 << 30)                         /* Bit 30: DMA request signal enabled */
+#define OTG_GRSTCTL_AHBIDL            (1 << 31)                         /* Bit 31: AHB master idle */
 
 /* Core interrupt and Interrupt mask registers */
 
@@ -362,48 +354,48 @@
 
 /* Receive status debug read/OTG status read and pop registers (host mode) */
 
-#define OTG_GRXSTSH_CHNUM_SHIFT       (0)       /* Bits 0-3: Channel number */
+#define OTG_GRXSTSH_CHNUM_SHIFT       (0)                             /* Bits 0-3: Channel number */
 #define OTG_GRXSTSH_CHNUM_MASK        (15 << OTG_GRXSTSH_CHNUM_SHIFT)
-#define OTG_GRXSTSH_BCNT_SHIFT        (4)       /* Bits 4-14: Byte count */
+#define OTG_GRXSTSH_BCNT_SHIFT        (4)                             /* Bits 4-14: Byte count */
 #define OTG_GRXSTSH_BCNT_MASK         (0x7ff << OTG_GRXSTSH_BCNT_SHIFT)
-#define OTG_GRXSTSH_DPID_SHIFT        (15)      /* Bits 15-16: Data PID */
+#define OTG_GRXSTSH_DPID_SHIFT        (15)                            /* Bits 15-16: Data PID */
 #define OTG_GRXSTSH_DPID_MASK         (3 << OTG_GRXSTSH_DPID_SHIFT)
 #  define OTG_GRXSTSH_DPID_DATA0      (0 << OTG_GRXSTSH_DPID_SHIFT)
 #  define OTG_GRXSTSH_DPID_DATA2      (1 << OTG_GRXSTSH_DPID_SHIFT)
 #  define OTG_GRXSTSH_DPID_DATA1      (2 << OTG_GRXSTSH_DPID_SHIFT)
 #  define OTG_GRXSTSH_DPID_MDATA      (3 << OTG_GRXSTSH_DPID_SHIFT)
-#define OTG_GRXSTSH_PKTSTS_SHIFT      (17)      /* Bits 17-20: Packet status */
+#define OTG_GRXSTSH_PKTSTS_SHIFT      (17)                            /* Bits 17-20: Packet status */
 #define OTG_GRXSTSH_PKTSTS_MASK       (15 << OTG_GRXSTSH_PKTSTS_SHIFT)
 #  define OTG_GRXSTSH_PKTSTS_INRECVD  (2 << OTG_GRXSTSH_PKTSTS_SHIFT) /* IN data packet received */
 #  define OTG_GRXSTSH_PKTSTS_INDONE   (3 << OTG_GRXSTSH_PKTSTS_SHIFT) /* IN transfer completed */
 #  define OTG_GRXSTSH_PKTSTS_DTOGERR  (5 << OTG_GRXSTSH_PKTSTS_SHIFT) /* Data toggle error */
 #  define OTG_GRXSTSH_PKTSTS_HALTED   (7 << OTG_GRXSTSH_PKTSTS_SHIFT) /* Channel halted */
-                                                /* Bits 21-31: Reserved */
+                                                                      /* Bits 21-31: Reserved */
 
 /* Receive status debug read/OTG status read and pop registers (device mode) */
 
-#define OTG_GRXSTSD_EPNUM_SHIFT       (0)       /* Bits 0-3: Endpoint number */
-#define OTG_GRXSTSD_EPNUM_MASK        (15 << OTG_GRXSTSD_EPNUM_SHIFT)
-#define OTG_GRXSTSD_BCNT_SHIFT        (4)       /* Bits 4-14: Byte count */
-#define OTG_GRXSTSD_BCNT_MASK         (0x7ff << OTG_GRXSTSD_BCNT_SHIFT)
-#define OTG_GRXSTSD_DPID_SHIFT        (15)      /* Bits 15-16: Data PID */
-#define OTG_GRXSTSD_DPID_MASK         (3 << OTG_GRXSTSD_DPID_SHIFT)
-#  define OTG_GRXSTSD_DPID_DATA0      (0 << OTG_GRXSTSD_DPID_SHIFT)
-#  define OTG_GRXSTSD_DPID_DATA2      (1 << OTG_GRXSTSD_DPID_SHIFT)
-#  define OTG_GRXSTSD_DPID_DATA1      (2 << OTG_GRXSTSD_DPID_SHIFT)
-#  define OTG_GRXSTSD_DPID_MDATA      (3 << OTG_GRXSTSD_DPID_SHIFT)
-#define OTG_GRXSTSD_PKTSTS_SHIFT      (17)      /* Bits 17-20: Packet status */
-#define OTG_GRXSTSD_PKTSTS_MASK       (15 << OTG_GRXSTSD_PKTSTS_SHIFT)
+#define OTG_GRXSTSD_EPNUM_SHIFT         (0)                             /* Bits 0-3: Endpoint number */
+#define OTG_GRXSTSD_EPNUM_MASK          (15 << OTG_GRXSTSD_EPNUM_SHIFT)
+#define OTG_GRXSTSD_BCNT_SHIFT          (4)                             /* Bits 4-14: Byte count */
+#define OTG_GRXSTSD_BCNT_MASK           (0x7ff << OTG_GRXSTSD_BCNT_SHIFT)
+#define OTG_GRXSTSD_DPID_SHIFT          (15)                            /* Bits 15-16: Data PID */
+#define OTG_GRXSTSD_DPID_MASK           (3 << OTG_GRXSTSD_DPID_SHIFT)
+#  define OTG_GRXSTSD_DPID_DATA0        (0 << OTG_GRXSTSD_DPID_SHIFT)
+#  define OTG_GRXSTSD_DPID_DATA2        (1 << OTG_GRXSTSD_DPID_SHIFT)
+#  define OTG_GRXSTSD_DPID_DATA1        (2 << OTG_GRXSTSD_DPID_SHIFT)
+#  define OTG_GRXSTSD_DPID_MDATA        (3 << OTG_GRXSTSD_DPID_SHIFT)
+#define OTG_GRXSTSD_PKTSTS_SHIFT        (17)                            /* Bits 17-20: Packet status */
+#define OTG_GRXSTSD_PKTSTS_MASK         (15 << OTG_GRXSTSD_PKTSTS_SHIFT)
 #  define OTG_GRXSTSD_PKTSTS_OUTNAK     (1 << OTG_GRXSTSD_PKTSTS_SHIFT) /* Global OUT NAK */
 #  define OTG_GRXSTSD_PKTSTS_OUTRECVD   (2 << OTG_GRXSTSD_PKTSTS_SHIFT) /* OUT data packet received */
 #  define OTG_GRXSTSD_PKTSTS_OUTDONE    (3 << OTG_GRXSTSD_PKTSTS_SHIFT) /* OUT transfer completed */
 #  define OTG_GRXSTSD_PKTSTS_SETUPDONE  (4 << OTG_GRXSTSD_PKTSTS_SHIFT) /* SETUP transaction completed */
 #  define OTG_GRXSTSD_PKTSTS_SETUPRECVD (6 << OTG_GRXSTSD_PKTSTS_SHIFT) /* SETUP data packet received */
-#define OTG_GRXSTSD_FRMNUM_SHIFT      (21)      /* Bits 21-24: Frame number */
-#define OTG_GRXSTSD_FRMNUM_MASK       (15 << OTG_GRXSTSD_FRMNUM_SHIFT)
-                                                /* Bits 25-26: Reserved */
-#define OTG_GRXSTSH_STSPHST           (17)      /* Bit 27: Status phase start */
-                                                /* Bits 28-31: Reserved */
+#define OTG_GRXSTSD_FRMNUM_SHIFT        (21)                            /* Bits 21-24: Frame number */
+#define OTG_GRXSTSD_FRMNUM_MASK         (15 << OTG_GRXSTSD_FRMNUM_SHIFT)
+                                                                        /* Bits 25-26: Reserved */
+#define OTG_GRXSTSH_STSPHST             (17)                            /* Bit 27: Status phase start */
+                                                                        /* Bits 28-31: Reserved */
 
 /* Receive FIFO size register */
 
@@ -429,25 +421,25 @@
 
 /* Non-periodic transmit FIFO/queue status register */
 
-#define OTG_HNPTXSTS_NPTXFSAV_SHIFT   (0)       /* Bits 0-15: Non-periodic TxFIFO space available */
+#define OTG_HNPTXSTS_NPTXFSAV_SHIFT   (0)                            /* Bits 0-15: Non-periodic TxFIFO space available */
 #define OTG_HNPTXSTS_NPTXFSAV_MASK    (0xffff << OTG_HNPTXSTS_NPTXFSAV_SHIFT)
 #  define OTG_HNPTXSTS_NPTXFSAV_FULL  (0 << OTG_HNPTXSTS_NPTXFSAV_SHIFT)
-#define OTG_HNPTXSTS_NPTQXSAV_SHIFT   (16)      /* Bits 16-23: Non-periodic transmit request queue space available */
+#define OTG_HNPTXSTS_NPTQXSAV_SHIFT   (16)                           /* Bits 16-23: Non-periodic transmit request queue space available */
 #define OTG_HNPTXSTS_NPTQXSAV_MASK    (0xff << OTG_HNPTXSTS_NPTQXSAV_SHIFT)
 #  define OTG_HNPTXSTS_NPTQXSAV_FULL  (0 << OTG_HNPTXSTS_NPTQXSAV_SHIFT)
-#define OTG_HNPTXSTS_NPTXQTOP_SHIFT   (24)      /* Bits 24-30: Top of the non-periodic transmit request queue */
+#define OTG_HNPTXSTS_NPTXQTOP_SHIFT   (24)                           /* Bits 24-30: Top of the non-periodic transmit request queue */
 #define OTG_HNPTXSTS_NPTXQTOP_MASK    (0x7f << OTG_HNPTXSTS_NPTXQTOP_SHIFT)
-#  define OTG_HNPTXSTS_TERMINATE      (1 << 24) /* Bit 24: Terminate (last entry for selected channel/endpoint) */
-#  define OTG_HNPTXSTS_TYPE_SHIFT     (25)      /* Bits 25-26: Status */
+#  define OTG_HNPTXSTS_TERMINATE      (1 << 24)                      /* Bit 24: Terminate (last entry for selected channel/endpoint) */
+#  define OTG_HNPTXSTS_TYPE_SHIFT     (25)                           /* Bits 25-26: Status */
 #  define OTG_HNPTXSTS_TYPE_MASK      (3 << OTG_HNPTXSTS_TYPE_SHIFT)
 #    define OTG_HNPTXSTS_TYPE_INOUT   (0 << OTG_HNPTXSTS_TYPE_SHIFT) /* IN/OUT token */
 #    define OTG_HNPTXSTS_TYPE_ZLP     (1 << OTG_HNPTXSTS_TYPE_SHIFT) /* Zero-length transmit packet (device IN/host OUT) */
 #    define OTG_HNPTXSTS_TYPE_HALT    (3 << OTG_HNPTXSTS_TYPE_SHIFT) /* Channel halt command */
-#  define OTG_HNPTXSTS_CHNUM_SHIFT    (27)      /* Bits 27-30: Channel number */
+#  define OTG_HNPTXSTS_CHNUM_SHIFT    (27)                           /* Bits 27-30: Channel number */
 #  define OTG_HNPTXSTS_CHNUM_MASK     (15 << OTG_HNPTXSTS_CHNUM_SHIFT)
-#  define OTG_HNPTXSTS_EPNUM_SHIFT    (27)      /* Bits 27-30: Endpoint number */
+#  define OTG_HNPTXSTS_EPNUM_SHIFT    (27)                           /* Bits 27-30: Endpoint number */
 #  define OTG_HNPTXSTS_EPNUM_MASK     (15 << OTG_HNPTXSTS_EPNUM_SHIFT)
-                                                /* Bit 31 Reserved */
+                                                                     /* Bit 31 Reserved */
 
 /* General core configuration register */
 
@@ -485,13 +477,14 @@
 
 /* Host configuration register */
 
-#define OTG_HCFG_FSLSPCS_SHIFT        (0)       /* Bits 0-1: FS/LS PHY clock select */
+#define OTG_HCFG_FSLSPCS_SHIFT        (0)                           /* Bits 0-1: FS/LS PHY clock select */
 #define OTG_HCFG_FSLSPCS_MASK         (3 << OTG_HCFG_FSLSPCS_SHIFT)
 #  define OTG_HCFG_FSLSPCS_FS48MHz    (1 << OTG_HCFG_FSLSPCS_SHIFT) /* FS host mode, PHY clock is running at 48 MHz */
 #  define OTG_HCFG_FSLSPCS_LS48MHz    (1 << OTG_HCFG_FSLSPCS_SHIFT) /* LS host mode,  Select 48 MHz PHY clock frequency */
 #  define OTG_HCFG_FSLSPCS_LS6MHz     (2 << OTG_HCFG_FSLSPCS_SHIFT) /* LS host mode, Select 6 MHz PHY clock frequency */
-#define OTG_HCFG_FSLSS                (1 << 2)  /* Bit 2: FS- and LS-only support */
-                                                /* Bits 31:3 Reserved */
+#define OTG_HCFG_FSLSS                (1 << 2)                      /* Bit 2: FS- and LS-only support */
+                                                                    /* Bits 31:3 Reserved */
+
 /* Host frame interval register */
 
 #define OTG_HFIR_SHIFT                (0)       /* Bits 0-16: Frame interval */
@@ -508,25 +501,25 @@
 
 /* Host periodic transmit FIFO/queue status register */
 
-#define OTG_HPTXSTS_PTXFSAVL_SHIFT    (0)       /* Bits 0-15: Periodic transmit data FIFO space available */
+#define OTG_HPTXSTS_PTXFSAVL_SHIFT    (0)                          /* Bits 0-15: Periodic transmit data FIFO space available */
 #define OTG_HPTXSTS_PTXFSAVL_MASK     (0xffff << OTG_HPTXSTS_PTXFSAVL_SHIFT)
 #  define OTG_HPTXSTS_PTXFSAVL_FULL   (0 << OTG_HPTXSTS_PTXFSAVL_SHIFT)
-#define OTG_HPTXSTS_PTXQSAV_SHIFT     (16)      /* Bits 16-23: Periodic transmit request queue space available */
+#define OTG_HPTXSTS_PTXQSAV_SHIFT     (16)                          /* Bits 16-23: Periodic transmit request queue space available */
 #define OTG_HPTXSTS_PTXQSAV_MASK      (0xff << OTG_HPTXSTS_PTXQSAV_SHIFT)
 #  define OTG_HPTXSTS_PTXQSAV_FULL    (0 << OTG_HPTXSTS_PTXQSAV_SHIFT)
-#define OTG_HPTXSTS_PTXQTOP_SHIFT     (24)      /* Bits 24-31: Top of the periodic transmit request queue */
+#define OTG_HPTXSTS_PTXQTOP_SHIFT     (24)                          /* Bits 24-31: Top of the periodic transmit request queue */
 #define OTG_HPTXSTS_PTXQTOP_MASK      (0xff << OTG_HPTXSTS_PTXQTOP_SHIFT)
-#  define OTG_HPTXSTS_TERMINATE       (1 << 24) /* Bit 24: Terminate (last entry for selected channel/endpoint) */
-#  define OTG_HPTXSTS_TYPE_SHIFT      (25)      /* Bits 25-26: Type */
+#  define OTG_HPTXSTS_TERMINATE       (1 << 24)                     /* Bit 24: Terminate (last entry for selected channel/endpoint) */
+#  define OTG_HPTXSTS_TYPE_SHIFT      (25)                          /* Bits 25-26: Type */
 #  define OTG_HPTXSTS_TYPE_MASK       (3 << OTG_HPTXSTS_TYPE_SHIFT)
 #    define OTG_HPTXSTS_TYPE_INOUT    (0 << OTG_HPTXSTS_TYPE_SHIFT) /* IN/OUT token */
 #    define OTG_HPTXSTS_TYPE_ZLP      (1 << OTG_HPTXSTS_TYPE_SHIFT) /* Zero-length transmit packet */
 #    define OTG_HPTXSTS_TYPE_HALT     (3 << OTG_HPTXSTS_TYPE_SHIFT) /* Disable channel command */
-#  define OTG_HPTXSTS_EPNUM_SHIFT     (27)      /* Bits 27-30: Endpoint number */
+#  define OTG_HPTXSTS_EPNUM_SHIFT     (27)                          /* Bits 27-30: Endpoint number */
 #  define OTG_HPTXSTS_EPNUM_MASK      (15 << OTG_HPTXSTS_EPNUM_SHIFT)
-#  define OTG_HPTXSTS_CHNUM_SHIFT     (27)      /* Bits 27-30: Channel number */
+#  define OTG_HPTXSTS_CHNUM_SHIFT     (27)                          /* Bits 27-30: Channel number */
 #  define OTG_HPTXSTS_CHNUM_MASK      (15 << OTG_HPTXSTS_CHNUM_SHIFT)
-#  define OTG_HPTXSTS_ODD             (1 << 31) /* Bit 31: Send in odd (vs even) frame */
+#  define OTG_HPTXSTS_ODD             (1 << 31)                     /* Bit 31: Send in odd (vs even) frame */
 
 /* Host all channels interrupt and all channels interrupt mask registers */
 
@@ -534,22 +527,22 @@
 
 /* Host port control and status register */
 
-#define OTG_HPRT_PCSTS                (1 << 0)  /* Bit 0:  Port connect status */
-#define OTG_HPRT_PCDET                (1 << 1)  /* Bit 1:  Port connect detected */
-#define OTG_HPRT_PENA                 (1 << 2)  /* Bit 2:  Port enable */
-#define OTG_HPRT_PENCHNG              (1 << 3)  /* Bit 3:  Port enable/disable change */
-#define OTG_HPRT_POCA                 (1 << 4)  /* Bit 4:  Port overcurrent active */
-#define OTG_HPRT_POCCHNG              (1 << 5)  /* Bit 5:  Port overcurrent change */
-#define OTG_HPRT_PRES                 (1 << 6)  /* Bit 6:  Port resume */
-#define OTG_HPRT_PSUSP                (1 << 7)  /* Bit 7:  Port suspend */
-#define OTG_HPRT_PRST                 (1 << 8)  /* Bit 8:  Port reset */
-                                                /* Bit 9:  Reserved */
-#define OTG_HPRT_PLSTS_SHIFT          (10)      /* Bits 10-11: Port line status */
+#define OTG_HPRT_PCSTS                (1 << 0)                    /* Bit 0:  Port connect status */
+#define OTG_HPRT_PCDET                (1 << 1)                    /* Bit 1:  Port connect detected */
+#define OTG_HPRT_PENA                 (1 << 2)                    /* Bit 2:  Port enable */
+#define OTG_HPRT_PENCHNG              (1 << 3)                    /* Bit 3:  Port enable/disable change */
+#define OTG_HPRT_POCA                 (1 << 4)                    /* Bit 4:  Port overcurrent active */
+#define OTG_HPRT_POCCHNG              (1 << 5)                    /* Bit 5:  Port overcurrent change */
+#define OTG_HPRT_PRES                 (1 << 6)                    /* Bit 6:  Port resume */
+#define OTG_HPRT_PSUSP                (1 << 7)                    /* Bit 7:  Port suspend */
+#define OTG_HPRT_PRST                 (1 << 8)                    /* Bit 8:  Port reset */
+                                                                  /* Bit 9:  Reserved */
+#define OTG_HPRT_PLSTS_SHIFT          (10)                        /* Bits 10-11: Port line status */
 #define OTG_HPRT_PLSTS_MASK           (3 << OTG_HPRT_PLSTS_SHIFT)
-#  define OTG_HPRT_PLSTS_DP           (1 << 10) /* Bit 10: Logic level of OTG_FS_FS_DP */
-#  define OTG_HPRT_PLSTS_DM           (1 << 11) /* Bit 11: Logic level of OTG_FS_FS_DM */
-#define OTG_HPRT_PPWR                 (1 << 12) /* Bit 12: Port power */
-#define OTG_HPRT_PTCTL_SHIFT          (13)      /* Bits 13-16: Port test control */
+#  define OTG_HPRT_PLSTS_DP           (1 << 10)                   /* Bit 10: Logic level of OTG_FS_FS_DP */
+#  define OTG_HPRT_PLSTS_DM           (1 << 11)                   /* Bit 11: Logic level of OTG_FS_FS_DM */
+#define OTG_HPRT_PPWR                 (1 << 12)                   /* Bit 12: Port power */
+#define OTG_HPRT_PTCTL_SHIFT          (13)                        /* Bits 13-16: Port test control */
 #define OTG_HPRT_PTCTL_MASK           (15 << OTG_HPRT_PTCTL_SHIFT)
 #  define OTG_HPRT_PTCTL_DISABLED     (0 << OTG_HPRT_PTCTL_SHIFT) /* Test mode disabled */
 #  define OTG_HPRT_PTCTL_J            (1 << OTG_HPRT_PTCTL_SHIFT) /* Test_J mode */
@@ -557,37 +550,37 @@
 #  define OTG_HPRT_PTCTL_SE0_NAK      (3 << OTG_HPRT_PTCTL_SHIFT) /* Test_SE0_NAK mode */
 #  define OTG_HPRT_PTCTL_PACKET       (4 << OTG_HPRT_PTCTL_SHIFT) /* Test_Packet mode */
 #  define OTG_HPRT_PTCTL_FORCE        (5 << OTG_HPRT_PTCTL_SHIFT) /* Test_Force_Enable */
-#define OTG_HPRT_PSPD_SHIFT           (17)      /* Bits 17-18: Port speed */
+#define OTG_HPRT_PSPD_SHIFT           (17)                        /* Bits 17-18: Port speed */
 #define OTG_HPRT_PSPD_MASK            (3 << OTG_HPRT_PSPD_SHIFT)
 #  define OTG_HPRT_PSPD_HS            (0 << OTG_HPRT_PSPD_SHIFT) /* High speed */
 #  define OTG_HPRT_PSPD_FS            (1 << OTG_HPRT_PSPD_SHIFT) /* Full speed */
 #  define OTG_HPRT_PSPD_LS            (2 << OTG_HPRT_PSPD_SHIFT) /* Low speed */
-                                                /* Bits 19-31: Reserved */
+                                                                 /* Bits 19-31: Reserved */
 
 /* Host channel-n characteristics register */
 
-#define OTG_HCCHAR_MPSIZ_SHIFT        (0)       /* Bits 0-10: Maximum packet size */
+#define OTG_HCCHAR_MPSIZ_SHIFT        (0)                           /* Bits 0-10: Maximum packet size */
 #define OTG_HCCHAR_MPSIZ_MASK         (0x7ff << OTG_HCCHAR_MPSIZ_SHIFT)
-#define OTG_HCCHAR_EPNUM_SHIFT        (11)      /* Bits 11-14: Endpoint number */
+#define OTG_HCCHAR_EPNUM_SHIFT        (11)                          /* Bits 11-14: Endpoint number */
 #define OTG_HCCHAR_EPNUM_MASK         (15 << OTG_HCCHAR_EPNUM_SHIFT)
-#define OTG_HCCHAR_EPDIR              (1 << 15) /* Bit 15: Endpoint direction */
+#define OTG_HCCHAR_EPDIR              (1 << 15)                     /* Bit 15: Endpoint direction */
 #  define OTG_HCCHAR_EPDIR_OUT        (0)
 #  define OTG_HCCHAR_EPDIR_IN         OTG_HCCHAR_EPDIR
-                                                /* Bit 16 Reserved */
-#define OTG_HCCHAR_LSDEV              (1 << 17) /* Bit 17: Low-speed device */
-#define OTG_HCCHAR_EPTYP_SHIFT        (18)      /* Bits 18-19: Endpoint type */
+                                                                    /* Bit 16 Reserved */
+#define OTG_HCCHAR_LSDEV              (1 << 17)                     /* Bit 17: Low-speed device */
+#define OTG_HCCHAR_EPTYP_SHIFT        (18)                          /* Bits 18-19: Endpoint type */
 #define OTG_HCCHAR_EPTYP_MASK         (3 << OTG_HCCHAR_EPTYP_SHIFT)
 #  define OTG_HCCHAR_EPTYP_CTRL       (0 << OTG_HCCHAR_EPTYP_SHIFT) /* Control */
 #  define OTG_HCCHAR_EPTYP_ISOC       (1 << OTG_HCCHAR_EPTYP_SHIFT) /* Isochronous */
 #  define OTG_HCCHAR_EPTYP_BULK       (2 << OTG_HCCHAR_EPTYP_SHIFT) /* Bulk */
 #  define OTG_HCCHAR_EPTYP_INTR       (3 << OTG_HCCHAR_EPTYP_SHIFT) /* Interrupt */
-#define OTG_HCCHAR_MCNT_SHIFT         (20)      /* Bits 20-21: Multicount */
+#define OTG_HCCHAR_MCNT_SHIFT         (20)                          /* Bits 20-21: Multicount */
 #define OTG_HCCHAR_MCNT_MASK          (3 << OTG_HCCHAR_MCNT_SHIFT)
-#define OTG_HCCHAR_DAD_SHIFT          (22)      /* Bits 22-28: Device address */
+#define OTG_HCCHAR_DAD_SHIFT          (22)                          /* Bits 22-28: Device address */
 #define OTG_HCCHAR_DAD_MASK           (0x7f << OTG_HCCHAR_DAD_SHIFT)
-#define OTG_HCCHAR_ODDFRM             (1 << 29) /* Bit 29: Odd frame */
-#define OTG_HCCHAR_CHDIS              (1 << 30) /* Bit 30: Channel disable */
-#define OTG_HCCHAR_CHENA              (1 << 31) /* Bit 31: Channel enable */
+#define OTG_HCCHAR_ODDFRM             (1 << 29)                     /* Bit 29: Odd frame */
+#define OTG_HCCHAR_CHDIS              (1 << 30)                     /* Bit 30: Channel disable */
+#define OTG_HCCHAR_CHENA              (1 << 31)                     /* Bit 31: Channel enable */
 
 /* TODO: OTG host channel-n split control register */
 
@@ -619,46 +612,47 @@
 #  define OTG_HCTSIZ_DPID_DATA1       (2 << OTG_HCTSIZ_DPID_SHIFT)
 #  define OTG_HCTSIZ_DPID_MDATA       (3 << OTG_HCTSIZ_DPID_SHIFT) /* Non-control */
 #  define OTG_HCTSIZ_PID_SETUP        (3 << OTG_HCTSIZ_DPID_SHIFT) /* Control */
-                                                  /* Bit 31: Reserved */
+                                                                   /* Bit 31: Reserved */
 
 /* Device configuration register */
 
-#define OTG_DCFG_DSPD_SHIFT           (0)       /* Bits 0-1: Device speed */
+#define OTG_DCFG_DSPD_SHIFT           (0)                         /* Bits 0-1: Device speed */
 #define OTG_DCFG_DSPD_MASK            (3 << OTG_DCFG_DSPD_SHIFT)
-#  define OTG_DCFG_DSPD_HS            (0 << OTG_DCFG_DSPD_SHIFT) /* High speed */
-#  define OTG_DCFG_DSPD_FSHS          (1 << OTG_DCFG_DSPD_SHIFT) /* Full speed using HS */
-#  define OTG_DCFG_DSPD_FS            (3 << OTG_DCFG_DSPD_SHIFT) /* Full speed using internal FS PHY */
-#define OTG_DCFG_NZLSOHSK             (1 << 2)  /* Bit 2:  Non-zero-length status OUT handshake */
-                                                /* Bit 3:  Reserved */
-#define OTG_DCFG_DAD_SHIFT            (4)       /* Bits 4-10: Device address */
+#  define OTG_DCFG_DSPD_HS            (0 << OTG_DCFG_DSPD_SHIFT)  /* High speed */
+#  define OTG_DCFG_DSPD_FSHS          (1 << OTG_DCFG_DSPD_SHIFT)  /* Full speed using HS */
+#  define OTG_DCFG_DSPD_FS            (3 << OTG_DCFG_DSPD_SHIFT)  /* Full speed using internal FS PHY */
+#define OTG_DCFG_NZLSOHSK             (1 << 2)                    /* Bit 2:  Non-zero-length status OUT handshake */
+                                                                  /* Bit 3:  Reserved */
+#define OTG_DCFG_DAD_SHIFT            (4)                         /* Bits 4-10: Device address */
 #define OTG_DCFG_DAD_MASK             (0x7f << OTG_DCFG_DAD_SHIFT)
-#define OTG_DCFG_PFIVL_SHIFT          (11)      /* Bits 11-12: Periodic frame interval */
+#define OTG_DCFG_PFIVL_SHIFT          (11)                        /* Bits 11-12: Periodic frame interval */
 #define OTG_DCFG_PFIVL_MASK           (3 << OTG_DCFG_PFIVL_SHIFT)
 #  define OTG_DCFG_PFIVL_80PCT        (0 << OTG_DCFG_PFIVL_SHIFT) /* 80% of the frame interval */
 #  define OTG_DCFG_PFIVL_85PCT        (1 << OTG_DCFG_PFIVL_SHIFT) /* 85% of the frame interval */
 #  define OTG_DCFG_PFIVL_90PCT        (2 << OTG_DCFG_PFIVL_SHIFT) /* 90% of the frame interval */
 #  define OTG_DCFG_PFIVL_95PCT        (3 << OTG_DCFG_PFIVL_SHIFT) /* 95% of the frame interval */
-                                                  /* Bit 13: Reserved */
-#define OTG_DCFG_XCVRDLY              (1 << 14)   /* Bit 14: Transceiver delay */
-#define OTG_DCFG_ERRATIMY             (1 << 15)   /* Bit 15: Erratic error interrupt mask */
-                                                  /* Bits 16-23: Reserved */
-#define OTG_DCFG_PERSCHIVL_SHIFT      (24)        /* Bits 24-25: Periodic schedule interval */
+                                                                  /* Bit 13: Reserved */
+#define OTG_DCFG_XCVRDLY              (1 << 14)                   /* Bit 14: Transceiver delay */
+#define OTG_DCFG_ERRATIMY             (1 << 15)                   /* Bit 15: Erratic error interrupt mask */
+                                                                  /* Bits 16-23: Reserved */
+#define OTG_DCFG_PERSCHIVL_SHIFT      (24)                        /* Bits 24-25: Periodic schedule interval */
 #define OTG_DCFG_PERSCHIVL_MASK       (3 << OTG_DCFG_PERSCHIVL_SHIFT)
-                                                  /* Bits 26-31: Reserved */
+                                                                  /* Bits 26-31: Reserved */
+
 /* Device control register */
 
-#define OTG_TESTMODE_DISABLED         (0) /* Test mode disabled */
-#define OTG_TESTMODE_J                (1) /* Test_J mode */
-#define OTG_TESTMODE_K                (2) /* Test_K mode */
-#define OTG_TESTMODE_SE0_NAK          (3) /* Test_SE0_NAK mode */
-#define OTG_TESTMODE_PACKET           (4) /* Test_Packet mode */
-#define OTG_TESTMODE_FORCE            (5) /* Test_Force_Enable */
+#define OTG_TESTMODE_DISABLED         (0)                        /* Test mode disabled */
+#define OTG_TESTMODE_J                (1)                        /* Test_J mode */
+#define OTG_TESTMODE_K                (2)                        /* Test_K mode */
+#define OTG_TESTMODE_SE0_NAK          (3)                        /* Test_SE0_NAK mode */
+#define OTG_TESTMODE_PACKET           (4)                        /* Test_Packet mode */
+#define OTG_TESTMODE_FORCE            (5)                        /* Test_Force_Enable */
 
-#define OTG_DCTL_RWUSIG               (1 << 0)  /* Bit 0:  Remote wakeup signaling */
-#define OTG_DCTL_SDIS                 (1 << 1)  /* Bit 1:  Soft disconnect */
-#define OTG_DCTL_GINSTS               (1 << 2)  /* Bit 2:  Global IN NAK status */
-#define OTG_DCTL_GONSTS               (1 << 3)  /* Bit 3:  Global OUT NAK status */
-#define OTG_DCTL_TCTL_SHIFT           (4)       /* Bits 4-6: Test control */
+#define OTG_DCTL_RWUSIG               (1 << 0)                   /* Bit 0:  Remote wakeup signaling */
+#define OTG_DCTL_SDIS                 (1 << 1)                   /* Bit 1:  Soft disconnect */
+#define OTG_DCTL_GINSTS               (1 << 2)                   /* Bit 2:  Global IN NAK status */
+#define OTG_DCTL_GONSTS               (1 << 3)                   /* Bit 3:  Global OUT NAK status */
+#define OTG_DCTL_TCTL_SHIFT           (4)                        /* Bits 4-6: Test control */
 #define OTG_DCTL_TCTL_MASK            (7 << OTG_DCTL_TCTL_SHIFT)
 #  define OTG_DCTL_TCTL_DISABLED      (0 << OTG_DCTL_TCTL_SHIFT) /* Test mode disabled */
 #  define OTG_DCTL_TCTL_J             (1 << OTG_DCTL_TCTL_SHIFT) /* Test_J mode */
@@ -666,33 +660,34 @@
 #  define OTG_DCTL_TCTL_SE0_NAK       (3 << OTG_DCTL_TCTL_SHIFT) /* Test_SE0_NAK mode */
 #  define OTG_DCTL_TCTL_PACKET        (4 << OTG_DCTL_TCTL_SHIFT) /* Test_Packet mode */
 #  define OTG_DCTL_TCTL_FORCE         (5 << OTG_DCTL_TCTL_SHIFT) /* Test_Force_Enable */
-#define OTG_DCTL_SGINAK               (1 << 7)  /* Bit 7:  Set global IN NAK */
-#define OTG_DCTL_CGINAK               (1 << 8)  /* Bit 8:  Clear global IN NAK */
-#define OTG_DCTL_SGONAK               (1 << 9)  /* Bit 9:  Set global OUT NAK */
-#define OTG_DCTL_CGONAK               (1 << 10) /* Bit 10: Clear global OUT NAK */
-#define OTG_DCTL_POPRGDNE             (1 << 11) /* Bit 11: Power-on programming done */
-                                                /* Bits 12-17: Reserved */
-#define OTG_DCTL_DSBESLRJCT           (1 << 18) /* Bit 18: Deep sleep BESL reject */
-                                                /* Bits 19-31: Reserved */
+#define OTG_DCTL_SGINAK               (1 << 7)                   /* Bit 7:  Set global IN NAK */
+#define OTG_DCTL_CGINAK               (1 << 8)                   /* Bit 8:  Clear global IN NAK */
+#define OTG_DCTL_SGONAK               (1 << 9)                   /* Bit 9:  Set global OUT NAK */
+#define OTG_DCTL_CGONAK               (1 << 10)                  /* Bit 10: Clear global OUT NAK */
+#define OTG_DCTL_POPRGDNE             (1 << 11)                  /* Bit 11: Power-on programming done */
+                                                                 /* Bits 12-17: Reserved */
+#define OTG_DCTL_DSBESLRJCT           (1 << 18)                  /* Bit 18: Deep sleep BESL reject */
+                                                                 /* Bits 19-31: Reserved */
+
 /* Device status register */
 
-#define OTG_DSTS_SUSPSTS              (1 << 0)  /* Bit 0: Suspend status */
-#define OTG_DSTS_ENUMSPD_SHIFT        (1)       /* Bits 1-2: Enumerated speed */
+#define OTG_DSTS_SUSPSTS              (1 << 0)                     /* Bit 0: Suspend status */
+#define OTG_DSTS_ENUMSPD_SHIFT        (1)                          /* Bits 1-2: Enumerated speed */
 #define OTG_DSTS_ENUMSPD_MASK         (3 << OTG_DSTS_ENUMSPD_SHIFT)
 #  define OTG_DSTS_ENUMSPD_FS         (3 << OTG_DSTS_ENUMSPD_MASK) /* Full speed */
-                                                /* Bits 4-7: Reserved */
-#define OTG_DSTS_EERR                 (1 << 3)  /* Bit 3: Erratic error */
-#define OTG_DSTS_SOFFN_SHIFT          (8)       /* Bits 8-21: Frame number of the received SOF */
+                                                                   /* Bits 4-7: Reserved */
+#define OTG_DSTS_EERR                 (1 << 3)                     /* Bit 3: Erratic error */
+#define OTG_DSTS_SOFFN_SHIFT          (8)                          /* Bits 8-21: Frame number of the received SOF */
 #define OTG_DSTS_SOFFN_MASK           (0x3fff << OTG_DSTS_SOFFN_SHIFT)
-#define OTG_DSTS_SOFFN0               (1 << 8)  /* Bits 8: Frame number even/odd bit */
+#define OTG_DSTS_SOFFN0               (1 << 8)                     /* Bits 8: Frame number even/odd bit */
 #define OTG_DSTS_SOFFN_EVEN           0
 #define OTG_DSTS_SOFFN_ODD            OTG_DSTS_SOFFN0
-                                                /* Bits 23-31: Reserved */
-#define OTG_DSTS_DEVLNSTS_SHIFT       (22)      /* Bits 22-23: Device line status */
+                                                                   /* Bits 23-31: Reserved */
+#define OTG_DSTS_DEVLNSTS_SHIFT       (22)                         /* Bits 22-23: Device line status */
 #define OTG_DSTS_DEVLNSTS_MASK        (3 << OTG_DSTS_DEVLNSTS_SHIFT)
 #  define OTG_DSTS_DEVLNSTS_DP        (1 << OTG_DSTS_DEVLNSTS_SHIFT)
 #  define OTG_DSTS_DEVLNSTS_DM        (2 << OTG_DSTS_DEVLNSTS_SHIFT)
-                                                /* Bits 24-31: Reserved */
+                                                                   /* Bits 24-31: Reserved */
 
 /* Device IN endpoint common interrupt mask register */
 
@@ -755,33 +750,33 @@
 
 /* Device control IN endpoint n control register */
 
-#define OTG_DIEPCTL_MPSIZ_SHIFT       (0)       /* Bits 0-10: Maximum packet size */
+#define OTG_DIEPCTL_MPSIZ_SHIFT       (0)                            /* Bits 0-10: Maximum packet size */
 #define OTG_DIEPCTL_MPSIZ_MASK        (0x7ff << OTG_DIEPCTL_MPSIZ_SHIFT)
-                                                /* Bits 11-14: Reserved */
-#define OTG_DIEPCTL_USBAEP            (1 << 15) /* Bit 15: USB active endpoint */
-#define OTG_DIEPCTL_EONUM             (1 << 16) /* Bit 16: Even/odd frame */
+                                                                     /* Bits 11-14: Reserved */
+#define OTG_DIEPCTL_USBAEP            (1 << 15)                      /* Bit 15: USB active endpoint */
+#define OTG_DIEPCTL_EONUM             (1 << 16)                      /* Bit 16: Even/odd frame */
 #  define OTG_DIEPCTL_EVEN            (0)
 #  define OTG_DIEPCTL_ODD             OTG_DIEPCTL_EONUM
 #  define OTG_DIEPCTL_DATA0           (0)
 #  define OTG_DIEPCTL_DATA1           OTG_DIEPCTL_EONUM
-#define OTG_DIEPCTL_NAKSTS            (1 << 17) /* Bit 17: NAK status */
-#define OTG_DIEPCTL_EPTYP_SHIFT       (18)      /* Bits 18-19: Endpoint type */
+#define OTG_DIEPCTL_NAKSTS            (1 << 17)                      /* Bit 17: NAK status */
+#define OTG_DIEPCTL_EPTYP_SHIFT       (18)                           /* Bits 18-19: Endpoint type */
 #define OTG_DIEPCTL_EPTYP_MASK        (3 << OTG_DIEPCTL_EPTYP_SHIFT)
 #  define OTG_DIEPCTL_EPTYP_CTRL      (0 << OTG_DIEPCTL_EPTYP_SHIFT) /* Control */
 #  define OTG_DIEPCTL_EPTYP_ISOC      (1 << OTG_DIEPCTL_EPTYP_SHIFT) /* Isochronous */
 #  define OTG_DIEPCTL_EPTYP_BULK      (2 << OTG_DIEPCTL_EPTYP_SHIFT) /* Bulk */
 #  define OTG_DIEPCTL_EPTYP_INTR      (3 << OTG_DIEPCTL_EPTYP_SHIFT) /* Interrupt */
-                                                /* Bit 20: Reserved */
-#define OTG_DIEPCTL_STALL             (1 << 21) /* Bit 21: STALL handshake */
-#define OTG_DIEPCTL_TXFNUM_SHIFT      (22)      /* Bits 22-25: TxFIFO number */
+                                                                     /* Bit 20: Reserved */
+#define OTG_DIEPCTL_STALL             (1 << 21)                      /* Bit 21: STALL handshake */
+#define OTG_DIEPCTL_TXFNUM_SHIFT      (22)                           /* Bits 22-25: TxFIFO number */
 #define OTG_DIEPCTL_TXFNUM_MASK       (15 << OTG_DIEPCTL_TXFNUM_SHIFT)
-#define OTG_DIEPCTL_CNAK              (1 << 26) /* Bit 26: Clear NAK */
-#define OTG_DIEPCTL_SNAK              (1 << 27) /* Bit 27: Set NAK */
-#define OTG_DIEPCTL_SD0PID            (1 << 28) /* Bit 28: Set DATA0 PID (interrupt/bulk) */
-#define OTG_DIEPCTL_SEVNFRM           (1 << 28) /* Bit 28: Set even frame (isochronous)) */
-#define OTG_DIEPCTL_SODDFRM           (1 << 29) /* Bit 29: Set odd frame (isochronous) */
-#define OTG_DIEPCTL_EPDIS             (1 << 30) /* Bit 30: Endpoint disable */
-#define OTG_DIEPCTL_EPENA             (1 << 31) /* Bit 31: Endpoint enable */
+#define OTG_DIEPCTL_CNAK              (1 << 26)                      /* Bit 26: Clear NAK */
+#define OTG_DIEPCTL_SNAK              (1 << 27)                      /* Bit 27: Set NAK */
+#define OTG_DIEPCTL_SD0PID            (1 << 28)                      /* Bit 28: Set DATA0 PID (interrupt/bulk) */
+#define OTG_DIEPCTL_SEVNFRM           (1 << 28)                      /* Bit 28: Set even frame (isochronous)) */
+#define OTG_DIEPCTL_SODDFRM           (1 << 29)                      /* Bit 29: Set odd frame (isochronous) */
+#define OTG_DIEPCTL_EPDIS             (1 << 30)                      /* Bit 30: Endpoint disable */
+#define OTG_DIEPCTL_EPENA             (1 << 31)                      /* Bit 31: Endpoint enable */
 
 /* Device endpoint-n interrupt register */
 
@@ -802,79 +797,81 @@
 
 /* Device IN endpoint 0 transfer size register */
 
-#define OTG_DIEPTSIZ0_XFRSIZ_SHIFT    (0)       /* Bits 0-6: Transfer size */
+#define OTG_DIEPTSIZ0_XFRSIZ_SHIFT    (0)         /* Bits 0-6: Transfer size */
 #define OTG_DIEPTSIZ0_XFRSIZ_MASK     (0x7f << OTG_DIEPTSIZ0_XFRSIZ_SHIFT)
                                                   /* Bits 7-18: Reserved, must be kept at reset value */
-#define OTG_DIEPTSIZ0_PKTCNT_SHIFT    (19)      /* Bits 19-20: Packet count */
+#define OTG_DIEPTSIZ0_PKTCNT_SHIFT    (19)        /* Bits 19-20: Packet count */
 #define OTG_DIEPTSIZ0_PKTCNT_MASK     (3 << OTG_DIEPTSIZ0_PKTCNT_SHIFT)
                                                   /* Bits 21-31: Reserved, must be kept at reset value */
+
 /* Device IN endpoint n transfer size register */
 
-#define OTG_DIEPTSIZ_XFRSIZ_SHIFT     (0)       /* Bits 0-18: Transfer size */
+#define OTG_DIEPTSIZ_XFRSIZ_SHIFT     (0)         /* Bits 0-18: Transfer size */
 #define OTG_DIEPTSIZ_XFRSIZ_MASK      (0x7ffff << OTG_DIEPTSIZ_XFRSIZ_SHIFT)
-#define OTG_DIEPTSIZ_PKTCNT_SHIFT     (19)      /* Bit 19-28: Packet count */
+#define OTG_DIEPTSIZ_PKTCNT_SHIFT     (19)        /* Bit 19-28: Packet count */
 #define OTG_DIEPTSIZ_PKTCNT_MASK      (0x3ff << OTG_DIEPTSIZ_PKTCNT_SHIFT)
-#define OTG_DIEPTSIZ_MCNT_SHIFT       (29)      /* Bits 29-30: Multi count */
+#define OTG_DIEPTSIZ_MCNT_SHIFT       (29)        /* Bits 29-30: Multi count */
 #define OTG_DIEPTSIZ_MCNT_MASK        (3 << OTG_DIEPTSIZ_MCNT_SHIFT)
-                                                /* Bit 31: Reserved */
+                                                  /* Bit 31: Reserved */
+
 /* Device OUT endpoint TxFIFO status register */
 
 #define OTG_DTXFSTS_MASK              (0xffff)
 
 /* Device OUT endpoint 0 control register */
 
-#define OTG_DOEPCTL0_MPSIZ_SHIFT      (0)       /* Bits 0-1: Maximum packet size */
+#define OTG_DOEPCTL0_MPSIZ_SHIFT      (0)                             /* Bits 0-1: Maximum packet size */
 #define OTG_DOEPCTL0_MPSIZ_MASK       (3 << OTG_DOEPCTL0_MPSIZ_SHIFT)
 #  define OTG_DOEPCTL0_MPSIZ_64       (0 << OTG_DOEPCTL0_MPSIZ_SHIFT) /* 64 bytes */
 #  define OTG_DOEPCTL0_MPSIZ_32       (1 << OTG_DOEPCTL0_MPSIZ_SHIFT) /* 32 bytes */
 #  define OTG_DOEPCTL0_MPSIZ_16       (2 << OTG_DOEPCTL0_MPSIZ_SHIFT) /* 16 bytes */
 #  define OTG_DOEPCTL0_MPSIZ_8        (3 << OTG_DOEPCTL0_MPSIZ_SHIFT) /* 8 bytes */
-                                                /* Bits 2-14: Reserved */
-#define OTG_DOEPCTL0_USBAEP           (1 << 15) /* Bit 15: USB active endpoint */
-                                                /* Bit 16: Reserved */
-#define OTG_DOEPCTL0_NAKSTS           (1 << 17) /* Bit 17: NAK status */
-#define OTG_DOEPCTL0_EPTYP_SHIFT      (18)      /* Bits 18-19: Endpoint type */
+                                                                      /* Bits 2-14: Reserved */
+#define OTG_DOEPCTL0_USBAEP           (1 << 15)                       /* Bit 15: USB active endpoint */
+                                                                      /* Bit 16: Reserved */
+#define OTG_DOEPCTL0_NAKSTS           (1 << 17)                       /* Bit 17: NAK status */
+#define OTG_DOEPCTL0_EPTYP_SHIFT      (18)                            /* Bits 18-19: Endpoint type */
 #define OTG_DOEPCTL0_EPTYP_MASK       (3 << OTG_DOEPCTL0_EPTYP_SHIFT)
 #  define OTG_DOEPCTL0_EPTYP_CTRL     (0 << OTG_DOEPCTL0_EPTYP_SHIFT) /* Control (hard-coded) */
-#define OTG_DOEPCTL0_SNPM             (1 << 20) /* Bit 20: Snoop mode */
-#define OTG_DOEPCTL0_STALL            (1 << 21) /* Bit 21: STALL handshake */
-                                                /* Bits 22-25: Reserved */
-#define OTG_DOEPCTL0_CNAK             (1 << 26) /* Bit 26: Clear NAK */
-#define OTG_DOEPCTL0_SNAK             (1 << 27) /* Bit 27: Set NAK */
-                                                /* Bits 28-29: Reserved */
-#define OTG_DOEPCTL0_EPDIS            (1 << 30) /* Bit 30: Endpoint disable */
-#define OTG_DOEPCTL0_EPENA            (1 << 31) /* Bit 31: Endpoint enable */
+#define OTG_DOEPCTL0_SNPM             (1 << 20)                       /* Bit 20: Snoop mode */
+#define OTG_DOEPCTL0_STALL            (1 << 21)                       /* Bit 21: STALL handshake */
+                                                                      /* Bits 22-25: Reserved */
+#define OTG_DOEPCTL0_CNAK             (1 << 26)                       /* Bit 26: Clear NAK */
+#define OTG_DOEPCTL0_SNAK             (1 << 27)                       /* Bit 27: Set NAK */
+                                                                      /* Bits 28-29: Reserved */
+#define OTG_DOEPCTL0_EPDIS            (1 << 30)                       /* Bit 30: Endpoint disable */
+#define OTG_DOEPCTL0_EPENA            (1 << 31)                       /* Bit 31: Endpoint enable */
 
 /* Device OUT endpoint n control register */
 
-#define OTG_DOEPCTL_MPSIZ_SHIFT       (0)       /* Bits 0-10: Maximum packet size */
+#define OTG_DOEPCTL_MPSIZ_SHIFT       (0)                            /* Bits 0-10: Maximum packet size */
 #define OTG_DOEPCTL_MPSIZ_MASK        (0x7ff << OTG_DOEPCTL_MPSIZ_SHIFT)
-                                                /* Bits 11-14: Reserved */
-#define OTG_DOEPCTL_USBAEP            (1 << 15) /* Bit 15: USB active endpoint */
-#define OTG_DOEPCTL_DPID              (1 << 16) /* Bit 16: Endpoint data PID (interrupt/bulk) */
+                                                                     /* Bits 11-14: Reserved */
+#define OTG_DOEPCTL_USBAEP            (1 << 15)                      /* Bit 15: USB active endpoint */
+#define OTG_DOEPCTL_DPID              (1 << 16)                      /* Bit 16: Endpoint data PID (interrupt/bulk) */
 #  define OTG_DOEPCTL_DATA0           (0)
 #  define OTG_DOEPCTL_DATA1           OTG_DOEPCTL_DPID
-#define OTG_DOEPCTL_EONUM             (1 << 16) /* Bit 16: Even/odd frame (isochronous) */
+#define OTG_DOEPCTL_EONUM             (1 << 16)                      /* Bit 16: Even/odd frame (isochronous) */
 #  define OTG_DOEPCTL_EVEN            (0)
 #  define OTG_DOEPCTL_ODD             OTG_DOEPCTL_EONUM
-#define OTG_DOEPCTL_NAKSTS            (1 << 17) /* Bit 17: NAK status */
-#define OTG_DOEPCTL_EPTYP_SHIFT       (18)      /* Bits 18-19: Endpoint type */
+#define OTG_DOEPCTL_NAKSTS            (1 << 17)                      /* Bit 17: NAK status */
+#define OTG_DOEPCTL_EPTYP_SHIFT       (18)                           /* Bits 18-19: Endpoint type */
 #define OTG_DOEPCTL_EPTYP_MASK        (3 << OTG_DOEPCTL_EPTYP_SHIFT)
 #  define OTG_DOEPCTL_EPTYP_CTRL      (0 << OTG_DOEPCTL_EPTYP_SHIFT) /* Control */
 #  define OTG_DOEPCTL_EPTYP_ISOC      (1 << OTG_DOEPCTL_EPTYP_SHIFT) /* Isochronous */
 #  define OTG_DOEPCTL_EPTYP_BULK      (2 << OTG_DOEPCTL_EPTYP_SHIFT) /* Bulk */
 #  define OTG_DOEPCTL_EPTYP_INTR      (3 << OTG_DOEPCTL_EPTYP_SHIFT) /* Interrupt */
-#define OTG_DOEPCTL_SNPM              (1 << 20) /* Bit 20: Snoop mode */
-#define OTG_DOEPCTL_STALL             (1 << 21) /* Bit 21: STALL handshake */
-                                                /* Bits 22-25: Reserved */
-#define OTG_DOEPCTL_CNAK              (1 << 26) /* Bit 26: Clear NAK */
-#define OTG_DOEPCTL_SNAK              (1 << 27) /* Bit 27: Set NAK */
-#define OTG_DOEPCTL_SD0PID            (1 << 28) /* Bit 28: Set DATA0 PID (interrupt/bulk) */
-#define OTG_DOEPCTL_SEVNFRM           (1 << 28) /* Bit 28: Set even frame (isochronous) */
-#define OTG_DOEPCTL_SD1PID            (1 << 29) /* Bit 29: Set DATA1 PID (interrupt/bulk) */
-#define OTG_DOEPCTL_SODDFRM           (1 << 29) /* Bit 29: Set odd frame (isochronous */
-#define OTG_DOEPCTL_EPDIS             (1 << 30) /* Bit 30: Endpoint disable */
-#define OTG_DOEPCTL_EPENA             (1 << 31) /* Bit 31: Endpoint enable */
+#define OTG_DOEPCTL_SNPM              (1 << 20)                      /* Bit 20: Snoop mode */
+#define OTG_DOEPCTL_STALL             (1 << 21)                      /* Bit 21: STALL handshake */
+                                                                     /* Bits 22-25: Reserved */
+#define OTG_DOEPCTL_CNAK              (1 << 26)                      /* Bit 26: Clear NAK */
+#define OTG_DOEPCTL_SNAK              (1 << 27)                      /* Bit 27: Set NAK */
+#define OTG_DOEPCTL_SD0PID            (1 << 28)                      /* Bit 28: Set DATA0 PID (interrupt/bulk) */
+#define OTG_DOEPCTL_SEVNFRM           (1 << 28)                      /* Bit 28: Set even frame (isochronous) */
+#define OTG_DOEPCTL_SD1PID            (1 << 29)                      /* Bit 29: Set DATA1 PID (interrupt/bulk) */
+#define OTG_DOEPCTL_SODDFRM           (1 << 29)                      /* Bit 29: Set odd frame (isochronous */
+#define OTG_DOEPCTL_EPDIS             (1 << 30)                      /* Bit 30: Endpoint disable */
+#define OTG_DOEPCTL_EPENA             (1 << 31)                      /* Bit 31: Endpoint enable */
 
 /* Device endpoint-n interrupt register */
 
@@ -892,6 +889,7 @@
 #define OTG_DOEPINT_NAK               (1 << 13) /* Bit 13: NAK interrupt mask */
 #define OTG_DOEPINT_NYET              (1 << 14) /* Bit 14: NYET interrupt mask */
                                                 /* Bits 15-31: Reserved */
+
 /* Device OUT endpoint-0 transfer size register */
 
 #define OTG_DOEPTSIZ0_XFRSIZ_SHIFT    (0)       /* Bits 0-6: Transfer size */
@@ -918,6 +916,7 @@
 #  define OTG_DOEPTSIZ_RXDPID_DATA1   (2 << OTG_DOEPTSIZ_RXDPID_SHIFT)
 #  define OTG_DOEPTSIZ_RXDPID_MDATA   (3 << OTG_DOEPTSIZ_RXDPID_SHIFT)
                                                 /* Bit 31: Reserved */
+
 /* Power and clock gating control register */
 
 #define OTG_PCGCCTL_STPPCLK           (1 << 0)  /* Bit 0: Stop PHY clock */

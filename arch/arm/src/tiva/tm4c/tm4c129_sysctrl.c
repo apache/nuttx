@@ -186,10 +186,17 @@ static uint32_t tiva_vco_frequency(uint32_t pllfreq0, uint32_t pllfreq1)
 
   /* Extract all of the values from the hardware register values. */
 
-  mfrac =  (pllfreq0 & SYSCON_PLLFREQ0_MFRAC_MASK) >> SYSCON_PLLFREQ0_MFRAC_SHIFT;
-  mint  =  (pllfreq0 & SYSCON_PLLFREQ0_MINT_MASK) >> SYSCON_PLLFREQ0_MINT_SHIFT;
-  q     = ((pllfreq1 & SYSCON_PLLFREQ1_Q_MASK) >> SYSCON_PLLFREQ1_Q_SHIFT) + 1;
-  n     = ((pllfreq1 & SYSCON_PLLFREQ1_N_MASK) >> SYSCON_PLLFREQ1_N_SHIFT) + 1;
+  mfrac =  (pllfreq0 & SYSCON_PLLFREQ0_MFRAC_MASK) >>
+           SYSCON_PLLFREQ0_MFRAC_SHIFT;
+
+  mint  =  (pllfreq0 & SYSCON_PLLFREQ0_MINT_MASK) >>
+           SYSCON_PLLFREQ0_MINT_SHIFT;
+
+  q     = ((pllfreq1 & SYSCON_PLLFREQ1_Q_MASK) >>
+           SYSCON_PLLFREQ1_Q_SHIFT) + 1;
+
+  n     = ((pllfreq1 & SYSCON_PLLFREQ1_N_MASK) >>
+           SYSCON_PLLFREQ1_N_SHIFT) + 1;
 
   /* Algorithm:
    *
@@ -391,8 +398,8 @@ void tiva_clock_configure(void)
   uint32_t pllfreq0;
   uint32_t pllfreq1;
 
-  /* Set the clocking to run with the default settings provided in the board.h
-   * header file
+  /* Set the clocking to run with the default settings provided in the
+   * board.h header file
    */
 
   pllfreq0 = M2PLLFREQ0(BOARD_PLL_MINT, BOARD_PLL_MFRAC);

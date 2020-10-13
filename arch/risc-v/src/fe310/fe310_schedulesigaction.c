@@ -155,7 +155,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               g_current_regs[REG_EPC]     = (uint32_t)up_sigdeliver;
 
               int_ctx                     = g_current_regs[REG_INT_CTX];
-              int_ctx                    &= ~MSTATUS_MIE;
+              int_ctx                    &= ~MSTATUS_MPIE;
 
               g_current_regs[REG_INT_CTX] = int_ctx;
 
@@ -195,7 +195,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_EPC]      = (uint32_t)up_sigdeliver;
 
           int_ctx                     = tcb->xcp.regs[REG_INT_CTX];
-          int_ctx                    &= ~MSTATUS_MIE;
+          int_ctx                    &= ~MSTATUS_MPIE;
 
           tcb->xcp.regs[REG_INT_CTX]  = int_ctx;
 

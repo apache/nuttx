@@ -99,7 +99,7 @@ static dq_queue_t g_active_tcp_connections;
  *
  * Description:
  *   Given a local port number (in network byte order), find the TCP
- *   connection that listens on this this port.
+ *   connection that listens on this port.
  *
  *   Primary uses: (1) to determine if a port number is available, (2) to
  *   To identify the socket that will accept new connections on a local port.
@@ -150,7 +150,7 @@ static inline FAR struct tcp_conn_s *tcp_ipv4_listener(in_addr_t ipaddr,
  *
  * Description:
  *   Given a local port number (in network byte order), find the TCP
- *   connection that listens on this this port.
+ *   connection that listens on this port.
  *
  *   Primary uses: (1) to determine if a port number is available, (2) to
  *   To identify the socket that will accept new connections on a local port.
@@ -201,7 +201,7 @@ tcp_ipv6_listener(const net_ipv6addr_t ipaddr, uint16_t portno)
  *
  * Description:
  *   Given a local port number (in network byte order), find the TCP
- *   connection that listens on this this port.
+ *   connection that listens on this port.
  *
  *   Primary uses: (1) to determine if a port number is available, (2) to
  *   To identify the socket that will accept new connections on a local port.

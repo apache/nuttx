@@ -15,6 +15,10 @@ config ARCH_PHY_INTERRUPT
 	bool
 	default n
 
+config ARCH_PHY_POLLED
+	bool
+	default n
+
 config ARCH_HAVE_NETDEV_STATISTICS
 	bool
 	default n

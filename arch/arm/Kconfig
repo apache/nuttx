@@ -213,6 +213,7 @@ config ARCH_CHIP_NRF52
 	#select ARM_HAVE_MPU_UNIFIED
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_PWM_MULTICHAN
+	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		Nordic NRF52 architectures (ARM Cortex-M4).
 

@@ -59,5 +59,21 @@
 
 bool up_interrupt_context(void)
 {
-  return CURRENT_REGS != NULL;
+#ifdef CONFIG_SMP
+  /* REVISIT:  Currently up_irq_save() will not disable the Software
+   * Generated Interrupts (SGIs) for the case of ARMv7-A architecture using
+   * the GIC.  So this will not be sufficient in that case, at least not
+   * until we add support for the ICCMPR.
+   */
+
+  irqstate_t flags = up_irq_save();
+#endif
+
+  bool ret = CURRENT_REGS != NULL;
+
+#ifdef CONFIG_SMP
+  up_irq_restore(flags);
+#endif
+
+  return ret;
 }

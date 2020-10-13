@@ -134,7 +134,7 @@ struct esp32_spi_priv_s
 
   sem_t            sem_isr;
 
-  uint32_t         cpuint;      /* SPI interrupt ID */
+  int              cpuint;      /* SPI interrupt ID */
 
   uint32_t         frequency;   /* Requested clock frequency */
   uint32_t         actual;      /* Actual clock frequency */
@@ -1241,32 +1241,32 @@ static void esp32_spi_init(FAR struct spi_dev_s *dev)
   if (esp32_spi_iomux(priv))
     {
 #ifndef CONFIG_ESP32_SPI_SWCS
-      esp32_configgpio(config->cs_pin, OUTPUT_FUNCTION_1);
+      esp32_configgpio(config->cs_pin, OUTPUT_FUNCTION_2);
       gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
 #endif
-      esp32_configgpio(config->mosi_pin, OUTPUT_FUNCTION_1);
+      esp32_configgpio(config->mosi_pin, OUTPUT_FUNCTION_2);
       gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
-      esp32_configgpio(config->miso_pin, INPUT_FUNCTION_1 | PULLUP);
+      esp32_configgpio(config->miso_pin, INPUT_FUNCTION_2 | PULLUP);
       gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
-      esp32_configgpio(config->clk_pin, OUTPUT_FUNCTION_1);
+      esp32_configgpio(config->clk_pin, OUTPUT_FUNCTION_2);
       gpio_matrix_out(config->clk_pin, SIG_GPIO_OUT_IDX, 0, 0);
     }
   else
     {
 #ifndef CONFIG_ESP32_SPI_SWCS
-      esp32_configgpio(config->cs_pin, OUTPUT_FUNCTION_2);
+      esp32_configgpio(config->cs_pin, OUTPUT_FUNCTION_3);
       gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
 #endif
 
-      esp32_configgpio(config->mosi_pin, OUTPUT_FUNCTION_2);
+      esp32_configgpio(config->mosi_pin, OUTPUT_FUNCTION_3);
       gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
 
-      esp32_configgpio(config->miso_pin, INPUT_FUNCTION_2 | PULLUP);
+      esp32_configgpio(config->miso_pin, INPUT_FUNCTION_3 | PULLUP);
       gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
 
-      esp32_configgpio(config->clk_pin, OUTPUT_FUNCTION_2);
+      esp32_configgpio(config->clk_pin, OUTPUT_FUNCTION_3);
       gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
     }
 

@@ -227,6 +227,12 @@
 #define RX65N_GRPAL0_ERI10_MASK         (1U <<  9)
 #define RX65N_GRPAL0_TEI11_MASK         (1U << 12)
 #define RX65N_GRPAL0_ERI11_MASK         (1U << 13)
+#define RX65N_GRPAL0_SPII0_MASK         (1U << 16)
+#define RX65N_GRPAL0_SPEI0_MASK         (1U << 17)
+#define RX65N_GRPAL0_SPII1_MASK         (1U << 18)
+#define RX65N_GRPAL0_SPEI1_MASK         (1U << 19)
+#define RX65N_GRPAL0_SPII2_MASK         (1U << 20)
+#define RX65N_GRPAL0_SPEI2_MASK         (1U << 21)
 #define RX65N_GRPBL0_TEI12_MASK         (1U << 16)
 #define RX65N_GRPBL0_ERI12_MASK         (1U << 17)
 
@@ -1442,6 +1448,163 @@
 
 #define USB_INT_BRDY                                 (0x0001u)
 #define USB_BMREQUESTTYPERECIP                       (0x001Fu)   /* b4-0: Recipient */
+
+/* Start of RSPI interface related definitions */
+
+#if defined(CONFIG_SPI) || defined(CONFIG_SPI_DRIVER)
+  #define HAVE_RSPI_DRIVER            1
+#endif
+
+#define RX65N_RSPI0_BASE              (0x000D0100)
+#define RX65N_RSPI1_BASE              (0x000D0140)
+#define RX65N_RSPI2_BASE              (0x000D0300)
+
+/* Tx and Rx vector number */
+
+#define RX65N_RSPI0_RXVECT            (38)
+#define RX65N_RSPI0_TXVECT            (39)
+#define RX65N_RSPI1_RXVECT            (40)
+#define RX65N_RSPI1_TXVECT            (41)
+#define RX65N_RSPI2_RXVECT            (108)
+#define RX65N_RSPI2_TXVECT            (109)
+
+#define RX65N_PCLK_FREQUENCY RX_PCLKA
+
+/* RSPI Register offsets */
+
+#define RX65N_RSPI_SPCR_OFFSET        (0x0000)   /* RSPI Control Register */
+#define RX65N_RSPI_SSLP_OFFSET        (0x0001)   /* RSPI Slave Select Polarity Register */
+#define RX65N_RSPI_SPPCR_OFFSET       (0x0002)   /* RSPI Pin Control Register */
+#define RX65N_RSPI_SPSR_OFFSET        (0x0003)   /* RSPI Status Register */
+#define RX65N_RSPI_SPDR_OFFSET        (0x0004)   /* RSPI Data Register */
+#define RX65N_RSPI_SPSCR_OFFSET       (0x0008)   /* RSPI Sequence Control Register */
+#define RX65N_RSPI_SPSSR_OFFSET       (0x0009)   /* RSPI Sequence Status Register */
+#define RX65N_RSPI_SPBR_OFFSET        (0x000A)   /* RSPI Bit Rate Register */
+#define RX65N_RSPI_SPDCR_OFFSET       (0x000B)   /* RSPI Data Control Register */
+#define RX65N_RSPI_SPCKD_OFFSET       (0x000C)   /* RSPI Clock Delay Register */
+#define RX65N_RSPI_SSLND_OFFSET       (0x000D)   /* RSPI Slave Select Negation Delay Register */
+#define RX65N_RSPI_SPND_OFFSET        (0x000E)   /* RSPI Next-Access Delay Register */
+#define RX65N_RSPI_SPCR2_OFFSET       (0x000F)   /* RSPI Control Register 2 */
+#define RX65N_RSPI_SPCMD0_OFFSET      (0x0010)   /* RSPI Command Registers 0 */
+#define RX65N_RSPI_SPCMD1_OFFSET      (0x0012)   /* RSPI Command Registers 1 */
+#define RX65N_RSPI_SPCMD2_OFFSET      (0x0014)   /* RSPI Command Registers 2 */
+#define RX65N_RSPI_SPCMD3_OFFSET      (0x0016)   /* RSPI Command Registers 3 */
+#define RX65N_RSPI_SPCMD4_OFFSET      (0x0018)   /* RSPI Command Registers 4 */
+#define RX65N_RSPI_SPCMD5_OFFSET      (0x001A)   /* RSPI Command Registers 5 */
+#define RX65N_RSPI_SPCMD6_OFFSET      (0x001C)   /* RSPI Command Registers 6 */
+#define RX65N_RSPI_SPCMD7_OFFSET      (0x001E)   /* RSPI Command Registers 7 */
+#define RX65N_RSPI_SPDCR2_OFFSET      (0x0020)   /* RSPI Data Control Register 2 */
+
+/* RSPI Control Register bits */
+
+#define RSPI_SPCR_SMPS                (1 << 0) /* RSPI Mode Select */
+#define RSPI_SPCR_TXMD                (1 << 1) /* Communications Operating Mode Select */
+#define RSPI_SPCR_MODFEN              (1 << 2) /* Mode Fault Error Detection Enable */
+#define RSPI_SPCR_MSTR                (1 << 3) /* RSPI Master/Slave Mode Select */
+#define RSPI_SPCR_SPEIE               (1 << 4) /* RSPI Error Interrupt Enable */
+#define RSPI_SPCR_SPTIE               (1 << 5) /* Transmit Buffer Empty Interrupt Enable */
+#define RSPI_SPCR_SPE                 (1 << 6) /* RSPI Function Enable */
+#define RSPI_SPCR_SPRIE               (1 << 7) /* RSPI Receive Buffer Full Interrupt Enable */
+
+/* RSPI Slave Select Polarity Register bits */
+
+#define RSPI_SSLP_SSL0P               (1 << 0)  /* SSL0 Signal Polarity Setting */
+#define RSPI_SSLP_SSL1P               (1 << 1)  /* SSL0 Signal Polarity Setting */
+#define RSPI_SSLP_SSL2P               (1 << 2)  /* SSL0 Signal Polarity Setting */
+#define RSPI_SSLP_SSL3P               (1 << 3)  /* SSL0 Signal Polarity Setting */
+
+/* RSPI Pin Control Register bits */
+
+#define RSPI_SPPCR_SPLP               (1 << 0)  /* 0: Normal mode. 1: Loopback mode (reversed transmit data = receive). */
+#define RSPI_SPPCR_SPLP2              (1 << 1)  /* 0: Normal mode. 1: Loopback mode (transmit data = receive data). */
+#define RSPI_SPPCR_MOIFV              (1 << 4)  /* 0: MOSI pin idles low. 1: MOSI pin idles high. */
+#define RSPI_SPPCR_MOIFE              (1 << 5)  /* 0: MOSI pin idles at final previous data. 1: MOSI pin idles at MOIFV. */
+
+/* RSPI status register bits */
+
+#define RSPI_SPSR_OVRF                (1 << 0)  /* Overrun Error Flag */
+#define RSPI_SPSR_IDLNF               (1 << 1)  /* RSPI Idle Flag */
+#define RSPI_SPSR_MODF                (1 << 2)  /* Mode Fault Error Flag */
+#define RSPI_SPSR_PERF                (1 << 3)  /* Parity Error Flag */
+#define RSPI_SPSR_UDRF                (1 << 4)  /* Underrun Error Flag */
+#define RSPI_SPSR_SPTEF               (1 << 5)  /* Transmit Buffer Empty Flag */
+#define RSPI_SPSR_SPRF                (1 << 7)  /* Receive Buffer Full Flag */
+#define RSPI_SPSR_MODF_UDRF_MASK      (0xAB)    /* Protect reserved bits. */
+
+/* RSPI Data Control Register bit and mask */
+
+#define RSPI_SPDCR_MASK               (0x73)   /* Mask for SPDCR*/
+#define RSPI_SPDCR_SPFC0              (1 << 0) /* b0 used for number of frame calculation with b1 */
+#define RSPI_SPDCR_SPFC1              (1 << 1) /* b1 used for number of frame calculation with b0 */
+#define RSPI_SPDCR_SPRDTD             (1 << 4) /* RSPI Receive/Transmit Data Select*/
+#define RSPI_SPDCR_SPLW               (1 << 5) /* RSPI Longword Access Word Access Specification */
+#define RSPI_SPDCR_SPBYT              (1 << 6) /* RSPI Byte Access Specification*/
+#define RSPI_SPDCR_SPFC_MASK          (0x3)    /* SPFC mask */
+
+/* RSPI command register bits */
+
+#define RSPI_SPCMD_MASK               (0xFF << 0) /* RSPI Command Register mask */
+#define RSPI_SPCMD_PHA                (1 << 0)    /* RSPCK Phase Setting */
+#define RSPI_SPCMD_POL                (1 << 1)    /* RSPCK Polarity Setting */
+#define RSPI_SPCMD_BRDV0              (1 << 2)    /* Bit Rate Division Setting bit b2 */
+#define RSPI_SPCMD_BRDV1              (1 << 3)    /* Bit Rate Division Setting bit b3 */
+#define RSPI_SPCMD_SSLA0              (1 << 4)    /* SSL Signal Assertion Setting bit b4 */
+#define RSPI_SPCMD_SSLA1              (1 << 5)    /* SSL Signal Assertion Setting bit b5 */
+#define RSPI_SPCMD_SSLA2              (1 << 6)    /* SSL Signal Assertion Setting bit b6 */
+#define RSPI_SPCMD_SSLKP              (1 << 7)    /* SSL Signal Level Keeping bit b7 */
+#define RSPI_SPCMD_SPB0               (1 << 8)    /* RSPI Data Length Setting bit b8 */
+#define RSPI_SPCMD_SPB1               (1 << 9)    /* RSPI Data Length Setting bit b9 */
+#define RSPI_SPCMD_SPB2               (1 << 10)   /* RSPI Data Length Setting bit b10 */
+#define RSPI_SPCMD_SPB3               (1 << 11)   /* RSPI Data Length Setting bit b11 */
+#define RSPI_SPCMD_LSBF               (1 << 12)   /* RSPI LSB First bit b12 */
+#define RSPI_SPCMD_SPNDEN             (1 << 13)   /* RSPI Next-Access Delay Enable bit */
+#define RSPI_SPCMD_SLNDEN             (1 << 14)   /* SSL Negation Delay Setting Enable bit */
+#define RSPI_SPCMD_SCKDEN             (1 << 15)   /* SCKDEN RSPCK Delay Setting Enable bit */
+#define RSPI_SPCMD_BRDV_MASK          (3 << 2)    /* Bit Rate Division Setting mask */
+#define RSPI_SPCMD_SPB_MASK           (15 << 8)   /* RSPI Data Length Setting */
+
+/* RSPI clock delay register bit */
+
+#define RSPI_SPCKD_MASK               (7 << 0)  /* RSPCK Delay Setting mask */
+#define RSPI_SPCKD_SCKDL0             (1 << 0)  /* SCKDL0 bit */
+#define RSPI_SPCKD_SCKDL1             (1 << 1)  /* SCKDL1 bit */
+#define RSPI_SPCKD_SCKDL2             (1 << 2)  /* SCKDL2 bit */
+
+/* RSPI Slave Select Negation Delay Register bit */
+
+#define RSPI_SSLND_MASK               (7 << 0)  /* SSL Negation Delay Setting mask */
+#define RSPI_SSLND_SLNDL0             (1 << 0)  /* SLNDL0 bit */
+#define RSPI_SSLND_SLNDL1             (1 << 1)  /* SLNDL1 bit */
+#define RSPI_SSLND_SLNDL2             (1 << 2)  /* SLNDL2 bit */
+
+/* RSPI clock delay register bit */
+
+#define RSPI_SPND_MASK                (7 << 0)  /* RSPI Next-Access Delay mask */
+#define RSPI_SPND_SPNDL0              (1 << 0)  /* SPNDL0 bit */
+#define RSPI_SPND_SPNDL1              (1 << 1)  /* SPNDL1 bit */
+#define RSPI_SPND_SPNDL2              (1 << 2)  /* SPNDL2 bit */
+
+/* RSPI RSPI Control Register 2 bit */
+
+#define RSPI_SPCR2_MASK               (0x1F << 0)  /* RSPI Control Register 2 mask */
+#define RSPI_SPCR2_SPPE               (1 << 0)     /* Parity Enable bit */
+#define RSPI_SPCR2_SPOE               (1 << 1)     /* Parity Mode bit */
+#define RSPI_SPCR2_SPIIE              (1 << 2)     /* RSPI Idle Interrupt Enable */
+#define RSPI_SPCR2_PTE                (1 << 3)     /* Parity Self-Diagnosis bit */
+#define RSPI_SPCR2_SCKASE             (1 << 4)     /* RSPCK Auto-Stop Function Enable bit */
+
+/* RSPI Sequence Control Register 2 bit */
+
+#define RSPI_SPSCR_MASK               (7 << 0) /* RSPI Sequence Control Register mask */
+#define RSPI_SPSCR_SPSLN0             (1 << 0) /* SPSLN0 bit */
+#define RSPI_SPSCR_SPSLN1             (1 << 1) /* SPSLN1 bit */
+#define RSPI_SPSCR_SPSLN2             (1 << 2) /* SPSLN2 bit */
+
+/* Set RSPI data control register 2 bit */
+
+#define RSPI_SPDCR2_BYSW              (1 << 0) /* RSPI Byte Swap */
+
+/* End of RSPI interface related definitions */
 
 /* RIIC related definitions */
 

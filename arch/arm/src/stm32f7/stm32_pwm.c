@@ -231,10 +231,12 @@ struct stm32_pwmtimer_s
 /****************************************************************************
  * Static Function Prototypes
  ****************************************************************************/
+
 /* Register access */
 
 static uint16_t pwm_getreg(struct stm32_pwmtimer_s *priv, int offset);
-static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset, uint16_t value);
+static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset,
+                       uint16_t value);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
 static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg);
@@ -1032,7 +1034,7 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
               pwm_getreg(priv, STM32_GTIM_EGR_OFFSET),
               pwm_getreg(priv, STM32_GTIM_CCMR1_OFFSET));
     }
-   else
+  else
     {
       pwminfo("   SR: %04x EGR:  %04x CCMR1: %04x CCMR2: %04x\n",
               pwm_getreg(priv, STM32_GTIM_SR_OFFSET),
@@ -1148,8 +1150,8 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   pwm_putreg(priv, STM32_GTIM_SR_OFFSET, 0);
 #endif
 
-  /* Calculate optimal values for the timer prescaler and for the timer reload
-   * register.  If 'frequency' is the desired frequency, then
+  /* Calculate optimal values for the timer prescaler and for the timer
+   * reload register.  If 'frequency' is the desired frequency, then
    *
    *   reload = timclk / frequency
    *   timclk = pclk / presc
@@ -1158,8 +1160,8 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
    *
    *   reload = pclk / presc / frequency
    *
-   * There are many solutions to this this, but the best solution will be the
-   * one that has the largest reload value and the smallest prescaler value.
+   * There are many solutions to this, but the best solution will be the one
+   * that has the largest reload value and the smallest prescaler value.
    * That is the solution that should give us the most accuracy in the timer
    * control.  Subject to:
    *
@@ -1207,8 +1209,10 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
       reload--;
     }
 
-  pwminfo("TIM%u PCLK: %u frequency: %u TIMCLK: %u prescaler: %u reload: %u\n",
-          priv->timid, priv->pclk, info->frequency, timclk, prescaler, reload);
+  pwminfo("TIM%u PCLK: %u frequency: %u "
+          "TIMCLK: %u prescaler: %u reload: %u\n",
+          priv->timid, priv->pclk, info->frequency,
+          timclk, prescaler, reload);
 
   /* Set up the timer CR1 register:
    *
@@ -1440,7 +1444,9 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
                           (chanmode << ATIM_CCMR1_OC1M_SHIFT) |
                           ATIM_CCMR1_OC1PE;
 
-              /* Set the duty cycle by writing to the CCR register for this channel */
+              /* Set the duty cycle by writing to the CCR register for this
+               * channel
+               */
 
               pwm_putreg(priv, STM32_GTIM_CCR1_OFFSET, (uint16_t)ccr);
             }
@@ -1458,7 +1464,9 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
                           (chanmode << ATIM_CCMR1_OC2M_SHIFT) |
                           ATIM_CCMR1_OC2PE;
 
-              /* Set the duty cycle by writing to the CCR register for this channel */
+              /* Set the duty cycle by writing to the CCR register for this
+               * channel
+               */
 
               pwm_putreg(priv, STM32_GTIM_CCR2_OFFSET, (uint16_t)ccr);
             }
@@ -1476,7 +1484,9 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
                           (chanmode << ATIM_CCMR2_OC3M_SHIFT) |
                           ATIM_CCMR2_OC3PE;
 
-              /* Set the duty cycle by writing to the CCR register for this channel */
+              /* Set the duty cycle by writing to the CCR register for this
+               * channel
+               */
 
               pwm_putreg(priv, STM32_GTIM_CCR3_OFFSET, (uint16_t)ccr);
             }
@@ -1494,7 +1504,9 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
                           (chanmode << ATIM_CCMR2_OC4M_SHIFT) |
                           ATIM_CCMR2_OC4PE;
 
-              /* Set the duty cycle by writing to the CCR register for this channel */
+              /* Set the duty cycle by writing to the CCR register for this
+               * channel
+               */
 
               pwm_putreg(priv, STM32_GTIM_CCR4_OFFSET, (uint16_t)ccr);
             }
@@ -1518,7 +1530,9 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   ccmr1 = pwm_getreg(priv, STM32_GTIM_CCMR1_OFFSET);
   ccmr2 = pwm_getreg(priv, STM32_GTIM_CCMR2_OFFSET);
 
-  /* Reset the Output Compare Mode Bits and set the select output compare mode */
+  /* Reset the Output Compare Mode Bits and set the select output compare
+   * mode
+   */
 
   ccmr1 &= ~(ATIM_CCMR1_CC1S_MASK | ATIM_CCMR1_OC1M_MASK | ATIM_CCMR1_OC1PE |
              ATIM_CCMR1_CC2S_MASK | ATIM_CCMR1_OC2M_MASK | ATIM_CCMR1_OC2PE);
@@ -1527,7 +1541,9 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   ccmr1 |= ocmode1;
   ccmr2 |= ocmode2;
 
-  /* Reset the output polarity level of all channels (selects high polarity) */
+  /* Reset the output polarity level of all channels (selects high
+   * polarity)
+   */
 
   ccer &= ~(ATIM_CCER_CC1P | ATIM_CCER_CC2P | ATIM_CCER_CC3P |
             ATIM_CCER_CC4P);
@@ -1543,7 +1559,8 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 #if defined(CONFIG_STM32F7_TIM1_PWM) || defined(CONFIG_STM32F7_TIM8_PWM) || \
     defined(CONFIG_STM32F7_TIM15_PWM) || defined(CONFIG_STM32F7_TIM16_PWM) || \
     defined(CONFIG_STM32F7_TIM17_PWM)
-  if (priv->timtype == TIMTYPE_ADVANCED || priv->timtype == TIMTYPE_COUNTUP16)
+  if (priv->timtype == TIMTYPE_ADVANCED ||
+      priv->timtype == TIMTYPE_COUNTUP16)
     {
       uint16_t bdtr;
 
@@ -1784,7 +1801,9 @@ static int pwm_interrupt(struct stm32_pwmtimer_s *priv)
       pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
     }
 
-  /* Now all of the time critical stuff is done so we can do some debug output */
+  /* Now all of the time critical stuff is done so we can do some debug
+   * output
+   */
 
   pwminfo("Update interrupt SR: %04x prev: %u curr: %u count: %u\n",
           regval, priv->prev, priv->curr, priv->count);

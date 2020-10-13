@@ -218,14 +218,15 @@
  * Besides the general purpose input/output functions, SW2 and SW3 can be
  * low-power wake up signal. Also, only SW3 can be a non-maskable interrupt.
  *
- *   Switch    GPIO Function
- *   --------- ---------------------------------------------------------------
- *   SW2       PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
- *   SW3       PTA4/FTM0_CH1/NMI_b/LLWU_P3
+ *   Switch  GPIO Function
+ *   ------- ---------------------------------------------------------------
+ *   SW2     PTC6/SPI0_SOUT/PD0_EXTRG/I2S0_RX_BCLK/FB_AD9/I2S0_MCLK/LLWU_P10
+ *   SW3     PTA4/FTM0_CH1/NMI_b/LLWU_P3
  */
 
 #define BUTTON_SW2        0
 #define BUTTON_SW3        1
+#define NUM_BUTTONS       2
 
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 #define BUTTON_SW3_BIT    (1 << BUTTON_SW3)

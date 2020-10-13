@@ -47,7 +47,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
- /* Mark GPIO interrupts as disabled for non-existent GPIO ports. */
+/* Mark GPIO interrupts as disabled for non-existent GPIO ports. */
 
 #if TIVA_NPORTS < 1
 #  undef CONFIG_TIVA_GPIOA_IRQS
@@ -124,6 +124,10 @@
 
 #define TIVA_IRQ_INTERRUPTS (16) /* Vector number of the first external interrupt */
 
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
 #if defined(CONFIG_ARCH_CHIP_LM3S)
 #  include <arch/tiva/lm3s_irq.h>
 #elif defined(CONFIG_ARCH_CHIP_LM4F)
@@ -147,7 +151,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 #endif /* __ARCH_ARM_INCLUDE_TIVA_IRQ_H */

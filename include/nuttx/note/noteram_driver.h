@@ -26,14 +26,38 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+/* IOCTL Commands ***********************************************************/
+
+/* NOTERAM_CLEAR
+ *              - Clear all contents of the circular buffer
+ *                Argument: Ignored
+ * NOTERAM_GETMODE
+ *              - Get overwrite mode
+ *                Argument: A writable pointer to unsigned int
+ * NOTERAM_SETMODE
+ *              - Set overwrite mode
+ *                Argument: A read-only pointer to unsigned int
+ */
+
+#ifdef CONFIG_DRIVER_NOTERAM
+#define NOTERAM_CLEAR           _NOTERAMIOC(0x01)
+#define NOTERAM_GETMODE         _NOTERAMIOC(0x02)
+#define NOTERAM_SETMODE         _NOTERAMIOC(0x03)
+#endif
+
+/* Overwrite mode definitions */
+
+#ifdef CONFIG_DRIVER_NOTERAM
+#define NOTERAM_MODE_OVERWRITE_DISABLE      0
+#define NOTERAM_MODE_OVERWRITE_ENABLE       1
+#define NOTERAM_MODE_OVERWRITE_OVERFLOW     2
+#endif
 
 /****************************************************************************
  * Public Function Prototypes

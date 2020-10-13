@@ -1,35 +1,20 @@
 /************************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_dmamux.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ************************************************************************************/
 
@@ -69,18 +54,18 @@
 #define STM32_DMAMUX_C13CR_OFFSET    STM32_DMAMUX_CXCR_OFFSET(13)
 #define STM32_DMAMUX_C14CR_OFFSET    STM32_DMAMUX_CXCR_OFFSET(14)
 #define STM32_DMAMUX_C15CR_OFFSET    STM32_DMAMUX_CXCR_OFFSET(15)
-                                            /* 0x040-0x07C: Reserved */
-#define STM32_DMAMUX_CSR_OFFSET      0x0080 /* DMAMUX12 request line multiplexer interrupt channel status register */
-#define STM32_DMAMUX_CFR_OFFSET      0x0084 /* DMAMUX12 request line multiplexer interrupt clear flag register */
-                                            /* 0x088-0x0FC: Reserved */
+                                                        /* 0x040-0x07C: Reserved */
+#define STM32_DMAMUX_CSR_OFFSET      0x0080             /* DMAMUX12 request line multiplexer interrupt channel status register */
+#define STM32_DMAMUX_CFR_OFFSET      0x0084             /* DMAMUX12 request line multiplexer interrupt clear flag register */
+                                                        /* 0x088-0x0FC: Reserved */
 #define STM32_DMAMUX_RGXCR_OFFSET(x) (0x0100+0x004*(x)) /* DMAMUX12 request generator channel x configuration register */
 #define STM32_DMAMUX_RG0CR_OFFSET    STM32_DMAMUX_RGXCR_OFFSET(0)
 #define STM32_DMAMUX_RG1CR_OFFSET    STM32_DMAMUX_RGXCR_OFFSET(1)
 #define STM32_DMAMUX_RG2CR_OFFSET    STM32_DMAMUX_RGXCR_OFFSET(2)
 #define STM32_DMAMUX_RG3CR_OFFSET    STM32_DMAMUX_RGXCR_OFFSET(3)
-#define STM32_DMAMUX_RGSR_OFFSET     0x0140 /* DMAMUX12 request generator interrupt status register */
-#define STM32_DMAMUX_RGCFR_OFFSET    0x0144 /* DMAMUX12 request generator interrupt clear flag register */
-                                            /* 0x148-0x3FC: Reserved */
+#define STM32_DMAMUX_RGSR_OFFSET     0x0140             /* DMAMUX12 request generator interrupt status register */
+#define STM32_DMAMUX_RGCFR_OFFSET    0x0144             /* DMAMUX12 request generator interrupt clear flag register */
+                                                        /* 0x148-0x3FC: Reserved */
 
 /* Register Addresses ***************************************************************/
 
@@ -170,8 +155,9 @@
 
 /* DMAMUX12 request generator channel x configuration register */
 
-#define DMAMUX_RGCR_SIGID_SHIFT    (0)  /* Bits 0-4: Signal identifiaction */
-                                        /* WARNING: different length for DMAMUX1 and DMAMUX2 !*/
+#define DMAMUX_RGCR_SIGID_SHIFT    (0)  /* Bits 0-4: Signal identifiaction
+                                         * WARNING: different length for DMAMUX1 and DMAMUX2 !
+                                         */
 #define DMAMUX_RGCR_SIGID_MASK     (0x1f << DMAMUX_RGCR_SIGID_SHIFT)
 #define DMAMUX_RGCR_OIE            (8)  /* Bit 8: Trigger overrun interrupt enable */
 #define DMAMUX_RGCR_GE             (16) /* Bit 16: DMA request generator channel X enable*/
@@ -199,6 +185,10 @@
 #define DMAMAP_MAP(d,c)           ((d) << 8 | c)
 #define DMAMAP_CONTROLLER(m)      ((m) >> 8 & 0x07)
 #define DMAMAP_REQUEST(m)         ((m) >> 0 & 0xff)
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
 
 /* Import DMAMUX map */
 

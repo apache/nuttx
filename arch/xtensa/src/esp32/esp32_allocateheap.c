@@ -43,10 +43,15 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/mm/mm.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "xtensa.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -88,5 +93,10 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void xtensa_add_region(void)
 {
+  /* Check for any additional memory regions */
+
+#if defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_SIZE)
+  umm_addregion((FAR void *)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+#endif
 }
 #endif

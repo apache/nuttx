@@ -1024,7 +1024,7 @@ static void s32k1xx_txdone(FAR void *arg)
  * Function: s32k1xx_flexcan_interrupt
  *
  * Description:
- *   Three interrupt sources will vector this this function:
+ *   Three interrupt sources will vector to this function:
  *   1. CAN MB transmit interrupt handler
  *   2. CAN MB receive interrupt handler
  *   3.

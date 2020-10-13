@@ -235,7 +235,7 @@ extern "C"
  *   initialization.
  *
  * Input Parameters:
- *   dev path - The full path to the driver to be registers in the NuttX
+ *   dev path - The full path to the driver to be registered in the NuttX
  *     pseudo-filesystem.  The recommended convention is to name all timer
  *     drivers as "/dev/timer0", "/dev/timer1", etc.  where the driver
  *     path differs only in the "minor" number at the end of the device name.

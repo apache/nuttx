@@ -240,7 +240,7 @@ static void up_dumpstate(void)
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  /* This this thread have a kernel stack allocated? */
+  /* Does this thread have a kernel stack allocated? */
 
   if (rtcb->xcp.kstack)
     {

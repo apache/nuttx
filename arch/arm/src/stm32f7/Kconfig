@@ -1144,6 +1144,10 @@ config STM32F7_HAVE_ETHRNET
 	bool
 	default n
 
+config STM32F7_HAVE_PHY_POLLED
+	bool
+	default n
+
 config STM32F7_HAVE_RNG
 	bool
 	default n
@@ -1402,6 +1406,7 @@ config STM32F7_ETHMAC
 	depends on STM32F7_HAVE_ETHRNET
 	select NETDEVICES
 	select ARCH_HAVE_PHY
+	select STM32F7_HAVE_PHY_POLLED
 
 config STM32F7_FMC
 	bool "FMC"
@@ -5267,6 +5272,16 @@ config STM32F7_PHYINIT
 		STM32F7_PHYINIT is defined in the configuration then the board specific logic must
 		provide stm32_phyinitialize();  The STM32 Ethernet driver will call this function
 		one time before it first uses the PHY.
+
+config STM32F7_PHY_POLLING
+	bool "Support network monitoring by poling the PHY"
+	default n
+	depends on STM32F7_HAVE_PHY_POLLED
+	select ARCH_PHY_POLLED
+	---help---
+		Some boards may not have an interrupt connected to the PHY.
+		This option allows the network monitor to be used by polling the
+		the PHY for status.
 
 config STM32F7_MII
 	bool "Use MII interface"

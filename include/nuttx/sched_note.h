@@ -34,6 +34,18 @@
 
 #include <nuttx/sched.h>
 
+/* For system call numbers definition */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+#ifdef CONFIG_LIB_SYSCALL
+#include <syscall.h>
+#else
+#define CONFIG_LIB_SYSCALL
+#include <syscall.h>
+#undef CONFIG_LIB_SYSCALL
+#endif
+#endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
 /****************************************************************************
@@ -46,6 +58,42 @@
 
 #ifndef CONFIG_SCHED_INSTRUMENTATION_CPUSET
 #  define CONFIG_SCHED_INSTRUMENTATION_CPUSET 0xffff
+#endif
+
+/* Note filter mode flag definitions */
+
+#define NOTE_FILTER_MODE_FLAG_ENABLE       (1 << 0) /* Enable instrumentation */
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+#define NOTE_FILTER_MODE_FLAG_SYSCALL      (1 << 1) /* Enable syscall instrumentation */
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+#define NOTE_FILTER_MODE_FLAG_IRQ          (1 << 2) /* Enable IRQ instrumentaiton */
+#endif
+
+/* Helper macros for syscall instrumentation filter */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+#define NOTE_FILTER_SYSCALLMASK_SET(nr, s) \
+  ((s)->syscall_mask[(nr) / 8] |= (1 << ((nr) % 8)))
+#define NOTE_FILTER_SYSCALLMASK_CLR(nr, s) \
+  ((s)->syscall_mask[(nr) / 8] &= ~(1 << ((nr) % 8)))
+#define NOTE_FILTER_SYSCALLMASK_ISSET(nr, s) \
+  ((s)->syscall_mask[(nr) / 8] & (1 << ((nr) % 8)))
+#define NOTE_FILTER_SYSCALLMASK_ZERO(s) \
+  memset((s), 0, sizeof(struct note_filter_syscall_s))
+#endif
+
+/* Helper macros for IRQ instrumentation filter */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+#define NOTE_FILTER_IRQMASK_SET(nr, s) \
+  ((s)->irq_mask[(nr) / 8] |= (1 << ((nr) % 8)))
+#define NOTE_FILTER_IRQMASK_CLR(nr, s) \
+  ((s)->irq_mask[(nr) / 8] &= ~(1 << ((nr) % 8)))
+#define NOTE_FILTER_IRQMASK_ISSET(nr, s) \
+  ((s)->irq_mask[(nr) / 8] & (1 << ((nr) % 8)))
+#define NOTE_FILTER_IRQMASK_ZERO(s) \
+  memset((s), 0, sizeof(struct note_filter_irq_s))
 #endif
 
 /****************************************************************************
@@ -254,6 +302,44 @@ struct note_irqhandler_s
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER */
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+
+/* This is the type of the argument passed to the NOTECTL_GETMODE and
+ * NOTECTL_SETMODE ioctls
+ */
+
+struct note_filter_mode_s
+{
+  unsigned int flag;          /* Filter mode flag */
+#ifdef CONFIG_SMP
+  unsigned int cpuset;        /* The set of monitored CPUs */
+#endif  
+};
+
+/* This is the type of the argument passed to the NOTECTL_GETSYSCALLFILTER
+ * and NOTECTL_SETSYSCALLFILTER ioctls
+ */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+struct note_filter_syscall_s
+{
+  uint8_t syscall_mask[(SYS_nsyscalls + 7) / 8];
+};
+#endif
+
+/* This is the type of the argument passed to the NOTECTL_GETIRQFILTER and
+ * NOTECTL_SETIRQFILTER ioctls
+ */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+struct note_filter_irq_s
+{
+  uint8_t irq_mask[(NR_IRQS + 7) / 8];
+};
+#endif
+
+#endif /* CONFIG_SCHED_INSTRUMENTATION_FILTER */
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -337,6 +423,8 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 #  define sched_note_irqhandler(i,h,e)
 #endif
 
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
+
 /****************************************************************************
  * Name: sched_note_add
  *
@@ -356,6 +444,85 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
  ****************************************************************************/
 
 void sched_note_add(FAR const void *note, size_t notelen);
+
+/****************************************************************************
+ * Name: sched_note_filter_mode
+ *
+ * Description:
+ *   Set and get note filter mode.
+ *   (Same as NOTECTL_GETMODE / NOTECTL_SETMODE ioctls)
+ *
+ * Input Parameters:
+ *   oldm - A writable pointer to struct note_filter_mode_s to get current
+ *          filter mode
+ *          If 0, no data is written.
+ *   newm - A read-only pointer to struct note_filter_mode_s which holds the
+ *          new filter mode
+ *          If 0, the filter mode is not updated.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+void sched_note_filter_mode(struct note_filter_mode_s *oldm,
+                            struct note_filter_mode_s *newm);
+#endif
+
+/****************************************************************************
+ * Name: sched_note_filter_syscall
+ *
+ * Description:
+ *   Set and get syscall filter setting
+ *   (Same as NOTECTL_GETSYSCALLFILTER / NOTECTL_SETSYSCALLFILTER ioctls)
+ *
+ * Input Parameters:
+ *   oldf - A writable pointer to struct note_filter_syscall_s to get
+ *          current syscall filter setting
+ *          If 0, no data is written.
+ *   newf - A read-only pointer to struct note_filter_syscall_s of the
+ *          new syscall filter setting
+ *          If 0, the setting is not updated.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) && \
+    defined(CONFIG_SCHED_INSTRUMENTATION_SYSCALL)
+void sched_note_filter_syscall(struct note_filter_syscall_s *oldf,
+                               struct note_filter_syscall_s *newf);
+#endif
+
+/****************************************************************************
+ * Name: sched_note_filter_irq
+ *
+ * Description:
+ *   Set and get IRQ filter setting
+ *   (Same as NOTECTL_GETIRQFILTER / NOTECTL_SETIRQFILTER ioctls)
+ *
+ * Input Parameters:
+ *   oldf - A writable pointer to struct note_filter_irq_s to get
+ *          current IRQ filter setting
+ *          If 0, no data is written.
+ *   newf - A read-only pointer to struct note_filter_irq_s of the new
+ *          IRQ filter setting
+ *          If 0, the setting is not updated.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) && \
+    defined(CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER)
+void sched_note_filter_irq(struct note_filter_irq_s *oldf,
+                           struct note_filter_irq_s *newf);
+#endif
+
+#endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 

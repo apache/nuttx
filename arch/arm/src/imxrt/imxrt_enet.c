@@ -1090,7 +1090,7 @@ static void imxrt_enet_interrupt_work(FAR void *arg)
  * Function: imxrt_enet_interrupt
  *
  * Description:
- *   Three interrupt sources will vector this this function:
+ *   Three interrupt sources will vector to this function:
  *   1. Ethernet MAC transmit interrupt handler
  *   2. Ethernet MAC receive interrupt handler
  *   3.

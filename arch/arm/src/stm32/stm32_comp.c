@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_comp.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -53,6 +38,7 @@
 #include "stm32_comp.h"
 
 /* Some COMP peripheral must be enabled */
+
 /* Up to 7 comparators in STM32F3 Series */
 
 #if defined(CONFIG_STM32_COMP1) || defined(CONFIG_STM32_COMP2) || \
@@ -198,7 +184,8 @@ static int stm32_complock(FAR struct stm32_comp_s *priv, bool lock);
 static void comp_shutdown(FAR struct comp_dev_s *dev);
 static int comp_setup(FAR struct comp_dev_s *dev);
 static int comp_read(FAR struct comp_dev_s *dev);
-static int comp_ioctl(FAR struct comp_dev_s *dev, int cmd, unsigned long arg);
+static int comp_ioctl(FAR struct comp_dev_s *dev, int cmd,
+                      unsigned long arg);
 
 /* Initialization */
 
@@ -672,30 +659,36 @@ static int stm32_compconfig(FAR struct stm32_comp_s *priv)
               /* COMP2_INM can be PA2 or PA4 */
 
               stm32_configgpio(GPIO_COMP2_INM);
-              regval |= (GPIO_COMP2_INM == GPIO_COMP2_INM_1 ? COMP_CSR_INMSEL_PA2 : COMP_CSR_INMSEL_PA4);
+              regval |= (GPIO_COMP2_INM == GPIO_COMP2_INM_1 ?
+                         COMP_CSR_INMSEL_PA2 : COMP_CSR_INMSEL_PA4);
               break;
             }
 #endif
+
 #ifdef CONFIG_STM32_COMP4
           case 4:
             {
               /* COMP4_INM can be PB2 or PA4 */
 
               stm32_configgpio(GPIO_COMP4_INM);
-              regval |= (GPIO_COMP4_INM == GPIO_COMP4_INM_1 ? COMP_CSR_INMSEL_PB2 : COMP_CSR_INMSEL_PA4);
+              regval |= (GPIO_COMP4_INM == GPIO_COMP4_INM_1 ?
+                         COMP_CSR_INMSEL_PB2 : COMP_CSR_INMSEL_PA4);
               break;
             }
 #endif
+
 #ifdef CONFIG_STM32_COMP6
           case 6:
             {
               /* COMP6_INM can be PB15 or PA4 */
 
               stm32_configgpio(GPIO_COMP6_INM);
-              regval |= (GPIO_COMP6_INM == GPIO_COMP6_INM_1 ? COMP_CSR_INMSEL_PB15 : COMP_CSR_INMSEL_PA4);
+              regval |= (GPIO_COMP6_INM == GPIO_COMP6_INM_1 ?
+                         COMP_CSR_INMSEL_PB15 : COMP_CSR_INMSEL_PA4);
               break;
             }
 #endif
+
           default :
             return -EINVAL;
           }
@@ -907,7 +900,8 @@ static int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable)
 static int comp_setup(FAR struct comp_dev_s *dev)
 {
 #warning "Missing logic"
-    return OK;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -999,9 +993,9 @@ static int comp_ioctl(FAR struct comp_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-FAR struct comp_dev_s* stm32_compinitialize(int intf)
+FAR struct comp_dev_s *stm32_compinitialize(int intf)
 {
-  FAR struct comp_dev_s  *dev;
+  FAR struct comp_dev_s   *dev;
   FAR struct stm32_comp_s *comp;
   int ret;
 
@@ -1076,7 +1070,9 @@ FAR struct comp_dev_s* stm32_compinitialize(int intf)
 }
 
 #endif /* CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F33XX ||
-        * CONFIG_STM32_STM32F37XX*/
+        * CONFIG_STM32_STM32F37XX
+        */
 
 #endif /* CONFIG_STM32_COMP2 || CONFIG_STM32_COMP4 ||
-        * CONFIG_STM32_COMP6 */
+        * CONFIG_STM32_COMP6
+        */

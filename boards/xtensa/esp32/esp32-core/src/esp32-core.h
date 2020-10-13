@@ -95,6 +95,17 @@ int esp32_mmcsd_initialize(int minor);
  ****************************************************************************/
 
 int esp32_spiflash_init(void);
+/****************************************************************************
+ * Name: esp32_timer_driver_setup
+ *
+ * Description:
+ *   Initialize TIMER driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIMER
+int esp32_timer_driver_setup(FAR const char *devpath, int timer);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H */

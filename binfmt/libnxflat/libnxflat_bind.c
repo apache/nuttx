@@ -454,7 +454,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
           symname = (FAR char *)
             (offset + loadinfo->ispace + sizeof(struct nxflat_hdr_s));
 
-          /* Find the exported symbol value for this this symbol name. */
+          /* Find the exported symbol value for this symbol name. */
 
 #ifdef CONFIG_SYMTAB_ORDEREDBYNAME
           symbol = symtab_findorderedbyname(exports, symname, nexports);

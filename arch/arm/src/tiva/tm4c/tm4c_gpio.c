@@ -687,9 +687,9 @@ static inline void tiva_interrupt(pinconfig_t pinconfig)
    * corresponding bit in the GPIO Interrupt Sense (GPIO IS) register ... is
    * set to detect edges, bits set to High in GPIO IBE configure the
    * corresponding pin to detect both rising and falling edges, regardless
-   * of the corresponding bit in the GPIO Interrupt Event (GPIO IEV) register ...
-   * Clearing a bit configures the pin to be controlled by GPIOIEV. All bits
-   * are cleared by a reset.
+   * of the corresponding bit in the GPIO Interrupt Event (GPIO IEV)
+   * register ... Clearing a bit configures the pin to be controlled by
+   * GPIOIEV. All bits are cleared by a reset.
    */
 
   modifyreg32(base + TIVA_GPIO_IBE_OFFSET, ibeclr, ibeset);
@@ -702,12 +702,12 @@ static inline void tiva_interrupt(pinconfig_t pinconfig)
 
   modifyreg32(base + TIVA_GPIO_IS_OFFSET, isclr, isset);
 
-  /* "The GPIOIEV register is the interrupt event register. Bits set to
-   * High in GPIO IEV configure the corresponding pin to detect rising edges
-   * or high levels, depending on the corresponding bit value in the GPIO
-   * Interrupt Sense (GPIO IS) register... Clearing a bit configures the pin to
-   * detect falling edges or low levels, depending on the corresponding bit
-   * value in GPIOIS. All bits are cleared by a reset.
+  /* "The GPIOIEV register is the interrupt event register. Bits set to High
+   * in GPIO IEV configure the corresponding pin to detect rising edges or
+   * high levels, depending on the corresponding bit value in the GPIO
+   * Interrupt Sense (GPIO IS) register... Clearing a bit configures the pin
+   * to detect falling edges or low levels, depending on the corresponding
+   * bit value in GPIOIS. All bits are cleared by a reset.
    */
 
   modifyreg32(base + TIVA_GPIO_IEV_OFFSET, ievclr, ievset);
@@ -717,13 +717,13 @@ static inline void tiva_interrupt(pinconfig_t pinconfig)
 
   gpioinfo("reg expected actual: [interrupt type=%d]\n", inttype);
 
-  regval = (getreg32(base+TIVA_GPIO_IS_OFFSET) & pin) ? pin : 0;
+  regval = (getreg32(base + TIVA_GPIO_IS_OFFSET) & pin) ? pin : 0;
   gpioinfo("IS  0x%08x 0x%08x\n", isset, regval);
 
-  regval = (getreg32(base+TIVA_GPIO_IBE_OFFSET) & pin) ? pin : 0;
+  regval = (getreg32(base + TIVA_GPIO_IBE_OFFSET) & pin) ? pin : 0;
   gpioinfo("IBE 0x%08x 0x%08x\n", ibeset, regval);
 
-  regval = (getreg32(base+TIVA_GPIO_IEV_OFFSET) & pin) ? pin : 0;
+  regval = (getreg32(base + TIVA_GPIO_IEV_OFFSET) & pin) ? pin : 0;
   gpioinfo("IEV 0x%08x 0x%08x\n", ievset, regval);
 #endif
 }
@@ -824,9 +824,9 @@ int tiva_configgpio(pinconfig_t pinconfig)
   tiva_gpiofunc(base, pinno, &g_funcbits[0]);
   tiva_portcontrol(base, pinno, pinconfig, &g_funcbits[0]);
 
-  /* Then set up pad strengths and pull-ups.  These setups should be done before
-   * setting up the function because some function settings will over-ride these
-   * user options.
+  /* Then set up pad strengths and pull-ups.  These setups should be done
+   * before setting up the function because some function settings will
+   * over-ride these user options.
    */
 
   tiva_gpiopadstrength(base, pin, pinconfig);
@@ -880,19 +880,20 @@ void tiva_gpiowrite(pinconfig_t pinconfig, bool value)
 
   base  = tiva_gpiobaseaddress(port);
 
-  /* "The GPIO DATA register is the data register. In software control mode,
-   *  values written in the GPIO DATA register are transferred onto the GPIO
-   *  port pins if the respective pins have been configured as outputs through
-   *  the GPIO Direction (GPIO DIR) register ...
+  /* "The GPIO DATA register is the data register. In software control
+   *  mode, values written in the GPIO DATA register are transferred onto
+   *  the GPIO port pins if the respective pins have been configured as
+   *  outputs through the GPIO Direction (GPIO DIR) register ...
    *
    * "In order to write to GPIO DATA, the corresponding bits in the mask,
-   *  resulting from the address bus bits [9:2], must be High. Otherwise, the
-   *  bit values remain unchanged by the write.
+   *  resulting from the address bus bits [9:2], must be High. Otherwise,
+   *  the bit values remain unchanged by the write.
    *
    * "... All bits are cleared by a reset."
    */
 
-  putreg32((uint32_t)value << pinno, base + TIVA_GPIO_DATA_OFFSET + (1 << (pinno + 2)));
+  putreg32((uint32_t)value << pinno,
+           base + TIVA_GPIO_DATA_OFFSET + (1 << (pinno + 2)));
 }
 
 /****************************************************************************
@@ -918,18 +919,19 @@ bool tiva_gpioread(pinconfig_t pinconfig)
 
   base = tiva_gpiobaseaddress(port);
 
-  /* "... the values read from this register are determined for each bit
-   *  by the mask bit derived from the address used to access the data register,
-   *  bits [9:2]. Bits that are 1 in the address mask cause the corresponding
-   *  bits in GPIODATA to be read, and bits that are 0 in the address mask cause
-   *  the corresponding bits in GPIO DATA to be read as 0, regardless of their
-   *  value.
+  /*  "... the values read from this register are determined for each bit by
+   *  the mask bit derived from the address used to access the data
+   *  register, bits [9:2]. Bits that are 1 in the address mask cause the
+   *  corresponding bits in GPIODATA to be read, and bits that are 0 in the
+   *  address mask cause the corresponding bits in GPIO DATA to be read as
+   *  0, regardless of their value.
    *
-   * "A read from GPIO DATA returns the last bit value written if the respective
-   *  pins are configured as outputs, or it returns the value on the
-   *  corresponding input pin when these are configured as inputs. All bits
-   *  are cleared by a reset."
+   * "A read from GPIO DATA returns the last bit value written if the
+   * respective pins are configured as outputs, or it returns the value on
+   * the corresponding input pin when these are configured as inputs. All
+   * bits are cleared by a reset."
    */
+
   return (getreg32(base + TIVA_GPIO_DATA_OFFSET + (1 << (pinno + 2))) != 0);
 }
 
@@ -978,5 +980,6 @@ void tiva_gpio_lockport(pinconfig_t pinconfig, bool lock)
 
   /* Restrict access to the TIVA_GPIO_CR_OFFSET register */
 
-  modifyreg32(base + TIVA_GPIO_LOCK_OFFSET,  GPIO_LOCK_UNLOCK, GPIO_LOCK_LOCKED);
+  modifyreg32(base + TIVA_GPIO_LOCK_OFFSET, GPIO_LOCK_UNLOCK,
+              GPIO_LOCK_LOCKED);
 }

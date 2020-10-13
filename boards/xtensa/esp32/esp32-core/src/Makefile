@@ -43,6 +43,9 @@ CSRCS = esp32_boot.c esp32_bringup.c
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += esp32_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += esp32_reset.c
+endif
 endif
 
 ifeq ($(CONFIG_ESP32_SPI),y)
@@ -55,6 +58,12 @@ endif
 
 ifeq ($(CONFIG_ESP32_SPIFLASH),y)
 CSRCS += esp32_spiflash.c
+endif
+
+ifeq ($(CONFIG_TIMER),y)
+ifeq ($(CONFIG_ESP32_TIMER),y)
+CSRCS += esp32_timer.c
+endif
 endif
 
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template.ld

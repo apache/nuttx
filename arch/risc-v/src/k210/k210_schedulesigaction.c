@@ -159,7 +159,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               CURRENT_REGS[REG_EPC]     = (uintptr_t)up_sigdeliver;
 
               int_ctx                     = CURRENT_REGS[REG_INT_CTX];
-              int_ctx                    &= ~MSTATUS_MIE;
+              int_ctx                    &= ~MSTATUS_MPIE;
 #ifdef CONFIG_BUILD_PROTECTED
               int_ctx                    |= MSTATUS_MPPM;
 #endif
@@ -203,7 +203,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_EPC]      = (uintptr_t)up_sigdeliver;
 
           int_ctx                     = tcb->xcp.regs[REG_INT_CTX];
-          int_ctx                    &= ~MSTATUS_MIE;
+          int_ctx                    &= ~MSTATUS_MPIE;
 
           tcb->xcp.regs[REG_INT_CTX]  = int_ctx;
 
@@ -304,7 +304,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                   tcb->xcp.regs[REG_EPC]      = (uintptr_t)up_sigdeliver;
 
                   int_ctx                     = tcb->xcp.regs[REG_INT_CTX];
-                  int_ctx                    &= ~MSTATUS_MIE;
+                  int_ctx                    &= ~MSTATUS_MPIE;
 
                   tcb->xcp.regs[REG_INT_CTX] = int_ctx;
                 }
@@ -329,7 +329,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                   CURRENT_REGS[REG_EPC]     = (uintptr_t)up_sigdeliver;
 
                   int_ctx                   = CURRENT_REGS[REG_INT_CTX];
-                  int_ctx                   &= ~MSTATUS_MIE;
+                  int_ctx                   &= ~MSTATUS_MPIE;
 #ifdef CONFIG_BUILD_PROTECTED
                   int_ctx                   |= MSTATUS_MPPM;
 #endif
@@ -400,7 +400,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_EPC]      = (uintptr_t)up_sigdeliver;
 
           int_ctx                     = tcb->xcp.regs[REG_INT_CTX];
-          int_ctx                    &= ~MSTATUS_MIE;
+          int_ctx                    &= ~MSTATUS_MPIE;
 
           tcb->xcp.regs[REG_INT_CTX]  = int_ctx;
         }

@@ -1919,8 +1919,8 @@ static int pwm_frequency_update(FAR struct pwm_lowerhalf_s *dev,
    *
    *   reload = pclk / presc / frequency
    *
-   * There are many solutions to this this, but the best solution will be the
-   * one that has the largest reload value and the smallest prescaler value.
+   * There are many solutions to this, but the best solution will be the one
+   * that has the largest reload value and the smallest prescaler value.
    * That is the solution that should give us the most accuracy in the timer
    * control.  Subject to:
    *

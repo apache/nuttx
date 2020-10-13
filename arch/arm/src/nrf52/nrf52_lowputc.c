@@ -113,19 +113,189 @@ static const struct uart_config_s g_console_config =
  *
  ****************************************************************************/
 
-#ifdef HAVE_UART_DEVICE
 static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
 {
   uint32_t br = 0;
 
-  if (config->baud == 115200)
+  switch (config->baud)
     {
-      br = UART_BAUDRATE_115200;
+      case 1200:
+        {
+          br = UART_BAUDRATE_1200;
+          break;
+        }
+
+      case 2400:
+        {
+          br = UART_BAUDRATE_2400;
+          break;
+        }
+
+      case 4800:
+        {
+          br = UART_BAUDRATE_4800;
+          break;
+        }
+
+      case 9600:
+        {
+          br = UART_BAUDRATE_9600;
+          break;
+        }
+
+      case 14400:
+        {
+          br = UART_BAUDRATE_14400;
+          break;
+        }
+
+      case 19200:
+        {
+          br = UART_BAUDRATE_19200;
+          break;
+        }
+
+      case 28800:
+        {
+          br = UART_BAUDRATE_28800;
+          break;
+        }
+
+#ifdef UART_BAUDRATE_31250
+      case 31250:
+        {
+          br = UART_BAUDRATE_31250;
+          break;
+        }
+#endif
+
+      case 38400:
+        {
+          br = UART_BAUDRATE_38400;
+          break;
+        }
+
+#ifdef UART_BAUDRATE_56000
+      case 56000:
+        {
+          br = UART_BAUDRATE_56000;
+          break;
+        }
+#endif
+
+      case 57600:
+        {
+          br = UART_BAUDRATE_57600;
+          break;
+        }
+
+      case 76000:
+        {
+          br = UART_BAUDRATE_76000;
+          break;
+        }
+
+      case 115200:
+        {
+          br = UART_BAUDRATE_115200;
+          break;
+        }
+
+      case 230400:
+        {
+          br = UART_BAUDRATE_230400;
+          break;
+        }
+
+      case 250000:
+        {
+          br = UART_BAUDRATE_250000;
+          break;
+        }
+
+      case 460800:
+        {
+          br = UART_BAUDRATE_460800;
+          break;
+        }
+
+      case 921600:
+        {
+          br = UART_BAUDRATE_921600;
+          break;
+        }
+
+      default:
+        {
+          DEBUGASSERT(0);
+          break;
+        }
     }
 
   putreg32(br, base + NRF52_UART_BAUDRATE_OFFSET);
 }
+
+/****************************************************************************
+ * Name: nrf52_setparity
+ ****************************************************************************/
+
+static void nrf52_setparity(uintptr_t base,
+                            const struct uart_config_s *config)
+{
+  uint32_t regval = 0;
+
+  regval = getreg32(base + NRF52_UART_CONFIG_OFFSET);
+
+  if (config->parity == 2)
+    {
+      /* Include even parity */
+
+      regval |= UART_CONFIG_PARITY;
+    }
+  else
+    {
+      /* Exclude parity */
+
+      regval &= ~UART_CONFIG_PARITY;
+    }
+
+  putreg32(regval, base + NRF52_UART_CONFIG_OFFSET);
+}
+
+/****************************************************************************
+ * Name: nrf52_setstops
+ ****************************************************************************/
+
+#ifdef HAVE_UART_STOPBITS
+static void nrf52_setstops(uintptr_t base,
+                           const struct uart_config_s *config)
+{
+  uint32_t regval = 0;
+
+  regval = getreg32(base + NRF52_UART_CONFIG_OFFSET);
+
+  if (config->stopbits2 == true)
+    {
+      regval |= UART_CONFIG_STOP;
+    }
+  else
+    {
+      regval &= ~UART_CONFIG_STOP;
+    }
+
+  putreg32(regval, base + NRF52_UART_CONFIG_OFFSET);
+}
 #endif
+
+/****************************************************************************
+ * Name: nrf52_sethwflow
+ ****************************************************************************/
+
+static void nrf52_sethwflow(uintptr_t base,
+                            const struct uart_config_s *config)
+{
+  /* TODO */
+}
 
 /****************************************************************************
  * Public Functions
@@ -174,9 +344,9 @@ void nrf52_usart_configure(uintptr_t base,
   putreg32(1, base + NRF52_UART_TASKS_STOPTX_OFFSET);
   putreg32(NRF52_UART_ENABLE_DISABLE, base + NRF52_UART_ENABLE_OFFSET);
 
-  /* Configure baud */
+  /* Set UART format */
 
-  nrf52_setbaud(base, config);
+  nrf52_usart_setformat(base, config);
 
   /* Config GPIO pins for uart */
 
@@ -262,4 +432,34 @@ void arm_lowputc(char ch)
 
   putreg32(1, CONSOLE_BASE + NRF52_UART_TASKS_STOPTX_OFFSET);
 #endif
+}
+
+/****************************************************************************
+ * Name: nrf52_usart_setformat
+ *
+ * Description:
+ *   Set the USART line format and speed.
+ *
+ ****************************************************************************/
+
+void nrf52_usart_setformat(uintptr_t base,
+                           FAR const struct uart_config_s *config)
+{
+  /* Configure baud */
+
+  nrf52_setbaud(base, config);
+
+  /* Configure polarity */
+
+  nrf52_setparity(base, config);
+
+#ifdef HAVE_UART_STOPBITS
+  /* Configure STOP bits */
+
+  nrf52_setstops(base, config);
+#endif
+
+  /* Configure hardware flow control */
+
+  nrf52_sethwflow(base, config);
 }

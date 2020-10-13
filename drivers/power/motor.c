@@ -2,35 +2,20 @@
  * drivers/power/motor.c
  * Upper-half, character driver for motor control
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -63,7 +48,8 @@ static ssize_t motor_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static ssize_t motor_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen);
-static int     motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     motor_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -108,8 +94,8 @@ static int motor_open(FAR struct file *filep)
   if (ret >= 0)
     {
       /* Increment the count of references to the device.  If this the first
-       * time that the driver has been opened for this device, then initialize
-       * the device.
+       * time that the driver has been opened for this device, then
+       * initialize the device.
        */
 
       tmp = dev->ocount + 1;
@@ -121,7 +107,9 @@ static int motor_open(FAR struct file *filep)
         }
       else
         {
-          /* Check if this is the first time that the driver has been opened. */
+          /* Check if this is the first time that the driver has been
+           * opened.
+           */
 
           if (tmp == 1)
             {
@@ -181,7 +169,7 @@ static int motor_close(FAR struct file *filep)
 
           /* Free the IRQ and disable the motor device */
 
-          flags = enter_critical_section();       /* Disable interrupts */
+          flags = enter_critical_section();      /* Disable interrupts */
           dev->ops->shutdown(dev);               /* Disable the motor */
           leave_critical_section(flags);
 
@@ -196,7 +184,8 @@ static int motor_close(FAR struct file *filep)
  * Name: motor_read
  ****************************************************************************/
 
-static ssize_t motor_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t motor_read(FAR struct file *filep, FAR char *buffer,
+                          size_t buflen)
 {
   return 1;
 }
@@ -444,7 +433,8 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           if (params->position < 0.0 ||
               params->position > motor->limits.position)
             {
-              pwrerr("ERROR: params->position > limits.position: %.2f > %.2f\n",
+              pwrerr("ERROR: params->position > limits.position: "
+                     "%.2f > %.2f\n",
                      params->position, motor->limits.position);
 
               ret = -EPERM;
@@ -455,7 +445,8 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_MOTOR_HAVE_SPEED
           /* Check speed configuration */
 
-          if (motor->limits.speed > 0.0 && params->speed > motor->limits.speed)
+          if (motor->limits.speed > 0.0 &&
+              params->speed > motor->limits.speed)
             {
               pwrerr("ERROR: params->speed > limits.speed: %.2f > %.2f\n",
                      params->speed, motor->limits.speed);
@@ -468,7 +459,8 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_MOTOR_HAVE_TORQUE
           /* Check torque configuration */
 
-          if (motor->limits.torque > 0.0 && params->torque > motor->limits.torque)
+          if (motor->limits.torque > 0.0 &&
+              params->torque > motor->limits.torque)
             {
               pwrerr("ERROR: params->torque > limits.torque: %.2f > %.2f\n",
                      params->torque, motor->limits.torque);
@@ -481,7 +473,8 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_MOTOR_HAVE_FORCE
           /* Check force configuration */
 
-          if (motor->limits.force > 0.0 && params->force > motor->limits.force)
+          if (motor->limits.force > 0.0 &&
+              params->force > motor->limits.force)
             {
               pwrerr("ERROR: params->force > limits.force: %.2f > %.2f\n",
                      params->force, motor->limits.force);
@@ -519,7 +512,8 @@ errout:
  * Name: motor_register
  ****************************************************************************/
 
-int motor_register(FAR const char *path, FAR struct motor_dev_s *dev, FAR void *lower)
+int motor_register(FAR const char *path, FAR struct motor_dev_s *dev,
+                   FAR void *lower)
 {
   int ret;
 

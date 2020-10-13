@@ -1,35 +1,20 @@
 /************************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_mdma.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ************************************************************************************/
 
@@ -509,7 +494,9 @@
 
 #define MDMA_CXISR_GIF(x)         (1 << x)
 
-/* MDMA channel x interrupt/status register and channel x interrupt flag clear register */
+/* MDMA channel x interrupt/status register and channel x interrupt flag clear
+ * register
+ */
 
 #define MDMA_INT_TEIF             (1 << 0) /* Bit 0: Channel X transfer error flag */
 #define BDMA_INT_CTCIF            (1 << 1) /* Bit 1: Channel X transfer complete flag */
@@ -530,60 +517,60 @@
 
 /* MDMA channel x control register */
 
-#define MDMA_CCR_EN               (0)      /* Bit 0: Channel enable / flag channel ready */
-#define MDMA_CCR_TEIE             (1)      /* Bit 1: Transfer error interrupt enable */
-#define MDMA_CCR_CTCIE            (2)      /* Bit 2: Channel transfer complete interrupt enable */
-#define MDMA_CCR_BRTIE            (3)      /* Bit 3: Block repeat transfer interrupt enable */
-#define MDMA_CCR_BTIE             (4)      /* Bit 4: Block transfer interrupt enable */
-#define MDMA_CCR_TCIE             (5)      /* Bit 5: Buffer transfer complete interrupt enable */
-#define MDMA_CCR_PL_SHIFT         (6)      /* Bis 6-7: Priority level */
+#define MDMA_CCR_EN               (0)                      /* Bit 0: Channel enable / flag channel ready */
+#define MDMA_CCR_TEIE             (1)                      /* Bit 1: Transfer error interrupt enable */
+#define MDMA_CCR_CTCIE            (2)                      /* Bit 2: Channel transfer complete interrupt enable */
+#define MDMA_CCR_BRTIE            (3)                      /* Bit 3: Block repeat transfer interrupt enable */
+#define MDMA_CCR_BTIE             (4)                      /* Bit 4: Block transfer interrupt enable */
+#define MDMA_CCR_TCIE             (5)                      /* Bit 5: Buffer transfer complete interrupt enable */
+#define MDMA_CCR_PL_SHIFT         (6)                      /* Bis 6-7: Priority level */
 #define MDMA_CCR_PL_MASK          (3 << MDMA_CCR_PL_SHIFT)
 #  define MDMA_CCR_PRILO          (0 << MDMA_CCR_PL_SHIFT) /* 00: Low */
 #  define MDMA_CCR_PRIMED         (1 << MDMA_CCR_PL_SHIFT) /* 01: Medium */
 #  define MDMA_CCR_PRIHI          (2 << MDMA_CCR_PL_SHIFT) /* 10: High */
 #  define MDMA_CCR_PRIVERYHI      (3 << MDMA_CCR_PL_SHIFT) /* 11: Very high */
-#define MDMA_CCR_BEX              (12)      /* Bit 12: Byte endianness exchange */
-#define MDMA_CCR_HEX              (13)      /* Bit 13: Half word endianness exchange */
-#define MDMA_CCR_WEX              (14)      /* Bit 14: Word endianness exchange */
-#define MDMA_CCR_SWRQ             (16)      /* Bit 16: Software request */
+#define MDMA_CCR_BEX              (12)                     /* Bit 12: Byte endianness exchange */
+#define MDMA_CCR_HEX              (13)                     /* Bit 13: Half word endianness exchange */
+#define MDMA_CCR_WEX              (14)                     /* Bit 14: Word endianness exchange */
+#define MDMA_CCR_SWRQ             (16)                     /* Bit 16: Software request */
 
 /* MDMA channel x transfer configuration register */
 
-#define MDMA_CTCR_SINC_SHIFT      (0)      /* Bits 0-1: Source increment mode */
+#define MDMA_CTCR_SINC_SHIFT      (0)                         /* Bits 0-1: Source increment mode */
 #define MDMA_CTCR_SINC_MASK       (3 << MDMA_CTCR_SINC_SHIFT)
 #  define MDMA_CTCR_SINC_FIXED    (0 << MDMA_CTCR_SINC_SHIFT) /* 00: */
 #  define MDMA_CTCR_SINC_INCR     (2 << MDMA_CTCR_SINC_SHIFT) /* 10: */
 #  define MDMA_CTCR_SINC_DECR     (3 << MDMA_CTCR_SINC_SHIFT) /* 11: */
-#define MDMA_CTCR_DINC_SHIFT      (2)      /* Bits 2-3: Destination increment mode */
+#define MDMA_CTCR_DINC_SHIFT      (2)                         /* Bits 2-3: Destination increment mode */
 #define MDMA_CTCR_DINC_MASK       (3 << MDMA_CTCR_DINC_SHIFT)
 #  define MDMA_CTCR_DINC_FIXED    (0 << MDMA_CTCR_DINC_SHIFT) /* 00: */
 #  define MDMA_CTCR_DINC_INCR     (2 << MDMA_CTCR_DINC_SHIFT) /* 10: */
 #  define MDMA_CTCR_DINC_DECR     (3 << MDMA_CTCR_DINC_SHIFT) /* 11: */
-#define MDMA_CTCR_SSIZE_SHIFT     (4)      /* Bits 4-5: Source data size */
+#define MDMA_CTCR_SSIZE_SHIFT     (4)                         /* Bits 4-5: Source data size */
 #define MDMA_CTCR_SSIZE_MASK      (3 << MDMA_CTCR_SSIZE_SHIFT)
 #  define MDMA_CTCR_SSIZE_8BITS   (0 << MDMA_CTCR_SSIZE_SHIFT) /* 00: */
 #  define MDMA_CTCR_SSIZE_16BITS  (1 << MDMA_CTCR_SSIZE_SHIFT) /* 01: */
 #  define MDMA_CTCR_SSIZE_32BITS  (2 << MDMA_CTCR_SSIZE_SHIFT) /* 10: */
 #  define MDMA_CTCR_SSIZE_64BITS  (3 << MDMA_CTCR_SSIZE_SHIFT) /* 11: */
-#define MDMA_CTCR_DSIZE_SHIFT     (6)      /* Bits 6-7: Destination data size */
+#define MDMA_CTCR_DSIZE_SHIFT     (6)                          /* Bits 6-7: Destination data size */
 #define MDMA_CTCR_DSIZE_MASK      (3 << MDMA_CTCR_DSIZE_SHIFT)
 #  define MDMA_CTCR_DSIZE_8BITS   (0 << MDMA_CTCR_DSIZE_SHIFT) /* 00: */
 #  define MDMA_CTCR_DSIZE_16BITS  (1 << MDMA_CTCR_DSIZE_SHIFT) /* 01: */
 #  define MDMA_CTCR_DSIZE_32BITS  (2 << MDMA_CTCR_DSIZE_SHIFT) /* 10: */
 #  define MDMA_CTCR_DSIZE_64BITS  (3 << MDMA_CTCR_DSIZE_SHIFT) /* 11: */
-#define MDMA_CTCR_SINCOS_SHIFT    (8)      /* Bits 8-9: Source increment offset size */
+#define MDMA_CTCR_SINCOS_SHIFT    (8)                          /* Bits 8-9: Source increment offset size */
 #define MDMA_CTCR_SINCOS_MASK     (3 << MDMA_CTCR_SINCOS_SHIFT)
 #  define MDMA_CTCR_SINCOS_8BITS  (0 << MDMA_CTCR_SINCOS_SHIFT) /* 00: */
 #  define MDMA_CTCR_SINCOS_16BITS (1 << MDMA_CTCR_SINCOS_SHIFT) /* 01: */
 #  define MDMA_CTCR_SINCOS_32BITS (2 << MDMA_CTCR_SINCOS_SHIFT) /* 10: */
 #  define MDMA_CTCR_SINCOS_64BITS (3 << MDMA_CTCR_SINCOS_SHIFT) /* 11: */
-#define MDMA_CTCR_DINCOS_SHIFT    (10)      /* Bits 10-11: Destination increment offset size */
+#define MDMA_CTCR_DINCOS_SHIFT    (10)                          /* Bits 10-11: Destination increment offset size */
 #define MDMA_CTCR_DINCOS_MASK     (7 << MDMA_CTCR_DINCOS_SHIFT)
 #  define MDMA_CTCR_DINCOS_8BITS  (0 << MDMA_CTCR_DINCOS_SHIFT) /* 00: */
 #  define MDMA_CTCR_DINCOS_16BITS (1 << MDMA_CTCR_DINCOS_SHIFT) /* 01: */
 #  define MDMA_CTCR_DINCOS_32BITS (2 << MDMA_CTCR_DINCOS_SHIFT) /* 10: */
 #  define MDMA_CTCR_DINCOS_64BITS (3 << MDMA_CTCR_DINCOS_SHIFT) /* 11: */
-#define MDMA_CTCR_SBURST_SHIFT    (12)      /* Bits 12-14: Source burst transfer configuration */
+#define MDMA_CTCR_SBURST_SHIFT    (12)                          /* Bits 12-14: Source burst transfer configuration */
 #define MDMA_CTCR_SBURST_MASK     (7 << MDMA_CTCR_SBURST_SHIFT)
 #  define MDMA_CTCR_SBURST_1      (0 << MDMA_CTCR_SBURST_SHIFT) /* 000: */
 #  define MDMA_CTCR_SBURST_2      (1 << MDMA_CTCR_SBURST_SHIFT) /* 001: */
@@ -593,7 +580,7 @@
 #  define MDMA_CTCR_SBURST_32     (5 << MDMA_CTCR_SBURST_SHIFT) /* 101: */
 #  define MDMA_CTCR_SBURST_64     (6 << MDMA_CTCR_SBURST_SHIFT) /* 110: */
 #  define MDMA_CTCR_SBURST_128    (7 << MDMA_CTCR_SBURST_SHIFT) /* 111: */
-#define MDMA_CTCR_DBURST_SHIFT    (15)      /* Bits 15-16: Destination burst transfer configuration */
+#define MDMA_CTCR_DBURST_SHIFT    (15)                          /* Bits 15-16: Destination burst transfer configuration */
 #define MDMA_CTCR_DBURST_MASK     (7 << MDMA_CTCR_DBURST_SHIFT)
 #  define MDMA_CTCR_DBURST_1      (0 << MDMA_CTCR_DBURST_SHIFT) /* 000: */
 #  define MDMA_CTCR_DBURST_2      (1 << MDMA_CTCR_DBURST_SHIFT) /* 001: */
@@ -603,23 +590,23 @@
 #  define MDMA_CTCR_DBURST_32     (5 << MDMA_CTCR_DBURST_SHIFT) /* 101: */
 #  define MDMA_CTCR_DBURST_64     (6 << MDMA_CTCR_DBURST_SHIFT) /* 110: */
 #  define MDMA_CTCR_DBURST_128    (7 << MDMA_CTCR_DBURST_SHIFT) /* 111: */
-#define MDMA_CTCR_TLEN_SHIFT      (18)      /* Bits 18-24: Buffer transfer length - 1  */
+#define MDMA_CTCR_TLEN_SHIFT      (18)                          /* Bits 18-24: Buffer transfer length - 1  */
 #define MDMA_CTCR_TLEN_MASK       (0x7f << MDMA_CTCR_TLEN_SHIFT)
 #  define MDMA_CTCR_TLEN(len)     (((len-1) << MDMA_CTCR_TLEN_SHIFT) & MDMA_CTCR_TLEN_MASK)
-#define MDMA_CTCR_PKE             (25) /* Bit 25: Pack enable */
-#define MDMA_CTCR_PAM_SHIFT       (26) /* Bits 26-27: Padding/alignment mode */
+#define MDMA_CTCR_PKE             (25)                          /* Bit 25: Pack enable */
+#define MDMA_CTCR_PAM_SHIFT       (26)                          /* Bits 26-27: Padding/alignment mode */
 #define MDMA_CTCR_PAM_MASK        (3 << MDMA_CTCR_PAM_SHIFT)
-#  define MDMA_CTCR_PAM_RIGHT     (0 << MDMA_CTCR_PAM_SHIFT) /* 00: */
-#  define MDMA_CTCR_PAM_SINRIGHT  (1 << MDMA_CTCR_PAM_SHIFT) /* 01: */
-#  define MDMA_CTCR_PAM_LEFT      (2 << MDMA_CTCR_PAM_SHIFT) /* 10: */
-#define MDMA_CTCR_TRGM_SHIFT      (28) /* Bits 28-29: Trigger mode */
+#  define MDMA_CTCR_PAM_RIGHT     (0 << MDMA_CTCR_PAM_SHIFT)    /* 00: */
+#  define MDMA_CTCR_PAM_SINRIGHT  (1 << MDMA_CTCR_PAM_SHIFT)    /* 01: */
+#  define MDMA_CTCR_PAM_LEFT      (2 << MDMA_CTCR_PAM_SHIFT)    /* 10: */
+#define MDMA_CTCR_TRGM_SHIFT      (28)                          /* Bits 28-29: Trigger mode */
 #define MDMA_CTCR_TRGM_MASK       (3 << MDMA_CTCR_TRGM_SHIFT)
-#  define MDMA_CTCR_TRGM_BUFFER   (0 << MDMA_CTCR_TRGM_SHIFT) /* 00: */
-#  define MDMA_CTCR_TRGM_BLOCK    (1 << MDMA_CTCR_TRGM_SHIFT) /* 01: */
-#  define MDMA_CTCR_TRGM_RBLOCK   (2 << MDMA_CTCR_TRGM_SHIFT) /* 10: */
-#  define MDMA_CTCR_TRGM_DATA     (3 << MDMA_CTCR_TRGM_SHIFT) /* 11: */
-#define MDMA_CTCR_SWRM            (30) /* Bit 30: Software request mode */
-#define MDMA_CTCR_BWM             (31) /* Bit 31: Bufferable write mode */
+#  define MDMA_CTCR_TRGM_BUFFER   (0 << MDMA_CTCR_TRGM_SHIFT)   /* 00: */
+#  define MDMA_CTCR_TRGM_BLOCK    (1 << MDMA_CTCR_TRGM_SHIFT)   /* 01: */
+#  define MDMA_CTCR_TRGM_RBLOCK   (2 << MDMA_CTCR_TRGM_SHIFT)   /* 10: */
+#  define MDMA_CTCR_TRGM_DATA     (3 << MDMA_CTCR_TRGM_SHIFT)   /* 11: */
+#define MDMA_CTCR_SWRM            (30)                          /* Bit 30: Software request mode */
+#define MDMA_CTCR_BWM             (31)                          /* Bit 31: Bufferable write mode */
 
 /* MDMA channel x block number of data register */
 

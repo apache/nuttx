@@ -24,6 +24,7 @@
 
 #include <nuttx/note/note_driver.h>
 #include <nuttx/note/noteram_driver.h>
+#include <nuttx/note/notectl_driver.h>
 
 /****************************************************************************
  * Public Functions
@@ -50,6 +51,14 @@ int note_register(void)
 
 #ifdef CONFIG_DRIVER_NOTERAM
   ret = noteram_register();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_DRIVER_NOTECTL
+  ret = notectl_register();
   if (ret < 0)
     {
       return ret;

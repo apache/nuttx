@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/risc-v/src/nr5m100/hardware/nr5_timer.h
  *
  *   Copyright (C) 2016 Ken Pettit. All rights reserved.
@@ -28,10 +28,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef ARCH_RISCV_SRC_NR5M100_CHIP_NR5M1XX_TIMERA_H
 #define ARCH_RISCV_SRC_NR5M100_CHIP_NR5M1XX_TIMERA_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include "nr5m1xx_memorymap.h"
 
@@ -122,7 +126,7 @@
 #define NR5_TIMER5_TAIV_OFFSET            (NR5_TIMER5_BASE+NR5_TIMERA_TAIV_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ********************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Control register TACTL Bit definitions */
 

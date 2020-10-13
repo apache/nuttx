@@ -20,7 +20,7 @@ config NX_LCDDRIVER
 	---help---
 		By default, the NX graphics system uses the frame buffer driver interface
 		defined in include/nuttx/video/fb.h.  However, if LCD is support is enabled,
-		this this option is provide to select, instead, the LCD driver interface
+		this option is provided to select, instead, the LCD driver interface
 		defined in include/nuttx/lcd/lcd.h.
 
 config NX_NDISPLAYS
@@ -495,11 +495,11 @@ config NXSTART_EXTERNINIT
 	select LCD_EXTERNINIT if LCD && LCD_FRAMEBUFFER && NX_LCDDRIVER
 	---help---
 		Define to support external display initialization by platform-
-		specific code.  This this option is defined, then nxmu_start()
-		will call board_graphics_setup(CONFIG_NXSTART_DEVNO) to initialize
-		the graphics device.  This option is necessary if display is used
-		that cannot be initialized using the standard LCD or framebuffer
-		interfaces.
+		specific code.  If this option is defined, then nxmu_start()
+		will call board_graphics_setup(CONFIG_NXSTART_DEVNO) to
+		initialize the graphics device.  This option is necessary if
+		display is used that cannot be initialized using the standard
+		LCD or framebuffer interfaces.
 
 config NXSTART_SERVERPRIO
 	int "NX Server priority"
