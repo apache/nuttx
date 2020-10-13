@@ -369,23 +369,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
   FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)pvconn;
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
 
-  DEBUGASSERT(dev != NULL && conn != NULL && psock != NULL);
-
-  /* The UDP socket should be bound to a device.  Make sure that the polling
-   * device is the one that we are bound to.
-   *
-   * REVISIT:  There is a logical error here for the case where there are
-   * multiple network devices.  In that case, the packets may need to be sent
-   * in a different order than they were queued.  The packet we may need to
-   * send on this device may not be at the head of the list.  Forcing FIFO
-   * packet transmission could degrade performance!
-   */
-
-  DEBUGASSERT(conn->dev != NULL);
-  if (dev != conn->dev)
-    {
-      return flags;
-    }
+  DEBUGASSERT(dev != NULL && psock != NULL);
 
   ninfo("flags: %04x\n", flags);
 
@@ -399,7 +383,24 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
        * the next transfer.
        */
 
-      sendto_writebuffer_release(psock, conn);
+      sendto_writebuffer_release(psock, psock->s_conn);
+      return flags;
+    }
+
+  /* The UDP socket should be bound to a device.  Make sure that the polling
+   * device is the one that we are bound to.
+   *
+   * REVISIT:  There is a logical error here for the case where there are
+   * multiple network devices.  In that case, the packets may need to be sent
+   * in a different order than they were queued.  The packet we may need to
+   * send on this device may not be at the head of the list.  Forcing FIFO
+   * packet transmission could degrade performance!
+   */
+
+  DEBUGASSERT(conn != NULL);
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
       return flags;
     }
 
