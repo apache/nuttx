@@ -48,6 +48,10 @@
 
 #if defined(CONFIG_KINETIS_I2C0)
 
+# if defined(CONFIG_SENSORS_FXOS8700CQ)
+#  include "nuttx/sensors/fxos8700cq.h"
+# endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -84,6 +88,9 @@ int k64_i2cdev_initialize(void)
     {
 #ifdef CONFIG_I2C_DRIVER
       ret = i2c_register(g_i2c0_dev, 0);
+#if defined(CONFIG_SENSORS_FXOS8700CQ)
+      fxos8700cq_register("/dev/accel0", g_i2c0_dev);
+#endif
 #endif
     }
 #endif
