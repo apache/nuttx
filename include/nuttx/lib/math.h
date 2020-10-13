@@ -443,6 +443,8 @@ long double truncl (long double x);
 #define nanl(x) ((long double)(NAN))
 #endif
 
+#define	signbit(x)	__builtin_signbit(x)
+
 #if defined(__cplusplus)
 }
 #endif
