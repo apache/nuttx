@@ -131,6 +131,13 @@ config SENSORS_DHTXX
 	---help---
 		Enable driver support for the DHTxx humidity/temperature sensor.
 
+config SENSORS_FXOS8700CQ
+	bool "NXP FXOS8700CQ Motion Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the NXP FXOS8700CQ Motion sensor
+
 config SENSORS_HCSR04
 	bool "HC-SR04 Distance Measurement Sensor"
 	default n

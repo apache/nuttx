@@ -69,6 +69,10 @@ ifeq ($(CONFIG_SENSORS_AS726X),y)
   CSRCS += as726x.c
 endif
 
+ifeq ($(CONFIG_SENSORS_FXOS8700CQ),y)
+  CSRCS += fxos8700cq.c
+endif
+
 ifeq ($(CONFIG_SENSORS_KXTJ9),y)
   CSRCS += kxtj9.c
 endif
