@@ -34,10 +34,13 @@
 #include <sys/time.h>
 #include "hardware/esp32_rtccntl.h"
 #include "hardware/esp32_uart.h"
+#include "hardware/esp32_dport.h"
 #include "xtensa.h"
 #include "xtensa_attr.h"
 #include "esp32_rtc.h"
 #include "esp32_clockconfig.h"
+#include "esp32_pm.h"
+#include "esp32_resetcause.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,6 +65,7 @@
 /* Extra time it takes to enter and exit light sleep and deep sleep */
 
 #define LIGHT_SLEEP_TIME_OVERHEAD_US (250 + 30 * 240 / CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ)
+#define DEEP_SLEEP_TIME_OVERHEAD_US  (250 + 100 * 240 / CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ)
 
 #define CONFIG_ESP32_DEEP_SLEEP_WAKEUP_DELAY 2000
 
@@ -79,6 +83,9 @@
 #define RTC_TOUCH_TRIG_EN     BIT(8)  /* Touch wakeup */
 #define RTC_ULP_TRIG_EN       BIT(9)  /* ULP wakeup */
 #define RTC_BT_TRIG_EN        BIT(10) /* BT wakeup (light sleep only) */
+
+#define RTC_ENTRY_ADDR_REG    RTC_CNTL_STORE6_REG
+#define RTC_MEMORY_CRC_REG    RTC_CNTL_STORE7_REG
 
 /****************************************************************************
  * Private Types
@@ -141,6 +148,10 @@ struct rtc_vddsdio_config_s
   uint32_t drefl : 2;     /* Tuning parameter for VDDSDIO regulator */
 };
 
+/* Function type for stub to run on wake from sleep */
+
+typedef void (*esp_deep_sleep_wake_stub_fn_t)(void);
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -158,6 +169,11 @@ static int IRAM_ATTR esp32_get_vddsdio_config(
 int IRAM_ATTR esp32_light_sleep_inner(uint32_t pd_flags,
                       uint32_t time_us, struct rtc_vddsdio_config_s config);
 static int IRAM_ATTR esp32_configure_cpu_freq(uint32_t cpu_freq_mhz);
+static inline bool IRAM_ATTR esp32_ptr_executable(const void *p);
+static void esp32_set_deep_sleep_wake_stub(
+                      esp_deep_sleep_wake_stub_fn_t new_stub);
+static void RTC_IRAM_ATTR esp32_wake_deep_sleep(void);
+static esp_deep_sleep_wake_stub_fn_t esp32_get_deep_sleep_wake_stub(void);
 
 /****************************************************************************
  * Public Data
@@ -180,7 +196,23 @@ static struct esp32_sleep_config_t s_config =
  * Private Functions
  ****************************************************************************/
 
+/* CPU do while loop for some time. */
+
 extern void ets_delay_us(uint32_t us);
+
+/* Set CRC of Fast RTC memory 0-0x7ff into RTC STORE7. */
+
+extern void set_rtc_memory_crc(void);
+
+/* Set the real CPU ticks per us to the ets,
+ * so that ets_delay_us will be accurate.
+ */
+
+extern void ets_update_cpu_frequency_rom(uint32_t ticks_per_us);
+
+/* Get xtal_freq value, If value not stored in RTC_STORE5, than store. */
+
+extern uint32_t ets_get_detected_xtal_freq(void);
 
 /****************************************************************************
  * Name: esp32_uart_tx_wait_idle
@@ -655,6 +687,131 @@ static int IRAM_ATTR esp32_configure_cpu_freq(uint32_t cpu_freq_mhz)
 }
 
 /****************************************************************************
+ * Name:  esp32_ptr_executable
+ *
+ * Description:
+ *   Check if point p in a compatible memory area of IRAM
+ *
+ * Input Parameters:
+ *   p - Memory address
+ *
+ * Returned Value:
+ *    True if in memory area or false if not.
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32_ptr_executable(const void *p)
+{
+  intptr_t ip = (intptr_t) p;
+
+  return (ip >= SOC_IROM_LOW && ip < SOC_IROM_HIGH)
+        || (ip >= SOC_IRAM_LOW && ip < SOC_IRAM_HIGH)
+        || (ip >= SOC_IROM_MASK_LOW && ip < SOC_IROM_MASK_HIGH)
+#if defined(SOC_CACHE_APP_LOW)
+        || (ip >= SOC_CACHE_APP_LOW && ip < SOC_CACHE_APP_HIGH)
+#endif
+        || (ip >= SOC_RTC_IRAM_LOW && ip < SOC_RTC_IRAM_HIGH);
+}
+
+/****************************************************************************
+ * Name:  esp32_set_deep_sleep_wake_stub
+ *
+ * Description:
+ *   Install a new stub at runtime to run on wake from deep sleep.
+ *
+ * Input Parameters:
+ *   new_stub - Function type for stub to run on wake from sleep
+ *
+ * Returned Value:
+ *    None.
+ *
+ ****************************************************************************/
+
+static void esp32_set_deep_sleep_wake_stub(
+                      esp_deep_sleep_wake_stub_fn_t new_stub)
+{
+  putreg32((uint32_t)new_stub, RTC_ENTRY_ADDR_REG);
+  set_rtc_memory_crc();
+}
+
+/****************************************************************************
+ * Name:  esp32_get_deep_sleep_wake_stub
+ *
+ * Description:
+ *   Get current wake from deep sleep stub.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *    Current wake from deep sleep stub, or NULL if no stub is installed.
+ *
+ ****************************************************************************/
+
+static esp_deep_sleep_wake_stub_fn_t esp32_get_deep_sleep_wake_stub(void)
+{
+  uint32_t stored_crc = 0;
+  uint32_t calc_crc = 0;
+  esp_deep_sleep_wake_stub_fn_t stub_ptr = NULL;
+
+  stored_crc = getreg32(RTC_MEMORY_CRC_REG);
+  set_rtc_memory_crc();
+  calc_crc = getreg32(RTC_MEMORY_CRC_REG);
+  putreg32(stored_crc, RTC_MEMORY_CRC_REG);
+
+  if (stored_crc != calc_crc)
+    {
+      return NULL;
+    }
+
+  stub_ptr = (esp_deep_sleep_wake_stub_fn_t) getreg32(RTC_ENTRY_ADDR_REG);
+  if (!esp32_ptr_executable(stub_ptr))
+    {
+      return NULL;
+    }
+
+  return stub_ptr;
+}
+
+/****************************************************************************
+ * Name:  esp32_wake_deep_sleep
+ *
+ * Description:
+ *   Default stub to run on wake from deep sleep.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *    None
+ *
+ ****************************************************************************/
+
+static void RTC_IRAM_ATTR esp32_wake_deep_sleep(void)
+{
+  /* Clear MMU for CPU 0 */
+
+  putreg32(getreg32(DPORT_PRO_CACHE_CTRL1_REG) | DPORT_PRO_CACHE_MMU_IA_CLR,
+                    DPORT_PRO_CACHE_CTRL1_REG);
+  putreg32(getreg32(DPORT_PRO_CACHE_CTRL1_REG) &
+                   (~DPORT_PRO_CACHE_MMU_IA_CLR), DPORT_PRO_CACHE_CTRL1_REG);
+
+#if CONFIG_ESP32_DEEP_SLEEP_WAKEUP_DELAY > 0
+  /* ROM code has not started yet, so we need to set delay factor
+   * used by ets_delay_us first.
+   */
+
+  ets_update_cpu_frequency_rom(ets_get_detected_xtal_freq() / 1000000);
+
+  /* This delay is configured in menuconfig, it can be used to give
+   * the flash chip some time to become ready.
+   */
+
+  ets_delay_us(CONFIG_ESP32_DEEP_SLEEP_WAKEUP_DELAY);
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -762,10 +919,10 @@ void esp32_pminit(void)
 }
 
 /****************************************************************************
- * Name: esp32_pmstart
+ * Name: esp32_pmstandby
  *
  * Description:
- *   Enter force sleep time interval.
+ *   Enter force sleep.
  *
  * Input Parameters:
  *   time_in_us - force sleep time interval
@@ -775,13 +932,142 @@ void esp32_pminit(void)
  *
  ****************************************************************************/
 
-void esp32_pmstart(uint64_t time_in_us)
+void esp32_pmstandby(uint64_t time_in_us)
 {
   /* don't power down XTAL — powering it up takes different time on. */
 
   fflush(stdout);
   esp32_sleep_enable_timer_wakeup(time_in_us);
   esp32_light_sleep_start();
+}
+
+/****************************************************************************
+ * Name: esp32_sleep_get_wakeup_cause
+ *
+ * Description:
+ *   Get the wakeup source which caused wakeup from sleep.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cause of wake up from last sleep
+ *   (one of enum esp32_sleep_source_e values).
+ *
+ ****************************************************************************/
+
+enum esp32_sleep_source_e esp32_sleep_get_wakeup_cause(void)
+{
+  uint32_t wakeup_cause;
+  if (esp32_resetcause(0) != ESP32_RESETCAUSE_CORE_DPSP)
+    {
+      return ESP_SLEEP_WAKEUP_UNDEFINED;
+    }
+
+  wakeup_cause = REG_GET_FIELD(RTC_CNTL_WAKEUP_STATE_REG,
+                                    RTC_CNTL_WAKEUP_CAUSE);
+  if (wakeup_cause & RTC_EXT0_TRIG_EN)
+    {
+      return ESP_SLEEP_WAKEUP_EXT0;
+    }
+  else if (wakeup_cause & RTC_EXT1_TRIG_EN)
+    {
+      return ESP_SLEEP_WAKEUP_EXT1;
+    }
+  else if (wakeup_cause & RTC_TIMER_TRIG_EN)
+    {
+      return ESP_SLEEP_WAKEUP_TIMER;
+    }
+  else if (wakeup_cause & RTC_TOUCH_TRIG_EN)
+    {
+      return ESP_SLEEP_WAKEUP_TOUCHPAD;
+    }
+  else if (wakeup_cause & RTC_ULP_TRIG_EN)
+    {
+      return ESP_SLEEP_WAKEUP_ULP;
+    }
+  else if (wakeup_cause & RTC_GPIO_TRIG_EN)
+    {
+      return ESP_SLEEP_WAKEUP_GPIO;
+    }
+  else if (wakeup_cause & (RTC_UART0_TRIG_EN | RTC_UART1_TRIG_EN))
+    {
+      return ESP_SLEEP_WAKEUP_UART;
+    }
+  else
+    {
+      return ESP_SLEEP_WAKEUP_UNDEFINED;
+    }
+}
+
+/****************************************************************************
+ * Name:  esp32_deep_sleep_start
+ *
+ * Description:
+ *   Enter deep sleep mode
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_deep_sleep_start(void)
+{
+  uint32_t pd_flags;
+
+  /* record current RTC time */
+
+  s_config.rtc_ticks_at_sleep_start = esp32_rtc_time_get();
+
+  /* Configure wake stub */
+
+  if (esp32_get_deep_sleep_wake_stub() == NULL)
+    {
+      esp32_set_deep_sleep_wake_stub(esp32_wake_deep_sleep);
+    }
+
+  /* Decide which power domains can be powered down */
+
+  pd_flags = esp32_get_power_down_flags();
+
+  /* Correct the sleep time */
+
+  s_config.sleep_time_adjustment = DEEP_SLEEP_TIME_OVERHEAD_US;
+
+  /* Enter deep sleep */
+
+  esp32_sleep_start(RTC_SLEEP_PD_DIG | RTC_SLEEP_PD_VDDSDIO
+                              | RTC_SLEEP_PD_XTAL | pd_flags);
+
+  /* Because RTC is in a slower clock domain than the CPU, it
+   * can take several CPU cycles for the sleep mode to start.
+   */
+
+  while (1);
+}
+
+/****************************************************************************
+ * Name: esp32_pmsleep
+ *
+ * Description:
+ *   Enter deep sleep.
+ *
+ * Input Parameters:
+ *   time_in_us - deep sleep time interval
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_pmsleep(uint64_t time_in_us)
+{
+  fflush(stdout);
+  esp32_sleep_enable_timer_wakeup(time_in_us);
+  esp32_deep_sleep_start();
 }
 
 #endif /* CONFIG_PM */
