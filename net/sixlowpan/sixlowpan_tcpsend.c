@@ -312,6 +312,15 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
+  /* Check if the IEEE802.15.4 network driver went down */
+
+  if ((flags & NETDEV_DOWN) != 0)
+    {
+      nwarn("WARNING: Device is down\n");
+      sinfo->s_result = -ENOTCONN;
+      goto end_wait;
+    }
+
   /* The TCP socket is connected and, hence, should be bound to a device.
    * Make sure that the polling device is the one that we are bound to.
    */
@@ -321,15 +330,6 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
     {
       ninfo("Not the connected device\n");
       return flags;
-    }
-
-  /* Check if the IEEE802.15.4 network driver went down */
-
-  if ((flags & NETDEV_DOWN) != 0)
-    {
-      nwarn("WARNING: Device is down\n");
-      sinfo->s_result = -ENOTCONN;
-      goto end_wait;
     }
 
   ninfo("flags: %04x acked: %u sent: %u\n",

@@ -236,19 +236,6 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
   FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
   int ret;
 
-  /* The TCP socket is connected and, hence, should be bound to a device.
-   * Make sure that the polling device is the own that we are bound to.
-   */
-
-  DEBUGASSERT(conn->dev != NULL);
-  if (dev != conn->dev)
-    {
-      return flags;
-    }
-
-  ninfo("flags: %04x acked: %d sent: %d\n",
-        flags, pstate->snd_acked, pstate->snd_sent);
-
   /* Check for a loss of connection */
 
   if ((flags & TCP_DISCONN_EVENTS) != 0)
@@ -275,6 +262,20 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
       pstate->snd_sent = -ENOTCONN;
       goto end_wait;
     }
+
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn);
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
+
+  ninfo("flags: %04x acked: %d sent: %d\n",
+        flags, pstate->snd_acked, pstate->snd_sent);
 
   /* We get here if (1) not all of the data has been ACKed, (2) we have been
    * asked to retransmit data, (3) the connection is still healthy, and (4)

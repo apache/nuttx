@@ -282,7 +282,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
   int hdrlen;
   int ret;
 
-  DEBUGASSERT(pvpriv != NULL && dev != NULL && pvconn != NULL);
+  DEBUGASSERT(pvpriv != NULL && dev != NULL);
 
   /* Ignore polls from non IEEE 802.15.4 network drivers */
 
