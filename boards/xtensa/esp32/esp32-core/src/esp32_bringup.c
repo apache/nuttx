@@ -49,6 +49,7 @@
 #include <sys/mount.h>
 #include <syslog.h>
 #include <debug.h>
+#include <stdio.h>
 
 #ifdef CONFIG_TIMER
 #  include <nuttx/timers/timer.h>
@@ -71,22 +72,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifdef CONFIG_ESP32_TIMER0
-#define ESP32_TIMER0 (0)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER1
-#define ESP32_TIMER1 (1)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER2
-#define ESP32_TIMER2 (2)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER3
-#define ESP32_TIMER3 (3)
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -219,45 +204,15 @@ int esp32_bringup(void)
 
 #ifdef CONFIG_TIMER
   /* Configure TIMER driver */
-#ifdef CONFIG_ESP32_TIMER0
-  ret = esp32_timer_driver_setup("/dev/timer0", ESP32_TIMER0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-    }
-#endif
 
-#ifdef CONFIG_ESP32_TIMER1
-  ret = esp32_timer_driver_setup("/dev/timer1", ESP32_TIMER1);
+  ret = esp32_timer_driver_init();
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
+             "ERROR: Failed to initialize timer drivers: %d\n",
              ret);
     }
-#endif
 
-#ifdef CONFIG_ESP32_TIMER2
-  ret = esp32_timer_driver_setup("/dev/timer2", ESP32_TIMER2);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-    }
-#endif
-
-#ifdef CONFIG_ESP32_TIMER3
-  ret = esp32_timer_driver_setup("/dev/timer3", ESP32_TIMER3);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-    }
-#endif
 #endif
 
 #ifdef CONFIG_USERLED
@@ -268,6 +223,19 @@ int esp32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_WATCHDOG
+  /* Configure WATCHDOG driver */
+
+  ret = esp32_wtd_driver_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize watchdog drivers: %d\n",
+             ret);
+    }
+
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

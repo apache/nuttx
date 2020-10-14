@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/esp32/esp32_tim_lowerhalf.h
+ * arch/arm/src/esp32/esp32_tim_lowerhalf.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

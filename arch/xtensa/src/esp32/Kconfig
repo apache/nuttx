@@ -47,6 +47,10 @@ config ESP32_TIMER
 	bool
 	default n
 
+config ESP32_WTD
+	bool
+	default n
+
 config ESP32_BT
 	bool "Bluetooth"
 	default n
@@ -205,43 +209,20 @@ config ESP32_TIMER3
 		Enables Timer
 
 config ESP32_MWDT0
-	bool "Timer 0 Watchdog"
+	bool "Main System Watchdog Timer (Group 0)"
 	default n
-	depends on EXPERIMENTAL
-	select ESP32_TIMER0
+	select ESP32_WTD
 	---help---
-		No yet implemented
-
+		Includes MWDT0. This watchdog timer is part of the Group 0 
+		timer submodule. 
+		
 config ESP32_MWDT1
-	bool "Timer 1 Watchdog"
+	bool "Main System Watchdog Timer (Group 1)"
 	default n
-	depends on EXPERIMENTAL
-	select ESP32_TIMER1
+	select ESP32_WTD
 	---help---
-		No yet implemented
-
-config ESP32_MWDT2
-	bool "Timer 2 Watchdog"
-	default n
-	depends on EXPERIMENTAL
-	select ESP32_TIMER2
-	---help---
-		No yet implemented
-
-config ESP32_MWDT3
-	bool "Timer 3 Watchdog"
-	default n
-	depends on EXPERIMENTAL
-	select ESP32_TIMER3
-	---help---
-		No yet implemented
-
-config ESP32_RWDT
-	bool "RTC Watchdog"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		No yet implemented
+		Includes MWDT1. This watchdog timer is part of the Group 0 
+		timer submodule. 
 
 config ESP32_UART0
 	bool "UART 0"

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-core/src/esp32_timer.c
+ * boards/xtensa/esp32/esp32-core/src/esp32_wtd.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,9 +23,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/timers/timer.h>
 #include <debug.h>
-#include "esp32_tim_lowerhalf.h"
+#include "esp32_wtd_lowerhalf.h"
 #include "esp32-core.h"
 #include <sys/types.h>
 
@@ -33,20 +32,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32_TIMER0
-#define ESP32_TIMER0 (0)
+#ifdef CONFIG_ESP32_MWDT0
+#define ESP32_MWDT0 (0)
 #endif
 
-#ifdef CONFIG_ESP32_TIMER1
-#define ESP32_TIMER1 (1)
+#ifdef CONFIG_ESP32_MWDT1
+#define ESP32_MWDT1 (1)
 #endif
 
-#ifdef CONFIG_ESP32_TIMER2
-#define ESP32_TIMER2 (2)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER3
-#define ESP32_TIMER3 (3)
+#ifdef CONFIG_ESP32_RWDT
+#define ESP32_RWDT  (2)
 #endif
 
 /****************************************************************************
@@ -54,15 +49,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_timer_driver_setup
+ * Name: esp32_wtd_driver_init
  *
  * Description:
  *   Configure the timer driver.
  *
  * Input Parameters:
- *   devpath - The full path to the timer device.  This should be of the
- *             form /dev/timerX
- *   timer   - The timer's number.
+ *   devpath   - The full path to the timer device.  This should be of the
+ *               form /dev/watchdogX
+ *   wdt timer - The wdt timer's number.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
@@ -70,51 +65,44 @@
  *
  ****************************************************************************/
 
-int esp32_timer_driver_init(void)
+int esp32_wtd_driver_init(void)
 {
   int ret = OK;
-  #ifdef CONFIG_ESP32_TIMER0
-  ret = esp32_timer_initialize("/dev/timer0", ESP32_TIMER0);
+
+#ifdef CONFIG_ESP32_MWDT0
+  ret = esp32_wtd_initialize("/dev/watchdog0", ESP32_MWDT0);
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
+             "ERROR: Failed to initialize watchdog driver: %d\n",
              ret);
       goto errout;
     }
+
 #endif
 
-#ifdef CONFIG_ESP32_TIMER1
-  ret = esp32_timer_initialize("/dev/timer1", ESP32_TIMER1);
+#ifdef CONFIG_ESP32_MWDT1
+  ret = esp32_wtd_initialize("/dev/watchdog1", ESP32_MWDT1);
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
+             "ERROR: Failed to initialize watchdog driver: %d\n",
              ret);
       goto errout;
     }
+
 #endif
 
-#ifdef CONFIG_ESP32_TIMER2
-  ret = esp32_timer_initialize("/dev/timer2", ESP32_TIMER2);
+#ifdef CONFIG_ESP32_RWDT
+  ret = esp32_wtd_initialize("/dev/watchdog2", ESP32_RWDT);
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
+             "ERROR: Failed to initialize watchdog driver: %d\n",
              ret);
       goto errout;
     }
-#endif
 
-#ifdef CONFIG_ESP32_TIMER3
-  ret = esp32_timer_initialize("/dev/timer3", ESP32_TIMER3);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
 #endif
 
 errout:

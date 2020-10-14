@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/hardware/esp32_rtccnt.h
+ * arch/xtensa/src/esp32/hardware/esp32_rtccntl.h
  *
  * Adapted from use in NuttX by:
  *
@@ -36,6 +36,26 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* WTD defines */
+
+/* Offset relative to each wathdog timer instance memory base */
+
+/* RWDT */
+#define RWDT_CONFIG0_OFFSET         0x008c
+#define RWDT_STAGE0_TIMEOUT_OFFSET  0x0090
+#define RWDT_STAGE1_TIMEOUT_OFFSET  0x0094
+#define RWDT_STAGE2_TIMEOUT_OFFSET  0x0098
+#define RWDT_STAGE3_TIMEOUT_OFFSET  0x009c
+#define RWDT_WP_REG                 0x00a4
+#define RWDT_FEED_OFFSET            0x00a0
+#define RCLK_CONF_REG_OFFSET        0x0070
+#define RWDT_INT_ENA_REG_OFFSET     0x003c
+#define RWDT_INT_CLR_REG_OFFSET     0x0048
+
+/* CLK */
+#define CK_XTAL_32K_MASK            (BIT(30))
+#define CK8M_D256_OUT_MASK          (BIT(31))
 
 #define RTC_CNTL_OPTIONS0_REG          (DR_REG_RTCCNTL_BASE + 0x0)
 

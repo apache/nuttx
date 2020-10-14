@@ -46,6 +46,25 @@
 #define TIM1_INT_ST_OFFSET 		0x007c
 #define LOW_32_MASK				0xffffffff
 
+/* WTD defines */
+
+#define WRITE_PROTECTION_KEY    0x050d83aa1
+
+/* Offset relative to each watchdog timer instance memory base */
+
+#define MWDT_CONFIG0_OFFSET         0x0000
+
+/* MWDTs */
+
+#define MWDT_CLK_PRESCALE_OFFSET    0x0004
+#define MWDT_STAGE0_TIMEOUT_OFFSET  0x0008
+#define MWDT_STAGE1_TIMEOUT_OFFSET  0x000c
+#define MWDT_STAGE2_TIMEOUT_OFFSET  0x0010
+#define MWDT_STAGE3_TIMEOUT_OFFSET  0x0014
+#define MWDT_WP_REG                 0x001c
+#define MWDT_FEED_OFFSET            0x0018
+#define MWDT_INT_ENA_REG_OFFSET     0x0050
+#define MWDT_INT_CLR_REG_OFFSET     0x005c
 /* The value that needs to be written to TIMG_WDT_WKEY to write-enable the wdt
  * registers
  */
