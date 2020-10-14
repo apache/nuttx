@@ -88,7 +88,7 @@ static struct gpio_handler_s g_gpio_inthandler[TIVA_NIRQ_PINS];
  *
  ****************************************************************************/
 
-static int cc13xx_gpio_interrupt)(int irq, FAR void *context, FAR void *arg)
+static int cc13xx_gpio_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t evflags;
   uint32_t regval;
@@ -118,7 +118,8 @@ static int cc13xx_gpio_interrupt)(int irq, FAR void *context, FAR void *arg)
 
           FAR struct gpio_handler_s *handler = &g_gpio_inthandler[dio];
 
-          gpioinfo("dio=%d isr=%p arg=%p\n", dio, handler->isr, handler->arg);
+          gpioinfo("dio=%d isr=%p arg=%p\n", dio, handler->isr,
+                   handler->arg);
           handler->isr(irq, context, handler->arg);
 
           evflags &= ~diomask;
