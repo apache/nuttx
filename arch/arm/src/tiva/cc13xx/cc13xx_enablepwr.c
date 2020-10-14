@@ -58,13 +58,13 @@ static uint16_t g_domain_usage[2];
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name:  cc13xx_periph_enablepwr
  *
  * Description:
  *   Enable the power domain associated with the peripheral.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void cc13xx_periph_enablepwr(uint32_t peripheral)
 {
@@ -87,8 +87,8 @@ void cc13xx_periph_enablepwr(uint32_t peripheral)
   prcm_powerdomain_on(domain);
   spin_unlock_irqrestore(flags);
 
-  /* Wait for the power domain to be ready.  REVISIT:  This really should be in the
-   * critical section but this could take too long.
+  /* Wait for the power domain to be ready.  REVISIT:  This really should be
+   * in the critical section but this could take too long.
    */
 
   while (!prcm_powerdomain_status(domain))
@@ -96,14 +96,14 @@ void cc13xx_periph_enablepwr(uint32_t peripheral)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  cc13xx_periph_disablepwr
  *
  * Description:
- *   Disable the power domain associated with the peripheral if and only if all
- *   peripherals using that power domain no longer need power.
+ *   Disable the power domain associated with the peripheral if and only if
+ *   all peripherals using that power domain no longer need power.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void cc13xx_periph_disablepwr(uint32_t peripheral)
 {
@@ -116,13 +116,14 @@ void cc13xx_periph_disablepwr(uint32_t peripheral)
   flags = spin_lock_irqsave();
   g_domain_usage[dndx] &= ~(1 << pndx);
 
-  /* If there are no peripherals needing power in this domain, then turn off the
-   * power domain.
+  /* If there are no peripherals needing power in this domain, then turn off
+   * the power domain.
    */
 
   if (g_domain_usage[dndx] == 0)
     {
-      prcm_powerdomain_off(pndx == 0 ? PRCM_DOMAIN_SERIAL : PRCM_DOMAIN_PERIPH);
+      prcm_powerdomain_off(pndx == 0 ?
+                           PRCM_DOMAIN_SERIAL : PRCM_DOMAIN_PERIPH);
     }
 
   spin_unlock_irqrestore(flags);

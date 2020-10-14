@@ -1,12 +1,12 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/cc13xx/cc13x2_aux_sysif.c
  * Driver for the AUX System Interface
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI aux_sysif.c file that has a compatible BSD
- * license:
+ * Technical content derives from a TI aux_sysif.c file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -38,11 +38,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <stdint.h>
 #include "arm_arch.h"
@@ -50,11 +50,13 @@
 #include "hardware/tiva_aux_sysif.h"
 #include "cc13xx/cc13x2_aux_sysif.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Private Data
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Used in aux_sysif_opmode() to control the change of the operational mode. */
+/* Used in aux_sysif_opmode() to control the change of the operational
+ * mode.
+ */
 
 static const uint8_t g_opmode_to_order[4] =
 {
@@ -66,11 +68,11 @@ static const uint8_t g_order_to_opmode[4] =
   2, 0, 1, 3
 };
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: aux_sysif_opmode
  *
  * Description:
@@ -81,17 +83,17 @@ static const uint8_t g_order_to_opmode[4] =
  *
  * Input Parameters:
  *   - opmode:  AUX operational mode.  One of
- *              AUX_SYSIF_OPMODE_TARGET_PDLP: Power down operational mode with wakeup
- *                                            to low power mode)
- *              AUX_SYSIF_OPMODE_TARGET_PDA:  Power down operational mode with wakeup
-                                              to active mode
+ *              AUX_SYSIF_OPMODE_TARGET_PDLP: Power down operational mode
+ *                                            with wakeup to low power mode)
+ *              AUX_SYSIF_OPMODE_TARGET_PDA:  Power down operational mode
+ *                                            with wakeup to active mode
  *              AUX_SYSIF_OPMODE_TARGET_LP:   Low power operational mode)
  *              AUX_SYSIF_OPMODE_TARGET_A:    Active operational mode
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void aux_sysif_opmode(uint32_t opmode)
 {
