@@ -157,6 +157,14 @@ ifeq ($(CONFIG_ESP32_PARTITION),y)
 CHIP_CSRCS += esp32_partition.c
 endif
 
+ifeq ($(CONFIG_WATCHDOG),y)
+CHIP_CSRCS += esp32_wtd_lowerhalf.c
+ifeq ($(CONFIG_ESP32_WTD),y)
+CHIP_CSRCS += esp32_wtd.c
+endif
+endif
+
+
 ifeq ($(CONFIG_ARCH_USE_MODULE_TEXT),y)
 CHIP_CSRCS += esp32_modtext.c
 CMN_ASRCS += xtensa_loadstore.S

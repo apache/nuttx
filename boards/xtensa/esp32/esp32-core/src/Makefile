@@ -70,6 +70,12 @@ ifeq ($(CONFIG_USERLED),y)
   CSRCS += esp32_userleds.c
 endif
 
+ifeq ($(CONFIG_WATCHDOG),y)
+ifeq ($(CONFIG_ESP32_WTD),y)
+CSRCS += esp32_wtd.c
+endif
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
 

@@ -104,7 +104,18 @@ int esp32_spiflash_init(void);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int esp32_timer_driver_setup(FAR const char *devpath, int timer);
+int esp32_timer_driver_init(void);
+#endif
+/****************************************************************************
+ * Name: esp32_wdt_driver_init
+ *
+ * Description:
+ *   Initialize WATCHDOG driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WATCHDOG
+int esp32_wtd_driver_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
