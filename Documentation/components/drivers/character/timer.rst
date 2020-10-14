@@ -95,6 +95,7 @@ These ``ioctl`` commands internally call lower-half layer operations and the par
 These ``struct timer_ops_s`` keeps pointers to the implementation of each operation. Following is the struct.
 
 .. c:struct:: timer_ops_s
+.. code-block:: c
 
    struct timer_ops_s
    {
