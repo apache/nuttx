@@ -26,7 +26,7 @@ There are two ways to enable Timer Support along with the Timer Example. The fir
 And the second way is creating your own config file. To do so, follow the next instructions.
 
 Enabling the Timer Support and Example in ``menuconfing``
----------------------------------------------------------
+----------------------------------------------------------
 
   1. Select Timer Instances
 
@@ -84,14 +84,63 @@ The first necessary thing to be done in order to use the timer driver in an appl
 
 At an application level, the timer functionalities may be accessed through ``ioctl`` systems calls. The available ``ioctl`` commands are:
 
-* TCIOC_START
-* TCIOC_STOP
-* TCIOC_GETSTATUS
-* TCIOC_SETTIMEOUT 
-* TCIOC_NOTIFICATION
-* TCIOC_MAXTIMEOUT
+.. c:macro:: TCIOC_START
+.. c:macro:: TCIOC_STOP
+.. c:macro:: TCIOC_GETSTATUS
+.. c:macro:: TCIOC_SETTIMEOUT 
+.. c:macro:: TCIOC_NOTIFICATION
+.. c:macro:: TCIOC_MAXTIMEOUT
 
-These ``ioctl`` commands internally call lower-half layer functions and the parameters are forwarded to these functions through the ``ioctl`` system call. The return of a system call is the return of a function.
+These ``ioctl`` commands internally call lower-half layer operations and the parameters are forwarded to these ops through the ``ioctl`` system call. The return of a system call is the return of an operation.
+These ``struct timer_ops_s`` keeps pointers to the implementation of each operation. Following is the struct.
+
+.. c:struct:: timer_ops_s
+
+   struct timer_ops_s
+   {
+      /* Required methods *******************************************************/
+
+      /* Start the timer, resetting the time to the current timeout */
+
+      CODE int (*start)(FAR struct timer_lowerhalf_s *lower);
+
+      /* Stop the timer */
+
+      CODE int (*stop)(FAR struct timer_lowerhalf_s *lower);
+
+      /* Get the current timer status */
+
+      CODE int (*getstatus)(FAR struct timer_lowerhalf_s *lower,
+                              FAR struct timer_status_s *status);
+
+      /* Set a new timeout value (and reset the timer) */
+
+      CODE int (*settimeout)(FAR struct timer_lowerhalf_s *lower,
+                              uint32_t timeout);
+
+      /* Call the NuttX INTERNAL timeout callback on timeout.
+         * NOTE:  Providing callback==NULL disable.
+         * NOT to call back into applications.
+         */
+
+      CODE void (*setcallback)(FAR struct timer_lowerhalf_s *lower,
+                                 CODE tccb_t callback, FAR void *arg);
+
+      /* Any ioctl commands that are not recognized by the "upper-half" driver
+         * are forwarded to the lower half driver through this method.
+         */
+
+      CODE int (*ioctl)(FAR struct timer_lowerhalf_s *lower, int cmd,
+                        unsigned long arg);
+
+      /* Get the maximum supported timeout value */
+
+      CODE int (*maxtimeout)(FAR struct timer_lowerhalf_s *lower,
+                              FAR uint32_t *maxtimeout);
+   };
+
+
+
 Since  ``ioctl`` system calls expect a file descriptor, before using these commands, it's necessary to open the timer device special file in order to get a file descriptor. The following snippet demonstrates how to do so:
 
 .. code-block:: c
@@ -108,14 +157,13 @@ Since  ``ioctl`` system calls expect a file descriptor, before using these comma
       return EXIT_FAILURE;
     }
 
-TCIOC_START
------------
+.. c:macro:: TCIOC_START
 
-The ``TCIOC_START`` command calls the ``start`` function, which is described below.
+The ``TCIOC_START`` command calls the ``start`` operation, which is described below.
 
 .. c:function:: int start(void)
 
-  The start function configures the timer, enables the interrupt if ``TCIOC_NOTIFICATION`` has already been called and finally starts the timer.
+  The start operation configures the timer, enables the interrupt if ``TCIOC_NOTIFICATION`` has already been called and finally starts the timer.
 
   :return: A Linux System Error Code for failing or 0 for success. 
 
@@ -135,14 +183,13 @@ This command may be used like so:
       return EXIT_FAILURE;
     }
 
-TCIOC_STOP
-----------
+.. c:macro:: TCIOC_STOP
 
-The ``TCIOC_STOP`` command calls the ``stop`` function, which is described below.
+The ``TCIOC_STOP`` command calls the ``stop`` operation, which is described below.
 
 .. c:function:: int stop(void)
 
-  The stop function stops the timer and disables the interrupt.
+  The stop operation stops the timer and disables the interrupt.
 
   :return: A Linux System Error Code for failing or 0 for success. 
 
@@ -162,14 +209,13 @@ This command may be used like so:
       return EXIT_FAILURE;
     }
 
-TCIOC_GETSTATUS
----------------
+.. c:macro:: TCIOC_GETSTATUS
 
-The ``TCIOC_GETSTATUS`` command calls the ``getstatus`` function, which is described below.
+The ``TCIOC_GETSTATUS`` command calls the ``getstatus`` operation, which is described below.
 
 .. c:function:: int getstatus(FAR struct timer_status_s *status)
 
-  The getstatus function gathers the timer's current information.
+  The getstatus operation gathers the timer's current information.
 
   :param status: A writable pointer to a struct ``timer_status_s``. This struct contains 3 fields: ``flags`` (``uint32_t``), ``timeout`` (``uint32_t``) and ``timeleft`` (``uint32_t``). Bit 0 from `flags` indicates the timer's status, 1 indicates that the timer is running, zero it is stopped. Bit 1 from `flags` indicates if there's a callback registered. The `timeout` indicates the time interval that was configured to trigger an alarm, it is in microseconds. The `timeleft` interval indicates how many microseconds it's missing to trigger the alarm. The following snippet demonstrates how to use it and how to access these fields. 
 
@@ -195,14 +241,13 @@ This command may be used like so:
          (unsigned long)status.flags, (unsigned long)status.timeout,
          (unsigned long)status.timeleft);
 
-TCIOC_SETTIMEOUT
----------------
+.. c:macro:: TCIOC_SETTIMEOUT
 
-The ``TCIOC_SETTIMEOUT`` command calls the ``settimeout`` function, which is described below.
+The ``TCIOC_SETTIMEOUT`` command calls the ``settimeout`` operation, which is described below.
 
 .. c:function:: int settimeout(uint32_t timeout)
 
-  The getstatus function sets a timeout interval to trigger the alarm and then trigger an interrupt. It defines the timer interval in which the handler will be called.
+  The getstatus operation sets a timeout interval to trigger the alarm and then trigger an interrupt. It defines the timer interval in which the handler will be called.
 
   :param timeout: An argument of type ``uint32_t`` with the timeout value in microseconds. 
 
@@ -225,10 +270,9 @@ This command may be used like so:
       return EXIT_FAILURE;
     }
 
-TCIOC_NOTIFICATION
--------------------
+.. c:macro:: TCIOC_NOTIFICATION
 
-The ``TCIOC_NOTIFICATION`` is used to configure the timer callback to notify the application via a signal when the timer expires. This command calls the ``setcallback`` function. Which will not be described here, since the application does not set a callback directly. Instead, the user should configure a signal handler to catch notifications, and then, configure a timer notifier to notify and to signal the previously configured signal handler. For a better performance, a separate pthread may be configured to wait on sigwaitinfo() for timer events. 
+The ``TCIOC_NOTIFICATION`` is used to configure the timer callback to notify the application via a signal when the timer expires. This command calls the ``setcallback`` operation. Which will not be described here, since the application does not set a callback directly. Instead, the user should configure a signal handler to catch notifications, and then, configure a timer notifier to notify and to signal the previously configured signal handler. For a better performance, a separate pthread may be configured to wait on sigwaitinfo() for timer events. 
 
 In any case, this command expects a read-only pointer to a struct `timer_notify_s`. This struct contains 2 fields: ``pid`` (``pid_t``), that indicates the ID of the task/thread to receive the signal and ``event`` (``struct sigevent``), which describes the way a task will be notified.
 
@@ -252,14 +296,13 @@ This command may be used like so:
     }
 
 
-TCIOC_MAXTIMEOUT
-------------------
+.. c:macro:: TCIOC_MAXTIMEOUT
 
-The ``TCIOC_MAXTIMEOUT`` command calls the ``maxtimeout`` function, which is described below.
+The ``TCIOC_MAXTIMEOUT`` command calls the ``maxtimeout`` operation, which is described below.
 
 .. c:function:: int maxtimeout(uint32_t *status)
 
-  The maxtimeout function  gets the maximum timeout value that can be configured. 
+  The maxtimeout operation  gets the maximum timeout value that can be configured. 
 
   :param maxtimeout: A writable pointer to a variable of ``uint32_t`` type in which the value will be stored.
   :return: A Linux System Error Code for failing or 0 for success. 
