@@ -36,6 +36,13 @@ config ARCH_CHIP_ESP32
 		"application"), however for most purposes the two CPUs are
 		interchangeable.
 
+config ARCH_CHIP_XTENSA_CUSTOM
+	bool "Custom XTENSA chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/xtensa/src/.
+
+
 endchoice # XTENSA chip selection
 
 config ARCH_FAMILY_LX6
