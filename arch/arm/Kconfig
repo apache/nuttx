@@ -434,6 +434,12 @@ config ARCH_CHIP_CXD56XX
 	---help---
 		Sony CXD56XX (ARM Cortex-M4) architectures
 
+config ARCH_CHIP_ARM_CUSTOM
+	bool "Custom ARM chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/arm/src/.
+
 endchoice
 
 config ARCH_ARM7TDMI

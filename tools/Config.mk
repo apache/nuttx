@@ -135,6 +135,22 @@ else
   DELIM ?= $(strip /)
 endif
 
+# Process chip-specific directories
+
+ifeq ($(CONFIG_ARCH_CHIP_CUSTOM),y)
+  CUSTOM_CHIP_DIR = $(patsubst "%",%,$(CONFIG_ARCH_CHIP_CUSTOM_DIR))
+ifeq ($(CONFIG_ARCH_CHIP_CUSTOM_DIR_RELPATH),y)
+  CHIP_DIR ?= $(TOPDIR)$(DELIM)$(CUSTOM_CHIP_DIR)
+  CHIP_KCONFIG = $(TOPDIR)$(DELIM)$(CUSTOM_CHIP_DIR)$(DELIM)Kconfig
+else
+  CHIP_DIR ?= $(CUSTOM_CHIP_DIR)
+  CHIP_KCONFIG = $(CUSTOM_CHIP_DIR)$(DELIM)Kconfig
+endif
+else
+  CHIP_DIR ?= $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)$(CONFIG_ARCH_CHIP)
+  CHIP_KCONFIG = $(TOPDIR)$(DELIM)arch$(DELIM)dummy$(DELIM)dummy_kconfig
+endif
+
 # Process board-specific directories
 
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)

@@ -45,6 +45,12 @@ config ARCH_CHIP_R5F565NEHDFP
 	---help---
 		Renesas RX65N on GR-ROSE
 
+config ARCH_CHIP_RENESAS_CUSTOM
+	bool "Custom Renesas chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/renesas/src/.
+
 endchoice
 
 config ARCH_SH1

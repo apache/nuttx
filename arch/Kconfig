@@ -148,6 +148,44 @@ source arch/z16/Kconfig
 source arch/z80/Kconfig
 source arch/or1k/Kconfig
 
+config ARCH_CHIP_CUSTOM
+	bool
+	default n
+
+if ARCH_CHIP_CUSTOM
+menu "Custom Chip Configuration"
+
+config ARCH_CHIP_CUSTOM_NAME
+	string "Custom chip name"
+	default ""
+	---help---
+		This is a name for the chip.  It is not used except to return the
+		information via the NSH uname command.
+
+config ARCH_CHIP_CUSTOM_DIR
+	string "Custom chip directory"
+	default ""
+	---help---
+		If the custom chip configuration is selected, then it is necessary
+		to also tell the build system where it can find the chip directory
+		for the custom chip.
+
+		In this case, the chip directory is assumed to lie outside the
+		NuttX directory.  The provided path must then be a full, absolute
+		path to some location outside of the NuttX source tree (like
+		"~/projects/mychip").
+
+config ARCH_CHIP_CUSTOM_DIR_RELPATH
+	bool "Relative custom chip directory"
+	default y
+	---help---
+		Specifies that the chip directory is relative to the NuttX directory.
+
+endmenu # Custom Chip Configuration
+endif #ARCH_CHIP_CUSTOM
+
+source arch/dummy/Kconfig
+
 config ARCH_TOOLCHAIN_IAR
 	bool
 	default n

@@ -13,6 +13,12 @@ choice
 config ARCH_CHIP_MOR1KX
 	bool "mor1kx"
 
+config ARCH_CHIP_OR1K_CUSTOM
+	bool "Custom OpenRISC chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/or1k/src/.
+
 endchoice
 
 config ARCH_CHIP

@@ -40,6 +40,12 @@ config ARCH_CHIP_Z8
 	---help---
 		ZiLOG z8 architecture
 
+config ARCH_CHIP_Z80_CUSTOM
+	bool "Custom Z80 chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/z80/src/.
+
 endchoice
 
 config ARCH_CHIP

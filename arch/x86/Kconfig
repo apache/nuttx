@@ -16,6 +16,12 @@ config ARCH_I486
 	---help---
 		Intel i486 architecture
 
+config ARCH_CHIP_X86_CUSTOM
+	bool "Custom x86 chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/x86/src/.
+
 endchoice
 
 config ARCH_CHIP_QEMU

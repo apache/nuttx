@@ -44,6 +44,12 @@ config ARCH_CHIP_GAP8
 		GreenwavesTechnologies GAP8 features a 1+8-core RI5CY DSP-like
 		processor, which originally comes from the ETH PULP platform.
 
+config ARCH_CHIP_RISCV_CUSTOM
+	bool "Custom RISC-V chip"
+	select ARCH_CHIP_CUSTOM
+	---help---
+		Select this option if there is no directory for the chip under arch/risc-v/src/.
+
 endchoice
 
 config ARCH_RV32I
