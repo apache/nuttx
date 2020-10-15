@@ -133,35 +133,28 @@ volatile cpu_set_t g_cpu_lockset SP_SECTION;
 int sched_lock(void)
 {
   FAR struct tcb_s *rtcb;
-  irqstate_t flags;
-  int cpu;
 
   /* If the CPU supports suppression of interprocessor interrupts, then
    * simple disabling interrupts will provide sufficient protection for
    * the following operation.
    */
 
-  flags = up_irq_save();
-
-  cpu  = this_cpu();
-  rtcb = current_task(cpu);
+  rtcb = this_task();
 
   /* Check for some special cases:  (1) rtcb may be NULL only during early
    * boot-up phases, and (2) sched_lock() should have no effect if called
    * from the interrupt level.
    */
 
-  if (rtcb == NULL || up_interrupt_context())
-    {
-      up_irq_restore(flags);
-    }
-  else
+  if (rtcb != NULL && !up_interrupt_context())
     {
       /* Catch attempts to increment the lockcount beyond the range of the
        * integer type.
        */
 
       DEBUGASSERT(rtcb->lockcount < MAX_LOCK_COUNT);
+
+      irqstate_t flags = enter_critical_section();
 
       /* We must hold the lock on this CPU before we increment the lockcount
        * for the first time. Holding the lock is sufficient to lockout
@@ -196,8 +189,6 @@ int sched_lock(void)
 
       rtcb->lockcount++;
 
-      up_irq_restore(flags);
-
 #if defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION) || \
     defined(CONFIG_SCHED_CRITMONITOR)
       /* Check if we just acquired the lock */
@@ -223,6 +214,8 @@ int sched_lock(void)
       nxsched_merge_prioritized((FAR dq_queue_t *)&g_readytorun,
                                 (FAR dq_queue_t *)&g_pendingtasks,
                                 TSTATE_TASK_PENDING);
+
+      leave_critical_section(flags);
     }
 
   return OK;
