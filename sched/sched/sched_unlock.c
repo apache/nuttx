@@ -54,14 +54,12 @@
 int sched_unlock(void)
 {
   FAR struct tcb_s *rtcb;
-  int cpu;
 
   /* This operation is safe because the scheduler is locked and no context
    * switch may occur.
    */
 
-  cpu  = this_cpu();
-  rtcb = current_task(cpu);
+  rtcb = this_task();
 
   /* Check for some special cases:  (1) rtcb may be NULL only during
    * early boot-up phases, and (2) sched_unlock() should have no
@@ -73,6 +71,7 @@ int sched_unlock(void)
       /* Prevent context switches throughout the following. */
 
       irqstate_t flags = enter_critical_section();
+      int cpu = this_cpu();
 
       /* Decrement the preemption lock counter */
 
