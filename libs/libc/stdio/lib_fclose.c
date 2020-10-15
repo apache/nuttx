@@ -81,6 +81,23 @@ int fclose(FAR FILE *stream)
 
   if (stream)
     {
+      ret = OK;
+
+      /* If the stream was opened for writing, then flush the stream */
+
+      if ((stream->fs_oflags & O_WROK) != 0)
+        {
+          ret = lib_fflush(stream, true);
+          errcode = get_errno();
+        }
+
+      /* Skip close the builtin streams(stdin, stdout and stderr) */
+
+      if (stream == stdin || stream == stdout || stream == stderr)
+        {
+          goto done;
+        }
+
       /* Remove FILE structure from the stream list */
 
       slist = nxsched_get_streams();
@@ -114,17 +131,8 @@ int fclose(FAR FILE *stream)
        * file.
        */
 
-      ret = OK;
       if (stream->fs_fd >= 0)
         {
-          /* If the stream was opened for writing, then flush the stream */
-
-          if ((stream->fs_oflags & O_WROK) != 0)
-            {
-              ret = lib_fflush(stream, true);
-              errcode = get_errno();
-            }
-
           /* Close the file descriptor and save the return status */
 
           status = close(stream->fs_fd);
@@ -157,6 +165,7 @@ int fclose(FAR FILE *stream)
       lib_free(stream);
     }
 
+done:
   /* On an error, reset the errno to the first error encountered and return
    * EOF.
    */
