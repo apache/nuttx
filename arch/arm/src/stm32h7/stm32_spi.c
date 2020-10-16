@@ -1022,9 +1022,10 @@ static int spi_interrupt(int irq, void *context, void *arg)
       spi_modifyreg(priv, STM32_SPI_IER_OFFSET, SPI_IER_EOTIE, 0);
 
       /* Set result and release wait semaphore */
-
+#ifdef CONFIG_STM32H7_SPI_DMA
       priv->txresult = 0x80;
       nxsem_post(&priv->txsem);
+#endif
     }
 
   return 0;
