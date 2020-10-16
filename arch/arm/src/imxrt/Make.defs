@@ -133,6 +133,10 @@ ifeq ($(CONFIG_IMXRT_LCD),y)
 CHIP_CSRCS += imxrt_lcd.c
 endif
 
+ifeq ($(CONFIG_IMXRT_FLEXCAN),y)
+CHIP_CSRCS += imxrt_flexcan.c
+endif
+
 ifeq ($(CONFIG_IMXRT_SNVS_LPSRTC),y)
 CHIP_CSRCS += imxrt_lpsrtc.c
 CHIP_CSRCS += imxrt_hprtc.c

@@ -84,6 +84,7 @@
 #define IMXRT_CCM_CCGR4_OFFSET                   0x0078  /* CCM Clock Gating Register 4 */
 #define IMXRT_CCM_CCGR5_OFFSET                   0x007c  /* CCM Clock Gating Register 5 */
 #define IMXRT_CCM_CCGR6_OFFSET                   0x0080  /* CCM Clock Gating Register 6 */
+#define IMXRT_CCM_CCGR7_OFFSET                   0x0084  /* CCM Clock Gating Register 7 */
                                               /* 0x0084  Reserved */
 #define IMXRT_CCM_CMEOR_OFFSET                   0x0088  /* CCM Module Enable Override Register */
 
@@ -138,6 +139,7 @@
 #define IMXRT_CCM_CCGR4                          (IMXRT_CCM_BASE + IMXRT_CCM_CCGR4_OFFSET)
 #define IMXRT_CCM_CCGR5                          (IMXRT_CCM_BASE + IMXRT_CCM_CCGR5_OFFSET)
 #define IMXRT_CCM_CCGR6                          (IMXRT_CCM_BASE + IMXRT_CCM_CCGR6_OFFSET)
+#define IMXRT_CCM_CCGR7                          (IMXRT_CCM_BASE + IMXRT_CCM_CCGR7_OFFSET)
 #define IMXRT_CCM_CMEOR                          (IMXRT_CCM_BASE + IMXRT_CCM_CMEOR_OFFSET)
 
 #define IMXRT_CCM_ANALOG_PLL_ARM                 (IMXRT_ANATOP_BASE + IMXRT_CCM_ANALOG_PLL_ARM_OFFSET)
@@ -764,6 +766,14 @@
 #define CCM_CCGR_USDHC1                          IMXRT_CCM_CCGR6, 1
 #define CCM_CCGR_USBOH3                          IMXRT_CCM_CCGR6, 0
 
+#define CCM_CCGR_FLEXIO                          IMXRT_CCM_CCGR7, 6
+#define CCM_CCGR_AIPS                            IMXRT_CCM_CCGR7, 5
+#define CCM_CCGR_CAN3_SERIAL                     IMXRT_CCM_CCGR7, 4
+#define CCM_CCGR_CAN3                            IMXRT_CCM_CCGR7, 3
+#define CCM_CCGR_AXBS                            IMXRT_CCM_CCGR7, 2
+#define CCM_CCGR_FLEXSPI2                        IMXRT_CCM_CCGR7, 1
+#define CCM_CCGR_ENET2                           IMXRT_CCM_CCGR7, 0
+
 /* Module Enable Override Register */
 
                                                            /* Bits 0-4: Reserved */
@@ -771,7 +781,8 @@
 #define CCM_CMEOR_MOD_EN_OV_PIT                  (1 << 6)  /* Bit 6:      Override clock enable signal from PIT */
 #define CCM_CMEOR_MOD_EN_OV_USDHC                (1 << 7)  /* Bit 7:      Override clock enable signal from USDHC */
 #define CCM_CMEOR_MOD_EN_OV_TRNG                 (1 << 9)  /* Bit 9:      Override clock enable signal from TRNG */
-                                                           /* Bits 10-27: Reserved */
+#define CCM_CMEOR_MOD_EN_OV_CANFD_CPI            (1 << 10) /* Bit 10:     Override clock enable signal from CAN3 */ 
+                                                           /* Bits 11-27: Reserved */
 #define CCM_CMEOR_MOD_EN_OV_CAN2_CPI             (1 << 28) /* Bit 28:     Override clock enable signal from CAN2 */
 #define CCM_CMEOR_MOD_EN_OV_CAN1_CPI             (1 << 30) /* Bit 30:     Override clock enable signal from CAN1 */
                                                            /* Bit 31:     Reserved */

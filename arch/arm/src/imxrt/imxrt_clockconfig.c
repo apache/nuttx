@@ -619,6 +619,22 @@ void imxrt_clockconfig(void)
 
 #endif
 
+#ifdef CONFIG_IMXRT_FLEXCAN
+  /* Set FlexCAN clock source to PLL3 80M */
+  reg = getreg32(IMXRT_CCM_CSCMR2);
+  reg &= ~CCM_CSCMR2_CAN_CLK_SEL_MASK;
+  reg |= IMXRT_CAN_CLK_SELECT;
+  putreg32(reg, IMXRT_CCM_CSCMR2);
+
+  /* Set FlexCAN dividet to 1 for 80 MHz */
+  reg  = getreg32(IMXRT_CCM_CSCMR2);
+  reg &= ~CCM_CSCMR2_CAN_CLK_PODF_MASK;
+  reg |= CCM_CSCMR2_CAN_CLK_PODF(
+           CCM_PODF_FROM_DIVISOR(IMXRT_CAN_PODF_DIVIDER)
+         );
+  putreg32(reg, IMXRT_CCM_CSCMR2);
+#endif
+ 
 #ifdef CONFIG_IMXRT_LPSPI
   /* Set LPSPI clock source to PLL3 PFD0 */
 
