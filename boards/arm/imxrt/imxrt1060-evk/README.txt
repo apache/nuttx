@@ -184,6 +184,31 @@ Configurations
 Configuration sub-directories
 -----------------------------
 
+  can:
+
+    This is an nsh configuration (see below) with added support of CAN driver.
+    FlexCAN3 is chosen as default, the change can be made at System type peripheral
+    selection. Please note that only FlexCAN3 and FlexCAN2 is available on this board.
+
+    Bitrate and sample point can be also changed at System type peripheral selection,
+    basic values are 1 MHz for bitrate and 0.80 for sample point. The FlexCAN driver
+    for imxrt runs at 80 MHz clock frequency.
+
+    The configuration also includes CAN utilities as candump and cansend.
+
+  canfd:
+
+    This is an nsh configuration (see below) with added support of CAN_FD driver.
+    FlexCAN3 is chosen as default, please note that only FlexCAN3 is capable of
+    providing CAN_FD support.
+
+    Bitrate and sample point can be also changed at System type peripheral selection,
+    basic values are 1 MHz for bitrate and 0.80 for sample point for arbitration phase
+    and 4 MHz (bitrate) and 0.90 (sample point) for data phase. The FlexCAN driver
+    for imxrt runs at 80 MHz clock frequency.
+
+    The configuration also includes CAN utilities as candump and cansend.
+
   knsh:
 
     This is identical to the nsh configuration below except that NuttX

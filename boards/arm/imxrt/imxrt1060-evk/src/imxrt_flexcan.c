@@ -1,9 +1,6 @@
 /****************************************************************************
- * boards/arm/imxrt/imxrt1060-evk/src/imxrt_appinit.c
+ * boards/arm/imxrt/imxrt1060-evk/src/imxrt_flexcan.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,68 +36,61 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <syslog.h>
-#include <sys/types.h>
 
-#include <nuttx/board.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <debug.h>
 
+#include <nuttx/can/can.h>
+
+#include "imxrt_flexcan.h"
 #include "imxrt1060-evk.h"
 
-#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
-#  define HAVE_LEDS 0
-#endif
-
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_IMXRT_FLEXCAN
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: imxrt_can_setup
  *
  * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
- *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value could be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ *  Initialize CAN and register the CAN device
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+int imxrt_can_setup(void)
 {
-#ifdef HAVE_LEDS
-  /* Register the LED driver */
   int ret;
-  ret = userled_lower_initialize(LED_DRIVER_PATH);
+#if defined(CONFIG_IMXRT_FLEXCAN3) && defined(CONFIG_IMXRT_FLEXCAN2)
+  canerr("ERROR: Only one FlexCAN interface can be defined at the same time on imxrt1060-evk\n");
+  return -ENODEV;
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXCAN3
+  /* Call arm_caninitialize() to get an instance of the CAN interface */
+
+  ret = imxrt_caninitialize(3);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-      return ret;
+      canerr("ERROR: Failed to get CAN interface\n");
+      return -ENODEV;
     }
-#endif
-
-#ifndef CONFIG_BOARD_LATE_INITIALIZE
-  /* Perform board initialization */
-
-  return imxrt_bringup();
+#elif CONFIG_IMXRT_FLEXCAN2
+  ret = imxrt_caninitialize(2);
+  if (ret < 0)
+    {
+      canerr("ERROR: Failed to get CAN interface\n");
+      return -ENODEV;
+    }
+#elif CONFIG_IMXRT_FLEXCAN1
+  canerr("ERROR: FlexCAN1 is not available on imxrt1060-evk. Please choose FlexCAN2 or FlexCAN3 (CAN_FD available)\n");
+  return -ENODEV;
 #else
-  return OK;
+  return -ENODEV;
 #endif
+  return OK;
 }
 
-#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* CONFIG_IMXRT_FLEXCAN */

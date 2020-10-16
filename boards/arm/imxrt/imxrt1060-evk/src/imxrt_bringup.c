@@ -63,6 +63,7 @@
 #  include <nuttx/usb/pl2303.h>
 #endif
 
+#include "imxrt_enet.h"
 #include "imxrt1060-evk.h"
 
 #include <arch/board/board.h>  /* Must always be included last */
@@ -209,6 +210,19 @@ int imxrt_bringup(void)
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_IMXRT_ENET) && defined(CONFIG_NETDEV_LATEINIT)
+  ret = imxrt_netinitialize(0);
+#endif
+
+#ifdef CONFIG_IMXRT_FLEXCAN
+  ret = imxrt_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: imxrt_can_setup() failed: %d\n", ret);
+      return ret;
     }
 #endif
 

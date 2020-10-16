@@ -89,4 +89,8 @@ ifeq ($(CONFIG_IMXRT_USBOTG),y)
 CSRCS += imxrt_usbhost.c
 endif
 
+ifeq ($(CONFIG_IMXRT_FLEXCAN),y)
+CSRCS += imxrt_flexcan.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

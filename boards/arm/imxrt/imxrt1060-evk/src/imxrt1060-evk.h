@@ -88,6 +88,8 @@
 #define GPIO_LED        (GPIO_OUTPUT | IOMUX_LED_DEFAULT | \
                          GPIO_OUTPUT_ZERO | GPIO_PORT1 | GPIO_PIN9)  /* AD_BO_09 */
 
+#define LED_DRIVER_PATH "/dev/userleds"
+
 /* Buttons ******************************************************************/
 
 /* The IMXRT board has one external user button
@@ -273,6 +275,18 @@ void imxrt_autoled_initialize(void);
 
 #ifdef CONFIG_DEV_GPIO
 int imxrt_gpio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: imxrt_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_FLEXCAN
+int imxrt_can_setup(void);
 #endif
 
 /****************************************************************************
