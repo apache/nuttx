@@ -221,6 +221,12 @@
 #define LED_ASSERTION    2
 #define LED_PANIC        1
 
+/* DAC
+ * Default is PA4 (same as ADC, do not use both at the same time)
+ */
+
+#define GPIO_DAC1_OUT            GPIO_DAC1_OUT_1
+
 /* Quadrature encoder
  * Default is to use timer 5 (32-bit) and encoder on PA0/PA1
  */
