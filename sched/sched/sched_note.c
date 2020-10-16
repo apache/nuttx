@@ -319,7 +319,20 @@ static void note_spincommon(FAR struct tcb_s *tcb,
   /* Format the note */
 
   note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
-  note.nsp_spinlock = (FAR void *)spinlock;
+
+  note.nsp_spinlock[0] = (uint8_t)((uintptr_t)spinlock & 0xff);
+  note.nsp_spinlock[1] = (uint8_t)(((uintptr_t)spinlock >> 8)  & 0xff);
+#if UINTPTR_MAX > UINT16_MAX
+  note.nsp_spinlock[2] = (uint8_t)(((uintptr_t)spinlock >> 16) & 0xff);
+  note.nsp_spinlock[3] = (uint8_t)(((uintptr_t)spinlock >> 24) & 0xff);
+#if UINTPTR_MAX > UINT32_MAX
+  note.nsp_spinlock[4] = (uint8_t)(((uintptr_t)spinlock >> 32) & 0xff);
+  note.nsp_spinlock[5] = (uint8_t)(((uintptr_t)spinlock >> 40) & 0xff);
+  note.nsp_spinlock[6] = (uint8_t)(((uintptr_t)spinlock >> 48) & 0xff);
+  note.nsp_spinlock[7] = (uint8_t)(((uintptr_t)spinlock >> 56) & 0xff);
+#endif
+#endif
+
   note.nsp_value    = (uint8_t)*spinlock;
 
   /* Add the note to circular buffer */
@@ -670,9 +683,21 @@ void sched_note_syscall_leave(int nr, uintptr_t result)
 
   note_common(tcb, &note.nsc_cmn, sizeof(struct note_syscall_leave_s),
               NOTE_SYSCALL_LEAVE);
-  note.nsc_result = result;
   DEBUGASSERT(nr <= UCHAR_MAX);
   note.nsc_nr     = nr;
+
+  note.nsc_result[0] = (uint8_t)(result & 0xff);
+  note.nsc_result[1] = (uint8_t)((result >> 8)  & 0xff);
+#if UINTPTR_MAX > UINT16_MAX
+  note.nsc_result[2] = (uint8_t)((result >> 16) & 0xff);
+  note.nsc_result[3] = (uint8_t)((result >> 24) & 0xff);
+#if UINTPTR_MAX > UINT32_MAX
+  note.nsc_result[4] = (uint8_t)((result >> 32) & 0xff);
+  note.nsc_result[5] = (uint8_t)((result >> 40) & 0xff);
+  note.nsc_result[6] = (uint8_t)((result >> 48) & 0xff);
+  note.nsc_result[7] = (uint8_t)((result >> 56) & 0xff);
+#endif
+#endif
 
   /* Add the note to circular buffer */
 
