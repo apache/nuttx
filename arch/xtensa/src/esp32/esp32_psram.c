@@ -253,7 +253,7 @@ struct rtc_vddsdio_config_s
  * Private Data
  ****************************************************************************/
 
-static psram_cache_mode_t s_psram_mode = PSRAM_CACHE_MAX;
+static int s_psram_mode = PSRAM_CACHE_MAX;
 static psram_clk_mode_t s_clk_mode = PSRAM_CLK_MODE_DCLK;
 static uint64_t s_psram_id = 0;
 static bool s_2t_mode_enabled = false;
@@ -275,8 +275,8 @@ static int IRAM_ATTR esp32_get_vddsdio_config(
                      struct rtc_vddsdio_config_s *config);
 
 static void IRAM_ATTR
-psram_cache_init(psram_cache_mode_t psram_cache_mode,
-                 psram_vaddr_mode_t vaddrmode);
+psram_cache_init(int psram_cache_mode,
+                 int vaddrmode);
 
 static void psram_clear_spi_fifo(psram_spi_num_t spi_num);
 
@@ -305,6 +305,7 @@ static void psram_read_id(uint64_t *dev_id);
 static int IRAM_ATTR
 psram_enable_qio_mode(psram_spi_num_t spi_num);
 
+#if defined(CONFIG_ESP32_SPIRAM_2T_MODE)
 static void spi_user_psram_write(psram_spi_num_t spi_num, uint32_t address,
                                  uint32_t *data_buffer, uint32_t data_len);
 
@@ -315,6 +316,7 @@ static int IRAM_ATTR
 psram_2t_mode_enable(psram_spi_num_t spi_num);
 
 static int psram_2t_mode_check(psram_spi_num_t spi_num);
+#endif
 
 /****************************************************************************
  * ROM function prototypes
@@ -1052,7 +1054,7 @@ void psram_set_cs_timing(psram_spi_num_t spi_num, psram_clk_mode_t clk_mode)
 /* spi param init for psram */
 
 void IRAM_ATTR
-psram_spi_init(psram_spi_num_t spi_num, psram_cache_mode_t mode)
+psram_spi_init(psram_spi_num_t spi_num, int mode)
 {
   modifyreg32(SPI_SLAVE_REG(spi_num), SPI_TRANS_DONE << 5, 0);
 
@@ -1086,7 +1088,7 @@ psram_spi_init(psram_spi_num_t spi_num, psram_cache_mode_t mode)
  */
 
 static void IRAM_ATTR psram_gpio_config(psram_io_t *psram_io,
-                                        psram_cache_mode_t mode)
+                                        int mode)
 {
   int spi_cache_dummy = 0;
   uint32_t rd_mode_reg = getreg32(SPI_CTRL_REG(0));
@@ -1236,7 +1238,7 @@ static void IRAM_ATTR psram_gpio_config(psram_io_t *psram_io,
 #endif
 }
 
-psram_size_t psram_get_size(void)
+int psram_get_size(void)
 {
   if ((PSRAM_SIZE_ID(s_psram_id) == PSRAM_EID_SIZE_64MBITS) ||
       PSRAM_IS_64MBIT_TRIAL(s_psram_id))
@@ -1277,7 +1279,7 @@ bool psram_is_32mbit_ver0(void)
  */
 
 int IRAM_ATTR
-psram_enable(psram_cache_mode_t mode, psram_vaddr_mode_t vaddrmode)   /* psram init */
+psram_enable(int mode, int vaddrmode)   /* psram init */
 {
   struct rtc_vddsdio_config_s cfg;
 
@@ -1546,8 +1548,7 @@ psram_enable(psram_cache_mode_t mode, psram_vaddr_mode_t vaddrmode)   /* psram i
 /* register initialization for sram cache params and r/w commands */
 
 static void IRAM_ATTR
-psram_cache_init(psram_cache_mode_t psram_cache_mode,
-                 psram_vaddr_mode_t vaddrmode)
+psram_cache_init(int psram_cache_mode, int vaddrmode)
 {
   uint32_t regval;
 

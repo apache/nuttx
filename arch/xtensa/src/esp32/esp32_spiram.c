@@ -93,18 +93,6 @@ size_t __attribute__((weak)) esp_himem_reserved_area_size(void)
   return 0;
 }
 
-static int spiram_size_usable_for_malloc(void)
-{
-  int s = esp_spiram_get_size();
-
-  if (s > 4 * 1024 * 1024)
-    {
-      s = 4 * 1024 * 1024; /* we can map at most 4MiB */
-    }
-
-  return s - esp_himem_reserved_area_size();
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -124,15 +112,17 @@ void IRAM_ATTR esp_spiram_init_cache(void)
 #endif
 }
 
-esp_spiram_size_t esp_spiram_get_chip_size(void)
+int esp_spiram_get_chip_size(void)
 {
+  int psram_size;
+
   if (!spiram_inited)
     {
       merr("SPI RAM not initialized");
       return ESP_SPIRAM_SIZE_INVALID;
     }
 
-  psram_size_t psram_size = psram_get_size();
+  psram_size = psram_get_size();
   switch (psram_size)
   {
     case PSRAM_SIZE_16MBITS:
@@ -249,7 +239,7 @@ int esp_spiram_reserve_dma_pool(size_t size)
 
 size_t esp_spiram_get_size(void)
 {
-  psram_size_t size = esp_spiram_get_chip_size();
+  int size = esp_spiram_get_chip_size();
 
   if (size == PSRAM_SIZE_16MBITS)
     {
