@@ -269,9 +269,9 @@ struct note_csection_s
 
 struct note_spinlock_s
 {
-  struct note_common_s nsp_cmn; /* Common note parameters */
-  FAR void *nsp_spinlock;       /* Address of spinlock */
-  uint8_t nsp_value;            /* Value of spinlock */
+  struct note_common_s nsp_cmn;             /* Common note parameters */
+  uint8_t nsp_spinlock[sizeof(uintptr_t)];  /* Address of spinlock */
+  uint8_t nsp_value;                        /* Value of spinlock */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS */
 
@@ -286,9 +286,9 @@ struct note_syscall_enter_s
 
 struct note_syscall_leave_s
 {
-  struct note_common_s nsc_cmn; /* Common note parameters */
-  uintptr_t nsc_result;         /* Result of the system call */
-  uint8_t nsc_nr;               /* System call number */
+  struct note_common_s nsc_cmn;          /* Common note parameters */
+  uint8_t nsc_nr;                        /* System call number */
+  uint8_t nsc_result[sizeof(uintptr_t)]; /* Result of the system call */
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_SYSCALL */
 
