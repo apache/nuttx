@@ -3177,6 +3177,7 @@ config STM32_SYSCFG_IOCOMPENSATION
 		from 2.4 to 3.6 V.
 
 menu "Alternate Pin Mapping"
+	depends on STM32_STM32F10XX || STM32_CONNECTIVITYLINE
 
 choice
 	prompt "CAN1 Alternate Pin Mappings"
