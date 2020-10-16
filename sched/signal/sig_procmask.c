@@ -81,7 +81,7 @@
  *   sigprocmask() except that it does not modify the errno value.
  *
  * Input Parameters:
- *   how - How the signal mast will be changed:
+ *   how - How the signal mask will be changed:
  *         SIG_BLOCK   - The resulting set is the union of the current set
  *                       and the signal set pointed to by 'set'.
  *         SIG_UNBLOCK - The resulting set is the intersection of the current
@@ -186,7 +186,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
  *   by this function call.
  *
  * Input Parameters:
- *   how - How the signal mast will be changed:
+ *   how - How the signal mask will be changed:
  *         SIG_BLOCK   - The resulting set is the union of the current set
  *                       and the signal set pointed to by 'set'.
  *         SIG_UNBLOCK - The resulting set is the intersection of the current

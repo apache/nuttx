@@ -205,7 +205,7 @@ int nxsig_delset(FAR sigset_t *set, int signo);
  *   sigprocmask() except that it does not modify the errno value.
  *
  * Input Parameters:
- *   how - How the signal mast will be changed:
+ *   how - How the signal mask will be changed:
  *         SIG_BLOCK   - The resulting set is the union of the current set
  *                       and the signal set pointed to by 'set'.
  *         SIG_UNBLOCK - The resulting set is the intersection of the current
