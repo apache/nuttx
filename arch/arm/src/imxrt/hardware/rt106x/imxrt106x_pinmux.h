@@ -43,6 +43,7 @@
 
 #include <nuttx/config.h>
 #include "imxrt_iomuxc.h"
+#include "imxrt_gpio.h"
 
 /*****************************************************************************
  * Pre-processor Definitions
