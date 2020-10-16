@@ -25,21 +25,15 @@
  * Included Files
  ****************************************************************************/
 
-typedef enum
-{
-  PSRAM_CACHE_F80M_S40M = 0,
-  PSRAM_CACHE_F40M_S40M,
-  PSRAM_CACHE_F80M_S80M,
-  PSRAM_CACHE_MAX,
-} psram_cache_mode_t;
+#define PSRAM_CACHE_F80M_S40M   0
+#define PSRAM_CACHE_F40M_S40M   1
+#define PSRAM_CACHE_F80M_S80M   2
+#define PSRAM_CACHE_MAX         3
 
-typedef enum
-{
-  PSRAM_SIZE_16MBITS = 0,
-  PSRAM_SIZE_32MBITS = 1,
-  PSRAM_SIZE_64MBITS = 2,
-  PSRAM_SIZE_MAX,
-} psram_size_t;
+#define PSRAM_SIZE_16MBITS      0
+#define PSRAM_SIZE_32MBITS      1
+#define PSRAM_SIZE_64MBITS      2
+#define PSRAM_SIZE_MAX          3
 
 /* See the TRM, chapter PID/MPU/MMU, header 'External RAM' for the
  * definitions of these modes. Important is that NORMAL works with the app
@@ -48,20 +42,18 @@ typedef enum
  * issues but cannot be used when the app CPU cache is disabled.
  */
 
-typedef enum
-{
-  PSRAM_VADDR_MODE_NORMAL = 0, /* App and Pro CPU use their own flash cache
-                                * for external RAM access
-                                */
+#define PSRAM_VADDR_MODE_NORMAL   0  /* App and Pro CPU use their own flash
+                                      * cache for external RAM access
+                                      */
 
-  PSRAM_VADDR_MODE_LOWHIGH,    /* App and Pro CPU share external RAM caches:
-                                  * pro CPU has low 2M, app CPU has high 2M
-                                  */
-  PSRAM_VADDR_MODE_EVENODD,    /* App and Pro CPU share external RAM caches:
-                                * pro CPU does even 32yte ranges, app does
-                                * odd ones.
-                                */
-} psram_vaddr_mode_t;
+#define PSRAM_VADDR_MODE_LOWHIGH  1 /* App and Pro CPU share external RAM caches:
+                                     * pro CPU has low 2M, app CPU has high 2M
+                                     */
+
+#define PSRAM_VADDR_MODE_EVENODD  2 /* App and Pro CPU share external RAM caches:
+                                     * pro CPU does even 32yte ranges, app does
+                                     * odd ones.
+                                     */
 
 /* Description: Get PSRAM size
  * return:
@@ -69,7 +61,7 @@ typedef enum
  *   - PSRAM size
  */
 
-psram_size_t psram_get_size(void);
+int psram_get_size(void);
 
 /* Description: PSRAM cache enable function
  *
@@ -85,7 +77,6 @@ psram_size_t psram_get_size(void);
  *          claimed.
  */
 
-int psram_enable(psram_cache_mode_t mode, psram_vaddr_mode_t
-                       vaddrmode);
+int psram_enable(int mode, int vaddrmode);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_HIMEM_H */

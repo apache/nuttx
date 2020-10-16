@@ -30,13 +30,10 @@
 #include <stdbool.h>
 #include "xtensa_attr.h"
 
-typedef enum
-{
-  ESP_SPIRAM_SIZE_16MBITS = 0,   /* SPI RAM size is 16 MBits */
-  ESP_SPIRAM_SIZE_32MBITS = 1,   /* SPI RAM size is 32 MBits */
-  ESP_SPIRAM_SIZE_64MBITS = 2,   /* SPI RAM size is 64 MBits */
-  ESP_SPIRAM_SIZE_INVALID,       /* SPI RAM size is invalid */
-} esp_spiram_size_t;
+#define ESP_SPIRAM_SIZE_16MBITS   0   /* SPI RAM size is 16 MBits */
+#define ESP_SPIRAM_SIZE_32MBITS   1   /* SPI RAM size is 32 MBits */
+#define ESP_SPIRAM_SIZE_64MBITS   2   /* SPI RAM size is 64 MBits */
+#define ESP_SPIRAM_SIZE_INVALID   3   /* SPI RAM size is invalid  */
 
 /* Description: get SPI RAM size
  * return
@@ -44,7 +41,7 @@ typedef enum
  *   - SPI RAM size
  */
 
-esp_spiram_size_t esp_spiram_get_chip_size(void);
+int esp_spiram_get_chip_size(void);
 
 /* Description: Initialize spiram interface/hardware. Normally called from
  *              cpu_start.c.
@@ -58,9 +55,9 @@ int esp_spiram_init(void);
 /* Description: Configure Cache/MMU for access to external SPI RAM.
  *
  * Normally this function is called from cpu_start, if
- * CONFIG_ESP32_SPIRAM_BOOT_INIT option is enabled. Applications which need to
- * enable SPI RAM at run time can disable CONFIG_ESP32_SPIRAM_BOOT_INIT, and
- * call this function later.
+ * CONFIG_ESP32_SPIRAM_BOOT_INIT option is enabled. Applications which need
+ * to enable SPI RAM at run time can disable CONFIG_ESP32_SPIRAM_BOOT_INIT,
+ * and call this function later.
  *
  * Attention this function must be called with flash cache disabled.
  */
