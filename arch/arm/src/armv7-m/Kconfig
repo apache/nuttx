@@ -205,9 +205,9 @@ config ARMV7M_STACKCHECK
 		other architectures will be accepted.
 
 		This option requires that you are using a GCC toolchain and that
-		you also include -finstrument-functions in your CFLAGS when you
-		compile.  This addition to your CFLAGS should probably be added
-		to the definition of the CFFLAGS in your board Make.defs file.
+		you also include -finstrument-functions and -ffixed-r10 in your
+		CFLAGS when you compile. This addition to your CFLAGS should probably
+		be added to the definition of the CFFLAGS in your board Make.defs file.
 
 config ARMV7M_ITMSYSLOG
 	bool "ITM SYSLOG support"
