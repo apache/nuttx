@@ -108,6 +108,15 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
       goto errout_with_group;
     }
 
+  /* Initialize the task control block */
+
+  ret = nxtask_setup_scheduler(tcb, priority, nxtask_start,
+                               entry, ttype);
+  if (ret < OK)
+    {
+      goto errout_with_group;
+    }
+
   if (stack)
     {
       /* Use pre-allocated stack */
@@ -121,15 +130,6 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
       ret = up_create_stack(&tcb->cmn, stack_size, ttype);
     }
 
-  if (ret < OK)
-    {
-      goto errout_with_group;
-    }
-
-  /* Initialize the task control block */
-
-  ret = nxtask_setup_scheduler(tcb, priority, nxtask_start,
-                               entry, ttype);
   if (ret < OK)
     {
       goto errout_with_group;
