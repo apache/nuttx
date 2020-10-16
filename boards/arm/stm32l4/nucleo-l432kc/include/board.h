@@ -37,7 +37,7 @@
 #define __BOARDS_ARM_STM32L4_NUCLEO_L432KC_INCLUDE_BOARD_H
 
 /*****************************************************************************
- * Included File
+ * Included Files
  *****************************************************************************/
 
 #include <nuttx/config.h>
@@ -45,17 +45,17 @@
 # include <stdint.h>
 #endif
 
-/* Do not include STM32L4 header files here */
-
-/*****************************************************************************
- * Pre-processor Definitions
- *****************************************************************************/
-
 /* Clocking ******************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_STM32L432KC)
 #  include <arch/board/nucleo-l432kc.h>
 #endif
+
+/* Do not include STM32L4 header files here */
+
+/*****************************************************************************
+ * Pre-processor Definitions
+ *****************************************************************************/
 
 /* DMA Channel/Stream Selections *********************************************/
 
