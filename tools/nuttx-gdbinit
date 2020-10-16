@@ -39,6 +39,9 @@ define _examine_arch
   python if (_target_arch.name() == 'i386:x86-64') : \
   gdb.execute("set $_target_arch = \"i386:x86-64\"")
 
+  python if (_target_arch.name() == 'xtensa') : \
+  gdb.execute("set $_target_arch = \"xtensa\"")
+
   # NOTE: we assume that sim has sim_bringup function
   python if (type(gdb.lookup_global_symbol("sim_bringup")) is gdb.Symbol) : \
   gdb.execute("set $_target_arch=\"sim:x86-64\"")
@@ -103,6 +106,9 @@ define _save_tcb
   if ($_streq($_target_arch, "sim:x86-64") == 1)
     _save_tcb_simx86-64 $tcb
   end
+  if ($_streq($_target_arch, "xtensa") == 1)
+    _save_tcb_xtensa $tcb
+  end
 end
 
 define _save_current_tcb
@@ -143,6 +149,9 @@ define _switch_tcb
   end
   if ($_streq($_target_arch, "sim:x86-64") == 1)
     _switch_tcb_simx86-64 $tcb
+  end
+  if ($_streq($_target_arch, "xtensa") == 1)
+    _switch_tcb_xtensa $tcb
   end
 
   # update _current_tcb
@@ -275,6 +284,68 @@ define _switch_tcb_i386x86-64
   set $rip = $tcb.xcp.regs[21 + 64]
   set $rsp = $tcb.xcp.regs[24 + 64]
 end
+
+# see nuttx/arch/xtensa/include/irq.h
+define _save_tcb_xtensa
+  set $tcb = (struct tcb_s *)$arg0
+
+  set $tcb.xcp.regs[0] = $pc
+  set $tcb.xcp.regs[1] = $ps
+  set $tcb.xcp.regs[2] = $a0
+  set $tcb.xcp.regs[3] = $a1
+  set $tcb.xcp.regs[4] = $a2
+  set $tcb.xcp.regs[5] = $a3
+  set $tcb.xcp.regs[6] = $a4
+  set $tcb.xcp.regs[7] = $a5
+  set $tcb.xcp.regs[8] = $a6
+  set $tcb.xcp.regs[9] = $a7
+  set $tcb.xcp.regs[10] = $a8
+  set $tcb.xcp.regs[11] = $a9
+  set $tcb.xcp.regs[12] = $a10
+  set $tcb.xcp.regs[13] = $a11
+  set $tcb.xcp.regs[14] = $a12
+  set $tcb.xcp.regs[15] = $a13
+  set $tcb.xcp.regs[16] = $a14
+  set $tcb.xcp.regs[17] = $a15
+  set $tcb.xcp.regs[18] = $sar
+  set $tcb.xcp.regs[19] = $exccause
+  set $tcb.xcp.regs[20] = $excvaddr
+  set $tcb.xcp.regs[21] = $lbeg
+  set $tcb.xcp.regs[22] = $lend
+  set $tcb.xcp.regs[23] = $lcount
+
+  set $_pc_reg_idx = 0
+end
+
+define _switch_tcb_xtensa
+  set $tcb = (struct tcb_s *)$arg0
+
+  set $pc       = $tcb.xcp.regs[0]
+  set $ps       = $tcb.xcp.regs[1]
+  set $a0       = $tcb.xcp.regs[2]
+  set $a1       = $tcb.xcp.regs[3]
+  set $a2       = $tcb.xcp.regs[4]
+  set $a3       = $tcb.xcp.regs[5]
+  set $a4       = $tcb.xcp.regs[6]
+  set $a5       = $tcb.xcp.regs[7]
+  set $a6       = $tcb.xcp.regs[8]
+  set $a7       = $tcb.xcp.regs[9]
+  set $a8       = $tcb.xcp.regs[10]
+  set $a9       = $tcb.xcp.regs[11]
+  set $a10      = $tcb.xcp.regs[12]
+  set $a11      = $tcb.xcp.regs[13]
+  set $a12      = $tcb.xcp.regs[13]
+  set $a13      = $tcb.xcp.regs[15]
+  set $a14      = $tcb.xcp.regs[16]
+  set $a15      = $tcb.xcp.regs[17]
+  set $sar      = $tcb.xcp.regs[18]
+  set $exccause = $tcb.xcp.regs[19]
+  set $excvaddr = $tcb.xcp.regs[20]
+  set $lbeg     = $tcb.xcp.regs[21]
+  set $lend     = $tcb.xcp.regs[22]
+  set $lcount   = $tcb.xcp.regs[23]
+end
+
 
 # see nuttx/arch/sim/src/sim/up_internal.h
 define _save_tcb_simx86-64
