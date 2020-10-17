@@ -128,18 +128,31 @@
  * is IO16, they are the default value for these two configs.
  */
 
-#define D0WD_PSRAM_CLK_IO          CONFIG_D0WD_PSRAM_CLK_IO  /* Default is 17 */
-#define D0WD_PSRAM_CS_IO           CONFIG_D0WD_PSRAM_CS_IO   /* Default is 16 */
+#ifndef CONFIG_D0WD_PSRAM_CLK_IO   /* Default is 17 */
+#  define CONFIG_D0WD_PSRAM_CLK_IO 17
+#endif
 
-#define D2WD_PSRAM_CLK_IO          CONFIG_D2WD_PSRAM_CLK_IO  /* Default is 9 */
-#define D2WD_PSRAM_CS_IO           CONFIG_D2WD_PSRAM_CS_IO   /* Default is 10 */
+#ifndef CONFIG_D0WD_PSRAM_CS_IO    /* Default is 16 */
+#  define CONFIG_D0WD_PSRAM_CS_IO  16
+#endif
+
+#ifndef CONFIG_D2WD_PSRAM_CLK_IO   /* Default is 9 */
+#  define CONFIG_D2WD_PSRAM_CLK_IO 9
+#endif
+
+#ifndef CONFIG_D2WD_PSRAM_CS_IO    /* Default is 10 */
+#  define CONFIG_D2WD_PSRAM_CS_IO  10
+#endif
 
 /* For ESP32-PICO chip, the psram share clock with flash. The flash clock
  * pin is fixed, which is IO6.
  */
 
 #define PICO_PSRAM_CLK_IO          6
-#define PICO_PSRAM_CS_IO           CONFIG_PICO_PSRAM_CS_IO   /* Default is 10 */
+
+#ifndef CONFIG_PICO_PSRAM_CS_IO    /* Default is 10 */
+#  define PICO_PSRAM_CS_IO         10
+#endif
 
 #define PSRAM_INTERNAL_IO_28       28
 #define PSRAM_INTERNAL_IO_29       29
@@ -915,8 +928,8 @@ psram_2t_mode_enable(psram_spi_num_t spi_num)
    *        send 1 bit high levle in ninth clock from the back to PSRAM SIO1
    */
 
-  GPIO_OUTPUT_SET(D0WD_PSRAM_CS_IO, 1);
-  gpio_matrix_out(D0WD_PSRAM_CS_IO, SIG_GPIO_OUT_IDX, 0, 0);
+  GPIO_OUTPUT_SET(CONFIG_D0WD_PSRAM_CS_IO, 1);
+  gpio_matrix_out(CONFIG_D0WD_PSRAM_CS_IO, SIG_GPIO_OUT_IDX, 0, 0);
 
   gpio_matrix_out(PSRAM_SPID_SD1_IO, SPIQ_OUT_IDX, 0, 0);
   gpio_matrix_in(PSRAM_SPID_SD1_IO, SPIQ_IN_IDX, 0);
@@ -943,7 +956,7 @@ psram_2t_mode_enable(psram_spi_num_t spi_num)
   gpio_matrix_out(PSRAM_SPID_SD1_IO, SPID_OUT_IDX, 0, 0);
   gpio_matrix_in(PSRAM_SPID_SD1_IO, SPID_IN_IDX, 0);
 
-  gpio_matrix_out(D0WD_PSRAM_CS_IO, SPICS1_OUT_IDX, 0, 0);
+  gpio_matrix_out(CONFIG_D0WD_PSRAM_CS_IO, SPICS1_OUT_IDX, 0, 0);
 
   /* setp4: send cmd 0x5f
    *        send one more bit clock after send cmd
@@ -1306,8 +1319,8 @@ psram_enable(int mode, int vaddrmode)   /* psram init */
           return -EFAULT;
         }
 
-      psram_io.psram_clk_io = D2WD_PSRAM_CLK_IO;
-      psram_io.psram_cs_io  = D2WD_PSRAM_CS_IO;
+      psram_io.psram_clk_io = CONFIG_D2WD_PSRAM_CLK_IO;
+      psram_io.psram_cs_io  = CONFIG_D2WD_PSRAM_CS_IO;
     }
   else
     {
@@ -1325,7 +1338,7 @@ psram_enable(int mode, int vaddrmode)   /* psram init */
 
           s_clk_mode = PSRAM_CLK_MODE_NORM;
           psram_io.psram_clk_io = PICO_PSRAM_CLK_IO;
-          psram_io.psram_cs_io  = PICO_PSRAM_CS_IO;
+          psram_io.psram_cs_io  = CONFIG_PICO_PSRAM_CS_IO;
         }
       else
         {
@@ -1333,8 +1346,8 @@ psram_enable(int mode, int vaddrmode)   /* psram init */
               (pkg_ver == EFUSE_RD_CHIP_VER_PKG_ESP32D0WDQ5))
             {
               minfo("This chip is ESP32-D0WD\n");
-              psram_io.psram_clk_io = D0WD_PSRAM_CLK_IO;
-              psram_io.psram_cs_io  = D0WD_PSRAM_CS_IO;
+              psram_io.psram_clk_io = CONFIG_D0WD_PSRAM_CLK_IO;
+              psram_io.psram_cs_io  = CONFIG_D0WD_PSRAM_CS_IO;
             }
           else
             {
