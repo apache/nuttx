@@ -1687,7 +1687,6 @@ int imxrt_caninitialize(int intf)
 {
   struct imxrt_driver_s *priv;
   int ret;
-  uint32_t regval;
 #ifdef TX_TIMEOUT_WQ
   uint32_t i;
 #endif
@@ -1845,7 +1844,6 @@ int imxrt_caninitialize(int intf)
 #if !defined(CONFIG_NETDEV_LATEINIT)
 void arm_netinitialize(void)
 {
-
 #ifdef CONFIG_IMXRT_FLEXCAN1
   imxrt_caninitialize(1);
 #endif
@@ -1857,7 +1855,6 @@ void arm_netinitialize(void)
 #ifdef CONFIG_IMXRT_FLEXCAN3
   imxrt_caninitialize(3);
 #endif
-
 }
 #endif
 
