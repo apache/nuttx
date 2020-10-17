@@ -85,6 +85,7 @@ int board_app_initialize(uintptr_t arg)
 {
 #ifdef HAVE_LEDS
   /* Register the LED driver */
+
   int ret;
   ret = userled_lower_initialize(LED_DRIVER_PATH);
   if (ret < 0)
