@@ -35,7 +35,6 @@
 #include "esp32_gpio.h"
 #include "esp32_psram.h"
 #include "hardware/esp32_spi.h"
-#include "hardware/esp32_caps.h"
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_iomux.h"
 #include "hardware/esp32_rtccntl.h"
@@ -110,6 +109,9 @@
  * with either a setup that has the flash on non-standard pins or ESP32s with
  * built-in flash.
  */
+
+#define SPI_IOMUX_PIN_NUM_CLK      6
+#define SPI_IOMUX_PIN_NUM_CS       11
 
 #define PSRAM_SPIQ_SD0_IO          7
 #define PSRAM_SPID_SD1_IO          8
