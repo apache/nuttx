@@ -74,7 +74,7 @@ OBJS = $(AOBJS) $(COBJS)
 
 LDSTARTGROUP ?= --start-group
 LDENDGROUP ?= --end-group
-LDFLAGS += $(ARCHSCRIPT)
+LDFLAGS += $(ARCHSCRIPT) -static
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
 
