@@ -113,7 +113,7 @@ You'll need to use the `Sony fork of OpenOCD <https://github.com/sony/openocd-nu
 according to the OpenOCD instructions.
 
 See this article for more info:
-`Debugging a Apache NuttX target with GDB and OpenOCD <https://micro-ros.github.io/docs/tutorials/advanced/debugging_gdb_openocd/>`_.
+`Debugging a Apache NuttX target with GDB and OpenOCD <https://micro-ros.github.io/docs/tutorials/advanced/nuttx/debugging/>`_.
 
 See the section :ref:`Running <running>` for a brief tutorial on how to use GDB.
 
