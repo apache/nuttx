@@ -754,6 +754,8 @@ arm_data_initialize:
 .Lstackpointer:
 #ifdef CONFIG_BOOT_SDRAM_DATA
 	.long	IDLE_STACK_VBASE+CONFIG_IDLETHREAD_STACKSIZE-4
+#elif defined(CONFIG_SMP)
+	.long	_enoinit+CONFIG_IDLETHREAD_STACKSIZE-4
 #else
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 #endif
@@ -773,6 +775,8 @@ arm_data_initialize:
 .Lstkinit:
 #ifdef CONFIG_BOOT_SDRAM_DATA
 	.long	IDLE_STACK_VBASE		/* Beginning of the IDLE stack, then words of IDLE stack */
+#elif defined(CONFIG_SMP)
+	.long	_enoinit
 #else
 	.long	_ebss					/* Beginning of the IDLE stack, then words of IDLE stack */
 #endif
@@ -785,7 +789,6 @@ arm_data_initialize:
  * Data section variables
  ***************************************************************************/
 
-#ifndef CONFIG_SMP
 	/* This global variable is unsigned long g_idle_topstack and is
 	 * exported from here only because of its coupling to .Linitparms
 	 * above.
@@ -800,10 +803,11 @@ g_idle_topstack:
 
 #ifdef CONFIG_BOOT_SDRAM_DATA
 	.long	IDLE_STACK_VBASE+CONFIG_IDLETHREAD_STACKSIZE
+#elif defined(CONFIG_SMP)
+	.long	_enoinit+CONFIG_IDLETHREAD_STACKSIZE
 #else
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 #endif
 	.size	g_idle_topstack, .-g_idle_topstack
-#endif
 	.end
 #endif
