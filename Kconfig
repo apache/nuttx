@@ -93,12 +93,6 @@ config WINDOWS_CYGWIN
 		Build natively in a Cygwin environment with POSIX style paths (like
 		/cygdrive/c/Program Files)
 
-config WINDOWS_UBUNTU
-	bool "Ubuntu under Windows 10"
-	---help---
-		Build natively in an Ubuntu shell under Windows 10 environment with
-		POSIX style paths (like /mnt/c/Program Files)
-
 config WINDOWS_MSYS
 	bool "MSYS or MSYS2"
 	select TOOLCHAIN_WINDOWS

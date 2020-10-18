@@ -49,12 +49,12 @@ GITCLEAN=0
 
 function showusage {
   echo ""
-  echo "USAGE: $progname [-l|m|c|u|g|n] [-d] [-e <extraflags>] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>"
+  echo "USAGE: $progname [-l|m|c|g|n] [-d] [-e <extraflags>] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>"
   echo "       $progname -h"
   echo ""
   echo "Where:"
-  echo "  -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),"
-  echo "     Ubuntu under Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Linux"
+  echo "  -l|m|c|g|n selects Linux (l), macOS (m), Cygwin (c),"
+  echo "     MSYS/MSYS2 (g) or Windows native (n). Default Linux"
   echo "  -d enables script debug output"
   echo "  -e pass extra c/c++ flags such as -Wno-cpp via make command line"
   echo "  -x exit on build failures"
@@ -81,7 +81,7 @@ function showusage {
 
 while [ ! -z "$1" ]; do
   case $1 in
-  -l | -m | -c | -u | -g | -n )
+  -l | -m | -c | -g | -n )
     HOPTION+=" $1"
     ;;
   -d )

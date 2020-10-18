@@ -114,9 +114,7 @@ ifeq ($(HOSTOS),Cygwin)
 endif
 
 ifeq ($(CONFIG_HOST_WINDOWS),y)
-ifneq ($(CONFIG_WINDOWS_UBUNTU),y)
   HOSTEXEEXT ?= .exe
-endif
 endif
 
 # This define is passed as EXTRAFLAGS for kernel-mode builds.  It is also passed
