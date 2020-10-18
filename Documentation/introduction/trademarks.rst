@@ -12,7 +12,7 @@ Trademarks
 -  Cygwin is a trademark of Red Hat, Incorporated.
 -  Linux is a registered trademark of Linus Torvalds.
 -  Eagle-100 is a trademark of `Micromint USA,
-   LLC <%20http://www.micromint.com/>`__.
+   LLC <http://www.micromint.com/>`__.
 -  EnergyLite is a trademark of STMicroelectronics.
 -  EFM32 is a trademark of Silicon Laboratories, Inc.
 -  LPC2148 is a trademark of NXP Semiconductors.
