@@ -87,7 +87,7 @@ pointer to a write-able instance of :c:struct:`binfmt_s`.
   structure is shown below:
 
   .. code-block:: c
-  
+
     struct symtab_s;
     struct binary_s
     {
@@ -137,9 +137,9 @@ pointer to a write-able instance of :c:struct:`binfmt_s`.
 
   Where the types ``binfmt_ctor_t`` and ``binfmt_dtor_t`` define the type
   of one C++ constructor or destructor:
-  
+
   .. code-block:: c
-  
+
     typedef FAR void (*binfmt_ctor_t)(void);
     typedef FAR void (*binfmt_dtor_t)(void);
 
@@ -152,20 +152,20 @@ Binary format management
 .. c:function:: int register_binfmt(FAR struct binfmt_s *binfmt)
 
   Register a loader for a binary format.
-  
+
   :return: This is a NuttX internal function so it follows the convention
     that 0 (OK) is returned on success and a negated errno is returned on
     failure.
-     
+
 .. c:function:: int unregister_binfmt(FAR struct binfmt_s *binfmt)
 
-  Register a loader for a binary format. 
-  
+  Register a loader for a binary format.
+
   :return:
     This is a NuttX internal function so it follows the convention
     that 0 (OK) is returned on success and a negated errno is returned on
     failure.
-   
+
 Basic module management
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -193,12 +193,12 @@ Basic module management
   (via :c:func:`exec_module`) and has not exited, calling this will be fatal.
 
   However, this function must be called after the module exist. How this is
-  done is up to your logic. Perhaps you register it to be called by :c:func:`on_exit`? 
+  done is up to your logic. Perhaps you register it to be called by :c:func:`on_exit`?
 
   :return:
     This is a NuttX internal function so it follows the convention that 0 (``OK``)
     is returned on success and a negated ``errno`` is returned on failure.
-    
+
 .. c:function:: int exec_module(FAR const struct binary_s *bin);
 
   Execute a module that has been loaded into memory by :c:func:`load_module`.
@@ -209,10 +209,10 @@ Basic module management
 
 .. tip::
   The function :c:func:`exec` is a convenience function that wraps
-  :c:func:`load_module` and :c:func:`exec_module` into one call. 
+  :c:func:`load_module` and :c:func:`exec_module` into one call.
 
 ``PATH`` traversal logic
-~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. c:function:: ENVPATH_HANDLE envpath_init(void);
 
@@ -232,17 +232,17 @@ Basic module management
     that may subsequently be used in calls to :c:func:`envpath_next` and
     :c:func:`envpath_release`. On error, a ``NULL`` handle value will be returned.
     The most likely cause of an error would be that there is no value
-    associated with the ``PATH`` variable. 
+    associated with the ``PATH`` variable.
 
 .. c:function:: FAR char *envpath_next(ENVPATH_HANDLE handle, FAR const char *relpath)
 
   Traverse all possible values in the PATH variable in attempt to find the
-  full path to an executable file when only a relative path is provided. 
+  full path to an executable file when only a relative path is provided.
 
   :param handle: The handle value returned by :c:func:`envpath_init`.
   :param relpath: The relative path to the file to be found.
 
-  :return: 
+  :return:
     On success, a non-``NULL`` pointer to a null-terminated string is provided.
     This is the full path to a file that exists in the file system.
     This function will verify that the file exists (but will not verify that it is marked executable).
@@ -262,7 +262,7 @@ Release all resources set aside by envpath_init when the
 handle value was created. The handle value is invalid on
 return from this function. Attempts to all :c:func:`envpath_next`
 or :c:func:`envpath_release` with such a stale handle will result
-in undefined (i.e., not good) behavior. 
+in undefined (i.e., not good) behavior.
 
   :param handle: The handle value returned by :c:func:`envpath_init`.
 
@@ -297,7 +297,7 @@ Symbol Table Data Structures
   Describes one entry in the symbol table.
 
   .. code-block:: c
-  
+
     struct symtab_s
     {
       FAR const char *sym_name;          /* A pointer to the symbol name string */
@@ -326,16 +326,16 @@ Symbol Table Function Interfaces
   to ``nsyms``.
 
   :return:
-    A reference to the symbol table entry if an entry with the matching name is found; NULL is returned if the entry is not found. 
-    
+    A reference to the symbol table entry if an entry with the matching name is found; NULL is returned if the entry is not found.
+
 .. c:function:: FAR const struct symtab_s *symtab_findorderedbyname(FAR const struct symtab_s *symtab, FAR const char *name, int nsyms);
 
   Find the symbol in the symbol table with the matching name.
-  This version assumes that table ordered with respect to symbol name. 
+  This version assumes that table ordered with respect to symbol name.
 
   :return:
     A reference to the symbol table entry if an entry with
-    the matching name is found; NULL is returned if the entry is not found. 
+    the matching name is found; NULL is returned if the entry is not found.
 
 
 .. c:function:: FAR const struct symtab_s *symtab_findbyvalue(FAR const struct symtab_s *symtab, FAR void *value, int nsyms);
@@ -343,12 +343,12 @@ Symbol Table Function Interfaces
   Find the symbol in the symbol table whose value closest
   (but not greater than), the provided value. This version assumes
   that table is not ordered with respect to symbol name and, hence,
-  access time will be linear with respect to ``nsyms``. 
+  access time will be linear with respect to ``nsyms``.
 
   :return:
     A reference to the symbol table entry if an entry with the matching
     name is found; ``NULL`` is returned if the entry is not found.
-    
+
 Configuration Variables
 =======================
 

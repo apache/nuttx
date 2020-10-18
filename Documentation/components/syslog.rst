@@ -62,11 +62,11 @@ extent, its companion ``vsyslog()``:
        controlling the SYSLOG output only form that process. There
        will be a separate mask accessible only in the kernel code to
        control kernel SYSLOG output.
-       
+
 The above are all standard interfaces as defined at
 `OpenGroup.org <http://pubs.opengroup.org/onlinepubs/009695399/functions/closelog.html>`__.
 Those interfaces are available for use by application software.
-The remaining interfaces discussed in this section are non-standard, OS-internal interfaces. 
+The remaining interfaces discussed in this section are non-standard, OS-internal interfaces.
 
 Debug Interfaces
 ----------------
@@ -166,7 +166,7 @@ The channel interface is instantiated by calling
 
   :return:
     Zero (OK)is returned on success. A negated errno value is
-    returned on any failure. 
+    returned on any failure.
 
 SYSLOG Channel Initialization
 -----------------------------
@@ -423,14 +423,14 @@ SYSLOG file channel:
   NOTE interrupt level SYSLOG output will be lost in this case
   unless the interrupt buffer is used.
 
-  :param devpath: 
+  :param devpath:
     The full path to the file to be used for SYSLOG
     output. This may be an existing file or not. If the file
     exists, ``syslog_file_channel()`` will append new SYSLOG data
     to the end of the file. If it does not, then
     ``syslog_file_channel()`` will create the file.
 
-  :return: 
+  :return:
     Zero (``OK``) is returned on success; a
     negated ``errno`` value is returned on any failure.
 

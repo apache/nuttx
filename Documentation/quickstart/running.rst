@@ -21,14 +21,14 @@ Flashing
 
 There are various tools you can use to flash the NuttX binary to your Nucleo
 board. One common option is to use `openocd` which supports a large number
-of programmers and target microcontrollers. 
+of programmers and target microcontrollers.
 
 To install the stable version of openocd you can do:
 
 .. code-block:: console
 
   $ apt install openocd
-  
+
 .. todo:: add instructions for other platforms
 
 You should note that openocd project has not made stable releases for long
@@ -42,7 +42,7 @@ latest Git version. To install it you should:
   $ ./bootstrap
   $ ./configure --prefix install/
   $ make install
-  
+
 The resulting installation will be under ``openocd/install``. You can add
 ``openocd/install/bin`` to your ``PATH``.
 
@@ -53,7 +53,7 @@ Now, to flash the binary to your board, connect the USB cable and do:
   $ cd nuttx/
   $ openocd -f interface/st-link-v2.cfg -f target/stm32f1x.cfg -c 'init' \
     -c 'program nuttx/nuttx.bin verify reset' -c 'shutdown'
-  
+
 Access NuttShell
 ================
 
@@ -64,13 +64,13 @@ of your choice where you will see the ``nsh>`` prompt:
 .. tabs::
 
   .. code-tab:: console picocom (CLI)
-  
+
     $ picocom -b 115200 /dev/ttyUSB0
-    
+
   .. code-tab:: console gtkterm (GUI)
-  
+
     $ gtkterm -s 115200 -p /dev/ttyUSB0
-    
+
 
 Debugging
 =========
@@ -80,20 +80,20 @@ Using ``openocd`` you can also debug NuttX. To do so, first run:
 .. code-block:: console
 
   $ openocd -f interface/st-link-v2.cfg -f target/stm32f1x.cfg
-  
+
 which will start a GDB server. Then, start ``gdb`` as:
 
 .. code-block:: console
 
   $ cd nuttx/
   $ gdb-multiarch nuttx/nuttx
-  
+
 Inside ``gdb`` console, connect to the ``openocd`` server with:
 
 .. code-block::
 
   (gdb) target extended-remote :3333
-  
+
 You can debug using standard ``gdb`` commands.
 
 Advanced Debugging with JTAG

@@ -46,13 +46,13 @@ credentials at login time:
 
   #. The simplest implementation simply uses fixed login credentials and
      is selected with::
-     
-      CONFIG_NSH_LOGIN_FIXED=y     
+
+      CONFIG_NSH_LOGIN_FIXED=y
 
      The fixed login credentials are selected via::
-     
+
       CONFIG_NSH_LOGIN_USERNAME=admin
-      CONFIG_NSH_LOGIN_PASSWORD="Administrator"     
+      CONFIG_NSH_LOGIN_PASSWORD="Administrator"
 
      This is not very flexible since there can be only one user and the
      password is fixed in the FLASH image. This option is also not very
@@ -61,22 +61,22 @@ credentials at login time:
 
   #. NSH can also be configured to defer the entire user credential
      verification to platform-specific logic with this setting::
-     
-      CONFIG_NSH_LOGIN_PLATFORM=y     
+
+      CONFIG_NSH_LOGIN_PLATFORM=y
 
      In this case, NSH will call a platform-specific function to perform
      the verification of user credentials. The platform-specific logic
      must provide a function with the following prototype:
-     
+
      .. code-block:: c
-     
+
        int platform_user_verify(FAR const char *username, FAR const char *password);
 
      which is prototyped an described in ``apps/include/nsh.h`` and which
      may be included like:
-     
+
      .. code-block:: c
-     
+
       #include <apps/nsh.h>
 
      An appropriate place to implement this function might be in the
@@ -85,7 +85,7 @@ credentials at login time:
   #. A final option is to use a password file contained encrypted password
      information. This final option is selected with the following and
      described in more detail in the following paragraph::
-     
+
        CONFIG_NSH_LOGIN_PASSWD=y
 
 Password Files
@@ -126,17 +126,17 @@ The password file logic requires a few additional settings:
 
   #. The size of dynamically allocated and freed buffer that is used for
      file access::
-     
+
        CONFIG_FSUTILS_PASSWD_IOBUFFER_SIZE=512
 
   #. And the 128-bit encryption key. The password file currently uses the
      Tiny Encryption Algorithm (TEA), but could be extended to use
      something more powerful.
-     
+
         CONFIG_FSUTILS_PASSWD_KEY1=0x12345678
         CONFIG_FSUTILS_PASSWD_KEY2=0x9abcdef0
         CONFIG_FSUTILS_PASSWD_KEY3=0x12345678
-        CONFIG_FSUTILS_PASSWD_KEY4=0x9abcdef0     
+        CONFIG_FSUTILS_PASSWD_KEY4=0x9abcdef0
 
 Password can only be decrypted with access to this key. Note that this
 key could potentially be fished out of your FLASH image, but without any
@@ -178,27 +178,27 @@ ROMFS file system, passwords, and login prompts. First, I make these
 changes to that configuration.
 
   #. Disable logins:
-  
+
     .. code-block:: diff
-          
+
       - CONFIG_NSH_CONSOLE_LOGIN=y
       + # CONFIG_NSH_CONSOLE_LOGIN is not set
-        # CONFIG_NSH_TELNET_LOGIN is not set    
+        # CONFIG_NSH_TELNET_LOGIN is not set
 
   #. Move the password file to a write-able file system:
-  
+
     .. code-block:: diff
-    
+
       - CONFIG_FSUTILS_PASSWD_PATH="/etc/passwd"
       + CONFIG_FSUTILS_PASSWD_PATH="/tmp/passwd"
-    
+
   #. Make the password file modifiable
 
     .. code-block:: diff
-    
+
       - CONFIG_FSUTILS_PASSWD_READONLY=y
       # CONFIG_FSUTILS_PASSWD_READONLY is not set
-    
+
 Now rebuild the simulation. No login should be required to enter the
 shell and you should find the ```useradd`` <#cmduseradd>`__,
 ```userdel`` <#cmduserdel>`__, and ```passwd`` <#cmdpasswd>`__ commands
@@ -228,21 +228,21 @@ Then create/re-create the ``nsh_romfsimg.h`` file as described below.
 
   #. The content on the ``nsh_romfsimg.h`` header file is generated from a
      template directory structure. Create the directory structure::
-           
+
       mkdir etc
-      mkdir etc/init.d     
+      mkdir etc/init.d
 
      And copy your existing startup script into ``etc/init.c`` as ``rcS``.
 
   #. Save your new password file in the ``etc/`` directory as ``passwd``.
 
   #. Create the new ROMFS image::
-  
-      genromfs -f romfs_img -d etc -V MyVolName  
+
+      genromfs -f romfs_img -d etc -V MyVolName
 
   #. Convert the ROMFS image to a C header file::
-  
-      xxd -i romfs_img >nsh_romfsimg.h  
+
+      xxd -i romfs_img >nsh_romfsimg.h
 
   #. Edit ``nsh_romfsimg.h``: Mark both data definitions as ``const`` so
      that the data will be stored in FLASH.

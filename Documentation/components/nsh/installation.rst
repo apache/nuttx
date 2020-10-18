@@ -61,39 +61,39 @@ behave as follows at NSH start-up time:
 
   -  NSH will create a read-only RAM disk (a ROM disk), containing a tiny
      ROMFS file system containing the following::
-           
+
       `--init.d/
           `-- rcS
-     
+
      Where ``rcS`` is the NSH start-up script.
 
   -  NSH will then mount the ROMFS file system at ``/etc``, resulting in::
-        
+
       |--dev/
       |   `-- ram0
       `--etc/
           `--init.d/
-              `-- rcS  
+              `-- rcS
 
   -  By default, the contents of ``rcS`` script are::
-  
+
       # Create a RAMDISK and mount it at /tmp
 
       mkrd -m 1 -s 512 1024
       mkfatfs /dev/ram1
       mount -t vfat /dev/ram1 /tmp
-  
+
   -  NSH will execute the script at ``/etc/init.d/rcS`` at start-up
      (before the first NSH prompt). After execution of the script, the
      root FS will look like::
-           
+
       |--dev/
       |   |-- ram0
       |   `-- ram1
       |--etc/
       |   `--init.d/
       |       `-- rcS
-      `--tmp/     
+      `--tmp/
 
 **Example Configurations**. Here are some configurations that have
 ``CONFIG_NSH_ROMFSETC=y`` in the NuttX configuration file. They might

@@ -21,7 +21,7 @@ following section.
 
 .. toctree::
   :caption: Supported Drivers
-  
+
   spi.rst
   i2c.rst
   ethernet.rst

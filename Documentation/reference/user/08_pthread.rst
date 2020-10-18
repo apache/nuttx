@@ -828,7 +828,7 @@ No support for the following pthread interfaces is provided by NuttX:
 
   -  ``pthread_setspecific()`` may be called from a thread-specific data
      destructor function.
-   
+
 .. c:function:: void *pthread_getspecific(pthread_key_t key)
 
   The ``pthread_getspecific()`` function returns the value currently bound

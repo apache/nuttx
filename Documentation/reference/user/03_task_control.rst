@@ -26,11 +26,11 @@ Task Control Interfaces
   within the task group. Members of a task group share certain
   resources such as environment variables, file descriptors, ``FILE``
   streams, sockets, pthread keys and open message queues.
-  
+
     - :c:func:`atexit`
     - :c:func:`on_exit`
-    
-  .. note:: 
+
+  .. note::
      Behavior of features related to task group's depend of
      NuttX configuration settings. See the discussion of "Parent and
      Child Tasks," below. See also the\ `NuttX
@@ -132,9 +132,9 @@ Functions
 
   **POSIX Compatibility:** This is a NON-POSIX interface. VxWorks provides
   the comparable interface:
-  
+
   .. code-block:: c
-    
+
     STATUS taskLock(void);
 
 .. c:function:: int sched_unlock(void)
@@ -147,10 +147,10 @@ Functions
   task will execute.
 
   :return: OK or ERROR.
-  
+
   **POSIX Compatibility:** This is a NON-POSIX interface. VxWorks provides
   the comparable interface:
-  
+
   .. code-block:: c
 
     STATUS taskUnlock(void);
@@ -168,7 +168,7 @@ Functions
 
 .. c:function:: ipid_t waitpid(pid_t pid, int *stat_loc, int options)
 
-  .. note:: 
+  .. note::
      The following discussion is a general description of the
      ``waitpid()`` interface. However, as of this writing, the
      implementation of ``waitpid()`` is incomplete (but usable). If
@@ -363,7 +363,7 @@ Functions
   the structure pointed to by ``info`` will be filled in by the system
   with the status of the process. The ``si_signo`` member will always be
   equal to ``SIGCHLD``.
-  
+
   :return: If ``waitid()`` returns due to the change of state
     of one of its children, 0 is returned. Otherwise, -1 is returned and
     ``errno`` is set to indicate the error.

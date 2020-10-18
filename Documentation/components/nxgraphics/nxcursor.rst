@@ -20,7 +20,7 @@ NX Cursor Support (``NXCURSOR``)
 
   The image is provided a a 2-bits-per-pixel image. The two bit incoding
   is as following:
-  
+
   - 00: The transparent background.
   - 01: Color1: The main color of the cursor.
   - 10: Color2: The color of any border.

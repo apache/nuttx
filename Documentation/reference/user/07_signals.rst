@@ -19,7 +19,7 @@ time* signals by default. If the configuration option
 default actions dependent upon addition configuration settings as
 summarized in the following table:
 
-=======  ====================   =========================  
+=======  ====================   =========================
 Signal 	 Action 	              Additional Configuration
 =======  ====================   =========================
 SIGUSR1  Abnormal Termination 	CONFIG_SIG_SIGUSR1_ACTION
@@ -236,7 +236,7 @@ provided by NuttX:
 
   :param signo: The signal number to act on
 
-  :return: 
+  :return:
     -  Zero is returned upon successful completion, otherwise -1 (``ERROR``)
        is returned with the errno set appropriately. The ``errno`` value of
        ``EINVAL``, for example, would indicate that ``signo`` argument is
@@ -259,7 +259,7 @@ provided by NuttX:
   :param signo: The signal number to operate on
   :param disp: The new disposition of the signal
 
-  :return: 
+  :return:
     -  Upon successful completion, ``sigset()`` will the previous
        disposition of the signal. Otherwise, ``SIG_ERR`` will be returned
        and ``errno`` set to indicate the error.
@@ -279,7 +279,7 @@ provided by NuttX:
 
   :param how: How the signal mask will be changed.
     - ``SIG_BLOCK`` The resulting set is the union of the current set and the signal set pointed to by the ``set`` input parameter.
-    - ``SIG_UNBLOCK`` The resulting set is the intersection of the current set and the complement of the signal set pointed to by the ``set`` input parameter. 
+    - ``SIG_UNBLOCK`` The resulting set is the intersection of the current set and the complement of the signal set pointed to by the ``set`` input parameter.
     - ``SIG_SETMASK`` The resulting set is the signal set pointed to by the ``set`` input parameter.
 
   :param set: Location of the new signal mask

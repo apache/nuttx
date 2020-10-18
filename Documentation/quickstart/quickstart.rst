@@ -53,7 +53,7 @@ computer, you're using an ARM microcontroller on your embedded board, and you're
    NuttX is configured using ``kconfig`` system via an interactive menu system (``menuconfig``). It also includes the ``kconfig-tweak`` utility that can be used to quickly change debug settings without going into the menu system.
 
    .. tabs::
-      
+
       .. code-tab:: console Ubuntu 20.04 LTS and later
 
          $ apt install kconfig-frontends
@@ -91,7 +91,7 @@ computer, you're using an ARM microcontroller on your embedded board, and you're
       $ ./tools/configure.sh -l <board-name>:<config-dir>
       # for instance:
       $ ./tools/configure.sh -l sama5d27-xult:nsh
-    
+
 #. Customize Your Configuration (Optional)
 
    This step is optional. Right now, this is mainly to get familiar with how it works– you don't need to change
@@ -104,7 +104,7 @@ computer, you're using an ARM microcontroller on your embedded board, and you're
       $ make menuconfig
 
    Use your arrows to navigate the menu and :kbd:`Enter` key to enable/disable options. To exit and save your configuration, go back to the main menu, choose ``<Exit>`` and select "yes" when asked if you want to save.
-   
+
 #. Compile Apache NuttX
 
    .. code-block:: bash

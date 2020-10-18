@@ -16,7 +16,7 @@ locations:
    reside in ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>*
    directory for the specific processor *<architecture>* and for
    the specific *<chip>* timer peripheral devices.
-   
+
 There are two ways to enable Timer Support along with the Timer Example. The first is faster and simpler. Just run the following command to use a ready config file with timer support and example included. You need to check if there's a timer config file for your specific chip. You may check it at the specific board's path: ``/boards/<arch>/<chip>/<variant>/config``.
 
 .. code-block:: console
@@ -49,30 +49,30 @@ Enabling the Timer Support and Example in ``menuconfing``
 
   - [x] Timer example
 
-  Below the option, it is possible to manually configure some parameters as the standard timer device path, the timeout, the sample rate in which the counter will be read, the number of samples to be executed, and other parameters. 
-   
+  Below the option, it is possible to manually configure some parameters as the standard timer device path, the timeout, the sample rate in which the counter will be read, the number of samples to be executed, and other parameters.
+
 Timer Example
 --------------
 
 The previously selected example will basically consult the timer status, set a timer alarm interval, set a timer signal handler function to be notified at the alarm, which only increments a variable, and then it will start the timer. The application will periodically consult the timer status at the sample rate previously configured through the ``menuconfig`` to follow the time left until the timer expires. After the samples have been read, the application stops de timer.
 
-The `example code <https://github.com/apache/incubator-nuttx-apps/blob/master/examples/timer/timer_main.c#ref-example>`_  may be explored, its path is at ``/examples/timer/timer_main.c`` in the apps' repository. 
+The `example code <https://github.com/apache/incubator-nuttx-apps/blob/master/examples/timer/timer_main.c#ref-example>`_  may be explored, its path is at ``/examples/timer/timer_main.c`` in the apps' repository.
 
-In NuttX, the timer driver is a character driver and when a chip supports multiple timers, each one is accessible through its respective file in ``/dev`` directory. Each timer is registered using a unique numeric identifier (i.e. ``/dev/timer0``, ``/dev/timer1``, ...).  
+In NuttX, the timer driver is a character driver and when a chip supports multiple timers, each one is accessible through its respective file in ``/dev`` directory. Each timer is registered using a unique numeric identifier (i.e. ``/dev/timer0``, ``/dev/timer1``, ...).
 
 Use the following command to run the example:
 
 .. code-block:: console
 
   `nsh> timer`
- 
+
 This command will use the timer 0. To use the others, specify it through a parameter (where x is the timer number):
 
 .. code-block:: console
 
-  `nsh> timer -d /dev/timerx` 
-   
-Application Level Interface 
+  `nsh> timer -d /dev/timerx`
+
+Application Level Interface
 ----------------------------
 
 The first necessary thing to be done in order to use the timer driver in an application is to include the header file for the NuttX timer driver. It contains the Application Level Interface to the timer driver. To do so, include:
@@ -87,7 +87,7 @@ At an application level, the timer functionalities may be accessed through ``ioc
 .. c:macro:: TCIOC_START
 .. c:macro:: TCIOC_STOP
 .. c:macro:: TCIOC_GETSTATUS
-.. c:macro:: TCIOC_SETTIMEOUT 
+.. c:macro:: TCIOC_SETTIMEOUT
 .. c:macro:: TCIOC_NOTIFICATION
 .. c:macro:: TCIOC_MAXTIMEOUT
 
@@ -166,9 +166,9 @@ The ``TCIOC_START`` command calls the ``start`` operation, which is described be
 
   The start operation configures the timer, enables the interrupt if ``TCIOC_NOTIFICATION`` has already been called and finally starts the timer.
 
-  :return: A Linux System Error Code for failing or 0 for success. 
+  :return: A Linux System Error Code for failing or 0 for success.
 
-This command may be used like so: 
+This command may be used like so:
 
 .. code-block:: c
 
@@ -192,9 +192,9 @@ The ``TCIOC_STOP`` command calls the ``stop`` operation, which is described belo
 
   The stop operation stops the timer and disables the interrupt.
 
-  :return: A Linux System Error Code for failing or 0 for success. 
+  :return: A Linux System Error Code for failing or 0 for success.
 
-This command may be used like so: 
+This command may be used like so:
 
 .. code-block:: c
 
@@ -218,11 +218,11 @@ The ``TCIOC_GETSTATUS`` command calls the ``getstatus`` operation, which is desc
 
   The getstatus operation gathers the timer's current information.
 
-  :param status: A writable pointer to a struct ``timer_status_s``. This struct contains 3 fields: ``flags`` (``uint32_t``), ``timeout`` (``uint32_t``) and ``timeleft`` (``uint32_t``). Bit 0 from `flags` indicates the timer's status, 1 indicates that the timer is running, zero it is stopped. Bit 1 from `flags` indicates if there's a callback registered. The `timeout` indicates the time interval that was configured to trigger an alarm, it is in microseconds. The `timeleft` interval indicates how many microseconds it's missing to trigger the alarm. The following snippet demonstrates how to use it and how to access these fields. 
+  :param status: A writable pointer to a struct ``timer_status_s``. This struct contains 3 fields: ``flags`` (``uint32_t``), ``timeout`` (``uint32_t``) and ``timeleft`` (``uint32_t``). Bit 0 from `flags` indicates the timer's status, 1 indicates that the timer is running, zero it is stopped. Bit 1 from `flags` indicates if there's a callback registered. The `timeout` indicates the time interval that was configured to trigger an alarm, it is in microseconds. The `timeleft` interval indicates how many microseconds it's missing to trigger the alarm. The following snippet demonstrates how to use it and how to access these fields.
 
-  :return: A Linux System Error Code for failing or 0 for success. 
+  :return: A Linux System Error Code for failing or 0 for success.
 
-This command may be used like so: 
+This command may be used like so:
 
 .. code-block:: c
 
@@ -250,11 +250,11 @@ The ``TCIOC_SETTIMEOUT`` command calls the ``settimeout`` operation, which is de
 
   The getstatus operation sets a timeout interval to trigger the alarm and then trigger an interrupt. It defines the timer interval in which the handler will be called.
 
-  :param timeout: An argument of type ``uint32_t`` with the timeout value in microseconds. 
+  :param timeout: An argument of type ``uint32_t`` with the timeout value in microseconds.
 
-  :return: A Linux System Error Code for failing or 0 for success. 
+  :return: A Linux System Error Code for failing or 0 for success.
 
-This command may be used like so: 
+This command may be used like so:
 
 .. code-block:: c
 
@@ -273,11 +273,11 @@ This command may be used like so:
 
 .. c:macro:: TCIOC_NOTIFICATION
 
-The ``TCIOC_NOTIFICATION`` is used to configure the timer callback to notify the application via a signal when the timer expires. This command calls the ``setcallback`` operation. Which will not be described here, since the application does not set a callback directly. Instead, the user should configure a signal handler to catch notifications, and then, configure a timer notifier to notify and to signal the previously configured signal handler. For a better performance, a separate pthread may be configured to wait on sigwaitinfo() for timer events. 
+The ``TCIOC_NOTIFICATION`` is used to configure the timer callback to notify the application via a signal when the timer expires. This command calls the ``setcallback`` operation. Which will not be described here, since the application does not set a callback directly. Instead, the user should configure a signal handler to catch notifications, and then, configure a timer notifier to notify and to signal the previously configured signal handler. For a better performance, a separate pthread may be configured to wait on sigwaitinfo() for timer events.
 
 In any case, this command expects a read-only pointer to a struct `timer_notify_s`. This struct contains 2 fields: ``pid`` (``pid_t``), that indicates the ID of the task/thread to receive the signal and ``event`` (``struct sigevent``), which describes the way a task will be notified.
 
-This command may be used like so: 
+This command may be used like so:
 
 .. code-block:: c
 
@@ -303,12 +303,12 @@ The ``TCIOC_MAXTIMEOUT`` command calls the ``maxtimeout`` operation, which is de
 
 .. c:function:: int maxtimeout(uint32_t *status)
 
-  The maxtimeout operation  gets the maximum timeout value that can be configured. 
+  The maxtimeout operation  gets the maximum timeout value that can be configured.
 
   :param maxtimeout: A writable pointer to a variable of ``uint32_t`` type in which the value will be stored.
-  :return: A Linux System Error Code for failing or 0 for success. 
+  :return: A Linux System Error Code for failing or 0 for success.
 
-This command may be used like so: 
+This command may be used like so:
 
 .. code-block:: c
 
@@ -330,4 +330,4 @@ This command may be used like so:
 
 
 Those snippets were taken from the Example which provides a great resource to demonstrate how to use those ``ioctl`` commands.
- 
+

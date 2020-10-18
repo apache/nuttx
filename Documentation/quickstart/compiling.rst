@@ -19,7 +19,7 @@ a pre-existing configuration. To list all supported configurations you can do:
 
        $ cd nuttx
        $ ./tools/configure.sh -L | less
-       
+
 The output is in the format ``<board name>:<board configuration>``. You will see that
 generally all boards support the ``nsh`` configuration which is a good sarting point
 since it enables booting into the interactive command line
@@ -32,7 +32,7 @@ to ``configure.sh`` and indicate your host platform, such as:
 
        $ cd nuttx
        $ ./tools/configure.sh -l stm32f4discovery:nsh
-       
+
 The ``-l`` tells use that we're on Linux (macOS and Windows builds are
 possible). Use the ``-h`` argument to see all available options.
 
@@ -50,7 +50,7 @@ Don't worry about the complexity– you don't have to use most of the options.
 
    $ cd nuttx/
    $ make menuconfig
-   
+
 .. todo::
   Explain some useful options.
 
@@ -63,18 +63,18 @@ We can now build NuttX. To do so, you can simply run:
 
      $ cd nuttx/
      $ make make
-     
+
 The build will complete by generating the binary outputs
 inside `nuttx` directory. Typically this includes the `nuttx`
 ELF file (suitable for debugging using `gdb`) and a `nuttx.bin`
-file that can be flashed to the board.     
-     
+file that can be flashed to the board.
+
 To clean the build, you can do:
 
   .. code-block:: console
 
      $ make clean
-     
+
 .. warning::
   At the moment it is recommended that after modifying the
   configuration you first clean before building again. This

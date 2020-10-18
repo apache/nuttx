@@ -1,7 +1,7 @@
 ==============
 Device Drivers
 ==============
-    
+
 NuttX supports a variety of device drivers, which can be broadly
 divided in three classes:
 
@@ -10,8 +10,8 @@ divided in three classes:
 
   character/index.rst
   block/index.rst
-  special/index.rst  
-  
+  special/index.rst
+
 .. note::
   Device driver support depends on the *in-memory*, *pseudo*
   file system that is enabled by default.

@@ -406,7 +406,7 @@ examples:
 
   #. Using ``export`` to promote an NSH variable to an environment
      variable::
-             
+
         nsh> env
         PATH=/bin
 
@@ -417,7 +417,7 @@ examples:
         nsh> export foo
         nsh> env
         PATH=/bin
-        foo=bar     
+        foo=bar
 
      A group-wide environment variable is created with the same
      value as the local NSH variable; the local NSH variable is
@@ -428,12 +428,12 @@ examples:
           environment variable of the same name and same value.
 
   #. Using ``export`` to set an environment variable::
-      
+
       nsh> export dog poop
       nsh> env
       PATH=/bin
       foo=bar
-      dog=poop  
+      dog=poop
 
 The ``export`` command is not supported by NSH unless both
 ``CONFIG_NSH_VARS=y`` and ``CONFIG_DISABLE_ENVIRON``\ is not set.
@@ -452,7 +452,7 @@ example::
                total       used       free    largest
   Mem:       4194288    1591552    2602736    2601584
   nsh>
-  
+
 **Where:**
 
 =======  ======================================
@@ -477,7 +477,7 @@ whose IP address is identified by ``<ip-address>``.
 ===================  ============================================
 ``-f <local-path>``  The file will be saved relative to the current working directory unless <local-path> is provided.
 ``-n``               Selects text ("netascii") transfer mode (default).
-``-b``               Selects binary ("octet") transfer mode 
+``-b``               Selects binary ("octet") transfer mode
 ===================  ============================================
 
 Show Usage Command Usage (help)
@@ -509,7 +509,7 @@ character device
 
 ================= ==================================
 ``skip=<bytes>``  Will skip <bytes> number of bytes from the beginning.
-``count=<bytes>`` Will stop after dumping <bytes> number of bytes. 
+``count=<bytes>`` Will stop after dumping <bytes> number of bytes.
 ================= ==================================
 
 The ``skip`` and ``count`` options are only available if
@@ -529,9 +529,9 @@ supported:
   #. With one or no arguments, ``ifconfig`` will shows the current
      configuration of the network and, perhaps, the status of
      Ethernet device::
-           
+
        ifconfig
-       ifconfig [nic_name]     
+       ifconfig [nic_name]
 
      As an example::
 
@@ -545,7 +545,7 @@ supported:
   #. If both the network interface name and an IP address are
      supplied as arguments, then ``ifconfig`` will set the address
      of the Ethernet device::
-     
+
       ifconfig nic_name ip_address
 
   #. Other forms *to be provided*
@@ -553,7 +553,7 @@ supported:
 .. note:: This commands depends upon having the *procfs* file system
   configured into the system. The *procfs* file system must also
   have been mounted with a command like::
-  
+
     nsh> mount -t procfs /proc
 
 Take a network down (ifdown)
@@ -820,7 +820,7 @@ accesses (mh), or 32-bit access (mw). In each case,
 ``<hex-address>=<hex-value>``  Read the value, then write <hex-value> to the location.
 ``<hex-byte-count>``           Perform the mb, mh, or mw operation on a total of
                                <hex-byte-count> bytes, increment the <hex-address>
-                               appropriately after each access. 
+                               appropriately after each access.
 =============================  ==============================================
 
 **Example**::
@@ -1225,7 +1225,7 @@ names in the *pseudo* file system.
    TESTFILE.TXT
   nsh>
 
-Remove a Directory (rmdir) 
+Remove a Directory (rmdir)
 **************************
 
 **Command Syntax**::
@@ -1541,7 +1541,7 @@ output is the same as -s.
 ``-v``      Print the kernel version
 ``-m``      Print the machine hardware name
 ``-i``      Print the machine platform name
-``-p``      Print "unknown" 
+``-p``      Print "unknown"
 ==========  ========================================
 
 Unset an Environment Variable (unset)

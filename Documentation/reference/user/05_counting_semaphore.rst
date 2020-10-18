@@ -308,7 +308,7 @@ page <https://cwiki.apache.org/confluence/display/NUTTX/Signaling+Semaphores+and
 
   **POSIX Compatibility:** Comparable to the POSIX interface of the same
   name.
-  
+
 .. c:function:: int sem_timedwait(sem_t *sem, const struct timespec *abstime)
 
   This function will lock the semaphore referenced by sem

@@ -77,7 +77,7 @@ Limitations
     of file system but will require copying of all NXFLAT executables to RAM.
 
   - **GCC/ARM/Cortex-M3/4 Only**:
-    At present, the NXFLAT toolchain is only available for ARM and Cortex-M3/4 (thumb2) targets. 
+    At present, the NXFLAT toolchain is only available for ARM and Cortex-M3/4 (thumb2) targets.
 
   - **Read-Only Data in RAM**:
     With older GCC compilers (at least up to 4.3.3), read-only data must
@@ -96,10 +96,10 @@ Limitations
   - **Globally Scoped Function Function Pointers**:
     If a function pointer is taken to a statically defined function,
     then (at least for ARM) GCC will generate a relocation that NXFLAT
-    cannot handle. The workaround is make all such functions global in 
+    cannot handle. The workaround is make all such functions global in
     scope. A fix would involve a change to the GCC compiler as described
-    in Appendix B. 
-    
+    in Appendix B.
+
   - **Special Handling of Callbacks**:
     Callbacks through function pointers must be avoided or, when
     then cannot be avoided, handled very specially. The reason
@@ -109,7 +109,7 @@ Limitations
     will be unable to correctly access data memory. Special logic
     is in place to handle some NuttX callbacks: Signal callbacks
     and watchdog timer callbacks. But other callbacks (like those
-    used with qsort() must be avoided in an NXFLAT module. 
+    used with qsort() must be avoided in an NXFLAT module.
 
 Supported Processors
 --------------------
@@ -217,7 +217,7 @@ files. In particular, the CSV files:
      interface, and
   #. ``nuttx/libc/libc.csv`` that describes the NuttX C library interface.
   #. ``nuttx/libc/math.cvs`` that descirbes any math library.
-  
+
 ::
 
   USAGE: ./mksymtab <cvs-file> <symtab-file>
@@ -254,21 +254,21 @@ example).
 * Target 2:
 
   .. code-block:: makefile
-  
+
     hello-thunk.S: hello.r1
       mknxflat -o $@ $^
-      
+
 * Target 3:
 
   .. code-block:: makefile
-  
-    hello.r2: hello-thunk.S	
+
+    hello.r2: hello-thunk.S
       abc-nuttx-elf-ld -r -d -warn-common -T binfmt/libnxflat/gnu-nxflat-gotoff.ld -no-check-sections -o $@ hello.o hello-thunk.o
 
 * Target 4:
 
   .. code-block:: makefile
-  
+
     hello: hello.r2
       ldnxflat -e main -s 2048 -o $@ $^
 

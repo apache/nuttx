@@ -21,17 +21,17 @@ NXGL Types
   if 24, and 32 resolution support is disabled, or ``uint32_t``.
 
 .. c:type:: nxgl_coord_t
-  
+
   A given coordinate is limited to the screen height an
   width. If either of those values exceed 32,767 pixels, then the
   following will have to need to change:
 
 .. c:struct:: nxgl_point_s
-  
+
   Describes a point on the display:
-  
+
   .. code-block:: c
-  
+
     struct nxgl_point_s
     {
       nxgl_coord_t x;         /* X position, range: 0 to screen width - 1 */
@@ -39,28 +39,28 @@ NXGL Types
     };
 
 .. c:struct:: nxgl_size_s
-  
+
   Describes the size of a rectangular region.
-  
+
   .. code-block:: c
-  
+
     struct nxgl_size_s
     {
       nxgl_coord_t w;        /* Width in pixels */
       nxgl_coord_t h;        /* Height in rows */
-    };  
+    };
 
 .. c:struct:: nxgl_rect_s
 
   Describes a positioned rectangle on the display.
-  
+
   .. code-block:: c
-  
+
     struct nxgl_rect_s
     {
       struct nxgl_point_s pt1; /* Upper, left-hand corner */
       struct nxgl_point_s pt2; /* Lower, right-hand corner */
-    };  
+    };
 
 .. c:struct:: nxgl_run_s
 
@@ -68,30 +68,30 @@ NXGL Types
   that the start/end positions have fractional precision. This is
   necessary for good joining of trapezoids when a more complex shape is
   decomposed into trapezoids.
-  
+
   .. code-block:: c
-  
+
     struct nxgl_run_s
     {
       b16_t        x1;        /* Left X position, range: 0 to x2 */
       b16_t        x2;        /* Right X position, range: x1 to screen width - 1 */
       nxgl_coord_t y;         /* Top Y position, range: 0 to screen height - 1 */
     };
-  
+
 .. c:struct:: nxgl_trapezoid_s
 
   Describes a horizontal trapezoid on the
   display in terms the run at the top of the trapezoid and the run at the
   bottom.
-  
+
   .. code-block:: c
-  
+
     struct nxgl_trapezoid_s
     {
       struct nxgl_run_s top;  /* Top run */
       struct nxgl_run_s bot;  /* bottom run */
     };
-  
+
 .. c:function:: void nxgl_rgb2yuv(uint8_t r, uint8_t g, uint8_t b, uint8_t *y, uint8_t *u, uint8_t *v)
 
   Convert 8-bit RGB triplet to 8-bit YUV triplet.
@@ -144,24 +144,24 @@ NXGL Types
 .. c:function:: void nxgl_nonintersecting(FAR struct nxgl_rect_s result[4], \
                      FAR const struct nxgl_rect_s *rect1, \
                      FAR const struct nxgl_rect_s *rect2);
-                     
+
   Return the regions of rectangle ``rect1`` that do not
   intersect with ``rect2``. This will four rectangles, some of which may
   be degenerate (and can be picked off with :c:func:`nxgl_nullrect`).
 
 .. c:function:: bool nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1, \
                       FAR struct nxgl_rect_s *rect2);
-                      
+
   Return true if the two rectangles overlap.
 
 .. c:function:: bool nxgl_rectinside(FAR const struct nxgl_rect_s *rect, \
                      FAR const struct nxgl_point_s *pt);
-                     
+
   Return true if the point ``pt`` lies within ``rect``.
 
 .. c:function:: void nxgl_rectsize(FAR struct nxgl_size_s *size, \
                    FAR const struct nxgl_rect_s *rect);
-                   
+
   Return the size of the specified rectangle.
 
 .. c:function:: bool nxgl_nullrect(FAR const struct nxgl_rect_s *rect);
@@ -171,33 +171,33 @@ NXGL Types
 .. c:function:: void nxgl_runoffset(FAR struct nxgl_run_s *dest, \
                     FAR const struct nxgl_run_s *src, \
                     nxgl_coord_t dx, nxgl_coord_t dy);
-                    
+
   Offset the run position by the specified ``dx``, ``dy``
   values.
 
 .. c:function:: void nxgl_runcopy(FAR struct nxgl_run_s *dest, \
                   FAR const struct nxgl_run_s *src);
-                  
+
   This is essentially ``memcpy()``\ for runs. We don't do
   structure assignments because some compilers are not good at that.
 
 .. c:function:: void nxgl_trapoffset(FAR struct nxgl_trapezoid_s *dest, \
                      FAR const struct nxgl_trapezoid_s *src, \
                      nxgl_coord_t dx, nxgl_coord_t dy);
-                     
+
   Offset the trapezoid position by the specified ``dx``,
   ``dy`` values.
 
 .. c:function:: void nxgl_trapcopy(FAR struct nxgl_trapezoid_s *dest, \
                    FAR const struct nxgl_trapezoid_s *src);
-                   
+
   This is essentially ``memcpy()``\ for trapezoids. We
   don't do structure assignments because some compilers are not good at
   that.
 
 .. c:function:: void nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES], \
                const nxgl_mxpixel_t src[CONFIG_NX_NPLANES]);
-               
+
   This is essentially ``memcpy()``\ for colors. This does
   very little for us other than hide all of the conditional compilation
   for planar colors in one place.
@@ -230,7 +230,7 @@ NXGL Types
     - 0: Line successfully broken up into three trapezoids. Values in traps[0], traps[1], and traps[2] are valid.
     - 1: Line successfully represented by one trapezoid. Value in traps[1] is valid.
     - 2: Line successfully represented by one rectangle. Value in rect is valid
-    - <0: On errors, a negated errno value is returned. 
+    - <0: On errors, a negated errno value is returned.
 
 .. c:function:: void nxgl_circlepts(FAR const struct nxgl_point_s *center, nxgl_coord_t radius, \
                     FAR struct nxgl_point_s *circle);

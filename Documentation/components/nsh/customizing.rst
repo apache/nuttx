@@ -58,7 +58,7 @@ The NSH initialization function, ``nsh_initialize()``, be found in
 
      The ROMFS image is, itself, just built into the firmware. By default,
      this ``rcS`` start-up script contains the following logic::
-     
+
         # Create a RAMDISK and mount it at XXXRDMOUNTPOINTXXX
 
         mkrd -m XXXMKRDMINORXXX -s XXMKRDSECTORSIZEXXX XXMKRDBLOCKSXXX
@@ -80,12 +80,12 @@ The NSH initialization function, ``nsh_initialize()``, be found in
         Default: ``/etc``
 
      By default, the substituted values would yield an ``rcS`` file like::
-             
+
         # Create a RAMDISK and mount it at /tmp
 
         mkrd -m 1 -s 512 1024
         mkfatfs /dev/ram1
-        mount -t vfat /dev/ram1 /tmp     
+        mount -t vfat /dev/ram1 /tmp
 
      This script will, then:
 

@@ -14,7 +14,7 @@ to build NuttX.
 
 .. toctree::
   :maxdepth: 1
-  
+
   quickstart.rst
   install.rst
   compiling.rst

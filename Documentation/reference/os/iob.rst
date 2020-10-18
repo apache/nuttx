@@ -29,10 +29,10 @@ networking subsystem. This objectives of this feature are:
 Configuration Options
 =====================
 
-``CONFIG_MM_IOB`` 
+``CONFIG_MM_IOB``
    Enables generic I/O buffer support. This setting will build the
    common I/O buffer (IOB) support library.
-``CONFIG_IOB_NBUFFERS`` 
+``CONFIG_IOB_NBUFFERS``
    Number of pre-allocated I/O buffers. Each packet is represented
    by a series of small I/O buffers in a chain. This setting
    determines the number of preallocated I/O buffers available for
@@ -41,12 +41,12 @@ Configuration Options
    is enabled (neither ``CONFIG_NET_TCP_WRITE_BUFFERS`` nor
    ``CONFIG_NET_TCP``), 24 if only TCP/UDP is enabled, and 36 if
    both TCP/UDP and write buffering are enabled.
-``CONFIG_IOB_BUFSIZE`` 
+``CONFIG_IOB_BUFSIZE``
    Payload size of one I/O buffer. Each packet is represented by a
    series of small I/O buffers in a chain. This setting determines
    the data payload each preallocated I/O buffer. The default
    value is 196 bytes.
-``CONFIG_IOB_NCHAINS`` 
+``CONFIG_IOB_NCHAINS``
    Number of pre-allocated I/O buffer chain heads. These tiny
    nodes are used as *containers* to support queueing of I/O
    buffer chains. This will limit the number of I/O transactions
@@ -59,7 +59,7 @@ Configuration Options
    zero if nether TCP nor UDP is enabled (i.e., neither
    ``CONFIG_NET_TCP`` && !\ ``CONFIG_NET_UDP`` or eight if either
    is enabled.
-``CONFIG_IOB_THROTTLE`` 
+``CONFIG_IOB_THROTTLE``
    I/O buffer throttle value. TCP write buffering and read-ahead
    buffer use the same pool of free I/O buffers. In order to
    prevent uncontrolled incoming TCP packets from hogging all of
@@ -68,7 +68,7 @@ Configuration Options
    denied to the read-ahead logic before TCP writes are halted.
    The default 0 if neither TCP write buffering nor TCP read-ahead
    buffering is enabled. Otherwise, the default is 8.
-``CONFIG_IOB_DEBUG`` 
+``CONFIG_IOB_DEBUG``
    Force I/O buffer debug. This option will force debug output
    from I/O buffer logic. This is not normally something that
    would want to do but is convenient if you are debugging the I/O

@@ -128,7 +128,7 @@ Clocks and Timers
     return the pointer, ``buf``, provided by the caller. Otherwise, a NULL
     will be returned to indicate the error.
 
-.. c:function:: FAR char *ctime_r(FAR const time_t *timep, FAR char *buf) 
+.. c:function:: FAR char *ctime_r(FAR const time_t *timep, FAR char *buf)
 
   Converts the time provided in seconds
   since the epoch to a string representation. ``ctime()`` is re-entrant.

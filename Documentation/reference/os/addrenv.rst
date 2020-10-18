@@ -1,6 +1,6 @@
 ====================
 Address Environments
-====================   
+====================
 
 CPUs that support memory management units (MMUs) may provide
 *address environments* within which tasks and their child threads
@@ -93,7 +93,7 @@ The CPU-specific logic must provide two categories in interfaces:
 
   This function is called when a new task is created in order to
   instantiate an address environment for the new task group.
-  up_addrenv_create() is essentially the allocator of the physical memory for the new task. 
+  up_addrenv_create() is essentially the allocator of the physical memory for the new task.
 
   :param textsize: The size (in bytes) of the ``.text`` address
     environment needed by the task. This region may be read/execute
@@ -125,19 +125,19 @@ The CPU-specific logic must provide two categories in interfaces:
 
   Return the virtual .text address associated with the newly create
   address environment. This function is used by the binary loaders
-  in order get an address that can be used to initialize the new task. 
+  in order get an address that can be used to initialize the new task.
 
   :param addrenv: The representation of the task address environment
      previously returned by ``up_addrenv_create()``.
   :param vtext: The location to return the virtual address.
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
 .. c:function:: int up_addrenv_vdata(FAR group_addrenv_t *addrenv, size_t textsize, FAR void **vdata)
 
   Return the virtual .text address associated with the newly create
   address environment. This function is used by the binary loaders
-  in order get an address that can be used to initialize the new task. 
+  in order get an address that can be used to initialize the new task.
 
   :param addrenv: The representation of the task address environment
     previously returned by ``up_addrenv_create()``.
@@ -147,28 +147,28 @@ The CPU-specific logic must provide two categories in interfaces:
     offset into the common region.
   :param vdata: The location to return the virtual address.
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
 .. c:function:: ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv)
 
   Return the initial heap allocation size. That is the amount of
   memory allocated by up_addrenv_create() when the heap memory
   region was first created. This may or may not differ from the
-  heapsize parameter that was passed to up_addrenv_create(). 
+  heapsize parameter that was passed to up_addrenv_create().
 
   :param addrenv: The representation of the task address environment
     previously returned by ``up_addrenv_create()``.
 
   :return: The initial heap size allocated is returned on success;
-    a negated errno value on failure. 
+    a negated errno value on failure.
 
 .. c:function:: int up_addrenv_select(group_addrenv_t *addrenv, save_addrenv_t *oldenv)
 
-  After an address environment has been established for a task 
+  After an address environment has been established for a task
   (via up_addrenv_create()), this function may be called to instantiate
   that address environment in the virtual address space. This might be
   necessary, for example, to load the code for the task from a file or
-  to access address environment private data. 
+  to access address environment private data.
 
   :param addrenv: The representation of the task address environment
     previously returned by ``up_addrenv_create()``.
@@ -180,13 +180,13 @@ The CPU-specific logic must provide two categories in interfaces:
     platform-specific representation that may or may not be
     different from ``group_addrenv_t``.
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
 .. c:function:: int up_addrenv_restore(save_addrenv_t oldenv)
 
   After an address environment has been temporarily instantiated
   by up_addrenv_select, this function may be called to restore
-  the original address environment. 
+  the original address environment.
 
   :param oldenv: The platform-specific representation of the address
     environment previously returned by ``up_addrenv_select()``.
@@ -197,13 +197,13 @@ The CPU-specific logic must provide two categories in interfaces:
 
   Duplicate an address environment. This does not copy the underlying
   memory, only the representation that can be used to instantiate
-  that memory as an address environment. 
+  that memory as an address environment.
 
   :param src: The address environment to be copied.
   :param dest: The location to receive the copied address
     environment.
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
 .. c:function:: int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
 
@@ -220,7 +220,7 @@ The CPU-specific logic must provide two categories in interfaces:
   :param ctcb: The TCB of the thread needing the address
     environment.
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
 .. c:function:: int up_addrenv_detach(FAR struct task_group_s *group, FAR struct task_group_s *tcb)
 
@@ -228,17 +228,17 @@ The CPU-specific logic must provide two categories in interfaces:
   to release its reference to an address environment. The address
   environment, however, should persist until up_addrenv_destroy()
   is called when the task group is itself destroyed. Any resources
-  unique to this thread may be destroyed now. 
+  unique to this thread may be destroyed now.
 
   :param group: The group to which the thread belonged.
   :param tcb: The TCB of the task or thread whose the address
     environment will be released.
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
 .. c:function:: int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize)
 
-  This function is called when a new thread is created in order 
+  This function is called when a new thread is created in order
   to instantiate an address environment for the new thread's stack.
   up_addrenv_ustackalloc() is essentially the allocator of the
   physical memory for the new task's stack.
@@ -249,13 +249,13 @@ The CPU-specific logic must provide two categories in interfaces:
     environment needed by the task. This region may be read/write
     only.
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
 .. c:function:: int up_addrenv_ustackfree(FAR struct tcb_s *tcb)
 
   This function is called when any thread exits. This function then
   destroys the defunct address environment for the thread's stack,
-  releasing the underlying physical memory. 
+  releasing the underlying physical memory.
 
   :param tcb: The TCB of the thread that no longer requires the
     stack address environment.
@@ -269,7 +269,7 @@ The CPU-specific logic must provide two categories in interfaces:
   :param tcb: The TCB of the thread with the stack address environment of interest.
   :param vstack: The location to return the stack virtual base address.
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
 .. c:function:: int up_addrenv_ustackselect(FAR const struct tcb_s *tcb)
 
@@ -289,7 +289,7 @@ The CPU-specific logic must provide two categories in interfaces:
   This function is called when a new thread is created to allocate the
   new thread's kernel stack. This function may be called for certain
   terminating threads which have no kernel stack. It must be
-  tolerant of that case. 
+  tolerant of that case.
 
   :param tcb: The TCB of the thread that requires the kernel stack.
 
@@ -297,9 +297,9 @@ The CPU-specific logic must provide two categories in interfaces:
 
 .. c:function:: int up_addrenv_kstackfree(FAR struct tcb_s *tcb);
 
-  This function is called when any thread exits. This function frees the kernel stack. 
+  This function is called when any thread exits. This function frees the kernel stack.
 
   :param tcb: The TCB of the thread that no longer requires the
     kernel stack.
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.

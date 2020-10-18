@@ -31,7 +31,7 @@ The following configurations must be enabled.
 - ``CONFIG_SYSTEM_SYSTEM`` : Enables "``system``" command (required by :ref:`trace_cmd`)
 
 
-The following configurations are configurable parameters for trace. 
+The following configurations are configurable parameters for trace.
 
 - ``CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE``
 
