@@ -935,13 +935,12 @@ sethost.sh
 
     $ ./sethost.sh -h
 
-    USAGE: ./sethost.sh [-l|m|c|u|g|n] [make-opts]
+    USAGE: ./sethost.sh [-l|m|c|g|n] [make-opts]
            ./sethost.sh -h
 
     Where:
-      -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),
-         Ubuntu under Windows 10 (u), MSYS/MSYS2 (g)
-         or Windows native (n).  Default Linux
+      -l|m|c|g|n selects Linux (l), macOS (m), Cygwin (c),
+         MSYS/MSYS2 (g) or Windows native (n). Default Linux
       make-opts directly pass to make
       -h will show this help test and terminate
 
@@ -989,12 +988,12 @@ testbuild.sh
 
     $ ./testbuild.sh -h
 
-    USAGE: ./testbuild.sh [-l|m|c|u|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>
+    USAGE: ./testbuild.sh [-l|m|c|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>
            ./testbuild.sh -h
 
     Where:
-      -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),
-         Ubuntu under Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Linux
+      -l|m|c|g|n selects Linux (l), macOS (m), Cygwin (c),
+         MSYS/MSYS2 (g) or Windows native (n).  Default Linux
       -d enables script debug output
       -x exit on build failures
       -j <ncpus> passed on to make.  Default:  No -j make option.
@@ -1018,7 +1017,7 @@ testbuild.sh
   These script needs two pieces of information.
 
     a. A description of the platform that you are testing on.  This description
-       is provided by the optional -l, -m, -c, -u, -g and -n options.
+       is provided by the optional -l, -m, -c, -g and -n options.
     b. A list of configurations to build.  That list is provided by a test
        list file.  The final, non-optional parameter, <testlist-file>,
        provides the path to that file.
