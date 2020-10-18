@@ -499,7 +499,7 @@ configurations for building the simulation:
       to select ``CONFIG_SIM_M32=y`` in your configuration file.
 
    -  Refer to the readme file in sim configuration
-      `README.txt <https://bitbucket.org/nuttx/nuttx/src/master/boards/sim/sim/sim/README.txt>`__
+      `README.txt <https://github.com/apache/incubator-nuttx/blob/master/boards/sim/sim/sim/README.txt>`__
       file for additional information.
 
 **Test Coverage**. At present, ``apps/examples/nx``\ t only exercises a
