@@ -163,7 +163,7 @@ int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
    * Attach the new button handler.
    */
 
-  ret = kinetis_pinirqattach(pinset, irqhandler);
+  ret = kinetis_pinirqattach(pinset, irqhandler, NULL);
   if (ret >= 0)
     {
       /* Then make sure that interrupts are enabled on the pin */
