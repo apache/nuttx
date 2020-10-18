@@ -25,13 +25,12 @@ wenv=
 
 function showusage {
   echo ""
-  echo "USAGE: $progname [-l|m|c|u|g|n] [make-opts]"
+  echo "USAGE: $progname [-l|m|c|g|n] [make-opts]"
   echo "       $progname -h"
   echo ""
   echo "Where:"
-  echo "  -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),"
-  echo "     Ubuntu under Windows 10 (u), MSYS/MSYS2 (g)"
-  echo "     or Windows native (n). Default Linux"
+  echo "  -l|m|c|g|n selects Linux (l), macOS (m), Cygwin (c),"
+  echo "     MSYS/MSYS2 (g) or Windows native (n). Default Linux"
   echo "  make-opts directly pass to make"
   echo "  -h will show this help test and terminate"
   exit 1
@@ -51,10 +50,6 @@ while [ ! -z "$1" ]; do
   -g )
     host=windows
     wenv=msys
-    ;;
-  -u )
-    host=windows
-    wenv=ubuntu
     ;;
   -m )
     host=macos
@@ -171,13 +166,8 @@ else
       echo "  Select CONFIG_WINDOWS_MSYS=y"
       kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_MSYS
     else
-      if [ "X$wenv" == "Xubuntu" ]; then
-        echo "  Select CONFIG_WINDOWS_UBUNTU=y"
-        kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_UBUNTU
-      else
-        echo "  Select CONFIG_WINDOWS_NATIVE=y"
-        kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_NATIVE
-      fi
+      echo "  Select CONFIG_WINDOWS_NATIVE=y"
+      kconfig-tweak --file $nuttx/.config --enable CONFIG_WINDOWS_NATIVE
     fi
   fi
 fi

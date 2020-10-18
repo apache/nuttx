@@ -70,8 +70,7 @@
 
 #define WINDOWS_NATIVE 1
 #define WINDOWS_CYGWIN 2
-#define WINDOWS_UBUNTU 3
-#define WINDOWS_MSYS   4
+#define WINDOWS_MSYS   3
 
 /****************************************************************************
  * Private Function Prototypes
@@ -182,7 +181,7 @@ static const char *g_optfiles[] =
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s  [-d] [-E] [-e] [-b|f] [-L] [-l|m|c|u|g|n] "
+  fprintf(stderr, "\nUSAGE: %s  [-d] [-E] [-e] [-b|f] [-L] [-l|m|c|g|n] "
           "[-a <app-dir>] <board-name>:<config-name> [make-opts]\n",
           progname);
   fprintf(stderr, "\nUSAGE: %s  [-h]\n", progname);
@@ -215,12 +214,11 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "    style paths like C:\\Program Files are used.\n");
   fprintf(stderr, "    POSIX style paths are used by default.\n");
 #endif
-  fprintf(stderr, "  [-l|m|c|u|g|n]\n");
+  fprintf(stderr, "  [-l|m|c|g|n]\n");
   fprintf(stderr, "    Selects the host environment.\n");
   fprintf(stderr, "    -l Selects the Linux (l) host environment.\n");
   fprintf(stderr, "    -m Selects the macOS (m) host environment.\n");
   fprintf(stderr, "    -c Selects the Windows Cygwin (c) environment.\n");
-  fprintf(stderr, "    -u Selects the Windows Ubuntu (u) environment.\n");
   fprintf(stderr, "    -g Selects the Windows MinGW/MSYS environment.\n");
   fprintf(stderr, "    -n Selects the Windows native (n) environment.\n");
   fprintf(stderr, "  Default: Use host setup in the defconfig file.\n");
@@ -340,11 +338,6 @@ static void parse_args(int argc, char **argv)
           case 'n' :
             g_host    = HOST_WINDOWS;
             g_windows = WINDOWS_NATIVE;
-            break;
-
-          case 'u' :
-            g_host    = HOST_WINDOWS;
-            g_windows = WINDOWS_UBUNTU;
             break;
 
           case '?' :
@@ -1353,7 +1346,6 @@ static void set_host(const char *destconfig)
 
           disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
           disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-          disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
           disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
           disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
 
@@ -1372,7 +1364,6 @@ static void set_host(const char *destconfig)
 
           disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
           disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-          disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
           disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
           disable_feature(destconfig, "CONFIG_WINDOWS_OTHER");
 
@@ -1398,7 +1389,6 @@ static void set_host(const char *destconfig)
                 printf("  Select Windows/Cygwin host\n");
                 enable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
                 disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
-                disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
                 disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
                 break;
 
@@ -1406,15 +1396,6 @@ static void set_host(const char *destconfig)
                 printf("  Select Windows/MSYS host\n");
                 disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
                 enable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
-                disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
-                disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
-                break;
-
-              case WINDOWS_UBUNTU:
-                printf("  Select Ubuntu for Windows 10 host\n");
-                disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
-                disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
-                enable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
                 disable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
                 break;
 
@@ -1422,7 +1403,6 @@ static void set_host(const char *destconfig)
                 printf("  Select Windows native host\n");
                 disable_feature(destconfig, "CONFIG_WINDOWS_CYGWIN");
                 disable_feature(destconfig, "CONFIG_WINDOWS_MSYS");
-                disable_feature(destconfig, "CONFIG_WINDOWS_UBUNTU");
                 enable_feature(destconfig, "CONFIG_WINDOWS_NATIVE");
                 break;
 
