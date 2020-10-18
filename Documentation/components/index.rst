@@ -9,7 +9,6 @@ NuttX is very feature-rich RTOS and is thus composed of various different subsys
    
    nsh/index.rst
    power.rst
-   syslog.rst
    binfmt.rst
    drivers/index.rst
    filesystem.rst
