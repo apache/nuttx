@@ -191,18 +191,6 @@ int stm32l4_adc_setup(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dac_setup
- *
- * Description:
- *   Initialize DAC and register the DAC driver.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DAC
-int stm32l4_dac_setup(void);
-#endif
-
-/****************************************************************************
  * Name: stm32_dac7571initialize
  *
  * Description:

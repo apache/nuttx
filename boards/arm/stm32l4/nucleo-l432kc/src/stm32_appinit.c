@@ -242,12 +242,6 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_DAC
-  ainfo("Initializing DAC\n");
-
-  stm32l4_dac_setup();
-#endif /* CONFIG_DAC */
-
 #ifdef CONFIG_DAC7571
   /* Initialize and register DAC7571 */
 
