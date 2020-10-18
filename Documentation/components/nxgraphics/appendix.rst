@@ -488,16 +488,6 @@ configurations for building the simulation:
       The build will also fail to locate the X header files unless you
       install an X11 development package.
 
-   -  The sim target itself is broken under 64-bit Linux. This is
-      because the sim target is based upon some assembly language
-      setjmp/longjmp logic that only works on 32-bit systems.
-
-      NOTE: There is a workaround in this case: You can build for 32-bit
-      execution on a 64-bit machine by adding ``-m3`` to the ``CFLAGS``
-      and ``-m32 -m elf_i386`` to the ``LDFLAGS``. The
-      configuration/build system will do this for you; you simply need
-      to select ``CONFIG_SIM_M32=y`` in your configuration file.
-
    -  Refer to the readme file in sim configuration
       `README.txt <https://github.com/apache/incubator-nuttx/blob/master/boards/sim/sim/sim/README.txt>`__
       file for additional information.
