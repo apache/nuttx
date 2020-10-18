@@ -38,7 +38,7 @@ NuttX is a real time embedded operating system (RTOS). Its goals are:
   Fully pre-emptible; fixed priority, round-robin, and "sporadic" scheduling.
 
 * **Totally Open**
-  Non-restrictive BSD license.
+  Non-restrictive Apache license.
 
 * **GNU Toolchains**
   Compatible GNU toolchains based on `buildroot <http://buildroot.uclibc.org/>`__ available for `download <https://bitbucket.org/nuttx/buildroot/downloads/>`__
@@ -54,7 +54,7 @@ Key features of NuttX include:
   * Fully pre-emptible.
   * Naturally scalable.
   * Highly configurable.
-  * Easily extensible to new processor architectures, SoC architecture, or board architectures. A `Porting Guide <NuttxPortingGuide.html>`__ is available.
+  * Easily extensible to new processor architectures, SoC architecture, or board architectures. :doc:`/reference/os/index` is available.
   * FIFO and round-robin scheduling.
   * Realtime, deterministic, with support for priority inheritance
   * Tickless Operation
@@ -98,10 +98,10 @@ Key features of NuttX include:
   * Union filesystem - Supports combining and overlaying file systems.
   * UserFS - User application file system.
   * ``procfs/`` pseudo-filesystem support.
-  * A `binary loader <NuttXBinfmt.html>`__ with support for the following formats:
+  * :doc:`/components/binfmt` with support for the following formats:
 
     - Separately linked ELF modules.
-    - Separately linked `NXFLAT <NuttXNxFlat.html>`__ modules. NXFLAT is a binary format that can be XIP from a
+    - Separately linked :doc:`/components/nxflat` modules. NXFLAT is a binary format that can be XIP from a
       file system.
     - "Built-In" applications.
 
@@ -123,8 +123,8 @@ Key features of NuttX include:
   * Graphics: framebuffer drivers, graphic- and segment-LCD drivers. VNC server.
   * Audio subsystem: CODECs, audio input and output drivers. Command line and graphic media player applications.
   * Cryptographic subsystem.
-  * `Power Management <NuttxPortingGuide.htm l#pwrmgmt>`__ sub-system.
-  * ModBus support provided by built-in `FreeModBus <http://freemodbus.berlios.de/>`__ version 1.5.0.
+  * :doc:`/components/power` sub-system.
+  * ModBus support provided by built-in `FreeModBus <https://www.embedded-experts.at/en/freemodbus/>`__ version 1.5.0.
 
 * **C/C++ Libraries**
 
@@ -157,8 +157,8 @@ Key features of NuttX include:
     terminal"). VNC server.
   * ICMPv6 autonomous auto-configuration
   * NFS Client. Client side support for a Network File System (NFS, version 3, UDP).
-  * A NuttX port of Jeff Poskanzer's `THTTPD <http://acme.com/software /thttpd>`__
-    HTTP server integrated with the NuttX `binary loader <NuttXBinfmt.html>`__ to provide true, embedded CGI.
+  * A NuttX port of Jeff Poskanzer's `THTTPD <http://acme.com/software/thttpd>`__
+    HTTP server integrated with the NuttX :doc:`/components/binfmt` to provide true, embedded CGI.
   * PHY Link Status Management.
   * UDP Network Discovery (Contributed by Richard Cochran).
   * XML RPC Server (Contributed by Richard Cochran).
@@ -188,7 +188,7 @@ Key features of NuttX include:
   * Device-dependent USB class drivers available for USB serial (CDC/ACM and a PL2303 emulation),
     for USB mass storage, for USB networking (RNDIS and CDC/ECM), DFU, and for a dynamically
     configurable, composite USB devices.
-  * Built-in `USB device <UsbTrace.html>`__ and USB host trace functionality for non-invasive USB debug.
+  * Built-in :doc:`/guides/usbtrace` and USB host trace functionality for non-invasive USB debug.
 
 * **Graphics Support**
 
@@ -198,13 +198,12 @@ Key features of NuttX include:
   * VNC Server.
   * ``mmap``-able, framebuffer character driver.
   * NX: A graphics library, tiny windowing system and tiny font support that works with either
-    framebuffer or LCD drivers. Documented in the `NX Graphics Subsystem <NXGraphicsSubsystem.html>`__
-    manual.
+    framebuffer or LCD drivers. Documented in the :doc:`/components/nxgraphics/index` manual.
   * Font management sub-system.
-  * `NxWidgets <NxWidgets.html>`__: NXWidgets is library of graphic objects, or "widgets," (labels,
+  * :doc:`/components/nxwidgets`: NXWidgets is library of graphic objects, or "widgets," (labels,
     buttons, text boxes, images, sliders, progress bars, etc.). NXWidgets is written in C++ and
     integrates seamlessly with the NuttX NX graphics and font management subsystems.
-  * `NxWM <NxWidgets.html>`__: NxWM is the tiny NuttX window manager based on NX and NxWidgets.
+  * NxWM is the tiny NuttX window manager based on NX and NxWidgets.
 
 * **Input Devices**
 
@@ -223,7 +222,7 @@ Key features of NuttX include:
   The following packages are available to extend the basic NuttX feature set:
 
   * **NuttShell (NSH)**
-    A small, scalable, bash-like shell for NuttX with rich feature set and small footprint. See the `NuttShell User Guide <NuttShell.html>`__.
+    A small, scalable, bash-like shell for NuttX with rich feature set and small footprint. See the :doc:`/components/nsh/index`.
   * **BAS 2.4**
     Seamless integration of Michael Haardt's BAS 2.4: "Bas is an interpreter for the classic dialect of the programming language BASIC. It is pretty compatible to typical BASIC interpreters of the 1980s, unlike some other UNIX BASIC interpreters, that implement a different syntax, breaking compatibility to existing programs. Bas offers many ANSI BASIC statements for structured programming, such as procedures, local variables and various loop types. Further there are matrix operations, automatic LIST indentation and many statements and functions found in specific classic dialects. Line numbers are not required."
 
@@ -273,7 +272,7 @@ OS with all of that?
     Before you build NuttX, you must provide a configuration file that specifies what features you plan to use and
     which features you do not. This configuration file contains a long list of settings that control what is
     built into NuttX and what is not. There are hundreds of such settings (see the
-    `Configuration Variable Documentation <NuttXConfigVariables.html>`__
+    `Configuration Variable Documentation <https://cwiki.apache.org/confluence/display/NUTTX/Configuration+Variables?src=contextnavpagetreemode>`__
     for a partial list that excludes platform specific settings). These many, many configuration options allow
     NuttX to be highly tuned to meet size requirements. The downside to all of these configuration options is that
     it greatly complicates the maintenance of NuttX -- but that is my problem, not yours. -

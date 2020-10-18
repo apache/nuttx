@@ -241,7 +241,7 @@ Making an NXFLAT module
 
 Below is a snippet from an NXFLAT make file (simplified from NuttX
 `Hello,
-World! <https://bitbucket.org/nuttx/apps/src/master/apps/examples/nxflat/tests/hello/Makefile>`__
+World! <https://github.com/apache/incubator-nuttx-apps/blob/master/examples/nxflat/tests/hello/Makefile>`__
 example).
 
 * Target 1:

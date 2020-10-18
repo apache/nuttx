@@ -4,7 +4,7 @@ Detailed Platform Support
 
 **Details**. The details, caveats and fine print follow. For even more
 information see the *README* files that can be found
-`here <README.html>`__.
+`here <https://cwiki.apache.org/confluence/display/NUTTX/README+Files>`__.
 
 
 Linux User Mode Simulation
