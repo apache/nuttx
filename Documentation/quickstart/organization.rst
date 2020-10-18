@@ -348,7 +348,7 @@ Supported Boards
 
 All of the specific boards supported by NuttX are identified in
 the
-`README.txt <https://bitbucket.org/nuttx/nuttx/src/master/boards/README.txt>`__
+`README.txt <https://github.com/apache/incubator-nuttx/blob/master/boards/README.txt>`__
 file.
 
 Adding a New Board Configuration

@@ -30,7 +30,7 @@ support execution NXFLAT binaries from an SRAM copy as well.
 This NuttX feature includes:
 
   - A dynamic loader that is built into the NuttX core (See
-    `GIT <https://bitbucket.org/nuttx/nuttx/src/master/binfmt/>`__).
+    `GIT <https://github.com/apache/incubator-nuttx/blob/master/binfmt/>`__).
   - Minor changes to RTOS to support position independent code, and
   - A linker to bind ELF binaries to produce the NXFLAT binary format
     (See GIT).
@@ -124,7 +124,7 @@ Development Status
 The initial release of NXFLAT was made in NuttX version 0.4.9. Testing
 is limited to the tests found under ``apps/examples/nxflat`` in the
 source tree. Some known problems exist (see the
-`TODO <https://bitbucket.org/nuttx/nuttx/src/master/TODO>`__ list). As
+`TODO <https://github.com/apache/incubator-nuttx/blob/master/TODO>`__ list). As
 such, NXFLAT is currently in an early alpha phase.
 
 NXFLAT Toolchain
