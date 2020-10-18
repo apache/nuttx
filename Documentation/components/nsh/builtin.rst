@@ -135,17 +135,17 @@ registers the ``hello_main()`` application in the ``builtin``'s
 that in ``apps/examples/hello/Makefile`` is abstracted below:
 
   #. First, the ``Makefile`` includes ``apps/Make.defs``::
-  
+
       include $(APPDIR)/Make.defs
 
      This defines a macro called ``REGISTER`` that adds data to the
      *builtin* header files::
-             
+
         define REGISTER
             @echo "Register: $1"
             @echo "{ \"$1\", $2, $3, $4 }," >> "$(APPDIR)/builtin/builtin_list.h"
             @echo "EXTERN int $4(int argc, char *argv[]);" >> "$(APPDIR)/builtin/builtin_proto.h"
-        endef      
+        endef
 
      When this macro runs, you will see the output in the build
      "``Register: hello``", that is a sure sign that the registration was
@@ -154,21 +154,21 @@ that in ``apps/examples/hello/Makefile`` is abstracted below:
   #. The make file then defines the application name (``hello``), the task
      priority (default), and the stack size that will be allocated in the
      task runs (2K)::
-     
+
       APPNAME         = hello
       PRIORITY        = SCHED_PRIORITY_DEFAULT
       STACKSIZE       = 2048
-     
+
   #. And finally, the ``Makefile`` invokes the ``REGISTER`` macro to added
      the ``hello_main()`` builtin application. Then, when the system build
      completes, the ``hello`` command can be executed from the NSH command
      line. When the ``hello`` command is executed, it will start the task
      with entry point ``hello_main()`` with the default priority and with
      a stack size of 2K::
-           
+
       context:
         $(call REGISTER,$(APPNAME),$(PRIORITY),$(STACKSIZE),$(APPNAME)_main)
-           
+
 
 **Other Uses of Built-In Application.** The primary purpose of builtin
 applications is to support command line execution of applications from

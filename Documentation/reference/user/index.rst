@@ -23,6 +23,6 @@ Porting Guide <NuttxPortingGuide.html#configandbuild>`__.
   :maxdepth: 1
   :caption: Contents
   :glob:
-  
+
   *_*
   structures.rst

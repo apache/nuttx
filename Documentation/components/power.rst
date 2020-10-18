@@ -30,26 +30,26 @@ consumption states have various names and are sometimes used in
 conflicting ways. In the NuttX PM logic, we will use the following
 terminology:
 
-  ``NORMAL`` 
+  ``NORMAL``
      The normal, full power operating mode.
-  ``IDLE`` 
+  ``IDLE``
      This is still basically normal operational mode, the system is,
      however, ``IDLE`` and some simple simple steps to reduce power
      consumption provided that they do not interfere with normal
      Operation. Simply dimming the a backlight might be an example
      some that that would be done when the system is idle.
-  ``STANDBY`` 
+  ``STANDBY``
      Standby is a lower power consumption mode that may involve more
      extensive power management steps such has disabling clocking or
      setting the processor into reduced power consumption modes. In
      this state, the system should still be able to resume normal
      activity almost immediately.
-  ``SLEEP`` 
+  ``SLEEP``
      The lowest power consumption mode. The most drastic power
      reduction measures possible should be taken in this state. It
      may require some time to get back to normal operation from
      ``SLEEP`` (some MCUs may even require going through reset).
-     
+
 .. c:enum:: pm_state_e
 
   These various states are represented with type :c:enum:`pm_state_e`
@@ -117,7 +117,7 @@ All PM interfaces are declared in the file ``include/nuttx/power/pm.h``.
   and prevent entering reduced power states.
 
     :param domain: Identifies the domain of the new PM activity
-    :param priority: 
+    :param priority:
        Activity priority, range 0-9. Larger values correspond to
        higher priorities. Higher priority activity can prevent the
        system from entering reduced power states for a longer period
@@ -199,16 +199,16 @@ Callbacks
   state change mode by returning a non-zero value from the callback
   function.
 
-    :param cb: 
+    :param cb:
        Returned to the driver. The driver version of the callback
        structure may include additional, driver-specific state data at
        the end of the structure.
-    :param domain: 
+    :param domain:
        Identifies the activity domain of the state change
-    :param pmstate: 
+    :param pmstate:
        Identifies the new PM state
 
-    :return: 
+    :return:
       Zero (``OK``) means the event was successfully
       processed and that the driver is prepared for the PM state change.
       Non-zero means that the driver is not prepared to perform the
@@ -225,13 +225,13 @@ Callbacks
   callback is called after all drivers have had the opportunity to
   prepare for the new power state.
 
-    :param cb: 
+    :param cb:
        Returned to the driver. The driver version of the callback
        structure may include additional, driver-specific state data at
        the end of the structure.
-    :param domain: 
+    :param domain:
        Identifies the activity domain of the state change
-    :param pmstate: 
+    :param pmstate:
        Identifies the new PM state
 
   The driver already agreed to transition

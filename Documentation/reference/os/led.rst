@@ -108,13 +108,13 @@ The ``include/nuttx/board.h`` includes the following declarations:
     interfaces (such as ``stm32_led_initialize()``).
 
 .. c:function:: void board_autoled_on(int led)
-  
+
   Called to instantiate the LED
   presentation of the event. The ``led`` argument is one of the
   definitions provided in ``<board-name>/include/board.h``.
 
 .. c:function:: void board_autoled_off(int led)
-  
+
   Called to terminate the LED
   presentation of the event. The ``led`` argument is one of the
   definitions provided in ``<board-name>/include/board.h``. Note

@@ -1,9 +1,9 @@
-.. todo:: 
+.. todo::
   Include a full list of supported boards, organized by architecture / family / vendor.
   Each board should have its own entry, a photo, brief hardware specifications, features
   supported (currently working in NuttX), how to flash, special toolchains required, etc.
   This will involve migrating most of the content existing currently in board README files
-  to RST documents here. 
+  to RST documents here.
 
 Supported Boards
 ================

@@ -17,7 +17,7 @@ SocketCAN Device Drivers
      dlc to CAN FD len sizes named
 
      .. code-block:: c
-     
+
        extern const uint8_t can_dlc_to_len[16];
        extern const uint8_t len_to_can_dlc[65];
 

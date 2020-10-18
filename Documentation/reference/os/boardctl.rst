@@ -36,5 +36,5 @@
     of the argument is determined by the specific command.
 
   :return: On success zero (OK) is returned; -1 (ERROR) is
-    returned on failure with the errno variable set to indicate the nature of the failure. 
+    returned on failure with the errno variable set to indicate the nature of the failure.
 

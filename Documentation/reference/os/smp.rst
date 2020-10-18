@@ -26,7 +26,7 @@ Page <https://cwiki.apache.org/confluence/display/NUTTX/SMP>`__.
 
 .. c:function:: spinlock_t up_testset(volatile FAR spinlock_t *lock)
 
-  Perform and atomic test and set operation on the provided spinlock. 
+  Perform and atomic test and set operation on the provided spinlock.
 
   :param lock: The address of spinlock object.
 
@@ -35,16 +35,16 @@ Page <https://cwiki.apache.org/confluence/display/NUTTX/SMP>`__.
     either SP_LOCKED if the spinlock was previously locked
     (meaning that the test-and-set operation failed to obtain the lock)
     or SP_UNLOCKED if the spinlock was previously unlocked
-    (meaning that we successfully obtained the lock) 
+    (meaning that we successfully obtained the lock)
 
 .. c:function:: int up_cpu_index(void)
 
   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1)
-  that corresponds to the currently executing CPU. 
+  that corresponds to the currently executing CPU.
 
   :return: An integer index in the range of 0 through
     (CONFIG_SMP_NCPUS-1) that corresponds to the
-    currently executing CPU. 
+    currently executing CPU.
 
 .. c:function:: int up_cpu_start(int cpu)
 
@@ -66,7 +66,7 @@ Page <https://cwiki.apache.org/confluence/display/NUTTX/SMP>`__.
     numeric value in the range of from one to
     ``(CONFIG_SMP_NCPUS-1)``). (CPU 0 is already active).
 
-  :return: Zero (OK) is returned on success; a negated errno value on failure. 
+  :return: Zero (OK) is returned on success; a negated errno value on failure.
 
 .. c:function:: int up_cpu_pause(int cpu)
 
@@ -84,7 +84,7 @@ Page <https://cwiki.apache.org/confluence/display/NUTTX/SMP>`__.
 
 .. c:function:: int up_cpu_resume(int cpu)
 
-  Restart the cpu after it was paused via up_cpu_pause(), 
+  Restart the cpu after it was paused via up_cpu_pause(),
   restoring the state of the task at the head of the
   ``g_assignedtasks[cpu]`` list, and resume normal tasking.
 
@@ -95,5 +95,5 @@ Page <https://cwiki.apache.org/confluence/display/NUTTX/SMP>`__.
   :param cpu: The index of the CPU being resumed. This will not be
     the index of the currently executing CPU.
 
-  :return: Zero (OK) is returned on success; a negated errno value on failure. 
+  :return: Zero (OK) is returned on success; a negated errno value on failure.
 

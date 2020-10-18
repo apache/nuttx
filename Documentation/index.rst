@@ -1,12 +1,12 @@
 .. note::
-  The present documentation is a recent addition to NuttX and was migrated from previous 
+  The present documentation is a recent addition to NuttX and was migrated from previous
   documentation content. For this reason, it is possible you may find broken links or
   formatting errors. You can help contribute fixes or improvements to this documentation
   by following these :doc:`instructions <contributing/documentation>`.
 
 .. tip::
-  You can find the old documentation `here <https://cwiki.apache.org/confluence/display/NUTTX/Documentation>`_. 
-  
+  You can find the old documentation `here <https://cwiki.apache.org/confluence/display/NUTTX/Documentation>`_.
+
 ===================
 NuttX Documentation
 ===================
@@ -31,5 +31,5 @@ Last Updated: |today|
    releases/index.rst
    contributing/index.rst
    glossary.rst
-   
+
 .. include:: substitutions.rst

@@ -30,7 +30,7 @@ OS List Management APIs
   the tick-less OS expires.
 
   **Assumptions**: Base code implementation assumes that this
-  function is called from interrupt handling logic with interrupts disabled. 
+  function is called from interrupt handling logic with interrupts disabled.
 
 .. c:function:: void nxsched_alarm_expiration(void);
 
@@ -40,7 +40,7 @@ OS List Management APIs
   the tick-less OS expires.
 
   **Assumptions**: Base code implementation assumes that this
-  function is called from interrupt handling logic with interrupts disabled. 
+  function is called from interrupt handling logic with interrupts disabled.
 
 .. c:function:: void irq_dispatch(int irq, FAR void *context)
 

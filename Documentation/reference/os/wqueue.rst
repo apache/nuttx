@@ -237,7 +237,7 @@ Work Queue Interfaces
     until the worker is invoked. Zero means to perform the work
     immediately.
 
-  :return: Zero is returned on success; a negated errno is returned on failure. 
+  :return: Zero is returned on success; a negated errno is returned on failure.
 
 .. c:function:: int work_cancel(int qid, FAR struct work_s *work)
 
@@ -263,15 +263,15 @@ Work Queue Interfaces
 
   :param qid: The work queue ID.
 
-  :return: Zero is returned on success; a negated errno is returned on failure. 
+  :return: Zero is returned on success; a negated errno is returned on failure.
 
 .. c:function:: bool work_available(FAR struct work_s *work)
 
-  Check if the work structure is available. 
-   
+  Check if the work structure is available.
+
   :param work: The work queue structure to check.
 
-  :return: ``true`` if available; ``false`` if busy (i.e., there is still pending work). 
+  :return: ``true`` if available; ``false`` if busy (i.e., there is still pending work).
 
 .. c:function:: int work_usrstart(void)
 
@@ -285,7 +285,7 @@ Work Queue Interfaces
 
   :return: The task ID of the worker thread is returned on success.
     A negated ``errno`` value is returned on failure.
-  
+
 .. c:function:: void lpwork_boostpriority(uint8_t reqprio)
 
   Called by the work queue client to assure that

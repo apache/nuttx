@@ -34,7 +34,7 @@ NXFONTS types
     };
 
 
-.. c:struct:: nx_fontset_s 
+.. c:struct:: nx_fontset_s
 
   This structure describes one contiguous grouping of glyphs that can be
   described by an array starting with encoding ``first`` and extending
@@ -84,7 +84,7 @@ NXFONTS types
   Return font bitmap information for the selected
   character encoding.
 
-  :param ch: The char code for the requested bitmap. 
+  :param ch: The char code for the requested bitmap.
   :param handle: A font handle previously returned by :c:func:`nxf_getfonthandle`.
   :return: An instance of :c:struct:`nx_fontbitmap_s` describing the glyph.
 
@@ -92,7 +92,7 @@ NXFONTS types
                      uint16_t width, uint16_t stride, \
                      FAR const struct nx_fontbitmap_s *bm, \
                      nxgl_mxpixel_t color);
-                     
+
 .. c:function:: int nxf_convert_4bpp(FAR uint8_t *dest, uint16_t height, \
                      uint16_t width, uint16_t stride, \
                      FAR const struct nx_fontbitmap_s *bm, \
@@ -113,7 +113,7 @@ NXFONTS types
                       uint16_t width, uint16_t stride, \
                       FAR const struct nx_fontbitmap_s *bm, \
                       nxgl_mxpixel_t color);
-                      
+
   Convert the 1BPP font to a new pixel depth.
 
   :param dest: The destination buffer provided by the caller.

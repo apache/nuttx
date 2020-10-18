@@ -14,7 +14,7 @@ Prerequisites
 .. tabs::
 
   .. tab:: Linux
-  
+
     #. Install system packages
 
       .. code-block:: console
@@ -63,7 +63,7 @@ Prerequisites
         gcc-g++           gperf             libncurses-devel
         flex              gdb               libmpfr-devel
         git               unzip             zlib-devel
-        
+
 To complete the installation of prerequisites, you need to install `kconfig-frontends`
 as instructed in the :doc:`quickstart` guide.
 
@@ -74,7 +74,7 @@ To build Apache NuttX you need the appropriate toolchain
 according to your target platform. Some Operating Systems
 such as Linux distribute toolchains for various architectures.
 This is usually an easy choice however you should be aware
-that in some cases the version offered by your OS may have 
+that in some cases the version offered by your OS may have
 problems and it may better to use a widely used build from
 another source.
 
@@ -84,15 +84,15 @@ ARM architecture:
 .. tabs::
 
   .. code-tab:: console Ubuntu (deb)
-  
+
     $ apt install gcc-arm-none-eabi binutils-arm-none-eabi
-    
+
   .. tab:: From arm.com
-  
+
     First, create a directory to hold the toolchain:
-    
+
     .. code-block:: console
-    
+
       $ usermod -a -G users $USER
       $ # get a login shell that knows we're in this group:
       $ su - $USER
@@ -100,25 +100,25 @@ ARM architecture:
       $ sudo chgrp -R users /opt/gcc
       $ sudo chmod -R u+rw /opt/gcc
       $ cd /opt/gcc
-      
+
     Download and extract toolchain:
-    
+
     .. code-block:: console
-    
+
       $ HOST_PLATFORM=x86_64-linux   # use "mac" for macOS.
       $ # For windows there is a zip instead (gcc-arm-none-eabi-9-2019-q4-major-win32.zip)
       $ wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-${HOST_PLATFORM}.tar.bz2
       $ tar xf gcc-arm-none-eabi-9-2019-q4-major-${HOST_PLATFORM}.tar.bz2
-      
+
     Add the toolchain to your `PATH`:
-    
+
     .. code-block:: console
-    
+
       $ echo "export PATH=/opt/gcc/gcc-arm-none-eabi-9-2019-q4-major/bin:$PATH" >> ~/.bashrc
-      
+
     You can edit your shell's rc files if you don't use bash.
 
-.. tip:: 
+.. tip::
   There are hints on how to get the latest tool chains for most supported
   architectures in the Apache NuttX CI helper
   `script <https://github.com/apache/incubator-nuttx-testing/blob/master/cibuild.sh>`_
@@ -130,7 +130,7 @@ Get Source Code
 Now that all required tools are installed, you need to download NuttX source-code.
 
 .. tabs::
-    
+
   .. tab:: Development (Git)
 
     Apache NuttX is `actively developed on GitHub <https://github.com/apache/incubator-nuttx/>`_.
@@ -153,7 +153,7 @@ Now that all required tools are installed, you need to download NuttX source-cod
        # optionally, zipball is also available (for Windows users).
 
   .. tab:: Stable Release
-  
+
     Apache NuttX releases are published on the project `Downloads <https://nuttx.apache.org/download/>`_
     page and distributed by the Apache mirrors.  Be sure to download both the `nuttx` and `apps` tarballs.
 

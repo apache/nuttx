@@ -12,32 +12,32 @@ Using Sphinx, the RST files are rendered into HTML files that can be read in you
 Building
 ========
 
-To render the Documentation locally, you should clone the NuttX main repository, and 
+To render the Documentation locally, you should clone the NuttX main repository, and
 go into ``Documentation`` directory. Then,
 
   1. Install Sphinx and other dependencies using pipenv.
      You may also find it helpful on platforms such as Windows and MacOS to use *pyenv*
      to manage your python installation.  You can read about installing that on the
      project `site <https://github.com/pyenv/pyenv#installation>`_.
-  
+
     .. code-block:: console
-    
+
       $ pip3 install pipenv
       $ pipenv install
       $ # activate the virtual environent
       $ pipenv shell
-        
+
   2. Build documentation:
-  
+
     .. code-block:: console
-    
+
       $ make html
-      
+
     The resulting HTMLs will end up under ``_build/html``. You can open your browser at the root with:
-    
+
     .. code-block:: console
-    
-      $ xdg-open _build/html/index.html 
+
+      $ xdg-open _build/html/index.html
 
 Contributing
 ============
@@ -85,35 +85,35 @@ Sections should look like this:
 
   Subsection
   ==========
-  
+
   Subsubsection
   -------------
-  
+
 Code
 ----
 
-Code should be documented using the `C domain <https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#the-c-domain>`_. 
+Code should be documented using the `C domain <https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#the-c-domain>`_.
 This means for example that a function should be documented as:
 
 .. code-block:: RST
 
   .. c:function:: bool myfunction(int arg1, int arg2)
-  
+
     Here the function should be described
-    
+
     :param arg1: Description of arg1
     :param arg2: Description of arg2
-    
+
     :return: Description of return value
-    
+
 To document a piece of code, use a ``code-block`` `directive <https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-code-block>`_, specifying the highlight language. If the block is not of code but some verbatim piece of text,
 it is acceptable to use RST standard `::`. This is specially useful and compact when used in the following mode:
 
 .. code-block:: RST
 
   The text file should have the following content::
-  
-    Line1 
+
+    Line1
     Line2
     Line3
 
@@ -124,15 +124,15 @@ To generate internal links, Sphinx's `roles <https://www.sphinx-doc.org/en/maste
 be used. So, use ``:ref:`` instead of standard RST syntax like ```link <target>`_`` for internal links.
 
 Moreover, sphinx is configured to use `autosectionlabel <https://www.sphinx-doc.org/en/master/usage/extensions/autosectionlabel.html#confval-autosectionlabel_prefix_document>`_ extension. This means that sections will automatically get a label that can be linked with the
-`:ref:`. For example: 
+`:ref:`. For example:
 
 .. code-block:: RST
 
   This is a Section
   =================
-  
+
   :ref:`This is a Section` is a link to this very same section.
-  
+
 If the target is in a different file, you can refer it with: ``:ref:`link text </pathtorst:Section Name>```.
 
 Notes and TODOS
@@ -176,10 +176,10 @@ Generally, you should follow this format:
 .. code-block:: RST
 
   .. directive::
-  
+
     child content
-    
-  non-child content which appears after previous directive 
-    
-Note the line between directive and content and the indentation. 
+
+  non-child content which appears after previous directive
+
+Note the line between directive and content and the indentation.
 

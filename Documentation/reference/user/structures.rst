@@ -38,8 +38,8 @@ Access to the ``errno`` Variable
 A pointer to the thread-specific ``errno`` value is available through a
 function call:
 
-.. c:function:: int *__errno(void) 
-  
+.. c:function:: int *__errno(void)
+
   ``__errno()`` returns a pointer to the thread-specific
   ``errno`` value. Note that the symbol ``errno`` is defined to be
   ``__errno()`` so that the usual access by referencing the symbol
@@ -66,7 +66,7 @@ User Interface Structures
 .. c:type:: int (*main_t)(int argc, char *argv[])
 
 :c:type:`main_t` defines the type of a task entry point. :c:type:`main_t` is declared in
-``sys/types.h``.       
+``sys/types.h``.
 
 .. c:struct:: sched_param
 

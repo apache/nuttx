@@ -33,21 +33,21 @@ Notectl Device (``/dev/notectl``)
       unsigned int flag;          /* Filter mode flag */
     #ifdef CONFIG_SMP
       unsigned int cpuset;        /* The set of monitored CPUs */
-    #endif  
+    #endif
     };
 
   - ``flag`` : Filter mode flag. The bitwise OR of the following defines are available.
 
     .. c:macro:: NOTE_FILTER_MODE_FLAG_ENABLE
-    
+
       Enable instrumentation
 
     .. c:macro:: NOTE_FILTER_MODE_FLAG_SYSCALL
-    
+
       Enable syscall instrumentation
 
     .. c:macro:: NOTE_FILTER_MODE_FLAG_IRQ
-    
+
       Enable IRQ instrumentaiton
 
   - ``cpuset`` : (SMP only) Monitor only CPUs in the bitset. Bit 0=CPU0, Bit1=CPU1, etc.
@@ -199,7 +199,7 @@ Noteram Device (``/dev/note``)
     The overwrite mode takes one of the following values.
 
     .. c:macro:: NOTERAM_MODE_OVERWRITE_DISABLE
-     
+
       Overwrite mode is disabled. When the buffer is full, accepting the data will be stopped.
 
     .. c:macro:: NOTERAM_MODE_OVERWRITE_ENABLE

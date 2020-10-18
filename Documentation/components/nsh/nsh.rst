@@ -93,19 +93,19 @@ commands forms:
 Simple command                    ``<cmd>``
 Command with re-directed output   ``<cmd> > <file> <cmd> >> <file>``
 Background command                ``<cmd> &``
-Re-directed background command    ``<cmd> > <file> & <cmd> >> <file> &`` 
+Re-directed background command    ``<cmd> > <file> & <cmd> >> <file> &``
 ===============================   ======================================
 
 Where:
 
   * ``<cmd>`` is any one of the simple commands listed later.
-  * ``<file>`` is the full or relative path to any writable object in the file system name space (file or character driver). Such objects will be referred to simply as files throughout this document. 
+  * ``<file>`` is the full or relative path to any writable object in the file system name space (file or character driver). Such objects will be referred to simply as files throughout this document.
 
 ``nice`` **'d Background Commands**. NSH executes at the
 mid-priority (128). Backgrounded commands can be made to execute
 at higher or lower priorities using ``nice``::
 
-  [nice [-d <niceness>>]] <cmd> [> <file>|>> <file>] [&] 
+  [nice [-d <niceness>>]] <cmd> [> <file>|>> <file>] [&]
 
 Where ``<niceness>`` is any value between -20 and 19 where lower
 (more negative values) correspond to higher priorities. The
@@ -123,9 +123,9 @@ significant resources, they are disabled by default.
      commands can be used as arguments to other commands. The entity
      to be executed is identified by enclosing the command line in
      back quotes. For example,
-     
+
      .. code-block:: bash
-       
+
        set FOO myprogram $BAR
 
      Will execute the program named ``myprogram`` passing it the
@@ -135,9 +135,9 @@ significant resources, they are disabled by default.
 
   -  ``CONFIG_NSH_ARGCAT``: Support concatenation of strings
      with environment variables or command output. For example:
-     
+
      .. code-block:: bash
-     
+
        set FOO XYZ
        set BAR 123
        set FOOBAR ABC_${FOO}_${BAR}
@@ -191,20 +191,20 @@ the ```sh`` <#cmdsh>`__ command).
   - ``while-do-done``: Execute ``[sequence of <cmd>]`` as long
     as ``<cmd>`` has an exit status of zero. The syntax is as
     follows:
-    
+
     .. code-block:: bash
-    
+
       while <cmd>
       do
         [sequence of <cmd>]
-      done    
+      done
 
   - ``until-do-done``: Execute ``[sequence of <cmd>]`` as long
     as ``<cmd>`` has a non-zero exit status. The syntax is as
     follows:
 
     .. code-block::
-    
+
       until <cmd>
       do
         [sequence of <cmd>]
@@ -228,7 +228,7 @@ Built-In Variables
 ======  ====================================================
 ``$?`` 	The result of the last simple command execution. |br|
         On backgrounded commands, this variable holds only |br|
-        the result of spawning the background command. 
+        the result of spawning the background command.
 ======  ====================================================
 
 Current Working Directory
@@ -274,23 +274,23 @@ NSH to behave as follows at NSH startup time:
 
   -  NSH will create a read-only RAM disk (a ROM disk), containing a
      tiny ROMFS file system containing the following::
-     
+
        `--init.d/
             `-- rcS
 
      Where rcS is the NSH start-up script.
-     
+
   -  NSH will then mount the ROMFS file system at ``/etc``,
      resulting in::
-     
+
        |--dev/
        |   `-- ram0
        `--etc/
            `--init.d/
-               `-- rcS     
+               `-- rcS
 
   -  By default, the contents of rcS script are::
-  
+
        # Create a RAMDISK and mount it at XXXRDMOUNTPOINTXXX
 
        mkrd -m 1 -s 512 1024
@@ -300,14 +300,14 @@ NSH to behave as follows at NSH startup time:
   -  NSH will execute the script at ``/etc/init.d/rcS`` at start-up
      (before the first NSH prompt). After execution of the script,
      the root FS will look like::
-     
+
         |--dev/
         |   |-- ram0
         |   `-- ram1
         |--etc/
         |   `--init.d/
         |       `-- rcS
-        `--tmp/     
+        `--tmp/
 
 **Modifying the ROMFS Image**. The contents of the ``/etc``
 directory are retained in the file ``apps/nshlib/nsh_romfsimg.h``

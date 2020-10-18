@@ -38,7 +38,7 @@ These callbacks will be invoked as part of the processing performed by
 .. c:struct:: nx_callback_s
 
   .. code-block:: c
-  
+
     struct nx_callback_s
     {
       void (*redraw)(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
@@ -70,9 +70,9 @@ start this daemon. There are two ways that this can be done:
    ``CONFIG_BOARD_LATE_INITIALIZE`` is defined in the configuration. Or,
    the board startup logic can execute under control of the application
    by calling :c:func:`boardctl` as:
-  
+
    .. code-block:: c
-     
+
      boardctl(BOARDIOC_INIT, arg)
 
    The board initialization logic will run in either case and the simple
@@ -98,7 +98,7 @@ start this daemon. There are two ways that this can be done:
     waiting to accept connections from NX clients.
     A negated ``errno`` value is returned on failure. The ``errno`` value
     indicates the nature of the failure.
-    
+
 NX Server Callbacks
 ===================
 
@@ -107,12 +107,12 @@ NX Server Callbacks
   NX requests that the client re-draw the portion of the
   window within with rectangle.
 
-  :param hwnd: 
+  :param hwnd:
      The handle created by :c:func:`nx_openwindow` or :c:func:`nx_requestbkgd`
   :param rect:
      The rectangle that needs to be re-drawn (in window relative
      coordinates)
-  :param more: 
+  :param more:
      true: More re-draw requests will follow
   :param arg:
      User provided argument (see :c:func:`nx_openwindow`)
@@ -125,7 +125,7 @@ NX Server Callbacks
   The size or position of the window has changed (or the
   window was just created with zero size.
 
-  :param hwnd: 
+  :param hwnd:
      The handle created by :c:func:`nx_openwindow` or :c:func:`nx_requestbkgd`
   :param size:
      The size of the window
@@ -155,11 +155,11 @@ NX Server Callbacks
 
   New keyboard/keypad data is available for the window.
 
-  :param hwnd: 
+  :param hwnd:
        The handle created by :c:func:`nx_openwindow` or :c:func:`nx_requestbkgd`
-  :param nch: 
+  :param nch:
      The number of characters that are available in ch[]
-  :param ch: 
+  :param ch:
      The array of characters
   :param arg:
      User provided argument (see :c:func:`nx_openwindow`)
@@ -168,7 +168,7 @@ NX Server Callbacks
 
   This callback is used to communicate server events to the window listener.
 
-  - ``NXEVENT_BLOCKED``: Window messages are blocked. 
+  - ``NXEVENT_BLOCKED``: Window messages are blocked.
      This callback is the response from :c:func:`nx_block`,
      :c:func:`nxtk_block`. Those blocking interfaces are used
      to assure that no further messages are directed to the window.
@@ -180,7 +180,7 @@ NX Server Callbacks
      callbacks are processed. Then the window may be safely closed.
      Closing the window prior with pending callbacks can lead to bad
      behavior when the callback is executed.
-  - ``NXEVENT_SYNCHED``: Synchronization handshake 
+  - ``NXEVENT_SYNCHED``: Synchronization handshake
      This completes the handshake started by
      :c:func:`nx_synch`, or :c:func:`nxtk_synch`.
      Those interfaces send a synchronization messages to the NX server
@@ -190,23 +190,23 @@ NX Server Callbacks
      synchronization is sometimes necessary to assure that the client and
      server are working together properly.
 
-  :param hwnd: 
+  :param hwnd:
      TWindow handle of window receiving the event
-  :param event: 
+  :param event:
      The server event
-  :param arg1: 
+  :param arg1:
      User provided argument (see :c:func:`nx_openwindow`,
      :c:func:`nx_requestbkgd`, or :c:func:`nxtk_opentoolbar`)
-  :param arg2: 
+  :param arg2:
      TUser provided argument (see :c:func:`nx_block`, :c:func:`nxtk_block`,
      :c:func:`nx_synch`, or :c:func:`nxtk_synch`)
 
 .. c:macro:: nx_run(fb)
 
   .. code-block:: c
-  
+
     #define nx_run(fb) nx_runinstance(NX_DEFAULT_SERVER_MQNAME, dev)
-    
+
 .. c:function:: int nx_runinstance(FAR const char *mqname, FAR struct fb_vtable_s *fb)
 
   This is the server entry point. It does not return; the
@@ -227,9 +227,9 @@ NX Server Callbacks
 .. c:macro:: nx_connect(cb)
 
   .. code-block:: c
-  
+
     #define nx_connect(cb) nx_connectinstance(NX_DEFAULT_SERVER_MQNAME)
-    
+
 .. c:function:: NXHANDLE nx_connectinstance(FAR const char *svrmqname);
 
   Open a connection from a client to the NX server. One
@@ -250,8 +250,8 @@ NX Server Callbacks
   :param svrmqname: The name for the server incoming message queue
 
   :return: Success: A non-NULL handle used with subsequent NX accesses
-    Failure: NULL is returned and errno is set appropriately. 
-    
+    Failure: NULL is returned and errno is set appropriately.
+
 .. c:function:: void nx_disconnect(NXHANDLE handle)
 
   Disconnect a client from the NX server and/or free
@@ -321,7 +321,7 @@ NX Server Callbacks
   prior with pending callbacks can lead to bad behavior when the callback
   is executed.
 
-  :param wnd: The window to be blocked 
+  :param wnd: The window to be blocked
   :param arg: An argument that will accompany the block messages (This is ``arg2`` in
     the event callback).
 
@@ -341,7 +341,7 @@ NX Server Callbacks
   server are fully synchronized in time.
 
   Usage by the window client might be something like this:
-  
+
   .. code-block:: c
 
     extern bool g_synched;
@@ -376,7 +376,7 @@ NX Server Callbacks
 .. c:function:: NXWINDOW nx_openwindow(NXHANDLE handle, uint8_t flags, \
                        FAR const struct nx_callback_s *cb, \
                        FAR void *arg);
-                       
+
   Create a new window.
 
   :param handle: The handle returned by ```nx_connect()`` <#nxconnectinstance>`__.
@@ -388,7 +388,7 @@ NX Server Callbacks
   :param arg: User provided value that will be returned with NX callbacks.
 
   :return: Success: A non-NULL handle used with subsequent NX accesses
-    Failure: NULL is returned and errno is set appropriately. 
+    Failure: NULL is returned and errno is set appropriately.
 
 .. c:function:: int nx_closewindow(NXWINDOW hwnd)
 
@@ -543,7 +543,7 @@ NX Server Callbacks
 
 .. c:function:: int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect, \
                    nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
-                   
+
   Fill the specified rectangle in the window with the
   specified color.
 
@@ -608,7 +608,7 @@ NX Server Callbacks
   :param color: The color to use to fill the line
   :param caps: Draw a circular cap on the ends of the line to support better line
     joins. One of::
-      
+
       /* Line caps */
 
       #define NX_LINECAP_NONE  0x00, /* No line caps */

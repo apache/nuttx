@@ -14,7 +14,7 @@ below:
 
 .. c:function:: int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
-  Attach, i.e, map, on shared memory region to a user virtual address. 
+  Attach, i.e, map, on shared memory region to a user virtual address.
 
   :param pages: A pointer to the first element in a array of
     physical address, each corresponding to one page of memory.
@@ -23,16 +23,16 @@ below:
   :param vaddr: The virtual address corresponding to the beginning
     of the (contiguous) virtual address region.
 
-  :return: Zero (OK) is returned on success; a negated errno value is returned on failure. 
+  :return: Zero (OK) is returned on success; a negated errno value is returned on failure.
 
 
 .. c:function:: int up_shmdt(uintptr_t vaddr, unsigned int npages)
 
-  Detach, i.e, unmap, on shared memory region from a user virtual address. 
+  Detach, i.e, unmap, on shared memory region from a user virtual address.
 
   :param vaddr: The virtual address corresponding to the beginning
     of the (contiguous) virtual address region.
   :param npages: T The number of pages to be unmapped.
 
-  :return: Zero (OK) is returned on success; a negated errno value is returned on failure. 
+  :return: Zero (OK) is returned on success; a negated errno value is returned on failure.
 

@@ -55,13 +55,13 @@ Functions
   name. Differences from the full POSIX implementation include:
 
     -  The range of priority values for the POSIX call is 0 to 255.
-  
+
   .. note:: Setting a task's priority to the same value has the similar effect
     to ``sched_yield()``: The task will be moved to after all other tasks
-    with the same priority.  
+    with the same priority.
 
 .. c:function:: int sched_getparam(pid_t pid, FAR struct sched_param *param)
-       
+
   This function gets the scheduling priority of the task
   specified by pid.
 

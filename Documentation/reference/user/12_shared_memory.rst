@@ -10,7 +10,7 @@ memory interfaces:
   - :c:func:`shmat`
   - :c:func:`shmctl`
   - :c:func:`shmdt`
-  
+
 Functions
 ---------
 
@@ -83,7 +83,7 @@ Functions
      because user and group IDs are not yet supported by NuttX.
 
 .. c:function:: void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
- 
+
   Attaches the shared memory
   segment associated with the shared memory identifier specified by
   ``shmid`` to the address space of the calling process. The segment is
@@ -199,4 +199,4 @@ Functions
 
     -  ``EINVAL``. The value of ``shmaddr`` is not the data segment start
        address of a shared memory segment.
-     
+

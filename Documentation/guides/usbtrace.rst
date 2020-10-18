@@ -120,16 +120,16 @@ N.  USB EVENT ID          8-bit EVENT DATA  MEANING                             
 NOTES:
 
   1. See include/nuttx/usb/usbdev_trace.h
-  2. See arch/arm/src/lpc17xx_40xx/lpc17_40_usbdev.c 
+  2. See arch/arm/src/lpc17xx_40xx/lpc17_40_usbdev.c
 
 In the above example you can see that:
 
   -  **1**. The serial class USB setup method was called for the USB
      serial class. This is the corresponds to the following logic in
      ``drivers/usbdev/pl2303.c``:
-     
+
      .. code-block:: c
-     
+
        static int pl2303_setup(FAR struct uart_dev_s *dev)
        {
          ...
@@ -139,7 +139,7 @@ In the above example you can see that:
   -  **2**. An error occurred while processing the setup command because
      no configuration has yet been selected by the host. This corresponds
      to the following logic in ``drivers/usbdev/pl2303.c``:
-     
+
       .. code-block:: c
 
         static int pl2303_setup(FAR struct uart_dev_s *dev)
@@ -175,19 +175,19 @@ Device Drivers -> USB Device Driver Support  .
 .                                            (or increase the rate at which the trace buffer is emptied).
 ``CONFIG_USBDEV_TRACE_STRINGS=y`` 	         Optionally, convert trace ID numbers to strings.
 .                                            This feature may not be supported by all drivers.
-===========================================  ===================================================                                             
-                                             
-===========================================  ===================================================                                 
+===========================================  ===================================================
+
+===========================================  ===================================================
 Application Configuration -> NSH LIbrary     .
 ``CONFIG_NSH_USBDEV_TRACE=n`` 	             Make sure that any built-in tracing from NSH is disabled.
 ``CONFIG_NSH_ARCHINIT=y`` 	                 Enable this option only if your board-specific logic
 .                                            has logic to automatically start the USB monitor.
 .                                            Otherwise the USB monitor can be started or stopped
 .                                            with the usbmon_start and usbmon_stop commands from the NSH console.
-===========================================  ===================================================                                 
-                                             
-                                             
-                                             
+===========================================  ===================================================
+
+
+
 ===============================================   ============================================
 Application Configuration -> System NSH Add-Ons   .
 ``CONFIG_USBMONITOR=y`` 	                        Enable the USB monitor daemon
@@ -201,13 +201,13 @@ Application Configuration -> System NSH Add-Ons   .
 .                                                 If you lose buffered USB trace data, then dropping
 .                                                 this value will help by increasing the rate at which
 .                                                 the USB trace buffer is emptied.
-``CONFIG_USBMONITOR_TRACEINIT=y``                 Selects which USB event(s) that you want to be traced. 
+``CONFIG_USBMONITOR_TRACEINIT=y``                 Selects which USB event(s) that you want to be traced.
 ``CONFIG_USBMONITOR_TRACECLASS=y``                .
 ``CONFIG_USBMONITOR_TRACETRANSFERS=y``            .
 ``CONFIG_USBMONITOR_TRACECONTROLLER=y``           .
 ``CONFIG_USBMONITOR_TRACEINTERRUPTS=y``           .
 ===============================================   ============================================
-	
+
 
 NOTE: If USB debug output is also enabled, both outputs will appear on
 the serial console. However, the debug output will be asynchronous with

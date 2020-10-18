@@ -26,10 +26,10 @@ these sub-windows to be managed more-or-less independently:
      coordinate system for each sub-window begins at the top left
      corner of the subwindow. This means that toolbar logic need not
      be concerned about client window geometry (and vice versa) and,
-     for example, common toolbar logic can be used with different windows. 
+     for example, common toolbar logic can be used with different windows.
 
 .. c:type:: FAR void *NXTKWINDOW
-  
+
   This is the handle that can be used to access the window data region.
 
 .. c:function:: int nxtk_block(NXWINDOW hwnd, FAR void *arg)
@@ -71,9 +71,9 @@ these sub-windows to be managed more-or-less independently:
   server are fully synchronized in time.
 
   Usage by the window client might be something like this:
-  
+
   .. code-block:: c
-  
+
     extern bool g_synched;
     extern sem_t g_synch_sem;
 
@@ -91,7 +91,7 @@ these sub-windows to be managed more-or-less independently:
           {
              -- Handle the error --
           }
-      }  
+      }
 
   When the window listener thread receives the ``NXEVENT_SYNCHED`` event,
   it would set ``g_synched`` to ``true`` and post ``g_synch_sem``, waking
@@ -128,7 +128,7 @@ these sub-windows to be managed more-or-less independently:
      User provided argument (see ```nx_openwindow()`` <#nxopenwindow>`__)
 
   :return: Success: A non-NULL handle used with subsequent NXTK window accesses
-    Failure: NULL is returned and errno is set appropriately. 
+    Failure: NULL is returned and errno is set appropriately.
 
 .. c:function:: int nxtk_closewindow(NXTKWINDOW hfwnd);
 
@@ -204,7 +204,7 @@ these sub-windows to be managed more-or-less independently:
   Lower the window containing the specified client
   sub-window to the bottom of the display.
 
-  :param hfwnd: 
+  :param hfwnd:
      A handle previously returned by
      ```nxtk_openwindow()`` <#nxtkopenwindow>`__ specifying the window to
      be lowered.
@@ -251,7 +251,7 @@ these sub-windows to be managed more-or-less independently:
   is reported by ``nxtk_ishidden()``. ``nxtk_synch()`` may be used if
   temporal synchronization is required.
 
-  :param hfwnd: 
+  :param hfwnd:
      The handle returned by ```nxtk_openwindow()`` <#nxtkopenwindow>`__
      that identifies the window to be queried.
 
@@ -351,7 +351,7 @@ these sub-windows to be managed more-or-less independently:
   Draw a circular outline using the specified line
   thickness and color.
 
-  :param hfwnd: 
+  :param hfwnd:
      A handle previously returned by
      ```nxtk_openwindow()`` <#nxtkopenwindow>`__.
   :param center:
@@ -371,7 +371,7 @@ these sub-windows to be managed more-or-less independently:
 
   Fill a circular region using the specified color.
 
-  :param hfwnd: 
+  :param hfwnd:
      A handle previously returned by
      ```nxtk_openwindow()`` <#nxtkopenwindow>`__.
   :param center:
@@ -548,16 +548,16 @@ these sub-windows to be managed more-or-less independently:
   :param caps:
      Draw a circular cap on the ends of the line to support better line
      joins. One of:
-     
+
      .. code-block:: c
-     
+
       /* Line caps */
 
       #define NX_LINECAP_NONE  0x00, /* No line caps */
       #define NX_LINECAP_PT1   0x01  /* Line cap on pt1 on of the vector only */
       #define NX_LINECAP_PT2   0x02  /* Line cap on pt2 on of the vector only */
       #define NX_LINECAP_BOTH  0x03  /* Line cap on both ends of the vector only */
-     
+
 
   :return: ``OK`` on success; ``ERROR`` on failure with
     ``errno`` set appropriately
@@ -569,7 +569,7 @@ these sub-windows to be managed more-or-less independently:
   Draw a circular outline using the specified line
   thickness and color.
 
-  :param hfwnd: 
+  :param hfwnd:
      A handle previously returned by
      ```nxtk_openwindow()`` <#nxtkopenwindow>`__.
   :param center:
@@ -608,7 +608,7 @@ these sub-windows to be managed more-or-less independently:
   Move a rectangular region within the toolbar sub-window
   of a framed window.
 
-  :param hfwnd: 
+  :param hfwnd:
      A handle identifying sub-window containing the toolbar within which
      the move is to be done. This handle must have previously been
      returned by ```nxtk_openwindow()`` <#nxtkopenwindow>`__.
@@ -633,10 +633,10 @@ these sub-windows to be managed more-or-less independently:
   :param hfwnd:
      A handle previously returned by
      ```nxtk_openwindow()`` <#nxtkopenwindow>`__.
-  :param dest: 
+  :param dest:
      Describes the rectangular region on in the toolbar sub-window will
      receive the bit map.
-  :param src: 
+  :param src:
      The start of the source image.
   :param origin:
      The origin of the upper, left-most corner of the full bitmap. Both

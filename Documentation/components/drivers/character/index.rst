@@ -50,7 +50,7 @@ Character device drivers have these properties:
 
 .. toctree::
   :caption: Supported Drivers
-  
+
   serial.rst
   touchscreen.rst
   analog.rst

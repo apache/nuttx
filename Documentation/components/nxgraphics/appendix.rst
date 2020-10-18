@@ -14,22 +14,22 @@ the RTOS. User callable functions must be part of a library that can be
 linked against user applications. This user callable interfaces are
 provided in sub-directories under ``nuttx/libnx``.
 
-``libnx/nx`` 
+``libnx/nx``
    Common callable interfaces that are, logically, part of both nxmu and
    nxsu.
-``graphics/nxglib`` and ``libnx/nxglib`` 
+``graphics/nxglib`` and ``libnx/nxglib``
    The NuttX tiny graphics library. The directory contains generic
    utilities support operations on primitive graphics objects and logic
    to rasterize directly into a framebuffer or through an LCD driver
    interface. It has no concept of windows (other than the one,
    framebuffer or LCD window).
-``graphics/nxbe`` 
+``graphics/nxbe``
    This is the *back-end* of a tiny windowing system. It can be used
    with either of two front-ends to complete a windowing system (see
    ``nxmu`` and ``nxsu`` below). It contains most of the important
    window management logic: clipping, window controls, window drawing,
    etc.
-``graphics/nxmu`` and ``libnx/nxmu`` 
+``graphics/nxmu`` and ``libnx/nxmu``
    This is the NX multi user *front end*. When combined with the generic
    *back-end* (``nxbe``), it implements a multi-threaded, multi-user
    windowing system. The files in this directory present the window APIs
@@ -37,18 +37,18 @@ provided in sub-directories under ``nuttx/libnx``.
    includes a graphics server that executes on its own thread; multiple
    graphics clients then communicate with the server via a POSIX message
    queue to serialize window operations from many threads.
-``libnx/nxfonts`` 
+``libnx/nxfonts``
    This is where the NXFONTS implementation resides. This is a
    relatively low-level set of charset set/glyph management APIs. See
    ``include/nuttx/nx/nxfonts.h``.
-``libnx/nxtk`` 
+``libnx/nxtk``
    This is where the NXTOOLKIT implementation resides. This toolkit is
    built on top of NX and works with the multi-user NX front-end. See
    ``include/nuttx/nx/nxtk.h``.
-``apps/graphics/NxWidgets`` 
+``apps/graphics/NxWidgets``
    The `NxWidgets <NxWidgets.html>`__ code is provided as a separate
    package provided in the ``apps/`` repository.
-``graphics/nxterm`` 
+``graphics/nxterm``
    The NxTerm driver is built on top of NX and works with the multi-user
    NX front-end. See ``include/nuttx/nx/nxterm.h``.
 
@@ -58,9 +58,9 @@ NX Configuration Options
 General Configuration Settings
 ------------------------------
 
-``CONFIG_NX`` 
+``CONFIG_NX``
    Enables overall support for graphics library and NX
-``CONFIG_NX_RAMBACKED`` 
+``CONFIG_NX_RAMBACKED``
    Enables RAM backed window support. If this option is selected, then
    windows may be optionally created with a RAM framebuffer backing up
    the window content. Rending into the window will result in rending
@@ -87,21 +87,21 @@ General Configuration Settings
 NXGL Configuration Settings
 ---------------------------
 
-``CONFIG_NX_NPLANES``: 
+``CONFIG_NX_NPLANES``:
    Some YUV color formats requires support for multiple planes, one for
    each color component. Unless you have such special hardware, this
    value should be undefined or set to 1.
-``CONFIG_NX_DISABLE_1BPP``, ``CONFIG_NX_DISABLE_2BPP``, ``CONFIG_NX_DISABLE_4BPP``, ``CONFIG_NX_DISABLE_8BPP`` ``CONFIG_NX_DISABLE_16BPP``, ``CONFIG_NX_DISABLE_24BPP``, and ``CONFIG_NX_DISABLE_32BPP``: 
+``CONFIG_NX_DISABLE_1BPP``, ``CONFIG_NX_DISABLE_2BPP``, ``CONFIG_NX_DISABLE_4BPP``, ``CONFIG_NX_DISABLE_8BPP`` ``CONFIG_NX_DISABLE_16BPP``, ``CONFIG_NX_DISABLE_24BPP``, and ``CONFIG_NX_DISABLE_32BPP``:
    NX supports a variety of pixel depths. You can save some memory by
    disabling support for unused color depths.
-``CONFIG_NX_PACKEDMSFIRST``: 
+``CONFIG_NX_PACKEDMSFIRST``:
    If a pixel depth of less than 8-bits is used, then NX needs to know
    if the pixels pack from the MS to LS or from LS to MS
-``CONFIG_NX_LCDDRIVER``: 
+``CONFIG_NX_LCDDRIVER``:
    By default, NX builds to use a framebuffer driver (see
    ``include/nuttx/video/fb.h``). If this option is defined, NX will
    build to use an LCD driver (see ``include/nuttx/lcd/lcd.h``).
-``CONFIG_NX_ANTIALIASING``: 
+``CONFIG_NX_ANTIALIASING``:
    Enable support for anti-aliasing when rendering lines as various
    orientations. This option is only available for use with frame buffer
    drivers and only with 16-, 24-, or 32-bit RGB color formats.
@@ -109,11 +109,11 @@ NXGL Configuration Settings
 Configuration Settings
 ----------------------
 
-``CONFIG_NX_XYINPUT``: 
+``CONFIG_NX_XYINPUT``:
    Build in support for an X/Y input such as a mouse or a touscreen.
-``CONFIG_NX_KBD``: 
+``CONFIG_NX_KBD``:
    Build in support of keypad/keyboard input.
-``CONFIG_NX_WRITEONLY``: 
+``CONFIG_NX_WRITEONLY``:
    Define if the underlying graphics device does not support read
    operations. Automatically defined if ``CONFIG_NX_LCDDRIVER`` and
    ``CONFIG_LCD_NOGETRUN`` are defined.
@@ -121,11 +121,11 @@ Configuration Settings
 NX Server Configuration Settings
 --------------------------------
 
-``CONFIG_NX_BLOCKING`` 
+``CONFIG_NX_BLOCKING``
    Open the client message queues in blocking mode. In this case,
    ``nx_eventhandler()`` will not return until a message is received and
    processed.
-``CONFIG_NX_MXSERVERMSGS`` and ``CONFIG_NX_MXCLIENTMSGS`` 
+``CONFIG_NX_MXSERVERMSGS`` and ``CONFIG_NX_MXCLIENTMSGS``
    Specifies the maximum number of messages that can fit in the message
    queues. No additional resources are allocated, but this can be set to
    prevent flooding of the client or server with too many messages
@@ -135,17 +135,17 @@ NX Server Configuration Settings
 NXTK Configuration Settings
 ---------------------------
 
-``CONFIG_NXTK_BORDERWIDTH``: 
+``CONFIG_NXTK_BORDERWIDTH``:
    Specifies the width of the border (in pixels) used with framed
    windows. The default is 4.
-``CONFIG_NXTK_BORDERCOLOR1``, ``CONFIG_NXTK_BORDERCOLOR2``, and ``CONFIG_NXTK_BORDERCOLOR3``: 
+``CONFIG_NXTK_BORDERCOLOR1``, ``CONFIG_NXTK_BORDERCOLOR2``, and ``CONFIG_NXTK_BORDERCOLOR3``:
    Specify the colors of the border used with framed windows.
-``CONFIG_NXTK_BORDERCOLOR2`` 
+``CONFIG_NXTK_BORDERCOLOR2``
    The shadow side color and so is normally darker.
-``CONFIG_NXTK_BORDERCOLOR3`` 
+``CONFIG_NXTK_BORDERCOLOR3``
    The shiny side color and so is normally brighter. The default is
    medium, dark, and light grey, respectively
-``CONFIG_NXTK_AUTORAISE``: 
+``CONFIG_NXTK_AUTORAISE``:
    If set, a window will be raised to the top if the mouse position is
    over a visible portion of the window. Default: A mouse button must be
    clicked over a visible portion of the window.
@@ -153,58 +153,58 @@ NXTK Configuration Settings
 NXFONTS Configuration Settings
 ------------------------------
 
-``CONFIG_NXFONTS_CHARBITS``: 
+``CONFIG_NXFONTS_CHARBITS``:
    The number of bits in the character set. Current options are only 7
    and 8. The default is 7.
-``CONFIG_NXFONT_SANS17X22``: 
+``CONFIG_NXFONT_SANS17X22``:
    This option enables support for a tiny, 17x22 san serif font (font
    ``ID FONTID_SANS17X22`` == 14).
-``CONFIG_NXFONT_SANS20X26``: 
+``CONFIG_NXFONT_SANS20X26``:
    This option enables support for a tiny, 20x26 san serif font (font
    ``ID FONTID_SANS20X26`` == 15).
-``CONFIG_NXFONT_SANS23X27``: 
+``CONFIG_NXFONT_SANS23X27``:
    This option enables support for a tiny, 23x27 san serif font (font
    ``ID FONTID_SANS23X27`` == 1).
-``CONFIG_NXFONT_SANS22X29``: 
+``CONFIG_NXFONT_SANS22X29``:
    This option enables support for a small, 22x29 san serif font (font
    ``ID FONTID_SANS22X29`` == 2).
-``CONFIG_NXFONT_SANS28X37``: 
+``CONFIG_NXFONT_SANS28X37``:
    This option enables support for a medium, 28x37 san serif font (font
    ``ID FONTID_SANS28X37`` == 3).
-``CONFIG_NXFONT_SANS39X48``: 
+``CONFIG_NXFONT_SANS39X48``:
    This option enables support for a large, 39x48 san serif font (font
    ``ID FONTID_SANS39X48`` == 4).
-``CONFIG_NXFONT_SANS17X23B``: 
+``CONFIG_NXFONT_SANS17X23B``:
    This option enables support for a tiny, 17x23 san serif bold font
    (font ``ID FONTID_SANS17X23B`` == 16).
-``CONFIG_NXFONT_SANS20X27B``: 
+``CONFIG_NXFONT_SANS20X27B``:
    This option enables support for a tiny, 20x27 san serif bold font
    (font ``ID FONTID_SANS20X27B`` == 17).
-``CONFIG_NXFONT_SANS22X29B``: 
+``CONFIG_NXFONT_SANS22X29B``:
    This option enables support for a small, 22x29 san serif bold font
    (font ID ``FONTID_SANS22X29B`` == 5).
-``CONFIG_NXFONT_SANS28X37B``: 
+``CONFIG_NXFONT_SANS28X37B``:
    This option enables support for a medium, 28x37 san serif bold font
    (font ID ``FONTID_SANS28X37B`` == 6).
-``CONFIG_NXFONT_SANS40X49B``: 
+``CONFIG_NXFONT_SANS40X49B``:
    This option enables support for a large, 40x49 san serif bold font
    (font ID ``FONTID_SANS40X49B`` == 7).
-``CONFIG_NXFONT_SERIF22X29``: 
+``CONFIG_NXFONT_SERIF22X29``:
    This option enables support for a small, 22x29 font (with serifs)
    (font ID ``FONTID_SERIF22X29`` == 8).
-``CONFIG_NXFONT_SERIF29X37``: 
+``CONFIG_NXFONT_SERIF29X37``:
    This option enables support for a medium, 29x37 font (with serifs)
    (font ID ``FONTID_SERIF29X37`` == 9).
-``CONFIG_NXFONT_SERIF38X48``: 
+``CONFIG_NXFONT_SERIF38X48``:
    This option enables support for a large, 38x48 font (with serifs)
    (font ID ``FONTID_SERIF38X48`` == 10).
-``CONFIG_NXFONT_SERIF22X28B``: 
+``CONFIG_NXFONT_SERIF22X28B``:
    This option enables support for a small, 27x38 bold font (with
    serifs) (font ID ``FONTID_SERIF22X28B`` == 11).
-``CONFIG_NXFONT_SERIF27X38B``: 
+``CONFIG_NXFONT_SERIF27X38B``:
    This option enables support for a medium, 27x38 bold font (with
    serifs) (font ID ``FONTID_SERIF27X38B`` == 12).
-``CONFIG_NXFONT_SERIF38X49B``: 
+``CONFIG_NXFONT_SERIF38X49B``:
    This option enables support for a large, 38x49 bold font (with
    serifs) (font ID ``FONTID_SERIF38X49B`` == 13).
 
@@ -213,24 +213,24 @@ NxTerm Configuration Settings
 
 General NxTerm settings.
 
-``CONFIG_NXTERM``: 
+``CONFIG_NXTERM``:
    Enables building of the NxTerm driver.
 
 NxTerm output text/graphics options:
 
-``CONFIG_NXTERM_BPP``: 
+``CONFIG_NXTERM_BPP``:
    Currently, NxTerm supports only a single pixel depth. This
    configuration setting must be provided to support that single pixel
    depth. Default: The smallest enabled pixel depth. (see
    ``CONFIG_NX_DISABLE_*BPP``)
-``CONFIG_NXTERM_CURSORCHAR``: 
+``CONFIG_NXTERM_CURSORCHAR``:
    The bitmap code to use as the cursor. Default '_'
-``CONFIG_NXTERM_MXCHARS``: 
+``CONFIG_NXTERM_MXCHARS``:
    NxTerm needs to remember every character written to the console so
    that it can redraw the window. This setting determines the size of
    some internal memory allocations used to hold the character data.
    Default: 128.
-``CONFIG_NXTERM_CACHESIZE``: 
+``CONFIG_NXTERM_CACHESIZE``:
    NxTerm supports caching of rendered fonts. This font caching is
    required for two reasons: (1) First, it improves text performance,
    but more importantly (2) it preserves the font memory. Since the NX
@@ -251,26 +251,26 @@ NxTerm output text/graphics options:
       server task. ``CONFIG_NXTERM_CACHESIZE`` should be larger than
       ``CONFIG_MQ_MAXMSGSIZE`` in any event.
 
-``CONFIG_NXTERM_LINESEPARATION``: 
+``CONFIG_NXTERM_LINESEPARATION``:
    This the space (in rows) between each row of test. Default: 0
-``CONFIG_NXTERM_NOWRAP``: 
+``CONFIG_NXTERM_NOWRAP``:
    By default, lines will wrap when the test reaches the right hand side
    of the window. This setting can be defining to change this behavior
    so that the text is simply truncated until a new line is encountered.
 
 NxTerm input options:
 
-``CONFIG_NXTERM_NXKBDIN``: 
+``CONFIG_NXTERM_NXKBDIN``:
    Take input from the NX keyboard input callback. By default, keyboard
    input is taken from stdin (``/dev/console``). If this option is set,
    then the interface\ ``nxterm_kdbin()`` is enabled. That interface may
    be driven by window callback functions so that keyboard input *only*
    goes to the top window.
-``CONFIG_NXTERM_KBDBUFSIZE``: 
+``CONFIG_NXTERM_KBDBUFSIZE``:
    If ``CONFIG_NXTERM_NXKBDIN`` is enabled, then this value may be used
    to define the size of the per-window keyboard input buffer. Default:
    16
-``CONFIG_NXTERM_NPOLLWAITERS``: 
+``CONFIG_NXTERM_NPOLLWAITERS``:
    The number of threads that can be waiting for read data available.
    Default: 4
 
@@ -323,25 +323,25 @@ yournew font in a similar fashion:
 
 4. ``include/nuttx/nx/nxfonts.h``. Add you new font as a possible
    system default font:
-   
+
    .. code-block:: c
-   
+
     #if defined(CONFIG_NXFONT_SANS23X27)
     # define NXFONT_DEFAULT FONTID_SANS23X27
     #elif defined(CONFIG_NXFONT_MYFONT)
     # define NXFONT_DEFAULT FONTID_MYFONT
     #endif
-        
+
    Then define the actual font ID. Make sure that the font ID value is
    unique:
 
    .. code-block:: c
-   
+
     #if defined(CONFIG_NXFONT_SANS23X27)
     # define NXFONT_DEFAULT FONTID_SANS23X27
     #elif defined(CONFIG_NXFONT_MYFONT)
     # define NXFONT_DEFAULT FONTID_MYFONT
-    #endif    
+    #endif
 
 New Add the font to the NX build system. There are several files that
 you have to modify to do this. Look how the build system uses the font
@@ -352,29 +352,29 @@ CONFIG_NXFONT_SANS23X27 for examaples:
    with the *bdf-converter* program. Notice ``NXFONTS_FONTID=2``; this
    must be set to the same font ID value that you defined in the
    ``include/nuttx/nx/nxfonts.h`` file.
-   
+
    .. code-block:: makefile
-       
+
     genfontsources:
       ifeq ($(CONFIG_NXFONT_SANS23X27),y)
           @$(MAKE) -C nxfonts -f Makefile.sources NXFONTS_FONTID=1 EXTRAFLAGS=$(EXTRAFLAGS)
       endif
       ifeq ($(CONFIG_NXFONT_MYFONT),y)
           @$(MAKE) -C nxfonts -f Makefile.sources NXFONTS_FONTID=2 EXTRAFLAGS=$(EXTRAFLAGS)
-      endif   
+      endif
 
 6. ``nuttx/graphics/nxfonts/Make.defs``. Set the make variable
    ``NXFSET_CSRCS``. ``NXFSET_CSRCS`` determines the name of the font C
    file to build when ``NXFONTS_FONTID=2``:
-   
+
    .. code-block:: makefile
-       
+
     ifeq ($(CONFIG_NXFONT_SANS23X27),y)
     NXFSET_CSRCS += nxfonts_bitmaps_sans23x27.c
     endif
     ifeq ($(CONFIG_NXFONT_MYFONT),y)
     NXFSET_CSRCS += nxfonts_bitmaps_myfont.c
-    endif   
+    endif
 
 7. ``nuttx/graphics/nxfonts/Makefile.sources``. This is the Makefile
    used in step 5 that will actually generate the font C file. So, given
@@ -382,9 +382,9 @@ CONFIG_NXFONT_SANS23X27 for examaples:
    auto-generated variable and function names and (again) the name of
    the autogenerated file to create (this must be the same name that was
    used in ``nuttx/graphics/nxfonts/Make.defs``):
-   
+
    .. code-block:: makefile
-   
+
     ifeq ($(NXFONTS_FONTID),1)
     NXFONTS_PREFIX  := g_sans23x27_
     GEN_CSRC  = nxfonts_bitmaps_sans23x27.c
@@ -393,21 +393,21 @@ CONFIG_NXFONT_SANS23X27 for examaples:
     NXFONTS_PREFIX  := g_myfont_
     GEN_CSRC  = nxfonts_bitmaps_myfont.c
     endif
-   
+
 8. ``graphics/nxfonts/nxfonts_bitmaps.c``. This is the file that
    contains the generic font structures. It is used as a "template&qout;
    file by ``nuttx/graphics/nxfonts/Makefile.sources``\ to create your
    customized font data set at build time.
-   
+
    .. code-block:: c
-       
+
     #if NXFONTS_FONTID == 1
     #  include "nxfonts_sans23x27.h"
     #elif NXFONTS_FONTID == 2
     #  include "nxfonts_myfont.h"
     #else
     #  error "No font ID specified"
-    #endif   
+    #endif
 
    Where ``nxfonts_myfont.h`` is the NuttX font file that we generated
    in step 2 using the *bdf-converter* tool.
@@ -419,9 +419,9 @@ CONFIG_NXFONT_SANS23X27 for examaples:
    Note that the lookup is based on the font ID that was defined in step
    4. The new font information needs to be added to data structures used
    by that function:
-   
+
    .. code-block:: c
-   
+
     #ifdef CONFIG_NXFONT_SANS23X27
     extern const struct nx_fontpackage_s g_sans23x27_package;
     #endif
@@ -439,7 +439,7 @@ CONFIG_NXFONT_SANS23X27 for examaples:
     #endif
       NULL
     };
-   
+
 
 NX Test Coverage
 ================
@@ -460,10 +460,10 @@ configurations for building the simulation:
    feedback. In this configuration, a very simple, simulated framebuffer
    driver is used that is based upon a simple region of memory posing as
    video memory. That default configuration can be built as follows::
-       
+
     tools/configure.sh sim:nx
     make
-    ./nuttx   
+    ./nuttx
 
 #. The preferred configuration is at
    ``boards/sim/sim/sim/configs/nx11/defconfig``. This configuration
@@ -471,10 +471,10 @@ configurations for building the simulation:
    window as a framebuffer. This is a superior test configuration
    because the X window appears at your desktop and you can see the NX
    output. This preferred configuration can be built as follows::
-       
+
     tools/configure sim:nx11
     make
-    ./nuttx   
+    ./nuttx
 
    *Update:* The sim target has suffered some bit-rot over the years and
    so the following caveats need to be added:
@@ -537,7 +537,7 @@ Function                         Special Setup/Notes                  Verified
                                  There is a "fudge factor" that seems
                                  to eliminate the problem, but there
                                  could still be issues in some
-                                 configurations.   
+                                 configurations.
 ``nxgl_circlepts``               Verified by apps/examples/nxlines.   YES
 ``nxgl_circletraps``             Verified by apps/examples/nxlines.   YES
 ================================ ==================================== ========
@@ -569,25 +569,25 @@ Function                  Special Setup/Notes                                   
 ``nx_openwindow()``       Change to ``CONFIG_EXAMPLES_NX_RAWWINDOWS=y`` in the             YES
                           ``<NuttX-Directory>/.config file``
 ``nx_closewindow()``      Change to ``CONFIG_EXAMPLES_NX_RAWWINDOWS=y``                    YES
-                          in the ``<NuttX-Directory>/.config`` file   
+                          in the ``<NuttX-Directory>/.config`` file
 ``nx_requestbkgd()``      Verified by ``apps/examples/nxtext`` and                         YES
-                          ``apps/examples/nxhello``.   
+                          ``apps/examples/nxhello``.
 ``nx_releasebkgd()``      Verified by ``apps/examples/nxtext`` and                         YES
-                          ``apps/examples/nxhello``.   
+                          ``apps/examples/nxhello``.
 ``nx_getposition()``      .                                                                NO
 ``nx_setposition()``      Change to ``CONFIG_EXAMPLES_NX_RAWWINDOWS=y`` in the             YES
-                          ``<NuttX-Directory>/.config`` file   
+                          ``<NuttX-Directory>/.config`` file
 ``nx_setsize()``          Change to ``CONFIG_EXAMPLES_NX_RAWWINDOWS=y`` in the             YES
-                          ``<NuttX-Directory>/.config`` file   
+                          ``<NuttX-Directory>/.config`` file
 ``nx_raise()``            Change to ``CONFIG_EXAMPLES_NX_RAWWINDOWS=y`` in the             YES
-                          ``<NuttX-Directory>/.config`` file   
+                          ``<NuttX-Directory>/.config`` file
 ``nx_lower()``            Change to ``CONFIG_EXAMPLES_NX_RAWWINDOWS=y`` in the             YES
-                          ``<NuttX-Directory>/.config`` file   
+                          ``<NuttX-Directory>/.config`` file
 ``nx_modal()``            .                                                                NO
 ``nx_setvisibility()``    Exercized using Twm4Nx                                           YES, Informally
 ``nx_ishidden()``         Exercized using Twm4Nx                                           YES, Informally
 ``nx_fill()``             Change to ``CONFIG_EXAMPLES_NX_RAWWINDOWS=y`` in the             YES
-                          ``<NuttX-Directory>/.config`` file 
+                          ``<NuttX-Directory>/.config`` file
 ``nx_getrectangle()``     .                                                                YES
 ``nx_filltrapezoid()``    Verified by ``apps/examples/nxlines``.                           YES
 ``nx_drawline()``         by ``apps/examples/nxlines``.                                    YES
@@ -595,9 +595,9 @@ Function                  Special Setup/Notes                                   
 ``nx_fillcircle()``       Verified by ``apps/examples/nxlines``.                           YES
 ``nx_setbgcolor()``       .                                                                YES
 ``nx_move()``             Change to ``CONFIG_EXAMPLES_NX_RAWWINDOWS=y`` in the             YES
-                          ``<NuttX-Directory>/.config`` file   
+                          ``<NuttX-Directory>/.config`` file
 ``nx_bitmap()``           Change to ``CONFIG_EXAMPLES_NX_RAWWINDOWS=y`` in the             YES
-                          ``<NuttX-Directory>/.config`` file.   
+                          ``<NuttX-Directory>/.config`` file.
 ``nx_kbdin()``            .                                                                YES
 ``nx_mousein()``          .                                                                YES
 ========================= ===============================================================  ========
@@ -640,7 +640,7 @@ Function                     Special Setup/Notes       Verified
 
 NXFONTS API Test Coverage
 -------------------------
-  
+
 ======================== ============================= ========
 Function                 Special Setup/Notes           Verified
 ======================== ============================= ========

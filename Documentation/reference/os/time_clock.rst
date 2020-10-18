@@ -56,9 +56,9 @@ run. Consider this example implementation:
 
   #. Initially an accumulator is zero an the match value is
      programmed to 328:
-     
+
      .. code-block:: c
-     
+
       accumulator = 0;
       match = 328;
 
@@ -66,9 +66,9 @@ run. Consider this example implementation:
      that, in this reflects, 100\* the error in interval that just
      passed. So on the first timer interrupt, the accumulator would
      be updated like:
-     
+
      .. code-block:: c
-     
+
         if (match == 328)
           {
             accumulator += 32; // 100*(328 - 327.68)
@@ -76,13 +76,13 @@ run. Consider this example implementation:
         else
           {
             accumulator -= 68; // (100*(327 - 327.68)
-          }     
+          }
 
   #. And on that same timer interrupt a new match value would be
      programmed:
-     
+
      .. code-block:: c
-     
+
       if (accumulator < 0)
         {
           match = 328;
@@ -91,7 +91,7 @@ run. Consider this example implementation:
         {
           match = 327;
         }
-  
+
 In this way, the timer interval is controlled from
 interrupt-to-interrupt to produce an average frequency of exactly
 100Hz.
@@ -101,10 +101,10 @@ Hardware
 
 To enable hardware module use the following configuration options:
 
-``CONFIG_RTC`` 
+``CONFIG_RTC``
    Enables general support for a hardware RTC. Specific
    architectures may require other specific settings.
-``CONFIG_RTC_EXTERNAL`` 
+``CONFIG_RTC_EXTERNAL``
    Most MCUs include RTC hardware built into the chip. Other RTCs,
    *external* MCUs, may be provided as separate chips typically
    interfacing with the MCU via a serial interface such as SPI or
@@ -113,7 +113,7 @@ To enable hardware module use the following configuration options:
    booted and can support the required serial communications.
    ``CONFIG_RTC_EXTERNAL`` will configure the operating system so
    that it defers initialization of its time facilities.
-``CONFIG_RTC_DATETIME`` 
+``CONFIG_RTC_DATETIME``
    There are two general types of RTC: (1) A simple battery backed
    counter that keeps the time when power is down, and (2) A full
    date / time RTC the provides the date and time information,
@@ -121,7 +121,7 @@ To enable hardware module use the following configuration options:
    specifies this second kind of RTC. In this case, the RTC is
    used to "seed"" the normal NuttX timer and the NuttX system
    timer provides for higher resolution time.
-``CONFIG_RTC_HIRES`` 
+``CONFIG_RTC_HIRES``
    If ``CONFIG_RTC_DATETIME`` not selected, then the simple,
    battery backed counter is used. There are two different
    implementations of such simple counters based on the time
@@ -132,11 +132,11 @@ To enable hardware module use the following configuration options:
    If ``CONFIG_RTC_HIRES`` is enabled in the NuttX configuration,
    then the RTC provides higher resolution time and completely
    replaces the system timer for purpose of date and time.
-``CONFIG_RTC_FREQUENCY`` 
+``CONFIG_RTC_FREQUENCY``
    If ``CONFIG_RTC_HIRES`` is defined, then the frequency of the
    high resolution RTC must be provided. If ``CONFIG_RTC_HIRES``
    is not defined, ``CONFIG_RTC_FREQUENCY`` is assumed to be one.
-``CONFIG_RTC_ALARM`` 
+``CONFIG_RTC_ALARM``
    Enable if the RTC hardware supports setting of an alarm. A
    callback function will be executed when the alarm goes off
 
@@ -377,9 +377,9 @@ timer implementation:
   On return, the current up-time should be available from up_timer_gettime()
   and the interval timer is ready for use (but not actively timing).
   The naming will depend on the architecture so for STM32 ``archname`` will
-  be ``stm32``. 
+  be ``stm32``.
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
   **Assumptions**: Called early in the initialization sequence before
   any special concurrency protections are required.
@@ -395,12 +395,12 @@ timer implementation:
 
   :param ts: Provides the location in which to return the up-time..
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
   **Assumptions**: Called from the normal tasking context. The
   implementation must provide whatever mutual exclusion is necessary
   for correct operation. This can include disabling interrupts in
-  order to assure atomic register operations. 
+  order to assure atomic register operations.
 
 .. c:function:: int up_alarm_cancel(FAR struct timespec *ts)
 
@@ -415,11 +415,11 @@ timer implementation:
     time should be returned if the timer is not active. ``ts`` may
     be ``NULL`` in which case the time is not returned
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
   **Assumptions**: May be called from interrupt level handling or
   from the normal tasking level. interrupts may need to be disabled
-  internally to assure non-reentrancy. 
+  internally to assure non-reentrancy.
 
 .. c:function:: int up_alarm_start(FAR const struct timespec *ts)
 
@@ -431,11 +431,11 @@ timer implementation:
     occur. When the alarm occurs the timer logic will call
     ``nxsched_timer_expiration()``.
 
-  :return: Zero (OK) on success; a negated errno value on failure. 
+  :return: Zero (OK) on success; a negated errno value on failure.
 
   **Assumptions**: May be called from interrupt level handling or
   from the normal tasking level. Interrupts may need to be
-  disabled internally to assure non-reentrancy. 
+  disabled internally to assure non-reentrancy.
 
 .. c:function:: int up_timer_cancel(FAR struct timespec *ts)
 
@@ -451,11 +451,11 @@ remaining time of zero should be returned.
 :param ts: Location to return the remaining time. Zero should be
   returned if the timer is not active.
 
-:return: Zero (OK) on success; a negated errno value on failure. 
+:return: Zero (OK) on success; a negated errno value on failure.
 
 **Assumptions**: May be called from interrupt level handling or
-from the normal tasking level. interrupts may need to be 
-disabled internally to assure non-reentrancy. 
+from the normal tasking level. interrupts may need to be
+disabled internally to assure non-reentrancy.
 
 .. c:function:: int up_timer_start(FAR const struct timespec *ts)
 
@@ -466,11 +466,11 @@ called at the completion of the timeout (unless
 :param ts: Provides the time interval until
   ``nxsched_timer_expiration()`` is called.
 
-:return: Zero (OK) on success; a negated errno value on failure. 
+:return: Zero (OK) on success; a negated errno value on failure.
 
 **Assumptions**: May be called from interrupt level handling
 or from the normal tasking level. Interrupts may need to be
-disabled internally to assure non-reentrancy. 
+disabled internally to assure non-reentrancy.
 
 Watchdog Timer Interfaces
 =========================
@@ -562,18 +562,18 @@ with NuttX tasks.
     watchdog time expires. Zero means either that wdog is not valid or
     that the wdog has already expired.
 
-.. c:type:: void (*wdentry_t)(wdparm_t arg) 
+.. c:type:: void (*wdentry_t)(wdparm_t arg)
 
   **Watchdog Timer Callback**: when a watchdog expires,
   the callback function with this type is
   called.
-  
+
   The argument is passed as scalar ``wdparm_t`` values. For
   systems where the ``sizeof(pointer) < sizeof(uint32_t)``, the
   following union defines the alignment of the pointer within the
   ``uint32_t``. For example, the SDCC MCS51 general pointer is
   24-bits, but ``uint32_t`` is 32-bits (of course).
-  
+
   We always have ``sizeof(pointer) <= sizeof(uintptr_t)`` by
   definition.
 

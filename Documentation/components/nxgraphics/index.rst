@@ -9,7 +9,7 @@ organization, and OS configuration options.
 
 .. figure:: NuttXScreenShot.jpg
   :align: center
-  
+
   **Figure 1**. This screnshot shows the final frame for the NuttX example
   at ``apps/examples/nx`` running on the simulated, Linux x86 platform with
   simulated framebuffer output to an X window. This picture shows to framed window
@@ -152,18 +152,18 @@ and ``stderr`` and, hence, can provide the output side of NuttX console.
 NX Header Files
 ===============
 
-``include/nuttx/nx/nxglib.h`` 
+``include/nuttx/nx/nxglib.h``
    Describes the NXGLIB C interfaces
-``include/nuttx/nx/nx.h`` 
+``include/nuttx/nx/nx.h``
    Describes the NX C interfaces
-``include/nutt/nxtk.h`` 
+``include/nutt/nxtk.h``
    Describe the NXTOOLKIT C interfaces
-``include/nutt/nxfont.h`` 
+``include/nutt/nxfont.h``
    Describe sthe NXFONT C interfaces
 
 .. toctree::
   :Caption: User APIs
-  
+
   nxgl.rst
   nx.rst
   nxtk.rst
@@ -171,4 +171,4 @@ NX Header Files
   nxcursor.rst
   sample.rst
   appendix.rst
-  
+

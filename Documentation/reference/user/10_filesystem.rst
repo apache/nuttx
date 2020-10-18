@@ -410,13 +410,13 @@ Pipes and FIFOs
 .. c:function:: int pipe(int fd[2])
 
   Creates a pair of file descriptors, pointing to a pipe inode,
-  and places them in the array pointed to by ``fd``. 
+  and places them in the array pointed to by ``fd``.
 
   :param fd: The user provided array in which to catch the pipe file
     descriptors. ``fd[0]`` is for reading, ``fd[1]`` is for writing.
 
-  :return: 0 is returned on success; otherwise, -1 is returned with errno set appropriately. 
-  
+  :return: 0 is returned on success; otherwise, -1 is returned with errno set appropriately.
+
 .. c:function:: int mkfifo(FAR const char *pathname, mode_t mode);
 
   mkfifo() makes a FIFO device driver file with name pathname. Unlike Linux,
@@ -426,7 +426,7 @@ Pipes and FIFOs
   Once the FIFO has been created by mkfifo(), any thread can open it for reading
   or writing, in the same way as an ordinary file. However, it must have been
   opened from both reading and writing before input or output can be performed.
-  This FIFO implementation will block all attempts to open a FIFO read-only 
+  This FIFO implementation will block all attempts to open a FIFO read-only
   until at least one thread has opened the FIFO for writing.
 
   If all threads that write to the FIFO have closed, subsequent calls to
@@ -436,7 +436,7 @@ Pipes and FIFOs
     create (if not already created).
   :param mode: Ignored for now
 
-  :return: 0 is returned on success; otherwise, -1 is returned with errno set appropriately. 
+  :return: 0 is returned on success; otherwise, -1 is returned with errno set appropriately.
 
 ``mmap()`` and eXecute In Place (XIP)
 -------------------------------------
@@ -524,7 +524,7 @@ are two conditions where ``mmap()`` can be supported:
 
 .. c:function:: FAR void *mmap(FAR void *start, size_t length, int prot, int flags, int fd, off_t offset);
 
-  Provides minimal mmap() as needed to support eXecute In Place (XIP) operation (as described above). 
+  Provides minimal mmap() as needed to support eXecute In Place (XIP) operation (as described above).
 
   :param start: A hint at where to map the memory -- ignored. The address
     of the underlying media is fixed and cannot be re-mapped without MMU
