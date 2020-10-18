@@ -31,6 +31,7 @@
 #endif
 
 NXSYMBOLS(__cxa_atexit)
+NXSYMBOLS(atexit)
 NXSYMBOLS(bind)
 NXSYMBOLS(calloc)
 NXSYMBOLS(clock_gettime)
