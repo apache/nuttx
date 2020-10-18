@@ -21,7 +21,7 @@ NuttX is a real time embedded operating system (RTOS). Its goals are:
   tiny Linux work-alike with a much reduced feature set.
 
 * **Highly Scalable**
-  Fully scalable from tiny (8-bit) to moderate embedded (32-bit). Scalability with rich feature set
+  Fully scalable from tiny (8-bit) to moderate embedded (64-bit). Scalability with rich feature set
   is accomplished with: Many tiny source files, link from static libraries, highly configurable,
   use of weak symbols when available.
 
