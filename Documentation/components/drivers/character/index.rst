@@ -61,4 +61,5 @@ Character device drivers have these properties:
   rtc.rst
   watchdog.rst
   keypad.rst
+  note.rst
 
