@@ -32,7 +32,6 @@ has your configuration options selected.
        -l selects the Linux (l) host environment.
        -m selects the macOS (m) host environment.
        -c selects the Windows host and Cygwin (c) environment.
-       -u selects the Windows host and Ubuntu under Windows 10 (u) environment.
        -g selects the Windows host and MinGW/MSYS environment.
        -n selects the Windows host and Windows native (n) environment.
 

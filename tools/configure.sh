@@ -39,7 +39,7 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-E] [-e] [-l|m|c|u|g|n] [L] [-a <app-dir>] <board-name>:<config-name> [make-opts]
+USAGE: ${0} [-E] [-e] [-l|m|c|g|n] [L] [-a <app-dir>] <board-name>:<config-name> [make-opts]
 
 Where:
   -E enforces distclean if already configured.
@@ -47,7 +47,6 @@ Where:
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
   -c selects the Windows host and Cygwin (c) environment.
-  -u selects the Windows host and Ubuntu under Windows 10 (u) environment.
   -g selects the Windows host and MinGW/MSYS environment.
   -n selects the Windows host and Windows native (n) environment.
   Default: Use host setup in the defconfig file
@@ -95,7 +94,7 @@ while [ ! -z "$1" ]; do
     shift
     appdir=$1
     ;;
-  -c | -g | -l | -m | -u )
+  -c | -g | -l | -m )
     winnative=n
     host+=" $1"
     ;;
