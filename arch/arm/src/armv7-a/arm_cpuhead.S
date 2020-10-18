@@ -420,12 +420,13 @@ __cpu3_start:
 	 */
 
 	adr		r3, .Lstkinit
-	ldmia	r3, {r0, r1, r2}	/* R0 = start of IDLE stack; R1 = Size of stack; R2 = coloration */
+	mov		r0, sp		/* R0 = end of IDLE stack */
+	ldmia		r3, {r1, r2}	/* R1 = Size of stack; R2 = coloration */
 
 1:								/* Top of the loop */
 	sub		r1, r1, #1			/* R1 = Number of words remaining */
 	cmp		r1, #0				/* Check (nwords == 0) */
-	str		r2, [r0], #4		/* Save stack color word, increment stack address */
+	str		r2, [r0, #-4]!		/* Save stack color word, increment stack address */
 	bne		1b					/* Bottom of the loop */
 #endif
 
@@ -494,14 +495,5 @@ g_cpu3_idlestack:
 #endif /* CONFIG_SMP_NCPUS > 3 */
 #endif /* CONFIG_SMP_NCPUS > 2 */
 #endif /* CONFIG_SMP_NCPUS > 1 */
-
-	.align	8
-	.globl	g_idle_topstack
-	.type	g_idle_topstack, object
-
-g_idle_topstack:
-	.long	_enoinit
-	.size	g_idle_topstack, .-g_idle_topstack
-
 #endif /* CONFIG_SMP */
 	.end
