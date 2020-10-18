@@ -25,6 +25,7 @@ following section.
   spi.rst
   i2c.rst
   ethernet.rst
+  socketcan.rst
   framebuffer.rst
   lcd.rst
   mtd.rst
