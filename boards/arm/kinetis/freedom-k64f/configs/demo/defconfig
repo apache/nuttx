@@ -1,0 +1,10 @@
+#
+# Manualy created file
+# this mininal configuration will be regenerated using kconfig with default options
+#
+CONFIG_ARCH="arm"
+CONFIG_ARCH_BOARD="freedom-k64f"
+CONFIG_ARCH_BOARD_FREEDOM_K64F=y
+CONFIG_ARCH_CHIP="kinetis"
+CONFIG_ARCH_CHIP_KINETIS=y
+CONFIG_ARCH_CHIP_MK64FN1M0VLL12=y
