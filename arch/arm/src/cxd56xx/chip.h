@@ -56,6 +56,7 @@
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 #  include "cxd56_cpuindex.h"
+#  include "cxd56_irq.h"
 #endif
 
 /****************************************************************************
@@ -75,43 +76,13 @@
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
   .macro  setintstack, tmp1, tmp2
-#if CONFIG_SMP_NCPUS > 1
   ldr \tmp1, =CXD56_ADSP_PID
   ldr \tmp1, [\tmp1, 0]
   sub \tmp1, 2                   /* tmp1 = getreg32(CXD56_ADSP_PID) - 2 */
   ldr \tmp2, =g_cpu_intstack_top
   ldr sp, [\tmp2, \tmp1, lsl #2] /* sp = g_cpu_intstack_top[tmp1] */
-#endif
   .endm
 #endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
 #endif /* __ASSEMBLY__  */
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Functions Prototypes
- ****************************************************************************/
-
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-uintptr_t arm_intstack_base(void);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_H */
