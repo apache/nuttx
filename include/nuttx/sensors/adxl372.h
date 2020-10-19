@@ -45,7 +45,7 @@
  *
  * To use this driver via the file_operations interface, the board
  * initialization function should call this driver's registration function.
- * The driver will register itself with Nuttx under the /dev path that is
+ * The driver will register itself with NuttX under the /dev path that is
  * provided by the config structure.  Then user applications may access the
  * driver via the "file descriptor handle" returned by the file_operations
  * open() function.

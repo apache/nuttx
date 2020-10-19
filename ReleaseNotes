@@ -539,7 +539,7 @@ include:
 New features were also added:
 
 * New OS APIs: chdir() and getcwd()
-* The Nuttx shell (NSH) has been extended in many ways.
+* The NuttX shell (NSH) has been extended in many ways.
   - New commands: mkfatfs, mkfifo, sleep, usleep, nice, sh, cd, and pwd
   - New memory inspection commands and heap usage commands
   - New capabilities:
@@ -929,7 +929,7 @@ NuttX-0.4.6
 This is the 38th release of NuttX.  The release features support
 for the Micromint Eagle-100 development board.  This board is based
 around, the Luminary LM3S6918 MCU.  This is the first ARM Cortex-M3
-architecture supported by Nuttx. This initial, basic port includes
+architecture supported by NuttX. This initial, basic port includes
 timer and serial console with configurations to execute the NuttX
 OS test and to run the NuttShell (NSH). Work is still underway on
 this port and current plans are to have I2C, SSI, MMC/SD, and
@@ -1112,7 +1112,7 @@ NuttX-4.14
 This is the 46th release of NuttX.  The release extends the support
 for the STMicro STM32 microcontroller.  Minimal support for the
 STM3210E-EVAL development board based around the STM32F103ZET6 MCU
-was released in NuttX-0.4.12 and extended in Nuttx-0.4.13 to include
+was released in NuttX-0.4.12 and extended in NuttX-0.4.13 to include
 initial USB support.  This completes the STM32F103ZET6 and adds:
 
 New Generic RTOS Features:
@@ -1233,7 +1233,7 @@ two new MCU architectures in various states of development:
 
   The extended port will also include support for SDIO-based SD
   cards and USB device (and possible LCD support).  These extensions
-  may or may not happen by the Nuttx 5.2 release as my plate is
+  may or may not happen by the NuttX 5.2 release as my plate is
   kind of full now.
 
 * LPC3131 (http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/)
@@ -1893,7 +1893,7 @@ functionality.  These are provided as separate tarballs:
 
 The purpose of this separation is both to better organize and
 modularize the NuttX source tree, but also to provide better support
-for incorporation of end-user applications with Nuttx.
+for incorporation of end-user applications with NuttX.
 
 The incompatibility results from the changes to the board configuration
 logic needed to supported the separable application.  The major
@@ -7532,7 +7532,7 @@ Additional new features and extended functionality:
 
       - Add a mostly bogus wchar.h header file.  This file is mostly bogus
         because none of the wide character operations are currently
-        supported in the Nuttx C library.  The file does provide the wchar_t
+        supported in the NuttX C library.  The file does provide the wchar_t
         types needed by some software, however.
       - Add isatty() function. From  Alan Carvalho de Assis.
       - Add mktemp(), mkstemp(), tmpnam() and tempnam().
@@ -7944,7 +7944,7 @@ Additional new features and extended functionality:
         leave the terminal program and drop back to nsh.  This  might come
         in handy for people that have e.g. GSM modems, GPS receivers or
         other devices with text based serial communications attached to
-        their Nuttx systems. From Harald Welte
+        their NuttX systems. From Harald Welte
       - apps/interpreters/micropython:  A port of Micro Python to NuttX.
         Contributed by Dave Marples
 
@@ -9951,7 +9951,7 @@ Additional new features and extended functionality:
         accomplishes this by creating a temporary character driver to mediate
         the character oriented accesses to the block driver.
       - HOSTFS:  Added a HOSTFS file system for use with the simulator.  The
-        HOSTFS file system mounts in the simulated Nuttx context by provides
+        HOSTFS file system mounts in the simulated NuttX context by provides
         proxied access to the file system on the host PC.  This is useful for
         providing file system content and nonvolatile storage of files in the
         simulation environment.  From Ken Pettit.
@@ -10105,7 +10105,7 @@ Additional new features and extended functionality:
     * Applications: apps/system:
 
       - apps/system/hexed:  Port the hexed command line hexadeciamal editor
-         to Nuttx.  See http://apps.venomdev.net/hexed/.
+         to NuttX.  See http://apps.venomdev.net/hexed/.
 
     * Applications: apps/fsutils:
 
@@ -12433,7 +12433,7 @@ Additional new features and extended functionality:
     * NXP Freescale Kinetis:
 
       - Kinetis:  Added missing headers.  Kinetis broke out SPI to
-        kinetis/kinetis_spi.h. Broke out DMA to use the modern Nuttx chip
+        kinetis/kinetis_spi.h. Broke out DMA to use the modern NuttX chip
         inclusion - still STUBS.  Add Kinetis support for ARMV7-M Common
         Vector and FPU.  Allow CONFIG_ARMV7M_CMNVECTOR,
         CONFIG_STACK_COLORATION, CONFIG_ARCH_FPU.  Fix  i2c driver offset
@@ -17232,7 +17232,7 @@ detailed bugfix information):
       - ARP:  Fix an error introduced when ICMP and ICMP6 socket support was
         added in NuttX-7.3.  A gratuitous ARP (or solicitation) was being
         sent after receive of the ECHO replay (advertisement).
-      - ARP:  Fix IGMP multicast address computation on Nuttx network stack.
+      - ARP:  Fix IGMP multicast address computation on NuttX network stack.
         This change fixes the IGMP address computation to allow multicast
         UDP messages. The destination address was created with the incorrect
         bytes of the given IPv4 address.  From Louis Mayencourt.
@@ -18993,7 +18993,7 @@ Additional new features and extended functionality:
       - apps/examples/calib_udelay:  Add tool for calibrating
         CONFIG_BOARD_LOOPSPERMSEC  From Juha Niskanen.
       - apps/examples/dhtxx: Example for the DHTxx sensor.  From Ouss4.
-      - apps/examples/dsptest:  Add unit test for Nuttx DSP library  From
+      - apps/examples/dsptest:  Add unit test for NuttX DSP library  From
         Mateusz Szafoni.
       - apps/examples/elf:  CROMFS and ROMFS configuration currently only
         usable in FLAT build.  Add configuration to use ELF objects on
@@ -20391,7 +20391,7 @@ detailed bugfix information):
 
     * NXP i.MXRT Drivers:
 
-      - i.MXRT Ethernet: The board would not come up if I ran Nuttx from cold.
+      - i.MXRT Ethernet: The board would not come up if I ran NuttX from cold.
         I dumped the PHY registers to see what the differences were and the
         PHY was coming up in NANDTree mode. This is a mode for testing
         connectivity between the PHY and the MAC.  Switching this mode off in
@@ -22659,7 +22659,7 @@ detailed bugfix information):
 
     * NXP LPC17xx Drivers:
 
-      - LPC17xx CAN:  The name can_txready clashes with Nuttx CAN core
+      - LPC17xx CAN:  The name can_txready clashes with NuttX CAN core
         global function.  LPC178x has only single LPC17_SYSCON_PCLKSEL with
         only single divisor.  From Pavel Pisa.
 
@@ -26654,7 +26654,7 @@ This is the first release of NuttX as Apache NuttX (Incubating) and represents o
            - Add support for the Digilent ARTY_A7 board to test the Litex port
            - Added initial support for Sipeed Maix Bit board with Kendryte K210 processor
            - New architectural support: ez80f92
-           - Flat address x86_64 port of Nuttx
+           - Flat address x86_64 port of NuttX
            - Support to run NuttX on ESP32 QEMU
            - Initial support for Sipeed Maix Bit board with Kendryte K210 processor
            - Add initial support for Kendryte K210 processor in SMP mode

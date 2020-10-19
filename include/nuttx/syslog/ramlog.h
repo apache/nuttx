@@ -43,7 +43,7 @@
  * debugging output in a FIFO in RAM.  It differs from a pipe in numerous
  * details as needed to support logging.
  *
- * This driver is built when CONFIG_RAMLOG is defined in the Nuttx
+ * This driver is built when CONFIG_RAMLOG is defined in the NuttX
  * configuration.
  */
 

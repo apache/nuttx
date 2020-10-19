@@ -57,7 +57,7 @@ several permit the user to load firmware into them and perform as
 nanocontrollers.  Other sensors have very sophisticated built-in digital
 filters that can be programmed with hundreds of parameters.
 
-Currently most sensor drivers in the Nuttx drivers/sensors
+Currently most sensor drivers in the NuttX drivers/sensors
 directory implement file_ops open(), close(), and read() functions.
 The open() function initializes the sensor and places it in a mode where
 it can transfer live data in a default configuration. The close() function
@@ -241,34 +241,34 @@ Using the current implementation...
  1) A sensor "data ready" or timer interrupt occurs.
  2) Context is saved and and the driver's interrupt handler is scheduled
     to run.
- 3) The Nuttx scheduler dispatches the driver's interrupt handler task.
+ 3) The NuttX scheduler dispatches the driver's interrupt handler task.
  4) The driver's interrupt handler task posts to a semaphore that the
     driver's worker task is waiting on.
- 5) Nuttx restores the context for the driver's worker task and starts it
+ 5) NuttX restores the context for the driver's worker task and starts it
     running.
  6) The driver's worker task starts the i/o to collect the sample.) (This is
     where the 8 microseconds of real work gets performed.) And waits on a
     SPI data transfer complete semaphore.
- 7) The Nuttx saves the context of the driver's worker task, and the
+ 7) The NuttX saves the context of the driver's worker task, and the
     scheduler dispatches some other task to run while we are waiting.
     Note that this is a good thing. This task is probably performing some
     other real work. We want this to happen during the data transfer.
- 8) The completion of the data transfer causes an interrupt. Nuttx saves the
+ 8) The completion of the data transfer causes an interrupt. NuttX saves the
     current context and restores the driver's worker task's context.
  9) The driver's worker task goes to sleep waiting on the semaphore for the
     next sensor "data ready" or timer interrupt.
-10) The Nuttx saves the context of the driver's worker task, and the
+10) The NuttX saves the context of the driver's worker task, and the
     scheduler dispatches some other task to run while we are waiting.
 
 Independently with the above...
 
 a) The sensor application program performs a file_ops read() to collect a
    sample.
-b) The Nuttx high level driver receives control, performs a thin layer of
+b) The NuttX high level driver receives control, performs a thin layer of
    housekeeping and calls the sensor driver's read function.
 c) The sensor driver's read function copies the most recent sample from the
    worker task's data area to the application's buffer and returns.
-d) The Nuttx high level driver receives control, performs a thin layer of
+d) The NuttX high level driver receives control, performs a thin layer of
    housekeeping and returns.
 e) The application processes the sample.
 
@@ -305,11 +305,11 @@ Its goal is to change the sequence of events detailed above to...
  1) A sensor "data ready" or timer interrupt occurs.
  2) Context is saved and and the cluster driver's interrupt handler is
     scheduled to run.
- 3) The Nuttx scheduler dispatches the cluster driver's interrupt handler
+ 3) The NuttX scheduler dispatches the cluster driver's interrupt handler
     task.
  4) The cluster driver's interrupt handler task posts to a semaphore that
     the cluster driver's worker task is waiting on.
- 5) Nuttx restores the context for the driver's worker task and starts it
+ 5) NuttX restores the context for the driver's worker task and starts it
     running.
  6) The cluster driver's worker task starts the i/o to collect the sample.
     There are two choices here. Programed I/O (PIO) or DMA. If PIO is
@@ -326,29 +326,29 @@ Its goal is to change the sequence of events detailed above to...
     more transfers we yield control and move to the next step. Note that
     the data is being transferred directly into the buffer provided by the
     application program; so no copy needs to be performed.
- 7) The Nuttx saves the context of the cluster driver's worker task, and the
+ 7) The NuttX saves the context of the cluster driver's worker task, and the
     scheduler dispatches some other task to run while we are waiting.
     Again note that this is a good thing. This task is probably performing
     some other real work. We want this to happen during the data transfer.
  8) The completion of the last of the previous data transfers causes an
-    interrupt.  Nuttx saves the current context and restores the cluster
+    interrupt.  NuttX saves the current context and restores the cluster
     driver's worker task's context. If there is more sensor data to
     collect, then goto Step 6.  Otherwise it posts to a semaphore that
     will wake the application.
  9) The driver's worker task goes to sleep waiting on the semaphore for the
     next sensor "data ready" or timer interrupt.
-10) The Nuttx saves the context of the driver's worker task, and the
+10) The NuttX saves the context of the driver's worker task, and the
     scheduler dispatches some other task to run while we are waiting.
 
 Independently with the above...
 
 a) The sensor application program performs a file_ops read() to collect a
    sample.
-b) The Nuttx high level driver receives control, performs a thin layer of
+b) The NuttX high level driver receives control, performs a thin layer of
    housekeeping and calls the sensor driver's read function.
 c) The sensor driver's read function copies the most recent sample from the
    worker task's data area to the application's buffer and returns.
-d) The Nuttx high level driver receives control, performs a thin layer of
+d) The NuttX high level driver receives control, performs a thin layer of
    housekeeping and returns.
 e) The application processes the sample.
 
@@ -389,7 +389,7 @@ Sensor Cluster Interface description:
    configuration structure. The leaf driver registration function must store
    a handle (opaque pointer) to the instance of the leaf driver being
    registered in this field. Note that this should be the same handle that
-   the leaf driver supplies to Nuttx to register itself. The cluster driver
+   the leaf driver supplies to NuttX to register itself. The cluster driver
    will include this handle as a parameter in calls made to the leaf driver.
 
 struct sensor_cluster_operations_s
@@ -408,7 +408,7 @@ struct sensor_cluster_operations_s
   CODE int     (*driver_resume)(FAR void *instance_handle, int32_t arg);
 };
 
-Note that the sensor_cluster_operations_s strongly resembles the Nuttx fs.h
+Note that the sensor_cluster_operations_s strongly resembles the NuttX fs.h
 file_operations structures. This permits the current file_operations
 functions to become thin wrappers around these functions.
 

@@ -100,7 +100,7 @@ for more information.  Using the script:
    cd <nuttx-build-directory>
    boards/arm/stm32/stm3210e-eval/tools/oocd.sh $PWD
 
-2) Load Nuttx
+2) Load NuttX
 
    cd <nuttx-built-directory>
    arm-none-eabi-gdb nuttx

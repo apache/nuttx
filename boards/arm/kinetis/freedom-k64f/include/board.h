@@ -54,7 +54,7 @@
 
 /* The Freedom K64F uses a 50MHz external clock from the Micrel Ethernet PHY.
  * The Kinetis MCU startup from an internal digitally-controlled oscillator
- * (DCO). Nuttx will enable the main external oscillator (EXTAL0/XTAL0).
+ * (DCO). NuttX will enable the main external oscillator (EXTAL0/XTAL0).
  * The external oscillator/resonator can range from 32.768 KHz up to 50 MHz.
  * The default external source for the MCG oscillator inputs (EXTAL) is
  * 50 MHz clock source from Micrel Ethernet PHY.

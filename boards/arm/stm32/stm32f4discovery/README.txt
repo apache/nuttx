@@ -1266,7 +1266,7 @@ Configuration Sub-directories
 
   2. Example usage CS43L22 Audio driver
 
-    a. Power On or reset the STM32F4 Discovery board.  We can see the Nuttx
+    a. Power On or reset the STM32F4 Discovery board.  We can see the NuttX
        command line prompt:
 
       NuttShell (NSH)

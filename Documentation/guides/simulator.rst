@@ -134,7 +134,7 @@ Accessing the Network
    need to pick the one that's right for your system.
 
    Then, on Linux do this to set up the tap network interface and route that will let
-   the Apache Nuttx simulator access the network:
+   the Apache NuttX simulator access the network:
 
     .. code-block:: console
 

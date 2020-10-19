@@ -467,7 +467,7 @@ debugging output in a circular buffer in RAM. It differs from a
 pipe in numerous details as needed to support logging.
 
 This driver is built when ``CONFIG_RAMLOG`` is defined in the
-Nuttx configuration.
+NuttX configuration.
 
 ``dmesg`` command
 -----------------

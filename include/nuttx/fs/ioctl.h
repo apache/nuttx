@@ -314,7 +314,7 @@
 #define _SNIOCVALID(c)    (_IOC_TYPE(c)==_SNIOCBASE)
 #define _SNIOC(nr)        _IOC(_SNIOCBASE,nr)
 
-/* Nuttx Analog (DAC/ADC) ioctl commands (see nuttx/analog/ioctl.h **********/
+/* NuttX Analog (DAC/ADC) ioctl commands (see nuttx/analog/ioctl.h **********/
 
 #define _ANIOCVALID(c)    (_IOC_TYPE(c)==_ANIOCBASE)
 #define _ANIOC(nr)        _IOC(_ANIOCBASE,nr)

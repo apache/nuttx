@@ -162,7 +162,7 @@ NuttX EABI "buildroot" Toolchain
   Bitbucket download site (https://bitbucket.org/nuttx/buildroot/downloads/).
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
-  1. You must have already configured Nuttx in <some-dir>/nuttx.
+  1. You must have already configured NuttX in <some-dir>/nuttx.
 
      $ tools/configure.sh nucleo-l476rg:nsh
      $ make qconfig
@@ -205,7 +205,7 @@ NXFLAT Toolchain
 
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
-  1. You must have already configured Nuttx in <some-dir>/nuttx.
+  1. You must have already configured NuttX in <some-dir>/nuttx.
 
      tools/configure.sh lpcxpresso-lpc1768:<sub-dir>
 
@@ -519,7 +519,7 @@ Other External Hardware/Devices
   nucleo-stm32l476rg Cortex-M4. This option will or can broaden the
   functionality in your project, solution or application.
 
-  In this Nuttx project we attach an MH-SD Card Module (SPI).
+  In this NuttX project we attach an MH-SD Card Module (SPI).
   [http://www.geeetech.com/wiki/index.php/Arduino_SD_card_Module]
 
   Other solutions should also work.

@@ -795,7 +795,7 @@ Toolchains
      out 'cygpath -w'
 
   2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic
-     links are used in Nuttx (e.g., include/arch).  The make system works
+     links are used in NuttX (e.g., include/arch).  The make system works
      around these problems for the Windows tools by copying directories
      instead of linking them.  But this can also cause some confusion for
      you:  For example, you may edit a file in a "linked" directory and find

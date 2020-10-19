@@ -237,7 +237,7 @@ for more information.  Using the script:
    cd <nuttx-build-directory>
    boards/arm/stm32/fire-stm32v2/tools/oocd.sh $PWD
 
-2) Load Nuttx
+2) Load NuttX
 
    cd <nuttx-built-directory>
    arm-none-eabi-gdb nuttx

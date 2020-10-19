@@ -151,7 +151,7 @@ Booting NuttX from an SD card
          Hit any key to stop autoboot: 0
          U-Boot#
 
-    7. Load Nuttx into memory from the U-Boot prompt and run
+    7. Load NuttX into memory from the U-Boot prompt and run
 
          U-Boot# load mmc 0 0x8a000000 nuttx.bin
          U-Boot# go 0x8a000000

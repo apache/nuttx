@@ -1562,7 +1562,7 @@ int main(int argc, char **argv, char **envp)
   debug("main: Checking arguments\n");
   parse_args(argc, argv);
 
-  debug("main: Checking Nuttx Directories\n");
+  debug("main: Checking NuttX Directories\n");
   find_topdir();
   check_configdir();
   check_configured();

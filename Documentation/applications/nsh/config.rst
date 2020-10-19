@@ -10,7 +10,7 @@ The availability of the above commands depends upon features that may or
 may not be enabled in the NuttX configuration file. The following
 `table <#cmddependencies>`__ indicates the dependency of each command on
 NuttX configuration settings. General configuration settings are
-discussed in the `NuttX Porting Guide. <NuttxPortingGuide.html>`__
+discussed in the `NuttX Porting Guide. <NuttXPortingGuide.html>`__
 Configuration settings specific to NSH as discussed at the
 `bottom <#nshconfiguration>`__ of this document.
 

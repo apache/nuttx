@@ -345,7 +345,7 @@ Configuration sub-directories
     examples/lvgldemo. This configuration needs the optional LCD model
     RK043FN02H-CT from NXP. The LCD panel comes with the integrated
     capacitive touchscreen sensor FT5336GQQ connected to the LPI2C1 bus,
-    address 0x38. Nuttx support such touchscreen device via the driver
+    address 0x38. NuttX support such touchscreen device via the driver
     ft5x06 (drivers/input/ft5x06.c). At the moment only the polling
     method is available, the board features an interrupt line connected
     to the touchscreen sensor IC.

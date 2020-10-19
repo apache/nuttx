@@ -115,7 +115,7 @@ Make.defs -- This makefile fragment provides architecture and
   is the path to the root directory of the build.  This makefile
   fragment should include:
 
-    $(TOPDIR)/.config          : Nuttx configuration
+    $(TOPDIR)/.config          : NuttX configuration
     $(TOPDIR)/tools/Config.mk  : Common definitions
 
   Definitions in the Make.defs file probably depend on some of the
@@ -433,16 +433,16 @@ boards/hc/mcs92s12ne6/ne64badge
   not yet been fully tested.
 
 boards/arm/nrf52/nrf52-feather
-  Nuttx port to the Adafruit nRF52832 Feather board
+  NuttX port to the Adafruit nRF52832 Feather board
 
 boards/arm/nrf52/nrf52832-dk
-  Nuttx port to the Nordic nRF52832 Development Kit (PCA10040)
+  NuttX port to the Nordic nRF52832 Development Kit (PCA10040)
 
 boards/arm/nrf52/nrf52840-dk
-	Nuttx port to the Nordic nRF52840 Development Kit (PCA10056)
+	NuttX port to the Nordic nRF52840 Development Kit (PCA10056)
 
 boards/arm/nrf52/nrf52840-dongle
-  Nuttx port to the Nordic nRF52840 Dongle (PCA10059)
+  NuttX port to the Nordic nRF52840 Dongle (PCA10059)
 
 boards/arm/dm320/ntosd-dm320
   This port uses the Neuros OSD v1.0 Dev Board with a GNU arm-nuttx-elf
@@ -901,7 +901,7 @@ boards/arm/lpc214x/zp214xpa
 
 boards/arm/lpc17xx_40xx/zkit-arm-1769
   Zilogic System's ARM development Kit, ZKIT-ARM-1769.  This board is based
-  on the NXP LPC1769.  The Nuttx Buildroot toolchain is used by default.
+  on the NXP LPC1769.  The NuttX Buildroot toolchain is used by default.
 
 Configuring NuttX
 ^^^^^^^^^^^^^^^^^

@@ -316,7 +316,7 @@ contents of these configuration files.
    which is the path to the root directory of the build. This
    makefile fragment should include:
 
-   -  ``$(TOPDIR)/.config`` : Nuttx configuration
+   -  ``$(TOPDIR)/.config`` : NuttX configuration
    -  ``$(TOPDIR)/tools/Config.mk`` : Common definitions
 
    Definitions in the ``Make.defs`` file probably depend on some

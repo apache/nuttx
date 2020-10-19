@@ -118,7 +118,7 @@ static int baud_mask(speed_t speed)
  *   the input baud rate given to the hardware will be the same as the output
  *   baud rate stored in the termios structure."
  *
- *   NOTE 2. In Nuttx, the speed_t is defined to be unsigned int and the baud
+ *   NOTE 2. In NuttX, the speed_t is defined to be unsigned int and the baud
  *   encodings of termios.h are baud value mask. And their corresponding
  *   values are in array g_baud_table. However, if you do so, your code will
  *   *NOT* be portable to other environments where speed_t is smaller and
@@ -172,7 +172,7 @@ int cfsetspeed(FAR struct termios *termiosp, speed_t speed)
  *   NOTE 1: NuttX does not control input/output baud independently.  Both
  *   must be the same.  The POSIX standard interfaces, cfisetispeed() and
  *   cfisetospeed() are defined to be cfgetspeed() in termios.h.
- *   NOTE 2.  In Nuttx, the speed_t is defined to be uint32_t and the baud
+ *   NOTE 2.  In NuttX, the speed_t is defined to be uint32_t and the baud
  *   encodings of termios.h are the actual baud values themselves. Therefore,
  *   any baud value may be returned here... not just those enumerated in
  *   termios.h

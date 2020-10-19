@@ -20,7 +20,7 @@ Character device drivers have these properties:
 
 -  **User Access**. After it has been registered, the character
    driver can be accessed by user code using the standard `driver
-   operations <NuttxUserGuide.html#driveroperations>`__ including
+   operations <NuttXUserGuide.html#driveroperations>`__ including
    ``open()``, ``close()``, ``read()``, ``write()``, etc.
 
 -  **Specialized Character Drivers**. Within the common character

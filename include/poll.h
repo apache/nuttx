@@ -111,7 +111,7 @@ typedef unsigned int nfds_t;
 
 typedef uint8_t pollevent_t;
 
-/* This is the Nuttx variant of the standard pollfd structure.  The poll()
+/* This is the NuttX variant of the standard pollfd structure.  The poll()
  * interfaces receive a variable length array of such structures.
  *
  * REVISIT: In a multi-threaded environment, one use case might be to share

@@ -4,7 +4,7 @@
  *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Derives, in part, from Max Holtzberg's STM32 RNG Nuttx driver:
+ * Derives, in part, from Max Holtzberg's STM32 RNG NuttX driver:
  *
  *   Copyright (C) 2012 Max Holtzberg. All rights reserved.
  *   Author: Max Holtzberg <mh@uvc.de>

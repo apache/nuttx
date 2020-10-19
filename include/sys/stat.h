@@ -34,7 +34,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* mode_t bit settings (most of these do not apply to Nuttx). This assumes
+/* mode_t bit settings (most of these do not apply to NuttX). This assumes
  * that the full size of a mode_t is 16-bits. (However, mode_t must be size
  * 'int' because it is promoted to size int when passed in varargs).
  *
