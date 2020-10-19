@@ -287,6 +287,12 @@ struct cxd56_dev_s
   struct dq_queue_s       up_pendq;         /* Pending buffers from app to process */
   struct dq_queue_s       up_runq;          /* Buffers from app being played */
 
+#ifdef CONFIG_AUDIO_CXD56_SRC
+  struct dq_queue_s       down_pendq;       /* Pending SRC buffers to be DMA'd */
+  struct dq_queue_s       down_runq;        /* SRC buffers being processed */
+  struct dq_queue_s       down_doneq;       /* Done SRC buffers to be re-used */
+#endif
+
   uint16_t                samplerate;       /* Sample rate */
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
   int16_t                 volume;           /* Output volume {0..63} */
