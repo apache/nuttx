@@ -854,6 +854,16 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
           break;
         }
 
+      else if (filep->f_inode == 0)
+        {
+          /* File has been closed.
+           * Descriptor is not valid.
+           */
+
+          recvd = -EBADFD;
+          break;
+        }
+
       /* No... then we would have to wait to get receive some data.
        * If the user has specified the O_NONBLOCK option, then do not
        * wait.
@@ -1761,7 +1771,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
 void uart_reset_sem(FAR uart_dev_t *dev)
 {
   nxsem_reset(&dev->xmitsem,  0);
-  nxsem_reset(&dev->recvsem,  0);
+  nxsem_reset(&dev->recvsem,  1);
   nxsem_reset(&dev->xmit.sem, 1);
   nxsem_reset(&dev->recv.sem, 1);
   nxsem_reset(&dev->pollsem,  1);
