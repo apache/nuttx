@@ -37,6 +37,8 @@
 
 ifeq ($(CONFIG_SENSORS),y)
 
+CSRCS += sensor.c
+
 ifeq ($(CONFIG_SENSORS_HCSR04),y)
   CSRCS += hc_sr04.c
 endif
