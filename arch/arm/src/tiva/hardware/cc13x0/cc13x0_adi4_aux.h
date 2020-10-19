@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x0/cc13x0_adi4_aux.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a compatible
+ * BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,24 +37,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_ADI4_AUX_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_ADI4_AUX_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 #include "hardware/tiva_ddi.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* ADI3 AUX Register Offsets ****************************************************************************************/
+/* ADI3 AUX Register Offsets ************************************************/
 
 #define TIVA_ADI4_AUX_MUX0_OFFSET                          0x0000
 #define TIVA_ADI4_AUX_MUX1_OFFSET                          0x0001
@@ -67,7 +68,7 @@
 #define TIVA_ADI4_AUX_ADCREF0_OFFSET                       0x000a  /* ADC Reference 0 */
 #define TIVA_ADI4_AUX_ADCREF1_OFFSET                       0x000b  /* ADC Reference 1 */
 
-/* ADI3 AUX Register Addresses **************************************************************************************/
+/* ADI3 AUX Register Addresses **********************************************/
 
 #define TIVA_ADI4_AUX_MUX0                                 (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_MUX0_OFFSET)
 #define TIVA_ADI4_AUX_MUX1                                 (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_MUX1_OFFSET)
@@ -81,7 +82,9 @@
 #define TIVA_ADI4_AUX_ADCREF0                              (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_ADCREF0_OFFSET)
 #define TIVA_ADI4_AUX_ADCREF1                              (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_ADCREF1_OFFSET)
 
-/* Offsets may also be used in conjunction with access as described in cc13x0_ddi.h */
+/* Offsets may also be used in conjunction with access as described in
+ * cc13x0_ddi.h
+ */
 
 #define TIVA_ADI4_AUX_DIR                                  (TIVA_AUX_ADI4_BASE + TIVA_DDI_DIR_OFFSET)
 #define TIVA_ADI4_AUX_SET                                  (TIVA_AUX_ADI4_BASE + TIVA_DDI_SET_OFFSET)
@@ -90,7 +93,7 @@
 #define TIVA_ADI4_AUX_MASK8B                               (TIVA_AUX_ADI4_BASE + TIVA_DDI_MASK8B_OFFSET)
 #define TIVA_ADI4_AUX_MASK16B                              (TIVA_AUX_ADI4_BASE + TIVA_DDI_MASK16B_OFFSET)
 
-/* ADI3 AUX Register Bitfield Definitions ***************************************************************************/
+/* ADI3 AUX Register Bitfield Definitions ***********************************/
 
 /* TIVA_ADI4_AUX_MUX0 */
 
@@ -168,17 +171,17 @@
 
 /* TIVA_ADI4_AUX_COMP */
 
-#define ADI4_AUX_COMP_COMPA_EN                              (1 << 1)  /* Bit 1:  COMPA enable */
-#define ADI4_AUX_COMP_COMPB_EN                              (1 << 2)  /* Bit 2:  COMPB enable */
-#define ADI4_AUX_COMP_COMPB_TRIM_SHIFT                      (3)       /* Bits 3-5 */
+#define ADI4_AUX_COMP_COMPA_EN                              (1 << 1)                              /* Bit 1:  COMPA enable */
+#define ADI4_AUX_COMP_COMPB_EN                              (1 << 2)                              /* Bit 2:  COMPB enable */
+#define ADI4_AUX_COMP_COMPB_TRIM_SHIFT                      (3)                                   /* Bits 3-5 */
 #define ADI4_AUX_COMP_COMPB_TRIM_MASK                       (7 << ADI4_AUX_COMP_COMPB_TRIM_SHIFT)
 #  define ADI4_AUX_COMP_COMPB_TRIM(n)                       ((uint32_t)(n) << ADI4_AUX_COMP_COMPB_TRIM_SHIFT)
 #  define ADI4_AUX_COMP_COMPB_TRIM_DIV1                     (0 << ADI4_AUX_COMP_COMPB_TRIM_SHIFT) /* No reference division */
 #  define ADI4_AUX_COMP_COMPB_TRIM_DIV2                     (1 << ADI4_AUX_COMP_COMPB_TRIM_SHIFT) /* Divide reference by 2 */
 #  define ADI4_AUX_COMP_COMPB_TRIM_DIV3                     (3 << ADI4_AUX_COMP_COMPB_TRIM_SHIFT) /* Divide reference by 3 */
 #  define ADI4_AUX_COMP_COMPB_TRIM_DIV4                     (7 << ADI4_AUX_COMP_COMPB_TRIM_SHIFT) /* Divide reference by 4 */
-#define ADI4_AUX_COMP_COMPA_REF_CURR_EN                     (1 << 6)  /* Bit 6:  Enables 2uA IPTAT current from ISRC to COMPA reference */
-#define ADI4_AUX_COMP_COMPA_REF_RES_EN                      (1 << 7)  /* Bit 7:  Enables 400kohm resistance from COMPA reference */
+#define ADI4_AUX_COMP_COMPA_REF_CURR_EN                     (1 << 6)                              /* Bit 6:  Enables 2uA IPTAT current from ISRC to COMPA reference */
+#define ADI4_AUX_COMP_COMPA_REF_RES_EN                      (1 << 7)                              /* Bit 7:  Enables 400kohm resistance from COMPA reference */
 
 /* TIVA_ADI4_AUX_MUX4 */
 
@@ -217,7 +220,7 @@
 #  define ADI4_AUX_ADC0_SMPL_CYCLE_EXP_2p73_MS              (13 << ADI4_AUX_ADC0_SMPL_CYCLE_EXP_SHIFT) /* 16384 clocks = 2.73ms */
 #  define ADI4_AUX_ADC0_SMPL_CYCLE_EXP_5p46_MS              (14 << ADI4_AUX_ADC0_SMPL_CYCLE_EXP_SHIFT) /* 32768 clocks = 5.46ms */
 #  define ADI4_AUX_ADC0_SMPL_CYCLE_EXP_10p9_MS              (15 << ADI4_AUX_ADC0_SMPL_CYCLE_EXP_SHIFT) /* 65536 clocks = 10.9ms */
-#define ADI4_AUX_ADC0_SMPL_MODE                             (1 << 7)  /* Bit 7:  ADC Sampling mode */
+#define ADI4_AUX_ADC0_SMPL_MODE                             (1 << 7)                                   /* Bit 7:  ADC Sampling mode */
 #  define ADI4_AUX_ADC0_SMPL_MODE_SYNCH                     (0)
 #  define ADI4_AUX_ADC0_SMPL_MODE_ASYNCH                    ADI4_AUX_ADC0_SMPL_MODE
 
@@ -234,7 +237,6 @@
 #define ADI4_AUX_ADCREF0_EXT                                (1 << 4)  /* Bit 4 */
 #define ADI4_AUX_ADCREF0_IOMUX                              (1 << 5)  /* Bit 5 */
 #define ADI4_AUX_ADCREF0_REF_ON_IDLE                        (1 << 6)  /* Bit 6:  Enable ADCREF in IDLE state */
-
 
 /* TIVA_ADI4_AUX_ADCREF1 */
 
