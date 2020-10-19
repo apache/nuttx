@@ -706,7 +706,7 @@
 #define LPC43M0_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
 #define LPC43M0_SYSH_PRIORITY_STEP    0x40 /* Steps between priorities */
 
-/* Only the Cortex-M4 is supported by Nuttx */
+/* Only the Cortex-M4 is supported by NuttX */
 
 #define NVIC_SYSH_PRIORITY_MIN        LPC43M4_SYSH_PRIORITY_MIN
 #define NVIC_SYSH_PRIORITY_DEFAULT    LPC43M4_SYSH_PRIORITY_DEFAULT

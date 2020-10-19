@@ -1052,7 +1052,7 @@ Testing has also been performed using the maXTouch Xplained Pro LCD
   *   My understanding is that this configuration can be set on Linux      *
   *   using the mxp-app program which is available on GitHub.  There is an *
   *   (awkward) way to do this with NuttX too. In order to set the         *
-  *   maXTouch configuration with Nuttx you need to do these things:       *
+  *   maXTouch configuration with NuttX you need to do these things:       *
   *                                                                        *
   *   - Copy the function atmxt_config() from the file                     *
   *     boards/arm/samv7/samv71-xult/src/atmxt_config.c into the file               *

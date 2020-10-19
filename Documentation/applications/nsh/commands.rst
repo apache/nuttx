@@ -736,7 +736,7 @@ at <link> for the existing file or directory, <target>. This
 implementation is simplified for use with NuttX in these ways:
 
   -  Links may be created only within the NuttX top-level, `pseudo
-     file system <NuttxUserGuide.html#FileSystemOverview>`__. No
+     file system <NuttXUserGuide.html#FileSystemOverview>`__. No
      file system currently supported by NuttX provides symbolic
      links.
   -  For the same reason, only soft links are implemented.
@@ -875,7 +875,7 @@ of ``<path>`` except the final directory name must exist on a
 mounted file system; the final directory must not.
 
 **Limited to Mounted File Systems**. Recall that NuttX uses a
-`pseudo file system <NuttxUserGuide.html#FileSystemOverview>`__
+`pseudo file system <NuttXUserGuide.html#FileSystemOverview>`__
 for its root file system. The ``mkdir`` command can only be used
 to create directories in volumes set up with the
 ```mount`` <#cmdmount>`__ command; it cannot be used to create
@@ -916,7 +916,7 @@ zero because the FAT32 root directory is a cluster chain.
 NSH provides this command to access the
 ```mkfatfs()`` <mkfatfs>`__ NuttX API. This block device must
 reside in the NuttX `pseudo file
-system <NuttxUserGuide.html#FileSystemOverview>`__ and must have
+system <NuttXUserGuide.html#FileSystemOverview>`__ and must have
 been created by some call to ``register_blockdriver()`` (see
 ``include/nuttx/fs/fs.h``).
 
@@ -933,7 +933,7 @@ be needed to complete the ``<path>``. By convention, however,
 device drivers are place in the standard ``/dev`` directory. After
 it is created, the FIFO device may be used as any other device
 driver. NSH provides this command to access the
-```mkfifo()`` <NuttxUserGuide.html#mkfifo>`__ NuttX API.
+```mkfifo()`` <NuttXUserGuide.html#mkfifo>`__ NuttX API.
 
 **Example**::
 
@@ -1018,23 +1018,23 @@ way association, binding:
      supported value for ``<fstype>``
   #. **Block Device.** The ``<block-device>`` argument is the full
      or relative path to a block driver inode in the `pseudo file
-     system <NuttxUserGuide.html#FileSystemOverview>`__. By
+     system <NuttXUserGuide.html#FileSystemOverview>`__. By
      convention, this is a name under the ``/dev`` sub-directory.
      This ``<block-device>`` must have been previously formatted
      with the same file system type as specified by ``<fstype>``
   #. **Mount Point.** The mount point, ``<dir-path>``, is the
      location in the `pseudo file
-     system <NuttxUserGuide.html#FileSystemOverview>`__ where the
+     system <NuttXUserGuide.html#FileSystemOverview>`__ where the
      mounted volume will appear. This mount point can only reside in
      the NuttX `pseudo file
-     system <NuttxUserGuide.html#FileSystemOverview>`__. By
+     system <NuttXUserGuide.html#FileSystemOverview>`__. By
      convention, this mount point is a subdirectory under ``/mnt``.
      The mount command will create whatever pseudo directories that
      may be needed to complete the full path but the full path must
      not already exist.
 
 After the volume has been mounted in the NuttX `pseudo file
-system <NuttxUserGuide.html#FileSystemOverview>`__, it may be
+system <NuttXUserGuide.html#FileSystemOverview>`__, it may be
 access in the same way as other objects in the file system.
 
 **Examples**:
@@ -1207,7 +1207,7 @@ Remove a File (rm)
 
 **Synopsis**. Remove the specified ``<file-path>`` name from the
 mounted file system. Recall that NuttX uses a `pseudo file
-system <NuttxUserGuide.html#FileSystemOverview>`__ for its root
+system <NuttXUserGuide.html#FileSystemOverview>`__ for its root
 file system. The ``rm`` command can only be used to remove
 (unlink) files in volumes set up with the
 ```mount`` <#cmdmount>`__ command; it cannot be used to remove
@@ -1234,7 +1234,7 @@ Remove a Directory (rmdir)
 
 **Synopsis**. Remove the specified ``<dir-path>`` directory from
 the mounted file system. Recall that NuttX uses a `pseudo file
-system <NuttxUserGuide.html#FileSystemOverview>`__ for its root
+system <NuttXUserGuide.html#FileSystemOverview>`__ for its root
 file system. The ``rmdir`` command can only be used to remove
 directories from volumes set up with the ```mount`` <#cmdmount>`__
 command; it cannot be used to remove directories from the *pseudo*

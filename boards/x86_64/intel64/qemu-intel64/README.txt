@@ -36,7 +36,7 @@ To create a bootable disk with grub2, create a directory named `iso` with grub c
 
 ##### grub.cfg
 
-The grub.cfg should contain the boot entry of Nuttx.
+The grub.cfg should contain the boot entry of NuttX.
 ```
 set timeout=0
 set default=0
@@ -107,7 +107,7 @@ Running Bochs
 ------------
 
   First edit/check the .bochsrc
-  You can create one in the top-level Nuttx directory or bochs will use the one in your $HOME.
+  You can create one in the top-level NuttX directory or bochs will use the one in your $HOME.
   Remember to change the CPU model to one with mandatory features and enable the COM port.
 
   * Find and edit (You might adjust the IPS as you machine perform):

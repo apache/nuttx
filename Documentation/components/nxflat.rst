@@ -42,7 +42,7 @@ NXFLAT is derived from `XFLAT <http://xflat.sourceforge.net/>`__. XFLAT
 is a toolchain add that provides full shared library and XIP executable
 support for processors that have no Memory Management Unit
 (MMU:sup:`1`). NXFLAT is greatly simplified for the deeply embedded
-environment targeted by Nuttx:
+environment targeted by NuttX:
 
   - NXFLAT does not support shared libraries, because
   - NXFLAT does not support *exportation* of symbol values from a module
@@ -142,7 +142,7 @@ will need version 0.1.7 or later.
 
 Here are some general build instructions:
 
--  You must have already configured Nuttx in ``<some-dir>/nuttx``
+-  You must have already configured NuttX in ``<some-dir>/nuttx``
 -  Download the buildroot package ``buildroot-0.x.y`` into
    ``<some-dir>``
 -  Unpack ``<some-dir>/buildroot-0.x.y.tar.gz`` using a command like ``tar zxf buildroot-0.x.y``. This will result in a new directory like ``<some-dir>/buildroot-0.x.y``

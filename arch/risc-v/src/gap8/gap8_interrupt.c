@@ -62,7 +62,7 @@ volatile uint32_t *g_current_regs;
  * Public Functions
  ****************************************************************************/
 
-/* Function exported to the Nuttx kernel */
+/* Function exported to the NuttX kernel */
 
 void up_mdelay(unsigned int time)
 {

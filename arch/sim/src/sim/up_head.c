@@ -91,7 +91,7 @@ int main(int argc, char **argv, char **envp)
 
       sim_cpu0_start();
 #endif
-      /* Start the Nuttx emulation.  This should not return. */
+      /* Start the NuttX emulation.  This should not return. */
 
       nx_start();
     }

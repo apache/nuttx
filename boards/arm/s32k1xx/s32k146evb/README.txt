@@ -114,7 +114,7 @@ Thread-Aware Debugging with Eclipse
 
   Based on correspondence with Han Raaijmakers <han.raaijmakers@nxp.com>
 
-  OpenOCD-nuttx build on Linux (NXW00504) making use of S32DS for ARM 2018R1. Nuttx is built with debug symbols.
+  OpenOCD-nuttx build on Linux (NXW00504) making use of S32DS for ARM 2018R1. NuttX is built with debug symbols.
 
   Resulting debug window gives nuttx threads.  The full stack details can be viewed.
 

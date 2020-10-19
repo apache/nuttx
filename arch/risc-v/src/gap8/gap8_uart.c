@@ -37,7 +37,7 @@
 /****************************************************************************
  *  This UART IP has no flow control. So ioctl is limited.
  *  Note that here we don't use the uDMA to send multiple bytes, because
- *  Nuttx serial drivers don't have abstraction for puts().
+ *  NuttX serial drivers don't have abstraction for puts().
  ****************************************************************************/
 
 /****************************************************************************
@@ -211,7 +211,7 @@ static uart_dev_t g_uart0port =
  *
  * Description:
  *   These are the UART interrupt handler.  It is called on uDMA ISR. It
- *   should call uart_transmitchars or uart_receivechar to invoke the Nuttx
+ *   should call uart_transmitchars or uart_receivechar to invoke the NuttX
  *   kernel.
  *
  ****************************************************************************/

@@ -217,7 +217,7 @@ Basic configuration & build steps
      $ make oldconfig
    - Select the features you want in the build.
      $ make menuconfig
-   - Builds Nuttx with the features you selected.
+   - Builds NuttX with the features you selected.
      $ make
 
 Hardware

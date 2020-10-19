@@ -312,7 +312,7 @@ config ARCH_BOARD_GAPUINO
 	depends on ARCH_CHIP_GAP8
 	select UART_SERIALDRIVER
 	---help---
-		Nuttx port for gapuino, a GAP8 evaluation board.
+		NuttX port for gapuino, a GAP8 evaluation board.
 
 config ARCH_BOARD_HIFIVE1_REVB
 	bool "HiFive1 Rev B board"
@@ -2053,7 +2053,7 @@ config ARCH_BOARD_ZKITARM
 	select ARCH_HAVE_LEDS
 	---help---
 		Zilogic System's ARM development Kit, ZKIT-ARM-1769.  This board is based
-		on the NXP LPC1769.  The Nuttx Buildroot toolchain is used by default.
+		on the NXP LPC1769.  The NuttX Buildroot toolchain is used by default.
 
 config ARCH_BOARD_SPRESENSE
 	bool "Sony Spresense Board"

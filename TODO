@@ -550,7 +550,7 @@ o SMP
                can that occur?  I think it can occur in the following
                situation:
 
-               The log below was reported is Nuttx running on two cores
+               The log below was reported is NuttX running on two cores
                Cortex-A7 architecture in SMP mode.  You can notice see that
                when nxsched_add_readytorun() was called, the g_cpu_irqset is 3.
 

@@ -49,7 +49,7 @@
  *   state table allows for more PUSH/POP report items to be nested, but
  *   consumes more memory. By default this is set to 2 levels (allowing non-
  *   nested PUSH items) but this can be overridden by defining
- *   CONFIG_HID_STATEDEPTH in the Nuttx config file.
+ *   CONFIG_HID_STATEDEPTH in the NuttX config file.
  *
  * CONFIG_HID_USAGEDEPTH
  *   Constant indicating the maximum stack depth of the usage table. A larger
@@ -57,14 +57,14 @@
  *   REPORT COUNT entries of more than one, but requires more stack space. By
  *   default this is set to 8 levels (allowing for a report item with a count
  *   of 8) but this can be overridden by defining CONFIG_HID_USAGEDEPTH to
- *   in the Nuttx config file.
+ *   in the NuttX config file.
  *
  * CONFIG_HID_MAXCOLLECTIONS
  *   Constant indicating the maximum number of COLLECTION items (nested or
  *   unnested) that can be processed in the report item descriptor. A large
  *   value allows for more COLLECTION items to be processed, but consumes
  *   more memory. By default this is set to 10 collections, but this can be
- *   overridden by defining CONFIG_HID_MAXCOLLECTIONS in the Nuttx config file.
+ *   overridden by defining CONFIG_HID_MAXCOLLECTIONS in the NuttX config file.
  *
  * CONFIG_HID_MAXITEMS
  *   Constant indicating the maximum number of report items (IN, OUT or
@@ -72,7 +72,7 @@
  *   in the user HID Report Info structure. A large value allows
  *   for more report items to be stored, but consumes more memory. By default
  *   this is set to 20 items, but this can be overridden by defining
- *   CONFIG_HID_MAXITEMS in the Nuttx config file.
+ *   CONFIG_HID_MAXITEMS in the NuttX config file.
  *
  * CONFIG_HID_MAXIDS
  *   Constant indicating the maximum number of unique report IDs that can be
@@ -80,7 +80,7 @@
  *   array in the user HID Report Info structure. A large value allows for
  *   more report ID report sizes to be stored, but consumes more memory. By
  *   default this is set to 10 items, but this can be overridden by defining
- *   CONFIG_HID_MAXIDS in the Nuttx config file. Note that IN, OUT and FEATURE
+ *   CONFIG_HID_MAXIDS in the NuttX config file. Note that IN, OUT and FEATURE
  *   items sharing the same report ID consume only one size item in the array.
  */
 

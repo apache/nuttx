@@ -4,8 +4,8 @@
  *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Derives from the SAMA5D3 TRNG Nuttx driver which, in turn, derives, in
- * part, from Max Holtzberg's STM32 RNG Nuttx driver:
+ * Derives from the SAMA5D3 TRNG NuttX driver which, in turn, derives, in
+ * part, from Max Holtzberg's STM32 RNG NuttX driver:
  *
  *   Copyright (C) 2012 Max Holtzberg. All rights reserved.
  *   Author: Max Holtzberg <mh@uvc.de>

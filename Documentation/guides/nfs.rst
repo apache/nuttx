@@ -26,7 +26,7 @@ Mount Interface
 
 A low-level, C-callable interface is provided to mount a file system.
 That interface is called ``mount()`` and is mentioned in the
-```porting guide`` <NuttxPortingGuide.html#NxFileSystem>`__ and is
+```porting guide`` <NuttXPortingGuide.html#NxFileSystem>`__ and is
 prototyped in the header file ``include/sys/mount.h``:
 
 .. c:function:: int mount(const char *source, const char *target, const char *filesystemtype, unsigned long mountflags, const void *data)

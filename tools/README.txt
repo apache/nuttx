@@ -54,7 +54,7 @@ configure.c, cfgparser.c, and cfgparser.h
 
   configure.sh is a bash script that is used to configure NuttX for a given
   target board in a environment that supports POSIX paths (Linux, Cygwin,
-  macOS, or similar).  See boards/README.txt or Documentation/NuttxPortingGuide.html
+  macOS, or similar).  See boards/README.txt or Documentation/NuttXPortingGuide.html
   for a description of how to configure NuttX with this script.
 
   configure.c, cfgparser.c, and cfgparser.h can be used to build a work-alike
@@ -189,7 +189,7 @@ mkconfig.c, cfgdefine.c, and cfgdefine.h
 
   When you configure NuttX, you will copy a configuration file called .config
   in the top level NuttX directory (See boards/README.txt or
-  Documentation/NuttxPortingGuide.html).  The first time you make NuttX,
+  Documentation/NuttXPortingGuide.html).  The first time you make NuttX,
   the top-level makefile will build the mkconfig executable from mkconfig.c
   (using Makefile.host).  The top-level Makefile will then execute the
   mkconfig program to convert the .config file in the top level directory
@@ -251,7 +251,7 @@ mkversion.c, cfgdefine.c, and cfgdefine.h
   program is used during the initial NuttX build.
 
   When you build NuttX there should be a version file called .version in
-  the top level NuttX directory (See Documentation/NuttxPortingGuide.html).
+  the top level NuttX directory (See Documentation/NuttXPortingGuide.html).
   The first time you make NuttX, the top-level makefile will build the
   mkversion executable from mkversion.c (using Makefile.host).  The top-
   level Makefile will then execute the mkversion program to convert the
@@ -1047,13 +1047,13 @@ uncrustify.cfg
 
   This is a configuration script for the uncrustify code beautifier.
   Uncrustify does well with forcing braces into "if" statements and
-  indenting per the Nuttx C coding standard. It correctly does things
+  indenting per the NuttX C coding standard. It correctly does things
   like placing all braces on separate lines at the proper indentation
   level.  It cannot handle certain requirements of the coding standard
   such as
 
     - FAR attributes in pointer declarations.
-    - The Nuttx standard function header block comments.
+    - The NuttX standard function header block comments.
     - Naming violations such as use of CamelCase variable names,
       lower case pre-processor definitions, etc.
 

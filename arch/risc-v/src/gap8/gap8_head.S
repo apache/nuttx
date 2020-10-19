@@ -229,7 +229,7 @@ zero_loop_end:
 
   jal x1, gapuino_sysinit
 
-  /* Directly call Nuttx nx_start() */
+  /* Directly call NuttX nx_start() */
 
   jal x1, nx_start
 

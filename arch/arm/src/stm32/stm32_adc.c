@@ -71,7 +71,7 @@
 
 /* The STM32 ADC lower-half driver functionality overview:
  *   - one lower-half driver for all STM32 ADC IP cores,
- *   - general lower-half logic for the Nuttx upper-half ADC driver,
+ *   - general lower-half logic for the NuttX upper-half ADC driver,
  *   - lower-half ADC driver can be used not only with the upper-half ADC
  *     driver, but also in the lower-half logic for special-case custom
  *     drivers (eg. power-control, custom sensors),
@@ -103,7 +103,7 @@
  *   - TIM triggering with/without DMA tranfer
  *   - external triggering with/without DMA transfer
  *
- * (tested with ADC example app from Nuttx apps repo).
+ * (tested with ADC example app from NuttX apps repo).
  */
 
 /* At the moment there is no proper implementation for timers external

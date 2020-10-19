@@ -185,7 +185,7 @@ There are ports to two Microchip SAMA5D3 boards:
    -  A full-loaded NuttShell (:ref:`NSH <nsh>`) configuration
       that demonstrates all of the SAMA5D3x features.
 
-   The following support was added in Nuttx 6.30:
+   The following support was added in NuttX 6.30:
 
    -  DMA support, and
    -  PIO interrupts,
@@ -973,7 +973,7 @@ Three configurations are available:
    the STM32F103 or STM32F107 part.
 #. A network-enabled NuttShell (NSH) configuration that will work only
    with the STM32F107 part.
-#. The configuration that was used to verify the Nuttx `high-priority,
+#. The configuration that was used to verify the NuttX `high-priority,
    nested interrupt
    feature <https://cwiki.apache.org/confluence/display/NUTTX/High+Performance%2C+Zero+Latency+Interrupts>`__.
 
@@ -1173,7 +1173,7 @@ boards.
 
    Zilogic System's ARM development Kit, ZKIT-ARM-1769. This board is
    based on the NXP LPC1769. The initial release was included
-   NuttX-6.26. The Nuttx Buildroot toolchain is used by default. Verifed
+   NuttX-6.26. The NuttX Buildroot toolchain is used by default. Verifed
    configurations include the "Hello, World!" example application and a
    THTTPD demonstration. Refer to the NuttX board
    `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/lpc17xx_40xx/zkit-arm-1769/README.txt>`__
@@ -2455,7 +2455,7 @@ Also refer to the NuttX board
 `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/samd5e5/metro-m4/README.txt>`__
 file for further information about the current state of the port.
 
-Nuttx-9.0 added basic support for Microchip SAME54 Xplained Pro board.
+NuttX-9.0 added basic support for Microchip SAME54 Xplained Pro board.
 An ethernet driver was also added to the SAME5x familly.
 
 STMicro STM32 F72x/F73x
@@ -3039,7 +3039,7 @@ Parallel-Ultra-Low-Power design.
 
 `Sipeed Maix bit <#k210>`__
 
-Initial support for the Sipeed Maix bit board was added in Nuttx-9.0.
+Initial support for the Sipeed Maix bit board was added in NuttX-9.0.
 
 LiteX on ARTY A7
 ----------------

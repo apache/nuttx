@@ -25,7 +25,7 @@ Programming Interfaces
 ======================
 
 The following environment variable
-programming interfaces are provided by Nuttx and are described in detail
+programming interfaces are provided by NuttX and are described in detail
 in the following paragraphs.
 
   - :c:func:`getenv`

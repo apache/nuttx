@@ -159,7 +159,7 @@ Buttons and LEDs
   logic.  APIs are provided to support application control of the LED in
   that case (in include/board.h and src/tm4c_userleds.c).
 
-  If CONFIG_ARCH_LEDS is defined then the usage of the LEDs by Nuttx is
+  If CONFIG_ARCH_LEDS is defined then the usage of the LEDs by NuttX is
   defined in include/board.h and src/tm4c_autoleds.c. The LEDs are used to
   encode OS-related events as follows:
 

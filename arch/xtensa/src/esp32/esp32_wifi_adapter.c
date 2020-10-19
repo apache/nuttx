@@ -431,7 +431,7 @@ ESP_EVENT_DEFINE_BASE(WIFI_EVENT);
  *   Transform from nuttx error code to WiFi adapter error code
  *
  * Input Parameters:
- *   ret - Nuttx error code
+ *   ret - NuttX error code
  *
  * Returned Value:
  *   WiFi adapter error code
@@ -741,7 +741,7 @@ static void IRAM_ATTR esp_wifi_int_restore(void *wifi_int_mux, uint32_t tmp)
  * Name: esp_task_yield_from_isr
  *
  * Description:
- *   Do nothing in Nuttx
+ *   Do nothing in NuttX
  *
  * Input Parameters:
  *   None

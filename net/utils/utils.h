@@ -172,7 +172,7 @@ unsigned int net_timeval2dsec(FAR struct timeval *tv,
  * Name: net_ipv6_mask2pref
  *
  * Description:
- *   Convert a 128-bit netmask to a prefix length.  The Nuttx IPv6
+ *   Convert a 128-bit netmask to a prefix length.  The NuttX IPv6
  *   networking uses 128-bit network masks internally.  This function
  *   converts the IPv6 netmask to a prefix length.
  *

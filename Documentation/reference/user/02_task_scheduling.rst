@@ -6,7 +6,7 @@ priority have exclusive access to the CPU until they become blocked. At
 that time, the CPU is available to tasks of lower priority. Tasks of
 equal priority are scheduled FIFO.
 
-Optionally, a Nuttx task or thread can be configured with round-robin or
+Optionally, a NuttX task or thread can be configured with round-robin or
 *sporadic* scheduler. The round-robin is similar to priority scheduling
 *except* that tasks with equal priority and share CPU time via
 *time-slicing*. The time-slice interval is a constant determined by the
