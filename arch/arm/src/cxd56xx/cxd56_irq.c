@@ -72,10 +72,7 @@
 
 #define INTC_EN(n) (CXD56_INTC_BASE + 0x10 + (((n) >> 5) << 2))
 
-/* Interrupt stack definitions for SMP */
-
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-#  define INTSTACK_SIZE  CONFIG_ARCH_INTERRUPTSTACK
 #  define INTSTACK_ALLOC (CONFIG_SMP_NCPUS * INTSTACK_SIZE)
 #endif
 
@@ -115,17 +112,17 @@ static uint64_t g_intstack_alloc[INTSTACK_ALLOC >> 3];
 
 const uint32_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
 {
-  (uint32_t)g_intstack_alloc + INTSTACK_SIZE,
+  (uint32_t)g_intstack_alloc + INTSTACK_SIZE - 8,
 #if CONFIG_SMP_NCPUS > 1
-  (uint32_t)g_intstack_alloc + (2 * INTSTACK_SIZE),
+  (uint32_t)g_intstack_alloc + (2 * INTSTACK_SIZE) - 8,
 #if CONFIG_SMP_NCPUS > 2
-  (uint32_t)g_intstack_alloc + (3 * INTSTACK_SIZE),
+  (uint32_t)g_intstack_alloc + (3 * INTSTACK_SIZE) - 8,
 #if CONFIG_SMP_NCPUS > 3
-  (uint32_t)g_intstack_alloc + (4 * INTSTACK_SIZE),
+  (uint32_t)g_intstack_alloc + (4 * INTSTACK_SIZE) - 8,
 #if CONFIG_SMP_NCPUS > 4
-  (uint32_t)g_intstack_alloc + (5 * INTSTACK_SIZE),
+  (uint32_t)g_intstack_alloc + (5 * INTSTACK_SIZE) - 8,
 #if CONFIG_SMP_NCPUS > 5
-  (uint32_t)g_intstack_alloc + (6 * INTSTACK_SIZE),
+  (uint32_t)g_intstack_alloc + (6 * INTSTACK_SIZE) - 8,
 #endif /* CONFIG_SMP_NCPUS > 5 */
 #endif /* CONFIG_SMP_NCPUS > 4 */
 #endif /* CONFIG_SMP_NCPUS > 3 */
@@ -647,17 +644,29 @@ int up_prioritize_irq(int irq, int priority)
  *
  * Description:
  *   Return a pointer to the "base" the correct interrupt stack allocation
- *   for the  current CPU.
+ *   for the current CPU. NOTE: Here, the base means "top" of the stack
  *
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 uintptr_t arm_intstack_base(void)
 {
-  uintptr_t base = (uintptr_t)g_intstack_alloc;
-  uint32_t cpu = up_cpu_index();
-  base += cpu * INTSTACK_SIZE;
+  return g_cpu_intstack_top[up_cpu_index()];
+}
+#endif
 
-  return base;
+/****************************************************************************
+ * Name: arm_intstack_alloc
+ *
+ * Description:
+ *   Return a pointer to the "alloc" the correct interrupt stack allocation
+ *   for the current CPU.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+uintptr_t arm_intstack_alloc(void)
+{
+  return g_cpu_intstack_top[up_cpu_index()] - (INTSTACK_SIZE - 8);
 }
 #endif

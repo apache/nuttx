@@ -89,17 +89,17 @@ volatile uint32_t *g_current_regs[1];
  * These definitions provide the aligned stack allocations.
  */
 
-uint64_t g_instack_alloc[INTSTACK_ALLOC >> 3];
+uint64_t g_intstack_alloc[INTSTACK_ALLOC >> 3];
 
 /* These definitions provide the "top" of the push-down stacks. */
 
-const uint32_t g_cpu0_instack_base =
-  (uint32_t)g_instack_alloc + INTSTACK_SIZE;
-
+const uint32_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
+{
+  (uint32_t)g_intstack_alloc + INTSTACK_SIZE - 8,
 #if CONFIG_SMP_NCPUS > 1
-const uint32_t g_cpu1_instack_base =
-  (uint32_t)g_instack_alloc + 2 * INTSTACK_SIZE;
-#endif
+  (uint32_t)g_intstack_alloc + (2 * INTSTACK_SIZE) - 8,
+#endif /* CONFIG_SMP_NCPUS > 1 */
+};
 #endif
 
 /****************************************************************************
@@ -469,16 +469,6 @@ void up_irqinitialize(void)
 
   putreg32(0xffffffff, NVIC_IRQ0_31_CLEAR);
   putreg32(0xffffffff, NVIC_IRQ32_63_CLEAR);
-
-  /* Colorize the interrupt stack for debug purposes */
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-    {
-      size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
-      arm_stack_color((FAR void *)((uintptr_t)&g_intstackbase -
-                      intstack_size), intstack_size);
-    }
-#endif
 
   /* The standard location for the vector table is at the beginning of FLASH
    * at address 0x0800:0000.  If we are using the STMicro DFU bootloader,
@@ -869,3 +859,35 @@ int lc823450_irq_register(int irq, struct lc823450_irq_ops *ops)
   return OK;
 }
 #endif /* CONFIG_LC823450_VIRQ */
+
+/****************************************************************************
+ * Name: arm_intstack_base
+ *
+ * Description:
+ *   Return a pointer to the "base" the correct interrupt stack allocation
+ *   for the current CPU. NOTE: Here, the base means "top" of the stack
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+uintptr_t arm_intstack_base(void)
+{
+  return g_cpu_intstack_top[up_cpu_index()];
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_intstack_alloc
+ *
+ * Description:
+ *   Return a pointer to the "alloc" the correct interrupt stack allocation
+ *   for the current CPU.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+uintptr_t arm_intstack_alloc(void)
+{
+  return g_cpu_intstack_top[up_cpu_index()] - (INTSTACK_SIZE - 8);
+}
+#endif

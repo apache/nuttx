@@ -62,13 +62,17 @@
 static inline void up_color_intstack(void)
 {
 #ifdef CONFIG_SMP
-  uint32_t *ptr = (uint32_t *)arm_intstack_base();
+  uint32_t *ptr = (uint32_t *)arm_intstack_alloc();
 #else
   uint32_t *ptr = (uint32_t *)&g_intstackalloc;
 #endif
   ssize_t size;
 
+#ifdef CONFIG_SMP
+  for (size = ((CONFIG_ARCH_INTERRUPTSTACK & ~3) * CONFIG_SMP_NCPUS);
+#else
   for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+#endif
        size > 0;
        size -= sizeof(uint32_t))
     {

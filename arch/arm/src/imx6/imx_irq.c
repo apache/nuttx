@@ -88,15 +88,15 @@ uint64_t g_fiqstack_alloc[INTSTACK_ALLOC >> 3];
 
 uintptr_t g_irqstack_top[CONFIG_SMP_NCPUS] =
 {
-  (uintptr_t)g_irqstack_alloc + INTSTACK_SIZE,
+  (uintptr_t)g_irqstack_alloc + INTSTACK_SIZE - 8,
 #if CONFIG_SMP_NCPUS > 1
-  (uintptr_t)g_irqstack_alloc + 2 * INTSTACK_SIZE,
+  (uintptr_t)g_irqstack_alloc + (2 * INTSTACK_SIZE) - 8,
 #endif
 #if CONFIG_SMP_NCPUS > 2
-  (uintptr_t)g_irqstack_alloc + 3 * INTSTACK_SIZE,
+  (uintptr_t)g_irqstack_alloc + (3 * INTSTACK_SIZE) - 8,
 #endif
 #if CONFIG_SMP_NCPUS > 3
-  (uintptr_t)g_irqstack_alloc + 4 * INTSTACK_SIZE
+  (uintptr_t)g_irqstack_alloc + (4 * INTSTACK_SIZE) - 8
 #endif
 };
 
@@ -186,3 +186,35 @@ void up_irqinitialize(void)
   up_irq_enable();
 #endif
 }
+
+/****************************************************************************
+ * Name: arm_intstack_base
+ *
+ * Description:
+ *   Return a pointer to the "base" the correct interrupt stack allocation
+ *   for the current CPU. NOTE: Here, the base means "top" of the stack
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+uintptr_t arm_intstack_base(void)
+{
+  return g_irqstack_top[up_cpu_index()];
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_intstack_alloc
+ *
+ * Description:
+ *   Return a pointer to the "alloc" the correct interrupt stack allocation
+ *   for the current CPU.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+uintptr_t arm_intstack_alloc(void)
+{
+  return g_irqstack_top[up_cpu_index()] - (INTSTACK_SIZE - 8);
+}
+#endif
