@@ -127,7 +127,8 @@ extern "C"
  *
  ****************************************************************************/
 
-int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen);
+int ramlog_register(FAR const char *devpath,
+                    FAR char *buffer, size_t buflen);
 
 /****************************************************************************
  * Name: ramlog_syslog_register

@@ -148,7 +148,9 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
 
       if ((getreg32(SAM_TRNG_ISR) & TRNG_INT_DATRDY) == 0)
         {
-          /* No?  Then return and continue processing on the next interrupt. */
+          /* No?  Then return and continue processing on the next
+           * interrupt.
+           */
 
           return OK;
         }
@@ -156,10 +158,10 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
       /* As required by the FIPS PUB (Federal Information Processing Standard
        * Publication) 140-2, the first random number generated after setting
        * the RNGEN bit should not be used, but saved for comparison with the
-       * next generated random number. Each subsequent generated random number
-       * has to be compared with the previously generated number. The test
-       * fails if any two compared numbers are equal (continuous random number
-       * generator test).
+       * next generated random number. Each subsequent generated random
+       * number has to be compared with the previously generated number. The
+       * test fails if any two compared numbers are equal (continuous random
+       * number generator test).
        */
 
       if (g_trngdev.nsamples == 0)
@@ -179,7 +181,9 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
 
       else if (odata == g_trngdev.samples[g_trngdev.nsamples - 1])
         {
-          /* Two samples with the same value.  Discard this one and try again. */
+          /* Two samples with the same value.  Discard this one and try
+           * again.
+           */
 
           continue;
         }
@@ -307,7 +311,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
 
   /* Success... calculate the number of bytes to return */
 
-   retval = g_trngdev.nsamples << 2;
+  retval = g_trngdev.nsamples << 2;
 
 errout:
 
