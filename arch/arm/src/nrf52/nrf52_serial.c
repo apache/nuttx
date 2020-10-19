@@ -475,12 +475,6 @@ static int nrf52_ioctl(struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          /* Get baud */
-
-          cfsetispeed(termiosp, config->baud);
-
-          /* Get flags */
-
           termiosp->c_cflag = ((config->parity != 0) ? PARENB : 0)
                               | ((config->parity == 1) ? PARODD : 0)
                               | ((config->stopbits2) ? CSTOPB : 0) |
@@ -491,6 +485,8 @@ static int nrf52_ioctl(struct file *filep, int cmd, unsigned long arg)
                               ((config->iflow) ? CRTS_IFLOW : 0) |
 #endif
                               CS8;
+
+          cfsetispeed(termiosp, config->baud);
 
           break;
         }

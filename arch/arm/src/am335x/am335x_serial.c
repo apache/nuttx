@@ -1090,8 +1090,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
          * that only one speed is supported.
          */
 
-        /* Get the c_speed field in the termios struct */
-
         priv->baud = cfgetispeed(termiosp);
 
         /* TODO: Re-calculate the optimal CCLK divisor for the new baud and

@@ -2013,8 +2013,6 @@ static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
             break;
           }
 
-        cfsetispeed(termiosp, priv->baud);
-
         /* Note that since we only support 8/9 bit modes and
          * there is no way to report 9-bit mode, we always claim 8.
          */
@@ -2030,6 +2028,8 @@ static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
           ((priv->iflow) ? CRTS_IFLOW : 0) |
 #endif
           CS8;
+
+        cfsetispeed(termiosp, priv->baud);
 
         /* TODO: CCTS_IFLOW, CCTS_OFLOW */
       }

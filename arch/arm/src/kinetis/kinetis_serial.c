@@ -1341,8 +1341,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        cfsetispeed(termiosp, priv->baud);
-
         /* Note: CSIZE only supports 5-8 bits. The driver only support 8/9 bit
          * modes and therefore is no way to report 9-bit mode, we always claim
          * 8 bit mode.
@@ -1359,6 +1357,8 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
           ((priv->iflow) ? CRTS_IFLOW : 0) |
 #  endif
           CS8;
+
+        cfsetispeed(termiosp, priv->baud);
 
         /* TODO: CCTS_IFLOW, CCTS_OFLOW */
       }
