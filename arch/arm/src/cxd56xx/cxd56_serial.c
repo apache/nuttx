@@ -778,8 +778,6 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           flags = spin_lock_irqsave();
 
-          cfsetispeed(termiosp, priv->baud);
-
           termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
                               ((priv->parity == 1) ? PARODD : 0) |
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
@@ -789,6 +787,8 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                               ((priv->iflow) ? CRTS_IFLOW : 0) |
 #endif
                               ((priv->stopbits2) ? CSTOPB : 0);
+
+          cfsetispeed(termiosp, priv->baud);
 
           switch (priv->bits)
             {

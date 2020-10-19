@@ -1081,10 +1081,6 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        /* Return baud */
-
-        cfsetispeed(termiosp, priv->baud);
-
         /* Return parity */
 
         termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
@@ -1099,6 +1095,10 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
         termiosp->c_cflag |= (priv->flowc) ? (CCTS_OFLOW | CRTS_IFLOW): 0;
 #endif
+        /* Return baud */
+
+        cfsetispeed(termiosp, priv->baud);
+
         /* Return number of bits */
 
         switch (priv->bits)
