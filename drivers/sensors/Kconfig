@@ -11,6 +11,14 @@ menuconfig SENSORS
 
 if SENSORS
 
+config SENSORS_WTGAHRS2
+	bool "Wtgahrs2 Sensor Support"
+	default n
+	---help---
+		We can read sensor data by serial interface. It need the hardware sensor
+		wtgashrs2(JY901) as data source. This sensor can generate accelerometer,
+		gyroscope, magnetic, barometer and gps data.
+
 config SENSORS_APDS9960
 	bool "Avago APDS-9960 Gesture Sensor support"
 	default n
