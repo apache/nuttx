@@ -839,8 +839,6 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        cfsetispeed(termiosp, priv->config->baud);
-
         /* Note that since we only support 8/9 bit modes and
          * there is no way to report 9-bit mode, we always claim 8.
          */
@@ -848,6 +846,8 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
         termiosp->c_cflag = CS8;
 
         /* TODO: PARENB, PARODD, CSTOPB, CCTS_IFLOW, CCTS_OFLOW */
+
+        cfsetispeed(termiosp, priv->config->baud);
       }
       break;
 

@@ -1073,8 +1073,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        cfsetispeed(termiosp, priv->baud);
-
         if (priv->bits >= 5 && priv->bits <= 8)
           {
             ccflag |= (CS5 + (priv->bits - 5));
@@ -1099,6 +1097,8 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
          */
 
         termiosp->c_cflag = ccflag;
+
+        cfsetispeed(termiosp, priv->baud);
       }
       break;
 

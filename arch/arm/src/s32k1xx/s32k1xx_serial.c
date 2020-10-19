@@ -727,10 +727,6 @@ static int s32k1xx_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        /* Return baud */
-
-        cfsetispeed(termiosp, priv->baud);
-
         /* Return parity */
 
         termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
@@ -748,6 +744,10 @@ static int s32k1xx_ioctl(struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
         termiosp->c_cflag |= ((priv->iflow) ? CRTS_IFLOW : 0);
 #endif
+        /* Return baud */
+
+        cfsetispeed(termiosp, priv->baud);
+
         /* Return number of bits */
 
         switch (priv->bits)

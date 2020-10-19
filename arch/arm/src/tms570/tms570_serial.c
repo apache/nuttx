@@ -551,10 +551,6 @@ static int tms570_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        /* Return baud */
-
-        cfsetispeed(termiosp, priv->config.baud);
-
         /* Return parity */
 
         termiosp->c_cflag = ((priv->config.parity != 0) ? PARENB : 0) |
@@ -563,6 +559,10 @@ static int tms570_ioctl(struct file *filep, int cmd, unsigned long arg)
         /* Return stop bits */
 
         termiosp->c_cflag |= (priv->config.stopbits2) ? CSTOPB : 0;
+
+        /* Return baud */
+
+        cfsetispeed(termiosp, priv->config.baud);
 
         /* Return number of bits */
 
