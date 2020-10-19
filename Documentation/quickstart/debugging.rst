@@ -104,7 +104,7 @@ network thread. So far, `OpenOCD <http://openocd.org/>`_ is the only supported N
 
 .. note::
   OpenOCD hasn't announced a stable release for a few years but the development remains active. You'll need to use a
-  version of OpenOCD recent enough so that it includes Nuttx support as `contributed by Sony upstream
+  version of OpenOCD recent enough so that it includes NuttX support as `contributed by Sony upstream
   <http://openocd.zylin.com/#/c/4103/>`_. The version included in official OS repositories will probably be too old.
   You should build from source or use one of the unofficial, more recent builds. See `Getting OpenOCD
   <http://openocd.org/getting-openocd/>`_ for more details.
