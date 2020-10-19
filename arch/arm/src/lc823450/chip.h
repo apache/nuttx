@@ -56,18 +56,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef __ASSEMBLY__
-
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-  .globl  g_instack_alloc
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
-
-#endif /* __ASSEMBLY__ */
-
-/****************************************************************************
  * Macro Definitions
  ****************************************************************************/
 
@@ -84,77 +72,12 @@
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
   .macro  setintstack, tmp1, tmp2
-#if CONFIG_SMP_NCPUS > 1
-  ldr	 \tmp1, =CORE_COREID
-  ldr  \tmp1, [\tmp1, 0]     /* \tmp = getreg32(coreid_reg) */
-  and  \tmp1, \tmp1, 1       /* \tmp = COREID */
-  cmp  \tmp1, #0
-  bne  1f
-  ldr  \tmp1, =g_cpu0_instack_base
-  ldr  sp, [\tmp1, 0]        /* sp = getreg32(g_cpu0_instack_base) */
-  b    2f
-1:
-  ldr  \tmp1, =g_cpu1_instack_base
-  ldr  sp, [\tmp1, 0]        /* sp = getreg32(g_cpu1_instack_base) */
-2:
-#else
-  ldr  \tmp1, =g_cpu0_instack_base
-  ldr  sp, [\tmp1, 0]        /* sp = getreg32(g_cpu0_instack_base) */
-#endif
+  ldr \tmp1, =CORE_COREID
+  ldr \tmp1, [\tmp1, 0]          /* tmp1 = getreg32(CORE_COREID)  */
+  ldr \tmp2, =g_cpu_intstack_top
+  ldr sp, [\tmp2, \tmp1, lsl #2] /* sp = g_cpu_intstack_top[tmp1] */
   .endm
 #endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
 #endif /* __ASSEMBLY__  */
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Name: arm_intstack_base
- *
- * Description:
- *   Set the current stack pointer to the "base" the correct interrupt stack
- *   allocation for the current CPU.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-static inline uintptr_t arm_intstack_base(void)
-{
-  uintptr_t base = (uintptr_t)g_instack_alloc;
-#if CONFIG_SMP_NCPUS > 1
-  uint32_t coreid = getreg32(CORE_COREID);
-
-  if ((coreid & CORE_COREID_ID) != 0)
-    {
-      base += INTSTACK_SIZE;
-    }
-#endif
-
-  return base;
-}
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#if defined(__cplusplus)
-}
-#endif
-#undef EXTERN
-
-#endif /* !__ASSEMBLY__ */
-
 #endif /* _ARCH_ARM_SRC_LC823450_CHIP_H */
