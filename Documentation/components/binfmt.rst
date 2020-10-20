@@ -1,3 +1,5 @@
+.. _binfmt:
+
 =============
 Binary Loader
 =============
@@ -26,8 +28,8 @@ At present, the following binary formats are support by NuttX:
 
   - **ELF**. Standard ELF formatted files.
   - **NXFLAT**. NuttX NXFLAT formatted files. More information about the
-    NXFLAT binary format can be found in the `NXFLAT
-    documentation <NuttXNxFlat.html>`__.
+    NXFLAT binary format can be found in the :ref:`NXFLAT
+    documentation <nxflat>`.
 
 **Executables and Libraries** The generic binary loader logic does not
 care what it is that it being loaded. It could load an executable

@@ -23,7 +23,7 @@ a pre-existing configuration. To list all supported configurations you can do:
 The output is in the format ``<board name>:<board configuration>``. You will see that
 generally all boards support the ``nsh`` configuration which is a good sarting point
 since it enables booting into the interactive command line
-:doc:`/components/nsh/index`.
+:doc:`/applications/nsh/index`.
 
 To choose a configuration you pass the ``<board name>:<board configuration>`` option
 to ``configure.sh`` and indicate your host platform, such as:

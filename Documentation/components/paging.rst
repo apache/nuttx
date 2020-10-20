@@ -1,3 +1,5 @@
+.. _ondemandpaging:
+
 ================
 On-Demand Paging
 ================

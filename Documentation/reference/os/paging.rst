@@ -9,5 +9,5 @@ NuttX can provide on-demand paging: It can copy .text from the
 large program in non-volatile media into RAM as needed to execute
 a huge program from the small RAM. Design and porting issues for
 this feature are discussed in a separate document. Please see the
-`NuttX Demand Paging <NuttXDemandPaging.html>`__ design document
+:ref:`NuttX Demand Paging <ondemandpaging>` design document
 for further information.
