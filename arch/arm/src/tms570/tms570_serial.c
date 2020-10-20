@@ -282,7 +282,9 @@ static inline void tms570_serialout(struct tms570_dev_s *priv, int offset,
 static inline void tms570_restoresciint(struct tms570_dev_s *priv,
                                         uint32_t ints)
 {
-  /* Restore the previous interrupt state (assuming all interrupts disabled) */
+  /* Restore the previous interrupt state (assuming all interrupts
+   * disabled)
+   */
 
   tms570_serialout(priv, TMS570_SCI_SETINT_OFFSET, ints);
 }
@@ -364,9 +366,10 @@ static void tms570_shutdown(struct uart_dev_s *dev)
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -395,8 +398,8 @@ static int tms570_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach SCI interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -435,7 +438,8 @@ static int tms570_interrupt(int irq, void *context, FAR void *arg)
        * INVECT0 register clears the corresponding INTFLAG.
        */
 
-      intvec = tms570_serialin(priv, TMS570_SCI_INTVECT0_OFFSET) & SCI_INTVECT_MASK;
+      intvec = tms570_serialin(priv, TMS570_SCI_INTVECT0_OFFSET) & \
+               SCI_INTVECT_MASK;
 
       /* Handle the pending interrupt */
 
@@ -445,6 +449,7 @@ static int tms570_interrupt(int irq, void *context, FAR void *arg)
             return OK;
 
           case SCI_INTVECT_WAKEUP:  /* Wake-up interrupt */
+
             /* SCI sets the WAKEUP flag if bus activity on the RX line
              * either prevents power-down mode from being entered, or RX
              * line activity causes an exit from power-down mode. If
@@ -480,7 +485,9 @@ static int tms570_interrupt(int irq, void *context, FAR void *arg)
 
           case SCI_INTVECT_TX:      /* Tranmit interrupt */
             {
-              /* Transmit data register available ... process outgoing bytes */
+              /* Transmit data register available ...
+               * process outgoing bytes
+               */
 
               uart_xmitchars(dev);
             }
@@ -728,8 +735,8 @@ static void tms570_rxint(struct uart_dev_s *dev, bool enable)
 
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when their is anything in the Rx data register
+       * (or an RX timeout occurs).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -753,7 +760,8 @@ static void tms570_rxint(struct uart_dev_s *dev, bool enable)
 static bool tms570_rxavailable(struct uart_dev_s *dev)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
-  return ((tms570_serialin(priv, TMS570_SCI_FLR_OFFSET) & SCI_FLR_RXRDY) != 0);
+  return ((tms570_serialin(priv, TMS570_SCI_FLR_OFFSET) & \
+          SCI_FLR_RXRDY) != 0);
 }
 
 /****************************************************************************
@@ -821,7 +829,8 @@ static void tms570_txint(struct uart_dev_s *dev, bool enable)
 static bool tms570_txready(struct uart_dev_s *dev)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
-  return ((tms570_serialin(priv, TMS570_SCI_FLR_OFFSET) & SCI_FLR_TXRDY) != 0);
+  return ((tms570_serialin(priv, TMS570_SCI_FLR_OFFSET) & \
+          SCI_FLR_TXRDY) != 0);
 }
 
 /****************************************************************************
@@ -835,7 +844,8 @@ static bool tms570_txready(struct uart_dev_s *dev)
 static bool tms570_txempty(struct uart_dev_s *dev)
 {
   struct tms570_dev_s *priv = (struct tms570_dev_s *)dev->priv;
-  return ((tms570_serialin(priv, TMS570_SCI_FLR_OFFSET) & SCI_FLR_TXEMPTY) != 0);
+  return ((tms570_serialin(priv, TMS570_SCI_FLR_OFFSET) & \
+          SCI_FLR_TXEMPTY) != 0);
 }
 
 /****************************************************************************

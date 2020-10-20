@@ -321,29 +321,29 @@
 
 struct imxrt_uart_s
 {
-  uint32_t uartbase;    /* Base address of UART registers */
-  uint32_t baud;        /* Configured baud */
-  uint32_t ie;          /* Saved enabled interrupts */
-  uint8_t  irq;         /* IRQ associated with this UART */
-  uint8_t  parity;      /* 0=none, 1=odd, 2=even */
-  uint8_t  bits;        /* Number of bits (7 or 8) */
+  uint32_t uartbase;        /* Base address of UART registers */
+  uint32_t baud;            /* Configured baud */
+  uint32_t ie;              /* Saved enabled interrupts */
+  uint8_t  irq;             /* IRQ associated with this UART */
+  uint8_t  parity;          /* 0=none, 1=odd, 2=even */
+  uint8_t  bits;            /* Number of bits (7 or 8) */
 #if defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)
-  uint8_t  inviflow:1;  /* Invert RTS sense */
+  uint8_t  inviflow:1;      /* Invert RTS sense */
   const uint32_t rts_gpio;  /* U[S]ART RTS GPIO pin configuration */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   const uint32_t cts_gpio;  /* U[S]ART CTS GPIO pin configuration */
 #endif
 
-  uint8_t  stopbits2:1; /* 1: Configure with 2 stop bits vs 1 */
+  uint8_t  stopbits2:1;     /* 1: Configure with 2 stop bits vs 1 */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  uint8_t  iflow:1;     /* input flow control (RTS) enabled */
+  uint8_t  iflow:1;         /* input flow control (RTS) enabled */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  uint8_t  oflow:1;     /* output flow control (CTS) enabled */
+  uint8_t  oflow:1;         /* output flow control (CTS) enabled */
 #endif
 #ifdef CONFIG_SERIAL_RS485CONTROL
-  uint8_t rs485mode:1;  /* We are in RS485 (RTS on TX) mode */
+  uint8_t rs485mode:1;      /* We are in RS485 (RTS on TX) mode */
 #endif
 };
 
@@ -855,8 +855,8 @@ static inline uint32_t imxrt_serialin(struct imxrt_uart_s *priv,
  * Name: imxrt_serialout
  ****************************************************************************/
 
-static inline void imxrt_serialout(struct imxrt_uart_s *priv, uint32_t offset,
-                                   uint32_t value)
+static inline void imxrt_serialout(struct imxrt_uart_s *priv,
+                                   uint32_t offset, uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -949,11 +949,13 @@ static int imxrt_setup(struct uart_dev_s *dev)
 
   ret = imxrt_lpuart_configure(priv->uartbase, &config);
 
-  priv->ie = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) & LPUART_ALL_INTS;
+  priv->ie = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) & \
+             LPUART_ALL_INTS;
   return ret;
 
 #else
-  priv->ie = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) & LPUART_ALL_INTS;
+  priv->ie = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET) & \
+             LPUART_ALL_INTS;
   return OK;
 #endif
 }
@@ -1327,7 +1329,9 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
         stat   = imxrt_serialin(priv, IMXRT_LPUART_STAT_OFFSET);
         regval = ctrl;
 
-        /* {R|T}XINV bit field can only be written when the receiver is disabled (RE=0). */
+        /* {R|T}XINV bit field can only be written when the receiver
+         * is disabled (RE=0).
+         */
 
         regval &= ~LPUART_CTRL_RE;
 
