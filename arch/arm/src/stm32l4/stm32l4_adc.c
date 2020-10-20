@@ -1368,7 +1368,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   adc_putreg(priv, STM32L4_ADC_SMPR1_OFFSET, ADC_SMPR1_DEFAULT);
   adc_putreg(priv, STM32L4_ADC_SMPR2_OFFSET, ADC_SMPR2_DEFAULT);
 
-  #ifdef HAVE_ADC_RESOLUTION
+#ifdef HAVE_ADC_RESOLUTION
   /* Set the resolution of the conversion. */
 
   adc_resolution_set(dev, priv->resolution);
