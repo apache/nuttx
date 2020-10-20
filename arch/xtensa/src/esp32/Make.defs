@@ -158,6 +158,10 @@ CHIP_CSRCS += esp32_modtext.c
 CMN_ASRCS += xtensa_loadstore.S
 endif
 
+ifeq ($(CONFIG_ESP32_RT_TIMER),y)
+CHIP_CSRCS += esp32_rt_timer.c
+endif
+
 ifeq ($(CONFIG_ESP32_WIRELESS),y)
 WIRELESS_DRV_UNPACK  = esp-wireless-drivers-3rdparty
 WIRELESS_DRV_ID      = 5cb6561

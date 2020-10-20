@@ -51,6 +51,7 @@
 #include "hardware/esp32_emac.h"
 #include "esp32_cpuint.h"
 #include "esp32_wifi_adapter.h"
+#include "esp32_rt_timer.h"
 
 #include "espidf_wifi.h"
 
@@ -67,6 +68,8 @@
 #endif
 
 #define WIFI_CONNECT_TIMEOUT  CONFIG_ESP32_WIFI_CONNECT_TIMEOUT
+
+#define TIMER_INITIALIZED_VAL (0x5aa5a55a)
 
 /****************************************************************************
  * Private Types
@@ -209,7 +212,6 @@ static void esp_timer_arm(void *timer, uint32_t tmout, bool repeat);
 static void esp_timer_disarm(void *timer);
 static void esp32_timer_done(void *timer);
 static void esp_timer_setfn(void *timer, void *pfunction, void *parg);
-static void esp_timer_cb(wdparm_t parm);
 static void esp_timer_arm_us(void *timer, uint32_t us, bool repeat);
 static void esp_periph_module_enable(uint32_t periph);
 static void esp_periph_module_disable(uint32_t periph);
@@ -2333,15 +2335,12 @@ static void esp_timer_arm(void *ptimer, uint32_t ms, bool repeat)
 
 static void esp_timer_disarm(void *ptimer)
 {
-  struct timer_adpt *timer_adpt;
   struct ets_timer *ets_timer = (struct ets_timer *)ptimer;
+  esp_timer_handle_t esp_timer = (esp_timer_handle_t)ets_timer->priv;
 
-  if (ets_timer->priv)
+  if (ets_timer->expire == TIMER_INITIALIZED_VAL)
     {
-      timer_adpt = (struct timer_adpt *)ets_timer->priv;
-
-      wd_cancel(&timer_adpt->wdog);
-      work_cancel(LPWORK, &timer_adpt->work);
+      esp_timer_stop(esp_timer);
     }
 }
 
@@ -2361,18 +2360,13 @@ static void esp_timer_disarm(void *ptimer)
 
 static void esp32_timer_done(void *ptimer)
 {
-  struct timer_adpt *timer_adpt;
   struct ets_timer *ets_timer = (struct ets_timer *)ptimer;
+  esp_timer_handle_t esp_timer = (esp_timer_handle_t)ets_timer->priv;
 
-  if (ets_timer->priv)
+  if (ets_timer->expire == TIMER_INITIALIZED_VAL)
     {
-      timer_adpt = (struct timer_adpt *)ets_timer->priv;
-
-      wd_cancel(&timer_adpt->wdog);
-      work_cancel(LPWORK, &timer_adpt->work);
-
-      kmm_free(timer_adpt);
-
+      ets_timer->expire = 0;
+      esp_timer_delete(esp_timer);
       ets_timer->priv = NULL;
     }
 }
@@ -2395,79 +2389,36 @@ static void esp32_timer_done(void *ptimer)
 
 static void esp_timer_setfn(void *ptimer, void *pfunction, void *parg)
 {
-  struct timer_adpt *timer_adpt;
+  int ret;
+  esp_timer_handle_t esp_timer;
   struct ets_timer *ets_timer = (struct ets_timer *)ptimer;
 
-  if (ets_timer->priv)
+  if (ets_timer->expire != TIMER_INITIALIZED_VAL)
     {
-      return ;
+      ets_timer->priv = NULL;
     }
 
-  timer_adpt = kmm_zalloc(sizeof(struct timer_adpt));
-  if (!timer_adpt)
+  if (ets_timer->priv == NULL)
     {
-      wlerr("ERROR: Failed to malloc\n");
-      return ;
+      const esp_timer_create_args_t create_args =
+        {
+          .callback = pfunction,
+          .arg = parg,
+          .name = "ETSTimer",
+          .dispatch_method = ESP_TIMER_TASK
+        };
+
+      ret = esp_timer_create(&create_args, &esp_timer);
+      if (ret)
+        {
+          wlerr("ERROR: Failed to create ets_timer error=%d\n", ret);
+        }
+      else
+        {
+          ets_timer->priv = esp_timer;
+          ets_timer->expire = TIMER_INITIALIZED_VAL;
+        }
     }
-
-  timer_adpt->func = pfunction;
-  timer_adpt->priv = parg;
-
-  ets_timer->priv = timer_adpt;
-}
-
-/****************************************************************************
- * Name: esp_timer_work_cb
- *
- * Description:
- *   Process timer callback function in workqueue and active
- *   it if it has repeat flag
- *
- * Input Parameters:
- *   arg - Timer data pointer
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void esp_timer_work_cb(FAR void *arg)
-{
-  struct ets_timer *ets_timer = (struct ets_timer *)arg;
-  struct timer_adpt *timer_adpt =
-            (struct timer_adpt *)ets_timer->priv;
-
-  timer_adpt->func(timer_adpt->priv);
-  if (timer_adpt->repeat)
-    {
-      wd_start(&timer_adpt->wdog, timer_adpt->delay,
-               esp_timer_cb, (wdparm_t)ets_timer);
-    }
-}
-
-/****************************************************************************
- * Name: esp_timer_cb
- *
- * Description:
- *   Post event to work queue and let work queue to process the timer's
- *   real callback function
- *
- * Input Parameters:
- *   parm - Timer data pointer
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void esp_timer_cb(wdparm_t parm)
-{
-  struct ets_timer *ets_timer = (struct ets_timer *)parm;
-  struct timer_adpt *timer_adpt =
-            (struct timer_adpt *)ets_timer->priv;
-
-  work_queue(LPWORK, &timer_adpt->work,
-             esp_timer_work_cb, ets_timer, 0);
 }
 
 /****************************************************************************
@@ -2488,23 +2439,28 @@ static void esp_timer_cb(wdparm_t parm)
 
 static void esp_timer_arm_us(void *ptimer, uint32_t us, bool repeat)
 {
-  uint32_t delay;
-  struct timer_adpt *timer_adpt;
+  int ret;
   struct ets_timer *ets_timer = (struct ets_timer *)ptimer;
+  esp_timer_handle_t esp_timer = (esp_timer_handle_t)ets_timer->priv;
 
-  if (ets_timer->priv)
+  if (ets_timer->expire == TIMER_INITIALIZED_VAL)
     {
-      timer_adpt = (struct timer_adpt *)ets_timer->priv;
+      esp_timer_stop(esp_timer);
+      if (!repeat)
+        {
+          ret = esp_timer_start_once(esp_timer, us);
+        }
+      else
+        {
+          ret = esp_timer_start_periodic(esp_timer, us);
+        }
 
-      wd_cancel(&timer_adpt->wdog);
-      work_cancel(LPWORK, &timer_adpt->work);
-
-      delay = USEC2TICK(us);
-      timer_adpt->repeat = (uint32_t)repeat;
-      timer_adpt->delay = delay;
-
-      wd_start(&timer_adpt->wdog, delay,
-               esp_timer_cb, (wdparm_t)ets_timer);
+      if (ret)
+        {
+          wlerr("ERROR: Fail to start %s timer error%d\n",
+                repeat ? "periodic" : "once",
+                ret);
+        }
     }
 }
 
@@ -3861,23 +3817,21 @@ int net80211_printf(const char *format, ...)
 int32_t esp_timer_create(const esp_timer_create_args_t *create_args,
                          esp_timer_handle_t *out_handle)
 {
-  struct ets_timer *ets_timer;
+  int ret;
+  struct rt_timer_args_s rt_timer_args;
+  struct rt_timer_s *rt_timer;
 
-  ets_timer = kmm_zalloc(sizeof(struct ets_timer));
-  if (!ets_timer)
+  rt_timer_args.arg = create_args->arg;
+  rt_timer_args.callback = create_args->callback;
+
+  ret = rt_timer_create(&rt_timer_args, &rt_timer);
+  if (ret)
     {
-      wlerr("ERROR: Failed to malloc\n");
-      return -1;
+      wlerr("ERROR: Failed to create rt_timer error=%d\n", ret);
+      return ret;
     }
 
-  esp_timer_setfn(ets_timer, create_args->callback, create_args->arg);
-  if (!ets_timer->priv)
-    {
-      wlerr("ERROR: Failed to set timer func\n");
-      return -1;
-    }
-
-  *out_handle = (esp_timer_handle_t)ets_timer;
+  *out_handle = (esp_timer_handle_t)rt_timer;
 
   return 0;
 }
@@ -3899,9 +3853,11 @@ int32_t esp_timer_create(const esp_timer_create_args_t *create_args,
 
 int32_t esp_timer_start_once(esp_timer_handle_t timer, uint64_t timeout_us)
 {
-  struct ets_timer *ets_timer = (struct ets_timer *)timer;
+  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
 
-  esp_timer_arm_us(ets_timer, timeout_us, false);
+  DEBUGASSERT(timeout_us <= UINT32_MAX);
+
+  rt_timer_start(rt_timer, timeout_us, false);
 
   return 0;
 }
@@ -3923,9 +3879,11 @@ int32_t esp_timer_start_once(esp_timer_handle_t timer, uint64_t timeout_us)
 
 int32_t esp_timer_start_periodic(esp_timer_handle_t timer, uint64_t period)
 {
-  struct ets_timer *ets_timer = (struct ets_timer *)timer;
+  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
 
-  esp_timer_arm_us(ets_timer, period, true);
+  DEBUGASSERT(period <= UINT32_MAX);
+
+  rt_timer_start(rt_timer, period, true);
 
   return 0;
 }
@@ -3946,9 +3904,9 @@ int32_t esp_timer_start_periodic(esp_timer_handle_t timer, uint64_t period)
 
 int32_t esp_timer_stop(esp_timer_handle_t timer)
 {
-  struct ets_timer *ets_timer = (struct ets_timer *)timer;
+  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
 
-  esp_timer_disarm(ets_timer);
+  rt_timer_stop(rt_timer);
 
   return 0;
 }
@@ -3969,10 +3927,9 @@ int32_t esp_timer_stop(esp_timer_handle_t timer)
 
 int32_t esp_timer_delete(esp_timer_handle_t timer)
 {
-  struct ets_timer *ets_timer = (struct ets_timer *)timer;
+  struct rt_timer_s *rt_timer = (struct rt_timer_s *)timer;
 
-  esp32_timer_done(ets_timer);
-  kmm_free(ets_timer);
+  rt_timer_delete(rt_timer);
 
   return 0;
 }
@@ -4288,20 +4245,20 @@ int esp_wifi_adapter_init(void)
   init_cfg.nvs_enable = 0;
 #endif
 
+  ret = esp32_rt_timer_init();
+  if (ret < 0)
+    {
+      wlerr("ERROR: Failed to initialize RT timer error=%d\n", ret);
+      sem_destroy(&s_connect_sem);
+      return -1;
+    }
+
   ret = esp_wifi_init(&init_cfg);
   if (ret)
     {
       wlerr("ERROR: Failed to initialize WiFi error=%d\n", ret);
       sem_destroy(&s_connect_sem);
-      return -1;
-    }
-
-  ret = esp_wifi_set_ps(WIFI_PS_NONE);
-  if (ret)
-    {
-      wlerr("ERROR: Failed to close power save, error=%d\n", ret);
-      esp_wifi_deinit();
-      sem_destroy(&s_connect_sem);
+      esp32_rt_timer_deinit();
       return -1;
     }
 

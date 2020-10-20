@@ -834,7 +834,9 @@ static int esp32_tim_ackint(FAR struct esp32_tim_dev_s *dev)
  * Name: esp32_tim_init
  *
  * Description:
- *   Initialize TIMER device
+ *   Initialize TIMER device, if software real-time timer
+ *   (CONFIG_ESP32_RT_TIMER) is enable, then timer0 can't
+ *   be initialized by this function directly.
  *
  ****************************************************************************/
 
@@ -846,7 +848,7 @@ FAR struct esp32_tim_dev_s *esp32_tim_init(int timer)
 
   switch (timer)
     {
-#ifdef CONFIG_ESP32_TIMER0
+#if defined(CONFIG_ESP32_TIMER0) && !defined(CONFIG_ESP32_RT_TIMER)
       case 0:
         {
           tim = &g_esp32_tim0_priv;
@@ -915,3 +917,29 @@ int esp32_tim_deinit(FAR struct esp32_tim_dev_s *dev)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: esp32_tim0_init
+ *
+ * Description:
+ *   Initialize TIMER0 device, this function is only used by software
+ *   real-time timer(esp32_rt_timer.c).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_RT_TIMER
+
+FAR struct esp32_tim_dev_s *esp32_tim0_init(void)
+{
+  FAR struct esp32_tim_priv_s *tim = &g_esp32_tim0_priv;
+
+  if (tim->inuse == true)
+    {
+      tmrerr("ERROR: TIMER %d is already in use\n", timer);
+      tim = NULL;
+    }
+
+  return (FAR struct esp32_tim_dev_s *)tim;
+}
+
+#endif /* CONFIG_ESP32_RT_TIMER */
