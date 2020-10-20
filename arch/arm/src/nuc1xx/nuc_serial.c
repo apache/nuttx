@@ -160,7 +160,7 @@ static struct nuc_dev_s g_uart0priv =
   .irq            = NUC_IRQ_UART0,
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
-  .depth          = (UART0_FIFO_DEPTH-1),
+  .depth          = (UART0_FIFO_DEPTH - 1),
   .stopbits2      = CONFIG_UART0_2STOP,
 };
 
@@ -191,24 +191,24 @@ static struct nuc_dev_s g_uart1priv =
   .irq            = NUC_IRQ_UART1,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
-  .depth          = (UART1_FIFO_DEPTH-1),
+  .depth          = (UART1_FIFO_DEPTH - 1),
   .stopbits2      = CONFIG_UART1_2STOP,
 };
 
 static uart_dev_t g_uart1port =
 {
-  .recv     =
-  {
-    .size   = CONFIG_UART1_RXBUFSIZE,
-    .buffer = g_uart1rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART1_TXBUFSIZE,
-    .buffer = g_uart1txbuffer,
-  },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart1priv,
+  .recv       =
+    {
+      .size   = CONFIG_UART1_RXBUFSIZE,
+      .buffer = g_uart1rxbuffer,
+    },
+  .xmit       =
+    {
+      .size   = CONFIG_UART1_TXBUFSIZE,
+      .buffer = g_uart1txbuffer,
+    },
+  .ops        = &g_uart_ops,
+  .priv       = &g_uart1priv,
 };
 #endif /* CONFIG_NUC_UART1 */
 
@@ -222,24 +222,24 @@ static struct nuc_dev_s g_uart2priv =
   .irq            = NUC_IRQ_UART2,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
-  .depth          = (UART2_FIFO_DEPTH-1),
+  .depth          = (UART2_FIFO_DEPTH - 1),
   .stopbits2      = CONFIG_UART2_2STOP,
 };
 
 static uart_dev_t g_uart2port =
 {
-  .recv     =
-  {
-    .size   = CONFIG_UART2_RXBUFSIZE,
-    .buffer = g_uart2rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART2_TXBUFSIZE,
-    .buffer = g_uart2txbuffer,
-  },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart2priv,
+  .recv       =
+    {
+      .size   = CONFIG_UART2_RXBUFSIZE,
+      .buffer = g_uart2rxbuffer,
+    },
+  .xmit       =
+    {
+      .size   = CONFIG_UART2_TXBUFSIZE,
+      .buffer = g_uart2txbuffer,
+    },
+  .ops        = &g_uart_ops,
+  .priv       = &g_uart2priv,
 };
 #endif /* CONFIG_NUC_UART2 */
 
@@ -276,7 +276,9 @@ static uart_dev_t g_uart2port =
 #  endif
 #endif
 
-/* Pick ttys1.  This could be any two of UART0-2 excluding the console UART. */
+/* Pick ttys1.  This could be any two of UART0-2 excluding the console
+ * UART.
+ */
 
 #if defined(CONFIG_NUC_UART0) && !defined(UART0_ASSIGNED)
 #  define TTYS1_DEV           g_uart0port /* UART0 is ttyS1 */
@@ -319,7 +321,8 @@ static inline uint32_t up_serialin(struct nuc_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct nuc_dev_s *priv, int offset, uint32_t value)
+static inline void up_serialout(struct nuc_dev_s *priv, int offset,
+                                uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -525,6 +528,7 @@ static int up_setup(struct uart_dev_s *dev)
   priv->ier = up_serialin(priv, NUC_UART_IER_OFFSET);
 
   /* Enable Flow Control in the Modem Control Register */
+
   /* Not implemented */
 
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
@@ -549,14 +553,15 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
+ *   the setup() method is called, however, the serial console may operate
+ *   in a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -585,8 +590,8 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -632,11 +637,12 @@ static int up_interrupt(int irq, void *context,  void *arg)
 
        isr = up_serialin(priv, NUC_UART_ISR_OFFSET);
 
-      /* Check if the RX FIFO is empty.  Check if an RX timeout occur.  These affect
-       * some later decisions.
+      /* Check if the RX FIFO is empty.  Check if an RX timeout occur.
+       * These affect some later decisions.
        */
 
-      rxfe = ((up_serialin(priv, NUC_UART_FSR_OFFSET) & UART_FSR_RX_EMPTY) != 0);
+      rxfe = ((up_serialin(priv, NUC_UART_FSR_OFFSET) & \
+              UART_FSR_RX_EMPTY) != 0);
       rxto = ((isr & UART_ISR_TOUT_INT) != 0);
 
       /* Check if the RX FIFO is filled to the threshold value OR if the RX
@@ -676,7 +682,8 @@ static int up_interrupt(int irq, void *context,  void *arg)
        * data in the RX FIFO when we entered the interrupt handler?
        */
 
-      else if ((priv->ier & (UART_IER_RTO_IEN | UART_IER_RDA_IEN)) == UART_IER_RDA_IEN && !rxfe)
+      else if ((priv->ier & (UART_IER_RTO_IEN | UART_IER_RDA_IEN)) == \
+               UART_IER_RDA_IEN && !rxfe)
         {
           /* We are receiving data and the RX timeout is not enabled.
            * Set the RX FIFO threshold so that RX interrupts will only be
@@ -700,7 +707,9 @@ static int up_interrupt(int irq, void *context,  void *arg)
 
       if ((isr & UART_ISR_MODEM_INT) != 0)
         {
-          /* Cleared by setting the DCTSF bit in the modem control register (MCR) */
+          /* Cleared by setting the DCTSF bit in the modem control register
+           * (MCR)
+           */
 
          regval = up_serialin(priv, NUC_UART_MCR_OFFSET);
          up_serialout(priv, NUC_UART_MCR_OFFSET, regval | UART_MSR_DCTSF);

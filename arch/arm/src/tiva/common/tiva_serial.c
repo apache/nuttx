@@ -435,18 +435,18 @@ static struct up_dev_s g_uart1priv =
 
 static uart_dev_t g_uart1port =
 {
-  .recv     =
-  {
-    .size   = CONFIG_UART1_RXBUFSIZE,
-    .buffer = g_uart1rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART1_TXBUFSIZE,
-    .buffer = g_uart1txbuffer,
-   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart1priv,
+  .recv       =
+    {
+      .size   = CONFIG_UART1_RXBUFSIZE,
+      .buffer = g_uart1rxbuffer,
+    },
+  .xmit       =
+    {
+      .size   = CONFIG_UART1_TXBUFSIZE,
+      .buffer = g_uart1txbuffer,
+    },
+  .ops        = &g_uart_ops,
+  .priv       = &g_uart1priv,
 };
 #endif
 
@@ -465,18 +465,18 @@ static struct up_dev_s g_uart2priv =
 
 static uart_dev_t g_uart2port =
 {
-  .recv     =
-  {
-    .size   = CONFIG_UART2_RXBUFSIZE,
-    .buffer = g_uart2rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART2_TXBUFSIZE,
-    .buffer = g_uart2txbuffer,
-   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart2priv,
+  .recv       =
+    {
+      .size   = CONFIG_UART2_RXBUFSIZE,
+      .buffer = g_uart2rxbuffer,
+    },
+  .xmit       =
+    {
+      .size   = CONFIG_UART2_TXBUFSIZE,
+      .buffer = g_uart2txbuffer,
+    },
+  .ops        = &g_uart_ops,
+  .priv       = &g_uart2priv,
 };
 #endif
 
@@ -495,18 +495,18 @@ static struct up_dev_s g_uart3priv =
 
 static uart_dev_t g_uart3port =
 {
-  .recv     =
-  {
-    .size   = CONFIG_UART3_RXBUFSIZE,
-    .buffer = g_uart3rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART3_TXBUFSIZE,
-    .buffer = g_uart3txbuffer,
-  },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart3priv,
+  .recv       =
+    {
+      .size   = CONFIG_UART3_RXBUFSIZE,
+      .buffer = g_uart3rxbuffer,
+    },
+  .xmit       =
+    {
+      .size   = CONFIG_UART3_TXBUFSIZE,
+      .buffer = g_uart3txbuffer,
+    },
+  .ops        = &g_uart_ops,
+  .priv       = &g_uart3priv,
 };
 #endif
 
@@ -555,18 +555,18 @@ static struct up_dev_s g_uart5priv =
 
 static uart_dev_t g_uart5port =
 {
-  .recv     =
-  {
-    .size   = CONFIG_UART5_RXBUFSIZE,
-    .buffer = g_uart5rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART5_TXBUFSIZE,
-    .buffer = g_uart5txbuffer,
-  },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart5priv,
+  .recv       =
+    {
+      .size   = CONFIG_UART5_RXBUFSIZE,
+      .buffer = g_uart5rxbuffer,
+    },
+  .xmit       =
+    {
+      .size   = CONFIG_UART5_TXBUFSIZE,
+      .buffer = g_uart5txbuffer,
+    },
+  .ops        = &g_uart_ops,
+  .priv       = &g_uart5priv,
 };
 #endif
 
@@ -585,18 +585,18 @@ static struct up_dev_s g_uart6priv =
 
 static uart_dev_t g_uart6port =
 {
-  .recv     =
-  {
-    .size   = CONFIG_UART6_RXBUFSIZE,
-    .buffer = g_uart6rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART6_TXBUFSIZE,
-    .buffer = g_uart6txbuffer,
-  },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart6priv,
+  .recv       =
+    {
+      .size   = CONFIG_UART6_RXBUFSIZE,
+      .buffer = g_uart6rxbuffer,
+    },
+  .xmit       =
+    {
+      .size   = CONFIG_UART6_TXBUFSIZE,
+      .buffer = g_uart6txbuffer,
+    },
+  .ops        = &g_uart_ops,
+  .priv       = &g_uart6priv,
 };
 #endif
 
@@ -615,18 +615,18 @@ static struct up_dev_s g_uart7priv =
 
 static uart_dev_t g_uart7port =
 {
-  .recv     =
-  {
-    .size   = CONFIG_UART7_RXBUFSIZE,
-    .buffer = g_uart7rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_UART7_TXBUFSIZE,
-    .buffer = g_uart7txbuffer,
-  },
-  .ops      = &g_uart_ops,
-  .priv     = &g_uart7priv,
+  .recv       =
+    {
+      .size   = CONFIG_UART7_RXBUFSIZE,
+      .buffer = g_uart7rxbuffer,
+    },
+  .xmit       =
+    {
+      .size   = CONFIG_UART7_TXBUFSIZE,
+      .buffer = g_uart7txbuffer,
+    },
+  .ops        = &g_uart_ops,
+  .priv       = &g_uart7priv,
 };
 #endif
 
@@ -647,7 +647,8 @@ static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -749,36 +750,37 @@ static void up_set_format(struct uart_dev_s *dev)
    * "The baud-rate divisor is a 22-bit number consisting of a 16-bit integer
    *  and a 6-bit fractional part. The number formed by these two values is
    *  used by the baud-rate generator to determine the bit period. Having a
-   *  fractional baud-rate divider allows the UART to generate all the standard
-   *  baud rates.
+   *  fractional baud-rate divider allows the UART to generate all the
+   *  standard baud rates.
    *
    * "The 16-bit integer is loaded through the UART Integer Baud-Rate Divisor
-   *  (UARTIBRD) register ... and the 6-bit fractional part is loaded with the
-   *  UART Fractional Baud-Rate Divisor (UARTFBRD) register... The baud-rate
-   *  divisor (BRD) has the following relationship to the system clock (where
-   *  BRDI is the integer part of the BRD and BRDF is the fractional part,
-   *  separated by a decimal place.):
+   *  (UARTIBRD) register ... and the 6-bit fractional part is loaded with
+   *  the UART Fractional Baud-Rate Divisor (UARTFBRD) register... The
+   *  baud-rate divisor (BRD) has the following relationship to the system
+   *  clock (where BRDI is the integer part of the BRD and BRDF is the
+   *  fractional part, separated by a decimal place.):
    *
    *    "BRD = BRDI + BRDF = UARTSysClk / (16 * Baud Rate)
    *
    * "where UARTSysClk is the system clock connected to the UART. The 6-bit
-   *  fractional number (that is to be loaded into the DIVFRAC bit field in the
-   *  UARTFBRD register) can be calculated by taking the fractional part of the
-   *  baud-rate divisor, multiplying it by 64, and adding 0.5 to account for
-   *  rounding errors:
+   *  fractional number (that is to be loaded into the DIVFRAC bit field in
+   *  the UARTFBRD register) can be calculated by taking the fractional part
+   *  of the baud-rate divisor, multiplying it by 64, and adding 0.5 to
+   *  account for rounding errors:
    *
    *    "UARTFBRD[DIVFRAC] = integer(BRDF * 64 + 0.5)
    *
-   * "The UART generates an internal baud-rate reference clock at 16x the baud-
-   *  rate (referred to as Baud16). This reference clock is divided by 16 to
-   *  generate the transmit clock, and is used for error detection during receive
-   *  operations.
+   * "The UART generates an internal baud-rate reference clock at 16x the
+   *  baud-rate (referred to as Baud16). This reference clock is divided by
+   *  16 to generate the transmit clock, and is used for error detection
+   *  during receive operations.
    *
-   * "Along with the UART Line Control, High Byte (UARTLCRH) register ..., the
-   *  UARTIBRD and UARTFBRD registers form an internal 30-bit register. This
-   *  internal register is only updated when a write operation to UARTLCRH is
-   *  performed, so any changes to the baud-rate divisor must be followed by a
-   *  write to the UARTLCRH register for the changes to take effect. ..."
+   * "Along with the UART Line Control, High Byte (UARTLCRH) register ...,
+   *  the UARTIBRD and UARTFBRD registers form an internal 30-bit register.
+   *  This internal register is only updated when a write operation to
+   *  UARTLCRH is performed, so any changes to the baud-rate divisor must be
+   *  followed by a write to the UARTLCRH register for the changes to take
+   *  effect. ..."
    */
 
   den       = priv->baud << 4;
@@ -865,14 +867,15 @@ static int up_setup(struct uart_dev_s *dev)
    */
 
   up_serialout(priv, TIVA_UART_IFLS_OFFSET,
-               UART_IFLS_TXIFLSEL_18th | UART_IFLS_RXIFLSEL_18th);
+               UART_IFLS_TXIFLSEL_18TH | UART_IFLS_RXIFLSEL_18TH);
 
   /* Flush the Rx and Tx FIFOs -- How do you do that? */
 
-  /* Enable Rx interrupts from the UART except for Tx interrupts.  We don't want
-   * Tx interrupts until we have something to send.  We will check for serial
-   * errors as part of Rx interrupt processing (no interrupts will be received
-   * yet because the interrupt is still disabled at the interrupt controller.
+  /* Enable Rx interrupts from the UART except for Tx interrupts.  We don't
+   * want TX interrupts until we have something to send.  We will check for
+   * serial errors as part of Rx interrupt processing (no interrupts will be
+   * received yet because the interrupt is still disabled at the interrupt
+   * controller.
    */
 
   up_serialout(priv, TIVA_UART_IM_OFFSET, UART_IM_RXIM | UART_IM_RTIM);
@@ -919,9 +922,10 @@ static void up_shutdown(struct uart_dev_s *dev)
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -950,8 +954,8 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -1204,6 +1208,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     {
       priv->im &= ~(UART_IM_RXIM | UART_IM_RTIM);
     }
+
   up_serialout(priv, TIVA_UART_IM_OFFSET, priv->im);
 }
 
@@ -1277,6 +1282,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       priv->im &= ~UART_IM_TXIM;
       up_serialout(priv, TIVA_UART_IM_OFFSET, priv->im);
     }
+
   leave_critical_section(flags);
 }
 

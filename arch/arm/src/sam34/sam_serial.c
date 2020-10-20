@@ -109,7 +109,9 @@
 #  define HAVE_USART
 #endif
 
-/* Hardware flow control requires using the PDC or DMAC channel for reception */
+/* Hardware flow control requires using the PDC or DMAC channel for
+ * reception
+ */
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 #  warning PDC or DMAC support is required for RTS hardware flow control
@@ -180,9 +182,13 @@
 
 #ifdef USE_SERIALDRIVER
 
-/* Which UART/USART with be tty0/console and which tty1? tty2? tty3? tty4? tty5? */
+/* Which UART/USART with be tty0/console and which tty1? tty2? tty3?
+ * tty4? tty5?
+ */
 
-/* First pick the console and ttys0.  This could be any of UART0-1, USART0-3 */
+/* First pick the console and ttys0.  This could be any of UART0-1,
+ * USART0-3
+ */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart0port  /* UART0 is console */
@@ -230,7 +236,9 @@
 #  endif
 #endif
 
-/* Pick ttys1.  This could be any of UART0-1, USART0-3 excluding the console UART. */
+/* Pick ttys1.  This could be any of UART0-1, USART0-3 excluding the
+ * console UART.
+ */
 
 #if defined(CONFIG_SAM34_UART0) && !defined(UART0_ASSIGNED)
 #  define TTYS1_DEV           g_uart0port  /* UART0 is ttyS1 */
@@ -573,18 +581,18 @@ static struct up_dev_s g_usart2priv =
 
 static uart_dev_t g_usart2port =
 {
-  .recv     =
-  {
-    .size   = CONFIG_USART2_RXBUFSIZE,
-    .buffer = g_usart2rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_USART2_TXBUFSIZE,
-    .buffer = g_usart2txbuffer,
-   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_usart2priv,
+  .recv       =
+    {
+      .size   = CONFIG_USART2_RXBUFSIZE,
+      .buffer = g_usart2rxbuffer,
+    },
+  .xmit       =
+    {
+      .size   = CONFIG_USART2_TXBUFSIZE,
+      .buffer = g_usart2txbuffer,
+    },
+  .ops        = &g_uart_ops,
+  .priv       = &g_usart2priv,
 };
 #endif
 
@@ -606,18 +614,18 @@ static struct up_dev_s g_usart3priv =
 
 static uart_dev_t g_usart3port =
 {
-  .recv     =
-  {
-    .size   = CONFIG_USART3_RXBUFSIZE,
-    .buffer = g_usart3rxbuffer,
-  },
-  .xmit     =
-  {
-    .size   = CONFIG_USART3_TXBUFSIZE,
-    .buffer = g_usart3txbuffer,
-   },
-  .ops      = &g_uart_ops,
-  .priv     = &g_usart3priv,
+  .recv       =
+    {
+      .size   = CONFIG_USART3_RXBUFSIZE,
+      .buffer = g_usart3rxbuffer,
+    },
+  .xmit       =
+    {
+      .size   = CONFIG_USART3_TXBUFSIZE,
+      .buffer = g_usart3txbuffer,
+    },
+  .ops        = &g_uart_ops,
+  .priv       = &g_usart3priv,
 };
 #endif
 
@@ -638,7 +646,8 @@ static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint32_t value)
 {
   putreg32(value, priv->usartbase + offset);
 }
@@ -713,7 +722,8 @@ static int up_setup(struct uart_dev_s *dev)
   /* "Setting the USART to operate with hardware handshaking is performed by
    *  writing the USART_MODE field in the Mode Register (US_MR) to the value
    *  0x2. ... Using this mode requires using the PDC or DMAC channel for
-   *  reception. The transmitter can handle hardware handshaking in any case."
+   *  reception. The transmitter can handle hardware handshaking in any
+   *  case."
    */
 
   if (priv->flowc)
@@ -812,7 +822,7 @@ static int up_setup(struct uart_dev_s *dev)
    * for lower USART clocks.
    */
 
-  regval  = (SAM_USART_CLOCK + (priv->baud << 3))/(priv->baud << 4);
+  regval  = (SAM_USART_CLOCK + (priv->baud << 3)) / (priv->baud << 4);
   up_serialout(priv, SAM_UART_BRGR_OFFSET, regval);
 
   /* Enable receiver & transmitter */
@@ -853,14 +863,15 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the USART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the USART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -880,6 +891,7 @@ static int up_attach(struct uart_dev_s *dev)
 
       up_enable_irq(priv->irq);
     }
+
   return ret;
 }
 
@@ -888,8 +900,8 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach USART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -933,14 +945,16 @@ static int up_interrupt(int irq, void *context, void *arg)
     {
       handled = false;
 
-      /* Get the UART/USART status (we are only interested in the unmasked interrupts). */
+      /* Get the UART/USART status (we are only interested in the unmasked
+       * interrupts).
+       */
 
       priv->sr = up_serialin(priv, SAM_UART_SR_OFFSET);  /* Save for error reporting */
       imr      = up_serialin(priv, SAM_UART_IMR_OFFSET); /* Interrupt mask */
-      pending  = priv->sr & imr;                        /* Mask out disabled interrupt sources */
+      pending  = priv->sr & imr;                         /* Mask out disabled interrupt sources */
 
-      /* Handle an incoming, receive byte.  RXRDY: At least one complete character
-       * has been received and US_RHR has not yet been read.
+      /* Handle an incoming, receive byte.  RXRDY: At least one complete
+       * character has been received and US_RHR has not yet been read.
        */
 
       if ((pending & UART_INT_RXRDY) != 0)
@@ -1206,8 +1220,8 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when their is anything in the Rx data register
+       * (or an RX timeout occurs).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS

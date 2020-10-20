@@ -172,11 +172,13 @@
 #define UART_LCRH_STP2             (1 << 3)  /* Bit 3:  UART Two Stop Bits Select */
 #define UART_LCRH_FEN              (1 << 4)  /* Bit 4:  UART Enable FIFOs */
 #define UART_LCRH_WLEN_SHIFT       5         /* Bits 6-5: UART Word Length */
+
 #define UART_LCRH_WLEN_MASK        (3 << UART_LCRH_WLEN_SHIFT)
 #  define UART_LCRH_WLEN_5BITS     (0 << UART_LCRH_WLEN_SHIFT) /* 5-bits (reset) */
 #  define UART_LCRH_WLEN_6BITS     (1 << UART_LCRH_WLEN_SHIFT) /* 6-bits */
 #  define UART_LCRH_WLEN_7BITS     (2 << UART_LCRH_WLEN_SHIFT) /* 7-bits */
 #  define UART_LCRH_WLEN_8BITS     (3 << UART_LCRH_WLEN_SHIFT) /* 8-bits */
+
 #define UART_LCRH_SPS              (1 << 7)  /* Bit 7:  UART Stick Parity Select */
 
 /* UART Control (CTL) */
@@ -194,18 +196,19 @@
 
 #define UART_IFLS_TXIFLSEL_SHIFT   0         /* Bits 0-2: UART Transmit Interrupt FIFO Level Select */
 #define UART_IFLS_TXIFLSEL_MASK    (7 << UART_IFLS_TXIFLSEL_SHIFT)
-#  define UART_IFLS_TXIFLSEL_18th  (0 << UART_IFLS_TXIFLSEL_SHIFT) /* 1/8th full */
-#  define UART_IFLS_TXIFLSEL_14th  (1 << UART_IFLS_TXIFLSEL_SHIFT) /* 1/4th full */
-#  define UART_IFLS_TXIFLSEL_half  (2 << UART_IFLS_TXIFLSEL_SHIFT) /* half full */
-#  define UART_IFLS_TXIFLSEL_34th  (3 << UART_IFLS_TXIFLSEL_SHIFT) /* 3/4th full */
-#  define UART_IFLS_TXIFLSEL_78th  (4 << UART_IFLS_TXIFLSEL_SHIFT) /* 7/8th full */
+#  define UART_IFLS_TXIFLSEL_18TH  (0 << UART_IFLS_TXIFLSEL_SHIFT) /* 1/8th full */
+#  define UART_IFLS_TXIFLSEL_14TH  (1 << UART_IFLS_TXIFLSEL_SHIFT) /* 1/4th full */
+#  define UART_IFLS_TXIFLSEL_HALF  (2 << UART_IFLS_TXIFLSEL_SHIFT) /* half full */
+#  define UART_IFLS_TXIFLSEL_34TH  (3 << UART_IFLS_TXIFLSEL_SHIFT) /* 3/4th full */
+#  define UART_IFLS_TXIFLSEL_78TH  (4 << UART_IFLS_TXIFLSEL_SHIFT) /* 7/8th full */
+
 #define UART_IFLS_RXIFLSEL_SHIFT   3         /* Bits 3-5: UART Receive Interrupt FIFO Level Select */
 #define UART_IFLS_RXIFLSEL_MASK    (7 << UART_IFLS_RXIFLSEL_SHIFT)
-#  define UART_IFLS_RXIFLSEL_18th  (0 << UART_IFLS_RXIFLSEL_SHIFT) /* 1/8th full */
-#  define UART_IFLS_RXIFLSEL_14th  (1 << UART_IFLS_RXIFLSEL_SHIFT) /* 1/4th full */
-#  define UART_IFLS_RXIFLSEL_half  (2 << UART_IFLS_RXIFLSEL_SHIFT) /* half full */
-#  define UART_IFLS_RXIFLSEL_34th  (3 << UART_IFLS_RXIFLSEL_SHIFT) /* 3/4th full */
-#  define UART_IFLS_RXIFLSEL_78th  (4 << UART_IFLS_RXIFLSEL_SHIFT) /* 7/8th full */
+#  define UART_IFLS_RXIFLSEL_18TH  (0 << UART_IFLS_RXIFLSEL_SHIFT) /* 1/8th full */
+#  define UART_IFLS_RXIFLSEL_14TH  (1 << UART_IFLS_RXIFLSEL_SHIFT) /* 1/4th full */
+#  define UART_IFLS_RXIFLSEL_HALF  (2 << UART_IFLS_RXIFLSEL_SHIFT) /* half full */
+#  define UART_IFLS_RXIFLSEL_34TH  (3 << UART_IFLS_RXIFLSEL_SHIFT) /* 3/4th full */
+#  define UART_IFLS_RXIFLSEL_78TH  (4 << UART_IFLS_RXIFLSEL_SHIFT) /* 7/8th full */
 
 /* UART Interrupt Mask (IM) */
 
@@ -267,10 +270,6 @@
 
 /************************************************************************************
  * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
  ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2_CC13X20_CC26X2_UART_H */
