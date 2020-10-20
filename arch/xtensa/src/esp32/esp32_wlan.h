@@ -62,7 +62,7 @@ extern "C"
 
 int esp32_wlan_initialize(void);
 
-#endif /* CONFIG_ESP32_SPI */
+#endif /* CONFIG_ESP32_WIRELESS */
 #ifdef __cplusplus
 }
 #endif
