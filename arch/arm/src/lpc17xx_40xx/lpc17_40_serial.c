@@ -479,9 +479,10 @@ static uart_dev_t g_uart3port =
 #  endif
 #endif /* HAVE_CONSOLE */
 
-/************************************************************************************
+/****************************************************************************
+
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: up_serialin
@@ -496,7 +497,8 @@ static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -671,7 +673,8 @@ void up_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
 
   /* Then save the fractional divider values */
 
-  putreg32((mul << UART_FDR_MULVAL_SHIFT) | (divadd << UART_FDR_DIVADDVAL_SHIFT),
+  putreg32((mul << UART_FDR_MULVAL_SHIFT) | \
+           (divadd << UART_FDR_DIVADDVAL_SHIFT),
            uartbase + LPC17_40_UART_FDR_OFFSET);
 }
 #  ifdef LPC176x
@@ -685,13 +688,14 @@ static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
 }
 #  endif
 #else
-/************************************************************************************
+
+/****************************************************************************
  * Name: lpc17_40_uartcclkdiv
  *
  * Description:
- *   Select a CCLK divider to produce the UART PCLK.  The strategy is to select the
- *   smallest divisor that results in an solution within range of the 16-bit
- *   DLM and DLL divisor:
+ *   Select a CCLK divider to produce the UART PCLK.  The strategy is to
+ *   select the smallest divisor that results in an solution within range of
+ *   the 16-bit DLM and DLL divisor:
  *
  *     PCLK = CCLK / divisor
  *     BAUD = PCLK / (16 * DL)
@@ -702,14 +706,15 @@ static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
  *
  *     PCLK = CCLK / divisor
  *
- *   For the LPC178x/40xx, the PCLK is determined by the global divisor setting in
- *   the PLKSEL register (and, in that case, this function is not needed).
+ *   For the LPC178x/40xx, the PCLK is determined by the global divisor
+ *   setting in the PLKSEL register (and, in that case, this function is not
+ *   needed).
  *
- *   NOTE:  This is an inline function.  If a typical optimization level is used and
- *   a constant is provided for the desired frequency, then most of the following
- *   logic will be optimized away.
+ *   NOTE:  This is an inline function.  If a typical optimization level is
+ *   used and a constant is provided for the desired frequency, then most of
+ *   the following logic will be optimized away.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #  ifdef LPC176x
 static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
@@ -719,13 +724,14 @@ static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
    *   BAUD = PCLK / (16 * DL), or
    *   DL   = PCLK / BAUD / 16
    *
-   * Where for the LPC176x the PCLK is determined by the UART-specific divisor in
-   * PCLKSEL0 or PCLKSEL1:
+   * Where for the LPC176x the PCLK is determined by the UART-specific
+   * divisor in PCLKSEL0 or PCLKSEL1:
    *
    *   PCLK = CCLK / divisor
    *
-   * And for the LPC178x/40xx, the PCLK is determined by the global divisor setting in
-   * the PLKSEL register (and, in that case, this function is not needed).
+   * And for the LPC178x/40xx, the PCLK is determined by the global divisor
+   * setting in the PLKSEL register (and, in that case, this function is not
+   * needed).
    */
 
   /* Calculate and optimal PCLKSEL0/1 divisor.
@@ -799,23 +805,25 @@ static inline uint32_t lpc17_40_uartcclkdiv(uint32_t baud)
 }
 #  endif /* LPC176x */
 #endif /* CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER */
-/************************************************************************************
+
+/****************************************************************************
  * Name: lpc17_40_uart0config, uart1config, uart2config, and uart3config
  *
  * Description:
- *   Configure the UART.  UART0/1/2/3 peripherals are configured using the following
- *   registers:
+ *   Configure the UART.  UART0/1/2/3 peripherals are configured using the
+ *   following registers:
  *
  *   1. Power: In the PCONP register, set bits PCUART0/1/2/3.
  *      On reset, UART0 and UART 1 are enabled (PCUART0 = 1 and PCUART1 = 1)
  *      and UART2/3 are disabled (PCUART1 = 0 and PCUART3 = 0).
  *   2. Peripheral clock: In the PCLKSEL0 register, select PCLK_UART0 and
- *      PCLK_UART1; in the PCLKSEL1 register, select PCLK_UART2 and PCLK_UART3.
+ *      PCLK_UART1; in the PCLKSEL1 register, select PCLK_UART2 and
+ *      PCLK_UART3.
  *   3. Pins: Select UART pins through the PINSEL registers and pin modes
  *      through the PINMODE registers. UART receive pins should not have
  *      pull-down resistors enabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_UART0
 static inline void lpc17_40_uart0config(void)
@@ -966,7 +974,7 @@ static inline void lpc17_40_uart3config(void)
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_uartdl
  *
  * Description:
@@ -975,7 +983,7 @@ static inline void lpc17_40_uart3config(void)
  *     BAUD = PCLK / (16 * DL), or
  *     DL   = PCLK / BAUD / 16
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
 #  ifdef LPC176x
@@ -1082,7 +1090,8 @@ static int up_setup(struct uart_dev_s *dev)
    */
 
   up_serialout(priv, LPC17_40_UART_FDR_OFFSET,
-              (1 << UART_FDR_MULVAL_SHIFT) + (0 << UART_FDR_DIVADDVAL_SHIFT));
+               (1 << UART_FDR_MULVAL_SHIFT) + \
+               (0 << UART_FDR_DIVADDVAL_SHIFT));
 #endif
 
   /* Enter DLAB=1 */
@@ -1119,7 +1128,8 @@ static int up_setup(struct uart_dev_s *dev)
   if (priv->uartbase == LPC17_40_UART1_BASE)
     {
 #if defined(CONFIG_UART1_IFLOWCONTROL) && defined(CONFIG_UART1_OFLOWCONTROL)
-      up_serialout(priv, LPC17_40_UART_MCR_OFFSET, (UART_MCR_RTSEN | UART_MCR_CTSEN));
+      up_serialout(priv, LPC17_40_UART_MCR_OFFSET,
+                   (UART_MCR_RTSEN | UART_MCR_CTSEN));
 #elif defined(CONFIG_UART1_IFLOWCONTROL)
       up_serialout(priv, LPC17_40_UART_MCR_OFFSET, UART_MCR_RTSEN);
 #else
@@ -1150,14 +1160,15 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -1186,8 +1197,8 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -1398,14 +1409,16 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
          */
 
 #  ifdef CONFIG_LPC17_40_UART_USE_FRACTIONAL_DIVIDER
-        up_setbaud(priv->uartbase, LPC17_40_CCLK / priv->cclkdiv, priv->baud);
+        up_setbaud(priv->uartbase, LPC17_40_CCLK / \
+                   priv->cclkdiv, priv->baud);
 #  else
 #    if 0 /* ifdef LPC176x */
         priv->cclkdiv = lpc17_40_uartcclkdiv(priv->baud);
 #    endif
-        /* DLAB open latch */
-
-        /* REVISIT:  Shouldn't we just call up_setup() to do all of the following? */
+        /* DLAB open latch
+         * REVISIT: Shouldn't we just call up_setup() to do all of the
+         *          following?
+         */
 
         lcr = getreg32(priv->uartbase + LPC17_40_UART_LCR_OFFSET);
         up_serialout(priv, LPC17_40_UART_LCR_OFFSET, (lcr | UART_LCR_DLAB));
@@ -1556,7 +1569,8 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  return ((up_serialin(priv, LPC17_40_UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
+  return ((up_serialin(priv, LPC17_40_UART_LSR_OFFSET) & \
+          UART_LSR_THRE) != 0);
 }
 
 /****************************************************************************
@@ -1570,7 +1584,8 @@ static bool up_txready(struct uart_dev_s *dev)
 static bool up_txempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  return ((up_serialin(priv, LPC17_40_UART_LSR_OFFSET) & UART_LSR_THRE) != 0);
+  return ((up_serialin(priv, LPC17_40_UART_LSR_OFFSET) & \
+          UART_LSR_THRE) != 0);
 }
 
 /****************************************************************************
