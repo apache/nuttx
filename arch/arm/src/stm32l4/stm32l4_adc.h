@@ -1,4 +1,4 @@
-/************************************************************************************
+/*****************************************************************************
  * arch/arm/src/stm32L4/stm32l4_adc.h
  *
  *   Copyright (C) 2009, 2011, 2015-2017 Gregory Nutt. All rights reserved.
@@ -34,27 +34,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ *****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_ADC_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_ADC_H
 
-/************************************************************************************
+/*****************************************************************************
  * Included Files
- ************************************************************************************/
+ *****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/analog/adc.h>
 #include "chip.h"
 #include "hardware/stm32l4_adc.h"
 
-/************************************************************************************
+/*****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ *****************************************************************************/
 
-/* Timer devices may be used for different purposes.  One special purpose is to
- * control periodic ADC sampling.  If CONFIG_STM32L4_TIMn is defined then
+/* Configuration *************************************************************/
+
+/* Timer devices may be used for different purposes.  One special purpose is
+ * to control periodic ADC sampling.  If CONFIG_STM32L4_TIMn is defined then
  * CONFIG_STM32L4_TIMn_ADC must also be defined to indicate that timer "n" is
  * intended to be used for that purpose. Timers 1,2,3,6 and 15 may be used on
  * STM32L4X3, while STM32L4X6 adds support for timers 4 and 8 as well.
@@ -441,6 +442,9 @@
 #define ADC3_EXTSEL_T15CC4     ADC_CFGR_EXTSEL_T15CC4
 #define ADC3_EXTSEL_T15TRGO    ADC_CFGR_EXTSEL_T15TRGO
 
+/* EXTSEL configuration ******************************************************/
+
+/* Configure external event for regular group */
 
 #if defined(CONFIG_STM32L4_TIM1_ADC1)
 #  if CONFIG_STM32L4_ADC1_TIMTRIG == 0
@@ -754,13 +758,13 @@
 #  endif
 #endif
 
-/************************************************************************************
+/*****************************************************************************
  * Public Types
- ************************************************************************************/
+ *****************************************************************************/
 
-/************************************************************************************
+/*****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ *****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -771,7 +775,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
+/*****************************************************************************
  * Name: stm32l4_adc_initialize
  *
  * Description:
@@ -785,7 +789,7 @@ extern "C"
  * Returned Value:
  *   Valid ADC device structure reference on success; a NULL on failure
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 struct adc_dev_s;
 struct adc_dev_s *stm32l4_adc_initialize(int intf,

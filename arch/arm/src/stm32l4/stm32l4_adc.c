@@ -169,6 +169,44 @@
 #define ADC_EXTERNAL_CHAN_MIN  1
 #define ADC_EXTERNAL_CHAN_MAX  16
 
+/* ADCx_EXTSEL_VALUE can be set by this driver (look at stm32l4_adc.h) or
+ * by board specific logic in board.h file.
+ */
+
+#define ADC_EXTREG_EXTSEL_MASK       ADC_CFGR_EXTSEL_MASK
+#define ADC_EXTREG_EXTEN_MASK        ADC_CFGR_EXTEN_MASK
+#define ADC_EXTREG_EXTEN_DEFAULT     ADC_CFGR_EXTEN_RISING
+
+#ifdef ADC1_EXTSEL_VALUE
+#  define ADC1_HAVE_EXTCFG  1
+#  define ADC1_EXTCFG_VALUE (ADC1_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#else
+#  undef ADC1_HAVE_EXTCFG
+#endif
+#ifdef ADC2_EXTSEL_VALUE
+#  define ADC2_HAVE_EXTCFG  1
+#  define ADC2_EXTCFG_VALUE (ADC2_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#else
+#  undef ADC2_HAVE_EXTCFG
+#endif
+#ifdef ADC3_EXTSEL_VALUE
+#  define ADC3_HAVE_EXTCFG  1
+#  define ADC3_EXTCFG_VALUE (ADC3_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#else
+#  undef ADC3_HAVE_EXTCFG
+#endif
+#ifdef ADC4_EXTSEL_VALUE
+#  define ADC4_HAVE_EXTCFG  1
+#  define ADC4_EXTCFG_VALUE (ADC4_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#else
+#  undef ADC4_HAVE_EXTCFG
+#endif
+
+#if defined(ADC1_HAVE_EXTCFG) || defined(ADC2_HAVE_EXTCFG) || \
+    defined(ADC3_HAVE_EXTCFG) || defined(ADC3_HAVE_EXTCFG)
+#  define ADC_HAVE_EXTCFG
+#endif
+
 /* ADC resolution supported */
 
 #define HAVE_ADC_RESOLUTION
@@ -206,9 +244,11 @@ struct stm32_dev_s
   xcpt_t   isr;         /* Interrupt handler for this ADC block */
   uint32_t base;        /* Base address of registers unique to this ADC
                          * block */
+#if defined(ADC_HAVE_TIMER) || defined(ADC_HAVE_EXTCFG)
+  uint32_t extcfg;      /* External event configuration for regular group */
+#endif
 #ifdef ADC_HAVE_TIMER
   uint32_t tbase;       /* Base address of timer used by this ADC block */
-  uint32_t extsel;      /* EXTSEL value used by this ADC block */
   uint32_t pclck;       /* The PCLK frequency that drives this timer */
   uint32_t freq;        /* The desired frequency of conversions */
 #endif
@@ -243,6 +283,7 @@ static void     adc_putreg(FAR struct stm32_dev_s *priv, int offset,
                            uint32_t value);
 static void     adc_modifyreg(FAR struct stm32_dev_s *priv, int offset,
                               uint32_t clrbits, uint32_t setbits);
+static void     adc_dumpregs(FAR struct stm32_dev_s *priv);
 
 #ifdef ADC_HAVE_TIMER
 static uint16_t tim_getreg(FAR struct stm32_dev_s *priv, int offset);
@@ -283,6 +324,10 @@ static int adc_setoffset(FAR struct stm32_dev_s *priv, uint8_t ch, uint8_t i,
 #endif
 
 static void adc_startconv(FAR struct stm32_dev_s *priv, bool enable);
+
+#ifdef ADC_HAVE_EXTCFG
+static int adc_extsel_set(FAR struct adc_dev_s *dev, uint32_t extcfg);
+#endif
 
 #ifdef CONFIG_PM
 static int adc_pm_prepare(struct pm_callback_s *cb, int domain,
@@ -341,10 +386,12 @@ static struct stm32_dev_s g_adcpriv1 =
   .resolution  = CONFIG_STM32L4_ADC1_RESOLUTION,
 #endif  
   .base        = STM32L4_ADC1_BASE,
+#if defined(ADC1_HAVE_TIMER) || defined(ADC1_HAVE_EXTCFG)
+  .extcfg      = ADC1_EXTCFG_VALUE,
+#endif
 #ifdef ADC1_HAVE_TIMER
   .trigger     = CONFIG_STM32L4_ADC1_TIMTRIG,
   .tbase       = ADC1_TIMER_BASE,
-  .extsel      = ADC1_EXTSEL_VALUE,
   .pclck       = ADC1_TIMER_PCLK_FREQUENCY,
   .freq        = CONFIG_STM32L4_ADC1_SAMPLE_FREQUENCY,
 #endif
@@ -384,10 +431,12 @@ static struct stm32_dev_s g_adcpriv2 =
   .resolution  = CONFIG_STM32L4_ADC2_RESOLUTION,
 #endif
   .base        = STM32L4_ADC2_BASE,
+#if defined(ADC2_HAVE_TIMER) || defined(ADC2_HAVE_EXTCFG)
+  .extcfg      = ADC2_EXTCFG_VALUE,
+#endif
 #ifdef ADC2_HAVE_TIMER
   .trigger     = CONFIG_STM32L4_ADC2_TIMTRIG,
   .tbase       = ADC2_TIMER_BASE,
-  .extsel      = ADC2_EXTSEL_VALUE,
   .pclck       = ADC2_TIMER_PCLK_FREQUENCY,
   .freq        = CONFIG_STM32L4_ADC2_SAMPLE_FREQUENCY,
 #endif
@@ -427,10 +476,12 @@ static struct stm32_dev_s g_adcpriv3 =
   .resolution  = CONFIG_STM32L4_ADC3_RESOLUTION,
 #endif  
   .base        = STM32L4_ADC3_BASE,
+#if defined(ADC3_HAVE_TIMER) || defined(ADC3_HAVE_EXTCFG)
+  .extcfg      = ADC3_EXTCFG_VALUE,
+#endif
 #ifdef ADC3_HAVE_TIMER
   .trigger     = CONFIG_STM32L4_ADC3_TIMTRIG,
   .tbase       = ADC3_TIMER_BASE,
-  .extsel      = ADC3_EXTSEL_VALUE,
   .pclck       = ADC3_TIMER_PCLK_FREQUENCY,
   .freq        = CONFIG_STM32L4_ADC3_SAMPLE_FREQUENCY,
 #endif
@@ -749,21 +800,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
       return ERROR;
     }
 
-  /* EXTSEL selection: These bits select the external event used to trigger
-   * the start of conversion of a regular group.  NOTE:
-   *
-   * - The position with of the EXTSEL field varies from one STM32 MCU
-   *   to another.
-   * - The width of the EXTSEL field varies from one STM32 MCU to another.
-   * - The value in priv->extsel is already shifted into the correct bit
-   *   position.
-   */
-
-  ainfo("Initializing timers extsel = 0x%08x\n", priv->extsel);
-
-  adc_modifyreg(priv, STM32L4_ADC_CFGR_OFFSET,
-                ADC_CFGR_EXTEN_MASK | ADC_CFGR_EXTSEL_MASK,
-                ADC_CFGR_EXTEN_RISING | priv->extsel);
+  /* NOTE: EXTSEL configuration was done during adc configuration */
 
   /* Configure the timer channel to drive the ADC */
 
@@ -1331,7 +1368,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   adc_putreg(priv, STM32L4_ADC_SMPR1_OFFSET, ADC_SMPR1_DEFAULT);
   adc_putreg(priv, STM32L4_ADC_SMPR2_OFFSET, ADC_SMPR2_DEFAULT);
 
-  #ifdef HAVE_ADC_RESOLUTION
+#ifdef HAVE_ADC_RESOLUTION
   /* Set the resolution of the conversion. */
 
   adc_resolution_set(dev, priv->resolution);
@@ -1424,6 +1461,19 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
 #endif
 
+#ifdef ADC_HAVE_EXTCFG
+  /* Configure external event for regular group */
+
+  if (priv->cchannels > 0)
+    {
+      adc_extsel_set(dev, priv->extcfg);
+    }
+  else
+    {
+      awarn("WARNING: External event for regular channels not configured.\n");
+    }
+#endif
+
   /* Set ADEN to wake up the ADC from Power Down. */
 
   adc_enable(priv);
@@ -1441,17 +1491,9 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   leave_critical_section(flags);
 
-  ainfo("ISR:   0x%08x CR:    0x%08x CFGR:  0x%08x CFGR2: 0x%08x\n",
-        adc_getreg(priv, STM32L4_ADC_ISR_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_CR_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_CFGR_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_CFGR2_OFFSET));
-  ainfo("SQR1:  0x%08x SQR2:  0x%08x SQR3:  0x%08x SQR4:  0x%08x\n",
-        adc_getreg(priv, STM32L4_ADC_SQR1_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_SQR2_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_SQR3_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_SQR4_OFFSET));
-  ainfo("CCR:   0x%08x\n", getreg32(STM32L4_ADC_CCR));
+  /* Dump regs */
+
+  adc_dumpregs(priv);
 
 /* As default conversion is started here.
    *
@@ -1569,6 +1611,73 @@ errout:
   return ret;
 }
 #endif
+
+/*****************************************************************************
+ * Name: adc_extsel_set
+ *****************************************************************************/
+
+#ifdef ADC_HAVE_EXTCFG
+static int adc_extsel_set(FAR struct adc_dev_s *dev, uint32_t extcfg)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  uint32_t exten  = 0;
+  uint32_t extsel = 0;
+  uint32_t setbits = 0;
+  uint32_t clrbits = 0;
+
+  /* Get EXTEN and EXTSEL from input */
+
+  exten = (extcfg & ADC_EXTREG_EXTEN_MASK);
+  extsel = (extcfg & ADC_EXTREG_EXTSEL_MASK);
+
+  /* EXTSEL selection: These bits select the external event used
+   * to trigger the start of conversion of a regular group.  NOTE:
+   *
+   * - The position with of the EXTSEL field varies from one STM32L4 MCU
+   *   to another.
+   * - The width of the EXTSEL field varies from one STM32L4 MCU to another.
+   */
+
+  if (exten > 0)
+    {
+      setbits = (extsel | exten);
+      clrbits = (ADC_EXTREG_EXTEN_MASK | ADC_EXTREG_EXTSEL_MASK);
+
+      ainfo("Initializing extsel = 0x%08x\n", extsel);
+
+      /* Write register */
+
+      adc_modifyreg(priv, STM32L4_ADC_CFGR_OFFSET, clrbits, setbits);
+    }
+
+  return OK;
+}
+#endif
+
+/*****************************************************************************
+ * Name: adc_dumpregs
+ *****************************************************************************/
+
+static void adc_dumpregs(FAR struct stm32_dev_s *priv)
+{
+  UNUSED(priv);
+
+  ainfo("ISR:  0x%08x IER:  0x%08x CR:   0x%08x CFGR1: 0x%08x\n",
+        adc_getreg(priv, STM32L4_ADC_ISR_OFFSET),
+        adc_getreg(priv, STM32L4_ADC_IER_OFFSET),
+        adc_getreg(priv, STM32L4_ADC_CR_OFFSET),
+        adc_getreg(priv, STM32L4_ADC_CFGR_OFFSET));
+
+  ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x SQR4: 0x%08x\n",
+        adc_getreg(priv, STM32L4_ADC_SQR1_OFFSET),
+        adc_getreg(priv, STM32L4_ADC_SQR2_OFFSET),
+        adc_getreg(priv, STM32L4_ADC_SQR3_OFFSET),
+        adc_getreg(priv, STM32L4_ADC_SQR4_OFFSET));
+
+  ainfo("SMPR1: 0x%08x SMPR2: 0x%08x\n",
+        adc_getreg(priv, STM32L4_ADC_SMPR1_OFFSET),
+        adc_getreg(priv, STM32L4_ADC_SMPR2_OFFSET));
+}
 
 /*****************************************************************************
  * Name: adc_sqrbits
