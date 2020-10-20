@@ -1259,7 +1259,6 @@ static int esp_ioctl(FAR struct net_driver_s *dev,
   int ret;
   struct iw_point *essid;
   struct iw_encode_ext *ext;
-  struct mii_ioctl_notify_s *req;
   struct iwreq *iwr = (struct iwreq *)arg;
 
   /* Decode and dispatch the driver-specific IOCTL command */
@@ -1270,7 +1269,7 @@ static int esp_ioctl(FAR struct net_driver_s *dev,
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
       case SIOCMIINOTIFY: /* Set up for PHY event notifications */
         {
-          req = (struct mii_ioctl_notify_s *)arg;
+          struct mii_ioctl_notify_s *req = (struct mii_ioctl_notify_s *)arg;
           ret = esp_wifi_notify_subscribe(req->pid, &req->event);
           if (ret)
             {
