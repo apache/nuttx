@@ -70,8 +70,7 @@ TI TMS320-DM320
 (also called **DM320**)
 
 NuttX operates on the ARM9 of
-this dual core processor. This port uses the `Neuros
-OSD <http://wiki.neurostechnology.com/index.php/Developer_Welcome>`__
+this dual core processor. This port uses the Neuros OSD
 with a GNU arm-nuttx-elf toolchain\* under Linux or Cygwin. The port was
 performed using the OSD v1.0, development board.
 
@@ -80,15 +79,12 @@ NXP LPC3131
 
 Two boards based on the NXP LPC3131 are supported:
 
--  First, a port for the NXP
-   `LPC3131 <http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/>`__
-   on the `Embedded Artists
-   EA3131 <http://www.embeddedartists.com/products/kits/lpc3131_kit.php>`__
+-  First, a port for the NXP LPC3131
+   on the Embedded Artists EA3131
    development board was first released in NuttX-5.1 (but was not
    functional until NuttX-5.2).
 
--  A second port to the NXP
-   `LPC3131 <http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/>`__
+-  A second port to the NXP LPC3131
    on the `Olimex
    LPC-H3131 <https://www.olimex.com/Products/ARM/NXP/LPC-H3131/>`__
    development board was added in NuttX-6.32.
@@ -96,8 +92,7 @@ Two boards based on the NXP LPC3131 are supported:
 NXP LPC315x
 -----------
 
-Support for the NXP
-`LPC315x <http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/>`__
+Support for the NXP LPC315x
 family has been incorporated into the code base as of NuttX-6.4. Support
 was added for the Embedded Artists EA3152 board in NuttX-6.11.
 
@@ -515,7 +510,7 @@ TI/Stellaris LM3S6432S2E
 ------------------------
 
 This port uses Serial-to-Ethernet Reference
-Design Kit (`RDK-S2E <http://www.ti.com/tool/rdk-s2e>`__) and has
+Design Kit and has
 similar support as for the other Stellaris family members. A
 configuration is available for the NuttShell (NSH) (see :ref:`NSH <nsh>`). The NSH
 configuration including networking support with a Telnet NSH console.
@@ -525,7 +520,7 @@ TI/Stellaris LM3S6918
 ---------------------
 
 This port uses the
-`Micromint <%20http://www.micromint.com/>`__ Eagle-100 development board
+`Micromint <http://www.micromint.com/>`__ Eagle-100 development board
 with a GNU arm-nuttx-elf toolchain\* under either Linux or Cygwin.
 
 **Development Environments:** 1) Linux with native Linux GNU toolchain,
@@ -623,7 +618,7 @@ This is a port for the Silicon Laboratories' EFM32
    required to make further progress in testing.
 
    Refer to the Olimex EFM32G880F120-STK
-   `README.txt <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/efm32/olimex-efm32g880f129-stk/README.txt>`__
+   `README.txt <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/efm32/olimex-efm32g880f128-stk/README.txt>`__
    for further information.
 
 SiLabs EFM32 Giant Gecko
@@ -850,7 +845,7 @@ specifically for: STM32F103ZET6, STM32F103RET6, STM32F103VCT,
 STM32F103VET6, STM32F103RBT6, and STM32103CBT6. Boards supported
 include:
 
-#. **STM3210E-EVAL**. A port for the `STMicro <%20http://www.st.com/>`__
+#. **STM3210E-EVAL**. A port for the `STMicro <http://www.st.com/>`__
    STM3210E-EVAL development board that features the STM32F103ZET6 MCU.
    Refer to the NuttX board
    `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/stm32/stm3210e-eval/README.txt>`__
@@ -962,8 +957,8 @@ board
 `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/stm32/shenzhou/README.txt>`__
 file for further information.
 
-**ViewTool STM32F103/F107** Support for the `Viewtool
-STM32F103/F107 <https://http://www.viewtool.com/>`__ board was added in
+**ViewTool STM32F103/F107** Support for the Viewtool
+STM32F103/F107 board was added in
 NuttX-6.32. That board features the STMicro STM32F107VCT6 MCU.
 Networking, LCD, and touchscreen support were added in NuttX-6.33.
 
@@ -1184,7 +1179,6 @@ boards.
    This board configuration was contributed and made available in
    NuttX-6.20. As contributed board support, I am unsure of what all has
    been verfied and what has not. See the Microment website
-   `Lincoln60 <http://micromint.com/Products/lincoln60.html>`__ board
    and the NuttX board
    `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/lpc17xx_40xx/lincoln60/README.txt>`__
    file for further information about the Lincoln board.
@@ -1222,7 +1216,7 @@ The port of NuttX to the WaveShare Open1788 is a
 collaborative effort between Rommel Marcelo and myself (with Rommel
 being the leading contributor and I claiming only a support role). You
 can get more information at the Open1788 board from the WaveShare
-`website <http://www.wvshare.com/product/Open1788-Standard.htm>`__.
+website.
 
 ON Semiconductor LC823450
 -------------------------
@@ -1858,8 +1852,7 @@ Three boards are supported in this family:
 
 -  **STM32L476 MDK**. Very basic support for NuttX on the Motorola Moto
    Z MDK was contributed by Jim Wylder in NuttX 7.18. A simple NSH
-   configuration is available for the STM32L476 chip. See the `Moto Mods
-   Development Kit <http://developer.motorola.com/buy/>`__ and the board
+   configuration is available for the STM32L476 chip. See the board
    `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/stm32l4/stm32l476-mdk/README.txt>`__
    file for further information.
 
@@ -2866,12 +2859,7 @@ Microchip PIC32MX4xx
 **PIC32MX440F512H**. This port uses the "Advanced USB Storage Demo
 Board," Model DB-DP11215, from `Sure
 Electronics <http://www.sureelectronics.net>`__. This board features the
-Microchip PIC32MX440F512H. See the `Sure
-website <http://www.sureelectronics.net/goods.php?id=1168>`__ for
-further information about the DB-DP11215 board. (I believe that that the
-DB-DP11215 may be obsoleted now but replaced with the very similar,
-DB-DP11212. The DB-DP11212 board differs, I believe, only in its serial
-port configuration.)
+Microchip PIC32MX440F512H.
 
 **PIC32MX460F512L**. There one two board ports using this chip:
 
@@ -2895,7 +2883,7 @@ PIC32MX795F512L. There one two board ports using this chip:
 
 -  **Microchip PIC32 Ethernet Starter Kit**. This port uses the
    Microchip PIC32 Ethernet Starter Kit (DM320004) with the Expansion
-   I/O board. See the `Microchip website <http://ww.microchip.com>`__
+   I/O board. See the `Microchip website <http://www.microchip.com>`__
    for further information.
 -  **Mikroelektronika PIC32MX7 Mulitmedia Board (MMB)**. A port has been
    completed for the Mikroelektronika PIC32MX7 Multimedia Board (MMB).
@@ -3122,12 +3110,10 @@ environment is either Windows native or Cygwin under Windows.
 **STATUS:** This release has been verified only on the ZiLOG ZDS-II
 Z8Encore! chip simulation as of nuttx-0.3.9. Refer to the NuttX board
 README files for the
-`z8encore000zco <https://github.com/apache/incubator-nuttx/blob/master/boards/ez80/z8/z8encore000zco/README.txt>`__
+`z8encore000zco <https://github.com/apache/incubator-nuttx/blob/master/boards/z80/z8/z8encore000zco/README.txt>`__
 and for
-the\ `z8f64200100kit <https://github.com/apache/incubator-nuttx/blob/master/boards/ez80/z8/z8f64200100kit/README.txt>`__
+the\ `z8f64200100kit <https://github.com/apache/incubator-nuttx/blob/master/boards/z80/z8/z8f64200100kit/README.txt>`__
 for further information.
-
-
 
 Zilog Z180
 ==========

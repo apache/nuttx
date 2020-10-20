@@ -8,8 +8,8 @@ USB Device-Side Drivers
 
 -  ``include/nuttx/usb/usbdev_trace.h``. Declarations needed
    to work with the NuttX USB device driver trace capability. That
-   USB trace capability is detailed in `separate
-   document <UsbTrace.html>`__.
+   USB trace capability is detailed in :ref:`separate
+   document <usbtrace>`.
 
 -  ``struct usbdev_s``. Each USB device controller driver must
    implement an instance of ``struct usbdev_s``. This structure is

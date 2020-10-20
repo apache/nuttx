@@ -13,7 +13,7 @@ Serial Device Drivers
 -  ``int uart_register(FAR const char *path, FAR uart_dev_t *dev);``.
    A serial driver may register itself by calling
    ``uart_register()``, passing it the ``path`` where it will
-   appear in the `pseudo-file-system <#NxFileSystem>`__ and it's
+   appear in the :ref:`pseudo file system <file_system_overview>` and it's
    initialized instance of ``struct uart_ops_s``. By convention,
    serial device drivers are registered at paths like
    ``/dev/ttyS0``, ``/dev/ttyS1``, etc. See the

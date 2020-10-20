@@ -3,8 +3,8 @@ Network Interfaces
 ==================
 
 NuttX supports a BSD-compatible socket interface layer. These socket
-interface can be enabled by settings in the architecture `configuration
-file <NuttXConfigVariables.html>`__. Those socket APIs are discussed in
+interface can be enabled by settings in the architecture configuration
+file. Those socket APIs are discussed in
 the following paragraphs.
 
   - :c:func:`socket`

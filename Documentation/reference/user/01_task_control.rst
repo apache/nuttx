@@ -30,8 +30,8 @@ pthreads the were started from the same parent thread.
 **Executing Programs within a File System**. NuttX also provides
 internal interfaces for the execution of separately built programs that
 reside in a file system. These internal interfaces are, however,
-non-standard and are documented with the NuttX `binary
-loader <NuttXBinfmt.html>`__ and `NXFLAT <NuttXNxFlat.html#binfmt>`__.
+non-standard and are documented with the NuttX binary
+loader and NXFLAT documentation.
 
 **Task Control Interfaces**. The following task control interfaces are
 provided by NuttX:

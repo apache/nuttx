@@ -56,7 +56,7 @@ Timer Example
 
 The previously selected example will basically consult the timer status, set a timer alarm interval, set a timer signal handler function to be notified at the alarm, which only increments a variable, and then it will start the timer. The application will periodically consult the timer status at the sample rate previously configured through the ``menuconfig`` to follow the time left until the timer expires. After the samples have been read, the application stops de timer.
 
-The `example code <https://github.com/apache/incubator-nuttx-apps/blob/master/examples/timer/timer_main.c#ref-example>`_  may be explored, its path is at ``/examples/timer/timer_main.c`` in the apps' repository.
+The `example code <https://github.com/apache/incubator-nuttx-apps/blob/master/examples/timer/timer_main.c>`_  may be explored, its path is at ``/examples/timer/timer_main.c`` in the apps' repository.
 
 In NuttX, the timer driver is a character driver and when a chip supports multiple timers, each one is accessible through its respective file in ``/dev`` directory. Each timer is registered using a unique numeric identifier (i.e. ``/dev/timer0``, ``/dev/timer1``, ...).
 
@@ -84,12 +84,12 @@ The first necessary thing to be done in order to use the timer driver in an appl
 
 At an application level, the timer functionalities may be accessed through ``ioctl`` systems calls. The available ``ioctl`` commands are:
 
-.. c:macro:: TCIOC_START
-.. c:macro:: TCIOC_STOP
-.. c:macro:: TCIOC_GETSTATUS
-.. c:macro:: TCIOC_SETTIMEOUT
-.. c:macro:: TCIOC_NOTIFICATION
-.. c:macro:: TCIOC_MAXTIMEOUT
+ * :c:macro:`TCIOC_START`
+ * :c:macro:`TCIOC_STOP`
+ * :c:macro:`TCIOC_GETSTATUS`
+ * :c:macro:`TCIOC_SETTIMEOUT`
+ * :c:macro:`TCIOC_NOTIFICATION`
+ * :c:macro:`TCIOC_MAXTIMEOUT`
 
 These ``ioctl`` commands internally call lower-half layer operations and the parameters are forwarded to these ops through the ``ioctl`` system call. The return of a system call is the return of an operation.
 These ``struct timer_ops_s`` keeps pointers to the implementation of each operation. Following is the struct.

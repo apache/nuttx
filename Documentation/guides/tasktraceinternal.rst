@@ -42,14 +42,14 @@ Noteram device driver (``nuttx/drivers/note/noteram_driver.c``)
 - Accumurate incoming note records into the buffer.
 - Read the note records from the buffer by user requests.
 - The notes are recorded in the binary format of ``struct note_*_s``.
-- The detail function is described in :doc:`../reference/os/note`.
+- The detail function is described in :doc:`../components/drivers/character/note`.
 
 Notectl device driver (``nuttx/drivers/note/notectl_driver.c``)
 ---------------------------------------------------------------
 
 - ``/dev/notectl`` device driver.
 - Control the filter logic in ``sched_note.c`` by calling note filter APIs.
-- The detail function is described in :doc:`../reference/os/note`.
+- The detail function is described in :doc:`../components/drivers/character/note`.
 
 "``trace``" Built-In Application (``apps/system/trace/trace.c``)
 ----------------------------------------------------------------

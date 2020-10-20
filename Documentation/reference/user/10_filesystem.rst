@@ -2,6 +2,8 @@
 File System Interfaces
 ======================
 
+.. _file_system_overview:
+
 NuttX File System Overview
 ==========================
 
@@ -20,7 +22,7 @@ system).
 
 Any user supplied data or logic can be accessed via the pseudo-file
 system. Built in support is provided for character and block
-`driver <NuttXPortingGuide.html#DeviceDrivers>`__ *nodes* in the any
+:ref:`driver <drivers-porting>` *nodes* in the any
 pseudo file system directory. (By convention, however, all driver nodes
 should be in the ``/dev`` pseudo file system directory).
 

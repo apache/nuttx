@@ -59,7 +59,7 @@ The following configurations are configurable parameters for trace.
 
 After the configuration, rebuild the NuttX kernel and application.
 
-If the trace function is enabled, "``trace``" :doc:`../components/nsh/builtin` will be available.
+If the trace function is enabled, "``trace``" :doc:`../applications/nsh/builtin` will be available.
 
 How to get trace data
 =====================
