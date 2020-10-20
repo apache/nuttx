@@ -5021,6 +5021,36 @@ endmenu # Timer Configuration
 menu "ADC Configuration"
 	depends on STM32L4_ADC
 
+config STM32L4_ADC1_RESOLUTION
+	int "ADC1 resolution"
+	depends on STM32L4_ADC1
+	default 0
+	range 0 3
+	---help---
+		ADC1 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32L4_ADC2_RESOLUTION
+	int "ADC2 resolution"
+	depends on STM32L4_ADC2
+	default 0
+	range 0 3
+	---help---
+		ADC2 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32L4_ADC3_RESOLUTION
+	int "ADC3 resolution"
+	depends on STM32L4_ADC3
+	default 0
+	range 0 3
+	---help---
+		ADC3 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32L4_ADC_NO_STARTUP_CONV
+	bool "Do not start conversion when opening ADC device"
+	default n
+	---help---
+		Do not start conversion when opening ADC device.
+
 config STM32L4_ADC1_DMA
 	bool "ADC1 DMA"
 	depends on STM32L4_ADC1
