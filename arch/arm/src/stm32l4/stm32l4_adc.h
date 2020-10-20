@@ -441,6 +441,9 @@
 #define ADC3_EXTSEL_T15CC4     ADC_CFGR_EXTSEL_T15CC4
 #define ADC3_EXTSEL_T15TRGO    ADC_CFGR_EXTSEL_T15TRGO
 
+/* EXTSEL configuration *****************************************************/
+
+/* Configure external event for regular group */
 
 #if defined(CONFIG_STM32L4_TIM1_ADC1)
 #  if CONFIG_STM32L4_ADC1_TIMTRIG == 0
