@@ -1468,7 +1468,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
     {
       adc_extsel_set(dev, priv->extcfg);
     }
-  else 
+  else
     {
       awarn("WARNING: External event for regular channels not configured.\n");
     }
