@@ -41,7 +41,7 @@ ${IDF_PATH}:
 	mkdir -p ${ESP_PATH}
 	echo "WARNING:this directory can be automatically removed" > ${ESP_PATH}/README
 	cd ${ESP_PATH} && \
-		ls esp-idf || git clone -b master --recursive https://github.com/espressif/esp-idf.git && \
+		ls esp-idf || git clone -b v4.1 --recursive https://github.com/espressif/esp-idf.git && \
 	cd ${IDF_PATH} && \
 		./install.sh
 
