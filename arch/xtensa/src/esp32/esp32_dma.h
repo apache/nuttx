@@ -96,4 +96,4 @@ uint32_t esp32_dma_init(struct esp32_dmadesc_s *dmadesc, uint32_t num,
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_SPI_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_DMA_H */
