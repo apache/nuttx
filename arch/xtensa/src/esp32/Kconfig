@@ -25,6 +25,10 @@ config ESP32_DEFAULT_CPU_FREQ_MHZ
 	default 160 if ESP32_DEFAULT_CPU_FREQ_160
 	default 240 if ESP32_DEFAULT_CPU_FREQ_240
 
+config ESP32_RT_TIMER
+	bool "Real-time Timer"
+	default n
+
 menu "ESP32 Peripheral Selection"
 
 config ESP32_UART
@@ -259,6 +263,8 @@ config ESP32_WIRELESS
 	select NET
 	select ARCH_PHY_INTERRUPT
 	select ESP32_RNG
+	select ESP32_RT_TIMER
+	select ESP32_TIMER0
 	---help---
 		No yet implemented
 
@@ -664,5 +670,22 @@ config ESP32_WIFI_FS_MOUNTPT
 		Mount point of WiFi storage file system.
 
 endmenu # ESP32_WIRELESS
+
+menu "Real-Time Timer"
+	depends on ESP32_RT_TIMER
+
+config ESP32_RT_TIMER_TASK_NAME
+	string "Timer task name"
+	default "rt_timer"
+
+config ESP32_RT_TIMER_TASK_PRIORITY
+	int "Timer task priority"
+	default 223 # Lower than high priority workqueue
+
+config ESP32_RT_TIMER_TASK_STACK_SIZE
+	int "Timer task stack size"
+	default 2048
+
+endmenu # Real-Time Timer
 
 endif # ARCH_CHIP_ESP32

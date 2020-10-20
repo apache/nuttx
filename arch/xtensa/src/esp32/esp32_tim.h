@@ -123,5 +123,6 @@ struct esp32_tim_ops_s
 
 FAR struct esp32_tim_dev_s *esp32_tim_init(int timer);
 int esp32_tim_deinit(FAR struct esp32_tim_dev_s *dev);
+FAR struct esp32_tim_dev_s *esp32_tim0_init(void);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_TIM_H */
