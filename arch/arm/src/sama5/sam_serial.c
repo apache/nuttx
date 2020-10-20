@@ -185,7 +185,9 @@
 #  endif
 #endif
 
-/* Pick ttyS1.  This could be any of UART0-4, USART0-4 excluding the console UART. */
+/* Pick ttyS1.  This could be any of UART0-4, USART0-4 excluding the
+ * console UART.
+ */
 
 #if defined(CONFIG_SAMA5_UART0) && !defined(UART0_ASSIGNED)
 #  define TTYS1_DEV           g_uart0port  /* UART0 is ttyS1 */
@@ -908,7 +910,9 @@ static inline void up_serialout(struct up_dev_s *priv, int offset,
 
 static inline void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
 {
-  /* Restore the previous interrupt state (assuming all interrupts disabled) */
+  /* Restore the previous interrupt state (assuming all interrupts
+   * disabled)
+   */
 
   up_serialout(priv, SAM_UART_IER_OFFSET, imr);
 }
@@ -969,7 +973,9 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
     {
       handled = false;
 
-      /* Get the UART/USART status (we are only interested in the unmasked interrupts). */
+      /* Get the UART/USART status (we are only interested in the unmasked
+       * interrupts).
+       */
 
       priv->sr = up_serialin(priv, SAM_UART_SR_OFFSET);  /* Save for error reporting */
       imr      = up_serialin(priv, SAM_UART_IMR_OFFSET); /* Interrupt mask */

@@ -154,29 +154,29 @@
 
 struct s32k1xx_uart_s
 {
-  uint32_t uartbase;    /* Base address of UART registers */
-  uint32_t baud;        /* Configured baud */
-  uint32_t ie;          /* Saved enabled interrupts */
-  uint8_t  irq;         /* IRQ associated with this UART */
-  uint8_t  parity;      /* 0=none, 1=odd, 2=even */
-  uint8_t  bits;        /* Number of bits (7 or 8) */
+  uint32_t uartbase;        /* Base address of UART registers */
+  uint32_t baud;            /* Configured baud */
+  uint32_t ie;              /* Saved enabled interrupts */
+  uint8_t  irq;             /* IRQ associated with this UART */
+  uint8_t  parity;          /* 0=none, 1=odd, 2=even */
+  uint8_t  bits;            /* Number of bits (7 or 8) */
 #if defined(CONFIG_SERIAL_RS485CONTROL) || defined(CONFIG_SERIAL_IFLOWCONTROL)
-  uint8_t  inviflow:1;  /* Invert RTS sense */
+  uint8_t  inviflow:1;      /* Invert RTS sense */
   const uint32_t rts_gpio;  /* U[S]ART RTS GPIO pin configuration */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   const uint32_t cts_gpio;  /* U[S]ART CTS GPIO pin configuration */
 #endif
 
-  uint8_t  stopbits2:1; /* 1: Configure with 2 stop bits vs 1 */
+  uint8_t  stopbits2:1;     /* 1: Configure with 2 stop bits vs 1 */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  uint8_t  iflow:1;     /* input flow control (RTS) enabled */
+  uint8_t  iflow:1;         /* input flow control (RTS) enabled */
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  uint8_t  oflow:1;     /* output flow control (CTS) enabled */
+  uint8_t  oflow:1;         /* output flow control (CTS) enabled */
 #endif
 #ifdef CONFIG_SERIAL_RS485CONTROL
-  uint8_t rs485mode:1;  /* We are in RS485 (RTS on TX) mode */
+  uint8_t rs485mode:1;      /* We are in RS485 (RTS on TX) mode */
 #endif
 };
 
@@ -340,18 +340,18 @@ static struct s32k1xx_uart_s g_uart1priv =
 
 static struct uart_dev_s g_uart1port =
 {
-  .recv         =
-  {
-    .size       = CONFIG_LPUART1_RXBUFSIZE,
-    .buffer     = g_uart1rxbuffer,
-  },
-  .xmit         =
-  {
-    .size       = CONFIG_LPUART1_TXBUFSIZE,
-    .buffer     = g_uart1txbuffer,
-   },
-  .ops          = &g_uart_ops,
-  .priv         = &g_uart1priv,
+  .recv           =
+    {
+      .size       = CONFIG_LPUART1_RXBUFSIZE,
+      .buffer     = g_uart1rxbuffer,
+    },
+  .xmit           =
+    {
+      .size       = CONFIG_LPUART1_TXBUFSIZE,
+      .buffer     = g_uart1txbuffer,
+    },
+  .ops            = &g_uart_ops,
+  .priv           = &g_uart1priv,
 };
 #endif
 
@@ -387,18 +387,18 @@ static struct s32k1xx_uart_s g_uart2priv =
 
 static struct uart_dev_s g_uart2port =
 {
-  .recv         =
-  {
-    .size       = CONFIG_LPUART2_RXBUFSIZE,
-    .buffer     = g_uart2rxbuffer,
-  },
-  .xmit         =
-  {
-    .size       = CONFIG_LPUART2_TXBUFSIZE,
-    .buffer     = g_uart2txbuffer,
-  },
-  .ops          = &g_uart_ops,
-  .priv         = &g_uart2priv,
+  .recv           =
+    {
+      .size       = CONFIG_LPUART2_RXBUFSIZE,
+      .buffer     = g_uart2rxbuffer,
+    },
+  .xmit           =
+    {
+      .size       = CONFIG_LPUART2_TXBUFSIZE,
+      .buffer     = g_uart2txbuffer,
+    },
+  .ops            = &g_uart_ops,
+  .priv           = &g_uart2priv,
 };
 #endif
 
@@ -428,8 +428,8 @@ static inline uint32_t s32k1xx_serialin(struct s32k1xx_uart_s *priv,
  * Name: s32k1xx_serialout
  ****************************************************************************/
 
-static inline void s32k1xx_serialout(struct s32k1xx_uart_s *priv, uint32_t offset,
-                                   uint32_t value)
+static inline void s32k1xx_serialout(struct s32k1xx_uart_s *priv,
+                                     uint32_t offset, uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -439,7 +439,7 @@ static inline void s32k1xx_serialout(struct s32k1xx_uart_s *priv, uint32_t offse
  ****************************************************************************/
 
 static inline void s32k1xx_disableuartint(struct s32k1xx_uart_s *priv,
-                                        uint32_t *ie)
+                                          uint32_t *ie)
 {
   irqstate_t flags;
   uint32_t regval;
@@ -496,9 +496,10 @@ static int s32k1xx_setup(struct uart_dev_s *dev)
   struct s32k1xx_uart_s *priv = (struct s32k1xx_uart_s *)dev->priv;
 #ifndef CONFIG_SUPPRESS_LPUART_CONFIG
   struct uart_config_s config =
-  {
-    0
-  };
+    {
+      0
+    };
+
   int ret;
 
   /* Configure the UART */
@@ -522,11 +523,13 @@ static int s32k1xx_setup(struct uart_dev_s *dev)
 
   ret = s32k1xx_lpuart_configure(priv->uartbase, &config);
 
-  priv->ie = s32k1xx_serialin(priv, S32K1XX_LPUART_CTRL_OFFSET) & LPUART_ALL_INTS;
+  priv->ie = s32k1xx_serialin(priv, S32K1XX_LPUART_CTRL_OFFSET) & \
+             LPUART_ALL_INTS;
   return ret;
 
 #else
-  priv->ie = s32k1xx_serialin(priv, S32K1XX_LPUART_CTRL_OFFSET) & LPUART_ALL_INTS;
+  priv->ie = s32k1xx_serialin(priv, S32K1XX_LPUART_CTRL_OFFSET) & \
+             LPUART_ALL_INTS;
   return OK;
 #endif
 }
@@ -651,12 +654,14 @@ static int s32k1xx_interrupt(int irq, void *context, FAR void *arg)
 
       if ((usr & LPUART_STAT_OR) != 0)
         {
-          s32k1xx_serialout(priv, S32K1XX_LPUART_STAT_OFFSET, LPUART_STAT_OR);
+          s32k1xx_serialout(priv, S32K1XX_LPUART_STAT_OFFSET,
+                            LPUART_STAT_OR);
         }
 
       if ((usr & LPUART_STAT_FE) != 0)
         {
-          s32k1xx_serialout(priv, S32K1XX_LPUART_STAT_OFFSET, LPUART_STAT_FE);
+          s32k1xx_serialout(priv, S32K1XX_LPUART_STAT_OFFSET,
+                            LPUART_STAT_FE);
         }
 
       /* Handle incoming, receive bytes */
@@ -894,7 +899,9 @@ static int s32k1xx_ioctl(struct file *filep, int cmd, unsigned long arg)
         stat   = s32k1xx_serialin(priv, S32K1XX_LPUART_STAT_OFFSET);
         regval = ctrl;
 
-        /* {R|T}XINV bit field can only be written when the receiver is disabled (RE=0). */
+        /* {R|T}XINV bit field can only be written when the receiver is
+        * disabled (RE=0).
+        */
 
         regval &= ~LPUART_CTRL_RE;
 
@@ -1125,32 +1132,29 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
       case(PM_NORMAL):
         {
           /* Logic for PM_NORMAL goes here */
-
         }
         break;
 
       case(PM_IDLE):
         {
           /* Logic for PM_IDLE goes here */
-
         }
         break;
 
       case(PM_STANDBY):
         {
           /* Logic for PM_STANDBY goes here */
-
         }
         break;
 
       case(PM_SLEEP):
         {
           /* Logic for PM_SLEEP goes here */
-
         }
         break;
 
       default:
+
         /* Should not get here */
 
         break;
