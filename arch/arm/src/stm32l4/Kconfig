@@ -5042,6 +5042,12 @@ config STM32L4_ADC_SMPR
 			6 - 247.5 ADC clock cycles
 			7 - 640.5 ADC clock cycles
 
+config STM32L4_ADC_LL_OPS
+	bool "ADC low-level operations"
+	default n
+	---help---
+		Enable low-level ADC ops.
+
 config STM32L4_ADC1_RESOLUTION
 	int "ADC1 resolution"
 	depends on STM32L4_ADC1

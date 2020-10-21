@@ -758,9 +758,85 @@
 #  endif
 #endif
 
+/* ADC interrupts ************************************************************/
+
+#define ADC_ISR_EOC                  ADC_INT_EOC
+#define ADC_IER_EOC                  ADC_INT_EOC
+#define ADC_ISR_AWD                  ADC_INT_AWD1
+#define ADC_IER_AWD                  ADC_INT_AWD1
+#define ADC_ISR_JEOC                 ADC_INT_JEOC
+#define ADC_IER_JEOC                 ADC_INT_JEOC
+#define ADC_ISR_OVR                  ADC_INT_OVR
+#define ADC_IER_OVR                  ADC_INT_OVR
+#define ADC_ISR_JEOS                 ADC_INT_JEOS
+#define ADC_IER_JEOS                 ADC_INT_JEOS
+
+#define ADC_ISR_ALLINTS (ADC_ISR_EOC | ADC_ISR_AWD | ADC_ISR_JEOC | \
+                         ADC_ISR_JEOS | ADC_ISR_OVR)
+#define ADC_IER_ALLINTS (ADC_IER_EOC | ADC_IER_AWD | ADC_IER_JEOC | \
+                         ADC_IER_JEOS | ADC_IER_OVR)
+
 /*****************************************************************************
  * Public Types
  *****************************************************************************/
+
+#ifdef CONFIG_STM32L4_ADC_LL_OPS
+
+/* This structure provides the publicly visable representation of the
+ * "lower-half" ADC driver structure.
+ */
+
+struct stm32_adc_dev_s
+{
+  /* Publicly visible portion of the "lower-half" ADC driver structure */
+
+  FAR const struct stm32_adc_ops_s *llops;
+
+  /* Require cast-compatibility with private "lower-half" ADC strucutre */
+};
+
+/* Low-level operations for ADC */
+
+struct stm32_adc_ops_s
+{
+  /* Acknowledge interrupts */
+
+  void (*int_ack)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+
+  /* Get pending interrupts */
+
+  uint32_t (*int_get)(FAR struct stm32_adc_dev_s *dev);
+
+  /* Enable interrupts */
+
+  void (*int_en)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+
+  /* Disable interrupts */
+
+  void (*int_dis)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+
+  /* Get current ADC data register */
+
+  uint32_t (*val_get)(FAR struct stm32_adc_dev_s *dev);
+
+  /* Register buffer for ADC DMA transfer */
+
+  int (*regbuf_reg)(FAR struct stm32_adc_dev_s *dev, uint16_t *buffer,
+                    uint8_t len);
+
+  /* Start/stop regular conversion */
+
+  void (*reg_startconv)(FAR struct stm32_adc_dev_s *dev, bool state);
+
+  /* Set offset for channel */
+
+  int (*offset_set)(FAR struct stm32_adc_dev_s *dev, uint8_t ch, uint8_t i,
+                    uint16_t offset);
+
+  void (*dump_regs)(FAR struct stm32_adc_dev_s *dev);
+};
+
+#endif  /* CONFIG_STM32L4_ADC_LL_OPS */
 
 /*****************************************************************************
  * Public Function Prototypes
