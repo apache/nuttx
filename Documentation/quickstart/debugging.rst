@@ -95,7 +95,7 @@ JTAG/SWD Debugging
 `JTAG <https://en.wikipedia.org/wiki/JTAG>`_ is a set of standards that specify a way to attach a hardware device to
 your embedded board, and then remotely control the CPU. You can load code, start, stop, step through the program, and
 examine variables and memory. `SWD <https://en.wikipedia.org/wiki/JTAG#Similar_interface_standards>`_ is an
-Arm-specific, alternative 2-pin electrical interface that uses the same protocol and can be used too.
+Arm-specific interface with a reduced number of signals which can be used alternatively.
 
 The NuttX operating system uses `threads <https://en.wikipedia.org/wiki/Thread_(computing)>`_, so you need a
 thread-aware debugger to do more than load code, start, and stop it. A thread-aware debugger will allow you to switch
