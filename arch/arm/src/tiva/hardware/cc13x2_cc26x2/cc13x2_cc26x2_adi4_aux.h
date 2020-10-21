@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_adi4_aux.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a compatible
+ * BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,24 +37,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_ADI4_AUX_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_ADI4_AUX_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 #include "hardware/tiva_ddi.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* ADI3 AUX Register Offsets ****************************************************************************************/
+/* ADI3 AUX Register Offsets ************************************************/
 
 #define TIVA_ADI4_AUX_MUX0_OFFSET                          0x0000
 #define TIVA_ADI4_AUX_MUX1_OFFSET                          0x0001
@@ -68,7 +69,7 @@
 #define TIVA_ADI4_AUX_ADCREF1_OFFSET                       0x000b  /* ADC Reference 1 */
 #define TIVA_ADI4_AUX_LPMBIAS_OFFSET                       0x000e
 
-/* ADI3 AUX Register Addresses **************************************************************************************/
+/* ADI3 AUX Register Addresses **********************************************/
 
 #define TIVA_ADI4_AUX_MUX0                                 (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_MUX0_OFFSET)
 #define TIVA_ADI4_AUX_MUX1                                 (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_MUX1_OFFSET)
@@ -83,7 +84,9 @@
 #define TIVA_ADI4_AUX_ADCREF1                              (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_ADCREF1_OFFSET)
 #define TIVA_ADI4_AUX_LPMBIAS                              (TIVA_AUX_ADI4_BASE + TIVA_ADI4_AUX_LPMBIAS_OFFSET)
 
-/* Offsets may also be used in conjunction with access as described in cc13x2_cc26x2_ddi.h */
+/* Offsets may also be used in conjunction with access as described in
+ *cc13x2_cc26x2_ddi.h
+ */
 
 #define TIVA_ADI4_AUX_DIR                                  (TIVA_AUX_ADI4_BASE + TIVA_DDI_DIR_OFFSET)
 #define TIVA_ADI4_AUX_SET                                  (TIVA_AUX_ADI4_BASE + TIVA_DDI_SET_OFFSET)
@@ -92,7 +95,7 @@
 #define TIVA_ADI4_AUX_MASK8B                               (TIVA_AUX_ADI4_BASE + TIVA_DDI_MASK8B_OFFSET)
 #define TIVA_ADI4_AUX_MASK16B                              (TIVA_AUX_ADI4_BASE + TIVA_DDI_MASK16B_OFFSET)
 
-/* ADI3 AUX Register Bitfield Definitions ***************************************************************************/
+/* ADI3 AUX Register Bitfield Definitions ***********************************/
 
 /* TIVA_ADI4_AUX_MUX0 */
 
@@ -198,11 +201,11 @@
 
 /* TIVA_ADI4_AUX_ADC0 */
 
-#define ADI4_AUX_ADC0_EN                                    (1 << 0)  /* Bit 0:  ADC Enable */
-#define ADI4_AUX_ADC0_RESET_N                               (1 << 1)  /* Bit 1:  Reset ADC digital subchip, active low */
-#define ADI4_AUX_ADC0_SMPL_CYCLE_EXP_SHIFT                  (3)       /* Bits 3-6: Controls the sampling duration
-                                                                       * before conversion when the ADC is operated
-                                                                       * in synchronous mode (SMPL_MODE = 0) */
+#define ADI4_AUX_ADC0_EN                                    (1 << 0)                                   /* Bit 0:  ADC Enable */
+#define ADI4_AUX_ADC0_RESET_N                               (1 << 1)                                   /* Bit 1:  Reset ADC digital subchip, active low */
+#define ADI4_AUX_ADC0_SMPL_CYCLE_EXP_SHIFT                  (3)                                        /* Bits 3-6: Controls the sampling duration
+                                                                                                        * before conversion when the ADC is operated
+                                                                                                        * in synchronous mode (SMPL_MODE = 0) */
 #define ADI4_AUX_ADC0_SMPL_CYCLE_EXP_MASK                   (15 << ADI4_AUX_ADC0_SMPL_CYCLE_EXP_SHIFT)
 #  define ADI4_AUX_ADC0_SMPL_CYCLE_EXP(n)                   ((uint32_t)(n) << ADI4_AUX_ADC0_SMPL_CYCLE_EXP_SHIFT)
 #  define ADI4_AUX_ADC0_SMPL_CYCLE_EXP_2p7_US               (3  << ADI4_AUX_ADC0_SMPL_CYCLE_EXP_SHIFT) /* 16 clocks = 2.7us */
@@ -218,7 +221,7 @@
 #  define ADI4_AUX_ADC0_SMPL_CYCLE_EXP_2p73_MS              (13 << ADI4_AUX_ADC0_SMPL_CYCLE_EXP_SHIFT) /* 16384 clocks = 2.73ms */
 #  define ADI4_AUX_ADC0_SMPL_CYCLE_EXP_5p46_MS              (14 << ADI4_AUX_ADC0_SMPL_CYCLE_EXP_SHIFT) /* 32768 clocks = 5.46ms */
 #  define ADI4_AUX_ADC0_SMPL_CYCLE_EXP_10p9_MS              (15 << ADI4_AUX_ADC0_SMPL_CYCLE_EXP_SHIFT) /* 65536 clocks = 10.9ms */
-#define ADI4_AUX_ADC0_SMPL_MODE                             (1 << 7)  /* Bit 7:  ADC Sampling mode */
+#define ADI4_AUX_ADC0_SMPL_MODE                             (1 << 7)                                   /* Bit 7:  ADC Sampling mode */
 #  define ADI4_AUX_ADC0_SMPL_MODE_SYNCH                     (0)
 #  define ADI4_AUX_ADC0_SMPL_MODE_ASYNCH                    ADI4_AUX_ADC0_SMPL_MODE
 

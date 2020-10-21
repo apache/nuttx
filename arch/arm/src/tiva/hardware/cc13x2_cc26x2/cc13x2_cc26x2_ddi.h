@@ -4,7 +4,8 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a compatible
+ * BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -234,6 +235,7 @@
 #define TIVA_DDI_MASK16B_OFFSET   0x0400  /* Offset for 16-bit masked access */
 
 /* DDI Register Addresses ***************************************************/
+
 /* Register base addresses depend on that base address of the master, e.g.
  * TIVA_AUX_DDI0_OSC_BASE.
  */
