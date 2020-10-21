@@ -165,8 +165,12 @@ if [ ! -r ${src_makedefs} ]; then
   if [ ! -r ${src_makedefs} ]; then
     src_makedefs=${TOPDIR}/${boardconfig}/Make.defs
     if [ ! -r ${src_makedefs} ]; then
-      echo "File Make.defs could not be found"
-      exit 4
+      src_makedefs=${TOPDIR}/${boardconfig}/../../scripts/Make.defs
+
+      if [ ! -r ${src_makedefs} ]; then
+        echo "File Make.defs could not be found"
+        exit 4
+      fi
     fi
   fi
 fi
