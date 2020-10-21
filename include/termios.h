@@ -250,6 +250,13 @@ struct termios
   tcflag_t  c_cflag;        /* Control modes */
   tcflag_t  c_lflag;        /* Local modes */
   cc_t      c_cc[NCCS];     /* Control chars */
+
+  /* Implementation specific fields.  For portability reasons, these fields
+   * should not be accessed directly, but rather through only through the
+   * cf[set|get][o|i]speed() POSIX interfaces.
+   */
+
+  speed_t c_speed;          /* Input/output speed (non-POSIX) */
 };
 
 /****************************************************************************
