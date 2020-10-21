@@ -109,7 +109,7 @@ html_show_license = True
 html_logo = '_static/NuttX.png'
 html_favicon = '_static/favicon.ico'
 
-today_fmt = '%d %B %y at %H:%M'
+today_fmt = '%d %B %Y at %H:%M %z'
 
 c_id_attributes = [
   'FAR',
