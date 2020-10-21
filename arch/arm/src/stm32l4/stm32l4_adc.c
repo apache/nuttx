@@ -137,9 +137,14 @@
                               DMA_CCR_MINC | \
                               DMA_CCR_CIRC)
 
-/* DMA channels and interface values */
+/* Sample time default configuration */
 
-#define ADC_SMPR_DEFAULT    ADC_SMPR_640p5
+#ifndef CONFIG_STM32L4_ADC_SMPR
+#  define ADC_SMPR_DEFAULT    ADC_SMPR_640p5
+#else
+#  define ADC_SMPR_DEFAULT CONFIG_STM32L4_ADC_SMPR
+#endif
+
 #define ADC_SMPR1_DEFAULT   ((ADC_SMPR_DEFAULT << ADC_SMPR1_SMP0_SHIFT) | \
                              (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP1_SHIFT) | \
                              (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP2_SHIFT) | \
@@ -307,6 +312,7 @@ static bool     adc_internal(FAR struct stm32_dev_s * priv,
 #ifdef HAVE_ADC_RESOLUTION
 static int      adc_resolution_set(FAR struct adc_dev_s *dev, uint8_t res);
 #endif
+static void adc_sampletime_set(FAR struct adc_dev_s *dev);
 
 #ifdef ADC_HAVE_TIMER
 static void     adc_timstart(FAR struct stm32_dev_s *priv, bool enable);
@@ -1361,12 +1367,9 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   adc_reset(dev);
 
-  /* Initialize the same sample time for each ADC.
-   * During sample cycles channel selection bits must remain unchanged.
-   */
+  /* Initialize the same sample time for each ADC. */
 
-  adc_putreg(priv, STM32L4_ADC_SMPR1_OFFSET, ADC_SMPR1_DEFAULT);
-  adc_putreg(priv, STM32L4_ADC_SMPR2_OFFSET, ADC_SMPR2_DEFAULT);
+  adc_sampletime_set(dev);
 
 #ifdef HAVE_ADC_RESOLUTION
   /* Set the resolution of the conversion. */
@@ -1611,6 +1614,23 @@ errout:
   return ret;
 }
 #endif
+
+/****************************************************************************
+ * Name: adc_sampletime_set
+ ****************************************************************************/
+
+static void adc_sampletime_set(FAR struct adc_dev_s *dev)
+{
+  /* Initialize the same sample time for each ADC.
+   * During sample cycles channel selection bits must remain unchanged.
+   */  
+
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+
+  adc_putreg(priv, STM32L4_ADC_SMPR1_OFFSET, ADC_SMPR1_DEFAULT);
+  adc_putreg(priv, STM32L4_ADC_SMPR2_OFFSET, ADC_SMPR2_DEFAULT);
+
+}
 
 /*****************************************************************************
  * Name: adc_extsel_set
