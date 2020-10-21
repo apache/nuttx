@@ -32,10 +32,19 @@
  ****************************************************************************/
 
 #define CBAUD          0010017  /* Baud speed mask (not in POSIX) */
-#define CBAUDEX        0010000  /* Extra baud speed mask, included in CBAUD.
-                                 * (not in POSIX) */
+#define BOTHER         0010000  /* Magic token for custom baud rate */
 
 #define ARRAYSIZE(a)   (sizeof((a))/sizeof(a[0]))
+
+/****************************************************************************
+ * Private Type Definitions
+ ****************************************************************************/
+
+struct speed_s
+{
+  speed_t value;
+  speed_t mask;
+};
 
 /****************************************************************************
  * Private Data
@@ -47,50 +56,40 @@
  * include/termios.h file.
  */
 
-static const speed_t g_baud_table[] =
+static const struct speed_s g_baud_table[] =
 {
-  0,       50,      75,      110,     134,
-  150,     200,     300,     600,     1200,
-  1800,    2400,    4800,    9600,    19200,
-  38400,   57600,   115200,  230400,  460800,
-  500000,  576000,  921600,  1000000, 1152000,
-  1500000, 2000000, 2500000, 3000000, 3500000,
-  4000000
+  { 0,       B0 },
+  { 50,      B50 },
+  { 75,      B75 },
+  { 110,     B110 },
+  { 134,     B134 },
+  { 150,     B150 },
+  { 200,     B200 },
+  { 300,     B300 },
+  { 600,     B600 },
+  { 1200,    B1200 },
+  { 1800,    B1800 },
+  { 2400,    B2400 },
+  { 4800,    B4800 },
+  { 9600,    B9600 },
+  { 19200,   B19200 },
+  { 38400,   B38400 },
+  { 57600,   B57600 },
+  { 115200,  B115200 },
+  { 230400,  B230400 },
+  { 460800,  B460800 },
+  { 500000,  B500000 },
+  { 576000,  B576000 },
+  { 921600,  B921600 },
+  { 1000000, B1000000 },
+  { 1152000, B1152000 },
+  { 1500000, B1500000 },
+  { 2000000, B2000000 },
+  { 2500000, B2500000 },
+  { 3000000, B3000000 },
+  { 3500000, B3500000 },
+  { 4000000, B4000000 }
 };
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-static int baud_mask(speed_t speed)
-{
-  speed_t idx = 0;
-
-  for (; idx < ARRAYSIZE(g_baud_table); idx++)
-    {
-      if (speed == g_baud_table[idx])
-        {
-          break;
-        }
-    }
-
-  /* we don't find the speed value, it could be mask */
-
-  if (idx == ARRAYSIZE(g_baud_table))
-    {
-      return (speed & ~CBAUD) ? -1 : speed;
-    }
-
-  /* If idx > B38400, we should will idx minus 15, and or CBAUDEX */
-
-  if (idx > B38400)
-    {
-      idx -= B38400;
-      idx |= CBAUDEX;
-    }
-
-  return idx;
-}
 
 /****************************************************************************
  * Public Functions
@@ -145,17 +144,33 @@ static int baud_mask(speed_t speed)
 
 int cfsetspeed(FAR struct termios *termiosp, speed_t speed)
 {
-  int mask = baud_mask(speed);
+  size_t idx;
 
   DEBUGASSERT(termiosp);
-  if (mask == -1)
+  for (idx = 0; idx < ARRAYSIZE(g_baud_table); idx++)
     {
-      set_errno(EINVAL);
-      return mask;
+      if (speed == g_baud_table[idx].mask)
+        {
+          termiosp->c_speed = g_baud_table[idx].value;
+          break;
+        }
+      else if (speed == g_baud_table[idx].value)
+        {
+          termiosp->c_speed = speed;
+          speed = g_baud_table[idx].mask;
+          break;
+        }
+    }
+
+  if (idx == ARRAYSIZE(g_baud_table))
+    {
+      termiosp->c_speed = speed;
+      speed = BOTHER;
     }
 
   termiosp->c_cflag &= ~CBAUD;
-  termiosp->c_cflag |= mask;
+  termiosp->c_cflag |= speed;
+
   return 0;
 }
 
@@ -187,10 +202,6 @@ int cfsetspeed(FAR struct termios *termiosp, speed_t speed)
 
 speed_t cfgetspeed(FAR const struct termios *termiosp)
 {
-  int idx;
-
   DEBUGASSERT(termiosp);
-  idx = termiosp->c_cflag & CBAUD & ~CBAUDEX;
-  idx += (termiosp->c_cflag & CBAUDEX) ? 15 : 0;
-  return g_baud_table[idx];
+  return termiosp->c_speed;
 }
