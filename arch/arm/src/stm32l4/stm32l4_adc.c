@@ -132,6 +132,8 @@
 #  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
 #endif
 
+/* DMA channels and interface values */
+
 #define ADC_DMA_CONTROL_WORD (DMA_CCR_MSIZE_16BITS | \
                               DMA_CCR_PSIZE_16BITS | \
                               DMA_CCR_MINC | \
@@ -237,6 +239,7 @@ struct stm32_dev_s
 #endif
 #ifdef ADC_HAVE_DMA
   uint8_t dmachan;      /* DMA channel needed by this ADC */
+  uint8_t dmacfg;       /* DMA channel configuration */
   bool    hasdma;       /* True: This ADC supports DMA */
 #endif
 #ifdef ADC_HAVE_DFSDM
@@ -312,31 +315,29 @@ static bool     adc_internal(FAR struct stm32_dev_s * priv,
 #ifdef HAVE_ADC_RESOLUTION
 static int      adc_resolution_set(FAR struct adc_dev_s *dev, uint8_t res);
 #endif
-static void adc_sampletime_set(FAR struct adc_dev_s *dev);
-
+static void     adc_sample_time_set(FAR struct adc_dev_s *dev);
+static void     adc_startconv(FAR struct stm32_dev_s *priv, bool enable);
 #ifdef ADC_HAVE_TIMER
 static void     adc_timstart(FAR struct stm32_dev_s *priv, bool enable);
 static int      adc_timinit(FAR struct stm32_dev_s *priv);
 #endif
-
-#if defined(ADC_HAVE_DMA) && !defined(CONFIG_STM32L4_ADC_NOIRQ)
+#ifdef ADC_HAVE_DMA
+static void     adc_dma_cfg(FAR struct stm32_dev_s *priv);
+static void     adc_dma_start(FAR struct adc_dev_s *dev);
+#  ifndef CONFIG_STM32L4_ADC_NOIRQ
 static void     adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr,
                                     FAR void *arg);
+#  endif
 #endif
-
 #ifdef ADC_HAVE_DFSDM
-static int adc_setoffset(FAR struct stm32_dev_s *priv, uint8_t ch, uint8_t i,
-                         uint16_t offset);
+static int      adc_setoffset(FAR struct stm32_dev_s *priv, uint8_t ch,
+                         uint8_t i, uint16_t offset);
 #endif
-
-static void adc_startconv(FAR struct stm32_dev_s *priv, bool enable);
-
 #ifdef ADC_HAVE_EXTCFG
-static int adc_extsel_set(FAR struct adc_dev_s *dev, uint32_t extcfg);
+static int      adc_extsel_set(FAR struct adc_dev_s *dev, uint32_t extcfg);
 #endif
-
 #ifdef CONFIG_PM
-static int adc_pm_prepare(struct pm_callback_s *cb, int domain,
+static int      adc_pm_prepare(struct pm_callback_s *cb, int domain,
                           enum pm_state_e state);
 #endif
 
@@ -403,6 +404,7 @@ static struct stm32_dev_s g_adcpriv1 =
 #endif
 #ifdef ADC1_HAVE_DMA
   .dmachan     = ADC1_DMA_CHAN,
+  .dmacfg      = CONFIG_STM32L4_ADC1_DMA_CFG,
   .hasdma      = true,
 #endif
 #ifdef ADC1_HAVE_DFSDM
@@ -448,6 +450,7 @@ static struct stm32_dev_s g_adcpriv2 =
 #endif
 #ifdef ADC2_HAVE_DMA
   .dmachan     = ADC2_DMA_CHAN,
+  .dmacfg      = CONFIG_STM32L4_ADC1_DMA_CFG,
   .hasdma      = true,
 #endif
 #ifdef ADC2_HAVE_DFSDM
@@ -493,6 +496,7 @@ static struct stm32_dev_s g_adcpriv3 =
 #endif
 #ifdef ADC3_HAVE_DMA
   .dmachan     = ADC3_DMA_CHAN,
+  .dmacfg      = CONFIG_STM32L4_ADC1_DMA_CFG,
   .hasdma      = true,
 #endif
 #ifdef ADC3_HAVE_DFSDM
@@ -1369,38 +1373,12 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   /* Initialize the same sample time for each ADC. */
 
-  adc_sampletime_set(dev);
+  adc_sample_time_set(dev);
 
 #ifdef HAVE_ADC_RESOLUTION
   /* Set the resolution of the conversion. */
 
   adc_resolution_set(dev, priv->resolution);
-#endif
-
-#ifdef ADC_HAVE_DMA
-  if (priv->hasdma)
-    {
-      /* Set DMA one shot mode */
-
-      clrbits |= ADC_CFGR_DMACFG;
-
-      /* Enable DMA */
-
-      setbits |= ADC_CFGR_DMAEN;
-    }
-#endif
-
-#ifdef ADC_HAVE_DFSDM
-  if (priv->hasdfsdm)
-    {
-      /* Disable DMA */
-
-      clrbits |= ADC_CFGR_DMAEN;
-
-      /* Enable routing to DFSDM */
-
-      setbits |= ADC_CFGR_DFSDMCFG;
-    }
 #endif
 
   /* Disable continuous mode and set align to right */
@@ -1436,32 +1414,16 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   stm32_modifyreg32(STM32L4_ADC_CCR, clrbits, setbits);
 
 #ifdef ADC_HAVE_DMA
-
-  /* Enable DMA */
-
   if (priv->hasdma)
     {
-      /* Stop and free DMA if it was started before */
+      /* Configure ADC DMA */
 
-      if (priv->dma != NULL)
-        {
-          stm32l4_dmastop(priv->dma);
-          stm32l4_dmafree(priv->dma);
-        }
+      adc_dma_cfg(priv);
 
-      priv->dma = stm32l4_dmachannel(priv->dmachan);
+      /* Start ADC DMA */
 
-#ifndef CONFIG_STM32L4_ADC_NOIRQ
-      stm32l4_dmasetup(priv->dma,
-                       priv->base + STM32L4_ADC_DR_OFFSET,
-                       (uint32_t)priv->dmabuffer,
-                       priv->nchannels,
-                       ADC_DMA_CONTROL_WORD);
-
-      stm32l4_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
-#endif
+      adc_dma_start(dev);
     }
-
 #endif
 
 #ifdef ADC_HAVE_EXTCFG
@@ -1615,21 +1577,20 @@ errout:
 }
 #endif
 
-/****************************************************************************
- * Name: adc_sampletime_set
- ****************************************************************************/
+/*****************************************************************************
+ * Name: adc_sample_time_set
+ *****************************************************************************/
 
-static void adc_sampletime_set(FAR struct adc_dev_s *dev)
+static void adc_sample_time_set(FAR struct adc_dev_s *dev)
 {
   /* Initialize the same sample time for each ADC.
    * During sample cycles channel selection bits must remain unchanged.
-   */  
+   */
 
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
 
   adc_putreg(priv, STM32L4_ADC_SMPR1_OFFSET, ADC_SMPR1_DEFAULT);
   adc_putreg(priv, STM32L4_ADC_SMPR2_OFFSET, ADC_SMPR2_DEFAULT);
-
 }
 
 /*****************************************************************************
@@ -2099,6 +2060,7 @@ static int adc12_interrupt(int irq, FAR void *context, FAR void *arg)
  * Returned Value:
  *
  *****************************************************************************/
+
 #ifdef CONFIG_STM32L4_ADC3
 static int adc3_interrupt(int irq, FAR void *context, FAR void *arg)
 {
@@ -2121,6 +2083,82 @@ static int adc3_interrupt(int irq, FAR void *context, FAR void *arg)
 #endif
 #endif  /* CONFIG_STM32L4_ADC_NOIRQ */
 
+#ifdef ADC_HAVE_DMA
+/*****************************************************************************
+ * Name: adc_dma_cfg
+ *****************************************************************************/
+
+static void adc_dma_cfg(FAR struct stm32_dev_s *priv)
+{
+  uint32_t clrbits = 0;
+  uint32_t setbits = 0;
+
+  /* Set DMA mode */
+
+  if (priv->dmacfg == 0)
+    {
+      /* One Shot Mode */
+
+      clrbits |= ADC_CFGR_DMACFG;
+    }
+  else
+    {
+      /* Circular Mode */
+
+      setbits |= ADC_CFGR_DMACFG;
+    }
+
+  /* Enable DMA */
+
+  setbits |= ADC_CFGR_DMAEN;
+
+#ifdef ADC_HAVE_DFSDM
+  if (priv->hasdfsdm)
+    {
+      /* Disable DMA */
+
+      clrbits |= ADC_CFGR_DMAEN;
+
+      /* Enable routing to DFSDM */
+
+      setbits |= ADC_CFGR_DFSDMCFG;
+    }
+#endif
+
+  /* Modify CFGR configuration */
+
+  adc_modifyreg(priv, STM32L4_ADC_CFGR_OFFSET, clrbits, setbits);
+}
+
+/*****************************************************************************
+ * Name: adc_dma_start
+ *****************************************************************************/
+
+static void adc_dma_start(FAR struct adc_dev_s *dev)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+
+  /* Stop and free DMA if it was started before */
+
+  if (priv->dma != NULL)
+    {
+      stm32l4_dmastop(priv->dma);
+      stm32l4_dmafree(priv->dma);
+    }
+
+  priv->dma = stm32l4_dmachannel(priv->dmachan);
+
+#ifndef CONFIG_STM32L4_ADC_NOIRQ
+  stm32l4_dmasetup(priv->dma,
+                   priv->base + STM32L4_ADC_DR_OFFSET,
+                   (uint32_t)priv->dmabuffer,
+                   priv->nchannels,
+                   ADC_DMA_CONTROL_WORD);
+
+  stm32l4_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
+#endif
+}
+
 /*****************************************************************************
  * Name: adc_dmaconvcallback
  *
@@ -2138,7 +2176,7 @@ static int adc3_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  *****************************************************************************/
 
-#if defined(ADC_HAVE_DMA) && !defined(CONFIG_STM32L4_ADC_NOIRQ)
+#ifndef CONFIG_STM32L4_ADC_NOIRQ
 static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
 {
   FAR struct adc_dev_s   *dev  = (FAR struct adc_dev_s *)arg;
@@ -2171,6 +2209,7 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
   adc_modifyreg(priv, STM32L4_ADC_CFGR_OFFSET, 0, ADC_CFGR_DMAEN);
 }
 #endif
+#endif  /* ADC_HAVE_DMA */
 
 /*****************************************************************************
  * Public Functions

@@ -5075,6 +5075,14 @@ config STM32L4_ADC1_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32L4_ADC1_DMA_CFG
+	int "ADC1 DMA configuration"
+	depends on STM32L4_ADC1_DMA
+	range 0 1
+	default 1
+	---help---
+		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
+
 config STM32L4_ADC2_DMA
 	bool "ADC2 DMA"
 	depends on STM32L4_ADC2
@@ -5084,6 +5092,14 @@ config STM32L4_ADC2_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32L4_ADC2_DMA_CFG
+	int "ADC2 DMA configuration"
+	depends on STM32L4_ADC2_DMA
+	range 0 1
+	default 1
+	---help---
+		0 - ADC2 DMA in One Shot Mode, 1 - ADC2 DMA in Circular Mode
+
 config STM32L4_ADC3_DMA
 	bool "ADC3 DMA"
 	depends on STM32L4_ADC3
@@ -5092,6 +5108,14 @@ config STM32L4_ADC3_DMA
 		If DMA is selected, then the ADC may be configured to support
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
+
+config STM32L4_ADC3_DMA_CFG
+	int "ADC3 DMA configuration"
+	depends on STM32L4_ADC3_DMA
+	range 0 1
+	default 1
+	---help---
+		0 - ADC3 DMA in One Shot Mode, 1 - ADC3 DMA in Circular Mode
 
 config STM32L4_ADC1_OUTPUT_DFSDM
 	bool "ADC1 output to DFSDM"
