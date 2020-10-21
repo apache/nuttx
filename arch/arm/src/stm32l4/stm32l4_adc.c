@@ -386,7 +386,7 @@ static struct stm32_dev_s g_adcpriv1 =
   .resolution  = CONFIG_STM32L4_ADC1_RESOLUTION,
 #endif  
   .base        = STM32L4_ADC1_BASE,
-#if defined(ADC_HAVE_TIMER) || defined(ADC1_HAVE_EXTCFG)
+#if defined(ADC1_HAVE_TIMER) || defined(ADC1_HAVE_EXTCFG)
   .extcfg      = ADC1_EXTCFG_VALUE,
 #endif
 #ifdef ADC1_HAVE_TIMER
@@ -431,7 +431,7 @@ static struct stm32_dev_s g_adcpriv2 =
   .resolution  = CONFIG_STM32L4_ADC2_RESOLUTION,
 #endif
   .base        = STM32L4_ADC2_BASE,
-#if defined(ADC_HAVE_TIMER) || defined(ADC2_HAVE_EXTCFG)
+#if defined(ADC2_HAVE_TIMER) || defined(ADC2_HAVE_EXTCFG)
   .extcfg      = ADC2_EXTCFG_VALUE,
 #endif
 #ifdef ADC2_HAVE_TIMER
@@ -476,7 +476,7 @@ static struct stm32_dev_s g_adcpriv3 =
   .resolution  = CONFIG_STM32L4_ADC3_RESOLUTION,
 #endif  
   .base        = STM32L4_ADC3_BASE,
-#if defined(ADC_HAVE_TIMER) || defined(ADC3_HAVE_EXTCFG)
+#if defined(ADC3_HAVE_TIMER) || defined(ADC3_HAVE_EXTCFG)
   .extcfg      = ADC3_EXTCFG_VALUE,
 #endif
 #ifdef ADC3_HAVE_TIMER
