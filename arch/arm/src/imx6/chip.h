@@ -62,29 +62,12 @@
 #define CHIP_MPCORE_VBASE IMX_ARMMP_VSECTION
 
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef __ASSEMBLY__
-
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-	.globl	g_irqstack_top
-	.globl	g_fiqstack_top
-#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
-
-#endif /* __ASSEMBLY__ */
-
-/****************************************************************************
  * Macro Definitions
  ****************************************************************************/
 
 #ifdef __ASSEMBLY__
 
-/***************************************************************************
+/****************************************************************************
  * Name: cpuindex
  *
  * Description:
@@ -93,30 +76,30 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-	.macro	cpuindex, index
-	mrc		p15, 0, \index, c0, c0, 5	/* Read the MPIDR */
-	and		\index, \index, #3			/* Bits 0-1=CPU ID */
-	.endm
+  .macro  cpuindex, index
+  mrc  p15, 0, \index, c0, c0, 5  /* Read the MPIDR */
+  and  \index, \index, #3         /* Bits 0-1=CPU ID */
+  .endm
 #endif
 
-/***************************************************************************
+/****************************************************************************
  * Name: setirqstack
  *
  * Description:
  *   Set the current stack pointer to the  -"top" of the IRQ interrupt
  *   stack for the current CPU.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-	.macro	setirqstack, tmp1, tmp2
-	mrc		p15, 0, \tmp1, c0, c0, 5	/* tmp1=MPIDR */
-	and		\tmp1, \tmp1, #3			/* Bits 0-1=CPU ID */
-	ldr		\tmp2, =g_irqstack_top		/* tmp2=Array of IRQ stack pointers */
-	lsls	\tmp1, \tmp1, #2			/* tmp1=Array byte offset */
-	add		\tmp2, \tmp2, \tmp1			/* tmp2=Offset address into array */
-	ldr		sp, [\tmp2, #0]				/* sp=Address in stack allocation */
-	.endm
+  .macro  setirqstack, tmp1, tmp2
+  mrc  p15, 0, \tmp1, c0, c0, 5  /* tmp1=MPIDR */
+  and  \tmp1, \tmp1, #3          /* Bits 0-1=CPU ID */
+  ldr  \tmp2, =g_irqstack_top    /* tmp2=Array of IRQ stack pointers */
+  lsls \tmp1, \tmp1, #2          /* tmp1=Array byte offset */
+  add  \tmp2, \tmp2, \tmp1       /* tmp2=Offset address into array */
+  ldr  sp, [\tmp2, #0]           /* sp=Address in stack allocation */
+  .endm
 #endif
 
 /****************************************************************************
@@ -129,67 +112,16 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-	.macro	setfiqstack, tmp1, tmp2
-	mrc		p15, 0, \tmp1, c0, c0, 5	/* tmp1=MPIDR */
-	and		\tmp1, \tmp1, #3			/* Bits 0-1=CPU ID */
-	ldr		\tmp2, =g_fiqstack_top		/* tmp2=Array of FIQ stack pointers */
-	lsls	\tmp1, \tmp1, #2			/* tmp1=Array byte offset */
-	add		\tmp2, \tmp2, \tmp1			/* tmp2=Offset address into array */
-	ldr		sp, [\tmp2, #0]				/* sp=Address in stack allocation */
-	.endm
+  .macro  setfiqstack, tmp1, tmp2
+  mrc  p15, 0, \tmp1, c0, c0, 5  /* tmp1=MPIDR */
+  and  \tmp1, \tmp1, #3          /* Bits 0-1=CPU ID */
+  ldr  \tmp2, =g_fiqstack_top    /* tmp2=Array of FIQ stack pointers */
+  lsls \tmp1, \tmp1, #2          /* tmp1=Array byte offset */
+  add  \tmp2, \tmp2, \tmp1       /* tmp2=Offset address into array */
+  ldr  sp, [\tmp2, #0]           /* sp=Address in stack allocation */
+  .endm
 #endif
 
 #endif /* __ASSEMBLY__ */
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Name: arm_intstack_base
- *
- * Description:
- *   Return a pointer to the "base" the correct interrupt stack allocation
- *   for the  current CPU.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-static inline uintptr_t arm_intstack_base(void)
-{
-  uintptr_t base = (uintptr_t)g_irqstack_alloc;
-#if CONFIG_SMP_NCPUS > 1
-  uint32_t cpu = up_cpu_index();
-
-  base += cpu * INTSTACK_SIZE;
-#endif
-
-  return base;
-}
-#endif
-
-/****************************************************************************
- * Name: arm_intstack_top
- *
- * Description:
- *   Return a pointer to the "top" the correct interrupt stack for the
- *   current CPU.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-static inline uintptr_t arm_intstack_top(void)
-{
-  return arm_intstack_base() + INTSTACK_SIZE;
-}
-#endif
-
-#endif /* !__ASSEMBLY__ */
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_IMX6_CHIP_H */

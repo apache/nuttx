@@ -89,28 +89,31 @@ You can put a bunch of these into a simple script to configure the logging the w
    make oldconfig
 
 
-JTAG Debugging
---------------
+JTAG/SWD Debugging
+------------------
 
 `JTAG <https://en.wikipedia.org/wiki/JTAG>`_ is a set of standards that specify a way to attach a hardware device to
 your embedded board, and then remotely control the CPU. You can load code, start, stop, step through the program, and
-examine variables and memory.
-
-This guide assumes your board has a JTAG connector, and you have a JTAG hardware debugger like a
-`Segger J-Link <https://www.segger.com/products/debug-probes/j-link/>`_ or `OpenOCD <http://openocd.org/doc-release/html/index.html>`_.
+examine variables and memory. `SWD <https://en.wikipedia.org/wiki/JTAG#Similar_interface_standards>`_ is an
+Arm-specific interface with a reduced number of signals which can be used alternatively.
 
 The NuttX operating system uses `threads <https://en.wikipedia.org/wiki/Thread_(computing)>`_, so you need a
 thread-aware debugger to do more than load code, start, and stop it. A thread-aware debugger will allow you to switch
 threads to the one that is running the code you're interested in, for instance your application, or an operating system
-network thread. So far, OpenOCD is the only supported NuttX thread-aware debugger.
+network thread. So far, `OpenOCD <http://openocd.org/>`_ is the only supported NuttX thread-aware debugger.
 
-You will need an OpenOCD-compatible hardware adapter, ideally a fast one (USB 2.0 High Speed). This guide assumes you
-are using the `Olimex ARM USB TINY H <https://www.olimex.com/Products/ARM/JTAG/ARM-USB-TINY-H/>`_.
-(`Olimex ARM USB TINY H on Amazon <https://smile.amazon.com/Olimex-ARM-USB-TINY-H-Arm-Jtag/dp/B009UED630/>`_.) Other
-adapters may work, follow the OpenOCD instructions and the instructions that came with your adapter.
+.. note::
+  OpenOCD hasn't announced a stable release for a few years but the development remains active. You'll need to use a
+  version of OpenOCD recent enough so that it includes NuttX support as `contributed by Sony upstream
+  <http://openocd.zylin.com/#/c/4103/>`_. The version included in official OS repositories will probably be too old.
+  You should build from source or use one of the unofficial, more recent builds. See `Getting OpenOCD
+  <http://openocd.org/getting-openocd/>`_ for more details.
 
-You'll need to use the `Sony fork of OpenOCD <https://github.com/sony/openocd-nuttx>`_. Download and install it
-according to the OpenOCD instructions.
+You will need a board with a JTAG or SWD connector and an `OpenOCD-compatible hardware adapter
+<http://openocd.org/supported-jtag-interfaces/>`_, ideally a fast one (USB 2.0 High Speed). For example an `Olimex
+ARM USB TINY H <https://www.olimex.com/Products/ARM/JTAG/ARM-USB-TINY-H/>`_ or a `Segger J-Link
+<https://www.segger.com/products/debug-probes/j-link/>`_. Many other adapters work too, follow the OpenOCD
+instructions and the instructions that came with your adapter.
 
 See this article for more info:
 `Debugging a Apache NuttX target with GDB and OpenOCD <https://micro-ros.github.io/docs/tutorials/advanced/nuttx/debugging/>`_.

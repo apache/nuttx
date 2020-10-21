@@ -1824,7 +1824,7 @@ endmenu
 # Support optionally including external code
 # into the OS build. EXTERNALDIR will be used
 # to either point to 'nuttx/external' or
-# 'nuttx/.external-dummy', if 'nuttx/external'
+# 'nuttx/dummy', if 'nuttx/external'
 # does not contain a Kconfig file
 
 config EXTERNALDIR

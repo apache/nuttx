@@ -41,6 +41,7 @@ The following configurations are configurable parameters for trace.
     - Bit 0 = Enable instrumentation
     - Bit 1 = Enable syscall instrumentation
     - Bit 2 = Enable IRQ instrumentation
+    - Bit 3 = Enable collecting syscall arguments
 
 - ``CONFIG_SCHED_INSTRUMENTATION_NOTERAM_BUFSIZE``
 
@@ -51,6 +52,10 @@ The following configurations are configurable parameters for trace.
 
   - If enabled, stop overwriting old notes in the circular buffer when the buffer is full by default.
     This is useful to keep instrumentation data of the beginning of a system boot.
+
+- ``CONFIG_SCHED_INSTRUMENTATION_HIRES``
+
+  - If enabled, use higher resolution system timer for instrumentation.
 
 After the configuration, rebuild the NuttX kernel and application.
 
@@ -232,7 +237,7 @@ The default value is given by the kernel configuration ``CONFIG_SCHED_INSTRUMENT
 
 .. code-block::
 
-  trace mode [{+|-}{o|s|i}...]
+  trace mode [{+|-}{o|s|a|i}...]
 
 - ``+o`` : Enable overwrite mode.
   The trace buffer is a ring buffer and it can overwrite old data if no free space is available in the buffer.
@@ -247,6 +252,11 @@ The default value is given by the kernel configuration ``CONFIG_SCHED_INSTRUMENT
   All system calls are recorded by default. ``trace syscall`` command can filter the system calls to be recorded.
 
 - ``-s`` : Disable system call trace.
+
+- ``+a`` : Enable recording the system call arguments.
+  It records the arguments passed to the issued system call to the trace data.
+
+- ``-a`` : Disable recording the system call arguments.
 
 - ``+i`` : Enable interrupt trace.
   It records the event of enter/leave interrupt handler which is occured while the tracing.
@@ -266,6 +276,7 @@ If no command parameters are specified, display the current mode as the follows.
    Overwrite               : on  (+o)
    Syscall trace           : on  (+s)
     Filtered Syscalls      : 16
+   Syscall trace with args : on  (+a)
    IRQ trace               : on  (+i)
     Filtered IRQs          : 2
 

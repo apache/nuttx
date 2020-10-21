@@ -152,8 +152,12 @@ static inline void kinetis_i2c_sem_init(FAR struct kinetis_i2cdev_s *priv);
 static inline void
   kinetis_i2c_sem_destroy(FAR struct kinetis_i2cdev_s *priv);
 static inline int kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv);
+
+#ifdef CONFIG_I2C_RESET
 static int
   kinetis_i2c_sem_wait_noncancelable(FAR struct kinetis_i2cdev_s *priv);
+#endif
+
 static inline void kinetis_i2c_sem_post(struct kinetis_i2cdev_s *priv);
 
 /* Signal Helper */
@@ -363,6 +367,7 @@ static inline int kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv)
   return nxsem_wait(&priv->mutex);
 }
 
+#ifdef CONFIG_I2C_RESET
 /****************************************************************************
  * Name: kinetis_i2c_sem_wait_noncancelable
  *
@@ -376,6 +381,7 @@ static int
 {
   return nxsem_wait_uninterruptible(&priv->mutex);
 }
+#endif
 
 /****************************************************************************
  * Name: kinetis_i2c_sem_post

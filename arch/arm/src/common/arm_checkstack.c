@@ -245,7 +245,7 @@ ssize_t up_check_stack_remain(void)
 size_t up_check_intstack(void)
 {
 #ifdef CONFIG_SMP
-  return do_stackcheck((FAR void *)arm_intstack_base(),
+  return do_stackcheck((FAR void *)arm_intstack_alloc(),
                         INT32_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 #else
   return do_stackcheck((FAR void *)&g_intstackalloc,
