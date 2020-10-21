@@ -222,7 +222,7 @@ Key features of NuttX include:
   The following packages are available to extend the basic NuttX feature set:
 
   * **NuttShell (NSH)**
-    A small, scalable, bash-like shell for NuttX with rich feature set and small footprint. See the :doc:`/components/nsh/index`.
+    A small, scalable, bash-like shell for NuttX with rich feature set and small footprint. See the :doc:`/applications/nsh/index`.
   * **BAS 2.4**
     Seamless integration of Michael Haardt's BAS 2.4: "Bas is an interpreter for the classic dialect of the programming language BASIC. It is pretty compatible to typical BASIC interpreters of the 1980s, unlike some other UNIX BASIC interpreters, that implement a different syntax, breaking compatibility to existing programs. Bas offers many ANSI BASIC statements for structured programming, such as procedures, local variables and various loop types. Further there are matrix operations, automatic LIST indentation and many statements and functions found in specific classic dialects. Line numbers are not required."
 
