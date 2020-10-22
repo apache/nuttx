@@ -54,9 +54,9 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
 endif
 
 ARCHCPUFLAGS = -fno-builtin
-ARCHCPUFLAGSXX = -fno-builtin -nostdinc++ -fcheck-new
+ARCHCPUFLAGSXX = -fno-builtin -nostdinc++
 ifeq ($(CONFIG_CXX_EXCEPTION),)
-  ARCHCPUFLAGSXX += -fno-exceptions
+  ARCHCPUFLAGSXX += -fno-exceptions -fcheck-new
 endif
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wstrict-prototypes -Wundef
@@ -99,6 +99,10 @@ CXXFLAGS := $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGSXX) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+
+ifeq ($(CONFIG_LIBCXX),y)
+  CXXFLAGS += -DLIBCXX_BUILDING_LIBCXXABI
+endif
 
 # Loadable module definitions
 
