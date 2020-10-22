@@ -46,6 +46,17 @@ distclean::
 CXXFLAGS += ${shell $(DEFINE) "$(CC)" __GLIBCXX__}
 CXXFLAGS += ${shell $(DEFINE) "$(CC)" _LIBCPP_BUILDING_LIBRARY}
 
+# Workaround the following warning with "c++ (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
+#
+# libcxx/src/barrier.cpp: In constructor 'std::__1::__barrier_algorithm_base::__barrier_algorithm_base(ptrdiff_t&)':
+# libcxx/src/barrier.cpp:35:9: warning: declaration of '__expected' shadows a member of 'std::__1::__barrier_algorithm_base' [-Wshadow]
+#    35 |         : __expected(__expected)
+#       |         ^
+# libcxx/src/barrier.cpp:29:24: note: shadowed declaration is here
+#    29 |     ptrdiff_t&         __expected;
+#       |                        ^~~~~~~~~~
+libcxx/src/barrier.cpp_CXXFLAGS += -Wno-shadow
+
 CPPSRCS += $(notdir $(wildcard libcxx/src/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/experimental/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/filesystem/*.cpp))
