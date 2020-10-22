@@ -341,13 +341,36 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
                   case TCP_ESTABLISHED:
 
-                    /* In the ESTABLISHED state, we call upon the application
-                     * to do the actual retransmit after which we jump into
-                     * the code for sending out the packet.
+                    /* In the ESTABLISHED state, we have to differentiate
+                     * between a keepalive and actual transmitted data.
                      */
 
-                    result = tcp_callback(dev, conn, TCP_REXMIT);
-                    tcp_rexmit(dev, conn, result);
+#ifdef CONFIG_NET_TCP_KEEPALIVE
+                    if (conn->keepretries > 0)
+                      {
+                        /* In case of a keepalive timeout (based on RTT) the
+                         * state has to be set back into idle so that a new
+                         * keepalive can be fired.
+                         */
+
+                        uint32_t saveseq = tcp_getsequence(conn->sndseq);
+                        saveseq += conn->tx_unacked;
+                        tcp_setsequence(conn->sndseq, saveseq);
+                        conn->tx_unacked--;
+                      }
+                    else
+#endif
+                      {
+                        /* If there is a timeout on outstanding data we call
+                         * upon the application to do the actual retransmit
+                         * after which we jump into the code for sending out
+                         * the packet.
+                         */
+
+                        result = tcp_callback(dev, conn, TCP_REXMIT);
+                        tcp_rexmit(dev, conn, result);
+                      }
+
                     goto done;
 
                   case TCP_FIN_WAIT_1:
@@ -461,8 +484,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                           tcp_setsequence(conn->sndseq, saveseq - 1);
 
                           tcp_send(dev, conn, TCP_ACK, tcpiplen + 1);
-
-                          tcp_setsequence(conn->sndseq, saveseq);
 
                           /* Increment the number of un-ACKed bytes due to
                            * the dummy byte that we just sent.
