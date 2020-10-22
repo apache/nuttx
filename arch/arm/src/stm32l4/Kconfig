@@ -5027,6 +5027,12 @@ config STM32L4_ADC_NO_STARTUP_CONV
 	---help---
 		Do not start conversion when opening ADC device.
 
+config STM32L4_ADC_NOIRQ
+	bool "Do not use default ADC interrupts"
+	default n
+	---help---
+		Do not use default ADC interrupts handlers.
+
 config STM32L4_ADC_SMPR
 	int "ADC sample time"
 	default 0

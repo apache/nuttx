@@ -1549,10 +1549,10 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
 static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
-
 #ifndef CONFIG_STM32L4_ADC_NOIRQ
   /* Disable ADC interrupts and detach the ADC interrupt handler */
+
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
 
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
