@@ -112,17 +112,17 @@ static uint64_t g_intstack_alloc[INTSTACK_ALLOC >> 3];
 
 const uint32_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
 {
-  (uint32_t)g_intstack_alloc + INTSTACK_SIZE - 8,
+  (uint32_t)g_intstack_alloc + INTSTACK_SIZE,
 #if CONFIG_SMP_NCPUS > 1
-  (uint32_t)g_intstack_alloc + (2 * INTSTACK_SIZE) - 8,
+  (uint32_t)g_intstack_alloc + (2 * INTSTACK_SIZE),
 #if CONFIG_SMP_NCPUS > 2
-  (uint32_t)g_intstack_alloc + (3 * INTSTACK_SIZE) - 8,
+  (uint32_t)g_intstack_alloc + (3 * INTSTACK_SIZE),
 #if CONFIG_SMP_NCPUS > 3
-  (uint32_t)g_intstack_alloc + (4 * INTSTACK_SIZE) - 8,
+  (uint32_t)g_intstack_alloc + (4 * INTSTACK_SIZE),
 #if CONFIG_SMP_NCPUS > 4
-  (uint32_t)g_intstack_alloc + (5 * INTSTACK_SIZE) - 8,
+  (uint32_t)g_intstack_alloc + (5 * INTSTACK_SIZE),
 #if CONFIG_SMP_NCPUS > 5
-  (uint32_t)g_intstack_alloc + (6 * INTSTACK_SIZE) - 8,
+  (uint32_t)g_intstack_alloc + (6 * INTSTACK_SIZE),
 #endif /* CONFIG_SMP_NCPUS > 5 */
 #endif /* CONFIG_SMP_NCPUS > 4 */
 #endif /* CONFIG_SMP_NCPUS > 3 */
@@ -667,6 +667,6 @@ uintptr_t arm_intstack_base(void)
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 uintptr_t arm_intstack_alloc(void)
 {
-  return g_cpu_intstack_top[up_cpu_index()] - (INTSTACK_SIZE - 8);
+  return g_cpu_intstack_top[up_cpu_index()] - INTSTACK_SIZE;
 }
 #endif
