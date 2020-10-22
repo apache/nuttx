@@ -20,7 +20,7 @@
 
 VERSION=11.0.0
 
-$(TOPDIR)/include/libcxx:
+libcxx:
 	$(Q) wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$(VERSION)/libcxx-$(VERSION).src.tar.xz
 	$(Q) tar -xf libcxx-$(VERSION).src.tar.xz
 	$(Q) $(DELFILE) libcxx-$(VERSION).src.tar.xz
@@ -30,6 +30,9 @@ $(TOPDIR)/include/libcxx:
 	$(Q) patch -p0 < 0001-libc-Fix-tests-failing-with-Clang-after-removing-GCC.patch
 	$(Q) patch -p0 < 0001-libcxx-Check-_LIBCPP_PROVIDES_DEFAULT_RUNE_TABLE-fir.patch
 	$(Q) patch -p0 < 0001-libcxx-Port-to-NuttX-https-nuttx.apache.org-RTOS.patch
+	$(Q) touch $@
+
+$(TOPDIR)/include/libcxx: libcxx
 	$(Q) $(DIRLINK) $(CURDIR)/libcxx/include $(TOPDIR)/include/libcxx
 
 dirlinks:: $(TOPDIR)/include/libcxx
