@@ -243,6 +243,7 @@ begin_packed_struct struct usrsock_message_req_ack_s
   struct usrsock_message_common_s head;
 
   uint8_t xid;
+  uint8_t reserved;
   int32_t result;
 } end_packed_struct;
 
