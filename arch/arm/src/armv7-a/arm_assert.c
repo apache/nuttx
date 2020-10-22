@@ -265,24 +265,10 @@ static void up_dumpstate(void)
 
   if (sp > istackbase - istacksize && sp < istackbase)
     {
-      uint32_t *stackbase;
-
       /* Yes.. dump the interrupt stack */
 
       _alert("Interrupt Stack\n", sp);
       up_stackdump(sp, istackbase);
-
-      /* Extract the user stack pointer which should lie
-       * at the base of the interrupt stack.
-       */
-
-#ifdef CONFIG_SMP
-      stackbase = (uint32_t *)arm_intstack_base();
-#else
-      stackbase = (uint32_t *)&g_intstackbase;
-#endif
-      sp        = *stackbase;
-      _alert("User sp: %08x\n", sp);
     }
   else if (CURRENT_REGS)
     {
@@ -290,6 +276,17 @@ static void up_dumpstate(void)
       up_stackdump(istackbase - istacksize, istackbase);
     }
 #endif
+
+  /* Extract the user stack pointer if we are in an interrupt handler.
+   * If we are not in an interrupt handler.  Then sp is the user stack
+   * pointer (and the above range check should have failed).
+   */
+
+  if (CURRENT_REGS)
+    {
+      sp = CURRENT_REGS[REG_R13];
+      _alert("User sp: %08x\n", sp);
+    }
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.
