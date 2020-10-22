@@ -87,7 +87,11 @@ endif
 HOSTCFLAGS += -DCONFIG_USEC_PER_TICK=$(CONFIG_USEC_PER_TICK)
 HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c
 STDLIBS += -lpthread
-ifneq ($(CONFIG_HOST_MACOS),y)
+ifeq ($(CONFIG_HOST_MACOS),y)
+ifeq ($(CONFIG_LIBCXX),y)
+  STDLIBS += -lc++abi
+endif
+else
   STDLIBS += -lrt
 endif
 
