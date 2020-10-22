@@ -79,6 +79,7 @@
 #  define TCP_WBPKTLEN(wrb)          ((wrb)->wb_iob->io_pktlen)
 #  define TCP_WBSENT(wrb)            ((wrb)->wb_sent)
 #  define TCP_WBNRTX(wrb)            ((wrb)->wb_nrtx)
+#  define TCP_WBNACK(wrb)            ((wrb)->wb_nack)
 #  define TCP_WBIOB(wrb)             ((wrb)->wb_iob)
 #  define TCP_WBCOPYOUT(wrb,dest,n)  (iob_copyout(dest,(wrb)->wb_iob,(n),0))
 #  define TCP_WBCOPYIN(wrb,src,n) \
@@ -299,6 +300,7 @@ struct tcp_wrbuffer_s
   uint16_t   wb_sent;      /* Number of bytes sent from the I/O buffer chain */
   uint8_t    wb_nrtx;      /* The number of retransmissions for the last
                             * segment sent */
+  uint8_t    wb_nack;      /* The number of ack count */
   struct iob_s *wb_iob;    /* Head of the I/O buffer chain */
 };
 #endif

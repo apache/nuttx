@@ -79,6 +79,33 @@ config NET_MAX_LISTENPORTS
 	---help---
 		Maximum number of listening TCP/IP ports (all tasks).  Default: 20
 
+config NET_TCP_FAST_RETRANSMIT_WATERMARK
+	int "WaterMark to trigger Fast Retransmission"
+	default 3
+	---help---
+		RFC2001:
+		3.  Fast Retransmit
+			Modifications to the congestion avoidance algorithm were proposed in
+			1990 [3].  Before describing the change, realize that TCP may
+			generate an immediate acknowledgment (a duplicate ACK) when an out-
+			of-order segment is received (Section 4.2.2.21 of [1], with a note
+			that one reason for doing so was for the experimental fast-
+			retransmit algorithm).  This duplicate ACK should not be delayed.
+			The purpose of this duplicate ACK is to let the other end know that a
+			segment was received out of order, and to tell it what sequence
+			number is expected.
+
+			Since TCP does not know whether a duplicate ACK is caused by a lost
+			segment or just a reordering of segments, it waits for a small number
+			of duplicate ACKs to be received.  It is assumed that if there is
+			just a reordering of the segments, there will be only one or two
+			duplicate ACKs before the reordered segment is processed, which will
+			then generate a new ACK.  If three or more duplicate ACKs are
+			received in a row, it is a strong indication that a segment has been
+			lost.  TCP then performs a retransmission of what appears to be the
+			missing segment, without waiting for a retransmission timer to
+			expire.
+
 config NET_TCP_NOTIFIER
 	bool "Support TCP notifications"
 	default n
