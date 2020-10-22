@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_vims.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a compatible
+ * BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,61 +37,61 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_VIMS_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_VIMS_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* VIMS Register Offsets ********************************************************************************************/
+/* VIMS Register Offsets ****************************************************/
 
 #define TIVA_VIMS_STAT_OFFSET           0x0000  /* Status */
 #define TIVA_VIMS_CTL_OFFSET            0x0004  /* Control */
 
-/* VIMS Register Addresses ******************************************************************************************/
+/* VIMS Register Addresses **************************************************/
 
 #define TIVA_VIMS_STAT                  (TIVA_VIMS_BASE + TIVA_VIMS_STAT_OFFSET)
 #define TIVA_VIMS_CTL                   (TIVA_VIMS_BASE + TIVA_VIMS_CTL_OFFSET)
 
-/* VIMS Bitfield Definitions ****************************************************************************************/
+/* VIMS Bitfield Definitions ************************************************/
 
 /* VIMS_STAT */
 
-#define VIMS_STAT_MODE_SHIFT            (0)       /* Bits 0-1:  Current VMS mode */
+#define VIMS_STAT_MODE_SHIFT            (0)                         /* Bits 0-1:  Current VMS mode */
 #define VIMS_STAT_MODE_MASK             (3 << VIMS_STAT_MODE_SHIFT)
 #  define VIMS_STAT_MODE_GPRAM          (0 << VIMS_STAT_MODE_SHIFT) /* VIMS GPRAM mode */
 #  define VIMS_STAT_MODE_CACHE          (1 << VIMS_STAT_MODE_SHIFT) /* VIMS Cache mode */
 #  define VIMS_STAT_MODE_OFF            (3 << VIMS_STAT_MODE_SHIFT) /* VIMS Off mode */
-#define VIMS_STAT_INV                   (1 << 2)  /* Bit 2:  Invalidation of caching memory in-progress */
-#define VIMS_STAT_MODE_CHANGING         (1 << 3)  /* Bit 3:  VIMS mode change status */
-#define VIMS_STAT_SYSBUS_LB_DIS         (1 << 4)  /* Bit 4:  Sysbus flash line buffer control */
-#define VIMS_STAT_IDCODE_LB_DIS         (1 << 5)  /* Bit 5:  Icode/Dcode flash line buffer status */
+#define VIMS_STAT_INV                   (1 << 2)                    /* Bit 2:  Invalidation of caching memory in-progress */
+#define VIMS_STAT_MODE_CHANGING         (1 << 3)                    /* Bit 3:  VIMS mode change status */
+#define VIMS_STAT_SYSBUS_LB_DIS         (1 << 4)                    /* Bit 4:  Sysbus flash line buffer control */
+#define VIMS_STAT_IDCODE_LB_DIS         (1 << 5)                    /* Bit 5:  Icode/Dcode flash line buffer status */
 
 /* VIMS_CTL */
 
-#define VIMS_CTL_MODE_SHIFT             (0)       /* Bits 0-1:  Current VMS mode */
+#define VIMS_CTL_MODE_SHIFT             (0)                        /* Bits 0-1:  Current VMS mode */
 #define VIMS_CTL_MODE_MASK              (3 << VIMS_CTL_MODE_SHIFT)
 #  define VIMS_CTL_MODE_GPRAM           (0 << VIMS_CTL_MODE_SHIFT) /* VIMS GPRAM mode */
 #  define VIMS_CTL_MODE_CACHE           (1 << VIMS_CTL_MODE_SHIFT) /* VIMS Cache mode */
 #  define VIMS_CTL_MODE_OFF             (3 << VIMS_CTL_MODE_SHIFT) /* VIMS Off mode */
-#define VIMS_CTL_PREF_EN                (1 << 2)  /* Bit 2:  Tag prefetch control */
-#define VIMS_CTL_ARB_CFG                (1 << 3)  /* Bit 3:  Icode/Dcode and sysbus arbitation scheme */
+#define VIMS_CTL_PREF_EN                (1 << 2)                   /* Bit 2:  Tag prefetch control */
+#define VIMS_CTL_ARB_CFG                (1 << 3)                   /* Bit 3:  Icode/Dcode and sysbus arbitation scheme */
 #  define VIMS_CTL_ARB_STATIC           (0)
 #  define VIMS_CTL_ARB_ROUNDROBIN       VIMS_CTL_ARB_CFG
-#define VIMS_CTL_SYSBUS_LB_DIS          (1 << 4)  /* Bit 4:  Sysbus flash line buffer control */
-#define VIMS_CTL_IDCODE_LB_DIS          (1 << 5)  /* Bit 5:  Icode/Dcode flash line buffer control */
-#define VIMS_CTL_DYN_CG_EN              (1 << 29) /* Bit 29: Enable in-built clock gate */
-#define VIMS_CTL_STATS_EN               (1 << 30) /* Bit 30: Enable statistic counters */
-#define VIMS_CTL_STATS_CLR              (1 << 31) /* Bit 31: Clear statistics counters */
+#define VIMS_CTL_SYSBUS_LB_DIS          (1 << 4)                   /* Bit 4:  Sysbus flash line buffer control */
+#define VIMS_CTL_IDCODE_LB_DIS          (1 << 5)                   /* Bit 5:  Icode/Dcode flash line buffer control */
+#define VIMS_CTL_DYN_CG_EN              (1 << 29)                  /* Bit 29: Enable in-built clock gate */
+#define VIMS_CTL_STATS_EN               (1 << 30)                  /* Bit 30: Enable statistic counters */
+#define VIMS_CTL_STATS_CLR              (1 << 31)                  /* Bit 31: Clear statistics counters */
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_VIMS_H */
