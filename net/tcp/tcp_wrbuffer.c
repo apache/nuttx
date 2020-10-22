@@ -260,6 +260,10 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
       iob_free_chain(wrb->wb_iob, IOBUSER_NET_TCP_WRITEBUFFER);
     }
 
+  /* Reset the ack counter */
+
+  TCP_WBNACK(wrb) = 0;
+
   /* Then free the write buffer structure */
 
   sq_addlast(&wrb->wb_node, &g_wrbuffer.freebuffers);
