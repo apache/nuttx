@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/sched/task_startup.c
+ * libs/libc/sched/cxx_initialize_macho.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,50 +24,38 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <debug.h>
-
-#include "cxx_initialize.h"
-
-#ifndef CONFIG_BUILD_KERNEL
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtask_startup
+ * Name: cxx_initialize
  *
  * Description:
- *   This function is the user-space, task startup function.  It is called
- *   from up_task_start() in user-mode.
+ *   If C++ and C++ static constructors are supported, then this function
+ *   must be provided by board-specific logic in order to perform
+ *   initialization of the static C++ class instances.
  *
- * Input Parameters:
- *   entrypt - The user-space address of the task entry point
- *   argc and argv - Standard arguments for the task entry point
- *
- * Returned Value:
- *   None.  This function does not return.
+ *   This function should then be called in the application-specific
+ *   user_start logic in order to perform the C++ initialization.  NOTE
+ *   that no component of the core NuttX RTOS logic is involved; this
+ *   function definition only provides the 'contract' between application
+ *   specific C++ code and platform-specific toolchain support.
  *
  ****************************************************************************/
 
-void nxtask_startup(main_t entrypt, int argc, FAR char *argv[])
+void cxx_initialize(void)
 {
-  DEBUGASSERT(entrypt);
+#ifdef CONFIG_HAVE_CXXINITIALIZE
+  static int inited = 0;
 
-  /* If C++ initialization for static constructors is supported, then do
-   * that first
-   */
+  if (inited == 0)
+    {
+      extern void macho_call_saved_init_funcs(void);
 
-  cxx_initialize();
+      macho_call_saved_init_funcs();
 
-  /* Call the 'main' entry point passing argc and argv, calling exit()
-   * if/when the task returns.
-   */
-
-  exit(entrypt(argc, argv));
+      inited = 1;
+    }
+#endif
 }
-
-#endif /* !CONFIG_BUILD_KERNEL */
