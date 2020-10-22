@@ -117,3 +117,11 @@ c_id_attributes = [
   'noreturn_function'
 ]
 
+# This is required to allow running linkcheck with sphinx-tabs
+sphinx_tabs_valid_builders = ['linkcheck']
+
+# There are some sites where the linkchecker cannot handle anchors
+linkcheck_ignore = [
+   'https://github.com/pyenv/pyenv#installation',
+   'http://openocd.zylin.com/#/c/4103/',
+]

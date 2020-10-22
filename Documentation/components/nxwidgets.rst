@@ -1,11 +1,13 @@
+.. _nxwidgets:
+
 =========
 NxWidgets
 =========
 
 In order to better support NuttX based platforms, a special graphical
 userinterface has been created called NXWidgets. NXWidgets is written in
-C++ and integrates seamlessly with the NuttX `NX graphics
-subsystem <NXGraphicsSubsystem.html>`__ in order to provide graphic
+C++ and integrates seamlessly with the NuttX :ref:`NX graphics
+subsystem <nxgraphics>` in order to provide graphic
 objects, or "widgets," in the NX Graphics Subsystem
 
 Some of the features of NXWidgets include:
@@ -14,8 +16,8 @@ Some of the features of NXWidgets include:
    only selected "embedded friendly" C++ constructs that are fully
    supported under NuttX. No additional C++ support libraries are
    required.
--  **NX Integration**. NXWidgets integrate seamlessly with the `NX
-   graphics subsystem <NXGraphicsSubsystem.html>`__. Think of the X
+-  **NX Integration**. NXWidgets integrate seamlessly with the
+   :ref:`NX graphics subsystem <nxgraphics>`. Think of the X
    server under Linux … the NX graphics system is like a tiny X server
    that provides windowing under NuttX. By adding NXWidgets, you can
    support graphics objects like buttons and text boxes in the NX
@@ -40,7 +42,7 @@ Some of the features of NXWidgets include:
 -  **DOxygen Documentation** DOxygen documentation is available.
 
 Note: Many of the fundamental classed in NxWidgets derive from the
-Antony Dzeryn's "Woopsi" project: http://woopsi.org/ which also has a
+Antony Dzeryn's "Woopsi" project which also has a
 BSD style license. See the COPYING file for details.
 
 NXWidgets Doxygen Documentation

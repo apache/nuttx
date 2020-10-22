@@ -7,6 +7,8 @@ Drivers
 Some NuttX boards don't have full support for all the on-chip peripherals. If you need support for this hardware,
 you will either need to port a driver from another chip, or write one yourself. This section discusses how to do that.
 
+.. _drivers-porting:
+
 Porting a Driver
 ----------------
 

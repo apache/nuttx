@@ -46,7 +46,7 @@ provided in sub-directories under ``nuttx/libnx``.
    built on top of NX and works with the multi-user NX front-end. See
    ``include/nuttx/nx/nxtk.h``.
 ``apps/graphics/NxWidgets``
-   The `NxWidgets <NxWidgets.html>`__ code is provided as a separate
+   The :ref:`NxWidgets <nxwidgets>` code is provided as a separate
    package provided in the ``apps/`` repository.
 ``graphics/nxterm``
    The NxTerm driver is built on top of NX and works with the multi-user

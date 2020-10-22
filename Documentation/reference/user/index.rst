@@ -12,12 +12,12 @@ implementing applications on NuttX. Specifically, this documented is
 limited to addressing only NuttX RTOS APIs that are available to the
 application developer. As such, this document does not focus on any
 technical details of the organization or implementation of NuttX. Those
-technical details are provided in the `NuttX Porting
-Guide <NuttXPortingGuide.html>`__.
+technical details are provided in the NuttX Porting
+Guide.
 
 Information about configuring and building NuttX is also needed by the
-application developer. That information can also be found in the `NuttX
-Porting Guide <NuttXPortingGuide.html#configandbuild>`__.
+application developer. That information can also be found in the NuttX
+Porting Guide.
 
 .. toctree::
   :maxdepth: 1

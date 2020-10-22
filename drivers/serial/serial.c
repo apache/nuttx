@@ -686,6 +686,10 @@ static int uart_close(FAR struct file *filep)
 
   leave_critical_section(flags);
 
+  /* Wake up read and poll functions */
+
+  uart_datareceived(dev);
+
   /* We need to re-initialize the semaphores if this is the last close
    * of the device, as the close might be caused by pthread_cancel() of
    * a thread currently blocking on any of them.
@@ -851,6 +855,16 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
            * received up to the wait condition.
            */
 
+          break;
+        }
+
+      else if (filep->f_inode == 0)
+        {
+          /* File has been closed.
+           * Descriptor is not valid.
+           */
+
+          recvd = -EBADFD;
           break;
         }
 

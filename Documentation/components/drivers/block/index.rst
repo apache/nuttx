@@ -14,7 +14,7 @@ Block device drivers have these properties:
 -  ``int register_blockdriver(const char *path, const struct block_operations *bops, mode_t mode, void *priv);``.
    Each block driver registers itself by calling
    ``register_blockdriver()``, passing it the ``path`` where it
-   will appear in the `pseudo-file-system <#NxFileSystem>`__ and
+   will appear in the :ref:`pseudo file system <file_system_overview>` and
    it's initialized instance of ``struct block_operations``.
 
 -  **User Access**. Users do not normally access block drivers
