@@ -1,4 +1,4 @@
-/************************************************************************************
+/*****************************************************************************
  * arch/arm/src/stm32L4/stm32l4_adc.h
  *
  *   Copyright (C) 2009, 2011, 2015-2017 Gregory Nutt. All rights reserved.
@@ -34,27 +34,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ *****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_ADC_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_ADC_H
 
-/************************************************************************************
+/*****************************************************************************
  * Included Files
- ************************************************************************************/
+ *****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/analog/adc.h>
 #include "chip.h"
 #include "hardware/stm32l4_adc.h"
 
-/************************************************************************************
+/*****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ *****************************************************************************/
 
-/* Timer devices may be used for different purposes.  One special purpose is to
- * control periodic ADC sampling.  If CONFIG_STM32L4_TIMn is defined then
+/* Configuration *************************************************************/
+
+/* Timer devices may be used for different purposes.  One special purpose is
+ * to control periodic ADC sampling.  If CONFIG_STM32L4_TIMn is defined then
  * CONFIG_STM32L4_TIMn_ADC must also be defined to indicate that timer "n" is
  * intended to be used for that purpose. Timers 1,2,3,6 and 15 may be used on
  * STM32L4X3, while STM32L4X6 adds support for timers 4 and 8 as well.
@@ -441,6 +442,9 @@
 #define ADC3_EXTSEL_T15CC4     ADC_CFGR_EXTSEL_T15CC4
 #define ADC3_EXTSEL_T15TRGO    ADC_CFGR_EXTSEL_T15TRGO
 
+/* EXTSEL configuration ******************************************************/
+
+/* Configure external event for regular group */
 
 #if defined(CONFIG_STM32L4_TIM1_ADC1)
 #  if CONFIG_STM32L4_ADC1_TIMTRIG == 0
@@ -754,13 +758,110 @@
 #  endif
 #endif
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
+/* ADC interrupts ************************************************************/
 
-/************************************************************************************
+#define ADC_ISR_EOC                  ADC_INT_EOC
+#define ADC_IER_EOC                  ADC_INT_EOC
+#define ADC_ISR_AWD                  ADC_INT_AWD1
+#define ADC_IER_AWD                  ADC_INT_AWD1
+#define ADC_ISR_JEOC                 ADC_INT_JEOC
+#define ADC_IER_JEOC                 ADC_INT_JEOC
+#define ADC_ISR_OVR                  ADC_INT_OVR
+#define ADC_IER_OVR                  ADC_INT_OVR
+#define ADC_ISR_JEOS                 ADC_INT_JEOS
+#define ADC_IER_JEOS                 ADC_INT_JEOS
+
+#define ADC_ISR_ALLINTS (ADC_ISR_EOC | ADC_ISR_AWD | ADC_ISR_JEOC | \
+                         ADC_ISR_JEOS | ADC_ISR_OVR)
+#define ADC_IER_ALLINTS (ADC_IER_EOC | ADC_IER_AWD | ADC_IER_JEOC | \
+                         ADC_IER_JEOS | ADC_IER_OVR)
+
+/* Low-level ops helpers *****************************************************/
+
+#define ADC_INT_ACK(adc, source)                     \
+        (adc)->llops->int_ack(adc, source)
+#define ADC_INT_GET(adc)                             \
+        (adc)->llops->int_get(adc)
+#define ADC_INT_ENABLE(adc, source)                  \
+        (adc)->llops->int_en(adc, source)
+#define ADC_INT_DISABLE(adc, source)                 \
+        (adc)->llops->int_dis(adc, source)
+#define ADC_REGDATA_GET(adc)                         \
+        (adc)->llops->val_get(adc)
+#define ADC_REGBUF_REGISTER(adc, buffer, len)        \
+        (adc)->llops->regbuf_reg(adc, buffer, len)
+#define ADC_REG_STARTCONV(adc, state)                \
+        (adc)->llops->reg_startconv(adc, state)
+#define ADC_OFFSET_SET(adc, ch, i, o)                \
+        (adc)->llops->offset_set(adc, ch, i, o)
+#define ADC_DUMP_REGS(adc)                           \
+        (adc)->llops->dump_regs(adc)
+
+/*****************************************************************************
+ * Public Types
+ *****************************************************************************/
+
+#ifdef CONFIG_STM32L4_ADC_LL_OPS
+
+/* This structure provides the publicly visable representation of the
+ * "lower-half" ADC driver structure.
+ */
+
+struct stm32_adc_dev_s
+{
+  /* Publicly visible portion of the "lower-half" ADC driver structure */
+
+  FAR const struct stm32_adc_ops_s *llops;
+
+  /* Require cast-compatibility with private "lower-half" ADC strucutre */
+};
+
+/* Low-level operations for ADC */
+
+struct stm32_adc_ops_s
+{
+  /* Acknowledge interrupts */
+
+  void (*int_ack)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+
+  /* Get pending interrupts */
+
+  uint32_t (*int_get)(FAR struct stm32_adc_dev_s *dev);
+
+  /* Enable interrupts */
+
+  void (*int_en)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+
+  /* Disable interrupts */
+
+  void (*int_dis)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
+
+  /* Get current ADC data register */
+
+  uint32_t (*val_get)(FAR struct stm32_adc_dev_s *dev);
+
+  /* Register buffer for ADC DMA transfer */
+
+  int (*regbuf_reg)(FAR struct stm32_adc_dev_s *dev, uint16_t *buffer,
+                    uint8_t len);
+
+  /* Start/stop regular conversion */
+
+  void (*reg_startconv)(FAR struct stm32_adc_dev_s *dev, bool state);
+
+  /* Set offset for channel */
+
+  int (*offset_set)(FAR struct stm32_adc_dev_s *dev, uint8_t ch, uint8_t i,
+                    uint16_t offset);
+
+  void (*dump_regs)(FAR struct stm32_adc_dev_s *dev);
+};
+
+#endif  /* CONFIG_STM32L4_ADC_LL_OPS */
+
+/*****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ *****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -771,7 +872,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
+/*****************************************************************************
  * Name: stm32l4_adc_initialize
  *
  * Description:
@@ -785,7 +886,7 @@ extern "C"
  * Returned Value:
  *   Valid ADC device structure reference on success; a NULL on failure
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 struct adc_dev_s;
 struct adc_dev_s *stm32l4_adc_initialize(int intf,
