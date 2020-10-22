@@ -210,23 +210,28 @@ static void up_dumpstate(void)
    * stack?
    */
 
-  if (sp <= istackbase && sp > istackbase - istacksize)
+  if (sp < istackbase && sp > istackbase - istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
+      _alert("Interrupt Stack\n", sp);
       up_stackdump(sp, istackbase);
-
-      /* Extract the user stack pointer which should lie
-       * at the base of the interrupt stack.
-       */
-
-      sp = g_intstackbase;
-      _alert("sp:     %08x\n", sp);
     }
   else if (CURRENT_REGS)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
       up_stackdump(istackbase - istacksize, istackbase);
+    }
+
+  /* Extract the user stack pointer if we are in an interrupt handler.
+   * If we are not in an interrupt handler.  Then sp is the user stack
+   * pointer (and the above range check should have failed).
+   */
+
+  if (CURRENT_REGS)
+    {
+      sp = CURRENT_REGS[REG_R13];
+      _alert("User sp: %08x\n", sp);
     }
 
   /* Show user stack info */
