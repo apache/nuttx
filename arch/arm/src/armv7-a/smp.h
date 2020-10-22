@@ -58,7 +58,6 @@
 #define SMP_STACK_MASK       7
 #define SMP_STACK_SIZE       ((CONFIG_SMP_IDLETHREAD_STACKSIZE + 7) & ~7)
 #define SMP_STACK_WORDS      (SMP_STACK_SIZE >> 2)
-#define SMP_STACK_TOP        (SMP_STACK_SIZE - 8)
 
 /****************************************************************************
  * Public Data
