@@ -106,15 +106,15 @@
 #define NSEC_PER_MIN           (NSEC_PER_SEC * SEC_PER_MIN)
 #define USEC_PER_MIN           (USEC_PER_SEC * SEC_PER_MIN)
 #define MSEC_PER_MIN           (MSEC_PER_SEC * SEC_PER_MIN)
-#define DSEC_PER_MIN           (HSEC_PER_SEC * SEC_PER_MIN)
+#define DSEC_PER_MIN           (DSEC_PER_SEC * SEC_PER_MIN)
 #define HSEC_PER_MIN           (HSEC_PER_SEC * SEC_PER_MIN)
 
 #define MIN_PER_HOUR                  60L
 #define NSEC_PER_HOUR          (NSEC_PER_MIN * MIN_PER_HOUR)
 #define USEC_PER_HOUR          (USEC_PER_MIN * MIN_PER_HOUR)
 #define MSEC_PER_HOUR          (MSEC_PER_MIN * MIN_PER_HOUR)
-#define DSEC_PER_HOUR          (HSEC_PER_SEC * MIN_PER_HOUR)
-#define HSEC_PER_HOUR          (DSEC_PER_MIN * MIN_PER_HOUR)
+#define DSEC_PER_HOUR          (DSEC_PER_MIN * MIN_PER_HOUR)
+#define HSEC_PER_HOUR          (HSEC_PER_MIN * MIN_PER_HOUR)
 #define SEC_PER_HOUR           (SEC_PER_MIN  * MIN_PER_HOUR)
 
 #define HOURS_PER_DAY                 24L

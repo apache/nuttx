@@ -255,8 +255,8 @@ struct tcp_conn_s
   clock_t    keeptime;    /* Last time that the TCP socket was known to be
                            * alive (ACK or data received) OR time that the
                            * last probe was sent. */
-  uint16_t   keepidle;    /* Elapsed idle time before first probe sent (dsec) */
-  uint16_t   keepintvl;   /* Interval between probes (dsec) */
+  uint32_t   keepidle;    /* Elapsed idle time before first probe sent (dsec) */
+  uint32_t   keepintvl;   /* Interval between probes (dsec) */
   bool       keepalive;   /* True: KeepAlive enabled; false: disabled */
   uint8_t    keepcnt;     /* Number of retries before the socket is closed */
   uint8_t    keepretries; /* Number of retries attempted */
