@@ -270,7 +270,7 @@ exception_common:
 	.bss
 	.global	g_intstackalloc
 	.global g_intstackbase
-	.align	4
+	.balign	4
 g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
 g_intstackbase:
