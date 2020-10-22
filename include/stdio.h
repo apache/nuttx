@@ -164,7 +164,7 @@ FAR char *gets(FAR char *s);
 FAR char *gets_s(FAR char *s, rsize_t n);
 void   rewind(FAR FILE *stream);
 
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+#if !defined(CONFIG_STDIO_DISABLE_BUFFERING) || defined(CONFIG_LIBCXX)
 void   setbuf(FAR FILE *stream, FAR char *buf);
 int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
 #endif
