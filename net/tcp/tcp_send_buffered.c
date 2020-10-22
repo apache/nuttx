@@ -326,6 +326,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
+  bool rexmit = false;
 
   /* Check for a loss of connection */
 
@@ -482,6 +483,28 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                           wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb));
                 }
             }
+          else if (ackno == TCP_WBSEQNO(wrb))
+            {
+              /* Duplicate ACK? Retransmit data if need */
+
+              TCP_WBNACK(wrb)++;
+
+              if (TCP_WBNACK(wrb) ==
+                  CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK)
+                {
+                  /* Do fast retransmit */
+
+                  rexmit = true;
+                }
+              else if ((TCP_WBNACK(wrb) >
+                       CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK) &&
+                       TCP_WBNACK(wrb) == sq_count(&conn->unacked_q) - 1)
+                {
+                  /* Reset the duplicate ack counter */
+
+                  TCP_WBNACK(wrb) = 0;
+                }
+            }
         }
 
       /* A special case is the head of the write_q which may be partially
@@ -521,6 +544,11 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
   /* Check if we are being asked to retransmit data */
 
   else if ((flags & TCP_REXMIT) != 0)
+    {
+      rexmit = true;
+    }
+
+  if (rexmit)
     {
       FAR struct tcp_wrbuffer_s *wrb;
       FAR sq_entry_t *entry;
