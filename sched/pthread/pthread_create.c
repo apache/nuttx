@@ -289,6 +289,27 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       pjoin->detached = true;
     }
 
+  if (attr->stackaddr)
+    {
+      /* Use pre-allocated stack */
+
+      ret = up_use_stack((FAR struct tcb_s *)ptcb, attr->stackaddr,
+                         attr->stacksize);
+    }
+  else
+    {
+      /* Allocate the stack for the TCB */
+
+      ret = up_create_stack((FAR struct tcb_s *)ptcb, attr->stacksize,
+                            TCB_FLAG_TTYPE_PTHREAD);
+    }
+
+  if (ret != OK)
+    {
+      errcode = ENOMEM;
+      goto errout_with_join;
+    }
+
   /* Should we use the priority and scheduler specified in the pthread
    * attributes?  Or should we use the current thread's priority and
    * scheduler?
@@ -409,27 +430,6 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       ptcb->cmn.affinity = attr->affinity;
     }
 #endif
-
-  if (attr->stackaddr)
-    {
-      /* Use pre-allocated stack */
-
-      ret = up_use_stack((FAR struct tcb_s *)ptcb, attr->stackaddr,
-                         attr->stacksize);
-    }
-  else
-    {
-      /* Allocate the stack for the TCB */
-
-      ret = up_create_stack((FAR struct tcb_s *)ptcb, attr->stacksize,
-                            TCB_FLAG_TTYPE_PTHREAD);
-    }
-
-  if (ret != OK)
-    {
-      errcode = ENOMEM;
-      goto errout_with_join;
-    }
 
   /* Configure the TCB for a pthread receiving on parameter
    * passed by value
