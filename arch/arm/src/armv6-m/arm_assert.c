@@ -247,7 +247,7 @@ static void up_dumpstate(void)
    * stack?
    */
 
-  if (sp <= istackbase && sp > istackbase - istacksize)
+  if (sp < istackbase && sp > istackbase - istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
