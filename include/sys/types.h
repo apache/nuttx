@@ -162,6 +162,10 @@ typedef intptr_t     ptrdiff_t;
 typedef uint16_t     wchar_t;
 #endif
 
+#if defined(__WCHAR_WIDTH__) && __WCHAR_WIDTH__ != 16
+#warning __WCHAR_WIDTH__ should be 16 on NuttX. Your toolchain might need -fshort-wchar.
+#endif
+
 /* wint_t
  *   An integral type capable of storing any valid value of wchar_t, or WEOF.
  */
