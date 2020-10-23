@@ -252,7 +252,7 @@ static void up_dumpstate(void)
   if (rtcb->xcp.kstack)
     {
       kstackbase = (uint32_t)rtcb->xcp.kstack +
-                   CONFIG_ARCH_KERNEL_STACKSIZE - 4;
+                   CONFIG_ARCH_KERNEL_STACKSIZE;
 
       _alert("Kernel stack:\n");
       _alert("  base: %08x\n", kstackbase);
