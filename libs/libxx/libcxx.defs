@@ -58,6 +58,9 @@ CXXFLAGS += ${shell $(DEFINE) "$(CC)" _LIBCPP_BUILDING_LIBRARY}
 libcxx/src/barrier.cpp_CXXFLAGS += -Wno-shadow
 libcxx/src/locale.cpp_CXXFLAGS += -Wno-shadow
 
+libcxx/src/filesystem/directory_iterator.cpp_CXXFLAGS += -Wno-shadow
+libcxx/src/filesystem/operations.cpp_CXXFLAGS += -Wno-shadow
+
 CPPSRCS += $(notdir $(wildcard libcxx/src/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/experimental/*.cpp))
 CPPSRCS += $(notdir $(wildcard libcxx/src/filesystem/*.cpp))
