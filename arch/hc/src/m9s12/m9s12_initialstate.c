@@ -72,8 +72,10 @@ void up_initial_state(struct tcb_s *tcb)
 
   if (tcb->pid == 0)
     {
-      up_use_stack(tcb, (void *)(g_idle_topstack -
-        CONFIG_IDLETHREAD_STACKSIZE), CONFIG_IDLETHREAD_STACKSIZE);
+      tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
+                                      CONFIG_IDLETHREAD_STACKSIZE);
+      tcb->adj_stack_ptr   = (void *)g_idle_topstack;
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
   /* Initialize the initial exception register context structure */
@@ -98,14 +100,14 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Condition code register:
    *
-   *   Bit 0: C — Carry/Borrow status bit
-   *   Bit 1: V — Two’s complement overflow status bit
-   *   Bit 2: Z — Zero status bit
-   *   Bit 3: N — Negative status bit
-   *   Bit 4: I — Maskable interrupt control bit
-   *   Bit 5: H — Half-carry status bit
-   *   Bit 6: X — Non-maskable interrupt control bit
-   *   Bit 7: S — STOP instruction control bit
+   *   Bit 0: C Carry/Borrow status bit
+   *   Bit 1: V Two's complement overflow status bit
+   *   Bit 2: Z Zero status bit
+   *   Bit 3: N Negative status bit
+   *   Bit 4: I Maskable interrupt control bit
+   *   Bit 5: H Half-carry status bit
+   *   Bit 6: X Non-maskable interrupt control bit
+   *   Bit 7: S STOP instruction control bit
    */
 
 # ifdef CONFIG_SUPPRESS_INTERRUPTS
