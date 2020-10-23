@@ -113,7 +113,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
   g_lcddev = pcd8544_initialize(g_spidev, lcddev);
   if (!g_lcddev)
     {
-      lcderr("ERROR: Failed to bind SPI port 1 to LCD %d: %d\n", lcddev);
+      lcderr("ERROR: Failed to bind SPI port 1 to LCD %d\n", lcddev);
     }
   else
     {
