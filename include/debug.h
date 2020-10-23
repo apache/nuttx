@@ -595,6 +595,24 @@
 #  define pwminfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_RC_ERROR
+#  define rcerr        _err
+#else
+#  define rcerr       _none
+#endif
+
+#ifdef CONFIG_DEBUG_RC_WARN
+#  define rcwarn      _warn
+#else
+#  define rcwarn      _none
+#endif
+
+#ifdef CONFIG_DEBUG_RC_INFO
+#  define rcinfo      _info
+#else
+#  define rcinfo      _none
+#endif
+
 #ifdef CONFIG_DEBUG_RTC_ERROR
 #  define rtcerr       _err
 #else

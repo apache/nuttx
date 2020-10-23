@@ -1417,6 +1417,44 @@ config DEBUG_PWM_INFO
 
 endif # DEBUG_PWM
 
+config DEBUG_RC
+	bool "RC Debug Features"
+	default n
+	depends on DRIVERS_RC
+	---help---
+		Enable RC debug features.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+if DEBUG_RC
+
+config DEBUG_RC_ERROR
+	bool "RC Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable RC driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_RC_WARN
+	bool "RC Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable RC driver warning output to SYSLOG.
+
+config DEBUG_RC_INFO
+	bool "RC Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable RC driver informational output to SYSLOG.
+
+endif # DEBUG_RC
+
 config DEBUG_RTC
 	bool "RTC Debug Features"
 	default n
