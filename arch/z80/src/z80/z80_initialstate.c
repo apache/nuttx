@@ -57,8 +57,10 @@ void up_initial_state(struct tcb_s *tcb)
 
   if (tcb->pid == 0)
     {
-      up_use_stack(tcb,
-        (void *)CONFIG_STACK_BASE, CONFIG_IDLETHREAD_STACKSIZE);
+      tcb->stack_alloc_ptr = (void *)CONFIG_STACK_BASE;
+      tcb->adj_stack_ptr   = (void *)(CONFIG_STACK_BASE +
+                                      CONFIG_IDLETHREAD_STACKSIZE);
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
   /* Initialize the initial exception register context structure */
