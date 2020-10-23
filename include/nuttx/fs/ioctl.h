@@ -99,6 +99,7 @@
 #define _RPTUNBASE      (0x2b00) /* Remote processor tunnel ioctl commands */
 #define _NOTECTLBASE    (0x2c00) /* Note filter control ioctl commands*/
 #define _NOTERAMBASE    (0x2d00) /* Noteram device ioctl commands*/
+#define _RCIOCBASE      (0x2e00) /* Remote Control device ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -538,6 +539,11 @@
 
 #define _NOTERAMIOCVALID(c) (_IOC_TYPE(c) == _NOTERAMBASE)
 #define _NOTERAMIOC(nr)     _IOC(_NOTERAMBASE, nr)
+
+/* Remote Control drivers ***************************************************/
+
+#define _RCIOCVALID(c)    (_IOC_TYPE(c)==_RCIOCBASE)
+#define _RCIOC(nr)        _IOC(_RCIOCBASE,nr)
 
 /* Wireless driver network ioctl definitions ********************************/
 
