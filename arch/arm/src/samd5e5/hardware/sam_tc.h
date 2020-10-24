@@ -343,17 +343,17 @@
 #define TC_CTRLA_CAPTEN0_SHIFT       (16)           /* (TC_CTRLA) Capture Channel 0 Enable */
 #define TC_CTRLA_CAPTEN0             (1 << TC_CTRLA_CAPTEN0_SHIFT)
 #define TC_CTRLA_CAPTEN1_SHIFT       (17)           /* (TC_CTRLA) Capture Channel 1 Enable */
-#define TC_CTRLA_CAPTEN1             (1 << TC_CTRLA_CAPTEN1_SHIFT) 
+#define TC_CTRLA_CAPTEN1             (1 << TC_CTRLA_CAPTEN1_SHIFT)
 #define TC_CTRLA_COPEN0_SHIFT        (20)            /* (TC_CTRLA) Capture On Pin 0 Enable */
 #define TC_CTRLA_COPEN0              (1 << TC_CTRLA_COPEN1_SHIFT)
 #define TC_CTRLA_COPEN1_SHIFT        (21)           /* (TC_CTRLA) Capture On Pin 1 Enable */
-#define TC_CTRLA_COPEN1              (1 << TC_CTRLA_CAPTEN1_SHIFT) 
-#define TC_CTRLA_CAPTMODE0_SHIFT     (24)  /* (TC_CTRLA) Capture Mode Channel 0 */        
+#define TC_CTRLA_COPEN1              (1 << TC_CTRLA_CAPTEN1_SHIFT)
+#define TC_CTRLA_CAPTMODE0_SHIFT     (24)  /* (TC_CTRLA) Capture Mode Channel 0 */
 #define TC_CTRLA_CAPTMODE0_MASK      (3 << TC_CTRLA_CAPTMODE0_SHIFT)
 #define TC_CTRLA_CAPTMODE0_CAPTD     (0 << TC_CTRLA_CAPTMODE0_SHIFT) /* (TC_CTRLA) Default capture */
 #define TC_CTRLA_CAPTMODE0_CAPTMIN   (1 << TC_CTRLA_CAPTMODE0_SHIFT) /* (TC_CTRLA) Minimum capture */
 #define TC_CTRLA_CAPTMODE0_CAPTMAX   (2 << TC_CTRLA_CAPTMODE0_SHIFT) /* (TC_CTRLA) Maximum capture */
-#define TC_CTRLA_CAPTMODE1_SHIFT     (27)                            /* (TC_CTRLA) Capture Mode Channel 0 */        
+#define TC_CTRLA_CAPTMODE1_SHIFT     (27)                            /* (TC_CTRLA) Capture Mode Channel 0 */
 #define TC_CTRLA_CAPTMODE1_MASK      (3 << TC_CTRLA_CAPTMODE1_SHIFT)
 #define TC_CTRLA_CAPTMODE1_CAPTD     (0 << TC_CTRLA_CAPTMODE1_SHIFT) /* (TC_CTRLA) Default capture */
 #define TC_CTRLA_CAPTMODE1_CAPTMIN   (1 << TC_CTRLA_CAPTMODE1_SHIFT) /* (TC_CTRLA) Minimum capture */

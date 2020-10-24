@@ -853,7 +853,7 @@ static void   sam_sw_shutdown(struct sam_usbdev_s *priv);
 
 #ifdef CONFIG_USBHOST
 
-#undef CONFIG_SAM_USBHOST_PKTDUMP 
+#undef CONFIG_SAM_USBHOST_PKTDUMP
 #ifdef CONFIG_SAM_USBHOST_PKTDUMP
 #  define sam_pktdump(m,b,n) lib_dumpbuffer(m,b,n)
 #else

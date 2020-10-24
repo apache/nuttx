@@ -116,7 +116,7 @@ int sam_bringup(void)
   /* Initialize I2C bus */
 
   ret = metro_m4_i2cdev_initialize();
-#endif 
+#endif
 
 #ifdef CONFIG_USBHOST
   /* Initialize USB host operation. samd_usbhost_initialize() starts a

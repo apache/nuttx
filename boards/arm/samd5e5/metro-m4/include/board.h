@@ -482,17 +482,17 @@
 
 /* Tickless */
 
-#define BOARD_TC0_PINMAP_CC0         0                      /* CC0: (not used) */ 
-#define BOARD_TC0_PINMAP_CC1         0                      /* CC1: (not used) */ 
-#define BOARD_TC0_GCLKGEN            3 
+#define BOARD_TC0_PINMAP_CC0         0                      /* CC0: (not used) */
+#define BOARD_TC0_PINMAP_CC1         0                      /* CC1: (not used) */
+#define BOARD_TC0_GCLKGEN            3
 #define BOARD_TC0_FREQUENCY          BOARD_GCLK3_FREQUENCY
-#define BOARD_TC2_PINMAP_CC0         0                      /* CC0: (not used) */ 
-#define BOARD_TC2_PINMAP_CC1         0                      /* CC1: (not used) */ 
+#define BOARD_TC2_PINMAP_CC0         0                      /* CC0: (not used) */
+#define BOARD_TC2_PINMAP_CC1         0                      /* CC1: (not used) */
 #define BOARD_TC2_GCLKGEN            3
 #define BOARD_TC2_FREQUENCY          BOARD_GCLK3_FREQUENCY
-#define BOARD_TC4_PINMAP_CC0         0                      /* CC0: (not used) */ 
-#define BOARD_TC4_PINMAP_CC1         0                      /* CC1: (not used) */ 
-#define BOARD_TC4_GCLKGEN            3 
+#define BOARD_TC4_PINMAP_CC0         0                      /* CC0: (not used) */
+#define BOARD_TC4_PINMAP_CC1         0                      /* CC1: (not used) */
+#define BOARD_TC4_GCLKGEN            3
 #define BOARD_TC4_FREQUENCY          BOARD_GCLK3_FREQUENCY
 
 /* USB */

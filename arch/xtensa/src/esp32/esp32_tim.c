@@ -34,7 +34,7 @@
 
 #include "xtensa.h"
 
-#include "hardware/esp32_tim.h" 
+#include "hardware/esp32_tim.h"
 
 #include "esp32_tim.h"
 #include "esp32_cpuint.h"
@@ -130,7 +130,7 @@ struct esp32_tim_ops_s esp32_tim_ops =
   .ackint        = esp32_tim_ackint
 };
 
-#ifdef CONFIG_ESP32_TIMER0  
+#ifdef CONFIG_ESP32_TIMER0
 /* TIMER0 */
 
 struct esp32_tim_priv_s g_esp32_tim0_priv =

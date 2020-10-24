@@ -158,7 +158,7 @@
 
 /* I2C selections ***********************************************************/
 
-#define PIN_LPI2C0_SCL   PIN_LPI2C0_SCL_2   /* PTA3 */				
+#define PIN_LPI2C0_SCL   PIN_LPI2C0_SCL_2   /* PTA3 */
 #define PIN_LPI2C0_SDA	 PIN_LPI2C0_SDA_2   /* PTA2 */
 
 #endif  /* __BOARDS_ARM_S32K146EVB_INCLUDE_BOARD_H */

@@ -104,7 +104,7 @@
 
 #define DTC_VECTOR_TABLE_SIZE_BYTES (DTC_VECTOR_ADDRESS_ALIGN + DTC_VECTOR_TABLE_SIZE)
 
-#endif 
+#endif
 
 /* DTC register mask and value */
 
@@ -170,7 +170,7 @@ struct st_dtc_mrb_bit
   uint8_t DISEL:1; /* DTC Interrupt Select */
   uint8_t CHNS :1; /* DTC Chain Transfer Select */
   uint8_t CHNE :1; /* b7: DTC Chain Transfer Enable */
-#else 
+#else
   uint8_t CHNE :1; /* b7: DTC Chain Transfer Enable */
   uint8_t CHNS :1; /* DTC Chain Transfer Select */
   uint8_t DISEL:1; /* DTC Interrupt Select */
@@ -269,10 +269,10 @@ struct st_second_word
 #ifdef __RX_LITTLE_ENDIAN__
     uint8_t SAR[3];
     dtc_mrb_t MRB;
-#else 
+#else
     dtc_mrb_t MRB;
     uint8_t DAR[3];
-#endif 
+#endif
   };
 
 struct st_third_word
@@ -280,10 +280,10 @@ struct st_third_word
 #ifdef __RX_LITTLE_ENDIAN__
     dtc_crb_t CRB;
     dtc_cra_t CRA;
-#else 
+#else
     dtc_cra_t CRA;
     dtc_crb_t CRB;
-#endif 
+#endif
   };
 
 typedef union lword1
@@ -331,9 +331,9 @@ struct st_first_lword
 #else
   dtc_mrc_t MRC;
   uint8_t reserver; /* reserve area */
-#endif 
+#endif
 
-#endif 
+#endif
   };
 
 struct st_fourth_lword
@@ -396,7 +396,7 @@ struct rx65n_dtc_s
   uint8_t * vectortable; /* Vector table pointer */
 #if defined (CONFIG_RX65N_DTC_SEQUENCE_TRANSFER_MODE)
   uint8_t * indextable;  /* Index table pointer for sequence transfer */
-#endif  
+#endif
 
   uint8_t addmode;        /* Address mode */
 
@@ -1775,7 +1775,7 @@ void rx65n_dtc_initialize(void)
 #if defined(CONFIG_RX65N_DTC_SHORT_ADDRESS_MODE) /* Short-address mode */
       DTC.DTCADMOD.BIT.SHORT = 1;
       dtchandle->addmode = 1;
-#else 
+#else
       /* Full-address mode */
 
       DTC.DTCADMOD.BIT.SHORT = 0;

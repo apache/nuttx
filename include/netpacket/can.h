@@ -67,17 +67,17 @@
 
 /* CAN_RAW socket options */
 
-#define CAN_RAW_FILTER         (__SO_PROTOCOL + 0)     
+#define CAN_RAW_FILTER         (__SO_PROTOCOL + 0)
                                  /* set 0 .. n can_filter(s) */
-#define CAN_RAW_ERR_FILTER     (__SO_PROTOCOL + 1)      
+#define CAN_RAW_ERR_FILTER     (__SO_PROTOCOL + 1)
                                  /* set filter for error frames */
-#define CAN_RAW_LOOPBACK       (__SO_PROTOCOL + 2)      
+#define CAN_RAW_LOOPBACK       (__SO_PROTOCOL + 2)
                                  /* local loopback (default:on) */
-#define CAN_RAW_RECV_OWN_MSGS  (__SO_PROTOCOL + 3)	     
+#define CAN_RAW_RECV_OWN_MSGS  (__SO_PROTOCOL + 3)
                                  /* receive my own msgs (default:off) */
-#define CAN_RAW_FD_FRAMES      (__SO_PROTOCOL + 4)      
+#define CAN_RAW_FD_FRAMES      (__SO_PROTOCOL + 4)
                                  /* allow CAN FD frames (default:off) */
-#define CAN_RAW_JOIN_FILTERS   (__SO_PROTOCOL + 5)     
+#define CAN_RAW_JOIN_FILTERS   (__SO_PROTOCOL + 5)
                                  /* all filters must match to trigger */
 #define CAN_RAW_TX_DEADLINE    (__SO_PROTOCOL + 6)
                                  /* Abort frame when deadline passed */

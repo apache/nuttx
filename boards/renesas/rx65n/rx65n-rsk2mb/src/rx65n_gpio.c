@@ -38,7 +38,7 @@
  * LED Port Initialization for RX65N RSK2MB Board
  ****************************************************************************/
 
-#if   defined (CONFIG_ARCH_BOARD_RX65N_RSK2MB) 
+#if   defined (CONFIG_ARCH_BOARD_RX65N_RSK2MB)
 void led_port_create(void)
 {
   /* LED Port initialization of RX65N RSK2MB */
@@ -460,7 +460,7 @@ void rspi_pinconfig(int bus)
         break;
     }
 }
-#endif 
+#endif
 
 /****************************************************************************
  * Name: riic0_init_port

@@ -87,7 +87,7 @@
 
 /* Disable logging from the ROM code. */
 
-#define RTC_DISABLE_ROM_LOG ((1 << 0) | (1 << 16)) 
+#define RTC_DISABLE_ROM_LOG ((1 << 0) | (1 << 16))
 #define EXT_OSC_FLAG    BIT(3)
 
 /* Default initializer for esp32_rtc_sleep_config_t

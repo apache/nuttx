@@ -55,7 +55,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STA_DEVNO                  0           
+#define STA_DEVNO                  0
 
 /* TX poll delay = 1 seconds.
  * CLK_TCK is the number of clock ticks per second

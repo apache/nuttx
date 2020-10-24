@@ -145,7 +145,7 @@
 
 /* SMI interface pins */
 
-#define EMAC_MDC_PIN            (CONFIG_ESP32_ETH_MDCPIN)         
+#define EMAC_MDC_PIN            (CONFIG_ESP32_ETH_MDCPIN)
 #define EMAC_MDIO_PIN           (CONFIG_ESP32_ETH_MDIOPIN)
 
 /* Reset PHY chip pins */

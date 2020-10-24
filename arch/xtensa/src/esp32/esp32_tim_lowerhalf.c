@@ -45,7 +45,7 @@
 /* TIMER configuration */
 
 /* Lowest divider, Highest Frequency Best Resolution */
-#define ESP32_TIMER_PRESCALER   2    
+#define ESP32_TIMER_PRESCALER   2
 /* Number of cycles to complete 1 microsecond */
 #define ESP32_1USECOND          ((TB_CLK_FREQ/ESP32_TIMER_PRESCALER)/1000000)
 #define ESP32_INIT_CNTR_VALUE   0    /* Initial counter value */

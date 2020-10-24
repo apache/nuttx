@@ -492,7 +492,7 @@ dtc_static_transfer_data_cfg_t rx_cfg =
   .source_addr = (uint32_t)NULL,            /* Set data register address */
   .dest_addr = (uint32_t)NULL,              /* This will set dynamically */
   .transfer_count = 0,                      /* This will set dynamically */
-#if CONFIG_RX65N_RSPI_BUF_SIZE > 1	
+#if CONFIG_RX65N_RSPI_BUF_SIZE > 1
   .block_size = CONFIG_RX65N_RSPI_BUF_SIZE, /* Looks like tx fifo size */
 #else
   .block_size = 0,
@@ -2309,7 +2309,7 @@ static void rspi_bus_initialize(FAR struct rx65n_rspidev_s *priv)
 #else
   regval8 |= (RSPI_SPDCR_SPFC0 | RSPI_SPDCR_SPFC1); /* 4 frames */
   priv->bufsize = BUFSIZE_4FRAME;
-#endif  
+#endif
   regval8 |= (RSPI_SPDCR_SPBYT);
   priv->nbits = 8;
   rspi_putreg8(priv, RX65N_RSPI_SPDCR_OFFSET, regval8);

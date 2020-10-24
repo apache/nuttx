@@ -1905,7 +1905,7 @@ static void rspi_bus_initialize(FAR struct rx65n_rspidev_s *priv)
 #else
   regval8 |= (RSPI_SPDCR_SPFC0 | RSPI_SPDCR_SPFC1); /* 4 frames */
   priv->bufsize = BUFSIZE_4FRAME;
-#endif  
+#endif
   regval8 |= (RSPI_SPDCR_SPBYT);
   priv->nbits = 8;
   rspi_putreg8(priv, RX65N_RSPI_SPDCR_OFFSET, regval8);
