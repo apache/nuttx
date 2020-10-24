@@ -141,7 +141,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
             break;
 
           /* The resulting set is the intersection of the current set and
-           * the complement of the signal set pointed to by _set.
+           * the complement of the signal set pointed to by set.
            */
 
           case SIG_UNBLOCK:
