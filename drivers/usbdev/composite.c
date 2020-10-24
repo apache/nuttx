@@ -654,14 +654,37 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
                 for (i = 0; i < priv->ndevices; i++)
                   {
+                    /* The device must *NOT* submit on EP0 here */
+
                     ret = CLASS_SETUP(priv->device[i].dev,
                                       dev,
                                       ctrl,
                                       dataout,
                                       outlen);
+                    if (ret < 0)
+                      {
+                        /* FIXME does this work ? */
+
+                        ctrl->value = 0;
+
+                        for (i=i-1; i>=0; i--)
+                          {
+                            /* Reset configurations */
+
+                            CLASS_SETUP(priv->device[i].dev,
+                                            dev,
+                                            ctrl,
+                                            dataout,
+                                            outlen);
+                          }
+
+                        break;
+                      }
                   }
 
-                dispatched = true;
+                /* FIXME host is expecting only one reply */
+
+                // dispatched = true;
                 priv->config = value;
               }
           }
