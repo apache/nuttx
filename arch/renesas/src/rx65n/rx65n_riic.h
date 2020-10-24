@@ -50,7 +50,7 @@
 #define RIIC_ERR_AL             3 /* Arbitration lost error */
 #define RIIC_ERR_TMO            4 /* Time Out error */
 #define RIIC_ERR_NACK           5 /* NACK reception */
-#define RIIC_ERR_OTHER          6 /* Other error */      
+#define RIIC_ERR_OTHER          6 /* Other error */
 
 /****************************************************************************
  * Public Function Prototypes

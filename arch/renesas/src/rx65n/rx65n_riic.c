@@ -864,7 +864,7 @@ static void rx65n_riic_init(FAR struct rx65n_i2c_priv_s *priv)
         }
 
       rx65n_putreg(regval, RX65N_RIIC0_ICMR2);
-#endif 
+#endif
 
       rx65n_riic_irq_init(priv);
 

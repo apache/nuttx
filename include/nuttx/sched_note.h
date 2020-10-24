@@ -329,7 +329,7 @@ struct note_filter_mode_s
   unsigned int flag;          /* Filter mode flag */
 #ifdef CONFIG_SMP
   unsigned int cpuset;        /* The set of monitored CPUs */
-#endif  
+#endif
 };
 
 /* This is the type of the argument passed to the NOTECTL_GETSYSCALLFILTER

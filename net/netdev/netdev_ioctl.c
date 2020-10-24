@@ -1088,7 +1088,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
             }
         }
         break;
-#endif  
+#endif
 
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_CAN_BITRATE_IOCTL)
       case SIOCGCANBITRATE:  /* Get bitrate from a CAN controller */

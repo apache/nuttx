@@ -1030,7 +1030,7 @@
 #define USB0_CFIFO16                    (USB0.CFIFO.WORD)
 #define USB0_D0FIFO16                   (USB0.D0FIFO.WORD)
 #define USB0_D1FIFO16                   (USB0.D1FIFO.WORD)
-#define USB_WRITEEND                    (0x0000u)     
+#define USB_WRITEEND                    (0x0000u)
 #define USB_CTRL_END                    (0u)
 #define USB_BREQUEST                    (0xFF00u)
 #define USB_BRDY0                       (0x0001u)     /* b1: PIPE0 */

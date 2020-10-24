@@ -99,7 +99,7 @@ void r_ether_pheriperal_enable(void)
 {
   /* TODO */
 }
-#endif 
+#endif
 
 /****************************************************************************
  * Name: sci2_init_port
@@ -123,5 +123,5 @@ inline void sci2_init_port(void)
   PORT5.PDR.BIT.BT0  = 1u;
   PORT5.PMR.BIT.BT0  = 1u;
 }
-#endif 
+#endif
 #endif /* CONFIG_ARCH_BOARD_RX65N_RSK1MB*/

@@ -32,7 +32,7 @@
   #define PHY_STS_REG_LINK             (1 << 0)
   #define PHY_STS_READ_REG             PHY_STS_REG
   #define PHY_STS_BIT_MASK             (0x1)
-  #define PHY_STS_SHIFT_COUNT          (0x0)	
+  #define PHY_STS_SHIFT_COUNT          (0x0)
 #endif
 
 #if defined(CONFIG_ARCH_RX65N_GRROSE)

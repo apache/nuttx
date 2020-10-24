@@ -784,7 +784,7 @@
 #define CCM_CMEOR_MOD_EN_OV_PIT                  (1 << 6)  /* Bit 6:      Override clock enable signal from PIT */
 #define CCM_CMEOR_MOD_EN_OV_USDHC                (1 << 7)  /* Bit 7:      Override clock enable signal from USDHC */
 #define CCM_CMEOR_MOD_EN_OV_TRNG                 (1 << 9)  /* Bit 9:      Override clock enable signal from TRNG */
-#define CCM_CMEOR_MOD_EN_OV_CANFD_CPI            (1 << 10) /* Bit 10:     Override clock enable signal from CAN3 */ 
+#define CCM_CMEOR_MOD_EN_OV_CANFD_CPI            (1 << 10) /* Bit 10:     Override clock enable signal from CAN3 */
                                                            /* Bits 11-27: Reserved */
 #define CCM_CMEOR_MOD_EN_OV_CAN2_CPI             (1 << 28) /* Bit 28:     Override clock enable signal from CAN2 */
 #define CCM_CMEOR_MOD_EN_OV_CAN1_CPI             (1 << 30) /* Bit 30:     Override clock enable signal from CAN1 */
