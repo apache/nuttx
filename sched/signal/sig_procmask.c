@@ -104,7 +104,6 @@
 int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 {
   FAR struct tcb_s *rtcb = this_task();
-  sigset_t   oldsigprocmask;
   irqstate_t flags;
   int        ret = OK;
 
@@ -112,10 +111,9 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 
   /* Return the old signal mask if requested */
 
-  oldsigprocmask = rtcb->sigprocmask;
   if (oset != NULL)
     {
-      *oset = oldsigprocmask;
+      *oset = rtcb->sigprocmask;
     }
 
   /* Modify the current signal mask if so requested */
