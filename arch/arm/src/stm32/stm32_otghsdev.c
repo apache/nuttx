@@ -2327,7 +2327,8 @@ static inline void stm32_ep0out_stdrequest(struct stm32_usbdev_s *priv,
 
       {
         usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_GETSETDESC), 0);
-        if ((ctrlreq->type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE)
+        if ((ctrlreq->type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE ||
+            (ctrlreq->type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_INTERFACE)
           {
             stm32_req_dispatch(priv, &priv->ctrlreq);
           }
