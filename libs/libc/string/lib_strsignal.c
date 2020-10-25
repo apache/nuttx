@@ -90,7 +90,7 @@ static FAR const char *g_default_sigstr[32] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psignal
+ * Name: strsignal
  *
  * Description:
  *   The strsignal() function will map the signal number in signum to an
