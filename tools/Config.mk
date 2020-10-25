@@ -56,9 +56,7 @@ MODULESTRIP ?= $(STRIP)
 # Define HOSTCC on the make command line if it differs from these defaults
 # Define HOSTCFLAGS with -g on the make command line to build debug versions
 
-HOSTOS = ${shell uname -o 2>/dev/null || uname -s 2>/dev/null || echo "Other"}
-
-ifeq ($(HOSTOS),MinGW)
+ifeq ($(CONFIG_WINDOWS_MSYS),y)
 
 # In the Windows native environment, the MinGW GCC compiler is used
 
@@ -76,7 +74,7 @@ HOSTCC ?= cc
 HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow
 HOSTCFLAGS += -DHAVE_STRTOK_C=1
 
-ifeq ($(HOSTOS),Cygwin)
+ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
 HOSTCFLAGS += -DHOST_CYGWIN=1
 endif
 endif
@@ -88,7 +86,7 @@ ASMEXT ?= .S
 OBJEXT ?= .o
 LIBEXT ?= .a
 
-ifeq ($(HOSTOS),Cygwin)
+ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
   EXEEXT ?= .exe
 endif
 

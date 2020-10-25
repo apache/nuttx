@@ -60,7 +60,7 @@ else
 endif
 
 ifeq ($(OLDGCC),n)
-ifneq ($(HOSTOS),Cygwin)
+ifneq ($(CONFIG_WINDOWS_CYGWIN),y)
   OBJCOPYARGS = -R .note -R .note.gnu.build-id -R .comment
 endif
 endif
