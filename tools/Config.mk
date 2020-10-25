@@ -471,10 +471,12 @@ define CLEAN
 	$(Q) if exist *$(LIBEXT) (del /f /q *$(LIBEXT))
 	$(Q) if exist *~ (del /f /q *~)
 	$(Q) if exist (del /f /q  .*.swp)
+	$(Q) if exist $(OBJS) (del /f /q $(OBJS))
+	$(Q) if exist $(BIN) (del /f /q  $(BIN))
 endef
 else
 define CLEAN
-	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp
+	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN)
 endef
 endif
 
