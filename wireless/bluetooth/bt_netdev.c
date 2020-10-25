@@ -1064,8 +1064,6 @@ int bt_netdev_register(FAR const struct bt_driver_s *btdev)
 
   nxsem_init(&priv->bd_exclsem, 0, 1);
 
-  DEBUGASSERT(priv->bd_txpoll != NULL);
-
   /* Set the network mask. */
 
   btnet_netmask(netdev);
