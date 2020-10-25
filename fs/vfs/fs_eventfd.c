@@ -66,7 +66,7 @@ struct eventfd_priv_s
   eventfd_waiter_sem_t *rdsems; /* List of blocking readers */
   eventfd_waiter_sem_t *wrsems; /* List of blocking writers */
   eventfd_t counter;            /* eventfd counter */
-  uint8_t   minor;              /* eventfd minor number */
+  size_t    minor;              /* eventfd minor number */
   uint8_t   crefs;              /* References counts on eventfd (max: 255) */
   uint8_t   mode_semaphore;     /* eventfd mode (semaphore or counter) */
 
@@ -104,8 +104,8 @@ static int eventfd_blocking_io(FAR struct eventfd_priv_s *dev,
                                eventfd_waiter_sem_t *sem,
                                FAR eventfd_waiter_sem_t **slist);
 
-static int eventfd_get_unique_minor(void);
-static void eventfd_release_minor(int minor);
+static size_t eventfd_get_unique_minor(void);
+static void eventfd_release_minor(size_t minor);
 
 static FAR struct eventfd_priv_s *eventfd_allocdev(void);
 static void eventfd_destroy(FAR struct eventfd_priv_s *dev);
@@ -176,19 +176,14 @@ static void eventfd_pollnotify(FAR struct eventfd_priv_s *dev,
 }
 #endif
 
-static int eventfd_get_unique_minor(void)
+static size_t eventfd_get_unique_minor(void)
 {
-  static int minor = 0;
+  static size_t minor;
 
-  /* TODO reimplement this with minor bit map ?
-   * Current logic will not behave correctly after
-   * a minor overflow (> 255 eventfd created)
-   */
-
-  return (minor++) & 0xff;
+  return minor++;
 }
 
-static void eventfd_release_minor(int minor)
+static void eventfd_release_minor(size_t minor)
 {
 }
 
@@ -586,12 +581,11 @@ int eventfd(unsigned int count, int flags)
 {
   int ret;
   int new_fd;
-  unsigned int new_minor;
   FAR struct eventfd_priv_s *new_dev;
 
-  /* devpath: EVENT_FD_VFS_PATH + /efd (4) + %d (3) + null char (1) */
+  /* devpath: EVENT_FD_VFS_PATH + /efd (4) + size_t (10) + null char (1) */
 
-  char devpath[sizeof(CONFIG_EVENT_FD_VFS_PATH) + 4 + 3 + 1];
+  char devpath[sizeof(CONFIG_EVENT_FD_VFS_PATH) + 4 + 10 + 1];
 
   /* Allocate instance data for this driver */
 
@@ -609,20 +603,11 @@ int eventfd(unsigned int count, int flags)
 
   /* Request a unique minor device number */
 
-  new_minor = eventfd_get_unique_minor();
-
-  if (new_minor < 0)
-    {
-      ferr("Cannot get minor\n");
-      ret = -new_minor;
-      goto exit_free_new_dev;
-    }
-
-  new_dev->minor = new_minor;
+  new_dev->minor = eventfd_get_unique_minor();
 
   /* Get device path */
 
-  sprintf(devpath, CONFIG_EVENT_FD_VFS_PATH "/efd%d", new_minor);
+  sprintf(devpath, CONFIG_EVENT_FD_VFS_PATH "/efd%d", new_dev->minor);
 
   /* Register the driver */
 
@@ -654,8 +639,7 @@ int eventfd(unsigned int count, int flags)
 exit_unregister_driver:
   unregister_driver(devpath);
 exit_release_minor:
-  eventfd_release_minor(new_minor);
-exit_free_new_dev:
+  eventfd_release_minor(new_dev->minor);
   eventfd_destroy(new_dev);
 exit_set_errno:
   set_errno(ret);
