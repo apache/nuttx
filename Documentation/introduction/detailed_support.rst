@@ -2894,7 +2894,7 @@ PIC32MX795F512L. There one two board ports using this chip:
 #. The *LITE* version of the PIC32MX toolchain available for download
    from the `Microchip <http://www.microchip.com>`__ website, or
 #. The Pinguino MIPS ELF toolchain available from the Pinguino
-   `website <http://code.google.com/p/pinguino32/downloads/list>`__.
+   `website <https://code.google.com/archive/p/pinguino32/>`__.
 #. The MIPS SDE toolchain available from the `Mentor
    Graphics <http://www.mentor.com>`__ website.
 
