@@ -1002,11 +1002,6 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
 
       g_btdev.ncmd = 0;
 
-      wlinfo("Sending command %04x buf %p to driver\n",
-             buf->u.hci.opcode, buf);
-
-      btdev->send(btdev, buf);
-
       /* Clear out any existing sent command */
 
       if (g_btdev.sent_cmd)
@@ -1017,6 +1012,11 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
         }
 
       g_btdev.sent_cmd = buf;
+
+      wlinfo("Sending command %04x buf %p to driver\n",
+             buf->u.hci.opcode, buf);
+
+      btdev->send(btdev, buf);
     }
 
   return EXIT_SUCCESS;  /* Can't get here */
