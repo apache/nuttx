@@ -4362,6 +4362,7 @@ static inline int stm32_ethinitialize(int intf)
   struct stm32_ethmac_s *priv;
   uint8_t uid[12];
   uint64_t crc;
+  int ret = OK;
 
   ninfo("intf: %d\n", intf);
 
@@ -4431,7 +4432,7 @@ static inline int stm32_ethinitialize(int intf)
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   netdev_register(&priv->dev, NET_LL_ETHERNET);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
