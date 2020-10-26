@@ -27,19 +27,6 @@ This directory contains three C++ library:
  - uClibc++ C++ library (http://cxx.uclibc.org/)
    This implementation is selected with CONFIG_UCLIBCXX=y.
 
-If you have a need for more extensive C++ support, the following
-libraries might be usable too:
-
- - libstdc++  (part of GCC)
- - STLport    http://www.stlport.org/
- - uSTL       http://ustl.sourceforge.net/
-
-There is another version of uClibc++ that has been customized for
-use with NuttX. That version that can be found in the NuttX
-uClibc++ GIT repository.  (https://bitbucket.org/nuttx/uclibc/src/master/)
-Refer to the top-level uClibc++ README.txt file for installation
-instructions.
-
 operator new
 ------------
 
