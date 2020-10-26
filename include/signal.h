@@ -180,7 +180,7 @@
 #endif
 
 #ifndef CONFIG_SIG_PIPE
-#  define SIGPIPE       11
+#  define SIGPIPE       13
 #else
 #  define SIGPIPE       CONFIG_SIG_PIPE
 #endif
