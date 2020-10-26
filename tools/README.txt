@@ -1040,7 +1040,10 @@ testbuild.sh
   configured board.
 
   The prefix '-' can be used to skip a configuration:
-  -stm32f429i-disco/nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
+  -stm32f429i-disco/nsh
+
+  or skip a configuration on a specific host(e.g. Darwin):
+  -Darwin,sim:rpserver
 
 uncrustify.cfg
 --------------
