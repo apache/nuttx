@@ -125,30 +125,6 @@ static struct work_s g_hp_work;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bt_send
- *
- * Description:
- *   Add the provided buffer 'buf' to the head selected buffer list 'list'
- *
- * Input Parameters:
- *   btdev - An instance of the low-level drivers interface structure.
- *   buf   - The buffer to be sent by the driver
- *
- * Returned Value:
- *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
- *
- ****************************************************************************/
-
-static int bt_send(FAR const struct bt_driver_s *btdev,
-                   FAR struct bt_buf_s *buf)
-{
-  /* TODDO: Hook here to notify hci monitor */
-
-  return btdev->send(btdev, buf);
-}
-
-/****************************************************************************
  * Name: bt_enqueue_bufwork
  *
  * Description:
@@ -1050,7 +1026,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
       wlinfo("Sending command %04x buf %p to driver\n",
              buf->u.hci.opcode, buf);
 
-      btdev->send(btdev, buf);
+      bt_send(btdev, buf);
     }
 
   return EXIT_SUCCESS;  /* Can't get here */
@@ -1166,6 +1142,8 @@ static void priority_rx_work(FAR void *arg)
             wlerr("Unknown event 0x%02x\n", hdr->evt);
             break;
         }
+
+      bt_buf_release(buf);
 #else
       UNUSED(hdr);
 
@@ -1676,6 +1654,42 @@ void bt_hci_receive(FAR struct bt_buf_s *buf)
           wlerr("ERROR:  Failed to schedule LPWORK: %d\n", ret);
         }
     }
+}
+
+/****************************************************************************
+ * Name: bt_send
+ *
+ * Description:
+ *   Send the provided buffer to the bluetooth driver
+ *
+ * Input Parameters:
+ *   btdev - An instance of the low-level drivers interface structure.
+ *   buf   - The buffer to be sent by the driver
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int bt_send(FAR const struct bt_driver_s *btdev,
+            FAR struct bt_buf_s *buf)
+{
+  int ret;
+
+  /* Send to driver */
+
+  ret = btdev->send(btdev, buf);
+
+  /* TODDO: Hook here to notify hci monitor */
+
+#ifndef CONFIG_WIRELESS_BLUETOOTH_HOST
+  /* Free the buffer now that it is sent */
+
+  bt_buf_release(buf);
+#endif
+
+  return ret;
 }
 
 #ifdef CONFIG_WIRELESS_BLUETOOTH_HOST

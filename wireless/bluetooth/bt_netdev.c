@@ -1222,9 +1222,9 @@ static int  btnet_req_hci_data(FAR struct btnet_driver_s *priv,
           return -ENOMEM;
         }
 
-      g_btdev.btdev->send(g_btdev.btdev, buf);
-
       /* Transfer the frame to the Bluetooth stack. */
+
+      bt_send(g_btdev.btdev, buf);
 
       NETDEV_TXDONE(&priv->bd_dev.r_dev);
     }
