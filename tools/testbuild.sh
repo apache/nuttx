@@ -38,6 +38,9 @@ nuttx=$WD/../nuttx
 progname=$0
 fail=0
 APPSDIR=$WD/../apps
+if [ -z $ARTIFACTDIR ]; then
+  ARTIFACTDIR=$WD/../buildartifacts
+fi
 MAKE_FLAGS=-k
 EXTRA_FLAGS="EXTRAFLAGS="
 MAKE=make
@@ -46,6 +49,7 @@ unset HOPTION
 unset JOPTION
 PRINTLISTONLY=0
 GITCLEAN=0
+SAVEARTIFACTS=0
 
 case $(uname -s) in
   Darwin*)
@@ -77,8 +81,9 @@ function showusage {
   echo "  -x exit on build failures"
   echo "  -j <ncpus> passed on to make.  Default:  No -j make option."
   echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
-  echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx"
+  echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default ../nuttx"
   echo "  -p only print the list of configs without running any builds"
+  echo "  -A store the build executable artifact in ARTIFACTDIR (defaults to ../buildartifacts"
   echo "  -G Use \"git clean -xfdq\" instead of \"make distclean\" to clean the tree."
   echo "     This option may speed up the builds. However, note that:"
   echo "       * This assumes that your trees are git based."
@@ -129,6 +134,9 @@ while [ ! -z "$1" ]; do
     ;;
   -G )
     GITCLEAN=1
+    ;;
+  -A )
+    SAVEARTIFACTS=1
     ;;
   -h )
     showusage
@@ -247,6 +255,11 @@ function configure {
 function build {
   echo "  Building NuttX..."
   makefunc
+  if [ ${SAVEARTIFACTS} -eq 1 ]; then
+    artifactconfigdir=$ARTIFACTDIR/$(echo $config | sed "s/:/\//")/
+    mkdir -p $artifactconfigdir
+    xargs -a $nuttx/nuttx.manifest cp -t $artifactconfigdir
+  fi
 
   # Ensure defconfig in the canonical form
 
