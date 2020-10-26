@@ -47,6 +47,23 @@ unset JOPTION
 PRINTLISTONLY=0
 GITCLEAN=0
 
+case $(uname -s) in
+  Darwin*)
+    HOST=Darwin
+    ;;
+  CYGWIN*)
+    HOST=Cygwin
+    ;;
+  MINGW32*)
+    HOST=MinGw
+    ;;
+  *)
+
+    # Assume linux as a fallback
+    HOST=Linux
+    ;;
+esac
+
 function showusage {
   echo ""
   echo "USAGE: $progname [-l|m|c|g|n] [-d] [-e <extraflags>] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>"
@@ -258,51 +275,55 @@ function build {
 function dotest {
   echo "===================================================================================="
   config=`echo $1 | cut -d',' -f1`
-  re="-${config/\//:}[[:space:]]"
-  if [[ "${blacklist} " =~ $re ]]; then
-    echo "Skipping: $1"
-  else
-    echo "Configuration/Tool: $1"
-    if [ ${PRINTLISTONLY} -eq 1 ]; then
+  check=${HOST},${config/\//:}
+
+  for re in $blacklist; do
+    if [[ "${check}" =~ ${re:1}$ ]]; then
+      echo "Skipping: $1"
       return
     fi
+  done
 
-    # Parse the next line
-
-    configdir=`echo $config | cut -s -d':' -f2`
-    if [ -z "${configdir}" ]; then
-      configdir=`echo $config | cut -s -d'/' -f2`
-      if [ -z "${configdir}" ]; then
-        echo "ERROR: Malformed configuration: ${config}"
-        showusage
-      else
-        boarddir=`echo $config | cut -d'/' -f1`
-      fi
-    else
-      boarddir=`echo $config | cut -d':' -f1`
-    fi
-
-    path=$nuttx/boards/*/*/$boarddir/configs/$configdir
-    if [ ! -r $path/defconfig ]; then
-      echo "ERROR: no configuration found at $path"
-      showusage
-    fi
-
-    unset toolchain
-    if [ "X$config" != "X$1" ]; then
-      toolchain=`echo $1 | cut -d',' -f2`
-      if [ -z "$toolchain" ]; then
-        echo "  Warning: no tool configuration"
-      fi
-    fi
-
-    # Perform the build test
-
-    echo "------------------------------------------------------------------------------------"
-    distclean
-    configure
-    build
+  echo "Configuration/Tool: $1"
+  if [ ${PRINTLISTONLY} -eq 1 ]; then
+    return
   fi
+
+  # Parse the next line
+
+  configdir=`echo $config | cut -s -d':' -f2`
+  if [ -z "${configdir}" ]; then
+    configdir=`echo $config | cut -s -d'/' -f2`
+    if [ -z "${configdir}" ]; then
+      echo "ERROR: Malformed configuration: ${config}"
+      showusage
+    else
+      boarddir=`echo $config | cut -d'/' -f1`
+    fi
+  else
+    boarddir=`echo $config | cut -d':' -f1`
+  fi
+
+  path=$nuttx/boards/*/*/$boarddir/configs/$configdir
+  if [ ! -r $path/defconfig ]; then
+    echo "ERROR: no configuration found at $path"
+    showusage
+  fi
+
+  unset toolchain
+  if [ "X$config" != "X$1" ]; then
+    toolchain=`echo $1 | cut -d',' -f2`
+    if [ -z "$toolchain" ]; then
+      echo "  Warning: no tool configuration"
+    fi
+  fi
+
+  # Perform the build test
+
+  echo "------------------------------------------------------------------------------------"
+  distclean
+  configure
+  build
 }
 
 # Perform the build test for each entry in the test list file
