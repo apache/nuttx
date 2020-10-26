@@ -191,6 +191,7 @@ config ARCH_BOARD_QUICKFEATHER
 config ARCH_BOARD_ESP32CORE
 	bool "Espressif ESP32 Core board V2"
 	depends on ARCH_CHIP_ESP32
+	select ARCH_HAVE_LEDS
 	---help---
 		The ESP32 is a dual-core system from Espressif with two Harvard
 		architecture Xtensa LX6 CPUs. All embedded memory, external memory

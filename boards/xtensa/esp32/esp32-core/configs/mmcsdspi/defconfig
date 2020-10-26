@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_ARCH_LEDS is not set
 # CONFIG_ESP32_SPI2_DMA is not set
 # CONFIG_MMCSD_HAVE_CARDDETECT is not set
 # CONFIG_MMCSD_HAVE_WRITEPROTECT is not set

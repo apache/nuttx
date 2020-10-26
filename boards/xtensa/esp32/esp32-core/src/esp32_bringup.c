@@ -53,6 +53,11 @@
 #ifdef CONFIG_TIMER
 #  include <nuttx/timers/timer.h>
 #endif
+
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
 #include <syslog.h>
 #include <sys/errno.h>
 
@@ -242,6 +247,16 @@ int esp32_bringup(void)
              ret);
     }
 #endif
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
