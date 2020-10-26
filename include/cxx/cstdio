@@ -76,10 +76,8 @@ namespace std
   using ::fwrite;
   using ::gets;
   using ::gets_s;
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
   using ::setbuf;
   using ::setvbuf;
-#endif
   using ::ungetc;
 
   // Operations on the stdout stream, buffers, paths, and the whole printf-family

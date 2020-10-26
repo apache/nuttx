@@ -62,14 +62,11 @@ CSRCS += lib_stdsostream.c lib_perror.c lib_feof.c lib_ferror.c
 CSRCS += lib_rawinstream.c lib_rawoutstream.c lib_rawsistream.c
 CSRCS += lib_rawsostream.c lib_remove.c lib_rewind.c lib_clearerr.c
 CSRCS += lib_scanf.c lib_vscanf.c lib_fscanf.c lib_vfscanf.c lib_tmpfile.c
+CSRCS += lib_setbuf.c lib_setvbuf.c
 
 endif
 
 CSRCS += lib_tempnam.c lib_tmpnam.c
-
-ifneq ($(CONFIG_STDIO_DISABLE_BUFFERING),y)
-CSRCS += lib_setbuf.c lib_setvbuf.c
-endif
 
 # Other support that depends on specific, configured features.
 
