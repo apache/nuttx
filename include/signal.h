@@ -179,10 +179,10 @@
 #  define SIGTERM     CONFIG_SIG_TERM
 #endif
 
-#ifndef CONFIG_SIG_SIGPIPE
+#ifndef CONFIG_SIG_PIPE
 #  define SIGPIPE       11
 #else
-#  define SIGPIPE       CONFIG_SIG_SIGPIPE
+#  define SIGPIPE       CONFIG_SIG_PIPE
 #endif
 
 /* The following are non-standard signal definitions */
