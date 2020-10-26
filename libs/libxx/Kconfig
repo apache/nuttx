@@ -20,6 +20,14 @@ config HAVE_CXX
 		Toolchain supports C++ and CXX, CXXFLAGS, and COMPILEXX have been
 		defined in the configurations Make.defs file.
 
+config HAVE_CXX14
+	bool "C++14 support"
+	default n
+	depends on HAVE_CXX
+	---help---
+		C++14 support.
+		Namely, sized-versions of delete operator in libxx.
+
 if HAVE_CXX
 
 config HAVE_CXXINITIALIZE

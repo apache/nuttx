@@ -44,8 +44,6 @@
 
 #include "libxx.hxx"
 
-#ifdef CONFIG_HAVE_CXX14
-
 //***************************************************************************
 // Operators
 //***************************************************************************
@@ -58,5 +56,3 @@ void operator delete[](FAR void *ptr, std::size_t size)
 {
   lib_free(ptr);
 }
-
-#endif /* CONFIG_HAVE_CXX14 */

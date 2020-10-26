@@ -19,6 +19,10 @@
 ###########################################################################
 
 CXXSRCS += libxx_cxa_guard.cxx libxx_cxapurevirtual.cxx
-CXXSRCS += libxx_delete.cxx libxx_delete_sized.cxx libxx_deletea.cxx
-CXXSRCS += libxx_deletea_sized.cxx libxx_new.cxx libxx_newa.cxx
+CXXSRCS += libxx_delete.cxx libxx_deletea.cxx
+CXXSRCS += libxx_new.cxx libxx_newa.cxx
 CXXSRCS += libxx_stdthrow.cxx
+
+ifeq ($(CONFIG_HAVE_CXX14),y)
+CXXSRCS += libxx_delete_sized.cxx libxx_deletea_sized.cxx
+endif
