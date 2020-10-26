@@ -1505,7 +1505,7 @@ endif # SIG_DEFAULT
 
 config SIG_PIPE
 	int "SIGPIPE"
-	default 11
+	default 13
 	---help---
 		The SIGPIPE signal is sent to a task termination event.
 		This signal is generated when write on a pipe with no one to read it.
