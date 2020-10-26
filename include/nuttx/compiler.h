@@ -65,14 +65,6 @@
 #  define CONFIG_HAVE_BUILTIN_POPCOUNT 1
 #endif
 
-/* C++ support */
-
-#if defined(__cplusplus) && __cplusplus >= 201402L
-#  define CONFIG_HAVE_CXX14 1
-#else
-#  undef CONFIG_HAVE_CXX14
-#endif
-
 /* Attributes
  *
  * GCC supports weak symbols which can be used to reduce code size because
@@ -316,10 +308,6 @@
 
 # pragma disable_warning 85
 
-/* C++ support */
-
-#  undef CONFIG_HAVE_CXX14
-
 /* Attributes
  *
  * SDCC does not support weak symbols
@@ -454,10 +442,6 @@
 
 #  define IOBJ
 #  define IPTR
-
-/* C++ support */
-
-#  undef CONFIG_HAVE_CXX14
 
 /* Attributes
  *
@@ -602,10 +586,6 @@
 #  pragma section = ".data_init"
 #  pragma section = ".text"
 
-/* C++ support */
-
-#  undef CONFIG_HAVE_CXX14
-
 /* ISO C11 supports anonymous (unnamed) structures and unions.  Does
  * ICCARM?
  */
@@ -622,7 +602,6 @@
 #  undef  CONFIG_HAVE_FUNCTIONNAME
 #  undef  CONFIG_HAVE_FILENAME
 #  undef  CONFIG_HAVE_WEAKFUNCTIONS
-#  undef CONFIG_HAVE_CXX14
 #  define weak_alias(name, aliasname)
 #  define weak_data
 #  define weak_function
