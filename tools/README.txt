@@ -1026,9 +1026,9 @@ testbuild.sh
   build descriptions consists of two comma separated values.  For example:
 
     stm32f429i-disco:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
-    arduino-due:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL,-CONFIG_ARCH_SIZET_LONG
+    arduino-due:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
     /arm,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
-    /risc-v,CONFIG_RV32IM_TOOLCHAIN_GNU_RVGL,CONFIG_ARCH_SIZET_LONG
+    /risc-v,CONFIG_RV32IM_TOOLCHAIN_GNU_RVGL
 
   The first value is the usual configuration description of the form
   <board-name>:<configuration-name> or /<folder-name> and must correspond to a
