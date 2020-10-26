@@ -66,6 +66,10 @@ CSRCS += esp32_timer.c
 endif
 endif
 
+ifeq ($(CONFIG_USERLED),y)
+  CSRCS += esp32_userleds.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
 

@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_ARCH_LEDS is not set
 CONFIG_ARCH="xtensa"
 CONFIG_ARCH_BOARD="esp32-core"
 CONFIG_ARCH_BOARD_ESP32CORE=y
