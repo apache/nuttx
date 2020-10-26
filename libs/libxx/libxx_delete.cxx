@@ -49,7 +49,7 @@
 // Name: delete
 //***************************************************************************
 
-void operator delete(FAR void *ptr)
+void operator delete(FAR void *ptr) throw()
 {
   lib_free(ptr);
 }
