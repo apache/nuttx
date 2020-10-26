@@ -99,7 +99,7 @@ endchoice
 
 config SIM_WALLTIME
 	bool "Run the simulation at a fixed cadence in near real-time"
-	default n
+	default y
 
 if SIM_WALLTIME
 choice
@@ -134,10 +134,9 @@ endif
 config SIM_NETDEV
 	bool "Simulated Network Device"
 	default y
-	depends on NET_ETHERNET
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select SCHED_LPWORK
-	select SIM_WALLTIME
+	depends on (NET_ETHERNET && SIM_WALLTIME)
 	---help---
 		Build in support for a simulated network device.
 
@@ -226,7 +225,7 @@ config SIM_X11FB
 	bool "Use X11 window"
 	default n
 	select SCHED_LPWORK
-	select SIM_WALLTIME
+	depends on SIM_WALLTIME
 	---help---
 		Use an X11 graphics window to simulate the graphics device"
 
@@ -498,7 +497,7 @@ config SIM_QSPIFLASH_PAGESIZE
 config SIM_HCISOCKET
 	bool "Attach Host Bluetooth"
 	default false
-	depends on (WIRELESS_BLUETOOTH && HOST_LINUX)
+	depends on (WIRELESS_BLUETOOTH && HOST_LINUX && SIM_WALLTIME)
 	---help---
 		Attached the local bluetooth device to the simulation
 		target via HCI_CHANNEL_USER. This gives NuttX full
