@@ -22,7 +22,7 @@ config HAVE_CXX
 
 config HAVE_CXX14
 	bool "C++14 support"
-	default n
+	default y
 	depends on HAVE_CXX
 	---help---
 		C++14 support.
