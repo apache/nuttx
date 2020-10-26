@@ -219,14 +219,6 @@ function configure {
     sed -i -e "/$toolchain/d" $nuttx/.config
     echo "$toolchain=y" >> $nuttx/.config
 
-    if [ "X$sizet" == "Xuint" ]; then
-      echo "  Disabling CONFIG_ARCH_SIZET_LONG"
-      sed -i -e "/CONFIG_ARCH_SIZET_LONG/d" $nuttx/.config
-    elif [ "X$sizet" == "Xulong" ]; then
-      echo "  Enabling CONFIG_ARCH_SIZET_LONG"
-      sed -i -e "\$aCONFIG_ARCH_SIZET_LONG=y" $nuttx/.config
-    fi
-
     makefunc olddefconfig
   fi
 
@@ -297,17 +289,10 @@ function dotest {
     fi
 
     unset toolchain
-    unset sizet
     if [ "X$config" != "X$1" ]; then
       toolchain=`echo $1 | cut -d',' -f2`
       if [ -z "$toolchain" ]; then
         echo "  Warning: no tool configuration"
-      fi
-      archsizet=`echo $line | cut -d',' -f3`
-      if [ "X$archsizet" == "XCONFIG_ARCH_SIZET_LONG" ]; then
-        sizet=ulong
-      elif [ "X$archsizet" == "X-CONFIG_ARCH_SIZET_LONG" ]; then
-        sizet=uint
       fi
     fi
 

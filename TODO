@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 19, 2020)
+NuttX TODO List (Last updated October 20, 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -18,7 +18,7 @@ nuttx/:
   (0)  Message Queues (sched/mqueue)
   (1)  Work Queues (sched/wqueue)
   (6)  Kernel/Protected Build
-  (3)  C++ Support
+  (2)  C++ Support
   (5)  Binary loaders (binfmt/)
  (17)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
@@ -1076,23 +1076,6 @@ o Kernel/Protected Build
 
 o C++ Support
   ^^^^^^^^^^^
-
-  Title:       USE OF SIZE_T IN NEW OPERATOR
-  Description: The argument of the 'new' operators should take a type of
-               size_t (see libxx/libxx_new.cxx and libxx/libxx_newa.cxx).  But
-               size_t has an unknown underlying.  In the nuttx sys/types.h
-               header file, size_t is typed as uint32_t (which is determined by
-               architecture-specific logic).  But the C++ compiler may believe
-               that size_t is of a different type resulting in compilation errors
-               in the operator.  Using the underlying integer type Instead of
-               size_t seems to resolve the compilation issues.
-  Status:      Kind of open. There is a workaround. Setting CONFIG_ARCH_SIZET_LONG
-               =y will define the operators with argument of type unsigned long;
-               Setting CONFIG_ARCH_SIZET_LONG=n will define the operators with
-               argument of type unsigned int. But this is pretty ugly!  A better
-               solution would be to get a hold of the compilers definition of
-               size_t.
-  Priority:    Low.
 
   Title:       STATIC CONSTRUCTORS AND MULTITASKING
   Description: The logic that calls static constructors operates on the main
