@@ -161,8 +161,13 @@ jobs:
             export CCACHE_DIR=`pwd`/ccache
             mkdir $CCACHE_DIR
             cd sources/testing
-            ./cibuild.sh -c testlist/${{matrix.boards}}.dat
+            export ARTIFACTDIR=`pwd`/../../buildartifacts
+            ./cibuild.sh -A -c testlist/${{matrix.boards}}.dat
             ccache -s
+      - uses: actions/upload-artifact@v2
+        with:
+          name: linux-builds
+          path: buildartifacts/
 
   macOS:
     runs-on: macos-10.15
@@ -195,5 +200,10 @@ jobs:
           export CCACHE_DIR=`pwd`/ccache
           mkdir $CCACHE_DIR
           cd sources/testing
-          ./cibuild.sh -i -c testlist/${{matrix.boards}}.dat
+          export ARTIFACTDIR=`pwd`/../../buildartifacts
+          ./cibuild.sh -i -A -c testlist/${{matrix.boards}}.dat
           ccache -s
+      - uses: actions/upload-artifact@v2
+        with:
+          name: macos-builds
+          path: buildartifacts/

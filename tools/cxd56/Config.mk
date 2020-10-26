@@ -32,7 +32,7 @@ define POSTBUILD
 
 	+$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)cxd56 -f Makefile.host
 	tools$(DELIM)cxd56$(DELIM)mkspk$(HOSTEXEEXT) -c2 nuttx nuttx nuttx.spk;
-	$(Q)([ $$? -eq 0 ] && echo "Done.")
+	$(Q)([ $$? -eq 0 ] && echo nuttx.spk >> $(NUTTXNAME).manifest && echo "Done.")
 endef
 
 endif
