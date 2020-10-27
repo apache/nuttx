@@ -49,4 +49,5 @@ jobs:
         cd Documentation/
         pip3 install pipenv
         pipenv install
-        pipenv run make linkcheck
+        # This step flakes frequently so still annotate errors but dont fail the build
+        pipenv run make linkcheck || true
