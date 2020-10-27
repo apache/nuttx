@@ -22,6 +22,34 @@ config HAVE_CXX
 
 if HAVE_CXX
 
+choice
+	prompt "C++ Library"
+	default NUTTX_LIBXX
+
+config NUTTX_LIBXX
+	bool "NuttX C++ library"
+	---help---
+		A fragmentary C++ library that will allow to build only
+		the simplest of C++ applications.  In the deeply embedded world,
+		that is probably all that is necessary.
+
+config LIBCXX
+	bool "LLVM libc++ C++ Standard Library"
+	select CLOCK_MONOTONIC
+	select LIBC_WCHAR
+	select LIBC_LOCALE
+	---help---
+		LLVM "libc++" C++ Standard Library
+		https://libcxx.llvm.org/
+
+config UCLIBCXX
+	bool "uClibc++ Standard C++ Library"
+	---help---
+		uClibc++ C++ library
+		https://cxx.uclibc.org/
+
+endchoice
+
 config HAVE_CXXINITIALIZE
 	bool "Have C++ initialization"
 	default LIBCXX || UCLIBCXX
@@ -40,29 +68,6 @@ config CXX_LIBSUPCXX
 	---help---
 		Select if your toolchain provides libsupc++.  This option is required
 		at present because the built-in libsupc++ support is incomplete.
-
-comment "LLVM C++ Library (libcxx)"
-
-config LIBCXX
-	bool "Build LLVM libcxx (must be installed)"
-	default n
-	select CLOCK_MONOTONIC
-	select LIBC_WCHAR
-	select LIBC_LOCALE
-	---help---
-		If you have installed libcxx into the NuttX source tree, then it can
-		be built by selecting this option.  See the README.txt file in the
-		libcxx package for information on installing libcxx.
-
-comment "uClibc++ Standard C++ Library"
-
-config UCLIBCXX
-	bool "Build uClibc++ (must be installed)"
-	default n
-	---help---
-		If you have installed uClibc++ into the NuttX source try, then it can
-		be built by selecting this option.  See the README.txt file in the
-		uClibc++ packet for information on installing uClibc++.
 
 if UCLIBCXX
 
