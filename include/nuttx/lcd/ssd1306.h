@@ -1,22 +1,22 @@
-/**************************************************************************************
+/****************************************************************************
  * include/nuttx/lcd/ssd1306.h
  *
- * Driver for Univision UG-2864HSWEG01 OLED display or UG-2832HSWEG04 both with the
- * Univision SSD1306 controller in SPI mode and Densitron DD-12864WO-4A with SSD1309
- * in SPI mode.
+ * Driver for Univision UG-2864HSWEG01 OLED display or UG-2832HSWEG04 both
+ * with the Univision SSD1306 controller in SPI mode and Densitron
+ * DD-12864WO-4A with SSD1309 in SPI mode.
  *
  *   Copyright (C) 2012-2013, 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
- *   1. Product Specification (Preliminary), Part Name: OEL Display Module, Part ID:
+ *   1. Product Specification, Part Name: OEL Display Module, Part ID:
  *      UG-2864HSWEG01, Doc No: SAS1-9046-B, Univision Technology Inc.
- *   2. Product Specification, Part Name: OEL Display Module, Part ID: UG-2832HSWEG04,
- *      Doc No.: SAS1-B020-B, Univision Technology Inc.
- *   3. SSD1306, 128 X 64 Dot Matrix OLED/PLED, Preliminary Segment/Common Driver with
- *      Controller,  Solomon Systech
- *   4. SSD1309, 128 x 64 Dot Matrix OLED/PLED Segment/Common Driver with Controller,
- *      Solomon Systech
+ *   2. Product Specification, Part Name: OEL Display Module, Part ID:
+ *      UG-2832HSWEG04, Doc No.: SAS1-B020-B, Univision Technology Inc.
+ *   3. SSD1306, 128 X 64 Dot Matrix OLED/PLED, Preliminary Segment/Common
+ *      Driver with Controller, Solomon Systech
+ *   4. SSD1309, 128 x 64 Dot Matrix OLED/PLED Segment/Common Driver with
+ *      Controller, Solomon Systech
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,14 +45,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SSD1306_H
 #define __INCLUDE_NUTTX_SSD1306_H
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -62,24 +62,32 @@
 
 #ifdef CONFIG_LCD_SSD1306
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
-/* Configuration **********************************************************************/
-/* UG-2864HSWEG01 Configuration Settings:
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* SSD1306 configuration settings:
  *
- * CONFIG_UG2864HSWEG01_SPIMODE - Controls the SPI mode
- * CONFIG_UG2864HSWEG01_FREQUENCY - Define to use a different bus frequency
- * CONFIG_UG2864HSWEG01_NINTERFACES - Specifies the number of physical UG-2864HSWEG01
- *   devices that will be supported.
+ * CONFIG_SSD1306_SPIMODE - Controls the SPI mode
+ * CONFIG_SSD1306_FREQUENCY - Define to use a different bus frequency
+ *
+ * LCD panel selection settings:
+ *
+ * CONFIG_LCD_UG2864HSWEG01   - Enable UG-2864HSWEG01 support
+ * CONFIG_LCD_UG2832HSWEG04   - Enable UG-2832HSWEG04 support
+ * CONFIG_LCD_DD12864WO4A     - Enable DD-12864WO-4A support
+ * CONFIG_LCD_HILETGO         - Enable HiletGo 129x64 OLED support
+ * CONFIG_LCD_SH1106_OLED_132 - Enable SH1106 132x28 support
  *
  * Required LCD driver settings:
  *
- * CONFIG_LCD_UG28HSWEG01 - Enable UG-2864HSWEG01 support
- * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+ * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255
+ *   will be accepted.
  * CONFIG_LCD_MAXPOWER must be 1
  *
- * Option LCD driver settings:
+ * Optional LCD driver settings:
  * CONFIG_LCD_LANDSCAPE, CONFIG_LCD_PORTRAIT, CONFIG_LCD_RLANDSCAPE, and
  *   CONFIG_LCD_RPORTRAIT - Display orientation.
  *
@@ -90,27 +98,23 @@
 /* SPI Interface
  *
  * "The serial interface consists of serial clock SCL, serial data SI, A0 and
- *  CS . SI is shifted into an 8-bit shift register on every rising edge of
- *  SCL in the order of D7, D6, … and D0. A0 is sampled on every eighth clock
- *  and the data byte in the shift register is written to the display data RAM
- *  or command register in the same clock."
+ *  CS. SI is shifted into an 8-bit shift register on every rising edge of
+ *  SCL in the order of D7, D6, … and D0. A0 is sampled on every eighth
+ *  clock and the data byte in the shift register is written to the display
+ *  data RAM or command register in the same clock."
  *
  * MODE 3:
  *   Clock polarity:  High (CPOL=1)
  *   Clock phase:     Sample on trailing (rising edge) (CPHA 1)
  */
 
-#ifdef LCD_SSD1306_SPI
-
-#ifndef CONFIG_UG2864HSWEG01_SPIMODE
-#  define CONFIG_UG2864HSWEG01_SPIMODE SPIDEV_MODE3
-#endif
+#ifdef CONFIG_LCD_SSD1306_SPI
 
 /* "This module determines whether the input data is interpreted as data or
- * command. When A0 = “H”, the inputs at D7 - D0 are interpreted as data and be
- * written to display RAM. When A0 = “L”, the inputs at D7 - D0 are interpreted
- * as command, they will be decoded and be written to the corresponding command
- * registers.
+ * command. When A0 = H, the inputs at D7 - D0 are interpreted as data and be
+ * written to display RAM. When A0 = L, the inputs at D7 - D0 are interpreted
+ * as command, they will be decoded and be written to the corresponding
+ * command registers."
  */
 
 #ifndef CONFIG_SPI_CMDDATA
@@ -131,21 +135,13 @@
 
 #endif /* CONFIG_LCD_SSD1306_I2C */
 
-/* CONFIG_UG2864HSWEG01_NINTERFACES determines the number of physical interfaces
- * that will be supported.
- */
-
-#ifndef CONFIG_UG2864HSWEG01_NINTERFACES
-#  define CONFIG_UG2864HSWEG01_NINTERFACES 1
-#endif
-
 /* Check contrast selection */
 
 #if !defined(CONFIG_LCD_MAXCONTRAST)
 #  define CONFIG_LCD_MAXCONTRAST 255
 #endif
 
-#if CONFIG_LCD_MAXCONTRAST <= 0|| CONFIG_LCD_MAXCONTRAST > 255
+#if CONFIG_LCD_MAXCONTRAST <= 0 || CONFIG_LCD_MAXCONTRAST > 255
 #  error "CONFIG_LCD_MAXCONTRAST exceeds supported maximum"
 #endif
 
@@ -199,50 +195,50 @@
 #define SSD1306_Y1_BLACK  0
 #define SSD1306_Y1_WHITE  1
 
-/**************************************************************************************
+/****************************************************************************
  * Public Types
- **************************************************************************************/
+ ****************************************************************************/
 
 struct ssd1306_priv_s
 {
-  bool (*set_vcc) (bool on); /* Allow board to control display power. Return true if
-                                request state set successfully. */
+  bool (*set_vcc) (bool on); /* Allow board to control display power. Return
+                              * true if request state set successfully. */
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Public Data
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306initialize
  *
  * Description:
- *   Initialize the UG-2864HSWEG01 video hardware.  The initial state of the
- *   OLED is fully initialized, display memory cleared, and the OLED ready
- *   to use, but with the power setting at 0 (full off == sleep mode).
+ *   Initialize the video hardware.  The initial state of the OLED is
+ *   fully initialized, display memory cleared, and the OLED ready to
+ *   use, but with the power setting at 0 (full off == sleep mode).
  *
  * Input Parameters:
  *
  *   dev - A reference to the SPI/I2C driver instance.
  *   board_priv - Board specific structure.
- *   devno - A value in the range of 0 through CONFIG_UG2864HSWEG01_NINTERFACES-1.
- *     This allows support for multiple OLED devices.
+ *   devno - A device number when there are multiple OLED devices.
+ *     Currently must be zero.
  *
  * Returned Value:
  *
  *   On success, this function returns a reference to the LCD object for
  *   the specified OLED.  NULL is returned on any failure.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 struct lcd_dev_s;    /* See include/nuttx/lcd/lcd.h */
 struct spi_dev_s;    /* See include/nuttx/spi/spi.h */
@@ -250,28 +246,30 @@ struct i2c_master_s; /* See include/nuttx/i2c/i2c_master.h */
 
 #ifdef CONFIG_LCD_SSD1306_SPI
 FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *dev,
-                                         FAR const struct ssd1306_priv_s *board_priv,
-                                         unsigned int devno);
+                          FAR const struct ssd1306_priv_s *board_priv,
+                          unsigned int devno);
 #else
 FAR struct lcd_dev_s *ssd1306_initialize(FAR struct i2c_master_s *dev,
-                                         FAR const struct ssd1306_priv_s *board_priv,
-                                         unsigned int devno);
+                          FAR const struct ssd1306_priv_s *board_priv,
+                          unsigned int devno);
 #endif
 
-/************************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_fill
  *
  * Description:
- *   This non-standard method can be used to clear the entire display by writing one
- *   color to the display.  This is much faster than writing a series of runs.
+ *   This non-standard method can be used to clear the entire display by
+ *   writing one color to the display.  This is much faster than writing a
+ *   series of runs.
  *
  * Input Parameters:
- *   priv   - Reference to private driver structure
+ *   dev   - Reference to LCD object
+ *   color - Desired color
  *
  * Assumptions:
  *   Caller has selected the OLED section.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 int ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color);
 
