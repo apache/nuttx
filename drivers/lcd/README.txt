@@ -35,7 +35,7 @@ LCD Header files
         int (*getvideoinfo)(FAR struct lcd_dev_s *dev,
                             FAR struct fb_videoinfo_s *vinfo);
         int (*getplaneinfo)(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                           FAR struct lcd_planeinfo_s *pinfo);
+                            FAR struct lcd_planeinfo_s *pinfo);
 
       - The following are provided only if the video hardware supports RGB
         color mapping:
@@ -103,14 +103,14 @@ Re-usable LCD drivers reside in the drivers/lcd directory:
   ssd12989.c.  Generic LCD driver for LCDs based on the Solomon Systech
     SSD1289 LCD controller. Think of this as a template for an LCD driver
     that you will probably have to customize for any particular LCD
-    hardware. (see also boards/arm/stm32/hymini-stm32v/src/ssd1289.c below).
+    hardware. (See also boards/arm/stm32/hymini-stm32v/src/ssd1289.c below).
 
   st7567.c.  LCD Display Module, ST7567, Univision Technology Inc. Used
     with the LPCXpresso and Embedded Artists base board.
 
   memlcd.c.  Sharp Memory LCD Suite, LS013B7DH01, LS013B7DH03, etc.
     There are some more different models, they are basically controlled
-    by similar logics, thus this driver can be extended.  Example usage:
+    by similar logics, thus this driver can be extended.
 
   ra8875.c.  RAiO Technologies RA8875 LCD controller.  Contributed by
     Marten Svanfeldt.
@@ -120,7 +120,7 @@ Re-usable LCD drivers reside in the drivers/lcd directory:
   p14201.c.  Driver for RiT P14201 series display with SD1329 IC
     controller.  Based on the SD1329 controller.  This OLED is used with
     older versions of the TI/Luminary LM3S8962 Evaluation Kit.  Example
-    usage
+    usage:
 
       boards/arm/tiva/lm3s6965-ek/src
       boards/arm/tiva/lm3s8962-ek/src
@@ -138,9 +138,11 @@ Re-usable LCD drivers reside in the drivers/lcd directory:
       boards/arm/lpc71xx_40xx/lpcxpresso-lpc1768
 
   ssd1306.c.  OLED Display Modules based on the SSD1306 controllers.
-    This includes the UG-2864HSWEG01 and UG2832HSWEG04, Both from Univision
+    This includes the UG-2864HSWEG01 and UG2832HSWEG04, both from Univision
     Technology Inc.  The latter is used with the OLED1 module that comes
-    with the Atmel SAM4l Xplained Pro board.  Example usage:
+    with the Atmel SAM4l Xplained Pro board.  This driver also supports
+    Densitron Technologies DD-12864WO-4A which is based on SSD1309 LCD
+    controller. Example usage:
 
       boards/arm/stm32/stm32f4discovery
       boards/arm/sam34/sam4l-xplained
@@ -220,7 +222,7 @@ interface) that makes then less re-usable:
 
     boards/arm/stm32/stm32f4discovery/src/stm32_ug2864ambag01.c
     boards/arm/stm32/stm32f4discovery/src/stm32_ug2864hsweg01.c
-    boards/arm/sam34/sam4l-xplained/src/sa,_ug2832hsweg04.c
+    boards/arm/sam34/sam4l-xplained/src/sam_ug2832hsweg04.c
     boards/arm/lpc214x/zp214xpa/src/lpc2148_ug2864ambag01.c
 
   LCD controllers built-into the MCU:
@@ -231,7 +233,7 @@ interface) that makes then less re-usable:
     boards/arm/stm32/stm32ldiscovery/src/stm32_lcd.c.  1x6 segment LCD with
       bars using the segment LCD controller built-into the STM32L15X.
 
-  Alphnumeric/segment LCD Displays:
+  Alphanumeric/segment LCD Displays:
 
     boards/renesas/m16c/skp16c26/src/m16c_lcd.c.  Untested alphanumeric
       LCD driver.
