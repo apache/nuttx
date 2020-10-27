@@ -29,6 +29,14 @@ config ESP32_RT_TIMER
 	bool "Real-time Timer"
 	default n
 
+config ESP32_PARTITION
+	bool "ESP32 Partition"
+	default n
+	select ESP32_SPIFLASH
+	---help---
+		Decode esp-idf's partition file and initialize
+		partition by nuttx MTD.
+
 menu "ESP32 Peripheral Selection"
 
 config ESP32_UART
@@ -687,5 +695,18 @@ config ESP32_RT_TIMER_TASK_STACK_SIZE
 	default 2048
 
 endmenu # Real-Time Timer
+
+menu "Partition Configuration"
+	depends on ESP32_PARTITION
+
+config ESP32_PARTITION_OFFSET
+	hex "Partition offset"
+	default "0x8000"
+
+config ESP32_PARTITION_MOUNT
+	string "Partition mount point"
+	default "/dev/esp/partition/"
+
+endmenu # ESP32_PARTITION
 
 endif # ARCH_CHIP_ESP32
