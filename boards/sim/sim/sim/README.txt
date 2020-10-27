@@ -627,6 +627,13 @@ loadable
   with any Windows configuration, however, because Windows does not use the
   ELF format.
 
+  This is the key part of the configuration:
+
+  +CONFIG_PATH_INITIAL="/system/bin"
+  +CONFIG_USER_INITPATH="/system/bin/nsh"
+
+  The shell is loaded from the elf, but you can also run any of the ELFs that are in /system/bin as they are on the "PATH"
+
 minibasic
 
   This configuration was used to test the Mini Basic port at
@@ -635,14 +642,14 @@ minibasic
 module
 
   This is a configuration to test CONFIG_LIBC_MODLIB with 64-bit modules.
-  This has apps/examples/module and apps/examples/sotest enabled.
+  This has apps/examples/module enabled.
   This configuration is intended for 64-bit host OS.
 
 module32
 
   This is a configuration to test CONFIG_LIBC_MODLIB with CONFIG_SIM_M32
   and 32-bit modules.
-  This has apps/examples/module and apps/examples/sotest enabled.
+  This has apps/examples/module enabled.
   This configuration is intended for 64-bit host OS.
 
 mount
@@ -1146,6 +1153,19 @@ spiffs
 
   This is a test of the SPIFFS file system using the apps/testing/fstest test
   with an MTD RAM driver to simulate the FLASH part.
+
+sotest
+
+  This is a configuration to test CONFIG_LIBC_MODLIB with 64-bit modules.
+  This has apps/examples/sotest enabled.
+  This configuration is intended for 64-bit host OS.
+
+sotest32
+
+  This is a configuration to test CONFIG_LIBC_MODLIB with CONFIG_SIM_M32
+  and 32-bit modules.
+  This has apps/examples/sotest enabled.
+  This configuration is intended for 64-bit host OS.
 
 tcploop
 
