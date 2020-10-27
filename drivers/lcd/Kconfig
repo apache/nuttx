@@ -356,14 +356,6 @@ config SSD1306_FREQUENCY
 	---help---
 		Selects the SPI bus frequency used with the SSD1306 device
 
-#config SSD1306_NINTERFACES
-#	int "Number of SSD1306 Devices"
-#	default 1
-#	---help---
-#		Specifies the number of physical SSD1306 devices that will be
-#		supported.  NOTE:  At present, this must be undefined or defined to
-#		be 1.
-
 endif # LCD_SSD1306_SPI
 
 if LCD_SSD1306_I2C
