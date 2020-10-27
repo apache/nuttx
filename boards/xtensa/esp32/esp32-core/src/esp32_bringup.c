@@ -66,6 +66,7 @@
 
 #include "esp32_wlan.h"
 #include "esp32_spiflash.h"
+#include "esp32_partition.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -180,6 +181,16 @@ int esp32_bringup(void)
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32_PARTITION
+  ret = esp32_partition_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize partition error=%d\n",
+             ret);
       return ret;
     }
 #endif
