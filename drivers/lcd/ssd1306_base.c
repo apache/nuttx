@@ -722,22 +722,25 @@ static int ssd1306_do_disponoff(struct ssd1306_dev_s *priv, bool on)
   return ret;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ssd1306_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power:
+ *     0: full off
+ *     CONFIG_LCD_MAXPOWER: full on
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
 {
   struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
   int ret;
 
+  DEBUGASSERT(priv);
   lcdinfo("power: %d [%d]\n", power, priv->on ? CONFIG_LCD_MAXPOWER : 0);
-  DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
+  DEBUGASSERT((unsigned)power <= CONFIG_LCD_MAXPOWER);
 
   if (power <= 0)
     {
