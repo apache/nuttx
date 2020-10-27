@@ -1391,6 +1391,55 @@ static enum pkt_type_e _parse_pkt(FAR uint8_t *p, uint16_t len,
 }
 
 /****************************************************************************
+ * Name: _dup_pkt_dat_and_notify
+ ****************************************************************************/
+
+static void _dup_pkt_dat_and_notify(FAR struct gs2200m_dev_s *dev,
+                                    FAR struct pkt_dat_s *pkt_dat0)
+{
+  struct pkt_dat_s *pkt_dat;
+  uint8_t c;
+
+  /* Only bulk data */
+
+  ASSERT(pkt_dat0->data && (0 == pkt_dat0->n));
+
+  /* Allocate a new pkt_dat */
+
+  pkt_dat = (FAR struct pkt_dat_s *)kmm_malloc(sizeof(struct pkt_dat_s));
+  ASSERT(pkt_dat);
+
+  /* Copy pkt_dat0 to pkt_dat */
+
+  memcpy(pkt_dat, pkt_dat0, sizeof(struct pkt_dat_s));
+
+  /* Allocate bulk data and copy */
+
+  pkt_dat->data = (FAR uint8_t *)kmm_malloc(pkt_dat0->len);
+  ASSERT(pkt_dat->data);
+  memcpy(pkt_dat->data, pkt_dat0->data, pkt_dat0->len);
+
+  /* Convert cid to c */
+
+  c = _cid_to_uint8(pkt_dat->cid);
+
+  /* Add the pkt_dat to the pkt_q */
+
+  dq_addlast((FAR dq_entry_t *)pkt_dat, &dev->pkt_q[c]);
+  dev->pkt_q_cnt[c]++;
+
+  /* NOTE: total_bulk must be updated
+   * Usually, total_bulk is updated in gs2200m_recv_pkt()
+   * However, the pkt_dat was duplicated from pkt_dat0
+   * So it needs to be updated, otherwise it will cause ASSERT
+   */
+
+  dev->total_bulk += pkt_dat->len;
+
+  _notif_q_push(dev, pkt_dat->cid);
+}
+
+/****************************************************************************
  * Name: gs2200m_recv_pkt
  ****************************************************************************/
 
@@ -1452,6 +1501,7 @@ static enum pkt_type_e gs2200m_send_cmd(FAR struct gs2200m_dev_s *dev,
 {
   enum spi_status_e s;
   enum pkt_type_e r = TYPE_SPI_ERROR;
+  bool bulk = false;
   int n = 1;
 
   /* Disable gs2200m irq to poll dready */
@@ -1470,7 +1520,28 @@ retry:
       goto errout;
     }
 
+retry_recv:
+
   r = gs2200m_recv_pkt(dev, pkt_dat);
+
+  if ((TYPE_BULK_DATA_TCP == r || TYPE_BULK_DATA_UDP == r) && pkt_dat)
+    {
+      wlwarn("*** Found bulk data \n");
+
+      /* Bulk data found in the response,
+       * duplicate the packet and notify
+       */
+
+      _dup_pkt_dat_and_notify(dev, pkt_dat);
+
+      /* release & initialize pkt_dat before retry */
+
+      _release_pkt_dat(dev, pkt_dat);
+      memset(pkt_dat, 0, sizeof(pkt_dat));
+
+      bulk = true;
+      goto retry_recv;
+    }
 
   /* NOTE: retry in case of errors */
 
@@ -1489,6 +1560,11 @@ retry:
     }
 
 errout:
+
+  if (bulk)
+    {
+      wlwarn("*** Normal response r=%d \n", r);
+    }
 
   /* Enable gs2200m irq again */
 
@@ -1869,13 +1945,6 @@ static enum pkt_type_e gs2200m_start_server(FAR struct gs2200m_dev_s *dev,
 
   memset(&pkt_dat, 0, sizeof(pkt_dat));
   r = gs2200m_send_cmd(dev, cmd, &pkt_dat);
-
-  /* REVISIT:
-   * TYPE_BULK for other sockets might be received here,
-   * if the sockets have heavy bulk traffic.
-   * In this case, the packet should be queued and
-   * wait for a response to the NSTCP command.
-   */
 
   if (r != TYPE_OK || pkt_dat.n == 0)
     {
@@ -2259,13 +2328,6 @@ static int gs2200m_ioctl_connect(FAR struct gs2200m_dev_s *dev,
         break;
 
       default:
-        /* REVISIT:
-         * TYPE_BULK for other sockets might be received here,
-         * if the sockets have heavy bulk traffic.
-         * In this case, the packet should be queued and
-         * wait for a response to the NCTCP command.
-         */
-
         wlerr("+++ error: type=%d \n", type);
         ASSERT(false);
         ret = -EINVAL;
