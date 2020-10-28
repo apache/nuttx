@@ -118,5 +118,25 @@ int esp32_timer_driver_init(void);
 int esp32_wtd_driver_init(void);
 #endif
 
+/****************************************************************************
+ * Name: esp32_spiflash_encrypt_test
+ *
+ * Description:
+ *   Test ESP32 SPI Flash driver read/write with encryption.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_SPIFLASH_ENCRYPTION_TEST
+
+void esp32_spiflash_encrypt_test(void);
+
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H */
