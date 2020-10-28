@@ -43,7 +43,7 @@
 #include <syslog.h>
 
 #ifdef CONFIG_NRF52_WDT
-#  include "nrf52_wdt.h"
+#  include "nrf52_wdt_lowerhalf.h"
 #endif
 
 #ifdef CONFIG_USERLED
