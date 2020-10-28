@@ -1,5 +1,5 @@
 ############################################################################
-# board/arm/cxd56xx/spresense/script/Config.mk
+# tools/cxd56/Config.mk
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -24,18 +24,15 @@
 
 # POSTBUILD -- Perform post build operations
 
+
 ifeq ($(CONFIG_CXD56_BINARY),y)
+
 define POSTBUILD
-	$(Q) if [ ! -f "tools/cxd56/mkspk" ] ; then \
-		echo ""; \
-		echo "Please run the following command to build the needed tool"; \
-		echo ""; \
-		echo "cd tools/cxd56 && make && cd ../.."; \
-		echo ""; \
-		echo "run make again to create the nuttx.spk image."; \
-	else \
-		echo "Generating: $(NUTTXNAME).spk"; \
-		tools/cxd56/mkspk -c2 nuttx nuttx nuttx.spk; \
-	fi
+	$(Q)echo "Generating: $(NUTTXNAME).spk"; \
+
+	+$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)cxd56 -f Makefile.host
+	tools$(DELIM)cxd56$(DELIM)mkspk$(HOSTEXEEXT) -c2 nuttx nuttx nuttx.spk;
+	$(Q)([ $$? -eq 0 ] && echo "Done.")
 endef
+
 endif
