@@ -29,7 +29,7 @@ config DEFAULT_SMALL
 
 config DEFAULT_TASK_STACKSIZE
 	int "The default stack size for tasks"
-	default 8192 if ARCH_SIM
+	default 65536 if ARCH_SIM
 	default 2048
 	---help---
 		The default stack size for tasks.
