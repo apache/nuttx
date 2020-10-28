@@ -68,11 +68,11 @@ struct spawn_parms_s g_spawn_parms;
 
 static inline int nxspawn_close(FAR struct spawn_close_file_action_s *action)
 {
-  /* The return value from close() is ignored */
+  /* The return value from nx_close() is ignored */
 
   sinfo("Closing fd=%d\n", action->fd);
 
-  close(action->fd);
+  nx_close(action->fd);
   return OK;
 }
 
@@ -131,7 +131,7 @@ static inline int nxspawn_open(FAR struct spawn_open_file_action_s *action)
         }
 
       sinfo("Closing fd=%d\n", fd);
-      close(fd);
+      nx_close(fd);
     }
 
   return ret;
