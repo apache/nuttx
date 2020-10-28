@@ -261,6 +261,7 @@ ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) rm -rf *.dSYM
 endif
 	$(Q) $(MAKE) -C pic32 -f Makefile.host clean
+	$(Q) $(MAKE) -C cxd56 -f Makefile.host clean
 	$(call DELFILE, incdir)
 	$(call DELFILE, incdir.exe)
 	$(call CLEAN)
