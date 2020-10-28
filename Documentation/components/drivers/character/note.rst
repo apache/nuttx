@@ -180,6 +180,23 @@ Noteram Device (``/dev/note``)
 
   The header file ``include/nuttx/note/noteram_driver.h`` provides the interface definitions of the device.
 
+``/dev/note`` Data Structures
+--------------------------------
+
+.. c:struct:: noteram_get_taskname_s
+
+  .. code-block:: c
+
+    struct noteram_get_taskname_s
+    {
+      pid_t pid;
+      char taskname[CONFIG_TASK_NAME_SIZE + 1];
+    };
+
+  - ``pid`` : Task ID to get the task name.
+
+  - ``taskname`` : The task name string corresponding to given pid.
+
 ``/dev/note`` Ioctls
 --------------------
 
@@ -221,6 +238,15 @@ Noteram Device (``/dev/note``)
 
   :return: If success, 0 (``OK``) is returned and the given overwriter mode is set as the current settings.
     If failed, a negated ``errno`` is returned.
+
+.. c:macro:: NOTERAM_GETTASKNAME
+
+  Get task name string
+
+  :argument: A writable pointer to :c:struct:`noteram_get_taskname_s`
+
+  :return: If success, 0 (``OK``) is returned and the task name corresponding to given pid is stored into the given pointer.
+           If failed, a negated ``errno`` is returned.
 
 Filter control APIs
 ===================
