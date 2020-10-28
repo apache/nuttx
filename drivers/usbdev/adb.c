@@ -1157,6 +1157,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
             {
 #ifndef CONFIG_USBADB_COMPOSITE
             case USB_REQ_GETDESCRIPTOR:
+              {
                 /* The value field specifies the descriptor type in the
                  * MS byte and the descriptor index in the LS byte
                  * (order is little endian)
@@ -1216,6 +1217,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                     }
                     break;
                   }
+              }
+              break;
 
             /* If the serial device is used in as part of a composite device,
              * then the overall composite class configuration is managed by
@@ -1267,13 +1270,6 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
     }
 
 #ifndef CONFIG_USBADB_COMPOSITE
-
-  /* Composite should send only one resquest for USB_REQ_SETCONFIGURATION.
-   * Hence ADB driver cannot submit to ep0; composite has to handle it.
-   */
-
-  #warning composite_ep0submit() seems broken so skip it in case of composite
-
   /* Respond to the setup command if data was returned.  On an error return
    * value (ret < 0), the USB driver will stall.
    */
@@ -1297,6 +1293,12 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
           usbclass_ep0incomplete(dev->ep0, ctrlreq);
         }
     }
+#else
+  /* Composite should send only one resquest for USB_REQ_SETCONFIGURATION.
+   * Hence ADB driver cannot submit to ep0; composite has to handle it.
+   */
+
+  #warning composite_ep0submit() seems broken so skip it in case of composite
 #endif /* !CONFIG_USBADB_COMPOSITE */
 
   /* Returning a negative value will cause a STALL */
