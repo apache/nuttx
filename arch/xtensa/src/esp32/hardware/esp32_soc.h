@@ -275,6 +275,11 @@
 #define SOC_EXTRAM_DATA_LOW     0x3f800000
 #define SOC_EXTRAM_DATA_HIGH    0x3fc00000
 
+/* Virtual address 0 */
+
+#define VADDR0_START_ADDR       SOC_DROM_LOW
+#define VADDR0_END_ADDR         (SOC_DROM_HIGH - 1)
+
 /* Interrupt hardware source table
  * This table is decided by hardware, don't touch this.
  */
@@ -775,6 +780,15 @@ extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
 #define FE2_TX_INF_FORCE_PD_M       (BIT(9))
 #define FE2_TX_INF_FORCE_PD_V       1
 #define FE2_TX_INF_FORCE_PD_S       9
+
+/* RO data page in MMU index */
+
+#define DROM0_PAGES_START           0
+#define DROM0_PAGES_END             64
+
+/* MMU invaild value */
+
+#define INVALID_MMU_VAL             0x100
 
 /****************************************************************************
  * Inline Functions

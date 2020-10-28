@@ -4387,4 +4387,12 @@
 #define DPORT_DATE_S  0
 #define DPORT_DPORT_DATE_VERSION 0x1605190
 
+/* SPI Flash MMU table regitser base address for PRO CPU */
+
+#define DPORT_PRO_FLASH_MMU_TABLE_REG       (DR_REG_DPORT_BASE + 0x10000)
+
+/* SPI Flash MMU table regitser base address for APP CPU */
+
+#define DPORT_APP_FLASH_MMU_TABLE_REG       (DR_REG_DPORT_BASE + 0x12000)
+
 #endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_DPORT_H */

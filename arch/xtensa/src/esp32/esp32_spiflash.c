@@ -53,6 +53,14 @@
 #define SPI_FLASH_WRITE_BUF_SIZE    (32)
 #define SPI_FLASH_READ_BUF_SIZE     (64)
 
+#define SPI_FLASH_WRITE_WORDS       (SPI_FLASH_WRITE_BUF_SIZE / 4)
+#define SPI_FLASH_READ_WORDS        (SPI_FLASH_READ_BUF_SIZE / 4)
+
+#define SPI_FLASH_MAP_PAGE_SIZE     (0x10000)
+
+#define SPI_FLASH_ENCRYPT_UNIT_SIZE (32)
+#define SPI_FLASH_ENCRYPT_WORDS     (32 / 4)
+
 #define ESP32_MTD_OFFSET            CONFIG_ESP32_MTD_OFFSET
 #define ESP32_MTD_SIZE              CONFIG_ESP32_MTD_SIZE
 
@@ -63,9 +71,25 @@
 #define MTD_BLK2SIZE(_priv, _b)     (MTD_BLKSIZE(_priv) * (_b))
 #define MTD_SIZE2BLK(_priv, _s)     ((_s) / MTD_BLKSIZE(_priv))
 
+#define MMU_ADDR2PAGE(_addr)        ((_addr) / SPI_FLASH_MAP_PAGE_SIZE)
+#define MMU_ADDR2OFF(_addr)         ((_addr) % SPI_FLASH_MAP_PAGE_SIZE)
+#define MMU_BYTES2PAGES(_n)         (((_n) + SPI_FLASH_MAP_PAGE_SIZE - 1) \
+                                     / SPI_FLASH_MAP_PAGE_SIZE)
+
 #ifndef MIN
 #  define  MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
+
+#define DPORT_INTERRUPT_DISABLE()
+#define DPORT_INTERRUPT_RESTORE()
+
+/* Flash MMU table for PRO CPU */
+
+#define PRO_MMU_TABLE ((volatile uint32_t *)DPORT_PRO_FLASH_MMU_TABLE_REG)
+
+/* Flash MMU table for APP CPU */
+
+#define APP_MMU_TABLE ((volatile uint32_t *)DPORT_APP_FLASH_MMU_TABLE_REG)
 
 /****************************************************************************
  * Private Types
@@ -99,6 +123,31 @@ struct esp32_spiflash_s
   uint8_t *dummies;
 };
 
+/* SPI Flash map request data */
+
+struct spiflash_map_req
+{
+  /* Request mapping SPI Flash base address */
+
+  uint32_t  src_addr;
+
+  /* Request mapping SPI Flash size */
+
+  uint32_t  size;
+
+  /* Mapped memory pointer */
+
+  void      *ptr;
+
+  /* Mapped started MMU page index */
+
+  uint32_t  start_page;
+
+  /* Mapped MMU page count */
+
+  uint32_t  page_cnt;
+};
+
 /****************************************************************************
  * ROM function prototypes
  ****************************************************************************/
@@ -121,7 +170,6 @@ static inline void spi_set_regbits(struct esp32_spiflash_s *priv,
                                    int offset, uint32_t bits);
 static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
                                      int offset, uint32_t bits);
-static inline void IRAM_ATTR spi_memcpy(void *d, const void *s, uint32_t n);
 
 /* Misc. helpers */
 
@@ -161,12 +209,24 @@ static int esp32_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                        size_t nblocks);
 static ssize_t esp32_read(FAR struct mtd_dev_s *dev, off_t offset,
                           size_t nbytes, FAR uint8_t *buffer);
+static ssize_t esp32_read_decrypt(FAR struct mtd_dev_s *dev,
+                                  off_t offset,
+                                  size_t nbytes,
+                                  FAR uint8_t *buffer);
 static ssize_t esp32_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                            size_t nblocks, FAR uint8_t *buffer);
+static ssize_t esp32_bread_decrypt(FAR struct mtd_dev_s *dev,
+                                   off_t startblock,
+                                   size_t nblocks,
+                                   FAR uint8_t *buffer);
 static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
                            size_t nbytes, FAR const uint8_t *buffer);
 static ssize_t esp32_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                             size_t nblocks, FAR const uint8_t *buffer);
+static ssize_t esp32_bwrite_encrypt(FAR struct mtd_dev_s *dev,
+                                    off_t startblock,
+                                    size_t nblocks,
+                                    FAR const uint8_t *buffer);
 static int esp32_ioctl(FAR struct mtd_dev_s *dev, int cmd,
                        unsigned long arg);
 
@@ -198,7 +258,26 @@ static struct esp32_spiflash_s g_esp32_spiflash1 =
   .dummies = g_rom_spiflash_dummy_len_plus
 };
 
-/* Ensure exclusive access to the driver */
+static struct esp32_spiflash_s g_esp32_spiflash1_encrypt =
+{
+  .mtd =
+          {
+            .erase  = esp32_erase,
+            .bread  = esp32_bread_decrypt,
+            .bwrite = esp32_bwrite_encrypt,
+            .read   = esp32_read_decrypt,
+            .ioctl  = esp32_ioctl,
+#ifdef CONFIG_MTD_BYTE_WRITE
+            .write  = NULL,
+#endif
+            .name   = "esp32_mainflash_encrypt"
+          },
+  .config = &g_esp32_spiflash1_config,
+  .chip = &g_rom_flashchip,
+  .dummies = g_rom_spiflash_dummy_len_plus
+};
+
+/* Enxusre exculisve access to the driver */
 
 static sem_t g_exclsem = SEM_INITIALIZER(1);
 
@@ -295,35 +374,6 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
   uint32_t tmp = getreg32(priv->config->reg_base + offset);
 
   putreg32(tmp & (~bits), priv->config->reg_base + offset);
-}
-
-/****************************************************************************
- * Name: spi_memcpy
- *
- * Description:
- *   Copy data from one block of memory to another block of memory.
- *   The function must be linked in IRAM not in flash, so add this function
- *   instead of libc memcpy.
- *
- * Input Parameters:
- *   d - destination address
- *   s - source address
- *   n - data bytes
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void IRAM_ATTR spi_memcpy(void *d, const void *s, uint32_t n)
-{
-  uint8_t *dest = (uint8_t *)d;
-  const uint8_t *src = (const uint8_t *)s;
-
-  while (n--)
-    {
-      *dest++ = *src++;
-    }
 }
 
 /****************************************************************************
@@ -719,7 +769,7 @@ static int esp32_write_status(FAR struct esp32_spiflash_s *priv,
  *
  ****************************************************************************/
 
-static int esp32_enable_write(FAR struct esp32_spiflash_s *priv)
+static int IRAM_ATTR esp32_enable_write(FAR struct esp32_spiflash_s *priv)
 {
   uint32_t flags;
   uint32_t regval;
@@ -772,6 +822,8 @@ static int IRAM_ATTR esp32_erasesector(FAR struct esp32_spiflash_s *priv,
   int me;
   uint32_t flags;
 
+  esp32_set_write_opt(priv);
+
   if (esp32_wait_idle(priv) != OK)
     {
       return -EIO;
@@ -807,6 +859,78 @@ static int IRAM_ATTR esp32_erasesector(FAR struct esp32_spiflash_s *priv,
 }
 
 /****************************************************************************
+ * Name: esp32_writeonce
+ *
+ * Description:
+ *   Write max 32 byte data to SPI Flash at designated address.
+ *
+ *   ESP32 can write max 32 byte once transmission by hardware.
+ *
+ * Input Parameters:
+ *   spi    - ESP32 SPI Flash chip data
+ *   addr   - target address
+ *   buffer - data buffer pointer
+ *   size   - data number by bytes
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR esp32_writeonce(FAR struct esp32_spiflash_s *priv,
+                                     uint32_t addr,
+                                     const uint32_t *buffer,
+                                     uint32_t size)
+{
+  uint32_t regval;
+  uint32_t i;
+
+  if (size > SPI_FLASH_WRITE_BUF_SIZE)
+    {
+      return -EINVAL;
+    }
+
+  if (esp32_wait_idle(priv) != OK)
+    {
+      return -EIO;
+    }
+
+  if (esp32_enable_write(priv) != OK)
+    {
+      return -EIO;
+    }
+
+  regval = addr & 0xffffff;
+  regval |= size << ESP_ROM_SPIFLASH_BYTES_LEN;
+  spi_set_reg(priv, SPI_ADDR_OFFSET, regval);
+
+  for (i = 0; i < (size / 4); i++)
+    {
+      spi_set_reg(priv, SPI_W0_OFFSET + i * 4, buffer[i]);
+    }
+
+  if (size & 0x3)
+    {
+      memcpy(&regval, &buffer[i], size & 0x3);
+      spi_set_reg(priv, SPI_W0_OFFSET + i * 4, regval);
+    }
+
+  spi_set_reg(priv, SPI_RD_STATUS_OFFSET, 0);
+  spi_set_reg(priv, SPI_CMD_OFFSET, SPI_FLASH_PP);
+  while (spi_get_reg(priv, SPI_CMD_OFFSET) != 0)
+    {
+      ;
+    }
+
+  if (esp32_wait_idle(priv) != OK)
+    {
+      return -EIO;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: esp32_writedata
  *
  * Description:
@@ -823,34 +947,22 @@ static int IRAM_ATTR esp32_erasesector(FAR struct esp32_spiflash_s *priv,
  *
  ****************************************************************************/
 
-static int esp32_writedata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
-                           const uint8_t *buffer, uint32_t size)
+static int IRAM_ATTR esp32_writedata(FAR struct esp32_spiflash_s *priv,
+                                     uint32_t addr,
+                                     const uint8_t *buffer,
+                                     uint32_t size)
 {
-  uint32_t regval;
-  uint32_t i;
-  uint32_t bytes;
-  uint32_t tmp;
-  uint32_t res;
-  const uint8_t  *tmpbuff = buffer;
-  int ret = OK;
+  int ret;
   int me;
   uint32_t flags;
+  uint32_t off = 0;
+  uint32_t bytes;
+  uint32_t tmp_buf[SPI_FLASH_WRITE_WORDS];
 
-  if (esp32_wait_idle(priv) != OK)
-    {
-      return -EIO;
-    }
+  esp32_set_write_opt(priv);
 
   while (size > 0)
     {
-      flags = esp32_spiflash_opstart(priv, &me);
-
-      if (esp32_enable_write(priv) != OK)
-        {
-          esp32_spiflash_opdone(priv, flags, me);
-          return -EIO;
-        }
-
       bytes = MTD_BLKSIZE(priv) - addr % MTD_BLKSIZE(priv) ;
       if (!bytes)
         {
@@ -862,39 +974,173 @@ static int esp32_writedata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
           bytes = MIN(bytes, SPI_FLASH_WRITE_BUF_SIZE);
         }
 
-      regval = addr & 0xffffff;
-      regval |= bytes << ESP_ROM_SPIFLASH_BYTES_LEN;
-      spi_set_reg(priv, SPI_ADDR_OFFSET, regval);
+      memcpy(tmp_buf, &buffer[off], bytes);
 
-      for (i = 0; i < bytes; i += 4)
+      flags = esp32_spiflash_opstart(priv, &me);
+      ret = esp32_writeonce(priv, addr, tmp_buf, bytes);
+      esp32_spiflash_opdone(priv, flags, me);
+
+      if (ret)
         {
-          res = MIN(4, bytes - i);
-
-          spi_memcpy(&tmp, tmpbuff, res);
-          spi_set_reg(priv, SPI_W0_OFFSET + i, tmp);
-          tmpbuff += res;
-        }
-
-      spi_set_reg(priv, SPI_RD_STATUS_OFFSET, 0);
-      spi_set_reg(priv, SPI_CMD_OFFSET, SPI_FLASH_PP);
-      while (spi_get_reg(priv, SPI_CMD_OFFSET) != 0)
-        {
-          ;
-        }
-
-      if (esp32_wait_idle(priv) != OK)
-        {
-          esp32_spiflash_opdone(priv, flags, me);
-          return -EIO;
+          return ret;
         }
 
       addr += bytes;
       size -= bytes;
-
-      esp32_spiflash_opdone(priv, flags, me);
+      off += bytes;
     }
 
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp32_writedata
+ *
+ * Description:
+ *   Write plaintext data to SPI Flash at designated address by SPI Flash
+ *   hardware encryption, and written data in SPI Flash is ciphertext.
+ *
+ * Input Parameters:
+ *   spi    - ESP32 SPI Flash chip data
+ *   addr   - target address
+ *   buffer - data buffer pointer
+ *   size   - data number
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR esp32_writedata_encrypted(
+  FAR struct esp32_spiflash_s *priv,
+  uint32_t addr,
+  const uint8_t *buffer,
+  uint32_t size)
+{
+  int i;
+  int blocks;
+  int ret = OK;
+  int me;
+  uint32_t flags;
+  uint32_t tmp_buf[SPI_FLASH_ENCRYPT_WORDS];
+
+  if (addr % SPI_FLASH_ENCRYPT_UNIT_SIZE)
+    {
+      ferr("ERROR: address=0x%x is not %d-byte align\n",
+           addr, SPI_FLASH_ENCRYPT_UNIT_SIZE);
+      return -EINVAL;
+    }
+
+  if (size % SPI_FLASH_ENCRYPT_UNIT_SIZE)
+    {
+      ferr("ERROR: size=%u is not %d-byte align\n",
+           size, SPI_FLASH_ENCRYPT_UNIT_SIZE);
+      return -EINVAL;
+    }
+
+  blocks = size / SPI_FLASH_ENCRYPT_UNIT_SIZE;
+
+  for (i = 0; i < blocks; i++)
+    {
+      memcpy(tmp_buf, buffer, SPI_FLASH_ENCRYPT_UNIT_SIZE);
+
+      flags = esp32_spiflash_opstart(priv, &me);
+      esp_rom_spiflash_write_encrypted_enable();
+
+      ret = esp_rom_spiflash_prepare_encrypted_data(addr, tmp_buf);
+      if (ret)
+        {
+          ferr("ERROR: Failed to prepare encrypted data\n");
+          goto exit;
+        }
+
+      ret = esp32_writeonce(priv, addr, tmp_buf,
+                            SPI_FLASH_ENCRYPT_UNIT_SIZE);
+      if (ret)
+        {
+          ferr("ERROR: Failed to write encrypted data @ 0x%x\n", addr);
+          goto exit;
+        }
+
+      esp_rom_spiflash_write_encrypted_disable();
+      esp32_spiflash_opdone(priv, flags, me);
+
+      addr += SPI_FLASH_ENCRYPT_UNIT_SIZE;
+      buffer += SPI_FLASH_ENCRYPT_UNIT_SIZE;
+      size -= SPI_FLASH_ENCRYPT_UNIT_SIZE;
+    }
+
+  return 0;
+
+exit:
+  esp_rom_spiflash_write_encrypted_disable();
+  esp32_spiflash_opdone(priv, flags, me);
+
   return ret;
+}
+
+/****************************************************************************
+ * Name: esp32_readdata
+ *
+ * Description:
+ *   Read max 64 byte data data from SPI Flash at designated address.
+ *
+ *   ESP32 can read max 64 byte once transmission by hardware.
+ *
+ * Input Parameters:
+ *   spi    - ESP32 SPI Flash chip data
+ *   addr   - target address
+ *   buffer - data buffer pointer
+ *   size   - data number by bytes
+ *
+ * Returned Value:
+ *   OK if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR esp32_readonce(FAR struct esp32_spiflash_s *priv,
+                                    uint32_t addr,
+                                    uint32_t *buffer,
+                                    uint32_t size)
+{
+  uint32_t regval;
+  uint32_t i;
+
+  if (size > SPI_FLASH_READ_BUF_SIZE)
+    {
+      return -EINVAL;
+    }
+
+  if (esp32_wait_idle(priv) != OK)
+    {
+      return -EIO;
+    }
+
+  regval = ((size << 3) - 1) << SPI_USR_MISO_DBITLEN_S;
+  spi_set_reg(priv, SPI_MISO_DLEN_OFFSET, regval);
+
+  regval = addr << 8;
+  spi_set_reg(priv, SPI_ADDR_OFFSET, regval);
+
+  spi_set_reg(priv, SPI_RD_STATUS_OFFSET, 0);
+  spi_set_reg(priv, SPI_CMD_OFFSET, SPI_USR);
+  while (spi_get_reg(priv, SPI_CMD_OFFSET) != 0)
+    {
+      ;
+    }
+
+  for (i = 0; i < (size / 4); i++)
+    {
+      buffer[i] = spi_get_reg(priv, SPI_W0_OFFSET + i * 4);
+    }
+
+  if (size & 0x3)
+    {
+      regval = spi_get_reg(priv, SPI_W0_OFFSET + i * 4);
+      memcpy(&buffer[i], &regval, size & 0x3);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -914,55 +1160,193 @@ static int esp32_writedata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
  *
  ****************************************************************************/
 
-static int esp32_readdata(FAR struct esp32_spiflash_s *priv, uint32_t addr,
-                          uint8_t *buffer, uint32_t size)
+static int IRAM_ATTR esp32_readdata(FAR struct esp32_spiflash_s *priv,
+                                    uint32_t addr,
+                                    uint8_t *buffer,
+                                    uint32_t size)
 {
-  uint32_t regval;
-  uint32_t i;
-  uint32_t bytes;
-  uint32_t tmp;
-  uint32_t res;
-  uint8_t  *tmpbuff = buffer;
+  int ret;
   int me;
   uint32_t flags;
-
-  if (esp32_wait_idle(priv) != OK)
-    {
-      return -EIO;
-    }
+  uint32_t off = 0;
+  uint32_t bytes;
+  uint32_t tmp_buf[SPI_FLASH_READ_WORDS];
 
   while (size > 0)
     {
-      flags = esp32_spiflash_opstart(priv, &me);
-
       bytes = MIN(size, SPI_FLASH_READ_BUF_SIZE);
-      regval = ((bytes << 3) - 1) << SPI_USR_MISO_DBITLEN_S;
-      spi_set_reg(priv, SPI_MISO_DLEN_OFFSET, regval);
 
-      regval = addr << 8;
-      spi_set_reg(priv, SPI_ADDR_OFFSET, regval);
+      flags = esp32_spiflash_opstart(priv, &me);
+      ret = esp32_readonce(priv, addr, tmp_buf, bytes);
+      esp32_spiflash_opdone(priv, flags, me);
 
-      spi_set_reg(priv, SPI_RD_STATUS_OFFSET, 0);
-      spi_set_reg(priv, SPI_CMD_OFFSET, SPI_USR);
-      while (spi_get_reg(priv, SPI_CMD_OFFSET) != 0)
+      if (ret)
         {
-          ;
+          return ret;
         }
 
-      for (i = 0; i < bytes; i += 4)
-        {
-          res = MIN(4, bytes - i);
-
-          tmp = spi_get_reg(priv, SPI_W0_OFFSET + i);
-          spi_memcpy(tmpbuff, &tmp, res);
-          tmpbuff += res;
-        }
+      memcpy(&buffer[off], tmp_buf, bytes);
 
       addr += bytes;
       size -= bytes;
-
-      esp32_spiflash_opdone(priv, flags, me);
+      off += bytes;
     }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp32_mmap
+ *
+ * Description:
+ *   Mapped SPI Flash address to ESP32's address bus, so that software
+ *   can read SPI Flash data by reading data from memory access.
+ *
+ *   If SPI Flash hardware encryption is enable, the read from mapped
+ *   address is decrypted.
+ *
+ * Input Parameters:
+ *   spi - ESP32 SPI Flash chip data
+ *   req - SPI Flash mapping requesting parameters
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR esp32_mmap(FAR struct esp32_spiflash_s *priv,
+                                struct spiflash_map_req *req)
+{
+  int ret;
+  int i;
+  int me;
+  int start_page;
+  int flash_page;
+  int page_cnt;
+  uint32_t flags;
+
+  flags = esp32_spiflash_opstart(priv, &me);
+
+  for (start_page = DROM0_PAGES_START;
+       start_page < DROM0_PAGES_END;
+       ++start_page)
+    {
+      if (PRO_MMU_TABLE[start_page] == INVALID_MMU_VAL
+#ifdef CONFIG_SMP
+          && APP_MMU_TABLE[start_page] == INVALID_MMU_VAL
+#endif
+          )
+        {
+          break;
+        }
+    }
+
+  flash_page = MMU_ADDR2PAGE(req->src_addr);
+  page_cnt = MMU_BYTES2PAGES(req->size);
+
+  if (start_page + page_cnt < DROM0_PAGES_END)
+    {
+      for (i = 0; i < page_cnt; i++)
+        {
+          PRO_MMU_TABLE[start_page + i] = flash_page + i;
+#ifdef CONFIG_SMP
+          APP_MMU_TABLE[start_page + i] = flash_page + i;
+#endif
+        }
+
+      req->start_page = start_page;
+      req->page_cnt = page_cnt;
+      req->ptr = (void *)(VADDR0_START_ADDR +
+                          start_page * SPI_FLASH_MAP_PAGE_SIZE +
+                          MMU_ADDR2OFF(req->src_addr));
+
+      ret = 0;
+    }
+  else
+    {
+      ret = -ENOBUFS;
+    }
+
+  esp32_spiflash_opdone(priv, flags, me);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp32_ummap
+ *
+ * Description:
+ *   Unmap SPI Flash address in ESP32's address bus, and free resource.
+ *
+ * Input Parameters:
+ *   spi - ESP32 SPI Flash chip data
+ *   req - SPI Flash mapping requesting paramters
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void IRAM_ATTR esp32_ummap(FAR struct esp32_spiflash_s *priv,
+                                  const struct spiflash_map_req *req)
+{
+  uint32_t flags;
+  int me;
+  int i;
+
+  flags = esp32_spiflash_opstart(priv, &me);
+
+  for (i = req->start_page; i < req->start_page + req->page_cnt; ++i)
+    {
+      PRO_MMU_TABLE[i] = INVALID_MMU_VAL;
+#ifdef CONFIG_SMP
+      APP_MMU_TABLE[i] = INVALID_MMU_VAL;
+#endif
+    }
+
+  esp32_spiflash_opdone(priv, flags, me);
+}
+
+/****************************************************************************
+ * Name: esp32_readdata_encrypted
+ *
+ * Description:
+ *   Read decrypted data from SPI Flash at designated address when
+ *   enable SPI Flash hardware encryption.
+ *
+ * Input Parameters:
+ *   spi    - ESP32 SPI Flash chip data
+ *   addr   - target address
+ *   buffer - data buffer pointer
+ *   size   - data number
+ *
+ * Returned Value:
+ *   OK if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR esp32_readdata_encrypted(
+  FAR struct esp32_spiflash_s *priv,
+  uint32_t addr,
+  uint8_t *buffer,
+  uint32_t size)
+{
+  int ret;
+  struct spiflash_map_req req =
+    {
+      .src_addr = addr,
+      .size = size
+    };
+
+  ret = esp32_mmap(priv, &req);
+  if (ret)
+    {
+      return ret;
+    }
+
+  memcpy(buffer, req.ptr, size);
+
+  esp32_ummap(priv, &req);
 
   return OK;
 }
@@ -1006,7 +1390,6 @@ static int esp32_erase(FAR struct mtd_dev_s *dev, off_t startblock,
       return ret;
     }
 
-  esp32_set_write_opt(priv);
   ret = esp32_erasesector(priv, addr, size);
 
   nxsem_post(&g_exclsem);
@@ -1044,22 +1427,10 @@ static ssize_t esp32_read(FAR struct mtd_dev_s *dev, off_t offset,
                           size_t nbytes, FAR uint8_t *buffer)
 {
   int ret;
-  uint8_t *tmpbuff = buffer;
   FAR struct esp32_spiflash_s *priv = MTD2PRIV(dev);
 
 #ifdef CONFIG_ESP32_SPIFLASH_DEBUG
   finfo("esp32_read(%p, 0x%x, %d, %p)\n", dev, offset, nbytes, buffer);
-#endif
-
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
-  if (esp32_ptr_extram(buffer))
-    {
-      tmpbuff = xtensa_imm_malloc(nbytes);
-      if (tmpbuff == NULL)
-        {
-          return (ssize_t)-ENOMEM;
-        }
-    }
 #endif
 
   /* Acquire the semaphore. */
@@ -1071,7 +1442,7 @@ static ssize_t esp32_read(FAR struct mtd_dev_s *dev, off_t offset,
     }
 
   esp32_set_read_opt(priv);
-  ret = esp32_readdata(priv, offset, tmpbuff, nbytes);
+  ret = esp32_readdata(priv, offset, buffer, nbytes);
 
   nxsem_post(&g_exclsem);
 
@@ -1085,13 +1456,6 @@ static ssize_t esp32_read(FAR struct mtd_dev_s *dev, off_t offset,
 #endif
 
 error_with_buffer:
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
-  if (esp32_ptr_extram(buffer))
-    {
-      memcpy(buffer, tmpbuff, (ret == OK) ? nbytes : 0);
-      xtensa_imm_free(tmpbuff);
-    }
-#endif
 
   return (ssize_t)ret;
 }
@@ -1140,6 +1504,109 @@ static ssize_t esp32_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 }
 
 /****************************************************************************
+ * Name: esp32_read_decrypt
+ *
+ * Description:
+ *   Read encrypted data and decrypt automatically from SPI Flash
+ *   at designated address.
+ *
+ * Input Parameters:
+ *   dev    - ESP32 MTD device data
+ *   offset - target address offset
+ *   nbytes - data number
+ *   buffer - data buffer pointer
+ *
+ * Returned Value:
+ *   Read data bytes if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static ssize_t esp32_read_decrypt(FAR struct mtd_dev_s *dev,
+                                  off_t offset,
+                                  size_t nbytes,
+                                  FAR uint8_t *buffer)
+{
+  int ret;
+  uint8_t *tmpbuff = buffer;
+  FAR struct esp32_spiflash_s *priv = MTD2PRIV(dev);
+
+#ifdef CONFIG_ESP32_SPIFLASH_DEBUG
+  finfo("esp32_read_decrypt(%p, 0x%x, %d, %p)\n",
+        dev, offset, nbytes, buffer);
+#endif
+
+  /* Acquire the semaphore. */
+
+  ret = nxsem_wait(&g_exclsem);
+  if (ret < 0)
+    {
+      goto error_with_buffer;
+    }
+
+  ret = esp32_readdata_encrypted(priv, offset, tmpbuff, nbytes);
+
+  nxsem_post(&g_exclsem);
+
+  if (ret == OK)
+    {
+      ret = nbytes;
+    }
+
+#ifdef CONFIG_ESP32_SPIFLASH_DEBUG
+  finfo("esp32_read_decrypt()=%d\n", ret);
+#endif
+
+error_with_buffer:
+
+  return (ssize_t)ret;
+}
+
+/****************************************************************************
+ * Name: esp32_bread_decrypt
+ *
+ * Description:
+ *   Read encrypted data and decrypt automatically from designated blocks.
+ *
+ * Input Parameters:
+ *   dev        - ESP32 MTD device data
+ *   startblock - start block number, it is not equal to SPI Flash's block
+ *   nblocks    - blocks number
+ *   buffer     - data buffer pointer
+ *
+ * Returned Value:
+ *   Read block number if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static ssize_t esp32_bread_decrypt(FAR struct mtd_dev_s *dev,
+                                   off_t startblock,
+                                   size_t nblocks,
+                                   FAR uint8_t *buffer)
+{
+  int ret;
+  FAR struct esp32_spiflash_s *priv = MTD2PRIV(dev);
+  uint32_t addr = MTD_BLK2SIZE(priv, startblock);
+  uint32_t size = MTD_BLK2SIZE(priv, nblocks);
+
+#ifdef CONFIG_ESP32_SPIFLASH_DEBUG
+  finfo("esp32_bread_decrypt(%p, 0x%x, %d, %p)\n",
+        dev, startblock, nblocks, buffer);
+#endif
+
+  ret = esp32_read_decrypt(dev, addr, size, buffer);
+  if (ret == size)
+    {
+      ret = nblocks;
+    }
+
+#ifdef CONFIG_ESP32_SPIFLASH_DEBUG
+  finfo("esp32_bread_decrypt()=%d\n", ret);
+#endif
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: esp32_write
  *
  * Description:
@@ -1160,7 +1627,6 @@ static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
                            size_t nbytes, FAR const uint8_t *buffer)
 {
   int ret;
-  uint8_t *tmpbuff = (uint8_t *)buffer;
   FAR struct esp32_spiflash_s *priv = MTD2PRIV(dev);
 
   ASSERT(buffer);
@@ -1169,19 +1635,6 @@ static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
     {
       return -EINVAL;
     }
-
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
-  if (esp32_ptr_extram(buffer))
-    {
-      tmpbuff = xtensa_imm_malloc(nbytes);
-      if (tmpbuff == NULL)
-        {
-          return (ssize_t)-ENOMEM;
-        }
-
-      memcpy(tmpbuff, buffer, nbytes);
-    }
-#endif
 
 #ifdef CONFIG_ESP32_SPIFLASH_DEBUG
   finfo("esp32_write(%p, 0x%x, %d, %p)\n", dev, offset, nbytes, buffer);
@@ -1195,8 +1648,7 @@ static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
       goto error_with_buffer;
     }
 
-  esp32_set_write_opt(priv);
-  ret = esp32_writedata(priv, offset, tmpbuff, nbytes);
+  ret = esp32_writedata(priv, offset, buffer, nbytes);
 
   nxsem_post(&g_exclsem);
 
@@ -1210,12 +1662,6 @@ static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
 #endif
 
 error_with_buffer:
-#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
-  if (esp32_ptr_extram(buffer))
-    {
-      xtensa_imm_free(tmpbuff);
-    }
-#endif
 
   return (ssize_t)ret;
 }
@@ -1260,6 +1706,63 @@ static ssize_t esp32_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 #ifdef CONFIG_ESP32_SPIFLASH_DEBUG
   finfo("esp32_bwrite()=%d\n", ret);
 #endif
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp32_bwrite_encrypt
+ *
+ * Description:
+ *   Write data to designated blocks by SPI Flash hardware encryption.
+ *
+ * Input Parameters:
+ *   dev        - ESP32 MTD device data
+ *   startblock - start MTD block number,
+ *                it is not equal to SPI Flash's block
+ *   nblocks    - blocks number
+ *   buffer     - data buffer pointer
+ *
+ * Returned Value:
+ *   Writen block number if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static ssize_t esp32_bwrite_encrypt(FAR struct mtd_dev_s *dev,
+                                    off_t startblock,
+                                    size_t nblocks,
+                                    FAR const uint8_t *buffer)
+{
+  ssize_t ret;
+  FAR struct esp32_spiflash_s *priv = MTD2PRIV(dev);
+  uint32_t addr = MTD_BLK2SIZE(priv, startblock);
+  uint32_t size = MTD_BLK2SIZE(priv, nblocks);
+
+#ifdef CONFIG_ESP32_SPIFLASH_DEBUG
+  finfo("esp32_bwrite_encrypt(%p, 0x%x, %d, %p)\n",
+        dev, startblock, nblocks, buffer);
+#endif
+
+  ret = nxsem_wait(&g_exclsem);
+  if (ret < 0)
+    {
+      goto error_with_buffer;
+    }
+
+  ret = esp32_writedata_encrypted(priv, addr, buffer, size);
+
+  nxsem_post(&g_exclsem);
+
+  if (ret == OK)
+    {
+      ret = nblocks;
+    }
+
+#ifdef CONFIG_ESP32_SPIFLASH_DEBUG
+  finfo("esp32_bwrite_encrypt()=%d\n", ret);
+#endif
+
+error_with_buffer:
 
   return ret;
 }
@@ -1394,6 +1897,27 @@ FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(void)
 FAR struct mtd_dev_s *esp32_spiflash_get_mtd(void)
 {
   struct esp32_spiflash_s *priv = &g_esp32_spiflash1;
+
+  return &priv->mtd;
+}
+
+/****************************************************************************
+ * Name: esp32_spiflash_get_mtd
+ *
+ * Description:
+ *   Get ESP32 SPI Flash encryption raw MTD.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   ESP32 SPI Flash encryption raw MTD data pointer.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *esp32_spiflash_encrypt_get_mtd(void)
+{
+  struct esp32_spiflash_s *priv = &g_esp32_spiflash1_encrypt;
 
   return &priv->mtd;
 }
