@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/signal/sig_ignore.c
+ * libs/libc/signal/sig_pause.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
