@@ -43,19 +43,26 @@ The following configurations are configurable parameters for trace.
     - Bit 2 = Enable IRQ instrumentation
     - Bit 3 = Enable collecting syscall arguments
 
-- ``CONFIG_SCHED_INSTRUMENTATION_NOTERAM_BUFSIZE``
+- ``CONFIG_SCHED_INSTRUMENTATION_HIRES``
+
+  - If enabled, use higher resolution system timer for instrumentation.
+
+- ``CONFIG_DRIVER_NOTERAM_BUFSIZE``
 
   - Specify the note buffer size in bytes.
     Higher value can hold more note records, but consumes more kernel memory.
 
-- ``CONFIG_SCHED_INSTRUMENTATION_NOTERAM_DEFAULT_NOOVERWRITE``
+- ``CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE``
+
+  - Specify the task name buffer size in bytes.
+    The buffer is used to hold the name of the task during instrumentation.
+    Trace dump can find and show a task name corresponding to given pid in the instrumentation data by using this buffer.
+    If 0 is specified, this feature is disabled and trace dump shows only the name of the newly created task.
+
+- ``CONFIG_DRIVER_NOTERAM_DEFAULT_NOOVERWRITE``
 
   - If enabled, stop overwriting old notes in the circular buffer when the buffer is full by default.
     This is useful to keep instrumentation data of the beginning of a system boot.
-
-- ``CONFIG_SCHED_INSTRUMENTATION_HIRES``
-
-  - If enabled, use higher resolution system timer for instrumentation.
 
 After the configuration, rebuild the NuttX kernel and application.
 
