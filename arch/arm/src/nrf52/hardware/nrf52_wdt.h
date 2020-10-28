@@ -106,7 +106,7 @@
 /* CONFIG Register */
 
 #define WDT_CONFIG_SLEEP       (1 << 0) /* Bit 0: */
-#define WDT_CONFIG_HALT        (1 << 0) /* Bit 3: */
+#define WDT_CONFIG_HALT        (1 << 3) /* Bit 3: */
 
 /* RR[x] Register */
 

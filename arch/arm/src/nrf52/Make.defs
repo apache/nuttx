@@ -115,6 +115,10 @@ endif
 
 ifeq ($(CONFIG_NRF52_WDT),y)
 CHIP_CSRCS += nrf52_wdt.c
+
+ifeq ($(CONFIG_WATCHDOG),y)
+CHIP_CSRCS += nrf52_wdt_lowerhalf.c
+endif
 endif
 
 ifeq ($(CONFIG_NRF52_RNG),y)

@@ -1,8 +1,9 @@
 /****************************************************************************
- * arch/arm/src/nrf52/nrf52_wdt.h
+ * arch/arm/src/nrf52/nrf52_wdt_lowerhalf.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Zglue Inc. All rights reserved.
+ *   Author: Levin Li <zhiqiang@zglue.com>
+ *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,18 +34,43 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF52_NRF52_WDT_H
-#define __ARCH_ARM_SRC_NRF52_NRF52_WDT_H
+#ifndef __ARCH_ARM_NRF52_WDT_LOWERHALF_H
+#define __ARCH_ARM_NRF52_WDT_LOWERHALF_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdbool.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Types
+ ****************************************************************************/
+
+enum wdt_behaviour_e
+{
+  WDG_PAUSE = 0,
+  WDG_RUN = 1
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Inline Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -52,126 +78,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf52_wdt_int_enable
+ * Name: nrf52_wdt_initialize
  *
  * Description:
- *   Enable watchdog interrupt.
+ *   Initialize the WDT watchdog time.  The watchdog timer is initialized and
+ *   registers as 'devpath.  The initial state of the watchdog time is
+ *   disabled.
  *
- * Input Parameter:
- *   int_mask - Interrupt mask
+ * Input Parameters:
+ *   devpath    - The full path to the watchdog.  This should be of the form
+ *                /dev/watchdog0
+ *   mode_sleep - The behaviour of watchdog when CPU enter sleep mode
+ *   mode_halt  - The behaviour of watchdog when CPU was  HALT by
+ *                debugger
  *
  * Returned Values:
- *   None
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
-void nrf52_wdt_int_enable(uint32_t int_mask);
+int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
+                         int16_t mode_halt);
 
-/****************************************************************************
- * Name: nrf52_wdt_task_trigger
- *
- * Description:
- *   Starts the watchdog
- *
- * Input Parameter:
- *   None
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void nrf52_wdt_task_trigger(void);
-
-/****************************************************************************
- * Name: nrf52_wdt_reload_register_enable
- *
- * Description:
- *   Enable/disable a given reload register
- *
- * Input Parameter:
- *   rr_register - Reload request register
- *   enable - true to enable, false to disable
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void nrf52_wdt_reload_register_enable(int rr_register, bool enable);
-
-/****************************************************************************
- * Name: nrf52_wdt_reload_request_set
- *
- * Description:
- *   Setting a specific reload request register
- *
- * Input Parameter:
- *   rr_register - Reload request register to set
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void nrf52_wdt_reload_request_set(int rr_register);
-
-/****************************************************************************
- * Name: nrf52_wdt_behaviour_set
- *
- * Description:
- *   Configure the watchdog behaviour when the CPU is sleeping or halted
- *
- * Input Parameter:
- *   behavior - The behaviour to be configured
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void nrf52_wdt_behaviour_set(int behaviour);
-
-/****************************************************************************
- * Name: nrf52_wdt_reload_value_set
- *
- * Description:
- *   Setup the watchdog reload value
- *
- * Input Parameter:
- *   reload_value - Watchdog counter initial value
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-void nrf52_wdt_reload_value_set(uint32_t reload_value);
-
-/****************************************************************************
- * Name: nrf52_wdt_reload_value_get
- *
- * Description:
- *   Read the watchdog reload value
- *
- * Returned Values:
- *   Watchdog counter initial value
- *
- ****************************************************************************/
-
-uint32_t nrf52_wdt_reload_value_get(void);
-
-/****************************************************************************
- * Name: nrf52_wdt_running
- *
- * Description:
- *   Check if watchdog is running
- *
- * Returned Values:
- *   true if watchdog is running, false otherwise
- *
- ****************************************************************************/
-
-bool nrf52_wdt_running(void);
-
-#endif /* __ARCH_ARM_SRC_NRF52_NRF52_WDT_H */
+#endif /* __ARCH_ARM_NRF52_WDT_LOWERHALF_H */
