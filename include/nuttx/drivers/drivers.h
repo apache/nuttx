@@ -236,8 +236,8 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
  *   flags - The file status flags.
  *
  * Returned Value:
- *   0 is returned on success; otherwise, the negative error code return
- *   appropriately.
+ *   0 is returned on success; a negated errno value is returned on a
+ *   failure.
  *
  ****************************************************************************/
 
@@ -274,8 +274,8 @@ int nx_pipe(int fd[2], size_t bufsize, int flags);
  *   bufsize - The size of the in-memory, circular buffer in bytes.
  *
  * Returned Value:
- *   0 is returned on success; otherwise, the negative error code return
- *   appropriately.
+ *   0 is returned on success; a negated errno value is returned on a
+ *   failure.
  *
  ****************************************************************************/
 
