@@ -255,7 +255,7 @@ SYSCALL_LOOKUP(telldir,                    1)
 #endif
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
-  SYSCALL_LOOKUP(nx_pipe,                  2)
+  SYSCALL_LOOKUP(nx_pipe,                  3)
   SYSCALL_LOOKUP(nx_mkfifo,                3)
 #endif
 
