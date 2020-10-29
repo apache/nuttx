@@ -201,6 +201,14 @@ ifeq ($(CONFIG_SIM_HCISOCKET),y)
   CSRCS += up_hcisocket.c
 endif 
 
+ifeq ($(CONFIG_I2C_RESET),y)
+  HOSTCFLAGS += -DCONFIG_I2C_RESET=1
+endif
+
+ifeq ($(CONFIG_SIM_I2CBUS_LINUX),y)
+  HOSTSRCS += up_i2cbuslinux.c
+endif
+
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += up_rptun.c
 endif

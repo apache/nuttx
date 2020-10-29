@@ -160,6 +160,7 @@ struct tcb_s;
 struct spi_dev_s;
 struct qspi_dev_s;
 struct ioexpander_dev_s;
+struct i2c_master_s;
 
 /****************************************************************************
  * Public Data
@@ -402,6 +403,13 @@ int bthcisock_loop(void);
 #ifdef CONFIG_SIM_SOUND
 struct audio_lowerhalf_s *sim_audio_initialize(bool playback);
 void sim_audio_loop(void);
+#endif
+
+/* up_i2cbus*.c *************************************************************/
+
+#ifdef CONFIG_SIM_I2CBUS
+struct i2c_master_s *sim_i2cbus_initialize(int bus);
+int sim_i2cbus_uninitialize(struct i2c_master_s *dev);
 #endif
 
 /* Debug ********************************************************************/

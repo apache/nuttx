@@ -534,6 +534,36 @@ config SIM_HCISOCKET
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
 
+config SIM_I2CBUS
+	bool "Simulated I2C Bus"
+	default n
+	select I2C
+	---help---
+		Build in support for simulated i2c bus
+
+if SIM_I2CBUS
+
+choice
+	prompt "Simulated I2C Bus Type"
+	default SIM_I2CBUS_LINUX
+
+config SIM_I2CBUS_LINUX
+	bool "Linux I2C Bus Character Dev"
+	depends on HOST_LINUX
+	---help---
+		Attach a Linux I2C bus via the character device
+		interface. This should be used with caution as it
+		could interfere with devices internal to the system.
+		It is recommended to use this with a USB<>I2C device
+		like the MCP2221 and set udev rules so that only
+		the bus provided by this device can be controlled
+		by the user running the simulator.
+		https://www.kernel.org/doc/html/latest/i2c/dev-interface.html
+
+endchoice
+
+endif
+
 config SIM_UART_NUMBER
 	int "The number of tty ports on sim platform, range is 0~4"
 	default 0
