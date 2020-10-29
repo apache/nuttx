@@ -451,7 +451,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 #endif
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
-      /* If the task was stopped by SIGSTOP or SIGSTP, then unblock the task
+      /* If the task was stopped by SIGSTOP or SIGTSTP, then unblock the task
        * if SIGCONT is received.
        */
 

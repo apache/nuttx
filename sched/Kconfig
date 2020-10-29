@@ -1382,10 +1382,10 @@ config SIG_SIGPOLL_ACTION
 		sigaction() to ignore SIGPOLL.
 
 config SIG_SIGSTOP_ACTION
-	bool "SIGSTOP SIGSTP, and SIGCONT"
+	bool "SIGSTOP SIGTSTP, and SIGCONT"
 	default y
 	---help---
-		Enable the default action for SIGSTOP and SIGSTP (suspend the
+		Enable the default action for SIGSTOP and SIGTSTP (suspend the
 		task) and SIGCONT (resume the task).
 
 config SIG_SIGKILL_ACTION
@@ -1452,8 +1452,8 @@ config SIG_STOP
 	---help---
 		Suspend/pause a task.  SIGSTOP may not be caught or ignored.
 
-config SIG_STP
-	int "SIGSTP"
+config SIG_TSTP
+	int "SIGTSTP"
 	default 7
 	depends on SIG_SIGSTOP_ACTION
 	---help---

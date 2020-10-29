@@ -168,7 +168,7 @@
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
 #  define SIGSTOP     CONFIG_SIG_STOP
-#  define SIGSTP      CONFIG_SIG_STP
+#  define SIGTSTP     CONFIG_SIG_TSTP
 #  define SIGCONT     CONFIG_SIG_CONT
 #endif
 

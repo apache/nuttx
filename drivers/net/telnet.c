@@ -68,7 +68,7 @@
 #endif
 
 #undef HAVE_SIGNALS
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
 #  define HAVE_SIGNALS
 #endif
 
@@ -289,18 +289,18 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
         }
 #endif
 
-#ifdef CONFIG_TTY_SIGSTP
-      /* Is this the special character that will generate the SIGSTP
+#ifdef CONFIG_TTY_SIGTSTP
+      /* Is this the special character that will generate the SIGTSTP
        * signal?
        */
 
-      if (*buffer == CONFIG_TTY_SIGSTP_CHAR)
+      if (*buffer == CONFIG_TTY_SIGTSTP_CHAR)
         {
           /* Note that the kill is needed and do not put the character
            * into the Rx buffer.  It should not be read as normal data.
            */
 
-          signo = SIGSTP;
+          signo = SIGTSTP;
 #ifndef CONFIG_TTY_SIGINT
           break;
 #endif

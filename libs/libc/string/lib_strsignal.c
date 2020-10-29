@@ -143,9 +143,9 @@ FAR char *strsignal(int signum)
         return (FAR char *)"SIGSTOP";
 #endif
 
-#ifdef SIGSTP
-      case SIGSTP:
-        return (FAR char *)"SIGSTP";
+#ifdef SIGTSTP
+      case SIGTSTP:
+        return (FAR char *)"SIGTSTP";
 #endif
 
 #ifdef SIGCONT

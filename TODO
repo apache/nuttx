@@ -718,7 +718,7 @@ o Signals (sched/signal, arch/)
                SIGALRM Abnormal Termination CONFIG_SIG_SIGALRM_ACTION
                SIGPOLL Abnormal Termination CONFIG_SIG_SIGPOLL_ACTION
                SIGSTOP Suspend task         CONFIG_SIG_SIGSTOP_ACTION
-               SIGSTP  Suspend task         CONFIG_SIG_SIGSTOP_ACTION
+               SIGTSTP Suspend task         CONFIG_SIG_SIGSTOP_ACTION
                SIGCONT Resume task          CONFIG_SIG_SIGSTOP_ACTION
                SIGINT  Abnormal Termination CONFIG_SIG_SIGKILL_ACTION
                SIGKILL Abnormal Termination CONFIG_SIG_SIGKILL_ACTION
