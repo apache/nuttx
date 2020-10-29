@@ -38,10 +38,10 @@ config NET_BLUETOOTH_BACKLOG
 	default 8
 	range 0 255
 	---help---
-		As frames are received, then are help in an RX queue.  They remain
+		As frames are received, they are held in an RX queue.  They remain
 		in the RX queue until application logic reads the queue frames.  To
 		prevent overrun, the maximum backlog may be set to a nonzero value.
-		What the backlog of queue frames reaches that count, the olds frame
+		When the backlog of queue frames reaches that count, the old frame
 		will be freed, preventing overrun at the cost of losing the oldest
 		frames.
 
