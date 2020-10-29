@@ -258,7 +258,7 @@ function build {
   if [ ${SAVEARTIFACTS} -eq 1 ]; then
     artifactconfigdir=$ARTIFACTDIR/$(echo $config | sed "s/:/\//")/
     mkdir -p $artifactconfigdir
-    xargs -a $nuttx/nuttx.manifest cp -t $artifactconfigdir
+    xargs -I "{}" cp "{}" $artifactconfigdir < $nuttx/nuttx.manifest
   fi
 
   # Ensure defconfig in the canonical form
