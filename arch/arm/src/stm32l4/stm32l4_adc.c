@@ -414,7 +414,7 @@ static struct stm32_dev_s g_adcpriv1 =
   .intf        = 1,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32L4_ADC1_RESOLUTION,
-#endif  
+#endif
   .base        = STM32L4_ADC1_BASE,
 #if defined(ADC1_HAVE_TIMER) || defined(ADC1_HAVE_EXTCFG)
   .extcfg      = ADC1_EXTCFG_VALUE,
@@ -476,7 +476,7 @@ static struct stm32_dev_s g_adcpriv2 =
 #endif
 #ifdef ADC2_HAVE_DMA
   .dmachan     = ADC2_DMA_CHAN,
-  .dmacfg      = CONFIG_STM32L4_ADC1_DMA_CFG,
+  .dmacfg      = CONFIG_STM32L4_ADC2_DMA_CFG,
   .hasdma      = true,
 #endif
 #ifdef ADC2_HAVE_DFSDM
@@ -512,7 +512,7 @@ static struct stm32_dev_s g_adcpriv3 =
   .intf        = 3,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32L4_ADC3_RESOLUTION,
-#endif  
+#endif
   .base        = STM32L4_ADC3_BASE,
 #if defined(ADC3_HAVE_TIMER) || defined(ADC3_HAVE_EXTCFG)
   .extcfg      = ADC3_EXTCFG_VALUE,
@@ -525,7 +525,7 @@ static struct stm32_dev_s g_adcpriv3 =
 #endif
 #ifdef ADC3_HAVE_DMA
   .dmachan     = ADC3_DMA_CHAN,
-  .dmacfg      = CONFIG_STM32L4_ADC1_DMA_CFG,
+  .dmacfg      = CONFIG_STM32L4_ADC3_DMA_CFG,
   .hasdma      = true,
 #endif
 #ifdef ADC3_HAVE_DFSDM
