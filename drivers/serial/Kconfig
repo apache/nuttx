@@ -200,7 +200,7 @@ config TTY_SIGINT
 		    is like SIGKILL but can be caught or ignored.
 		  - SIGQUIT is like SIGINT but causes generation of a core dump
 		  - SIGSTOP cannot be caught or ignored.  SIGSTP is like SIGSTOP but
-		    can be caught or ignored ignored.
+		    can be caught or ignored.
 		  - The delayed suspend (DSUSD) is like suspend (SUPD), except that
 		    the suspension is delayed until the next read operation
 
@@ -245,7 +245,7 @@ config TTY_SIGSTP
 		    is like SIGKILL but can be caught or ignored.
 		  - SIGQUIT is like SIGINT but causes generation of a core dump
 		  - SIGSTOP cannot be caught or ignored.  SIGSTP is like SIGSTOP but
-		    can be caught or ignored ignored.
+		    can be caught or ignored.
 		  - The delayed suspend (DSUSD) is like suspend (SUPD), except that
 		    the suspension is delayed until the next read operation
 
