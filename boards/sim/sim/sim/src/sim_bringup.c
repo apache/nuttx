@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/sim/sim/sim/src/sam_bringup.c
+ * boards/sim/sim/sim/src/sim_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -40,6 +40,8 @@
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/sensors/mpu60x0.h>
 
 #ifdef CONFIG_LCD_DEV
 #include <nuttx/lcd/lcd_dev.h>
@@ -68,6 +70,13 @@ int sim_bringup(void)
 #ifdef CONFIG_RAMMTD
   FAR uint8_t *ramstart;
 #endif
+#ifdef CONFIG_SIM_I2CBUS
+  FAR struct i2c_master_s *i2cbus;
+#endif
+#ifdef CONFIG_MPU60X0_I2C
+  FAR struct mpu_config_s *mpu_config;
+#endif
+
   int ret = OK;
 
 #ifdef CONFIG_FS_BINFS
@@ -333,6 +342,42 @@ int sim_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: bthcisock_register() failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_SIM_I2CBUS
+  /* Initialize the i2c master bus device */
+
+  i2cbus = sim_i2cbus_initialize(CONFIG_SIM_I2CBUS_ID);
+  if (i2cbus == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: sim_i2cbus_initialize failed.\n");
+    }
+#if defined(CONFIG_SYSTEM_I2CTOOL) || defined(CONFIG_MPU60X0_I2C)
+  else
+    {
+      ret = i2c_register(i2cbus, 0);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                 0, ret);
+          sim_i2cbus_uninitialize(i2cbus);
+        }
+
+#ifdef CONFIG_MPU60X0_I2C
+      mpu_config = kmm_zalloc(sizeof(struct mpu_config_s));
+      if (mpu_config == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to allocate mpu60x0 driver\n");
+        }
+      else
+        {
+          mpu_config->i2c = i2cbus;
+          mpu_config->addr = 0x68;
+          mpu60x0_register("/dev/imu0", mpu_config);
+        }
+#endif
+    }
+#endif
 #endif
 
   return ret;

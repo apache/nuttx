@@ -453,13 +453,11 @@ static int __mpu_write_reg_i2c(FAR struct mpu_dev_s *dev,
   msg[0].flags     = I2C_M_NOSTOP;
   msg[0].buffer    = &reg_addr;
   msg[0].length    = 1;
-
   msg[1].frequency = CONFIG_MPU60X0_I2C_FREQ;
   msg[1].addr      = dev->config.addr;
   msg[1].flags     = I2C_M_NOSTART;
   msg[1].buffer    = (FAR uint8_t *)buf;
   msg[1].length    = len;
-
   ret = I2C_TRANSFER(dev->config.i2c, msg, 2);
   if (ret < 0)
     {
@@ -718,19 +716,19 @@ static int mpu_reset(FAR struct mpu_dev_s *dev)
 
   do
     {
-      up_mdelay(50);            /* msecs (arbitrary) */
+      nxsig_usleep(50000);            /* usecs (arbitrary) */
     }
   while (__mpu_read_pwr_mgmt_1(dev) & PWR_MGMT_1__DEVICE_RESET);
 
   /* Reset signal paths */
 
   __mpu_write_signal_path_reset(dev, SIGNAL_PATH_RESET__ALL_RESET);
-  up_mdelay(2);
+  nxsig_usleep(2000);
 
   /* Disable SLEEP, use PLL with z-axis clock source */
 
   __mpu_write_pwr_mgmt_1(dev, 3);
-  up_mdelay(2);
+  nxsig_usleep(2000);
 
   /* Disable i2c if we're on spi. */
 
