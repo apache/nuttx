@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 #include <nuttx/board.h>
 #include <nuttx/sensors/wtgahrs2.h>
+#include <nuttx/rc/lirc_dev.h>
+#include <nuttx/rc/dummy.h>
 
 #include "sim.h"
 #include "up_internal.h"
@@ -94,6 +96,10 @@ int board_app_initialize(uintptr_t arg)
 #elif CONFIG_SIM_WTGAHRS2_UARTN == 3
   wtgahrs2_initialize(CONFIG_SIM_UART3_NAME);
 #endif
+#endif
+
+#ifdef CONFIG_RC_DUMMY
+  rc_dummy_initialize(0);
 #endif
 
   return 0;
