@@ -820,7 +820,7 @@ done:
 
 static void le_adv_report(FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_hci_ev_le_advertising_info_s *info;
+  FAR struct bt_hci_ev_le_advertising_report_s *info;
   uint8_t num_reports = buf->data[0];
 
   wlinfo("Adv number of reports %u\n", num_reports);
@@ -859,10 +859,14 @@ static void le_adv_report(FAR struct bt_buf_s *buf)
 
       /* Get next report iteration by moving pointer to right offset in buf
        * according to spec 4.2, Vol 2, Part E, 7.7.65.2.
+       *
+       * TODO: multiple reports are stored as multiple arrays not one array
+       * of structs. If num_reports > 0 this will not WORK!
        */
 
-      info = bt_buf_consume(buf,
-                            sizeof(*info) + info->length + sizeof(rssi));
+      /* Note that info already contains one byte which accounts for RSSI */
+
+      info = bt_buf_consume(buf, sizeof(*info) + info->length);
     }
 }
 
@@ -1961,8 +1965,8 @@ send_set_param:
   set_param = bt_buf_extend(buf, sizeof(*set_param));
 
   memset(set_param, 0, sizeof(*set_param));
-  set_param->min_interval = BT_HOST2LE16(0x0800);
-  set_param->max_interval = BT_HOST2LE16(0x0800);
+  set_param->min_interval = BT_HOST2LE16(300);
+  set_param->max_interval = BT_HOST2LE16(300);
   set_param->type         = type;
   set_param->channel_map  = 0x07;
 
