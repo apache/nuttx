@@ -998,7 +998,7 @@ static int sam_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Initiate the message transfer */
 
-  ret = -BUSY;
+  ret = -EBUSY;
 
   /* Initiate the transfer.  The rest will be handled from interrupt logic.
    * Interrupts must be disabled to prevent re-entrance from the interrupt
