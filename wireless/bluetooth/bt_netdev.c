@@ -885,11 +885,11 @@ static int btnet_req_data(FAR struct radio_driver_s *netdev,
   FAR struct iob_s *iob;
   bt_addr_le_t peer;
 
-  wlinfo("Received framelist\n");
-  DEBUGASSERT(priv != NULL && meta != NULL && framelist != NULL);
-
   priv   = (FAR struct btnet_driver_s *)netdev;
   btmeta = (FAR struct bluetooth_frame_meta_s *)meta;
+
+  wlinfo("Received framelist\n");
+  DEBUGASSERT(priv != NULL && meta != NULL && framelist != NULL);
 
   /* Create a connection structure for this peer if one does not already
    * exist.
