@@ -24,6 +24,10 @@ ifeq ($(CONFIG_DRIVERS_RC),y)
 
 CSRCS += lirc_dev.c
 
+ifeq ($(CONFIG_RC_DUMMY),y)
+CSRCS += dummy.c
+endif
+
 # Include remote control driver build support
 
 DEPPATH += --dep-path rc
