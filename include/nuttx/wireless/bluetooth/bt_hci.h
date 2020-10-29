@@ -12,30 +12,31 @@
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -64,9 +65,16 @@
 
 /* HCI Error Codes */
 
+#define BT_HCI_SUCCESS                    0x00
+#define BT_HCI_PENDING                    0x00
+#define BT_HCI_ERR_UNKNOWN_COMMAND        0x01
+#define BT_HCI_ERR_CONNECTION_TIMEOUT     0x08
 #define BT_HCI_ERR_AUTHENTICATION_FAIL    0x05
+#define BT_HCI_ERR_COMMAND_DISALLOWED     0x0C
+#define BT_HCI_ERR_INVALID_PARAMETERS     0x12
 #define BT_HCI_ERR_REMOTE_USER_TERM_CONN  0x13
 #define BT_HCI_ERR_UNSUPP_REMOTE_FEATURE  0x1a
+#define BT_HCI_ERR_INSTANT_PASSED         0x28
 #define BT_HCI_ERR_PAIRING_NOT_SUPPORTED  0x29
 #define BT_HCI_ERR_UNACCEPT_CONN_PARAMS   0x3b
 
@@ -129,8 +137,11 @@
 #define BT_HCI_OP_READ_LOCAL_FEATURES         BT_OP(BT_OGF_INFO, 0x0003)
 #define BT_HCI_OP_READ_BUFFER_SIZE            BT_OP(BT_OGF_INFO, 0x0005)
 #define BT_HCI_OP_READ_BD_ADDR                BT_OP(BT_OGF_INFO, 0x0009)
+#define BT_HCI_OP_LE_SET_EVENT_MASK           BT_OP(BT_OGF_LE, 0x0001)
 #define BT_HCI_OP_LE_READ_BUFFER_SIZE         BT_OP(BT_OGF_LE, 0x0002)
 #define BT_HCI_OP_LE_READ_LOCAL_FEATURES      BT_OP(BT_OGF_LE, 0x0003)
+
+#define BT_HCI_OP_LE_SET_RAND_ADDR            BT_OP(BT_OGF_LE, 0x0005)
 
 /* Advertising types */
 
@@ -157,7 +168,12 @@
 #  define BT_LE_SCAN_FILTER_DUP_ENABLE        0x01
 #define BT_HCI_OP_LE_CREATE_CONN              BT_OP(BT_OGF_LE, 0x000d)
 #define BT_HCI_OP_LE_CREATE_CONN_CANCEL       BT_OP(BT_OGF_LE, 0x000e)
+#define BT_HCI_OP_LE_READ_WHITE_LIST_SIZE     BT_OP(BT_OGF_LE, 0x000f)
+#define BT_HCI_OP_LE_CLEAR_WHITE_LIST         BT_OP(BT_OGF_LE, 0x0010)
+#define BT_HCI_OP_LE_ADD_DEV_TO_WHITE_LIST    BT_OP(BT_OGF_LE, 0x0011)
+#define BT_HCI_OP_LE_REM_DEV_FROM_WHITE_LIST  BT_OP(BT_OGF_LE, 0x0012)
 #define BT_HCI_OP_LE_CONN_UPDATE              BT_OP(BT_OGF_LE, 0x0013)
+#define BT_HCI_OP_LE_READ_REMOTE_FEATURES     BT_OP(BT_OGF_LE, 0x0016)
 #define BT_HCI_OP_LE_ENCRYPT                  BT_OP(BT_OGF_LE, 0x0017)
 #define BT_HCI_OP_LE_RAND                     BT_OP(BT_OGF_LE, 0x0018)
 #define BT_HCI_OP_LE_START_ENCRYPTION         BT_OP(BT_OGF_LE, 0x0019)
@@ -173,11 +189,19 @@
 #define BT_HCI_EVT_NUM_COMPLETED_PACKETS      0x13
 #define BT_HCI_EVT_ENCRYPT_KEY_REFRESH_COMPLETE 0x30
 #define BT_HCI_EVT_LE_META_EVENT              0x3e
+
 #define BT_HCI_EVT_LE_CONN_COMPLETE           0x01
 #  define BT_HCI_ROLE_MASTER                  0x00
 #  define BT_HCI_ROLE_SLAVE                   0x01
 #define BT_HCI_EVT_LE_ADVERTISING_REPORT      0x02
+#define BT_HCI_EVT_LE_CONN_UPDATE             0x03
+#define BT_HCI_EVT_LE_READ_REM_FEAT_COMPLETE  0x04
 #define BT_HCI_EVT_LE_LTK_REQUEST             0x05
+
+/* Packet boundary flags for ACL packets */
+
+#define BT_HCI_ACL_CONTINUATION               0x0001
+#define BT_HCI_ACL_NEW                        0x0002
 
 /****************************************************************************
  * Public Types
@@ -202,7 +226,9 @@ begin_packed_struct struct bt_hci_evt_hdr_s
 
 begin_packed_struct struct bt_hci_acl_hdr_s
 {
-  uint16_t handle;
+  uint16_t handle          : 12;
+  uint16_t packet_boundary : 2;
+  uint16_t broadcast       : 2;
   uint16_t len;
 } end_packed_struct;
 
@@ -221,6 +247,11 @@ begin_packed_struct struct bt_hci_cp_disconnect_s
 begin_packed_struct struct bt_hci_cp_set_event_mask_s
 {
   uint8_t events[8];
+} end_packed_struct;
+
+begin_packed_struct struct bt_hci_cp_set_ctl_to_host_flow_s
+{
+  uint8_t enable;
 } end_packed_struct;
 
 begin_packed_struct struct bt_hci_cp_host_buffer_size_s
@@ -249,6 +280,11 @@ begin_packed_struct struct bt_hci_cp_write_le_host_supp_s
   uint8_t simul;
 } end_packed_struct;
 
+begin_packed_struct struct bt_hci_le_read_remote_features_s
+{
+  uint16_t conn;
+} end_packed_struct;
+
 begin_packed_struct struct bt_hci_rp_read_local_version_info_s
 {
   uint8_t status;
@@ -265,6 +301,13 @@ begin_packed_struct struct bt_hci_rp_read_local_features_s
   uint8_t features[8];
 } end_packed_struct;
 
+begin_packed_struct struct bt_hci_rp_le_read_remote_features_s
+{
+  uint8_t status;
+  uint16_t conn;
+  uint8_t features[8];
+} end_packed_struct;
+
 begin_packed_struct struct bt_hci_rp_read_buffer_size_s
 {
   uint8_t status;
@@ -277,7 +320,7 @@ begin_packed_struct struct bt_hci_rp_read_buffer_size_s
 begin_packed_struct struct bt_hci_rp_read_bd_addr_s
 {
   uint8_t status;
-  bt_addr_t bdaddr;
+  struct bt_addr_s bdaddr;
 } end_packed_struct;
 
 begin_packed_struct struct bt_hci_rp_le_read_buffer_size_s
@@ -415,6 +458,12 @@ begin_packed_struct struct bt_hci_evt_encrypt_change_s
   uint8_t encrypt;
 } end_packed_struct;
 
+begin_packed_struct struct hci_evt_cmd_disallowed_s
+{
+  uint8_t ncmd;
+  uint16_t opcode;
+} end_packed_struct;
+
 begin_packed_struct struct hci_evt_cmd_complete_s
 {
   uint8_t ncmd;
@@ -457,7 +506,16 @@ begin_packed_struct struct bt_hci_evt_le_conn_complete_s
   uint8_t clock_accuracy;
 } end_packed_struct;
 
-begin_packed_struct struct bt_hci_ev_le_advertising_info_s
+begin_packed_struct struct bt_hci_evt_le_conn_update_s
+{
+  uint8_t status;
+  uint16_t handle;
+  uint16_t interval;
+  uint16_t latency;
+  uint16_t timeout;
+} end_packed_struct;
+
+begin_packed_struct struct bt_hci_ev_le_advertising_report_s
 {
   uint8_t evt_type;
   bt_addr_le_t addr;
