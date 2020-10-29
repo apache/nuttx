@@ -55,7 +55,7 @@
  * Name: uart_check_signo
  *
  * Description:
- *   Check if the SIGINT or SIGSTP character is in the contiguous Rx DMA
+ *   Check if the SIGINT or SIGTSTP character is in the contiguous Rx DMA
  *   buffer region.  The first signal associated with the first such
  *   character is returned.
  *
@@ -64,12 +64,12 @@
  *
  * Returned Value:
  *   0 if a signal-related character does not appear in the.  Otherwise,
- *   SIGKILL or SIGSTP may be returned to indicate the appropriate signal
+ *   SIGKILL or SIGTSTP may be returned to indicate the appropriate signal
  *   action.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
 static int uart_check_signo(const char *buf, size_t size)
 {
   size_t i;
@@ -83,10 +83,10 @@ static int uart_check_signo(const char *buf, size_t size)
         }
 #endif
 
-#ifdef CONFIG_TTY_SIGSTP
-      if (buf[i] == CONFIG_TTY_SIGSTP_CHAR)
+#ifdef CONFIG_TTY_SIGTSTP
+      if (buf[i] == CONFIG_TTY_SIGTSTP_CHAR)
         {
-          return SIGSTP;
+          return SIGTSTP;
         }
 #endif
     }
@@ -102,13 +102,13 @@ static int uart_check_signo(const char *buf, size_t size)
  *   Check if the SIGINT character is anywhere in the newly received DMA
  *   buffer.
  *
- *   REVISIT:  We must also remove the SIGINT/SIGSTP character from the Rx
+ *   REVISIT:  We must also remove the SIGINT/SIGTSTP character from the Rx
  *   buffer.  It should not be read as normal data by the caller.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_SERIAL_RXDMA) && \
-   (defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP))
+   (defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP))
 static int uart_recvchars_signo(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
@@ -370,7 +370,7 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
   FAR struct uart_buffer_s *rxbuf = &dev->recv;
   size_t nbytes = xfer->nbytes;
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   int signo = 0;
 
   /* Check if the SIGINT character is anywhere in the newly received DMA
@@ -398,7 +398,7 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
       uart_datareceived(dev);
     }
 
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   /* Send the signal if necessary */
 
   if (signo != 0)
