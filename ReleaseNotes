@@ -3962,7 +3962,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
 
     * Tasking:
 
-      - The wrong PID was being signalled with SIGCHILD.  It should be
+      - The wrong PID was being signalled with SIGCHLD.  It should be
         the PID of the task that create the task group, not the ID of
         the last thread to leave the task group.
       - Added logic so that some internal resources and states are recovered

@@ -213,7 +213,7 @@
 
 /* struct sigaction flag values */
 
-#define SA_NOCLDSTOP    (1 << 0) /* Do not generate SIGCHILD when
+#define SA_NOCLDSTOP    (1 << 0) /* Do not generate SIGCHLD when
                                   * children stop (ignored) */
 #define SA_SIGINFO      (1 << 1) /* Invoke the signal-catching function
                                   * with 3 args instead of 1
