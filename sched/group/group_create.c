@@ -368,7 +368,7 @@ int group_initialize(FAR struct task_tcb_s *tcb)
 #endif
 
   /* Save the ID of the main task within the group of threads.  This needed
-   * for things like SIGCHILD.  It ID is also saved in the TCB of the main
+   * for things like SIGCHLD.  It ID is also saved in the TCB of the main
    * task but is also retained in the group which may persist after the main
    * task has exited.
    */

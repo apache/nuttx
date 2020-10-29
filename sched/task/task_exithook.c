@@ -264,7 +264,7 @@ static inline void nxtask_groupexit(FAR struct task_group_s *group)
  * Name: nxtask_sigchild
  *
  * Description:
- *   Send the SIGCHILD signal to the parent thread
+ *   Send the SIGCHLD signal to the parent thread
  *
  ****************************************************************************/
 
@@ -405,7 +405,7 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
  * Name: nxtask_signalparent
  *
  * Description:
- *   Send the SIGCHILD signal to the parent task group
+ *   Send the SIGCHLD signal to the parent task group
  *
  ****************************************************************************/
 
@@ -639,7 +639,7 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
 
   nxtask_recover(tcb);
 
-  /* Send the SIGCHILD signal to the parent task group */
+  /* Send the SIGCHLD signal to the parent task group */
 
   nxtask_signalparent(tcb, status);
 
