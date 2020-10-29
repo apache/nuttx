@@ -1045,11 +1045,11 @@ static int btnet_req_data(FAR struct radio_driver_s *netdev,
   FAR struct btnet_driver_s *priv;
   FAR struct bluetooth_frame_meta_s *btmeta;
 
-  wlinfo("Received framelist\n");
-  DEBUGASSERT(priv != NULL && meta != NULL && framelist != NULL);
-
   priv   = (FAR struct btnet_driver_s *)netdev;
   btmeta = (FAR struct bluetooth_frame_meta_s *)meta;
+
+  wlinfo("Received framelist\n");
+  DEBUGASSERT(priv != NULL && meta != NULL && framelist != NULL);
 
   if (btmeta->bm_proto == BTPROTO_HCI)
     {
