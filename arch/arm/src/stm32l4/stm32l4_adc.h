@@ -776,6 +776,8 @@
         (adc)->llops->reg_startconv(adc, state)
 #define ADC_OFFSET_SET(adc, ch, i, o)                \
         (adc)->llops->offset_set(adc, ch, i, o)
+#define ADC_EXTSEL_SET(adc, extcfg)                  \
+        (adc)->llops->extsel_set(adc, extcfg)
 #define ADC_DUMP_REGS(adc)                           \
         (adc)->llops->dump_regs(adc)
 
@@ -835,6 +837,12 @@ struct stm32_adc_ops_s
 
   int (*offset_set)(FAR struct stm32_adc_dev_s *dev, uint8_t ch, uint8_t i,
                     uint16_t offset);
+
+  /* Configure external event for regular group */
+
+  int (*extsel_set)(FAR struct stm32_adc_dev_s *dev, uint32_t extcfg);
+
+  /* Dump ADC regs */
 
   void (*dump_regs)(FAR struct stm32_adc_dev_s *dev);
 };

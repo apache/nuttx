@@ -315,8 +315,8 @@ static void     adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr,
 static int      adc_offset_set(FAR struct stm32_dev_s *priv, uint8_t ch,
                                uint8_t i, uint16_t offset);
 #endif
-#ifdef ADC_HAVE_EXTCFG
-static int      adc_extsel_set(FAR struct adc_dev_s *dev, uint32_t extcfg);
+#if defined(ADC_HAVE_EXTCFG) || defined(CONFIG_STM32L4_ADC_LL_OPS)
+static int      adc_extsel_set(FAR struct stm32_dev_s *priv, uint32_t extcfg);
 #endif
 #ifdef CONFIG_PM
 static int      adc_pm_prepare(struct pm_callback_s *cb, int domain,
@@ -339,6 +339,8 @@ static int      adc_llops_offset_set(FAR struct stm32_adc_dev_s *dev,
 static int      adc_regbufregister(FAR struct stm32_adc_dev_s *dev,
                                    uint16_t *buffer, uint8_t len);
 #  endif
+static int      adc_llops_extsel_set(FAR struct stm32_adc_dev_s *dev,
+                                 uint32_t extcfg);
 static void     adc_llops_dumpregs(FAR struct stm32_adc_dev_s *dev);
 #endif /* CONFIG_STM32L4_ADC_LL_OPS */
 
@@ -395,6 +397,7 @@ static const struct stm32_adc_ops_s g_adc_llops =
 #  ifdef ADC_HAVE_DMA
   .regbuf_reg    = adc_regbufregister,
 #  endif
+  .extsel_set    = adc_llops_extsel_set,
   .dump_regs     = adc_llops_dumpregs
 };
 #endif /* CONFIG_STM32L4_ADC_LL_OPS */
@@ -1376,7 +1379,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 static int adc_setup(FAR struct adc_dev_s *dev)
 {
 #if !defined(CONFIG_STM32L4_ADC_NOIRQ) ||  defined(ADC_HAVE_TIMER) || \
-    !defined(CONFIG_STM32L4_ADC_NO_STARTUP_CONV)
+  !defined(CONFIG_STM32L4_ADC_NO_STARTUP_CONV) || defined(HAVE_ADC_RESOLUTION)
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
 #endif
   int ret = OK;
@@ -1461,7 +1464,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   if (priv->cchannels > 0)
     {
-      adc_extsel_set(dev, priv->extcfg);
+      adc_extsel_set(priv, priv->extcfg);
     }
   else
     {
@@ -1627,10 +1630,9 @@ static void adc_sample_time_set(FAR struct adc_dev_s *dev)
  * Name: adc_extsel_set
  *****************************************************************************/
 
-#ifdef ADC_HAVE_EXTCFG
-static int adc_extsel_set(FAR struct adc_dev_s *dev, uint32_t extcfg)
+#if defined(ADC_HAVE_EXTCFG) || defined(CONFIG_STM32L4_ADC_LL_OPS)
+static int adc_extsel_set(FAR struct stm32_dev_s *priv, uint32_t extcfg)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   uint32_t exten  = 0;
   uint32_t extsel = 0;
   uint32_t setbits = 0;
@@ -2361,6 +2363,20 @@ static int adc_regbufregister(FAR struct stm32_adc_dev_s *dev,
   return OK;
 }
 #endif  /* ADC_HAVE_DMA */
+
+/*****************************************************************************
+ * Name: adc_llops_extsel_set
+ *****************************************************************************/
+
+static int  adc_llops_extsel_set(FAR struct stm32_adc_dev_s *dev,
+                                 uint32_t extcfg)
+{
+  int ret;
+
+  ret = adc_extsel_set((FAR struct stm32_dev_s *)dev, extcfg);
+
+  return ret;
+}
 
 /*****************************************************************************
  * Name: adc_llops_dumpregs
