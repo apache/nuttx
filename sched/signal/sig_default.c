@@ -317,7 +317,7 @@ static void nxsig_stop_task(int signo)
 
       group->tg_waitflags = 0;
 
-      /* YWakeup any tasks waiting for this task to exit or stop. */
+      /* Wakeup any tasks waiting for this task to exit or stop. */
 
       while (group->tg_exitsem.semcount < 0)
         {
