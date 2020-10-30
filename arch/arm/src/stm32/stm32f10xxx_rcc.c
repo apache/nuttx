@@ -49,6 +49,24 @@
 
 #define HSERDY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
 
+/* The FLASH latency depends on the system clock.
+ *
+ * Calculate the wait cycles, based on STM32_SYSCLK_FREQUENCY:
+ * 0WS from 0-24MHz
+ * 1WS from 24-48MHz
+ * 2WS from 48-72MHz
+ */
+
+#if (STM32_SYSCLK_FREQUENCY <= 24000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_0
+#elif (STM32_SYSCLK_FREQUENCY <= 48000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_1
+#elif (STM32_SYSCLK_FREQUENCY <= 78000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_2
+#else
+#  error "STM32_SYSCLK_FREQUENCY is out of range!"
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -522,16 +540,11 @@ static void stm32_stdclockconfig(void)
   regval |= RCC_CR_HSEON;           /* Enable HSE */
   putreg32(regval, STM32_RCC_CR);
 
-  /* Set flash wait states
-   * Sysclk runs with 72MHz -> 2 waitstates.
-   * 0WS from 0-24MHz
-   * 1WS from 24-48MHz
-   * 2WS from 48-72MHz
-   */
+  /* Enable prefetch buffer and set FLASH wait states */
 
   regval  = getreg32(STM32_FLASH_ACR);
   regval &= ~FLASH_ACR_LATENCY_MASK;
-  regval |= (FLASH_ACR_LATENCY_2 | FLASH_ACR_PRTFBE);
+  regval |= (FLASH_ACR_LATENCY_SETTING | FLASH_ACR_PRTFBE);
   putreg32(regval, STM32_FLASH_ACR);
 
   /* Set up PLL input scaling (with source = PLL2) */
@@ -687,11 +700,11 @@ static void stm32_stdclockconfig(void)
 
 #ifndef CONFIG_STM32_VALUELINE
 
-  /* Enable FLASH prefetch buffer and 2 wait states */
+  /* Enable FLASH prefetch buffer and set FLASH wait states */
 
   regval  = getreg32(STM32_FLASH_ACR);
   regval &= ~FLASH_ACR_LATENCY_MASK;
-  regval |= (FLASH_ACR_LATENCY_2 | FLASH_ACR_PRTFBE);
+  regval |= (FLASH_ACR_LATENCY_SETTING | FLASH_ACR_PRTFBE);
   putreg32(regval, STM32_FLASH_ACR);
 
 #endif

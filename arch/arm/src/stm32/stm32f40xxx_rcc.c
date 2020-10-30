@@ -68,6 +68,33 @@
 
 #define HSE_DIVISOR (STM32_HSE_FREQUENCY + 500000) / 1000000
 
+/* The FLASH latency depends on the system clock.
+ *
+ * Calculate the wait cycles, based on STM32_SYSCLK_FREQUENCY:
+ * 0WS from 0-30MHz
+ * 1WS from 30-60MHz
+ * 2WS from 60-90MHz
+ * 3WS from 90-120MHz
+ * 4WS from 120-150MHz
+ * 5WS from 150-180MHz
+ */
+
+#if (STM32_SYSCLK_FREQUENCY <= 30000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_0
+#elif (STM32_SYSCLK_FREQUENCY <= 60000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_1
+#elif (STM32_SYSCLK_FREQUENCY <= 90000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_2
+#elif (STM32_SYSCLK_FREQUENCY <= 120000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_3
+#elif (STM32_SYSCLK_FREQUENCY <= 150000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_4
+#elif (STM32_SYSCLK_FREQUENCY <= 180000000)
+#  define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_5
+#else
+#  error "STM32_SYSCLK_FREQUENCY is out of range!"
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -778,10 +805,10 @@ static void stm32_stdclockconfig(void)
 #endif
 
       /* Enable FLASH prefetch, instruction cache, data cache,
-       * and 5 wait states.
+       * and set FLASH wait states.
        */
 
-      regval = (FLASH_ACR_LATENCY_5
+      regval = (FLASH_ACR_LATENCY_SETTING
 #ifdef CONFIG_STM32_FLASH_ICACHE
                 | FLASH_ACR_ICEN
 #endif
