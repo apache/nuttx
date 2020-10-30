@@ -41,6 +41,10 @@ ifeq ($(CONFIG_LCD_FRAMEBUFFER),y)
   CSRCS += lcd_framebuffer.c
 endif
 
+ifeq ($(CONFIG_LCD_DEV),y)
+  CSRCS += lcd_dev.c
+endif
+
 # Include support for Graphics LCD drivers
 
 ifeq ($(CONFIG_LCD_FT80X),y)

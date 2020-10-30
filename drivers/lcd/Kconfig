@@ -24,6 +24,14 @@ config LCD_PACKEDMSFIRST
 
 comment "Common Graphic LCD Settings"
 
+config LCD_DEV
+  bool "LCD character device"
+  default n
+  ---help---
+    This option enables support for a character driver which exposes
+    LCD operations to userspace via ioctl() commands. This is useful when
+    not using NXGraphics but an alternative graphics library such as LVGL.
+
 config LCD_FRAMEBUFFER
 	bool "LCD framebuffer front end"
 	default n
