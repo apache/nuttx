@@ -1448,14 +1448,12 @@ if SIG_DEFAULT
 config SIG_STOP
 	int "SIGSTOP"
 	default 6
-	depends on SIG_SIGSTOP_ACTION
 	---help---
 		Suspend/pause a task.  SIGSTOP may not be caught or ignored.
 
 config SIG_TSTP
 	int "SIGTSTP"
 	default 7
-	depends on SIG_SIGSTOP_ACTION
 	---help---
 		Suspend/pause a task.  Unlike SIGSTOP, this signal can be caught or
 		ignored.
@@ -1463,7 +1461,6 @@ config SIG_TSTP
 config SIG_CONT
 	int "SIGCONT"
 	default 8
-	depends on SIG_SIGSTOP_ACTION
 	---help---
 		Resume a suspended/paused task.  SIGSTOP only has an action when
 		send to a stopped task.  SIGCONT is ignored by other task.  SIGCONT
@@ -1472,7 +1469,6 @@ config SIG_CONT
 config SIG_KILL
 	int "SIGKILL"
 	default 9
-	depends on SIG_SIGKILL_ACTION
 	---help---
 		The SIGKILL signal is sent to cause a task termination event.
 		SIGKILL may not be caught or ignored.
@@ -1480,7 +1476,6 @@ config SIG_KILL
 config SIG_INT
 	int "SIGINT"
 	default 10
-	depends on SIG_SIGKILL_ACTION
 	---help---
 		The SIGINT signal is sent to cause a task termination event.
 		SIGINT may be ignored or caught by the receiving task.
@@ -1488,7 +1483,6 @@ config SIG_INT
 config SIG_QUIT
 	int "SIGQUIT"
 	default 11
-	depends on SIG_SIGKILL_ACTION
 	---help---
 		The SIGINT signal is sent to cause a task termination event.
 		SIGQUIT may be ignored or caught by the receiving task.
@@ -1496,7 +1490,6 @@ config SIG_QUIT
 config SIG_TERM
 	int "SIGTERM"
 	default 12
-	depends on SIG_SIGKILL_ACTION
 	---help---
 		The SIGINT signal is sent to cause a task termination event.
 		SIGTERM may be ignored or caught by the receiving task.
