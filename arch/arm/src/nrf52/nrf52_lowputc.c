@@ -113,6 +113,7 @@ static const struct uart_config_s g_console_config =
  *
  ****************************************************************************/
 
+#ifdef HAVE_UART_DEVICE
 static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
 {
   uint32_t br = 0;
@@ -234,11 +235,13 @@ static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
 
   putreg32(br, base + NRF52_UART_BAUDRATE_OFFSET);
 }
+#endif
 
 /****************************************************************************
  * Name: nrf52_setparity
  ****************************************************************************/
 
+#ifdef HAVE_UART_DEVICE
 static void nrf52_setparity(uintptr_t base,
                             const struct uart_config_s *config)
 {
@@ -261,6 +264,7 @@ static void nrf52_setparity(uintptr_t base,
 
   putreg32(regval, base + NRF52_UART_CONFIG_OFFSET);
 }
+#endif
 
 /****************************************************************************
  * Name: nrf52_setstops
@@ -291,11 +295,13 @@ static void nrf52_setstops(uintptr_t base,
  * Name: nrf52_sethwflow
  ****************************************************************************/
 
+#ifdef HAVE_UART_DEVICE
 static void nrf52_sethwflow(uintptr_t base,
                             const struct uart_config_s *config)
 {
   /* TODO */
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -442,6 +448,7 @@ void arm_lowputc(char ch)
  *
  ****************************************************************************/
 
+#ifdef HAVE_UART_DEVICE
 void nrf52_usart_setformat(uintptr_t base,
                            FAR const struct uart_config_s *config)
 {
@@ -463,3 +470,4 @@ void nrf52_usart_setformat(uintptr_t base,
 
   nrf52_sethwflow(base, config);
 }
+#endif

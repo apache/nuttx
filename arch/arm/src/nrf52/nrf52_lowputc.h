@@ -123,7 +123,9 @@ void nrf52_usart_disable(uintptr_t base,
  *
  ****************************************************************************/
 
+#ifdef HAVE_UART_DEVICE
 void nrf52_usart_setformat(uintptr_t base,
                            FAR const struct uart_config_s *config);
+#endif
 
 #endif /* __ARCH_ARM_SRC_NRF52_NRF52_LOWPUTC_H */
