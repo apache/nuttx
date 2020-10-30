@@ -258,8 +258,8 @@ extern "C"
  *   Register the L3DF20 character device as 'devpath'.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register, e.g., "/dev/gyr0".
- *   i2c     - An SPI driver instance.
+ *   devno   - The device number, used to build the device path as /dev/sensor/gyro_uncalN
+ *   spi     - An SPI driver instance.
  *   config  - configuration for the L3GD20 driver. For details see
  *             description above.
  *
@@ -268,7 +268,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int l3gd20_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
+int l3gd20_register(int devno, FAR struct spi_dev_s *spi,
                     FAR struct l3gd20_config_s *config);
 
 #undef EXTERN

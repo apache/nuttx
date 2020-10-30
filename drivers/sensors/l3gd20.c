@@ -29,6 +29,7 @@
 #include <debug.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
@@ -36,6 +37,7 @@
 
 #include <nuttx/fs/fs.h>
 
+#include <nuttx/sensors/sensor.h>
 #include <nuttx/sensors/l3gd20.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_L3GD20)
@@ -59,9 +61,10 @@ struct l3gd20_dev_s
   FAR struct spi_dev_s *spi;          /* Pointer to the SPI instance */
   FAR struct l3gd20_config_s *config; /* Pointer to the configuration of the
                                        * L3GD20 sensor */
+  struct sensor_lowerhalf_s lower;    /* The struct of lower half driver */
   sem_t datasem;                      /* Manages exclusive access to this
                                        * structure */
-  struct l3gd20_sensor_data_s data;   /* The data as measured by the sensor */
+  struct sensor_event_gyro data;      /* The data as measured by the sensor */
   struct work_s work;                 /* The work queue is responsible for
                                        * retrieving the data from the sensor
                                        * after the arrival of new data was
@@ -90,30 +93,19 @@ static int l3gd20_interrupt_handler(int irq, FAR void *context,
                                     FAR void *arg);
 static void l3gd20_worker(FAR void *arg);
 
-static int l3gd20_open(FAR struct file *filep);
-static int l3gd20_close(FAR struct file *filep);
-static ssize_t l3gd20_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen);
-static ssize_t l3gd20_write(FAR struct file *filep, FAR const char *buffer,
-                            size_t buflen);
-static int l3gd20_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int l3gd20_activate(FAR struct sensor_lowerhalf_s *lower, bool enable);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_l3gd20_fops =
+/* The lower half sensor driver operations for sensor register*/
+
+static const struct sensor_ops_s g_l2gd20_ops =
 {
-  l3gd20_open,
-  l3gd20_close,
-  l3gd20_read,
-  l3gd20_write,
-  NULL,
-  l3gd20_ioctl,
-  NULL
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
-#endif
+  .activate = l3gd20_activate,
+  .set_interval = NULL,
+  .batch = NULL
 };
 
 /* Single linked list to store instances of drivers */
@@ -241,9 +233,10 @@ static void l3gd20_read_measurement_data(FAR struct l3gd20_dev_s *dev)
 
   /* Copy retrieve data to internal data structure */
 
-  dev->data.x_gyr = (int16_t) (x_gyr);
-  dev->data.y_gyr = (int16_t) (y_gyr);
-  dev->data.z_gyr = (int16_t) (z_gyr);
+  dev->data.x = ((int16_t)x_gyr / 180.0f) * M_PI_F;
+  dev->data.y = ((int16_t)y_gyr / 180.0f) * M_PI_F;
+  dev->data.z = ((int16_t)z_gyr / 180.0f) * M_PI_F;
+  dev->data.temperature = temperature;
 
   /* Give back the semaphore */
 
@@ -364,6 +357,11 @@ static int l3gd20_interrupt_handler(int irq, FAR void *context,
 
   DEBUGASSERT(priv->work.worker == NULL);
   ret = work_queue(HPWORK, &priv->work, l3gd20_worker, priv, 0);
+
+  /* Get the timestamp */
+
+  priv->data.timestamp = sensor_get_timestamp();
+
   if (ret < 0)
     {
       snerr("ERROR: Failed to queue work: %d\n", ret);
@@ -382,182 +380,106 @@ static void l3gd20_worker(FAR void *arg)
   FAR struct l3gd20_dev_s *priv = (FAR struct l3gd20_dev_s *)(arg);
   DEBUGASSERT(priv != NULL);
 
+  int ret;
+
   /* Read out the latest sensor data */
 
   l3gd20_read_measurement_data(priv);
-}
-
-/****************************************************************************
- * Name: l3gd20_open
- ****************************************************************************/
-
-static int l3gd20_open(FAR struct file *filep)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct l3gd20_dev_s *priv = inode->i_private;
-#ifdef CONFIG_DEBUG_SENSORS_INFO
-  uint8_t reg_content;
-  uint8_t reg_addr;
-#endif
-
-  DEBUGASSERT(priv != NULL);
-
-  /* Perform a reset */
-
-  l3gd20_reset(priv);
-
-  /* Enable DRDY signal on INT 2 */
-
-  l3gd20_write_register(priv,
-                        L3GD20_CTRL_REG_3,
-                        L3GD20_CTRL_REG_3_I2_DRDY_BM);
-
-  /* Enable the maximum full scale mode.
-   * Enable block data update for gyro sensor data.
-   * This should prevent race conditions when reading sensor data.
-   */
-
-  l3gd20_write_register(priv,
-                        L3GD20_CTRL_REG_4,
-                        L3GD20_CTRL_REG_4_BDU_BM |
-                        L3GD20_CTRL_REG_4_FS_1_BM |
-                        L3GD20_CTRL_REG_4_FS_0_BM);
-
-  /* Enable X,Y,Z axis
-   * DR=00 -> Output data rate = 95 Hz, Cut-off = 12.5
-   */
-
-  l3gd20_write_register(priv,
-                        L3GD20_CTRL_REG_1,
-                        L3GD20_CTRL_REG_1_POWERDOWN_BM |
-                        L3GD20_CTRL_REG_1_X_EN_BM |
-                        L3GD20_CTRL_REG_1_Y_EN_BM |
-                        L3GD20_CTRL_REG_1_Z_EN_BM);
-
-  /* Read measurement data to ensure DRDY is low */
-
-  l3gd20_read_measurement_data(priv);
-
-  /* Read back the content of all control registers for debug purposes */
-
-#ifdef CONFIG_DEBUG_SENSORS_INFO
-  reg_content = 0;
-
-  l3gd20_read_register(priv, L3GD20_WHO_AM_I, &reg_content);
-  sninfo("WHO_AM_I_REG = %04x\n", reg_content);
-
-  for (reg_addr = L3GD20_CTRL_REG_1;
-       reg_addr <= L3GD20_CTRL_REG_5;
-       reg_addr++)
-    {
-      l3gd20_read_register(priv, reg_addr, &reg_content);
-      sninfo("R#%04x = %04x\n", reg_addr, reg_content);
-    }
-
-  l3gd20_read_register(priv, L3GD20_STATUS_REG, &reg_content);
-  sninfo("STATUS_REG = %04x\n", reg_content);
-#endif
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: l3gd20_close
- ****************************************************************************/
-
-static int l3gd20_close(FAR struct file *filep)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct l3gd20_dev_s *priv = inode->i_private;
-
-  DEBUGASSERT(priv != NULL);
-
-  /* Perform a reset */
-
-  l3gd20_reset(priv);
-  return OK;
-}
-
-/****************************************************************************
- * Name: l3gd20_read
- ****************************************************************************/
-
-static ssize_t l3gd20_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct l3gd20_dev_s *priv = inode->i_private;
-  FAR struct l3gd20_sensor_data_s *data;
-  int ret;
-
-  DEBUGASSERT(priv != NULL);
-
-  /* Check if enough memory was provided for the read call */
-
-  if (buflen < sizeof(FAR struct l3gd20_sensor_data_s))
-    {
-      snerr("ERROR: Not enough memory for reading out a sensor data"
-            " sample\n");
-      return -ENOSYS;
-    }
 
   /* Acquire the semaphore before the data is copied */
 
   ret = nxsem_wait(&priv->datasem);
   if (ret < 0)
-    {
-      snerr("ERROR: Could not acquire priv->datasem: %d\n", ret);
-      return ret;
-    }
+  {
+    snerr("ERROR: Could not acquire priv->datasem: %d\n", ret);
+    return;
+  }
 
-  /* Copy the sensor data into the buffer */
+  /* push data to upper half driver */
 
-  data = (FAR struct l3gd20_sensor_data_s *)buffer;
-  memset(data, 0, sizeof(FAR struct l3gd20_sensor_data_s));
-
-  data->x_gyr = priv->data.x_gyr;
-  data->y_gyr = priv->data.y_gyr;
-  data->z_gyr = priv->data.z_gyr;
-  data->temperature = priv->data.temperature;
+  priv->lower.push_event(priv->lower.priv, &priv->data, sizeof(struct sensor_event_gyro));
 
   /* Give back the semaphore */
 
   nxsem_post(&priv->datasem);
-
-  return sizeof(FAR struct l3gd20_sensor_data_s);
 }
 
 /****************************************************************************
- * Name: l3gd20_write
+ * Name: l3gd20_activate
  ****************************************************************************/
 
-static ssize_t l3gd20_write(FAR struct file *filep, FAR const char *buffer,
-                            size_t buflen)
+static int l3gd20_activate(FAR struct sensor_lowerhalf_s *lower, bool enable)
 {
-  return -ENOSYS;
-}
+  FAR struct l3gd20_dev_s *priv = g_l3gd20_list;
 
-/****************************************************************************
- * Name: l3gd20_ioctl
- ****************************************************************************/
+  DEBUGASSERT(priv != NULL);
 
-static int l3gd20_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
-{
-  int ret = OK;
+  if (enable == true)
+  {
+    /* Perform a reset */
 
-  switch (cmd)
-    {
-      /* @TODO */
+    l3gd20_reset(priv);
 
-      /* Command was not recognized */
+    /* Enable DRDY signal on INT 2 */
 
-    default:
-      snerr("ERROR: Unrecognized cmd: %d\n", cmd);
-      ret = -ENOTTY;
-      break;
-    }
+    l3gd20_write_register(priv,
+                          L3GD20_CTRL_REG_3,
+                          L3GD20_CTRL_REG_3_I2_DRDY_BM);
 
-  return ret;
+    /* Enable the maximum full scale mode.
+     * Enable block data update for gyro sensor data.
+     * This should prevent race conditions when reading sensor data.
+     */
+
+    l3gd20_write_register(priv,
+                          L3GD20_CTRL_REG_4,
+                          L3GD20_CTRL_REG_4_BDU_BM |
+                          L3GD20_CTRL_REG_4_FS_1_BM |
+                          L3GD20_CTRL_REG_4_FS_0_BM);
+
+    /* Enable X,Y,Z axis
+     * DR=00 -> Output data rate = 95 Hz, Cut-off = 12.5
+     */
+
+    l3gd20_write_register(priv,
+                          L3GD20_CTRL_REG_1,
+                          L3GD20_CTRL_REG_1_POWERDOWN_BM |
+                          L3GD20_CTRL_REG_1_X_EN_BM |
+                          L3GD20_CTRL_REG_1_Y_EN_BM |
+                          L3GD20_CTRL_REG_1_Z_EN_BM);
+
+    /* Read measurement data to ensure DRDY is low */
+
+    l3gd20_read_measurement_data(priv);
+
+    /* Read back the content of all control registers for debug purposes */
+
+#ifdef CONFIG_DEBUG_SENSORS_INFO
+    reg_content = 0;
+
+    l3gd20_read_register(priv, L3GD20_WHO_AM_I, &reg_content);
+    sninfo("WHO_AM_I_REG = %04x\n", reg_content);
+
+    for (reg_addr = L3GD20_CTRL_REG_1;
+         reg_addr <= L3GD20_CTRL_REG_5;
+         reg_addr++)
+      {
+        l3gd20_read_register(priv, reg_addr, &reg_content);
+        sninfo("R#%04x = %04x\n", reg_addr, reg_content);
+      }
+
+    l3gd20_read_register(priv, L3GD20_STATUS_REG, &reg_content);
+    sninfo("STATUS_REG = %04x\n", reg_content);
+#endif
+  }
+  else
+  {
+    /* Perform a reset */
+
+    l3gd20_reset(priv);
+  }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -571,7 +493,7 @@ static int l3gd20_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   Register the L3DF20 character device as 'devpath'.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register, e.g., "/dev/gyr0".
+ *   devno   - The device number, used to build the device path as /dev/sensor/gyro_uncalN
  *   spi     - An SPI driver instance.
  *   config  - configuration for the L3GD20 driver.
  *
@@ -580,7 +502,7 @@ static int l3gd20_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int l3gd20_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
+int l3gd20_register(int devno, FAR struct spi_dev_s *spi,
                     FAR struct l3gd20_config_s *config)
 {
   FAR struct l3gd20_dev_s *priv;
@@ -605,10 +527,16 @@ int l3gd20_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
   priv->config           = config;
   priv->work.worker      = NULL;
 
-  priv->data.x_gyr       = 0;
-  priv->data.y_gyr       = 0;
-  priv->data.z_gyr       = 0;
-  priv->data.temperature = 0;
+  priv->data.x           = 0.0f;
+  priv->data.y           = 0.0f;
+  priv->data.z           = 0.0f;
+  priv->data.temperature = 0.0f;
+  priv->data.timestamp   = 0;
+
+  priv->lower.type = SENSOR_TYPE_GYROSCOPE;
+  priv->lower.buffer_bytes = sizeof(struct sensor_event_gyro) * CONFIG_SENSORS_L3GD20_BUFFER_SIZE;
+  priv->lower.ops = &g_l2gd20_ops;
+  priv->lower.uncalibrated = true;
 
   /* Initialize sensor data access semaphore */
 
@@ -628,9 +556,9 @@ int l3gd20_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
       goto errout;
     }
 
-  /* Register the character driver */
+  /* Register the sensor driver */
 
-  ret = register_driver(devpath, &g_l3gd20_fops, 0666, priv);
+  ret = sensor_register(&priv->lower, devno);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);

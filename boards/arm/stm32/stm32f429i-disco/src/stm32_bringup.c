@@ -372,7 +372,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_L3GD20
-  ret = board_l3gd20_initialize(0, 5);
+  ret = board_l3gd20_initialize(CONFIG_SENSORS_L3GD20_DEVNO, 5);
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize l3gd20 sensor:"
