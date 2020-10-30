@@ -143,7 +143,8 @@ enum pkt_type_e
   TYPE_FAIL = 7,
   TYPE_TIMEOUT = 8,
   TYPE_SPI_ERROR = 9,
-  TYPE_UNMATCH = 10,
+  TYPE_DISASSOCIATE = 10,
+  TYPE_UNMATCH = 11,
 };
 
 struct evt_code_s
@@ -202,6 +203,8 @@ struct gs2200m_dev_s
   struct net_driver_s  net_dev;
   uint8_t              op_mode;
   FAR const struct gs2200m_lower_s *lower;
+  bool                 disassociate_flag;
+  struct gs2200m_assoc_msg reconnect_msg;
 };
 
 /****************************************************************************
@@ -247,6 +250,7 @@ static const struct file_operations g_gs2200m_fops =
 static struct evt_code_s _evt_table[] =
 {
   {"OK", TYPE_OK},
+  {"Disassociation Event", TYPE_DISASSOCIATE},
   {"ERROR", TYPE_ERROR},
   {"DISCONNECT", TYPE_DISCONNECT},
   {"CONNECT", TYPE_CONNECT},
@@ -1473,6 +1477,11 @@ static enum pkt_type_e gs2200m_recv_pkt(FAR struct gs2200m_dev_s *dev,
       _check_pkt_q_cnt(dev, pkt_dat->cid);
     }
 
+  if (t == TYPE_DISASSOCIATE)
+    {
+      dev->disassociate_flag = true;
+    }
+
   if (pkt_dat)
     {
       pkt_dat->type = t;
@@ -2573,6 +2582,10 @@ static int gs2200m_ioctl_assoc_sta(FAR struct gs2200m_dev_s *dev,
 {
   enum pkt_type_e t;
 
+  /* Remember assoc request msg for reconnection */
+
+  memcpy(&dev->reconnect_msg, msg, sizeof(struct gs2200m_assoc_msg));
+
   /* Disassociate */
 
   t = gs2200m_disassociate(dev);
@@ -2624,6 +2637,8 @@ static int gs2200m_ioctl_assoc_sta(FAR struct gs2200m_dev_s *dev,
       wlerr("*** error: failed to join (ssid:%s) \n", msg->ssid);
       return -1;
     }
+
+  dev->disassociate_flag = false;
 
   return OK;
 }
@@ -3070,6 +3085,30 @@ repeat:
   /* Receive a packet */
 
   t = gs2200m_recv_pkt(dev, pkt_dat);
+
+  if (true == dev->disassociate_flag)
+    {
+      /* Disassociate recovery */
+
+      wlwarn("=== receive DISASSOCIATE\n");
+      dev->valid_cid_bits = 0;
+
+      do
+        {
+          /* Discard incoming packets until timeout happens */
+
+          while (gs2200m_recv_pkt(dev, NULL) != TYPE_TIMEOUT)
+            {
+              nxsig_usleep(100 * 1000);
+            }
+        }
+      while (gs2200m_ioctl_assoc_sta(dev, &dev->reconnect_msg) != OK);
+
+      wlwarn("=== recover DISASSOCIATE\n");
+      dev->disassociate_flag = false;
+
+      goto errout;
+    }
 
   if (TYPE_ERROR == t || 'z' == pkt_dat->cid)
     {
