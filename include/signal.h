@@ -166,17 +166,46 @@
 #  endif
 #endif
 
-#ifdef CONFIG_SIG_SIGSTOP_ACTION
-#  define SIGSTOP     CONFIG_SIG_STOP
-#  define SIGTSTP     CONFIG_SIG_TSTP
-#  define SIGCONT     CONFIG_SIG_CONT
+#ifndef CONFIG_SIG_STOP
+#  define SIGSTOP       6
+#else
+#  define SIGSTOP       CONFIG_SIG_STOP
 #endif
 
-#ifdef CONFIG_SIG_SIGKILL_ACTION
-#  define SIGKILL     CONFIG_SIG_KILL
-#  define SIGINT      CONFIG_SIG_INT
-#  define SIGQUIT     CONFIG_SIG_QUIT
-#  define SIGTERM     CONFIG_SIG_TERM
+#ifndef CONFIG_SIG_TSTP
+#  define SIGTSTP       7
+#else
+#  define SIGTSTP       CONFIG_SIG_TSTP
+#endif
+
+#ifndef CONFIG_SIG_CONT
+#  define SIGCONT       8
+#else
+#  define SIGCONT       CONFIG_SIG_CONT
+#endif
+
+#ifndef CONFIG_SIG_KILL
+#  define SIGKILL       9
+#else
+#  define SIGKILL       CONFIG_SIG_KILL
+#endif
+
+#ifndef CONFIG_SIG_INT
+#  define SIGINT        10
+#else
+#  define SIGINT        CONFIG_SIG_INT
+#endif
+
+#ifndef CONFIG_SIG_QUIT
+#  define SIGQUIT       11
+#else
+#  define SIGQUIT       CONFIG_SIG_QUIT
+#endif
+
+#ifndef CONFIG_SIG_TERM
+#  define SIGTERM       12
+#else
+#  define SIGTERM       CONFIG_SIG_TERM
 #endif
 
 #ifndef CONFIG_SIG_PIPE
