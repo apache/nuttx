@@ -205,7 +205,7 @@
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_DEFAULT              (0 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT)  /* Default, about 1.63V */
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_TYPICAL              (5 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT)  /* Typical voltage after trim voltage 1.71V */
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_MAX                  (21 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Max voltage 1.96V */
-#  define ADI3_REFS */YS_DCDCCTL0_VDDR_TRIM_MIN               (22 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Min voltage 1.47V */
+#  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_MIN                  (22 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Min voltage 1.47V */
 #define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT                  (5)                                          /* Bits 5-7:  Set charge and re-charge current level */
                                                                                                            /*            2's complement encoding */
 #define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_MASK                   (7 << ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT)
