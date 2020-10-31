@@ -70,6 +70,7 @@
  ****************************************************************************/
 
 /* Some sanity checks *******************************************************/
+
 /* Is there at least one UART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_UART_DEVICE
@@ -237,7 +238,7 @@ static uart_dev_t g_uart0port =
   {
     .size   = CONFIG_UART0_TXBUFSIZE,
     .buffer = g_uart0txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart0priv,
 };
@@ -281,7 +282,7 @@ static uart_dev_t g_uart1port =
   {
     .size   = CONFIG_UART1_TXBUFSIZE,
     .buffer = g_uart1txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart1priv,
 };
@@ -315,8 +316,9 @@ static inline void max326_serialout(struct max326_dev_s *priv,
  * Name: max326_modifyreg
  ****************************************************************************/
 
-static inline void max326_modifyreg(struct max326_dev_s *priv, unsigned int offset,
-                                   uint32_t setbits, uint32_t clrbits)
+static inline void max326_modifyreg(struct max326_dev_s *priv,
+                                    unsigned int offset, uint32_t setbits,
+                                    uint32_t clrbits)
 {
   irqstate_t flags;
   uintptr_t regaddr = priv->uartbase + offset;
@@ -436,14 +438,15 @@ static void max326_shutdown(struct uart_dev_s *dev)
  * Name: max326_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -469,9 +472,9 @@ static int max326_attach(struct uart_dev_s *dev)
  * Name: max326_detach
  *
  * Description:
- *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   Detach UART interrupts.  This method is called when the serial port
+ *   is closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -632,7 +635,7 @@ static int max326_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct max326_dev_s *priv = (struct max326_dev_s *)dev->priv;
 
-  /* Return receiver control information */
+  /* Return receiver control information. */
 
   if (status)
     {
@@ -641,7 +644,7 @@ static int max326_receive(struct uart_dev_s *dev, uint32_t *status)
 
   /* Then return the actual received data. */
 
- return max326_serialin(priv, MAX326_UART_FIFO_OFFSET);
+  return max326_serialin(priv, MAX326_UART_FIFO_OFFSET);
 }
 
 /****************************************************************************
@@ -659,8 +662,8 @@ static void max326_rxint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when there is anything in the Rx data register
+       * (or an Rx timeout occurs).
        */
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -795,24 +798,22 @@ static bool max326_txempty(struct uart_dev_s *dev)
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before max326_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in xmc_lowsetup() and main clock iniialization
- *   performed in xmc_clock_configure().
+ *   configuration performed in max326_lowsetup() and main clock
+ *   initialization performed in max326_clockconfig().
  *
  ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
 void max326_earlyserialinit(void)
 {
-  /* Disable interrupts from all UARTS.  The console is enabled in
-   * pic32mx_consoleinit()
-   */
+  /* Disable interrupts from all UARTS. */
 
   max326_int_disableall(TTYS0_DEV.priv, NULL);
 #ifdef TTYS1_DEV
   max326_int_disableall(TTYS1_DEV.priv, NULL);
 #endif
 
-  /* Configuration whichever one is the console */
+  /* Configuration whichever one is the console. */
 
 #ifdef HAVE_UART_CONSOLE
   CONSOLE_DEV.isconsole = true;

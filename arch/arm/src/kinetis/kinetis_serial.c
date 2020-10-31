@@ -1988,9 +1988,7 @@ static void up_dma_rxcallback(DMA_HANDLE handle, void *arg, int result)
 #if defined(USE_EARLYSERIALINIT)
 void kinetis_uart_earlyserialinit(void)
 {
-  /* Disable interrupts from all UARTS.  The console is enabled in
-   * pic32mx_consoleinit()
-   */
+  /* Disable interrupts from all UARTS. */
 
   up_restoreuartint(TTYS0_DEV.priv, 0);
 #ifdef TTYS1_DEV
@@ -2009,7 +2007,7 @@ void kinetis_uart_earlyserialinit(void)
   up_restoreuartint(TTYS5_DEV.priv, 0);
 #endif
 
-  /* Configuration whichever one is the console */
+  /* Configuration whichever one is the console. */
 
 #ifdef HAVE_UART_CONSOLE
   CONSOLE_DEV.isconsole = true;

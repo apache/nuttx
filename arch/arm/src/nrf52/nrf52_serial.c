@@ -749,8 +749,8 @@ static bool nrf52_txempty(struct uart_dev_s *dev)
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before nrf52_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in nrf52_lowsetup() and main clock iniialization
- *   performed in nrf_clock_configure().
+ *   configuration performed in nrf52_lowsetup() and main clock
+ *   initialization performed in nrf_clock_configure().
  *
  ****************************************************************************/
 

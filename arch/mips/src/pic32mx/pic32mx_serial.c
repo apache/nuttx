@@ -68,6 +68,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* If we are not using the serial driver for the console, then we still must
  * provide some minimal implementation of up_putc.
  */
@@ -316,7 +317,9 @@ static void up_restoreuartint(struct uart_dev_s *dev, uint8_t im)
 {
   irqstate_t flags;
 
-  /* Re-enable/re-disable interrupts corresponding to the state of bits in im */
+  /* Re-enable/re-disable interrupts corresponding to the state
+   * of bits in im.
+   */
 
   flags = enter_critical_section();
   up_rxint(dev, RX_ENABLED(im));
@@ -398,14 +401,14 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
  *   RX and TX interrupts are not enabled by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are
+ *   hardware supports multiple levels of interrupt enabling).  The RX and
+ *   TX interrupts are not enabled until the txint() and rxint() methods are
  *   called.
  *
  ****************************************************************************/
@@ -423,9 +426,9 @@ static int up_attach(struct uart_dev_s *dev)
  * Name: up_detach
  *
  * Description:
- *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   Detach UART interrupts.  This method is called when the serial port
+ *   is closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -831,8 +834,8 @@ static bool up_txempty(struct uart_dev_s *dev)
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before up_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in up_consoleinit() and main clock iniialization
- *   performed in up_clkinitialize().
+ *   configuration performed in up_consoleinit() and main clock
+ *   initialization performed in up_clkinitialize().
  *
  ****************************************************************************/
 
