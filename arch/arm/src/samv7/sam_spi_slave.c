@@ -703,7 +703,7 @@ static void spi_setmode(struct sam_spidev_s *priv, enum spi_smode_e mode)
  *
  * Input Parameters:
  *   priv   - SPI device data structure
- *   nbits  - The number of bits requests
+ *   nbits  - The number of bits requested
  *
  * Returned Value:
  *   none
@@ -730,8 +730,8 @@ static void spi_setbits(struct sam_spidev_s *priv, int nbits)
 
       spiinfo("csr0=%08x\n", regval);
 
-      /* Save the selection so the subsequence re-configurations will be
-       * faster
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
        */
 
       priv->nbits = nbits;

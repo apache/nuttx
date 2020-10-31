@@ -708,7 +708,9 @@ static int spi_poll(struct max326_spidev_s *priv)
           inten |= SPI_INT_RXLEVEL;
         }
 
-      /* Break out if we've received all the bytes and we're not transmitting */
+      /* Break out if we've received all the bytes and we're not
+       * transmitting.
+       */
 
       if (priv->txbuffer == NULL && priv->rxbytes == length)
         {
@@ -716,7 +718,7 @@ static int spi_poll(struct max326_spidev_s *priv)
         }
     }
 
-  /* Break out once we've transmitted and received all of the data */
+  /* Break out once we've transmitted and received all of the data. */
 
   if (priv->rxbytes == length && priv->txbytes == length)
     {
@@ -1080,7 +1082,9 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
         spi_modify_ctrl2(priv, setbits, clrbits);
 
-        /* Save the mode so that subsequent re-configurations will be faster */
+        /* Save the mode so that subsequent re-configurations will be
+         * faster.
+         */
 
         priv->mode = mode;
     }
@@ -1121,8 +1125,8 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
       priv->data16 = (nbits > 8);
 
-      /* Save the selection so the subsequence re-configurations will be
-       * faster
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
        */
 
       priv->nbits  = nbits;

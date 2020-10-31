@@ -813,7 +813,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval |= SPI_CTARM_FMSZ(nbits - 1);
       spi_putreg(priv, priv->ctarsel, regval);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so that subsequent re-configurations will be faster. */
 
       priv->nbits = nbits;
     }

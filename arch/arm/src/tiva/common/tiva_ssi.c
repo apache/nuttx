@@ -1277,7 +1277,7 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv,
       ssi_putreg(priv, TIVA_SSI_CR0_OFFSET, regval);
       spiinfo("CR0: %08x\n", regval);
 
-      /* Save the mode so that subsequent re-configuratins will be faster */
+      /* Save the mode so that subsequent re-configurations will be faster */
 
       priv->mode = mode;
     }

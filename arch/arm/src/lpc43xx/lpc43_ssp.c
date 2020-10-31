@@ -432,7 +432,7 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests
+ *   nbits - The number of bits requested
  *
  * Returned Value:
  *   none
@@ -461,7 +461,9 @@ static void ssp_setbits(FAR struct spi_dev_s *dev, int nbits)
       spiinfo("SSP Control Register 0 (CR0) after setting"
               "DSS: 0x%08X.\n", regval);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
+       */
 
       priv->nbits = nbits;
     }
@@ -550,7 +552,9 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   uint32_t datadummy = (priv->nbits > 8) ? 0xffff : 0xff;
   uint32_t rxpending = 0;
 
-  /* While there is remaining to be sent (and no synchronization error has occurred) */
+  /* While there is remaining to be sent (and no synchronization error
+   * has occurred)
+   */
 
   spiinfo("nwords: %d\n", nwords);
 
@@ -585,7 +589,9 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
           rxpending++;
         }
 
-      /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
+      /* Now, read the RX data from the RX FIFO while the RX FIFO is not
+       * empty.
+       */
 
       spiinfo("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE)
@@ -759,7 +765,9 @@ static inline FAR struct lpc43_sspdev_s *lpc43_ssp1initialize(void)
   /* Pins configuration */
 
 #ifdef PINCONF_SSP1_SCK
-  /* It is possible this is not configured if CLK0 is being used for clocking SPI */
+  /* It is possible this is not configured if CLK0 is being used for
+   * clocking SPI.
+   */
 
   lpc43_pin_config(PINCONF_SSP1_SCK);
 #endif

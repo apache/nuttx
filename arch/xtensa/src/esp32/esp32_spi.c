@@ -791,16 +791,14 @@ static void esp32_spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
-      /**
-       * Save the selection so the subsequence re-configurations
+      /* Save the selection so that subsequent re-configurations
        * will be faster.
        */
 
       priv->nbits = nbits;
 
-      /**
-       * Each DMA transmission will set these value according to
-       * calculate buffer length.
+      /* Each DMA transmission will set these value according to
+       * calculated buffer length.
        */
 
       if (!priv->dma_chan)
