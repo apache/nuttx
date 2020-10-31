@@ -44,7 +44,7 @@
 #include "lpc54_config.h"
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -54,8 +54,8 @@
  *   Performs the low level USART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before lpc54_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in xmc_lowsetup() and main clock iniialization
- *   performed in xmc_clock_configure().
+ *   configuration performed in lpc54_lowsetup() and main clock
+ *   initialization performed in lpc54_clockconfig().
  *
  ****************************************************************************/
 

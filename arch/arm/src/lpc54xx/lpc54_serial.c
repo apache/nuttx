@@ -68,7 +68,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Some sanity checks *******************************************************/
+
 /* Is there at least one USART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_USART_DEVICE
@@ -499,7 +501,7 @@ static uart_dev_t g_uart0port =
   {
     .size   = CONFIG_USART0_TXBUFSIZE,
     .buffer = g_uart0txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart0priv,
 };
@@ -541,7 +543,7 @@ static uart_dev_t g_uart1port =
   {
     .size   = CONFIG_USART1_TXBUFSIZE,
     .buffer = g_uart1txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart1priv,
 };
@@ -583,7 +585,7 @@ static uart_dev_t g_uart2port =
   {
     .size   = CONFIG_USART2_TXBUFSIZE,
     .buffer = g_uart2txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
 };
@@ -625,7 +627,7 @@ static uart_dev_t g_uart3port =
   {
     .size   = CONFIG_USART3_TXBUFSIZE,
     .buffer = g_uart3txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart3priv,
 };
@@ -667,7 +669,7 @@ static uart_dev_t g_uart4port =
   {
     .size   = CONFIG_USART4_TXBUFSIZE,
     .buffer = g_uart4txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart4priv,
 };
@@ -709,7 +711,7 @@ static uart_dev_t g_uart5port =
   {
     .size   = CONFIG_USART5_TXBUFSIZE,
     .buffer = g_uart5txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart5priv,
 };
@@ -751,7 +753,7 @@ static uart_dev_t g_uart6port =
   {
     .size   = CONFIG_USART6_TXBUFSIZE,
     .buffer = g_uart6txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart6priv,
 };
@@ -793,7 +795,7 @@ static uart_dev_t g_uart7port =
   {
     .size   = CONFIG_USART7_TXBUFSIZE,
     .buffer = g_uart7txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart7priv,
 };
@@ -835,7 +837,7 @@ static uart_dev_t g_uart8port =
   {
     .size   = CONFIG_USART8_TXBUFSIZE,
     .buffer = g_uart8txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart8priv,
 };
@@ -877,7 +879,7 @@ static uart_dev_t g_uart9port =
   {
     .size   = CONFIG_USART9_TXBUFSIZE,
     .buffer = g_uart9txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart9priv,
 };
@@ -892,7 +894,7 @@ static uart_dev_t g_uart9port =
  ****************************************************************************/
 
 static inline uint32_t lpc54_serialin(struct lpc54_dev_s *priv,
-                                     unsigned int offset)
+                                      unsigned int offset)
 {
   return getreg32(priv->uartbase + offset);
 }
@@ -902,7 +904,7 @@ static inline uint32_t lpc54_serialin(struct lpc54_dev_s *priv,
  ****************************************************************************/
 
 static inline void lpc54_serialout(struct lpc54_dev_s *priv,
-                                  unsigned int offset, uint32_t value)
+                                   unsigned int offset, uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -911,8 +913,9 @@ static inline void lpc54_serialout(struct lpc54_dev_s *priv,
  * Name: lpc54_modifyreg
  ****************************************************************************/
 
-static inline void lpc54_modifyreg(struct lpc54_dev_s *priv, unsigned int offset,
-                                   uint32_t setbits, uint32_t clrbits)
+static inline void lpc54_modifyreg(struct lpc54_dev_s *priv,
+                                   unsigned int offset, uint32_t setbits,
+                                   uint32_t clrbits)
 {
   irqstate_t flags;
   uintptr_t regaddr = priv->uartbase + offset;
@@ -932,7 +935,8 @@ static inline void lpc54_modifyreg(struct lpc54_dev_s *priv, unsigned int offset
  * Name: lpc54_fifoint_enable
  ****************************************************************************/
 
-static inline void lpc54_fifoint_enable(struct lpc54_dev_s *priv, uint32_t intset)
+static inline void lpc54_fifoint_enable(struct lpc54_dev_s *priv,
+                                        uint32_t intset)
 {
   lpc54_serialout(priv, LPC54_USART_FIFOINTENSET_OFFSET, intset);
 }
@@ -941,7 +945,8 @@ static inline void lpc54_fifoint_enable(struct lpc54_dev_s *priv, uint32_t intse
  * Name: lpc54_fifoint_disable
  ****************************************************************************/
 
-static inline void lpc54_fifoint_disable(struct lpc54_dev_s *priv, uint32_t intset)
+static inline void lpc54_fifoint_disable(struct lpc54_dev_s *priv,
+                                         uint32_t intset)
 {
   lpc54_serialout(priv, LPC54_USART_FIFOINTENCLR_OFFSET, intset);
 }
@@ -950,7 +955,8 @@ static inline void lpc54_fifoint_disable(struct lpc54_dev_s *priv, uint32_t ints
  * Name: lpc54_fifoint_disableall
  ****************************************************************************/
 
-static void lpc54_fifoint_disableall(struct lpc54_dev_s *priv, uint32_t *intset)
+static void lpc54_fifoint_disableall(struct lpc54_dev_s *priv,
+                                     uint32_t *intset)
 {
   irqstate_t flags;
 
@@ -994,7 +1000,7 @@ static int lpc54_setup(struct uart_dev_s *dev)
  *
  * Description:
  *   Disable the USART.  This method is called when the serial
- *   port is closed
+ *   port is closed.
  *
  ****************************************************************************/
 
@@ -1015,14 +1021,15 @@ static void lpc54_shutdown(struct uart_dev_s *dev)
  * Name: lpc54_attach
  *
  * Description:
- *   Configure the USART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the USART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -1048,9 +1055,9 @@ static int lpc54_attach(struct uart_dev_s *dev)
  * Name: lpc54_detach
  *
  * Description:
- *   Detach USART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   Detach USART interrupts.  This method is called when the serial port
+ *   is closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -1228,8 +1235,8 @@ static void lpc54_rxint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when there is anything in the Rx data register
+       * (or an Rx timeout occurs).
        */
 
       lpc54_fifoint_enable(priv, CCR_RX_EVENTS);
@@ -1360,17 +1367,15 @@ static bool lpc54_txempty(struct uart_dev_s *dev)
  *   Performs the low level USART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before lpc54_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in xmc_lowsetup() and main clock iniialization
- *   performed in xmc_clock_configure().
+ *   configuration performed in lpc54_lowsetup() and main clock
+ *   initialization performed in lpc54_clockconfig().
  *
  ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
 void lpc54_earlyserialinit(void)
 {
-  /* Disable interrupts from all USARTS.  The console is enabled in
-   * pic32mx_consoleinit()
-   */
+  /* Disable interrupts from all USARTS. */
 
   lpc54_fifoint_disableall(TTYS0_DEV.priv, NULL);
 #ifdef TTYS1_DEV
@@ -1401,7 +1406,7 @@ void lpc54_earlyserialinit(void)
   lpc54_fifoint_disableall(TTYS9_DEV.priv, NULL);
 #endif
 
-  /* Configuration whichever one is the console */
+  /* Configuration whichever one is the console. */
 
 #ifdef HAVE_USART_CONSOLE
   CONSOLE_DEV.isconsole = true;
@@ -1469,7 +1474,7 @@ void arm_serialinit(void)
  * Name: up_putc
  *
  * Description:
- *   Provide priority, low-level access to support OS debug  writes
+ *   Provide priority, low-level access to support OS debug writes.
  *
  ****************************************************************************/
 

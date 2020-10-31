@@ -1028,17 +1028,15 @@ static bool xmc4_txempty(struct uart_dev_s *dev)
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before xmc4_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in xmc_lowsetup() and main clock iniialization
- *   performed in xmc_clock_configure().
+ *   configuration performed in xmc4_lowsetup() and main clock initialization
+ *   performed in xmc4_clock_configure().
  *
  ****************************************************************************/
 
 #if defined(USE_EARLYSERIALINIT)
 void xmc4_earlyserialinit(void)
 {
-  /* Disable interrupts from all UARTS.  The console is enabled in
-   * pic32mx_consoleinit()
-   */
+  /* Disable interrupts from all UARTS. */
 
   xmc4_restoreuartint(TTYS0_DEV.priv, 0);
 #ifdef TTYS1_DEV
@@ -1057,7 +1055,7 @@ void xmc4_earlyserialinit(void)
   xmc4_restoreuartint(TTYS5_DEV.priv, 0);
 #endif
 
-  /* Configuration whichever one is the console */
+  /* Configuration whichever one is the console. */
 
 #ifdef HAVE_UART_CONSOLE
   CONSOLE_DEV.isconsole = true;
@@ -1113,7 +1111,7 @@ void arm_serialinit(void)
  * Name: up_putc
  *
  * Description:
- *   Provide priority, low-level access to support OS debug  writes
+ *   Provide priority, low-level access to support OS debug writes.
  *
  ****************************************************************************/
 

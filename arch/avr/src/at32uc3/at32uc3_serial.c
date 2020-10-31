@@ -260,7 +260,7 @@ static uart_dev_t g_usart1port =
   {
     .size   = CONFIG_USART1_TXBUFSIZE,
     .buffer = g_usart1txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_usart1priv,
 };
@@ -290,7 +290,7 @@ static uart_dev_t g_usart2port =
   {
     .size   = CONFIG_USART2_TXBUFSIZE,
     .buffer = g_usart2txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_usart2priv,
 };
@@ -313,7 +313,8 @@ static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint32_t value)
 {
   putreg32(value, priv->usartbase + offset);
 }
@@ -390,14 +391,15 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the USART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the USART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -415,8 +417,8 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach USART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -554,6 +556,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
     {
       *status = priv->csr;
     }
+
   priv->csr = 0;
 
   /* Then return the actual received byte */
@@ -575,18 +578,18 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when there is anything in the Rx data register
+       * (or an Rx timeout occurs).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
 #  ifdef CONFIG_USART_ERRINTS
-        up_serialout(priv, AVR32_USART_IER_OFFSET,
-                     USART_INT_RXRDY | USART_INT_TIMEOUT | USART_INT_OVRE |
-                     USART_INT_FRAME | USART_INT_PARE);
+      up_serialout(priv, AVR32_USART_IER_OFFSET,
+                   USART_INT_RXRDY | USART_INT_TIMEOUT | USART_INT_OVRE |
+                   USART_INT_FRAME | USART_INT_PARE);
 #  else
-        up_serialout(priv, AVR32_USART_IER_OFFSET,
-                     USART_INT_RXRDY | USART_INT_TIMEOUT);
+      up_serialout(priv, AVR32_USART_IER_OFFSET,
+                   USART_INT_RXRDY | USART_INT_TIMEOUT);
 #  endif
 #endif
     }
@@ -602,7 +605,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
  * Name: up_rxavailable
  *
  * Description:
- *   Return true if the receive register is not empty
+ *   Return true if the receive register is not empty.
  *
  ****************************************************************************/
 
@@ -649,7 +652,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   flags = enter_critical_section();
   if (enable)
     {
-      /* Set to receive an interrupt when the TX data register is empty */
+      /* Set to receive an interrupt when the TX data register is empty. */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
        up_serialout(priv, AVR32_USART_IER_OFFSET, USART_INT_TXRDY);
@@ -663,10 +666,11 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-      /* Disable the TX interrupt */
+      /* Disable the TX interrupt. */
 
        up_serialout(priv, AVR32_USART_IDR_OFFSET, USART_INT_TXRDY);
     }
+
   leave_critical_section(flags);
 }
 
@@ -704,8 +708,8 @@ static bool up_txready(struct uart_dev_s *dev)
  *   Performs the low level USART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before up_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in up_consoleinit() and main clock iniialization
- *   performed in up_clkinitialize().
+ *   configuration performed in up_consoleinit() and main clock
+ *   initialization performed in up_clkinitialize().
  *
  ****************************************************************************/
 

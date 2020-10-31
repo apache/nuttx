@@ -86,8 +86,8 @@ void xmc4_lowsetup(void);
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before xmc4_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in xmc_lowsetup() and main clock iniialization
- *   performed in xmc_clock_configure().
+ *   configuration performed in xmc4_lowsetup() and main clock initialization
+ *   performed in xmc4_clock_configure().
  *
  ****************************************************************************/
 

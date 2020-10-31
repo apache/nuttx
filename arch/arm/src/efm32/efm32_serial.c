@@ -1129,16 +1129,14 @@ static bool efm32_txempty(struct uart_dev_s *dev)
  *   serial console will be available during bootup.  This must be called
  *   before arm_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in efm32_consoleinit() and main clock
- *   iniialization performed in efm32_clkinitialize().
+ *   initialization performed in efm32_clkinitialize().
  *
  ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
 void arm_earlyserialinit(void)
 {
-  /* Disable interrupts from all UARTS.  The console is enabled in
-   * pic32mx_consoleinit()
-   */
+  /* Disable interrupts from all UARTS. */
 
   efm32_restoreuartint(TTYS0_DEV.priv, 0);
 #ifdef TTYS1_DEV
@@ -1154,7 +1152,7 @@ void arm_earlyserialinit(void)
   efm32_restoreuartint(TTYS4_DEV.priv, 0);
 #endif
 
-  /* Configuration whichever one is the console */
+  /* Configuration whichever one is the console. */
 
 #ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = true;

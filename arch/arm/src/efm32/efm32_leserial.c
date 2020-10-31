@@ -63,7 +63,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Some sanity checks *******************************************************/
+
 /* Is there at least one UART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_LEUART_DEVICE
@@ -76,8 +78,9 @@
 
 #ifdef USE_SERIALDRIVER
 
-/* Which LEUART with be ttyLE0/console and which ttyLE1?  The console will always
- * be ttyLE0.  If there is no console then will use the lowest numbered LEUART.
+/* Which LEUART with be ttyLE0/console and which ttyLE1?  The console will
+ * always be ttyLE0.  If there is no console then will use the lowest
+ * numbered LEUART.
  */
 
 /* First pick the console and ttys0.  This could be either LEUART0-1 */
@@ -150,7 +153,8 @@ struct efm32_leuart_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline uint32_t efm32_serialin(struct efm32_leuart_s *priv, int offset);
+static inline uint32_t efm32_serialin(struct efm32_leuart_s *priv,
+                                      int offset);
 static inline void efm32_serialout(struct efm32_leuart_s *priv, int offset,
                                    uint32_t value);
 static inline void efm32_setuartint(struct efm32_leuart_s *priv);
@@ -234,7 +238,7 @@ static struct uart_dev_s g_leuart0port =
   {
     .size    = CONFIG_LEUART0_TXBUFSIZE,
     .buffer  = g_leuart0txbuffer,
-   },
+  },
   .ops       = &g_leuart_ops,
   .priv      = &g_leuart0priv,
 };
@@ -269,7 +273,7 @@ static struct uart_dev_s g_leuart1port =
   {
     .size    = CONFIG_LEUART1_TXBUFSIZE,
     .buffer  = g_leuart1txbuffer,
-   },
+  },
   .ops       = &g_leuart_ops,
   .priv      = &g_leuart1priv,
 };
@@ -283,7 +287,8 @@ static struct uart_dev_s g_leuart1port =
  * Name: efm32_serialin
  ****************************************************************************/
 
-static inline uint32_t efm32_serialin(struct efm32_leuart_s *priv, int offset)
+static inline uint32_t efm32_serialin(struct efm32_leuart_s *priv,
+                                      int offset)
 {
   return getreg32(priv->config->uartbase + offset);
 }
@@ -293,7 +298,7 @@ static inline uint32_t efm32_serialin(struct efm32_leuart_s *priv, int offset)
  ****************************************************************************/
 
 static inline void efm32_serialout(struct efm32_leuart_s *priv, int offset,
-                                uint32_t value)
+                                   uint32_t value)
 {
   putreg32(value, priv->config->uartbase + offset);
 }
@@ -315,7 +320,9 @@ static void efm32_restoreuartint(struct efm32_leuart_s *priv, uint32_t ien)
 {
   irqstate_t flags;
 
-  /* Re-enable/re-disable interrupts corresponding to the state of bits in ien */
+  /* Re-enable/re-disable interrupts corresponding to the state of
+   * bits in ien.
+   */
 
   flags     = enter_critical_section();
   priv->ien = ien;
@@ -398,14 +405,15 @@ static void efm32_shutdown(struct uart_dev_s *dev)
  * Name: efm32_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -432,9 +440,9 @@ static int efm32_attach(struct uart_dev_s *dev)
  * Name: efm32_detach
  *
  * Description:
- *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   Detach UART interrupts.  This method is called when the serial port
+ *   is closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -616,8 +624,8 @@ static void efm32_rxint(struct uart_dev_s *dev, bool enable)
   flags = enter_critical_section();
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when there is anything in the Rx data register
+       * (or an Rx timeout occurs).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -638,7 +646,7 @@ static void efm32_rxint(struct uart_dev_s *dev, bool enable)
  * Name: efm32_rxavailable
  *
  * Description:
- *   Return true if the receive register is not empty
+ *   Return true if the receive register is not empty.
  *
  ****************************************************************************/
 
@@ -648,7 +656,8 @@ static bool efm32_rxavailable(struct uart_dev_s *dev)
 
   /* Return true if the receive data is available (RXDATAV). */
 
-  return (efm32_serialin(priv, EFM32_LEUART_STATUS_OFFSET) & LEUART_STATUS_RXDATAV) != 0;
+  return (efm32_serialin(priv, EFM32_LEUART_STATUS_OFFSET) &
+          LEUART_STATUS_RXDATAV) != 0;
 }
 
 /****************************************************************************
@@ -722,7 +731,8 @@ static bool efm32_txready(struct uart_dev_s *dev)
    * when it is full.
    */
 
-  return (efm32_serialin(priv, EFM32_LEUART_STATUS_OFFSET) & LEUART_STATUS_TXBL) != 0;
+  return (efm32_serialin(priv, EFM32_LEUART_STATUS_OFFSET) &
+          LEUART_STATUS_TXBL) != 0;
 }
 
 /****************************************************************************
@@ -741,7 +751,8 @@ static bool efm32_txempty(struct uart_dev_s *dev)
    * data is available in the transmit buffer.
    */
 
-  return (efm32_serialin(priv, EFM32_LEUART_STATUS_OFFSET) & LEUART_STATUS_TXC) != 0;
+  return (efm32_serialin(priv, EFM32_LEUART_STATUS_OFFSET) &
+          LEUART_STATUS_TXC) != 0;
 }
 
 /****************************************************************************
@@ -757,23 +768,21 @@ static bool efm32_txempty(struct uart_dev_s *dev)
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before arm_serialinit.  NOTE:  This function depends on GPIO pin
- *   configuration performed in efm32_consoleinit() and main clock iniialization
- *   performed in efm32_clkinitialize().
+ *   configuration performed in efm32_consoleinit() and main clock
+ *   initialization performed in efm32_clkinitialize().
  *
  ****************************************************************************/
 
 void arm_earlyserialinit(void)
 {
-  /* Disable interrupts from all UARTS.  The console is enabled in
-   * pic32mx_consoleinit()
-   */
+  /* Disable interrupts from all UARTS. */
 
   efm32_restoreuartint(TTYLE0_DEV.priv, 0);
 #ifdef TTYLE1_DEV
   efm32_restoreuartint(TTYLE1_DEV.priv, 0);
 #endif
 
-  /* Configuration whichever one is the console */
+  /* Configuration whichever one is the console. */
 
 #ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = true;

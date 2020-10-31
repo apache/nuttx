@@ -67,6 +67,7 @@
  ****************************************************************************/
 
 /* Some sanity checks *******************************************************/
+
 /* Is there at least one UART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_UART_DEVICE
@@ -241,7 +242,7 @@ static uart_dev_t g_uart0port =
   {
     .size   = CONFIG_UART0_TXBUFSIZE,
     .buffer = g_uart0txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart0priv,
 };
@@ -271,7 +272,7 @@ static uart_dev_t g_uart1port =
   {
     .size   = CONFIG_UART1_TXBUFSIZE,
     .buffer = g_uart1txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart1priv,
 };
@@ -301,7 +302,7 @@ static uart_dev_t g_uart2port =
   {
     .size   = CONFIG_UART2_TXBUFSIZE,
     .buffer = g_uart2txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
 };
@@ -324,7 +325,8 @@ static inline uint8_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint8_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint8_t value)
 {
   putreg8(value, priv->uartbase + offset);
 }
@@ -338,7 +340,9 @@ static void up_setuartint(struct up_dev_s *priv)
   irqstate_t flags;
   uint8_t regval;
 
-  /* Re-enable/re-disable interrupts corresponding to the state of bits in ie */
+  /* Re-enable/re-disable interrupts corresponding to the state of bits
+   * in ie.
+   */
 
   flags    = enter_critical_section();
   regval   = up_serialin(priv, KL_UART_C2_OFFSET);
@@ -356,7 +360,9 @@ static void up_restoreuartint(struct up_dev_s *priv, uint8_t ie)
 {
   irqstate_t flags;
 
-  /* Re-enable/re-disable interrupts corresponding to the state of bits in ie */
+  /* Re-enable/re-disable interrupts corresponding to the state of bits
+   * in ie.
+   */
 
   flags    = enter_critical_section();
   priv->ie = ie & UART_C2_ALLINTS;
@@ -413,7 +419,7 @@ static int up_setup(struct uart_dev_s *dev)
  *
  * Description:
  *   Disable the UART.  This method is called when the serial
- *   port is closed
+ *   port is closed.
  *
  ****************************************************************************/
 
@@ -434,14 +440,15 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -467,9 +474,9 @@ static int up_attach(struct uart_dev_s *dev)
  * Name: up_detach
  *
  * Description:
- *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   Detach UART interrupts.  This method is called when the serial port
+ *   is closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -566,7 +573,8 @@ static int up_interrupts(int irq, void *context, void *arg)
        * FE: Framing error. To clear FE, write a logic one to the FE flag.
        * NF: Noise flag. To clear NF, write logic one to the NF.
        * PF: Parity error flag. To clear PF, write a logic one to the PF.
-       * OR: Receiver Overrun Flag.  To clear OR, write a logic 1 to the OR flag.
+       * OR: Receiver Overrun Flag. To clear OR, write a logic 1 to the OR
+       *     flag.
        */
 
       if ((s1 & UART_S1_ERRORS) != 0)
@@ -810,9 +818,7 @@ static bool up_txready(struct uart_dev_s *dev)
 
 void arm_earlyserialinit(void)
 {
-  /* Disable interrupts from all UARTS.  The console is enabled in
-   * pic32mx_consoleinit()
-   */
+  /* Disable interrupts from all UARTS. */
 
   up_restoreuartint(TTYS0_DEV.priv, 0);
 #ifdef TTYS1_DEV
@@ -831,7 +837,7 @@ void arm_earlyserialinit(void)
   up_restoreuartint(TTYS5_DEV.priv, 0);
 #endif
 
-  /* Configuration whichever one is the console */
+  /* Configuration whichever one is the console. */
 
 #ifdef HAVE_SERIAL_CONSOLE
   CONSOLE_DEV.isconsole = true;
