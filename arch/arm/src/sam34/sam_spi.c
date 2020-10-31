@@ -1149,7 +1149,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests
+ *   nbits - The number of bits requested
  *
  * Returned Value:
  *   none
@@ -1164,7 +1164,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
   unsigned int offset;
 
   spiinfo("cs=%d nbits=%d\n", spics->cs, nbits);
-  DEBUGASSERT(spics && nbits > 7 && nbits < 17);
+  DEBUGASSERT(nbits > 7 && nbits < 17);
 
   /* Has the number of bits changed? */
 
@@ -1180,7 +1180,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
       spiinfo("csr[offset=%02x]=%08x\n", offset, regval);
 
-      /* Save the selection so the subsequence re-configurations will be
+      /* Save the selection so the subsequent re-configurations will be
        * faster.
        */
 

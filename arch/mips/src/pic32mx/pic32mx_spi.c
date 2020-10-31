@@ -615,7 +615,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
       spi_putreg(priv, PIC32MX_SPI_CON_OFFSET, regval);
       spiinfo("CON: %08x\n", regval);
 
-      /* Save the mode so that subsequent re-configuratins will be faster */
+      /* Save the mode so that subsequent re-configurations will be faster */
 
       priv->mode = mode;
     }
@@ -629,7 +629,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests
+ *   nbits - The number of bits requested
  *
  * Returned Value:
  *   none
@@ -642,11 +642,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   uint32_t setting;
   uint32_t regval;
 
+  DEBUGASSERT(priv != NULL);
   spiinfo("Old nbits: %d New nbits: %d\n", priv->nbits, nbits);
+  DEBUGASSERT(nbits > 7 && nbits < 17);
 
   /* Has the number of bits changed? */
-
-  DEBUGASSERT(priv && nbits > 7 && nbits < 17);
 
   if (nbits != priv->nbits)
     {
@@ -676,8 +676,8 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval = spi_getreg(priv, PIC32MX_SPI_CON_OFFSET);
       spiinfo("CON: %08x\n", regval);
 
-      /* Save the selection so the subsequence re-configurations will be
-       * faster
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
        */
 
       priv->nbits = nbits;
