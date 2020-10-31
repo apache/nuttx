@@ -39,7 +39,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/board.h>
 
-#include "lcd_dev.h"
+#include <nuttx/lcd/lcd_dev.h>
 
 /****************************************************************************
  * Private Types
@@ -124,7 +124,7 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     case LCDDEVIO_GETRUN:
       {
         FAR struct lcddev_run_s *lcd_putrun =
-            (const FAR struct lcddev_run_s *)arg;
+            (FAR struct lcddev_run_s *)arg;
 
         ret = priv->planeinfo.getrun(lcd_putrun->row, lcd_putrun->col,
                                      lcd_putrun->data, lcd_putrun->npixels);
@@ -133,7 +133,7 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     case LCDDEVIO_PUTRUN:
       {
         const FAR struct lcddev_run_s *lcd_putrun =
-            (FAR struct lcddev_run_s *)arg;
+            (const FAR struct lcddev_run_s *)arg;
 
         ret = priv->planeinfo.putrun(lcd_putrun->row, lcd_putrun->col,
                                      lcd_putrun->data, lcd_putrun->npixels);
