@@ -255,7 +255,7 @@ static void nxsig_abnormal_termination(int signo)
  * Name: nxsig_stop_task
  *
  * Description:
- *   This is the handler for the abnormal termination default action.
+ *   This is the handler for the stop default action.
  *
  * Input Parameters:
  *   Standard signal handler parameters
