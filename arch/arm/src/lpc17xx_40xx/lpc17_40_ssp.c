@@ -385,9 +385,11 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev,
   uint32_t regval;
   uint32_t actual;
 
-  /* Check if the requested frequency is the same as the frequency selection */
-
   DEBUGASSERT(priv && frequency <= SSP_CLOCK / 2);
+
+  /* Check if the requested frequency is the same as the frequency
+   * selection.
+   */
 
   if (priv->frequency == frequency)
     {
@@ -533,7 +535,7 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests
+ *   nbits - The number of bits requested
  *
  * Returned Value:
  *   none
@@ -558,7 +560,9 @@ static void ssp_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval |= ((nbits - 1) << SSP_CR0_DSS_SHIFT);
       ssp_putreg(priv, LPC17_40_SSP_CR0_OFFSET, regval);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
+       */
 
       priv->nbits = nbits;
     }
@@ -731,7 +735,9 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
   uint32_t data;
   uint32_t rxpending = 0;
 
-  /* While there is remaining to be sent (and no synchronization error has occurred) */
+  /* While there is remaining to be sent (and no synchronization error
+   * has occurred)
+   */
 
   spiinfo("nwords: %d\n", nwords);
   u.pv = buffer;
@@ -752,7 +758,9 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
           rxpending++;
         }
 
-      /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
+      /* Now, read the RX data from the RX FIFO while the RX FIFO is
+       * not empty.
+       */
 
       spiinfo("RX: rxpending: %d\n", rxpending);
       while (ssp_getreg(priv, LPC17_40_SSP_SR_OFFSET) & SSP_SR_RNE)

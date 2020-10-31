@@ -1044,8 +1044,8 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
       regval |= setting;
       spi_putreg(config, EFM32_USART_FRAME_OFFSET, regval);
 
-      /* Save the selection so the subsequence re-configurations will be
-       * faster
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
        */
 
       priv->nbits = nbits;
@@ -1105,8 +1105,8 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev,
 
       spi_putreg(config, EFM32_USART_CTRL_OFFSET, regval);
 
-      /* Save the selection so the subsequence re-configurations will be
-       * faster
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
        */
 
       priv->lsbfirst = lsbfirst;

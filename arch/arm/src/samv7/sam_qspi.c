@@ -1281,7 +1281,7 @@ static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
  *
  * Input Parameters:
  *   dev -  Device-specific state data
- *   nbits - The number of bits requests
+ *   nbits - The number of bits requested
  *
  * Returned Value:
  *   none
@@ -1310,8 +1310,8 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
 
       spiinfo("MR=%08x\n", regval);
 
-      /* Save the selection so the subsequence re-configurations will be
-       * faster
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
        */
 
       priv->nbits = nbits;

@@ -1520,7 +1520,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       spi_modifycr1(priv, setbits, clrbits);
       spi_modifycr1(priv, SPI_CR1_SPE, 0);
 #endif
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so that subsequent re-configurations will be faster. */
 
       priv->nbits = nbits;
     }
@@ -1818,10 +1818,10 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* If this bus uses a in driver buffers we will incur 2 copies,
        * The copy cost is << less the non DMA transfer time and having
-       * the buffer in the driver ensures DMA can be used. This is bacause
+       * the buffer in the driver ensures DMA can be used. This is because
        * the API does not support passing the buffer extent so the only
        * extent is buffer + the transfer size. These can sizes be less than
-       * the cache line size, and not aligned and tyicaly greater then 4
+       * the cache line size, and not aligned and typically greater then 4
        * bytes, which is about the break even point for the DMA IO overhead.
        */
 
