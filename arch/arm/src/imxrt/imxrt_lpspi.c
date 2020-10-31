@@ -1187,7 +1187,6 @@ static int imxrt_lpspi_hwfeatures(FAR struct spi_dev_s *dev,
   FAR struct imxrt_lpspidev_s *priv = (FAR struct imxrt_lpspidev_s *)dev;
   uint32_t setbits;
   uint32_t clrbits;
-  int savbits = nbits;
 
   spiinfo("features=%08x\n", features);
 
@@ -1204,7 +1203,7 @@ static int imxrt_lpspi_hwfeatures(FAR struct spi_dev_s *dev,
       clrbits = LPSPI_TCR_LSBF;
     }
 
-  imxrt_lpspi_modigyreg32(priv, IMXRT_LPSPI_TCR_OFFSET, clrbits, setbits);
+  imxrt_lpspi_modifyreg32(priv, IMXRT_LPSPI_TCR_OFFSET, clrbits, setbits);
 
   /* Other H/W features are not supported */
 
