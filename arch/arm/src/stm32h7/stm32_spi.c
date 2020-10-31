@@ -1594,7 +1594,6 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
   uint32_t setbits = 0;
   uint32_t clrbits = 0;
-  int savbits = nbits;
 
   spiinfo("nbits=%d\n", nbits);
 
@@ -1633,11 +1632,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, clrbits, setbits);
       spi_enable(priv, true);
 
-      /* Save the selection so the subsequence re-configurations will be
-       * faster
+      /* Save the selection so that subsequent re-configurations will be
+       * faster.
        */
 
-      priv->nbits = savbits;  /* nbits has been clobbered... save the signed value */
+      priv->nbits = nbits;
     }
 }
 
