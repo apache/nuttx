@@ -153,41 +153,14 @@
 #define SPIM_ENABLE_DIS             (0)        /* Disable SPIM */
 #define SPIM_ENABLE_EN              (0x7 << 0) /* Enable SPIM */
 
-/* PSELSCK Register */
+/* PSEL(MOSI/MISO/SCK/CSN) Register */
 
-#define SPIM_PSELSCK_PIN_SHIFT      (0)       /* Bits 0-4: SCK pin number */
-#define SPIM_PSELSCK_PIN_MASK       (0x1f << SPIM_PSELSCK_PIN_SHIFT)
-#define SPIM_PSELSCK_PORT_SHIFT     (5)       /* Bit 5: SCK port number */
-#define SPIM_PSELSCK_PORT_MASK      (0x1 << SPIM_PSELSCK_PORT_SHIFT)
-#define SPIM_PSELSCK_CONNECTED      (1 << 31) /* Bit 31: Connection */
-#define SPIM_PSELSCK_RESET          (0xffffffff)
-
-/* PSELMOSI Register */
-
-#define SPIM_PSELMOSI_PIN_SHIFT     (0)       /* Bits 0-4: MOSI pin number */
-#define SPIM_PSELMOSI_PIN_MASK      (0x1f << SPIM_PSELMOSI_PIN_SHIFT)
-#define SPIM_PSELMOSI_PORT_SHIFT    (5)       /* Bit 5: MOSI port number */
-#define SPIM_PSELMOSI_PORT_MASK     (0x1 << SPIM_PSELMOSI_PORT_SHIFT)
-#define SPIM_PSELMOSI_CONNECTED     (1 << 31) /* Bit 31: Connection */
-#define SPIM_PSELMOSI_RESET         (0xffffffff)
-
-/* PSELMISO Register */
-
-#define SPIM_PSELMISO_PIN_SHIFT     (0)       /* Bits 0-4: MISO pin number */
-#define SPIM_PSELMISO_PIN_MASK      (0x1f << SPIM_PSELMISO_PIN_SHIFT)
-#define SPIM_PSELMISO_PORT_SHIFT    (5)       /* Bit 5: MISO port number */
-#define SPIM_PSELMISO_PORT_MASK     (0x1 << SPIM_PSELMISO_PORT_SHIFT)
-#define SPIM_PSELMISO_CONNECTED     (1 << 31) /* Bit 31: Connection */
-#define SPIM_PSELMISO_RESET         (0xffffffff)
-
-/* PSELCSN Register */
-
-#define SPIM_PSELCSN_PIN_SHIFT      (0)       /* Bits 0-4: CSN pin number */
-#define SPIM_PSELCSN_PIN_MASK       (0x1f << SPIM_PSELCSN_PIN_SHIFT)
-#define SPIM_PSELCSN_PORT_SHIFT     (5)       /* Bit 5: CSN port number */
-#define SPIM_PSELCSN_PORT_MASK      (0x1 << SPIM_PSELCSN_PORT_SHIFT)
-#define SPIM_PSELCSN_CONNECTED      (1 << 31) /* Bit 31: Connection */
-#define SPIM_PSELCSN_RESET          (0xffffffff)
+#define SPIM_PSEL_PIN_SHIFT         (0)       /* Bits 0-4: pin number */
+#define SPIM_PSEL_PIN_MASK          (0x1f << SPIM_PSEL_PIN_SHIFT)
+#define SPIM_PSEL_PORT_SHIFT        (5)       /* Bit 5: port number */
+#define SPIM_PSEL_PORT_MASK         (0x1 << SPIM_PSEL_PORT_SHIFT)
+#define SPIM_PSEL_CONNECTED         (1 << 31) /* Bit 31: Connection */
+#define SPIM_PSEL_RESET             (0xffffffff)
 
 /* FREQUENCY Register */
 
