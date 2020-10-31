@@ -1028,7 +1028,6 @@ static void spi_setbits(FAR struct spi_sctrlr_s *sctrlr, int nbits)
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)sctrlr;
   uint32_t setbits = 0;
   uint32_t clrbits = 0;
-  int savbits = nbits;
 
   spiinfo("nbits=%d\n", nbits);
 
@@ -1065,7 +1064,7 @@ static void spi_setbits(FAR struct spi_sctrlr_s *sctrlr, int nbits)
 
       spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, clrbits, setbits);
 
-      priv->nbits = savbits;
+      priv->nbits = nbits;
     }
 }
 

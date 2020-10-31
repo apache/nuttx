@@ -1084,7 +1084,6 @@ static void s32k1xx_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
   FAR struct s32k1xx_lpspidev_s *priv = (FAR struct s32k1xx_lpspidev_s *)dev;
   uint32_t regval;
   uint32_t men;
-  int savbits = nbits;
 
   spiinfo("nbits=%d\n", nbits);
 
@@ -1111,10 +1110,9 @@ static void s32k1xx_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       s32k1xx_lpspi_putreg32(priv, S32K1XX_LPSPI_TCR_OFFSET, regval);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so that subsequent re-configurations will be faster. */
 
-      priv->nbits = savbits;    /* nbits has been clobbered... save the signed
-                                 * value. */
+      priv->nbits = nbits;
 
       /* Re-enable LPSPI if it was enabled previously */
 
