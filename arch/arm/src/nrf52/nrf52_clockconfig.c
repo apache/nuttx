@@ -50,6 +50,7 @@
 
 #include "nrf52_clockconfig.h"
 #include "hardware/nrf52_clock.h"
+#include "hardware/nrf52_power.h"
 
 /****************************************************************************
  * Public Functions
@@ -104,5 +105,11 @@ void nrf52_clockconfig(void)
 #if defined(CONFIG_NRF52_LFCLK_RC)
   /* TODO: calibrate LFCLK RC oscillator */
 #endif
+#endif
+
+#ifdef CONFIG_NRF52_DCDC
+  /* Enable DC/DC regulator */
+
+  putreg32(NRF52_POWER_DCDCEN_ENABLE, NRF52_POWER_DCDCEN);
 #endif
 }
