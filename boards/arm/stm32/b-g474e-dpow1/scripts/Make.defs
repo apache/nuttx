@@ -48,7 +48,6 @@ ARCHCFLAGS = -fno-builtin -funwind-tables
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -funwind-tables
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
-ARCHDEFINES = -D__NuttX__
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
 CFLAGS := $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -ffunction-sections -fdata-sections -pipe
