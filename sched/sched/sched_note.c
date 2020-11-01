@@ -406,7 +406,7 @@ void sched_note_start(FAR struct tcb_s *tcb)
 
   length = SIZEOF_NOTE_START(namelen + 1);
 #else
-  length = SIZEOF_NOTE_START(0)
+  length = SIZEOF_NOTE_START(0);
 #endif
 
   /* Finish formatting the note */
