@@ -364,6 +364,13 @@ endif
 
 endmenu # System Timer
 
+config NRF52_DCDC
+  bool "Enable DC/DC regulator"
+  default n
+  ---help---
+    This option enables the DC/DC regulator, which reduces
+    current consumption. This requires extra circuitry (inductors).
+
 config NRF52_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
 	default y
