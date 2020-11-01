@@ -519,6 +519,10 @@ $(1)_$(2):
 
 endef
 
+# ARCHxxx means the predefined setting(either toolchain, arch, or system specific)
+
+ARCHDEFINES += ${shell $(DEFINE) "$(CC)" __NuttX__}
+
 # The default C/C++ search path
 
 ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
