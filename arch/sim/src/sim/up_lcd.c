@@ -115,6 +115,9 @@ struct sim_dev_s
 
 static int sim_putrun(fb_coord_t row, fb_coord_t col,
                       FAR const uint8_t *buffer, size_t npixels);
+static int sim_putarea(fb_coord_t row_start, fb_coord_t row_end,
+                       fb_coord_t col_start, fb_coord_t col_end,
+                       FAR const uint8_t *buffer);
 static int sim_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                       size_t npixels);
 
@@ -183,6 +186,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 static struct lcd_planeinfo_s g_planeinfo =
 {
   .putrun  = sim_putrun,                 /* Put a run into LCD memory */
+  .putarea = sim_putarea,                /* Put a rectangular area to LCD */
   .getrun  = sim_getrun,                 /* Get a run from LCD memory */
 #ifndef CONFIG_SIM_X11FB
   .buffer  = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
@@ -240,6 +244,63 @@ static int sim_putrun(fb_coord_t row, fb_coord_t col,
 #ifdef CONFIG_SIM_X11FB
   memcpy(&g_planeinfo.buffer[row * g_stride + col * (g_planeinfo.bpp / 8)],
          buffer, npixels * g_planeinfo.bpp / 8);
+#endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name:  sim_putarea
+ *
+ * Description:
+ *   This method can be used to write a partial raster line to the LCD:
+ *
+ *   row_start - Starting row to write to (range: 0 <= row < yres)
+ *   row_end   - Ending row to write to (range: row_start <= row < yres)
+ *   col_start - Starting column to write to (range: 0 <= col <= xres)
+ *   col_end   - Ending column to write to
+ *               (range: col_start <= col_end < xres)
+ *   buffer    - The buffer containing the area to be written to the LCD
+ *
+ ****************************************************************************/
+
+static int sim_putarea(fb_coord_t row_start, fb_coord_t row_end,
+                       fb_coord_t col_start, fb_coord_t col_end,
+                       FAR const uint8_t *buffer)
+{
+  fb_coord_t row;
+  size_t rows;
+  size_t cols;
+  size_t row_size;
+
+  lcdinfo("row_start: %d row_end: %d col_start: %d col_end: %d\n",
+          row_start, row_end, col_start, col_end);
+
+  cols = col_end - col_start + 1;
+  rows = row_end - row_start + 1;
+  row_size = cols * (g_planeinfo.bpp >> 3);
+
+#ifdef CONFIG_SIM_X11FB
+  if (col_start == 0 && col_end == (g_videoinfo.xres - 1) &&
+      g_stride == row_size)
+    {
+      /* simpler case, we can just memcpy() the whole buffer */
+
+      memcpy(&g_planeinfo.buffer[row_start * g_stride], buffer,
+             rows * row_size);
+    }
+  else
+    {
+      /* We have to go row by row */
+
+      for (row = row_start; row <= row_end; row++)
+        {
+          memcpy(&g_planeinfo.buffer[row * g_stride + col_start *
+                                     (g_planeinfo.bpp >> 3)],
+                 &buffer[(row - row_start) * row_size],
+                 cols * (g_planeinfo.bpp >> 3));
+        }
+    }
 #endif
 
   return OK;

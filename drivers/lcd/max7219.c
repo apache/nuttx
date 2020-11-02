@@ -57,6 +57,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* MAX7219 Configuration Settings:
  *
  * CONFIG_MAX7219_NHORIZONTALBLKS - Specifies the number of physical
@@ -102,6 +103,7 @@
 #endif
 
 /* Color Properties *********************************************************/
+
 /* The MAX7219 chip can handle resolution of 8x8, 16x8, 8x16, 16x16, 24x8,
  * etc.
  */
@@ -153,9 +155,9 @@ struct max7219_dev_s
   uint8_t contrast;
   uint8_t powered;
 
-  /* The MAX7219 does not support reading from the display memory in SPI mode.
-   * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep
-   * a shadow copy of the framebuffer memory.
+  /* The MAX7219 does not support reading from the display memory in SPI
+   * mode. Since there is 1 BPP and access is byte-by-byte, it is necessary
+   * to keep a shadow copy of the framebuffer memory.
    */
 
   uint8_t fb[MAX7219_FBSIZE];
@@ -239,10 +241,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  max7219_putrun,              /* Put a run into LCD memory */
-  max7219_getrun,              /* Get a run from LCD memory */
-  (FAR uint8_t *)g_runbuffer,  /* Run scratch buffer */
-  MAX7219_BPP,                 /* Bits-per-pixel */
+  .putrun = max7219_putrun,              /* Put a run into LCD memory */
+  .getrun = max7219_getrun,              /* Get a run from LCD memory */
+  .buffer = (FAR uint8_t *)g_runbuffer,  /* Run scratch buffer */
+  .bpp    = MAX7219_BPP,                 /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
@@ -250,6 +252,7 @@ static const struct lcd_planeinfo_s g_planeinfo =
 static struct max7219_dev_s g_max7219dev =
 {
   /* struct lcd_dev_s */
+
   {
     /* LCD Configuration */
 
@@ -647,8 +650,9 @@ static int max7219_getvideoinfo(FAR struct lcd_dev_s *dev,
  *
  ****************************************************************************/
 
-static int max7219_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                              FAR struct lcd_planeinfo_s *pinfo)
+static int max7219_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                unsigned int planeno,
+                                FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
 
@@ -682,8 +686,9 @@ static int max7219_getpower(struct lcd_dev_s *dev)
  * Name:  max7219_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full
+ *   on). On backlit LCDs, this setting may correspond to the backlight
+ *   setting.
  *
  ****************************************************************************/
 
@@ -898,7 +903,8 @@ FAR struct lcd_dev_s *max7219_initialize(FAR struct spi_dev_s *spi,
 
   /* Set intensity level configured by the user */
 
-  data = (MAX7219_INTENSITY) | (DISPLAY_INTENSITY(CONFIG_LCD_MAXCONTRAST) << 8);
+  data = (MAX7219_INTENSITY) |
+         (DISPLAY_INTENSITY(CONFIG_LCD_MAXCONTRAST) << 8);
 
   SPI_SNDBLOCK(priv->spi, &data, 2);
 
