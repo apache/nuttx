@@ -54,18 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_SIM_FBWIDTH
-#  define CONFIG_SIM_FBWIDTH  480 /* Framebuffer width in pixels */
-#endif
-
-#ifndef CONFIG_SIM_FBHEIGHT
-#  define CONFIG_SIM_FBHEIGHT 240 /* Framebuffer height in pixels */
-#endif
-
-#ifndef CONFIG_SIM_FBBPP
-#  define CONFIG_SIM_FBBPP    16  /* Framebuffer bytes per pixel (RGB) */
-#endif
-
 #undef FB_FMT
 #if CONFIG_SIM_FBBPP == 1
 #  define FB_FMT FB_FMT_RGB1

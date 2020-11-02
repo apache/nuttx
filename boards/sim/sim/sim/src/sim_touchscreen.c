@@ -228,6 +228,7 @@ int sim_tsc_setup(int minor)
       return ERROR;
     }
 
+#ifdef CONFIG_NX
   /* Set the background to the configured background color */
 
   iinfo("Set background color=%d\n", CONFIG_EXAMPLES_TOUCHSCREEN_BGCOLOR);
@@ -239,6 +240,9 @@ int sim_tsc_setup(int minor)
       ierr("ERROR: nx_setbgcolor failed: %d\n", ret);
       goto errout_with_nx;
     }
+#else
+  UNUSED(color);
+#endif
 
   /* Finally, initialize the touchscreen simulation on the X window */
 

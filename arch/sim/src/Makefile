@@ -125,10 +125,14 @@ ifeq ($(CONFIG_RTC_DRIVER),y)
   CSRCS += up_rtc.c
 endif
 
-ifeq ($(CONFIG_NX_LCDDRIVER),y)
+ifeq ($(CONFIG_SIM_LCDDRIVER),y)
   CSRCS += up_lcd.c
 else
-  CSRCS += up_framebuffer.c
+  ifeq ($(CONFIG_SIM_FRAMEBUFFER),y)
+    CSRCS += up_framebuffer.c
+  endif
+endif
+
 ifeq ($(CONFIG_SIM_X11FB),y)
 ifeq ($(CONFIG_SIM_X11NOSHM),y)
   HOSTCFLAGS += -DCONFIG_SIM_X11NOSHM=1
@@ -144,7 +148,6 @@ else ifeq ($(CONFIG_SIM_AJOYSTICK),y)
   CSRCS += up_ajoystick.c
   HOSTCFLAGS += -DCONFIG_SIM_AJOYSTICK=1
   HOSTSRCS += up_x11eventloop.c
-endif
 endif
 endif
 

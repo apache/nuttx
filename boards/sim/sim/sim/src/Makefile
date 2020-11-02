@@ -59,7 +59,7 @@ ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
 endif
 endif
 
-ifeq ($(CONFIG_NX),y)
+ifeq ($(CONFIG_SIM_X11FB),y)
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   CSRCS += sim_touchscreen.c
 endif
