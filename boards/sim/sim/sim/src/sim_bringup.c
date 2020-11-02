@@ -41,6 +41,10 @@
 #include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
+#ifdef CONFIG_LCD_DEV
+#include <nuttx/lcd/lcd_dev.h>
+#endif
+
 #include "up_internal.h"
 #include "sim.h"
 
@@ -257,6 +261,26 @@ int sim_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
+#  endif
+
+#  ifdef CONFIG_LCD
+
+  ret = board_lcd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_lcd_initialize() failed: %d\n", ret);
+    }
+
+#  ifdef CONFIG_LCD_DEV
+
+  ret = lcddev_register(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lcddev_register() failed: %d\n", ret);
+    }
+
+#  endif
+
 #  endif
 
 #  ifdef CONFIG_SIM_TOUCHSCREEN

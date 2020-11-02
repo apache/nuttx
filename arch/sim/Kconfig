@@ -205,36 +205,24 @@ config SIM_RPTUN_MASTER
 	bool "Remote Processor Tunneling Role"
 	depends on RPTUN
 
-config SIM_LCDDRIVER
-	bool "Build a simulated LCD driver"
-	default y
-	depends on NX && NX_LCDDRIVER
-	---help---
-		Build a simulated LCD driver"
-
-config SIM_FRAMEBUFFER
-	bool "Build a simulated frame buffer driver"
-	default n
-	depends on !NX_LCDDRIVER
-	---help---
-		Build a simulated frame buffer driver"
-
-if SIM_FRAMEBUFFER
+menu "Simulated Graphics/Input"
 
 config SIM_X11FB
-	bool "Use X11 window"
-	default n
-	select SCHED_LPWORK
+  bool "X11 graphics/input"
+  default n
+  select SCHED_LPWORK
 	depends on SIM_WALLTIME
 	---help---
-		Use an X11 graphics window to simulate the graphics device"
+		Use X11 to provide graphics and input emulation to interact with host.
 
 config SIM_X11NOSHM
 	bool "Don't use shared memory with X11"
 	default n
 	depends on SIM_X11FB
 	---help---
-		Don't use shared memory with the X11 graphics device emulation."
+		Don't use shared memory with the X11 graphics device emulation.
+
+menu "Window Configuration"
 
 config SIM_FBHEIGHT
 	int "Display height"
@@ -244,8 +232,7 @@ config SIM_FBHEIGHT
 
 config SIM_FBWIDTH
 	int "Display width"
-	default 320 if SIM_LCDDRIVER
-	default 480 if SIM_FRAMEBUFFER
+	default 320
 	---help---
 		Simulated width of the display.  Default: 320 or 480
 
@@ -257,28 +244,52 @@ config SIM_FBBPP
 		If you use the X11 display emulation, the selected BPP must match the BPP
 		of your graphics hardware (probably 32 bits).  Default: 8
 
-endif # SIM_FRAMEBUFFER
+endmenu
 
-if SIM_X11FB && INPUT
 choice
-	prompt "X11 Simulated Input Device"
+	prompt "Graphics Device"
+	default SIM_FRAMEBUFFER
+	---help---
+		Choose which kind of graphics device to emulate
+
+config SIM_LCDDRIVER
+	bool "LCD device"
+	depends on LCD
+	---help---
+		Emulate an LCD driver
+
+config SIM_FRAMEBUFFER
+	bool "Framebuffer"
+	depends on VIDEO_FB
+	---help---
+		Emulate a framebuffer
+
+endchoice
+
+if INPUT
+choice
+	prompt "Input Device"
 	default SIM_NOINPUT
 
 config SIM_TOUCHSCREEN
 	bool "X11 mouse-based touchscreen emulation"
+	depends on SIM_X11FB
 	---help---
 		Support an X11 mouse-based touchscreen emulation.  Also needs INPUT=y
 
 config SIM_AJOYSTICK
 	bool "X11 mouse-based analog joystick emulation"
+	depends on SIM_X11FB
 	---help---
 		Support an X11 mouse-based analog joystick emulation.  Also needs INPUT=y
 
 config SIM_NOINPUT
 	bool "No input device"
 
-endchoice # X11 Simulated Input Device
-endif # SIM_X11FB && INPUT
+endchoice # Input Device
+endif # if INPUT
+
+endmenu
 
 config SIM_TCNWAITERS
 	bool "Maximum number poll() waiters"
