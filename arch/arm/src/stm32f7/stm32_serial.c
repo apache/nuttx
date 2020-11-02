@@ -3661,7 +3661,7 @@ void arm_serialinit(void)
   minor = 1;
 #endif
 
-#ifdef SERIAL_HAVE_CONSOLE_DMA
+#if defined(SERIAL_HAVE_CONSOLE_RXDMA) || defined(SERIAL_HAVE_CONSOLE_TXDMA)
   /* If we need to re-initialise the console to enable DMA do that here. */
 
   up_dma_setup(&g_uart_devs[CONSOLE_UART - 1]->dev);
