@@ -55,9 +55,8 @@
 
 struct sensor_info
 {
-  uint8_t         idx;
-  const uint8_t   esize;
-  FAR const char *name;
+  uint8_t   esize;
+  FAR char *name;
 };
 
 /* This structure describes sensor circular buffer */
@@ -77,7 +76,6 @@ struct sensor_upperhalf_s
   FAR struct sensor_lowerhalf_s *lower;  /* the handle of lower half driver */
   FAR struct sensor_buffer_s    *buffer; /* The circualr buffer of sensor device */
   FAR struct pollfd *fds;                /* poll structures of threads waiting for driver events. */
-  uint8_t            idx;                /* The index number of node path */
   uint8_t            crefs;              /* Number of times the device has been opened */
   sem_t              exclsem;            /* Manages exclusive access to file operations */
   sem_t              buffersem;          /* Wakeup user waiting for data in circular buffer */
@@ -105,32 +103,32 @@ static int     sensor_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-static struct sensor_info g_sensor_info[] =
+static const struct sensor_info g_sensor_info[] =
 {
-  {0, sizeof(struct sensor_event_accel), "accel"},
-  {0, sizeof(struct sensor_event_mag),   "mag"},
-  {0, sizeof(struct sensor_event_gyro),  "gyro"},
-  {0, sizeof(struct sensor_event_light), "light"},
-  {0, sizeof(struct sensor_event_baro),  "baro"},
-  {0, sizeof(struct sensor_event_prox),  "prox"},
-  {0, sizeof(struct sensor_event_humi),  "humi"},
-  {0, sizeof(struct sensor_event_temp),  "temp"},
-  {0, sizeof(struct sensor_event_rgb),   "rgb"},
-  {0, sizeof(struct sensor_event_hall),  "hall"},
-  {0, sizeof(struct sensor_event_ir),    "ir"},
-  {0, sizeof(struct sensor_event_gps),   "gps"},
-  {0, sizeof(struct sensor_event_uv),    "uv"},
-  {0, sizeof(struct sensor_event_noise), "noise"},
-  {0, sizeof(struct sensor_event_pm25),  "pm25"},
-  {0, sizeof(struct sensor_event_pm1p0), "pm1p0"},
-  {0, sizeof(struct sensor_event_pm10),  "pm10"},
-  {0, sizeof(struct sensor_event_co2),   "co2"},
-  {0, sizeof(struct sensor_event_hcho),  "hcho"},
-  {0, sizeof(struct sensor_event_tvoc),  "tvoc"},
-  {0, sizeof(struct sensor_event_ph),    "ph"},
-  {0, sizeof(struct sensor_event_dust),  "dust"},
-  {0, sizeof(struct sensor_event_hrate), "hrate"},
-  {0, sizeof(struct sensor_event_hbeat), "hbeat"},
+  {sizeof(struct sensor_event_accel), "accel"},
+  {sizeof(struct sensor_event_mag),   "mag"},
+  {sizeof(struct sensor_event_gyro),  "gyro"},
+  {sizeof(struct sensor_event_light), "light"},
+  {sizeof(struct sensor_event_baro),  "baro"},
+  {sizeof(struct sensor_event_prox),  "prox"},
+  {sizeof(struct sensor_event_humi),  "humi"},
+  {sizeof(struct sensor_event_temp),  "temp"},
+  {sizeof(struct sensor_event_rgb),   "rgb"},
+  {sizeof(struct sensor_event_hall),  "hall"},
+  {sizeof(struct sensor_event_ir),    "ir"},
+  {sizeof(struct sensor_event_gps),   "gps"},
+  {sizeof(struct sensor_event_uv),    "uv"},
+  {sizeof(struct sensor_event_noise), "noise"},
+  {sizeof(struct sensor_event_pm25),  "pm25"},
+  {sizeof(struct sensor_event_pm1p0), "pm1p0"},
+  {sizeof(struct sensor_event_pm10),  "pm10"},
+  {sizeof(struct sensor_event_co2),   "co2"},
+  {sizeof(struct sensor_event_hcho),  "hcho"},
+  {sizeof(struct sensor_event_tvoc),  "tvoc"},
+  {sizeof(struct sensor_event_ph),    "ph"},
+  {sizeof(struct sensor_event_dust),  "dust"},
+  {sizeof(struct sensor_event_hrate), "hrate"},
+  {sizeof(struct sensor_event_hbeat), "hbeat"},
 };
 
 static const struct file_operations g_sensor_fops =
@@ -630,9 +628,11 @@ static void sensor_push_event(FAR void *priv, FAR const void *data,
  *   numbers. eg: accel0, accel1
  *
  * Input Parameters:
- *   dev  - A pointer to an instance of lower half sensor driver. This
- *          instance is bound to the sensor driver and must persists as long
- *          as the driver persists.
+ *   dev   - A pointer to an instance of lower half sensor driver. This
+ *           instance is bound to the sensor driver and must persists as long
+ *           as the driver persists.
+ *   devno - The user specifies which device of this type, from 0. If the
+ *           devno alerady exists, -EEXIST will be returned.
  *
  * Returned Value:
  *   OK if the driver was successfully register; A negated errno value is
@@ -640,7 +640,7 @@ static void sensor_push_event(FAR void *priv, FAR const void *data,
  *
  ****************************************************************************/
 
-int sensor_register(FAR struct sensor_lowerhalf_s *lower)
+int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
 {
   FAR struct sensor_upperhalf_s *upper;
   char path[DEVNAME_MAX];
@@ -691,11 +691,10 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower)
       goto buf_err;
     }
 
-  upper->idx = g_sensor_info[lower->type].idx++;
   snprintf(path, DEVNAME_MAX, DEVNAME_FMT,
            g_sensor_info[lower->type].name,
            lower->uncalibrated ? DEVNAME_UNCAL : "",
-           upper->idx);
+           devno);
   sninfo("Registering %s\n", path);
 
   ret = register_driver(path, &g_sensor_fops, 0666, upper);
@@ -708,7 +707,6 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower)
 
 drv_err:
   sensor_buffer_release(upper->buffer);
-  g_sensor_info[lower->type].idx--;
 buf_err:
   nxsem_destroy(&upper->exclsem);
   nxsem_destroy(&upper->buffersem);
@@ -726,12 +724,13 @@ buf_err:
  *   upper half driver.
  *
  * Input Parameters:
- *   dev  - A pointer to an instance of lower half sensor driver. This
- *          instance is bound to the sensor driver and must persists as long
- *          as the driver persists.
+ *   dev   - A pointer to an instance of lower half sensor driver. This
+ *           instance is bound to the sensor driver and must persists as long
+ *           as the driver persists.
+ *   devno - The user specifies which device of this type, from 0.
  ****************************************************************************/
 
-void sensor_unregister(FAR struct sensor_lowerhalf_s *lower)
+void sensor_unregister(FAR struct sensor_lowerhalf_s *lower, int devno)
 {
   FAR struct sensor_upperhalf_s *upper;
   char path[DEVNAME_MAX];
@@ -744,7 +743,7 @@ void sensor_unregister(FAR struct sensor_lowerhalf_s *lower)
   snprintf(path, DEVNAME_MAX, DEVNAME_FMT,
            g_sensor_info[lower->type].name,
            lower->uncalibrated ? DEVNAME_UNCAL : "",
-           upper->idx);
+           devno);
   sninfo("UnRegistering %s\n", path);
   unregister_driver(path);
 
