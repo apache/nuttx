@@ -68,7 +68,8 @@ int ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
 {
   /* 8-bit data read sequence:
    *
-   *  Start - I2C_Write_Address - SSD1306_Reg_Address - SSD1306_Write_Data - STOP
+   *  Start - I2C_Write_Address - SSD1306_Reg_Address - SSD1306_Write_Data
+   *  - STOP
    */
 
   struct i2c_msg_s msg;
@@ -114,7 +115,8 @@ int ssd1306_sendbyte(FAR struct ssd1306_dev_s *priv, uint8_t regval)
  *
  ****************************************************************************/
 
-int ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
+int ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data,
+                    uint8_t len)
 {
   struct i2c_msg_s msg[2];
   uint8_t transfer_mode;
@@ -122,7 +124,8 @@ int ssd1306_sendblk(FAR struct ssd1306_dev_s *priv, uint8_t *data, uint8_t len)
 
   /* 8-bit data read sequence:
    *
-   *  Start - I2C_Write_Address - Data transfer select - SSD1306_Write_Data - STOP
+   *  Start - I2C_Write_Address - Data transfer select - SSD1306_Write_Data
+   *  - STOP
    */
 
   /* Send the SSD1306 register address (with no STOP) */
