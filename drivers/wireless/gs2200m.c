@@ -64,6 +64,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
+#include <nuttx/wireless/wireless.h>
 #include <nuttx/wireless/gs2200m.h>
 #include <nuttx/net/netdev.h>
 
@@ -253,7 +254,7 @@ static struct evt_code_s _evt_table[] =
   {"Disassociation Event", TYPE_DISASSOCIATE},
   {"ERROR", TYPE_ERROR},
   {"DISCONNECT", TYPE_DISCONNECT},
-  {"CONNECT", TYPE_CONNECT},
+  {"CONNECT ", TYPE_CONNECT},
   {"Serial2WiFi APP", TYPE_BOOT_MSG}
 };
 
@@ -1912,7 +1913,7 @@ gs2200m_create_clnt(FAR struct gs2200m_dev_s *dev,
       goto errout;
     }
 
-  if (NULL != (p = strstr(pkt_dat.msg[0], "CONNECT")))
+  if (NULL != (p = strstr(pkt_dat.msg[0], "CONNECT ")))
     {
       n = sscanf(p, "CONNECT %c", cid);
       ASSERT(1 == n);
@@ -1960,7 +1961,7 @@ static enum pkt_type_e gs2200m_start_server(FAR struct gs2200m_dev_s *dev,
       goto errout;
     }
 
-  if (NULL != (p = strstr(pkt_dat.msg[0], "CONNECT")))
+  if (NULL != (p = strstr(pkt_dat.msg[0], "CONNECT ")))
     {
       n = sscanf(p, "CONNECT %c", cid);
       ASSERT(1 == n);
@@ -2727,6 +2728,93 @@ static int gs2200m_ioctl_assoc_ap(FAR struct gs2200m_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: gs2200m_gs2200m_ioctl_iwreq
+ ****************************************************************************/
+
+static int gs2200m_ioctl_iwreq(FAR struct gs2200m_dev_s *dev,
+                               FAR struct gs2200m_ifreq_msg *msg)
+{
+  struct iwreq *res = (struct iwreq *)&msg->ifr;
+  struct pkt_dat_s pkt_dat;
+  enum pkt_type_e   r;
+  char cmd[64];
+  char cmd2[64];
+  int  n = 0;
+
+  snprintf(cmd, sizeof(cmd), "AT+NSTAT=?\r\n");
+
+  /* Initialize pkt_dat and send */
+
+  memset(&pkt_dat, 0, sizeof(pkt_dat));
+  r = gs2200m_send_cmd(dev, cmd, &pkt_dat);
+
+  if (r != TYPE_OK || pkt_dat.n <= 7)
+    {
+      wlinfo("+++ error: r=%d pkt_dat.msg[0]=%s \n",
+             r, pkt_dat.msg[0]);
+
+      goto errout;
+    }
+
+  /* Find cid in the connection status */
+
+  if (msg->cmd == SIOCGIWNWID)
+    {
+      if (strstr(pkt_dat.msg[2], "BSSID=") == NULL)
+        {
+          wlinfo("+++ error: pkt_dat.msg[2]=%s \n", pkt_dat.msg[2]);
+          goto errout;
+        }
+
+      n = sscanf(pkt_dat.msg[2], "BSSID=%x:%x:%x:%x:%x:%x %s",
+                 &res->u.ap_addr.sa_data[0], &res->u.ap_addr.sa_data[1],
+                 &res->u.ap_addr.sa_data[2], &res->u.ap_addr.sa_data[3],
+                 &res->u.ap_addr.sa_data[4], &res->u.ap_addr.sa_data[5],
+                 cmd);
+      ASSERT(7 == n);
+      wlinfo("BSSID:%02X:%02X:%02X:%02X:%02X:%02X\n",
+             res->u.ap_addr.sa_data[0], res->u.ap_addr.sa_data[1],
+             res->u.ap_addr.sa_data[2], res->u.ap_addr.sa_data[3],
+             res->u.ap_addr.sa_data[4], res->u.ap_addr.sa_data[5]);
+    }
+  else if (msg->cmd == SIOCGIWFREQ)
+    {
+      if (strstr(pkt_dat.msg[2], "CHANNEL=") == NULL)
+        {
+          wlinfo("+++ error: pkt_dat.msg[2]=%s \n", pkt_dat.msg[2]);
+          goto errout;
+        }
+
+      n = sscanf(pkt_dat.msg[2], "%s CHANNEL=%d %s",
+                 cmd, &res->u.freq.m, cmd2);
+      ASSERT(3 == n);
+      wlinfo("CHANNEL:%d\n", res->u.freq.m);
+    }
+  else if (msg->cmd == SIOCGIWSENS)
+    {
+      if (strstr(pkt_dat.msg[3], "RSSI=") == NULL)
+        {
+          wlinfo("+++ error: pkt_dat.msg[3]=%s \n", pkt_dat.msg[3]);
+          goto errout;
+        }
+
+      n = sscanf(pkt_dat.msg[3], "RSSI=%d", &res->u.qual.level);
+      ASSERT(1 == n);
+      wlinfo("RSSI:%d\n", res->u.qual.level);
+    }
+
+errout:
+  _release_pkt_dat(dev, &pkt_dat);
+
+  if (n == 0)
+    {
+      return -EINVAL;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: gs2200m_ifreq_ifreq
  ****************************************************************************/
 
@@ -2775,6 +2863,12 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
         memcpy(&dev->net_dev.d_netmask,
                &inaddr->sin_addr, sizeof(inaddr->sin_addr)
                );
+        break;
+
+      case SIOCGIWNWID:
+      case SIOCGIWFREQ:
+      case SIOCGIWSENS:
+        ret = gs2200m_ioctl_iwreq(dev, msg);
         break;
 
       default:
