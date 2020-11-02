@@ -97,10 +97,6 @@ struct esp32_spiflash_s
   /* SPI Flash communication dummy number */
 
   uint8_t *dummies;
-
-  /* Enxusre exculisve access to the driver */
-
-  sem_t exclsem;
 };
 
 /****************************************************************************
@@ -201,6 +197,10 @@ static struct esp32_spiflash_s g_esp32_spiflash1 =
   .chip = &g_rom_flashchip,
   .dummies = g_rom_spiflash_dummy_len_plus
 };
+
+/* Ensure exclusive access to the driver */
+
+static sem_t g_exclsem = SEM_INITIALIZER(1);
 
 /****************************************************************************
  * Private Functions
@@ -1000,7 +1000,7 @@ static int esp32_erase(FAR struct mtd_dev_s *dev, off_t startblock,
   finfo("esp32_erase(%p, %d, %d)\n", dev, startblock, nblocks);
 #endif
 
-  ret = nxsem_wait(&priv->exclsem);
+  ret = nxsem_wait(&g_exclsem);
   if (ret < 0)
     {
       return ret;
@@ -1009,7 +1009,7 @@ static int esp32_erase(FAR struct mtd_dev_s *dev, off_t startblock,
   esp32_set_write_opt(priv);
   ret = esp32_erasesector(priv, addr, size);
 
-  nxsem_post(&priv->exclsem);
+  nxsem_post(&g_exclsem);
 
   if (ret == OK)
     {
@@ -1064,7 +1064,7 @@ static ssize_t esp32_read(FAR struct mtd_dev_s *dev, off_t offset,
 
   /* Acquire the semaphore. */
 
-  ret = nxsem_wait(&priv->exclsem);
+  ret = nxsem_wait(&g_exclsem);
   if (ret < 0)
     {
       goto error_with_buffer;
@@ -1073,7 +1073,7 @@ static ssize_t esp32_read(FAR struct mtd_dev_s *dev, off_t offset,
   esp32_set_read_opt(priv);
   ret = esp32_readdata(priv, offset, tmpbuff, nbytes);
 
-  nxsem_post(&priv->exclsem);
+  nxsem_post(&g_exclsem);
 
   if (ret == OK)
     {
@@ -1189,7 +1189,7 @@ static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
 
   /* Acquire the semaphore. */
 
-  ret = nxsem_wait(&priv->exclsem);
+  ret = nxsem_wait(&g_exclsem);
   if (ret < 0)
     {
       goto error_with_buffer;
@@ -1198,7 +1198,7 @@ static ssize_t esp32_write(FAR struct mtd_dev_s *dev, off_t offset,
   esp32_set_write_opt(priv);
   ret = esp32_writedata(priv, offset, tmpbuff, nbytes);
 
-  nxsem_post(&priv->exclsem);
+  nxsem_post(&g_exclsem);
 
   if (ret == OK)
     {
@@ -1342,10 +1342,6 @@ FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(void)
   uint32_t blocks;
   uint32_t startblock;
   uint32_t size;
-
-  /* Initiliaze the mutex */
-
-  nxsem_init(&priv->exclsem, 0, 1);
 
   ASSERT((ESP32_MTD_OFFSET + ESP32_MTD_SIZE) <= chip->chip_size);
   ASSERT((ESP32_MTD_OFFSET % chip->sector_size) == 0);
