@@ -957,7 +957,6 @@ if __name__ == '__main__':
             lib_prj.make_output_dir(lib_name)
             if lib_name == 'libxx':
                 lib_prj.add_misc('cxx_misc')
-                lib_prj.add_define('cxx_def', 'CONFIG_WCHAR_BUILTIN')
             else:
                 lib_prj.add_misc('c_misc')
 

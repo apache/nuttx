@@ -65,7 +65,7 @@ ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
   ARCHCFLAGS += -nostdlib -ffreestanding
-  ARCHCXXFLAGS += -nostdlib -ffreestanding DCONFIG_WCHAR_BUILTIN
+  ARCHCXXFLAGS += -nostdlib -ffreestanding
 else
   ARCHCXXFLAGS += -fno-rtti
   ifneq ($(CONFIG_DEBUG_NOOPT),y)

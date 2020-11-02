@@ -52,7 +52,7 @@ ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
   ARCHCFLAGS += -nostdlib -ffreestanding
-  ARCHCXXFLAGS += -nostdlib -ffreestanding -DCONFIG_WCHAR_BUILTIN
+  ARCHCXXFLAGS += -nostdlib -ffreestanding
 else
   ARCHCFLAGS += -funwind-tables
   ARCHCXXFLAGS += -fno-rtti -funwind-tables
