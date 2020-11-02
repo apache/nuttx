@@ -433,7 +433,7 @@ static int wtgahrs2_thread(int argc, FAR char *argv[])
  * Public Functions
  ****************************************************************************/
 
-int wtgahrs2_initialize(FAR const char *path)
+int wtgahrs2_initialize(FAR const char *path, int devno)
 {
   FAR struct wtgahrs2_dev_s *rtdata;
   FAR struct wtgahrs2_sensor_s *tmp;
@@ -480,7 +480,7 @@ int wtgahrs2_initialize(FAR const char *path)
   tmp->lower.ops = &g_wtgahrs2_ops;
   tmp->lower.type = SENSOR_TYPE_ACCELEROMETER;
   tmp->lower.buffer_bytes = sizeof(struct sensor_event_accel);
-  ret = sensor_register(&tmp->lower);
+  ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
       goto accel_err;
@@ -492,7 +492,7 @@ int wtgahrs2_initialize(FAR const char *path)
   tmp->lower.ops = &g_wtgahrs2_ops;
   tmp->lower.type = SENSOR_TYPE_GYROSCOPE;
   tmp->lower.buffer_bytes = sizeof(struct sensor_event_gyro);
-  ret = sensor_register(&tmp->lower);
+  ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
       goto gyro_err;
@@ -504,7 +504,7 @@ int wtgahrs2_initialize(FAR const char *path)
   tmp->lower.ops = &g_wtgahrs2_ops;
   tmp->lower.type = SENSOR_TYPE_MAGNETIC_FIELD;
   tmp->lower.buffer_bytes = sizeof(struct sensor_event_mag);
-  ret = sensor_register(&tmp->lower);
+  ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
       goto mag_err;
@@ -516,7 +516,7 @@ int wtgahrs2_initialize(FAR const char *path)
   tmp->lower.ops = &g_wtgahrs2_ops;
   tmp->lower.type = SENSOR_TYPE_BAROMETER;
   tmp->lower.buffer_bytes = sizeof(struct sensor_event_baro);
-  ret = sensor_register(&tmp->lower);
+  ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
       goto baro_err;
@@ -528,7 +528,7 @@ int wtgahrs2_initialize(FAR const char *path)
   tmp->lower.ops = &g_wtgahrs2_ops;
   tmp->lower.type = SENSOR_TYPE_GPS;
   tmp->lower.buffer_bytes = sizeof(struct sensor_event_gps);
-  ret = sensor_register(&tmp->lower);
+  ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
       goto gps_err;
@@ -561,15 +561,15 @@ int wtgahrs2_initialize(FAR const char *path)
   return ret;
 
 thr_err:
-  sensor_unregister(&rtdata->dev[WTGAHRS2_GPS_IDX].lower);
+  sensor_unregister(&rtdata->dev[WTGAHRS2_GPS_IDX].lower, devno);
 gps_err:
-  sensor_unregister(&rtdata->dev[WTGAHRS2_BARO_IDX].lower);
+  sensor_unregister(&rtdata->dev[WTGAHRS2_BARO_IDX].lower, devno);
 baro_err:
-  sensor_unregister(&rtdata->dev[WTGAHRS2_MAG_IDX].lower);
+  sensor_unregister(&rtdata->dev[WTGAHRS2_MAG_IDX].lower, devno);
 mag_err:
-  sensor_unregister(&rtdata->dev[WTGAHRS2_GYRO_IDX].lower);
+  sensor_unregister(&rtdata->dev[WTGAHRS2_GYRO_IDX].lower, devno);
 gyro_err:
-  sensor_unregister(&rtdata->dev[WTGAHRS2_ACCEL_IDX].lower);
+  sensor_unregister(&rtdata->dev[WTGAHRS2_ACCEL_IDX].lower, devno);
 accel_err:
   file_close(&rtdata->file);
 open_err:

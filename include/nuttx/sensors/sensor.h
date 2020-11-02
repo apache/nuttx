@@ -581,9 +581,11 @@ extern "C"
  *   numbers. eg: accel0, accel1
  *
  * Input Parameters:
- *   dev  - A pointer to an instance of lower half sensor driver. This
- *          instance is bound to the sensor driver and must persists as long
- *          as the driver persists.
+ *   dev   - A pointer to an instance of lower half sensor driver. This
+ *           instance is bound to the sensor driver and must persists as long
+ *           as the driver persists.
+ *   devno - The user specifies which device of this type, from 0. If the
+ *           devno alerady exists, -EEXIST will be returned.
  *
  * Returned Value:
  *   OK if the driver was successfully register; A negated errno value is
@@ -591,7 +593,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int sensor_register(FAR struct sensor_lowerhalf_s *dev);
+int sensor_register(FAR struct sensor_lowerhalf_s *dev, int devno);
 
 /****************************************************************************
  * Name: sensor_unregister
@@ -601,12 +603,13 @@ int sensor_register(FAR struct sensor_lowerhalf_s *dev);
  *   upper half driver.
  *
  * Input Parameters:
- *   dev  - A pointer to an instance of lower half sensor driver. This
- *          instance is bound to the sensor driver and must persists as long
- *          as the driver persists.
+ *   dev   - A pointer to an instance of lower half sensor driver. This
+ *           instance is bound to the sensor driver and must persists as long
+ *           as the driver persists.
+ *   devno - The user specifies which device of this type, from 0.
  ****************************************************************************/
 
-void sensor_unregister(FAR struct sensor_lowerhalf_s *dev);
+void sensor_unregister(FAR struct sensor_lowerhalf_s *dev, int devno);
 
 #undef EXTERN
 #if defined(__cplusplus)
