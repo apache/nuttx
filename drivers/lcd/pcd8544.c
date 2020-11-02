@@ -1,4 +1,4 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/pcd8544.c
  *
  * Driver for the Philips PCD8544 Display controller
@@ -41,11 +41,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -63,11 +63,12 @@
 
 #include "pcd8544.h"
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration **********************************************************************/
+/* Configuration ************************************************************/
+
 /* PCD8544 Configuration Settings:
  *
  * CONFIG_PCD8544_SPIMODE - Controls the SPI mode
@@ -80,7 +81,8 @@
  *
  * Required LCD driver settings:
  * CONFIG_LCD_PCD8544 - Enable PCD8544 support
- * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+ * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be
+ * accepted.
  * CONFIG_LCD_MAXPOWER should be 1:  0=off, 1=normal
  *
  * Required SPI driver settings:
@@ -113,7 +115,9 @@
 #  define CONFIG_PCD8544_NINTERFACES 1
 #endif
 
-/* Verbose debug pcd8544 must also be enabled to use the extra OLED debug pcd8544 */
+/* Verbose debug pcd8544 must also be enabled to use the extra OLED debug
+ * pcd8544
+ */
 
 #ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_INFO
@@ -156,9 +160,10 @@
 #  error "CONFIG_SPI_CMDDATA must be defined in your NuttX configuration"
 #endif
 
-/* Color Properties *******************************************************************/
-/* The PCD8544 display controller can handle a resolution of 84x48.
- */
+/* Color Properties *********************************************************/
+
+/* The PCD8544 display controller can handle a resolution of 84x48. */
+
 /* Display Resolution */
 
 #ifdef CONFIG_PCD8544_XRES
@@ -192,9 +197,9 @@
 #define LS_BIT          (1 << 0)
 #define MS_BIT          (1 << 7)
 
-/**************************************************************************************
+/****************************************************************************
  * Private Type Definition
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This structure describes the state of this driver */
 
@@ -210,17 +215,17 @@ struct pcd8544_dev_s
   uint8_t contrast;
   uint8_t powered;
 
-  /* The PCD8544 does not support reading from the display memory in SPI mode.
-   * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep
-   * a shadow copy of the framebuffer memory.
+  /* The PCD8544 does not support reading from the display memory in SPI
+   * mode. Since there is 1 BPP and access is byte-by-byte, it is necessary
+   * to keep a shadow copy of the framebuffer memory.
    */
 
   uint8_t fb[PCD8544_FBSIZE];
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- **************************************************************************************/
+ ****************************************************************************/
 
 /* SPI helpers */
 
@@ -229,17 +234,18 @@ static void pcd8544_deselect(FAR struct spi_dev_s *spi);
 
 /* LCD Data Transfer Methods */
 
-static int pcd8544_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                     size_t npixels);
-static int pcd8544_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                     size_t npixels);
+static int pcd8544_putrun(fb_coord_t row, fb_coord_t col,
+                          FAR const uint8_t *buffer, size_t npixels);
+static int pcd8544_getrun(fb_coord_t row, fb_coord_t col,
+                          FAR uint8_t *buffer, size_t npixels);
 
 /* LCD Configuration */
 
 static int pcd8544_getvideoinfo(FAR struct lcd_dev_s *dev,
-                           FAR struct fb_videoinfo_s *vinfo);
-static int pcd8544_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                           FAR struct lcd_planeinfo_s *pinfo);
+                                FAR struct fb_videoinfo_s *vinfo);
+static int pcd8544_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                unsigned int planeno,
+                                FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
 
@@ -264,9 +270,9 @@ static int pcd8544_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
 static inline void up_clear(FAR struct pcd8544_dev_s  *priv);
 
-/**************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
@@ -279,7 +285,7 @@ static inline void up_clear(FAR struct pcd8544_dev_s  *priv);
  * if there are multiple LCD devices, they must each have unique run buffers.
  */
 
-static uint8_t g_runbuffer[PCD8544_XSTRIDE+1];
+static uint8_t g_runbuffer[PCD8544_XSTRIDE + 1];
 
 /* This structure describes the overall LCD video controller */
 
@@ -295,10 +301,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  pcd8544_putrun,              /* Put a run into LCD memory */
-  pcd8544_getrun,              /* Get a run from LCD memory */
-  (FAR uint8_t *)g_runbuffer,  /* Run scratch buffer */
-  PCD8544_BPP,                 /* Bits-per-pixel */
+  .putrun = pcd8544_putrun,              /* Put a run into LCD memory */
+  .getrun = pcd8544_getrun,              /* Get a run from LCD memory */
+  .buffer = (FAR uint8_t *)g_runbuffer,  /* Run scratch buffer */
+  .bpp    = PCD8544_BPP,                 /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
@@ -306,6 +312,7 @@ static const struct lcd_planeinfo_s g_planeinfo =
 static struct pcd8544_dev_s g_pcd8544dev =
 {
   /* struct lcd_dev_s */
+
   {
     /* LCD Configuration */
 
@@ -333,17 +340,17 @@ static struct pcd8544_dev_s g_pcd8544dev =
   },
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  pcd8544_powerstring
  *
  * Description:
  *   Convert the power setting to a string.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline FAR const char *pcd8544_powerstring(uint8_t power)
 {
@@ -361,7 +368,7 @@ static inline FAR const char *pcd8544_powerstring(uint8_t power)
     }
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: pcd8544_select
  *
  * Description:
@@ -375,7 +382,7 @@ static inline FAR const char *pcd8544_powerstring(uint8_t power)
  *
  * Assumptions:
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void pcd8544_select(FAR struct spi_dev_s *spi)
 {
@@ -396,7 +403,7 @@ static void pcd8544_select(FAR struct spi_dev_s *spi)
   SPI_SETFREQUENCY(spi, CONFIG_PCD8544_FREQUENCY);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: pcd8544_deselect
  *
  * Description:
@@ -410,7 +417,7 @@ static void pcd8544_select(FAR struct spi_dev_s *spi)
  *
  * Assumptions:
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void pcd8544_deselect(FAR struct spi_dev_s *spi)
 {
@@ -420,7 +427,7 @@ static void pcd8544_deselect(FAR struct spi_dev_s *spi)
   SPI_LOCK(spi, false);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  pcd8544_putrun
  *
  * Description:
@@ -432,12 +439,14 @@ static void pcd8544_deselect(FAR struct spi_dev_s *spi)
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int pcd8544_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                       size_t npixels)
+static int pcd8544_putrun(fb_coord_t row, fb_coord_t col,
+                          FAR const uint8_t *buffer, size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single PCD8544 device */
+  /* Because of this line of code, we will only be able to support a single
+   * PCD8544 device
+   */
 
   FAR struct pcd8544_dev_s *priv = &g_pcd8544dev;
   FAR uint8_t *fbptr;
@@ -551,7 +560,7 @@ static int pcd8544_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
 
   /* Set the starting position for the run */
 
-  SPI_SEND(priv->spi, PCD8544_SET_Y_ADDR+page);           /* Set the page start */
+  SPI_SEND(priv->spi, PCD8544_SET_Y_ADDR + page);         /* Set the page start */
   SPI_SEND(priv->spi, PCD8544_SET_X_ADDR + (col & 0x7f)); /* Set the low column */
 
   /* Select data transfer */
@@ -568,7 +577,7 @@ static int pcd8544_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  pcd8544_getrun
  *
  * Description:
@@ -580,12 +589,14 @@ static int pcd8544_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int pcd8544_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                     size_t npixels)
+static int pcd8544_getrun(fb_coord_t row, fb_coord_t col,
+                          FAR uint8_t *buffer, size_t npixels)
 {
-  /* Because of this line of code, we will only be able to support a single PCD8544 device */
+  /* Because of this line of code, we will only be able to support a single
+   * PCD8544 device
+   */
 
   FAR struct pcd8544_dev_s *priv = &g_pcd8544dev;
   FAR uint8_t *fbptr;
@@ -614,6 +625,7 @@ static int pcd8544_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
     }
 
   /* Then transfer the display data from the shadow frame buffer memory */
+
   /* Get the page number.  The range of 48 lines is divided up into six
    * pages of 8 lines each.
    */
@@ -694,34 +706,36 @@ static int pcd8544_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  pcd8544_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int pcd8544_getvideoinfo(FAR struct lcd_dev_s *dev,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
   ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
-         g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
+         g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres,
+        g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  pcd8544_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int pcd8544_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                              FAR struct lcd_planeinfo_s *pinfo)
+static int pcd8544_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                unsigned int planeno,
+                                FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
   ginfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
@@ -729,14 +743,15 @@ static int pcd8544_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  pcd8544_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full
+ *   on). On backlit LCDs, this setting may correspond to the backlight
+ *   setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int pcd8544_getpower(struct lcd_dev_s *dev)
 {
@@ -746,14 +761,15 @@ static int pcd8544_getpower(struct lcd_dev_s *dev)
   return priv->powered;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  pcd8544_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full
+ *   on). On backlit LCDs, this setting may correspond to the backlight
+ *   setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int pcd8544_setpower(struct lcd_dev_s *dev, int power)
 {
@@ -799,13 +815,13 @@ static int pcd8544_setpower(struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  pcd8544_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int pcd8544_getcontrast(struct lcd_dev_s *dev)
 {
@@ -814,13 +830,13 @@ static int pcd8544_getcontrast(struct lcd_dev_s *dev)
   return (int)priv->contrast;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  pcd8544_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int pcd8544_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -852,7 +868,7 @@ static int pcd8544_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 
   /* Set the contrast */
 
-  SPI_SEND(priv->spi, (PCD8544_WRITE_VOP | contrast) );
+  SPI_SEND(priv->spi, (PCD8544_WRITE_VOP | contrast));
 
   /* Return to normal mode */
 
@@ -869,13 +885,13 @@ static int pcd8544_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  up_clear
  *
  * Description:
  *   Clear the display.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void up_clear(FAR struct pcd8544_dev_s  *priv)
 {
@@ -901,17 +917,16 @@ static inline void up_clear(FAR struct pcd8544_dev_s  *priv)
 
       /* Set the starting position for the run */
 
-      SPI_SEND(priv->spi, PCD8544_SET_Y_ADDR+i);      /* Set the page start */
+      SPI_SEND(priv->spi, PCD8544_SET_Y_ADDR + i);    /* Set the page start */
       SPI_SEND(priv->spi, PCD8544_SET_X_ADDR + page); /* Set the column */
-
 
       /* Select data transfer */
 
       SPI_CMDDATA(spi, SPIDEV_DISPLAY(0), false);
 
-       /* Then transfer all 84 columns of data */
+      /* Then transfer all 84 columns of data */
 
-       SPI_SNDBLOCK(priv->spi, &priv->fb[page * PCD8544_XRES], PCD8544_XRES);
+      SPI_SNDBLOCK(priv->spi, &priv->fb[page * PCD8544_XRES], PCD8544_XRES);
     }
 
   /* Unlock and de-select the device */
@@ -919,11 +934,11 @@ static inline void up_clear(FAR struct pcd8544_dev_s  *priv)
   pcd8544_deselect(spi);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  pcd8544_initialize
  *
  * Description:
@@ -934,17 +949,19 @@ static inline void up_clear(FAR struct pcd8544_dev_s  *priv)
  * Input Parameters:
  *
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 thropcd8544h CONFIG_PCD8544_NINTERFACES-1.
- *     This allows support for multiple OLED devices.
+ *   devno - A value in the range of 0 thropcd8544h
+ *          CONFIG_PCD8544_NINTERFACES-1. This allows support for multiple
+ *          OLED devices.
  *
  * Returned Value:
  *
- *   On success, this function returns a reference to the LCD object for the specified
- *   OLED.  NULL is returned on any failure.
+ *   On success, this function returns a reference to the LCD object for the
+ *   specified OLED.  NULL is returned on any failure.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-FAR struct lcd_dev_s *pcd8544_initialize(FAR struct spi_dev_s *spi, unsigned int devno)
+FAR struct lcd_dev_s *pcd8544_initialize(FAR struct spi_dev_s *spi,
+                                         unsigned int devno)
 {
   /* Configure and enable LCD */
 

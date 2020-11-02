@@ -37,15 +37,17 @@
  * Type Definitions
  ****************************************************************************/
 
-#define LCDDEVIO_PUTRUN       _LCDIOC(0)  /* Arg: const struct lcddev_putrun_s* */
-#define LCDDEVIO_GETRUN       _LCDIOC(1)  /* Arg: struct lcddev_putrun_s* */
-#define LCDDEVIO_GETPOWER     _LCDIOC(2)  /* Arg: int* */
-#define LCDDEVIO_SETPOWER     _LCDIOC(3)  /* Arg: int */
-#define LCDDEVIO_GETCONTRAST  _LCDIOC(4)  /* Arg: int* */
-#define LCDDEVIO_SETCONTRAST  _LCDIOC(5)  /* Arg: unsigned int */
-#define LCDDEVIO_GETPLANEINFO _LCDIOC(6)  /* Arg: struct lcd_planeinfo_s* */
-#define LCDDEVIO_GETVIDEOINFO _LCDIOC(7)  /* Arg: struct fb_videoinfo_s* */
-#define LCDDEVIO_SETPLANENO   _LCDIOC(8)  /* Arg: int */
+#define LCDDEVIO_PUTRUN       _LCDIOC(0)  /* Arg: const struct lcddev_run_s* */
+#define LCDDEVIO_PUTAREA      _LCDIOC(1)  /* Arg: const struct lcddev_area_s* */
+#define LCDDEVIO_GETRUN       _LCDIOC(2)  /* Arg: struct lcddev_run_s* */
+#define LCDDEVIO_GETAREA      _LCDIOC(3)  /* Arg: struct lcddev_area_s* */
+#define LCDDEVIO_GETPOWER     _LCDIOC(4)  /* Arg: int* */
+#define LCDDEVIO_SETPOWER     _LCDIOC(5)  /* Arg: int */
+#define LCDDEVIO_GETCONTRAST  _LCDIOC(6)  /* Arg: int* */
+#define LCDDEVIO_SETCONTRAST  _LCDIOC(7)  /* Arg: unsigned int */
+#define LCDDEVIO_GETPLANEINFO _LCDIOC(8)  /* Arg: struct lcd_planeinfo_s* */
+#define LCDDEVIO_GETVIDEOINFO _LCDIOC(9)  /* Arg: struct fb_videoinfo_s* */
+#define LCDDEVIO_SETPLANENO   _LCDIOC(10) /* Arg: int */
 
 #ifdef CONFIG_FB_CMAP
 #define LCDDEVIO_GETCMAP      _LCDIOC(9)  /* Arg: struct fb_cmap_s* */
@@ -74,6 +76,13 @@ struct lcddev_run_s
   fb_coord_t row, col;
   FAR uint8_t *data;
   size_t npixels;
+};
+
+struct lcddev_area_s
+{
+  fb_coord_t row_start, row_end;
+  fb_coord_t col_start, col_end;
+  FAR uint8_t *data;
 };
 
 /****************************************************************************

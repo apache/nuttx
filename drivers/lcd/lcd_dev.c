@@ -123,20 +123,90 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
     case LCDDEVIO_GETRUN:
       {
-        FAR struct lcddev_run_s *lcd_putrun =
+        FAR struct lcddev_run_s *lcd_run =
             (FAR struct lcddev_run_s *)arg;
 
-        ret = priv->planeinfo.getrun(lcd_putrun->row, lcd_putrun->col,
-                                     lcd_putrun->data, lcd_putrun->npixels);
+        ret = priv->planeinfo.getrun(lcd_run->row, lcd_run->col,
+                                     lcd_run->data, lcd_run->npixels);
       }
       break;
     case LCDDEVIO_PUTRUN:
       {
-        const FAR struct lcddev_run_s *lcd_putrun =
+        const FAR struct lcddev_run_s *lcd_run =
             (const FAR struct lcddev_run_s *)arg;
 
-        ret = priv->planeinfo.putrun(lcd_putrun->row, lcd_putrun->col,
-                                     lcd_putrun->data, lcd_putrun->npixels);
+        ret = priv->planeinfo.putrun(lcd_run->row, lcd_run->col,
+                                     lcd_run->data, lcd_run->npixels);
+      }
+      break;
+    case LCDDEVIO_GETAREA:
+      {
+        FAR struct lcddev_area_s *lcd_area =
+            (FAR struct lcddev_area_s *)arg;
+
+        if (priv->planeinfo.getarea)
+          {
+            ret = priv->planeinfo.getarea(lcd_area->row_start,
+                                          lcd_area->row_end,
+                                          lcd_area->col_start,
+                                          lcd_area->col_end,
+                                          lcd_area->data);
+          }
+        else
+          {
+            /* Emulate getarea() using getrun() */
+
+            uint8_t *buf = lcd_area->data;
+            size_t npixels = (lcd_area->col_end - lcd_area->col_start + 1);
+            int row;
+
+            for (row = lcd_area->row_start; row <= lcd_area->row_end; row++)
+              {
+                ret = priv->planeinfo.getrun(row, lcd_area->col_start, buf,
+                                             npixels);
+                if (ret < 0)
+                  {
+                    break;
+                  }
+
+                buf += npixels * (priv->planeinfo.bpp >> 3);
+              }
+          }
+      }
+      break;
+    case LCDDEVIO_PUTAREA:
+      {
+        const FAR struct lcddev_area_s *lcd_area =
+            (const FAR struct lcddev_area_s *)arg;
+
+        if (priv->planeinfo.putarea)
+          {
+            ret = priv->planeinfo.putarea(lcd_area->row_start,
+                                          lcd_area->row_end,
+                                          lcd_area->col_start,
+                                          lcd_area->col_end,
+                                          lcd_area->data);
+          }
+        else
+          {
+            /* Emulate putarea() using putrun() */
+
+            uint8_t *buf = lcd_area->data;
+            size_t npixels = (lcd_area->col_end - lcd_area->col_start + 1);
+            int row;
+
+            for (row = lcd_area->row_start; row <= lcd_area->row_end; row++)
+              {
+                ret = priv->planeinfo.putrun(row, lcd_area->col_start, buf,
+                                             npixels);
+                if (ret < 0)
+                  {
+                    break;
+                  }
+
+                buf += npixels * (priv->planeinfo.bpp >> 3);
+              }
+          }
       }
       break;
     case LCDDEVIO_GETPOWER:
