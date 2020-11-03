@@ -70,7 +70,7 @@ void nxsig_release_pendingsignal(FAR sigpendq_t *sigpend)
 {
   irqstate_t flags;
 
-  /* If this is a generally available pre-allocated structyre,
+  /* If this is a generally available pre-allocated structure,
    * then just put it back in the free list.
    */
 
