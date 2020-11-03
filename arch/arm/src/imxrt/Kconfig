@@ -217,6 +217,11 @@ config IMXRT_LCD
 	default n
 	depends on IMXRT_HAVE_LCD
 
+config IMXRT_WDOG
+	bool "Watchdog 1"
+	default n
+	depends on WATCHDOG
+
 menu "FlexIO Peripherals"
 
 config IMXRT_FLEXIO1

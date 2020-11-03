@@ -59,6 +59,29 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+#if defined(CONFIG_WATCHDOG) && defined(CONFIG_IMXRT_WDOG)
+
+/****************************************************************************
+ * Name: imxrt_wdog_initialize
+ *
+ * Description:
+ *   Initialize the watchdog time.  The watchdog timer is initialized and
+ *   registered at devpath.  The initial state of the watchdog time is
+ *   disabled.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the watchdog.  This should be of the form
+ *     /dev/watchdog0
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void imxrt_wdog_initialize(void);
+
+#endif /* CONFIG_WATCHDOG && CONFIG_IMXRT_WDOG */
+
 /****************************************************************************
  * Name: imxrt_wdog_disable
  *
