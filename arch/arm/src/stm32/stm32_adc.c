@@ -2792,7 +2792,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   if (priv->initialized > 0)
     {
-      return;
+      goto out;
     }
 
 #ifdef HAVE_HSI_CONTROL
@@ -2814,7 +2814,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 #ifdef HAVE_ADC_CMN_DATA
   if (adccmn_lock(priv, true) < 0)
     {
-      return;
+      goto out;
     }
 
   if (priv->cmn->initialized == 0)
@@ -2833,6 +2833,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   adccmn_lock(priv, false);
 #endif
 
+out:
   leave_critical_section(flags);
 }
 
@@ -2982,9 +2983,14 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
 
-  /* Shutdown the ADC device only when not in use */
+  /* Decrement count only when ADC device is in use */
 
-  priv->initialized -= 1;
+  if (priv->initialized > 0)
+    {
+      priv->initialized -= 1;
+    }
+
+  /* Shutdown the ADC device only when not in use */
 
   if (priv->initialized > 0)
     {
