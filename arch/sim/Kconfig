@@ -302,6 +302,13 @@ config SIM_AJOYSTICK
 	---help---
 		Support an X11 mouse-based analog joystick emulation.  Also needs INPUT=y
 
+config SIM_BUTTONS
+	bool "X11 mouse-based button emulation"
+	depends on SIM_X11FB
+	---help---
+		Support an X11 mouse-based button emulation
+		(left-click mapped to button press). Also needs INPUT=y
+
 config SIM_NOINPUT
 	bool "No input device"
 
