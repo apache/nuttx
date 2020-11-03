@@ -2068,6 +2068,8 @@ config ARCH_BOARD_SPRESENSE
 
 config ARCH_BOARD_SIM
 	bool "User mode simulation"
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	depends on ARCH_SIM
 	---help---
 		A user-mode port of NuttX to the x86 Linux/Cygwin platform is available.

@@ -80,4 +80,8 @@ ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
 endif
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+  CSRCS += sim_buttons.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

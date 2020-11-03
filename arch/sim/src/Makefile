@@ -148,6 +148,9 @@ else ifeq ($(CONFIG_SIM_AJOYSTICK),y)
   CSRCS += up_ajoystick.c
   HOSTCFLAGS += -DCONFIG_SIM_AJOYSTICK=1
   HOSTSRCS += up_x11eventloop.c
+else ifeq ($(CONFIG_SIM_BUTTONS),y)
+  HOSTCFLAGS += -DCONFIG_SIM_BUTTONS=1
+  HOSTSRCS += up_x11eventloop.c
 endif
 endif
 

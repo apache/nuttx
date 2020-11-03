@@ -85,7 +85,7 @@ static int up_buttonmap(int state, int button)
    * corresponding bit now
    */
 
-  switch(button)
+  switch (button)
     {
       case Button1:
         buttons ^= 1;

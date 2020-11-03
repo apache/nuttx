@@ -47,6 +47,10 @@
 #include <nuttx/lcd/lcd_dev.h>
 #endif
 
+#if defined(CONFIG_BUTTONS_LOWER) && defined(CONFIG_SIM_BUTTONS)
+#include <nuttx/input/buttons.h>
+#endif
+
 #include "up_internal.h"
 #include "sim.h"
 
@@ -378,6 +382,14 @@ int sim_bringup(void)
 #endif
     }
 #endif
+#endif
+
+#if defined(CONFIG_BUTTONS_LOWER) && defined(CONFIG_SIM_BUTTONS)
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
 #endif
 
   return ret;

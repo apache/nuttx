@@ -93,7 +93,8 @@ void up_idle(void)
 
   up_uartloop();
 
-#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
+    defined(CONFIG_SIM_BUTTONS)
   /* Drive the X11 event loop */
 
   up_x11events();
