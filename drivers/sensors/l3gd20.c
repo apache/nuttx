@@ -534,7 +534,7 @@ int l3gd20_register(int devno, FAR struct spi_dev_s *spi,
   priv->data.timestamp   = 0;
 
   priv->lower.type = SENSOR_TYPE_GYROSCOPE;
-  priv->lower.buffer_bytes = sizeof(struct sensor_event_gyro) * CONFIG_SENSORS_L3GD20_BUFFER_SIZE;
+  priv->lower.buffer_size = sizeof(struct sensor_event_gyro) * CONFIG_SENSORS_L3GD20_BUFFER_SIZE;
   priv->lower.ops = &g_l2gd20_ops;
   priv->lower.uncalibrated = true;
 

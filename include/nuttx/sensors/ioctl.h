@@ -273,4 +273,14 @@
 
 #define SNIOC_GET_NEVENTBUF        _SNIOC(0x0070)
 
+/* Command:      SNIOC_SET_BUFFER_SIZE
+ * Description:  Use to set size of intermediate circual buffer in upper half driver.
+ * Argument:     This is the size of buffer pointer.
+ * Note:         The application layer can set size of intermediate circual buffer
+ *               by this ioctl cmd. The size is in bytes, it should be a multiple of
+ *               an event.
+ */
+
+#define SNIOC_SET_BUFFER_SIZE      _SNIOC(0x0071)
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

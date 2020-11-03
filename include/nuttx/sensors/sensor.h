@@ -495,6 +495,27 @@ struct sensor_ops_s
 
   CODE int (*batch)(FAR struct sensor_lowerhalf_s *lower,
                     FAR unsigned int *latency_us);
+
+  /**************************************************************************
+   * Name: control
+   *
+   * In this method, we allow user to set some special config for the sensor,
+   * such as changing the custom mode, setting the custom resolution, reset,
+   * etc, which are all parsed and implemented by lower half driver.
+   *
+   * Input Parameters:
+   *   lower      - The instance of lower half sensor driver.
+   *   cmd        - The special cmd for sensor.
+   *   arg        - The parameters associated with cmd.
+   *
+   * Returned Value:
+   *   Zero (OK) on success; a negated errno value on failure.
+   *   -ENOTTY    - The cmd don't support.
+   *
+   **************************************************************************/
+
+  CODE int (*control)(FAR struct sensor_lowerhalf_s *lower,
+                      int cmd, unsigned long arg);
 };
 
 /* This structure is the generic form of state structure used by lower half
@@ -507,7 +528,7 @@ struct sensor_lowerhalf_s
 
   int type;
 
-  /* The bytes length of the circular buffer used.
+  /* The size of the circular buffer used, in bytes units.
    * This sensor circular buffer is used to slove issue that application
    * can't read sensor event in time. If this length of buffer is too large,
    * the latency of sensor event will be too larage. If the length of buffer
@@ -517,7 +538,7 @@ struct sensor_lowerhalf_s
    * or three length of sensor event.
    */
 
-  uint32_t buffer_bytes;
+  uint32_t buffer_size;
 
   /* The uncalibrated use to describe whether the sensor event is
    * uncalibrated. True is uncalibrated data, false is calibrated data,
