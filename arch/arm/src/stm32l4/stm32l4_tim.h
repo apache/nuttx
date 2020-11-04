@@ -1,4 +1,4 @@
-/************************************************************************************
+/*****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_tim.h
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -37,25 +37,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ *****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_TIM_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_TIM_H
 
-/************************************************************************************
+/*****************************************************************************
  * Included Files
- ************************************************************************************/
+ *****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/stm32l4_tim.h"
 
-/************************************************************************************
+/*****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ *****************************************************************************/
 
-/* Helpers **************************************************************************/
+/* Helpers *******************************************************************/
 
 #define STM32L4_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
 #define STM32L4_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
@@ -71,12 +71,13 @@
 #define STM32L4_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
 #define STM32L4_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
 #define STM32L4_TIM_CHECKINT(d,s)         ((d)->ops->checkint(d,s))
-#define STM32L4_TIM_ENABLE(d,s)           ((d)->ops->enable(d,s))
+#define STM32L4_TIM_ENABLE(d)             ((d)->ops->enable(d))
+#define STM32L4_TIM_DISABLE(d)            ((d)->ops->disable(d))
 #define STM32L4_TIM_DUMPREGS(d)           ((d)->ops->dump_regs(d))
 
-/************************************************************************************
+/*****************************************************************************
  * Public Types
- ************************************************************************************/
+ *****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -117,7 +118,7 @@ enum stm32l4_tim_mode_e
 #if 0
   STM32L4_TIM_MODE_CK_INT_TRIG  = 0x0400,
   STM32L4_TIM_MODE_CK_EXT       = 0x0800,
-  STM32L4_TIM_MODE_CK_EXT_TRIG  = 0x0C00,
+  STM32L4_TIM_MODE_CK_EXT_TRIG  = 0x0c00,
 #endif
 
   /* Clock sources, OR'ed with CK_EXT */
@@ -150,7 +151,9 @@ enum stm32l4_tim_channel_e
 
   /* Output Compare Modes */
 
-  STM32L4_TIM_CH_OUTPWM         = 0x04,  /* Enable standard PWM mode, active high when counter < compare */
+  STM32L4_TIM_CH_OUTPWM         = 0x04,  /* Enable standard PWM mode, active
+                                          * high when counter < compare
+                                          */
 #if 0
   STM32L4_TIM_CH_OUTCOMPARE     = 0x06,
 #endif
@@ -194,13 +197,14 @@ struct stm32l4_tim_ops_s
   void (*disableint)(FAR struct stm32l4_tim_dev_s *dev, int source);
   void (*ackint)(FAR struct stm32l4_tim_dev_s *dev, int source);
   int  (*checkint)(FAR struct stm32l4_tim_dev_s *dev, int source);
-  void (*enable)(FAR struct stm32l4_tim_dev_s *dev, bool state);
+  void (*enable)(FAR struct stm32l4_tim_dev_s *dev);
+  void (*disable)(FAR struct stm32l4_tim_dev_s *dev);
   void (*dump_regs)(FAR struct stm32l4_tim_dev_s *dev);
 };
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/*****************************************************************************
+ * Public functions
+ *****************************************************************************/
 
 /* Power-up timer and get its structure */
 
@@ -210,7 +214,7 @@ FAR struct stm32l4_tim_dev_s *stm32l4_tim_init(int timer);
 
 int stm32l4_tim_deinit(FAR struct stm32l4_tim_dev_s *dev);
 
-/****************************************************************************
+/*****************************************************************************
  * Name: stm32l4_timer_initialize
  *
  * Description:
@@ -218,14 +222,15 @@ int stm32l4_tim_deinit(FAR struct stm32l4_tim_dev_s *dev);
  *   register the timer drivers at 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the timer device. This should be of the form /dev/timer0
+ *   devpath - The full path to the timer device. This should be of the form
+ *             /dev/timer0
  *   timer - the timer number.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
  *   to indicate the nature of any failure.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 #ifdef CONFIG_TIMER
 int stm32l4_timer_initialize(FAR const char *devpath, int timer);
