@@ -71,6 +71,8 @@
 #define STM32L4_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
 #define STM32L4_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
 #define STM32L4_TIM_CHECKINT(d,s)         ((d)->ops->checkint(d,s))
+#define STM32L4_TIM_ENABLE(d,s)           ((d)->ops->enable(d,s))
+#define STM32L4_TIM_DUMPREGS(d)           ((d)->ops->dump_regs(d))
 
 /************************************************************************************
  * Public Types
@@ -192,6 +194,8 @@ struct stm32l4_tim_ops_s
   void (*disableint)(FAR struct stm32l4_tim_dev_s *dev, int source);
   void (*ackint)(FAR struct stm32l4_tim_dev_s *dev, int source);
   int  (*checkint)(FAR struct stm32l4_tim_dev_s *dev, int source);
+  void (*enable)(FAR struct stm32l4_tim_dev_s *dev, bool state);
+  void (*dump_regs)(FAR struct stm32l4_tim_dev_s *dev);
 };
 
 /************************************************************************************
