@@ -35,6 +35,18 @@
 #define RT_TIMER_REPEAT     (1 << 0)    /* Timer is repeat */
 
 /**
+ * RT timer state
+ */
+
+enum rt_timer_state_e
+{
+  RT_TIMER_IDLE,            /* Timer is not counting */
+  RT_TIMER_READY,           /* Timer is counting */
+  RT_TIMER_TIMEOUT,         /* Timer is timeout */
+  RT_TIMER_DELETE           /* Timer is to be delete */
+};
+
+/**
  * RT timer data structure
  */
 
@@ -45,7 +57,7 @@ struct rt_timer_s
   void (*callback)(void *arg);  /* Callback function */
   void *arg;                    /* Private data */
   uint16_t flags;               /* Support feature */
-  bool started;                 /* Mark if timer is started */
+  enum rt_timer_state_e state;  /* Mark if timer is started */
   struct list_node list;        /* Working list */
 };
 

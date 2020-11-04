@@ -84,13 +84,17 @@ static struct esp32_tim_dev_s *s_esp32_tim_dev;
  *
  * Input Parameters:
  *   timer - RT timer pointer
+ *   timeout - Timeout value
+ *   repeat  - If the timer run repeat
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static void start_rt_timer(FAR struct rt_timer_s *timer)
+static void start_rt_timer(FAR struct rt_timer_s *timer,
+                           uint32_t timeout,
+                           bool repeat)
 {
   irqstate_t flags;
   struct rt_timer_s *p;
@@ -100,14 +104,24 @@ static void start_rt_timer(FAR struct rt_timer_s *timer)
 
   flags = enter_critical_section();
 
-  /* Check if timer is "not started" */
+  /* Only idle timer can be started */
 
-  if (!timer->started)
+  if (timer->state == RT_TIMER_IDLE)
     {
       /* Calculate the timer's alarm value */
 
       ESP32_TIM_GETCTR(tim, &counter);
+      timer->timeout = timeout;
       timer->alarm = timer->timeout + counter;
+
+      if (repeat)
+        {
+          timer->flags |= RT_TIMER_REPEAT;
+        }
+      else
+        {
+          timer->flags &= ~RT_TIMER_REPEAT;
+        }
 
       /** Scan timer list and insert the new timer into previous
        *  node of timer whose alarm value is larger than new one
@@ -130,7 +144,7 @@ static void start_rt_timer(FAR struct rt_timer_s *timer)
           list_add_tail(&s_runlist, &timer->list);
         }
 
-      timer->started = true;
+      timer->state = RT_TIMER_READY;
 
       /* If this timer is in head of list */
 
@@ -171,9 +185,16 @@ static void stop_rt_timer(FAR struct rt_timer_s *timer)
 
   flags = enter_critical_section();
 
-  /* Check if timer is "started" */
+  /**
+   * Function "start" can set timer to be repeat, and function "stop"
+   * should remove this feature although it is not in ready state.
+   */
 
-  if (timer->started)
+  timer->flags &= ~RT_TIMER_REPEAT;
+
+  /* Only ready timer can be stopped */
+
+  if (timer->state == RT_TIMER_READY)
     {
       /* Check if timer is in head of list */
 
@@ -187,7 +208,7 @@ static void stop_rt_timer(FAR struct rt_timer_s *timer)
         }
 
       list_delete(&timer->list);
-      timer->started = false;
+      timer->state = RT_TIMER_IDLE;
 
       /* If timer is in in head of list */
 
@@ -214,6 +235,48 @@ static void stop_rt_timer(FAR struct rt_timer_s *timer)
 }
 
 /****************************************************************************
+ * Name: delete_rt_timer
+ *
+ * Description:
+ *   Delete timer by removing it from list, then set the timer's state
+ *   to be "RT_TIMER_DELETE", inserting into work list to let rt-timer
+ *   thread to delete it and free resource.
+ *
+ * Input Parameters:
+ *   timer - RT timer pointer
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void delete_rt_timer(FAR struct rt_timer_s *timer)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  if (timer->state == RT_TIMER_READY)
+    {
+      stop_rt_timer(timer);
+    }
+  else if (timer->state == RT_TIMER_TIMEOUT)
+    {
+      list_delete(&timer->list);
+    }
+  else if (timer->state == RT_TIMER_DELETE)
+    {
+      goto exit;
+    }
+
+  list_add_after(&s_toutlist, &timer->list);
+  timer->state = RT_TIMER_DELETE;
+
+exit:
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
  * Name: rt_timer_thread
  *
  * Description:
@@ -234,6 +297,7 @@ static int rt_timer_thread(int argc, FAR char *argv[])
   int ret;
   irqstate_t flags;
   struct rt_timer_s *timer;
+  enum rt_timer_state_e raw_state;
 
   while (1)
     {
@@ -258,34 +322,44 @@ static int rt_timer_thread(int argc, FAR char *argv[])
 
           timer = container_of(s_toutlist.next, struct rt_timer_s, list);
 
+          /* Cache the raw state to decide how to deal with this timer */
+
+          raw_state = timer->state;
+
           /* Delete timer from list */
 
           list_delete(&timer->list);
-          timer->started = false;
+
+          /* Set timer's state to be let it to able to restart by user */
+
+          timer->state = RT_TIMER_IDLE;
 
           /* Leave from critical to start to call "callback" function */
 
           leave_critical_section(flags);
 
-          timer->callback(timer->arg);
-
-          /* Check if timer is repeat */
-
-          if (timer->flags & RT_TIMER_REPEAT)
+          if (raw_state == RT_TIMER_TIMEOUT)
             {
-              /* Check if timer is "not started" */
-
-              if (timer->started == false)
-                {
-                  /* Restart timer */
-
-                  start_rt_timer(timer);
-                }
+              timer->callback(timer->arg);
+            }
+          else if (raw_state == RT_TIMER_DELETE)
+            {
+              kmm_free(timer);
             }
 
           /* Enter critical for next scaning list */
 
           flags = enter_critical_section();
+
+          if (raw_state == RT_TIMER_TIMEOUT)
+            {
+              /* Check if timer is repeat */
+
+              if (timer->flags & RT_TIMER_REPEAT)
+                {
+                  start_rt_timer(timer, timer->timeout, true);
+                }
+            }
         }
 
       leave_critical_section(flags);
@@ -315,6 +389,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
   irqstate_t flags;
   struct rt_timer_s *timer;
   uint64_t alarm;
+  uint64_t counter;
   struct esp32_tim_dev_s *tim = s_esp32_tim_dev;
 
   /* Clear interrupt register status */
@@ -331,24 +406,40 @@ static int rt_timer_isr(int irq, void *context, void *arg)
 
   if (!list_is_empty(&s_runlist))
     {
-      /* Remove first timer in running list and add it into timeout list */
+      /**
+       * When stop/delete timer, in the same time the hardware timer
+       * interrupt triggers, function "stop/delete" remove the timer
+       * from running list, so the 1st timer is not which triggers.
+       */
 
       timer = container_of(s_runlist.next, struct rt_timer_s, list);
-      list_delete(&timer->list);
-      timer->started = false;
-      list_add_after(&s_toutlist, &timer->list);
-
-      /* Check if thers is timer running */
-
-      if (!list_is_empty(&s_runlist))
+      ESP32_TIM_GETCTR(tim, &counter);
+      if (timer->alarm <= counter)
         {
-          /* Reset hardware timer alarm with next timer's alarm value */
+          /**
+           * Remove first timer in running list and add it into
+           * timeout list.
+           *
+           * Set the timer's state to be RT_TIMER_TIMEOUT to avoid
+           * other operation.
+           */
 
-          timer = container_of(s_runlist.next, struct rt_timer_s, list);
-          alarm = timer->alarm;
+          list_delete(&timer->list);
+          timer->state = RT_TIMER_TIMEOUT;
+          list_add_after(&s_toutlist, &timer->list);
 
-          ESP32_TIM_SETALRVL(tim, alarm);
-          ESP32_TIM_SETALRM(tim, true);
+          /* Check if thers is timer running */
+
+          if (!list_is_empty(&s_runlist))
+            {
+              /* Reset hardware timer alarm with next timer's alarm value */
+
+              timer = container_of(s_runlist.next, struct rt_timer_s, list);
+              alarm = timer->alarm;
+
+              ESP32_TIM_SETALRVL(tim, alarm);
+              ESP32_TIM_SETALRM(tim, true);
+            }
         }
     }
 
@@ -391,7 +482,7 @@ int rt_timer_create(FAR const struct rt_timer_args_s *args,
   timer->callback = args->callback;
   timer->arg      = args->arg;
   timer->flags    = RT_TIMER_NOFLAGS;
-  timer->started  = false;
+  timer->state    = RT_TIMER_IDLE;
   list_initialize(&timer->list);
 
   *timer_handle = timer;
@@ -421,18 +512,7 @@ void rt_timer_start(FAR struct rt_timer_s *timer,
 {
   stop_rt_timer(timer);
 
-  if (repeat)
-    {
-      timer->flags |= RT_TIMER_REPEAT;
-    }
-  else
-    {
-      timer->flags &= ~RT_TIMER_REPEAT;
-    }
-
-  timer->timeout = timeout;
-
-  start_rt_timer(timer);
+  start_rt_timer(timer, timeout, repeat);
 }
 
 /****************************************************************************
@@ -470,9 +550,7 @@ void rt_timer_stop(FAR struct rt_timer_s *timer)
 
 void rt_timer_delete(FAR struct rt_timer_s *timer)
 {
-  stop_rt_timer(timer);
-
-  kmm_free(timer);
+  delete_rt_timer(timer);
 }
 
 /****************************************************************************
