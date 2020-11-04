@@ -402,24 +402,13 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
-  /* We must make sure that when the semaphore is equal to 1, there must
-   * be events avaliable in the buffer, so we use a while statement to
-   * synchronize this case that other read operations consume events
-   * that have just entered the buffer.
-   */
-
-  while (sensor_buffer_is_empty(upper->buffer))
+  if (lower->ops->fetch)
     {
-      if (filep->f_oflags & O_NONBLOCK)
-        {
-          ret = -EAGAIN;
-          goto again;
-        }
-      else
+      if (!(filep->f_oflags & O_NONBLOCK))
         {
           nxsem_post(&upper->exclsem);
           ret = nxsem_wait_uninterruptible(&upper->buffersem);
-          if (ret)
+          if (ret < 0)
             {
               return ret;
             }
@@ -430,21 +419,55 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
               return ret;
             }
         }
+
+        ret = lower->ops->fetch(lower, buffer, len);
     }
-
-  ret = sensor_buffer_pop(upper->buffer, buffer, len);
-
-  /* Release some buffer space when current mode isn't batch mode
-   * and last mode is batch mode, and the number of bytes avaliable
-   * in buffer is less than the number of bytes origin.
-   */
-
-  if (upper->latency == 0 &&
-      upper->buffer->size > lower->buffer_size &&
-      sensor_buffer_len(upper->buffer) <= lower->buffer_size)
+  else
     {
-      sensor_buffer_resize(&upper->buffer, lower->type,
-                           lower->buffer_size);
+      /* We must make sure that when the semaphore is equal to 1, there must
+       * be events avaliable in the buffer, so we use a while statement to
+       * synchronize this case that other read operations consume events
+       * that have just entered the buffer.
+       */
+
+      while (sensor_buffer_is_empty(upper->buffer))
+        {
+          if (filep->f_oflags & O_NONBLOCK)
+            {
+              ret = -EAGAIN;
+              goto again;
+            }
+          else
+            {
+              nxsem_post(&upper->exclsem);
+              ret = nxsem_wait_uninterruptible(&upper->buffersem);
+              if (ret < 0)
+                {
+                  return ret;
+                }
+
+              ret = nxsem_wait(&upper->exclsem);
+              if (ret < 0)
+                {
+                  return ret;
+                }
+            }
+        }
+
+      ret = sensor_buffer_pop(upper->buffer, buffer, len);
+
+      /* Release some buffer space when current mode isn't batch mode
+       * and last mode is batch mode, and the number of bytes avaliable
+       * in buffer is less than the number of bytes origin.
+       */
+
+      if (upper->latency == 0 &&
+          upper->buffer->size > lower->buffer_size &&
+          sensor_buffer_len(upper->buffer) <= lower->buffer_size)
+        {
+          sensor_buffer_resize(&upper->buffer, lower->type,
+                               lower->buffer_size);
+        }
     }
 
 again:
@@ -578,7 +601,9 @@ static int sensor_poll(FAR struct file *filep,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
+  FAR struct sensor_lowerhalf_s *lower = upper->lower;
   pollevent_t eventset = 0;
+  int semcount;
   int ret;
   int i;
 
@@ -608,7 +633,24 @@ static int sensor_poll(FAR struct file *filep,
           goto errout;
         }
 
-      if (!sensor_buffer_is_empty(upper->buffer))
+      if (lower->ops->fetch)
+        {
+          /* Always return POLLIN for fetch data directly(non-block) */
+
+          if (filep->f_oflags & O_NONBLOCK)
+            {
+              eventset |= (fds->events & POLLIN);
+            }
+          else
+            {
+              nxsem_get_value(&upper->buffersem, &semcount);
+              if (semcount > 0)
+                {
+                  eventset |= (fds->events & POLLIN);
+                }
+            }
+        }
+      else if (!sensor_buffer_is_empty(upper->buffer))
         {
           eventset |= (fds->events & POLLIN);
         }
@@ -637,7 +679,7 @@ errout:
 }
 
 static void sensor_push_event(FAR void *priv, FAR const void *data,
-                              uint32_t bytes)
+                              size_t bytes)
 {
   FAR struct sensor_upperhalf_s *upper = priv;
   int semcount;
@@ -648,6 +690,26 @@ static void sensor_push_event(FAR void *priv, FAR const void *data,
     }
 
   sensor_buffer_push(upper->buffer, data, bytes);
+  sensor_pollnotify(upper, POLLIN);
+  nxsem_get_value(&upper->buffersem, &semcount);
+  if (semcount < 1)
+    {
+      nxsem_post(&upper->buffersem);
+    }
+
+  nxsem_post(&upper->exclsem);
+}
+
+static void sensor_notify_event(FAR void *priv)
+{
+  FAR struct sensor_upperhalf_s *upper = priv;
+  int semcount;
+
+  if (nxsem_wait(&upper->exclsem) < 0)
+    {
+      return;
+    }
+
   sensor_pollnotify(upper, POLLIN);
   nxsem_get_value(&upper->buffersem, &semcount);
   if (semcount < 1)
@@ -722,11 +784,19 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
   /* Bind the lower half data structure member */
 
   lower->priv = upper;
-  lower->push_event = sensor_push_event;
 
-  if (!lower->buffer_size)
+  if (!lower->ops->fetch)
     {
-      lower->buffer_size = g_sensor_info[lower->type].esize;
+      if (!lower->buffer_size)
+        {
+          lower->buffer_size = g_sensor_info[lower->type].esize;
+        }
+
+      lower->push_event = sensor_push_event;
+    }
+  else
+    {
+      lower->notify_event = sensor_notify_event;
     }
 
   /* Initialize sensor buffer */
