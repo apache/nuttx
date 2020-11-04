@@ -498,6 +498,38 @@ struct sensor_ops_s
                     FAR unsigned int *latency_us);
 
   /**************************************************************************
+   * Name: fetch
+   *
+   * Fetch sensor register data by this function. It will use buffer of
+   * userspace provided and disables intermediate buffer of upper half. It's
+   * recommend that the lowerhalf driver writer to use this function for
+   * slower sensor ODR (output data rate) of sensor because this way saves
+   * space and it's simple.
+   *
+   * If fetch isn't NULL, upper half driver will disable intermediate
+   * buffer and userspace can't set buffer size by ioctl.
+   *
+   * You can call this function to read sensor register data by I2C/SPI bus
+   * when open mode is non-block, and poll are always successful.
+   * When you call this function and open mode is block, you will wait
+   * until sensor data ready, then read sensor data.
+   *
+   * Input Parameters:
+   *   lower      - The instance of lower half sensor driver.
+   *   buffer     - The buffer of receive sensor event, it's provided by
+   *                file_operation::sensor_read.
+   *   buflen     - The size of buffer.
+   *
+   * Returned Value:
+   *   The size of read buffer returned on success; a negated errno value
+   *   on failure.
+   *
+   **************************************************************************/
+
+  CODE int (*fetch)(FAR struct sensor_lowerhalf_s *lower,
+                    FAR char *buffer, size_t buflen);
+
+  /**************************************************************************
    * Name: control
    *
    * In this method, we allow user to set some special config for the sensor,
@@ -552,21 +584,39 @@ struct sensor_lowerhalf_s
 
   FAR const struct sensor_ops_s *ops;
 
-  /**************************************************************************
-   * Name: push_event
-   *
-   * Description:
-   *   Lower half driver push sensor event by calling this function.
-   *   It is provided by upper half driver to lower half driver.
-   *
-   * Input Parameters:
-   *   priv   - Upper half driver handle
-   *   data   - The buffer of event, it can be all type of sensor events.
-   *   bytes  - The number of bytes of sensor event
-   **************************************************************************/
+  union
+    {
+      /**********************************************************************
+       * Name: push_event
+       *
+       * Description:
+       *   Lower half driver push sensor event by calling this function.
+       *   It is provided by upper half driver to lower half driver.
+       *
+       * Input Parameters:
+       *   priv   - Upper half driver handle
+       *   data   - The buffer of event, it can be all type of sensor events.
+       *   bytes  - The number of bytes of sensor event
+       **********************************************************************/
 
-  CODE void (*push_event)(FAR void *priv, FAR const void *data,
-                          uint32_t bytes);
+      CODE void (*push_event)(FAR void *priv, FAR const void *data,
+                              size_t bytes);
+
+      /**********************************************************************
+       * Name: notify_event
+       *
+       * Description:
+       *   Lower half driver notify sensor data ready and can read by fetch.
+       *   It is provided by upper half driver to lower half driver.
+       *
+       *   This api is used when sensor_ops_s::fetch isn't NULL.
+       *
+       * Input Parameters:
+       *   priv   - Upper half driver handle
+       **********************************************************************/
+
+      CODE void (*notify_event)(FAR void *priv);
+    };
 
   /* The private opaque pointer to be passed to upper-layer during callback */
 
