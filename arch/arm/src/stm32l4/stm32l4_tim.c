@@ -254,7 +254,8 @@ static inline void stm32l4_putreg32(FAR struct stm32l4_tim_dev_s *dev,
 /* Timer helpers */
 
 static void stm32l4_tim_reload_counter(FAR struct stm32l4_tim_dev_s *dev);
-static void stm32l4_tim_enable(FAR struct stm32l4_tim_dev_s *dev, bool state);
+static void stm32l4_tim_enable(FAR struct stm32l4_tim_dev_s *dev);
+static void stm32l4_tim_disable(FAR struct stm32l4_tim_dev_s *dev);
 static void stm32l4_tim_reset(FAR struct stm32l4_tim_dev_s *dev);
 #if defined(HAVE_TIM1_GPIOCONFIG) || defined(HAVE_TIM2_GPIOCONFIG) || \
     defined(HAVE_TIM3_GPIOCONFIG) || defined(HAVE_TIM4_GPIOCONFIG) || \
@@ -312,6 +313,7 @@ static const struct stm32l4_tim_ops_s stm32l4_tim_ops =
   .ackint     = stm32l4_tim_ackint,
   .checkint   = stm32l4_tim_checkint,
   .enable     = stm32l4_tim_enable,
+  .disable    = stm32l4_tim_disable,
   .dump_regs  = stm32l4_tim_dumpregs,
 };
 
@@ -506,19 +508,23 @@ static void stm32l4_tim_reload_counter(FAR struct stm32l4_tim_dev_s *dev)
  * Name: stm32l4_tim_enable
  ************************************************************************************/
 
-static void stm32l4_tim_enable(FAR struct stm32l4_tim_dev_s *dev, bool state)
+static void stm32l4_tim_enable(FAR struct stm32l4_tim_dev_s *dev)
 {
   uint16_t val = stm32l4_getreg16(dev, STM32L4_BTIM_CR1_OFFSET);
 
-  if(state)
-    {
-      val |= ATIM_CR1_CEN;
-      stm32l4_tim_reload_counter(dev);
-    }
-  else
-    {
-      val &= ~ATIM_CR1_CEN;
-    }
+  val |= ATIM_CR1_CEN;
+  stm32l4_tim_reload_counter(dev);
+  stm32l4_putreg16(dev, STM32L4_BTIM_CR1_OFFSET, val);
+}
+
+/************************************************************************************
+ * Name: stm32l4_tim_disable
+ ************************************************************************************/
+
+static void stm32l4_tim_disable(FAR struct stm32l4_tim_dev_s *dev)
+{
+  uint16_t val = stm32l4_getreg16(dev, STM32L4_BTIM_CR1_OFFSET);
+  val &= ~ATIM_CR1_CEN;
   stm32l4_putreg16(dev, STM32L4_BTIM_CR1_OFFSET, val);
 }
 
@@ -533,7 +539,7 @@ static void stm32l4_tim_enable(FAR struct stm32l4_tim_dev_s *dev, bool state)
 static void stm32l4_tim_reset(FAR struct stm32l4_tim_dev_s *dev)
 {
   ((struct stm32l4_tim_priv_s *)dev)->mode = STM32L4_TIM_MODE_DISABLED;
-  stm32l4_tim_enable(dev, false);
+  stm32l4_tim_disable(dev);
 }
 
 /************************************************************************************
@@ -567,29 +573,30 @@ static void stm32l4_tim_gpioconfig(uint32_t cfg, enum stm32l4_tim_channel_e mode
 static void stm32l4_tim_dumpregs(FAR struct stm32l4_tim_dev_s *dev)
 {
   struct stm32l4_tim_priv_s *priv = (struct stm32l4_tim_priv_s *)dev;
-  {
-    /* data */
-  };
-  
+
   ainfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
           stm32l4_getreg16(dev, STM32L4_GTIM_CR1_OFFSET),
           stm32l4_getreg16(dev, STM32L4_GTIM_CR2_OFFSET),
           stm32l4_getreg16(dev, STM32L4_GTIM_SMCR_OFFSET),
-          stm32l4_getreg16(dev, STM32L4_GTIM_DIER_OFFSET));
+          stm32l4_getreg16(dev, STM32L4_GTIM_DIER_OFFSET)
+        );
   ainfo("   SR: %04x EGR:  0000 CCMR1: %04x CCMR2: %04x\n",
           stm32l4_getreg16(dev, STM32L4_GTIM_SR_OFFSET),
           stm32l4_getreg16(dev, STM32L4_GTIM_CCMR1_OFFSET),
-          stm32l4_getreg16(dev, STM32L4_GTIM_CCMR2_OFFSET));
+          stm32l4_getreg16(dev, STM32L4_GTIM_CCMR2_OFFSET)
+        );
   ainfo(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
           stm32l4_getreg16(dev, STM32L4_GTIM_CCER_OFFSET),
           stm32l4_getreg16(dev, STM32L4_GTIM_CNT_OFFSET),
           stm32l4_getreg16(dev, STM32L4_GTIM_PSC_OFFSET),
-          stm32l4_getreg16(dev, STM32L4_GTIM_ARR_OFFSET));
+          stm32l4_getreg16(dev, STM32L4_GTIM_ARR_OFFSET)
+        );
   ainfo(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
           stm32l4_getreg16(dev, STM32L4_GTIM_CCR1_OFFSET),
           stm32l4_getreg16(dev, STM32L4_GTIM_CCR2_OFFSET),
           stm32l4_getreg16(dev, STM32L4_GTIM_CCR3_OFFSET),
-          stm32l4_getreg16(dev, STM32L4_GTIM_CCR4_OFFSET));
+          stm32l4_getreg16(dev, STM32L4_GTIM_CCR4_OFFSET)
+        );
 
   if (priv->base == STM32L4_TIM1_BASE || priv->base == STM32L4_TIM8_BASE)
     {
@@ -698,7 +705,7 @@ static int stm32l4_tim_setclock(FAR struct stm32l4_tim_dev_s *dev,
 
   if (freq == 0)
     {
-      stm32l4_tim_enable(dev, false);
+      stm32l4_tim_disable(dev);
       return 0;
     }
 

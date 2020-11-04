@@ -392,6 +392,7 @@ static int spwm_tim6_setup(FAR struct spwm_s *spwm)
 
   STM32L4_TIM_SETCLOCK(tim, BOARD_TIM6_FREQUENCY);
   STM32L4_TIM_SETPERIOD(tim, per);
+  STM32L4_TIM_ENABLE(tim);
 
   /* Attach TIM6 ram vector */
 
