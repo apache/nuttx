@@ -495,11 +495,26 @@ config ARCH_SETJMP_H
 		ARCH_SETJMP_H=y and providing. If ARCH_SETJMP_H, is not defined, then
 		the setjmp.h header file will stay out-of-the-way in include/nuttx/.
 
+choice
+	prompt "debug.h selection"
+	default ARCH_NONE_DEBUG_H
+
+config ARCH_NONE_DEBUG_H
+	bool "None"
+	---help---
+		No debug.h under include/arch/ and include/arch/chip.
+
 config ARCH_DEBUG_H
 	bool "debug.h"
-	default n
 	---help---
-		The debug.h contains architecture dependent debugging primitives
+		The debug.h under include/arch contains architecture dependent debugging primitives
+
+config ARCH_CHIP_DEBUG_H
+	bool "chip debug.h"
+	---help---
+		The debug.h under include/arch/chip contains architecture dependent debugging primitives
+
+endchoice # debug.h selection
 
 endmenu # Customize Header Files
 
