@@ -65,7 +65,7 @@ libmetal.zip:
 	$(Q) mv libmetal-$(VERSION) libmetal
 	$(Q) patch -p0 < 0001-system-nuttx-change-clock_systimespec-to-clock_systi.patch
 
-.libmetal_headers: libmetal.zip
+.libmetal_headers:# libmetal.zip
 	$(eval headers := $(wildcard libmetal/lib/compiler/gcc/*.h))
 	$(eval headers += $(wildcard libmetal/lib/processor/$(LIBMETAL_ARCH)/*.h))
 	$(eval headers += $(wildcard libmetal/lib/system/nuttx/*.h))
@@ -81,8 +81,8 @@ dirlinks:: .libmetal_headers
 
 distclean::
 	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)metal)
-	$(call DELDIR, libmetal)
-	$(call DELFILE, libmetal.zip)
+#	$(call DELDIR, libmetal)
+#	$(call DELFILE, libmetal.zip)
 	$(call DELFILE, .libmetal_headers)
 
 endif

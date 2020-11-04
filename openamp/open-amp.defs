@@ -44,7 +44,7 @@ open-amp.zip:
 	$(Q) patch -p0 < 0009-implement-rproc_virtio_read_config-rproc_virtio_writ.patch
 	$(Q) patch -p0 < 0010-Negotiate-individual-buffer-size-dynamically.patch
 
-.openamp_headers: open-amp.zip
+.openamp_headers:# open-amp.zip
 	$(eval headers := $(wildcard open-amp/lib/include/openamp/*.h))
 	$(shell mkdir -p $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM))
 	$(foreach header,$(headers),$(shell cp -rf $(header) $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM)))
@@ -54,8 +54,8 @@ dirlinks:: .openamp_headers
 
 distclean::
 	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM))
-	$(call DELDIR, open-amp)
-	$(call DELFILE, open-amp.zip)
+#	$(call DELDIR, open-amp)
+#	$(call DELFILE, open-amp.zip)
 	$(call DELFILE, .openamp_headers)
 
 endif

@@ -50,11 +50,11 @@ $(LITTLEFS_TARBALL):
 	$(Q) mv littlefs/littlefs-$(LITTLEFS_VERSION) littlefs/littlefs
 	$(Q) touch littlefs/.littlefsunpack
 
-context:: .littlefsunpack
+context::# .littlefsunpack
 
 distclean::
-	$(call DELFILE, littlefs/.littlefsunpack)
-	$(call DELFILE, littlefs/$(LITTLEFS_TARBALL))
-	$(call DELDIR, littlefs/littlefs)
+#	$(call DELFILE, littlefs/.littlefsunpack)
+#	$(call DELFILE, littlefs/$(LITTLEFS_TARBALL))
+#	$(call DELDIR, littlefs/littlefs)
 
 endif

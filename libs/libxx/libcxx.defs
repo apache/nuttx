@@ -21,18 +21,18 @@
 VERSION=11.0.0
 
 $(TOPDIR)/include/libcxx:
-	$(Q) wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$(VERSION)/libcxx-$(VERSION).src.tar.xz
-	$(Q) tar -xf libcxx-$(VERSION).src.tar.xz
-	$(Q) $(DELFILE) libcxx-$(VERSION).src.tar.xz
-	$(Q) mv libcxx-$(VERSION).src libcxx
-	$(Q) patch -p0 < 0001-libcxx-Port-to-NuttX-https-nuttx.apache.org-RTOS.patch
+#	$(Q) wget https://github.com/llvm/llvm-project/releases/download/llvmorg-$(VERSION)/libcxx-$(VERSION).src.tar.xz
+#	$(Q) tar -xf libcxx-$(VERSION).src.tar.xz
+#	$(Q) $(DELFILE) libcxx-$(VERSION).src.tar.xz
+#	$(Q) mv libcxx-$(VERSION).src libcxx
+#	$(Q) patch -p0 < 0001-libcxx-Port-to-NuttX-https-nuttx.apache.org-RTOS.patch
 	$(Q) $(DIRLINK) $(CURDIR)/libcxx/include $(TOPDIR)/include/libcxx
 
 dirlinks:: $(TOPDIR)/include/libcxx
 
 distclean::
 	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libcxx
-	$(call DELDIR, libcxx)
+#	$(call DELDIR, libcxx)
 
 CXXFLAGS += ${shell $(DEFINE) "$(CC)" __GLIBCXX__}
 CXXFLAGS += ${shell $(DEFINE) "$(CC)" _LIBCPP_BUILDING_LIBRARY}
