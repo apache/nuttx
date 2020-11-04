@@ -73,9 +73,12 @@ struct sensor_buffer_s
 
 struct sensor_upperhalf_s
 {
+
+  /* poll structures of threads waiting for driver events. */
+
+  FAR struct pollfd             *fds[CONFIG_SENSORS_NPOLLWAITERS];
   FAR struct sensor_lowerhalf_s *lower;  /* the handle of lower half driver */
   FAR struct sensor_buffer_s    *buffer; /* The circualr buffer of sensor device */
-  FAR struct pollfd *fds;                /* poll structures of threads waiting for driver events. */
   uint8_t            crefs;              /* Number of times the device has been opened */
   sem_t              exclsem;            /* Manages exclusive access to file operations */
   sem_t              buffersem;          /* Wakeup user waiting for data in circular buffer */
@@ -297,20 +300,26 @@ static void sensor_buffer_release(FAR struct sensor_buffer_s *buffer)
 static void sensor_pollnotify(FAR struct sensor_upperhalf_s *upper,
                               pollevent_t eventset)
 {
+  FAR struct pollfd *fd;
   int semcount;
+  int i;
 
-  if (upper->fds)
+  for (i = 0; i < CONFIG_SENSORS_NPOLLWAITERS; i++)
     {
-      upper->fds->revents |= (upper->fds->events & eventset);
-
-      if (upper->fds->revents != 0)
+      fd = upper->fds[i];
+      if (fd)
         {
-          sninfo("Report events: %02x\n", upper->fds->revents);
+          fd->revents |= (fd->events & eventset);
 
-          nxsem_get_value(upper->fds->sem, &semcount);
-          if (semcount < 1)
+          if (fd->revents != 0)
             {
-              nxsem_post(upper->fds->sem);
+              sninfo("Report events: %02x\n", fd->revents);
+
+              nxsem_get_value(fd->sem, &semcount);
+              if (semcount < 1)
+                {
+                  nxsem_post(fd->sem);
+                }
             }
         }
     }
@@ -320,6 +329,7 @@ static int sensor_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
+  uint8_t tmp;
   int ret;
 
   ret = nxsem_wait(&upper->exclsem);
@@ -328,17 +338,21 @@ static int sensor_open(FAR struct file *filep)
       return ret;
     }
 
-  if (upper->crefs)
+  tmp = upper->crefs + 1;
+  if (tmp == 0)
     {
-      ret = -EBUSY;
+      /* More than 255 opens; uint8_t overflows to zero */
+
+      ret = -EMFILE;
+      goto err;
     }
-  else
+  else if (tmp == 1)
     {
-      upper->crefs++;
-      upper->fds = NULL;
       sensor_buffer_reset(upper->buffer);
     }
 
+  upper->crefs = tmp;
+err:
   nxsem_post(&upper->exclsem);
   return ret;
 }
@@ -421,16 +435,17 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
 
   ret = sensor_buffer_pop(upper->buffer, buffer, len);
 
-  /* Release some buffer space when current mode isn't batch mode and last
-   * mode is batch mode, and the number of bytes avaliable in buffer is
-   * less than the number of bytes origin.
+  /* Release some buffer space when current mode isn't batch mode
+   * and last mode is batch mode, and the number of bytes avaliable
+   * in buffer is less than the number of bytes origin.
    */
 
   if (upper->latency == 0 &&
-      upper->buffer->size > lower->buffer_bytes &&
-      sensor_buffer_len(upper->buffer) <= lower->buffer_bytes)
+      upper->buffer->size > lower->buffer_size &&
+      sensor_buffer_len(upper->buffer) <= lower->buffer_size)
     {
-      sensor_buffer_resize(&upper->buffer, lower->type, lower->buffer_bytes);
+      sensor_buffer_resize(&upper->buffer, lower->type,
+                           lower->buffer_size);
     }
 
 again:
@@ -511,7 +526,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   /* Adjust length of buffer in batch mode */
 
                   sensor_buffer_resize(&upper->buffer, lower->type,
-                                       lower->buffer_bytes +
+                                       lower->buffer_size +
                                        ROUNDUP(*val, upper->interval) /
                                        upper->interval *
                                        g_sensor_info[lower->type].esize);
@@ -522,12 +537,36 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_GET_NEVENTBUF:
         {
-          *val = lower->buffer_bytes / g_sensor_info[lower->type].esize;
+          *val = lower->buffer_size / g_sensor_info[lower->type].esize;
+        }
+        break;
+
+      case SNIOC_SET_BUFFER_SIZE:
+        {
+          if (*val != 0)
+            {
+              lower->buffer_size = ROUNDUP(*val,
+                                   g_sensor_info[lower->type].esize);
+              sensor_buffer_resize(&upper->buffer, lower->type,
+                                   lower->buffer_size);
+              *val = lower->buffer_size;
+            }
         }
         break;
 
       default:
-        ret = -ENOTTY;
+
+        /* Lowerhalf driver process other cmd. */
+
+        if (lower->ops->control)
+          {
+            ret = lower->ops->control(lower, cmd, arg);
+          }
+        else
+          {
+            ret = -ENOTTY;
+          }
+
         break;
     }
 
@@ -542,6 +581,7 @@ static int sensor_poll(FAR struct file *filep,
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
   pollevent_t eventset = 0;
   int ret;
+  int i;
 
   ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
@@ -551,14 +591,23 @@ static int sensor_poll(FAR struct file *filep,
 
   if (setup)
     {
-      if (upper->fds)
+      for (i = 0; i < CONFIG_SENSORS_NPOLLWAITERS; i++)
         {
-          ret = -EBUSY;
-          goto errout;
+          if (NULL == upper->fds[i])
+            {
+              upper->fds[i] = fds;
+              fds->priv = &upper->fds[i];
+              break;
+            }
         }
 
-      upper->fds = fds;
-      fds->priv = &upper->fds;
+      /* Don't have enough space to store fds */
+
+      if (i == CONFIG_SENSORS_NPOLLWAITERS)
+        {
+          ret = -ENOSPC;
+          goto errout;
+        }
 
       if (!sensor_buffer_is_empty(upper->buffer))
         {
@@ -572,16 +621,15 @@ static int sensor_poll(FAR struct file *filep,
     }
   else if (fds->priv != NULL)
     {
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
-
-      if (!slot)
+      for (i = 0; i < CONFIG_SENSORS_NPOLLWAITERS; i++)
         {
-          ret = -EIO;
-          goto errout;
+          if (fds == upper->fds[i])
+            {
+              upper->fds[i] = NULL;
+              fds->priv = NULL;
+              break;
+            }
         }
-
-      *slot = NULL;
-      fds->priv = NULL;
     }
 
 errout:
@@ -590,7 +638,7 @@ errout:
 }
 
 static void sensor_push_event(FAR void *priv, FAR const void *data,
-                                     uint32_t bytes)
+                              uint32_t bytes)
 {
   FAR struct sensor_upperhalf_s *upper = priv;
   int semcount;
@@ -677,15 +725,15 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
   lower->priv = upper;
   lower->push_event = sensor_push_event;
 
-  if (!lower->buffer_bytes)
+  if (!lower->buffer_size)
     {
-      lower->buffer_bytes = g_sensor_info[lower->type].esize;
+      lower->buffer_size = g_sensor_info[lower->type].esize;
     }
 
   /* Initialize sensor buffer */
 
   ret = sensor_buffer_create(&upper->buffer,
-                             lower->type, lower->buffer_bytes);
+                             lower->type, lower->buffer_size);
   if (ret)
     {
       goto buf_err;

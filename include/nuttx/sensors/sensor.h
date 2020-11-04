@@ -437,7 +437,7 @@ struct sensor_ops_s
    *   If *period_us > max_delay it will be truncated to max_dealy and if
    *   *period_us < min_delay it will be replaced by min_delay.
    *
-   *   Before changing the interval, we need to push the prepared data to
+   *   Before changing the interval, you need to push the prepared data to
    *   ensure that they are not lost.
    *
    * Input Parameters:
@@ -462,24 +462,25 @@ struct sensor_ops_s
    *   This function can be called while the sensor is activated,
    *   in which case it must not cause any sensor measurements to be lost.
    *   So, it is necessary to flush fifo or read ready data from data
-   *   register to prevent data lost before we using batch mode.
+   *   register to prevent data lost before you using batch mode.
    *
-   *   This sensor default mode isn't batch mode, so we need call this
+   *   This sensor default mode isn't batch mode, so you need call this
    *   function and *latency_us != 0.
    *   If *latency_us > max_report_latency it will be truncated to
    *   max_report_latency and return *latency_us to user
-   *   And we must flush fifo data to prevent data lost, then adjust latency.
+   *   And you must flush fifo data to prevent data lost, then adjust
+   *   latency.
    *
-   *   We can exit batch mode by call this function with *latency_us = 0.
-   *   And we must flush fifo data to prevent data lost, then stop batch.
+   *   You can exit batch mode by call this function with *latency_us = 0.
+   *   And you must flush fifo data to prevent data lost, then stop batch.
    *
    *   If sensor doesn't support batching (FIFO size zero), set batch to
    *   NULL.
    *
-   *   We must set interval by calling set_interval before calling batch(),
+   *   You must set interval by calling set_interval before calling batch(),
    *   othrewise, -EINVAL is returned.
    *
-   *   The reason why we don't have flush operation is that we need to push
+   *   The reason why you don't have flush operation is that you need to push
    *   the prepared data out before adjusting the latency to ensure that the
    *   data will not be lost.
    *
@@ -495,6 +496,27 @@ struct sensor_ops_s
 
   CODE int (*batch)(FAR struct sensor_lowerhalf_s *lower,
                     FAR unsigned int *latency_us);
+
+  /**************************************************************************
+   * Name: control
+   *
+   * In this method, we allow user to set some special config for the sensor,
+   * such as changing the custom mode, setting the custom resolution, reset,
+   * etc, which are all parsed and implemented by lower half driver.
+   *
+   * Input Parameters:
+   *   lower      - The instance of lower half sensor driver.
+   *   cmd        - The special cmd for sensor.
+   *   arg        - The parameters associated with cmd.
+   *
+   * Returned Value:
+   *   Zero (OK) on success; a negated errno value on failure.
+   *   -ENOTTY    - The cmd don't support.
+   *
+   **************************************************************************/
+
+  CODE int (*control)(FAR struct sensor_lowerhalf_s *lower,
+                      int cmd, unsigned long arg);
 };
 
 /* This structure is the generic form of state structure used by lower half
@@ -507,7 +529,7 @@ struct sensor_lowerhalf_s
 
   int type;
 
-  /* The bytes length of the circular buffer used.
+  /* The size of the circular buffer used, in bytes units.
    * This sensor circular buffer is used to slove issue that application
    * can't read sensor event in time. If this length of buffer is too large,
    * the latency of sensor event will be too larage. If the length of buffer
@@ -517,7 +539,7 @@ struct sensor_lowerhalf_s
    * or three length of sensor event.
    */
 
-  uint32_t buffer_bytes;
+  uint32_t buffer_size;
 
   /* The uncalibrated use to describe whether the sensor event is
    * uncalibrated. True is uncalibrated data, false is calibrated data,
@@ -582,7 +604,7 @@ extern "C"
  *
  * Input Parameters:
  *   dev   - A pointer to an instance of lower half sensor driver. This
- *           instance is bound to the sensor driver and must persists as long
+ *           instance is bound to the sensor driver and must persist as long
  *           as the driver persists.
  *   devno - The user specifies which device of this type, from 0. If the
  *           devno alerady exists, -EEXIST will be returned.
@@ -604,7 +626,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *dev, int devno);
  *
  * Input Parameters:
  *   dev   - A pointer to an instance of lower half sensor driver. This
- *           instance is bound to the sensor driver and must persists as long
+ *           instance is bound to the sensor driver and must persist as long
  *           as the driver persists.
  *   devno - The user specifies which device of this type, from 0.
  ****************************************************************************/
