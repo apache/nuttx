@@ -424,22 +424,22 @@ endif
 	$(Q) if [ -w /tftpboot ] ; then \
 		cp -f $(BIN) /tftpboot/$(BIN).${CONFIG_ARCH}; \
 	fi
-	echo $(BIN) > $(NUTTXNAME).manifest
-	printf "%s\n" *.map >> $(NUTTXNAME).manifest
+	$(Q) echo $(BIN) > $(NUTTXNAME).manifest
+	$(Q) printf "%s\n" *.map >> $(NUTTXNAME).manifest
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
 	@echo "CP: $(NUTTXNAME).hex"
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) $(NUTTXNAME).hex
-	echo $(NUTTXNAME).hex >> $(NUTTXNAME).manifest
+	$(Q) echo $(NUTTXNAME).hex >> $(NUTTXNAME).manifest
 endif
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
 	@echo "CP: $(NUTTXNAME).srec"
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O srec $(BIN) $(NUTTXNAME).srec
-	echo $(NUTTXNAME).srec >> $(NUTTXNAME).manifest
+	$(Q) echo $(NUTTXNAME).srec >> $(NUTTXNAME).manifest
 endif
 ifeq ($(CONFIG_RAW_BINARY),y)
 	@echo "CP: $(NUTTXNAME).bin"
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $(BIN) $(NUTTXNAME).bin
-	echo $(NUTTXNAME).bin >> $(NUTTXNAME).manifest
+	$(Q) echo $(NUTTXNAME).bin >> $(NUTTXNAME).manifest
 endif
 ifeq ($(CONFIG_UBOOT_UIMAGE),y)
 	@echo "MKIMAGE: uImage"
@@ -448,7 +448,7 @@ ifeq ($(CONFIG_UBOOT_UIMAGE),y)
 	$(Q) if [ -w /tftpboot ] ; then \
 		cp -f uImage /tftpboot/uImage; \
 	fi
-	echo "uImage" >> $(NUTTXNAME).manifest
+	$(Q) echo "uImage" >> $(NUTTXNAME).manifest
 endif
 	$(call POSTBUILD, $(TOPDIR))
 
