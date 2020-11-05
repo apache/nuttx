@@ -497,7 +497,12 @@ config ARCH_SETJMP_H
 
 choice
 	prompt "debug.h selection"
-	default ARCH_DEBUG_H
+	default ARCH_NONE_DEBUG_H
+
+config ARCH_NONE_DEBUG_H
+	bool "None"
+	---help---
+		No debug.h under include/arch/ and include/arch/chip.
 
 config ARCH_DEBUG_H
 	bool "debug.h"
