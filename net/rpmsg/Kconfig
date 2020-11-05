@@ -1,0 +1,32 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Rpmsg Socket Support"
+	depends on NET
+
+config NET_RPMSG
+	bool "Rpmsg domain (remote) sockets"
+	select MM_CIRCBUF
+	default n
+	---help---
+		Enable or disable Rpmsg (aka remote) sockets.
+
+if NET_RPMSG
+
+config NET_RPMSG_RXBUF_SIZE
+	int "Rpmsg socket rx buffer size"
+	default 1024
+	---help---
+		Socket rpmsg rx buffer size, for recv slowly
+
+config NET_RPMSG_NPOLLWAITERS
+	int "Rpmsg socket number of poll waiters"
+	default 4
+	---help---
+		Socket rpmsg number of poll waiters
+
+endif # NET_RPMSG
+
+endmenu # Rpmsg Domain Sockets

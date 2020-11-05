@@ -47,6 +47,7 @@
 
 #include "inet/inet.h"
 #include "local/local.h"
+#include "rpmsg/rpmsg.h"
 #include "can/can.h"
 #include "netlink/netlink.h"
 #include "pkt/pkt.h"
@@ -132,6 +133,12 @@ net_sockif(sa_family_t family, int type, int protocol)
 #ifdef CONFIG_NET_IEEE802154
     case PF_IEEE802154:
       sockif = &g_ieee802154_sockif;
+      break;
+#endif
+
+#ifdef CONFIG_NET_RPMSG
+    case PF_RPMSG:
+      sockif = &g_rpmsg_sockif;
       break;
 #endif
 

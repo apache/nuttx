@@ -106,7 +106,7 @@ int psock_socket(int domain, int type, int protocol,
   psock->s_type   = type;
 
 #ifdef CONFIG_NET_USRSOCK
-  if (domain != PF_LOCAL && domain != PF_UNSPEC)
+  if (domain != PF_LOCAL && domain != PF_UNSPEC && domain != PF_RPMSG)
     {
       /* Handle special setup for USRSOCK sockets (user-space networking
        * stack).

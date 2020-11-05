@@ -51,6 +51,7 @@ include neighbor/Make.defs
 include igmp/Make.defs
 include pkt/Make.defs
 include local/Make.defs
+include rpmsg/Make.defs
 include mld/Make.defs
 include can/Make.defs
 include netlink/Make.defs
