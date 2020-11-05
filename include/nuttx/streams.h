@@ -310,7 +310,8 @@ void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd);
  * Name: lib_lowoutstream
  *
  * Description:
- *   Initializes a stream for use with low-level, architecture-specific output.
+ *   Initializes a stream for use with low-level, architecture-specific
+ *   output.
  *   Defined in ib/stdio/lib_lowoutstream.c
  *
  * Input Parameters:
