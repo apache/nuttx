@@ -1370,11 +1370,11 @@ static void cxd56_dma_int_handler(void)
 
       flags = spin_lock_irqsave();
 
-      if (dq_count(&dev->runningq) > 0)
+      if (dq_count(&dev->up_runq) > 0)
         {
           FAR struct ap_buffer_s *apb;
 
-          apb = (struct ap_buffer_s *) dq_get(&dev->runningq);
+          apb = (struct ap_buffer_s *) dq_get(&dev->up_runq);
           spin_unlock_irqrestore(flags);
           dev->dev.upper(dev->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
           flags = spin_lock_irqsave();
@@ -1388,8 +1388,8 @@ static void cxd56_dma_int_handler(void)
 
           if (dev->state != CXD56_DEV_STATE_PAUSED)
             {
-              audinfo("DMA_TRANS pendingq=%d \n",
-                     dq_count(&dev->pendingq));
+              audinfo("DMA_TRANS up_pendq=%d \n",
+                     dq_count(&dev->up_pendq));
               msg.msg_id = AUDIO_MSG_STOP;
               msg.u.data = 0;
               ret = nxmq_send(dev->mq, (FAR const char *)&msg,
@@ -1624,8 +1624,8 @@ static void cxd56_init_dma(FAR struct cxd56_dev_s *dev)
           dev->state,
           dev->dma_handle);
 
-  dq_clear(&dev->pendingq);
-  dq_clear(&dev->runningq);
+  dq_clear(&dev->up_pendq);
+  dq_clear(&dev->up_runq);
 
   ints = CXD56_DMA_INT_DONE | CXD56_DMA_INT_ERR | CXD56_DMA_INT_CMB;
 
@@ -2991,7 +2991,7 @@ static int cxd56_resume(FAR struct audio_lowerhalf_s *lower)
           cxd56_power_on_analog_output(dev);
         }
 
-      audinfo("START DMA pendingq=%d \n", dq_count(&dev->pendingq));
+      audinfo("START DMA up_pendq=%d \n", dq_count(&dev->up_pendq));
       ret = cxd56_start_dma(dev);
       if (ret != OK)
         {
@@ -3067,7 +3067,7 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
   int ret = OK;
 
   flags = spin_lock_irqsave();
-  if (dq_count(&dev->pendingq) == 0)
+  if (dq_count(&dev->up_pendq) == 0)
     {
       /* Underrun occurred, stop DMA and change state for buffering */
 
@@ -3089,7 +3089,7 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
     {
       /* Fill up with as many DMA requests as we can */
 
-      while (dq_count(&dev->pendingq) > 0)
+      while (dq_count(&dev->up_pendq) > 0)
         {
           if (cxd56_dma_is_busy(dev->dma_handle))
             {
@@ -3099,7 +3099,7 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
               goto exit;
             }
 
-          apb = (struct ap_buffer_s *) dq_peek(&dev->pendingq);
+          apb = (struct ap_buffer_s *) dq_peek(&dev->up_pendq);
           addr = ((uint32_t)apb->samp) & CXD56_DMA_START_ADDR_MASK;
           size = (apb->nbytes / (dev->bitwidth / 8) / dev->channels) - 1;
 
@@ -3222,8 +3222,8 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
               cxd56_set_dma_running(dev->dma_handle, true);
             }
 
-          dq_get(&dev->pendingq);
-          dq_put(&dev->runningq, &apb->dq_entry);
+          dq_get(&dev->up_pendq);
+          dq_put(&dev->up_runq, &apb->dq_entry);
           dev->state = CXD56_DEV_STATE_STARTED;
 
           if ((apb->flags & AUDIO_APB_FINAL) != 0)
@@ -3272,7 +3272,7 @@ static int cxd56_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
   flags = spin_lock_irqsave();
 
   apb->dq_entry.flink = NULL;
-  dq_put(&priv->pendingq, &apb->dq_entry);
+  dq_put(&priv->up_pendq, &apb->dq_entry);
 
   spin_unlock_irqrestore(flags);
 
@@ -3423,21 +3423,21 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
           case AUDIO_MSG_ENQUEUE:
             if (priv->state == CXD56_DEV_STATE_BUFFERING)
               {
-                audwarn("Buffering pendingq=%d \n",
-                        dq_count(&priv->pendingq));
+                audwarn("Buffering up_pendq=%d \n",
+                        dq_count(&priv->up_pendq));
 
                 FAR struct ap_buffer_s *apb;
-                apb = (struct ap_buffer_s *)(&priv->pendingq)->tail;
+                apb = (struct ap_buffer_s *)(&priv->up_pendq)->tail;
 
                 bool final = (apb != NULL) &&
                   ((apb->flags & AUDIO_APB_FINAL) != 0);
 
-                /* If pendingq exceeds the threshold or pendingq
+                /* If up_pendq exceeds the threshold or up_pendq
                  * contains the final buffer, then start dma.
                  */
 
                 if (CONFIG_CXD56_AUDIO_NUM_BUFFERS <=
-                    dq_count(&priv->pendingq) || final)
+                    dq_count(&priv->up_pendq) || final)
                   {
                     cxd56_resume((FAR struct audio_lowerhalf_s *)priv);
                   }
@@ -3543,8 +3543,8 @@ struct audio_lowerhalf_s *cxd56_initialize(
       priv->state   = CXD56_DEV_STATE_OFF;
 
       nxsem_init(&priv->pendsem, 0, 1);
-      dq_init(&priv->pendingq);
-      dq_init(&priv->runningq);
+      dq_init(&priv->up_pendq);
+      dq_init(&priv->up_runq);
     }
 
   return &priv->dev;
