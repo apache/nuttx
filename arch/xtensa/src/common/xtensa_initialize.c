@@ -150,7 +150,7 @@ void up_initialize(void)
 
   /* Initialize the internal heap */
 
-#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
   xtensa_imm_initialize();
 #endif
 
