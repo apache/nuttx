@@ -170,17 +170,6 @@
 #define CXD56_DMA_CMD_FIFO_NOT_FULL 1
 #define CXD56_DMA_START_ADDR_MASK   0x3fffffff
 
-/* Queue helpers */
-
-#define dq_put(q,n) (dq_addlast((dq_entry_t*)n,(q)))
-#define dq_get(q)    (dq_remfirst(q))
-#define dq_clear(q) \
-  do \
-    { \
-      dq_remlast(q); \
-    } \
-  while (!dq_empty(q))
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -1360,6 +1349,7 @@ static void cxd56_dma_int_handler(void)
   else
     {
       audinfo("Unhandled interrupt\n");
+
       return;
     }
 
