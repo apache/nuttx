@@ -183,7 +183,16 @@ static const struct file_section_s g_section_info[] =
 static const char *g_white_prefix[] =
 {
   "Elf",     /* Ref:  include/elf.h, include/elf32.h, include/elf64.h */
-  "PRIx",    /* Ref:  intttypes.h */
+  "PRId",    /* Ref:  inttypes.h */
+  "PRIi",    /* Ref:  inttypes.h */
+  "PRIo",    /* Ref:  inttypes.h */
+  "PRIu",    /* Ref:  inttypes.h */
+  "PRIx",    /* Ref:  inttypes.h */
+  "SCNd",    /* Ref:  inttypes.h */
+  "SCNi",    /* Ref:  inttypes.h */
+  "SCNo",    /* Ref:  inttypes.h */
+  "SCNu",    /* Ref:  inttypes.h */
+  "SCNx",    /* Ref:  inttypes.h */
   "SYS_",    /* Ref:  include/sys/syscall.h */
   "STUB_",   /* Ref:  syscall/syscall_lookup.h, syscall/sycall_stublookup.c */
   "b8",      /* Ref:  include/fixedmath.h */
