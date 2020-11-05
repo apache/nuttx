@@ -1154,7 +1154,7 @@ static void *esp_queue_create(uint32_t queue_len, uint32_t item_size)
     }
 
   snprintf(mq_adpt->name, sizeof(mq_adpt->name),
-           "/tmp/%X", mq_adpt);
+           "/tmp/%p", mq_adpt);
 
   attr.mq_maxmsg  = queue_len;
   attr.mq_msgsize = item_size;
