@@ -22,6 +22,8 @@ Contents
   o Serial Console
   o Buttons and LEDs
   o Ethernet
+  o 64-bit Timers
+  o Watchdog Timers 
   o SMP
   o OpenOCD for the ESP32
   o Executing and Debugging from FLASH and IRAM
@@ -31,7 +33,8 @@ Contents
 STATUS
 ======
 
-  Currently we have support to UART, SPI, I2C, Ethernet, etc.
+  Currently we have support to UART, SPI, I2C, Ethernet, Timers,
+  Watchdog Timers, etc.
 
   Espressif is working to include support to WiFi and Bluetooth, but
   it will depends on their external libraries to get it up and running.
@@ -204,8 +207,8 @@ Ethernet
 ========
 
   ESP32 has a 802.11 hardware MAC, so just connects to external PHY chip.
-  Due to ESP32's GPIOs are not enough, so recommanded users to use RMII
-  to connect ESP32 to PHY chip, current driver also only supports RMII option.
+  Due to the limited number of GPIOs in ESP32, it's recommended to use RMII to
+  connect to an external PHY chip. Current driver also only supports RMII option.
 
   The RMII GPIO pins are fixed, but the SMI and functional GPIO pins are optional.
   
@@ -239,6 +242,25 @@ This driver has been tested according to this board and ESP32 core
 board + LAN8720 module. If users have some issue about using this driver,
 please refer the upper official document, specially the issue that GPIO0
 causes failing to bring the ESP32 chip up.
+
+64-bit Timers
+=============
+
+  ESP32 has 4 generic timers of 64 bits (2 from Group 0 and 2 from Group 1). They're
+  acessible as character drivers, the configuration along with a guidance on how
+  to run the example and the description of the application level interface can be found here:
+
+  https://nuttx.apache.org/docs/latest/components/drivers/character/timer.html  
+
+Watchdog Timers
+===============
+
+  ESP32 has 3 WDTs. 2 MWDTS from the Timers Module and 1 RWDT from the RTC Module 
+  (Currently not supported yet). They're acessible as character drivers,
+  The configuration along with a guidance on how to run the example and the description
+  of the application level interface can be found here:
+
+  https://nuttx.apache.org/docs/latest/components/drivers/character/watchdog.html
 
 SMP
 ===
@@ -808,6 +830,30 @@ NOTES:
         RAMTest: Pattern test: 3f800000 65536 66666666 99999999 
         RAMTest: Pattern test: 3f800000 65536 33333333 cccccccc 
         RAMTest: Address-in-address test: 3f800000 65536
+
+  timer:
+
+    This config test the general use purpose timers. It includes the 4 timers,
+    adds driver support, registers the timers as devices and includes the timer
+    example. 
+
+    To test it, just run the following:
+
+    `nsh> timer -d /dev/timerx`
+
+    Where x in the timer instance.  
+
+  watchdog:
+
+    This config test the watchdog timers. It includes the 2 MWDTS,
+    adds driver support, registers the WDTs as devices and includes the watchdog
+    example. 
+
+    To test it, just run the following:
+
+    `nsh> wdog -d /dev/watchdogx`
+
+    Where x in the watchdog instance.  
 
 Things to Do
 ============
