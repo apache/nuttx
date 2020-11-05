@@ -300,13 +300,8 @@ typedef _uint_farptr_t      uint_farptr_t;
 
 /* Greatest-width integer types */
 
-#ifdef __INT64_DEFINED
-typedef _int64_t            intmax_t;
-typedef _uint64_t           uintmax_t;
-#else
-typedef _int32_t            intmax_t;
-typedef _uint32_t           uintmax_t;
-#endif
+typedef _intmax_t           intmax_t;
+typedef _uintmax_t          uintmax_t;
 
 #endif /* CONFIG_ARCH_STDINT_H */
 #endif /* __INCLUDE_STDINT_H */
