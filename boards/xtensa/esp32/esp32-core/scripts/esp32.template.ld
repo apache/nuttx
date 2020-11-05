@@ -43,10 +43,15 @@ MEMORY
   /* Shared data RAM, excluding memory reserved for ROM bss/data/stack.
    * Enabling Bluetooth & Trace Memory features in menuconfig will decrease
    * the amount of RAM available.
+   *
+   * Note: The length of this section should be 0x50000, and this extra
+   * DRAM is available in heap at runtime. However due to static ROM memory
+   * usage at this 176KB mark, the additional static memory temporarily cannot
+   * be used.
    */
 
   dram0_0_seg (RW) :     org = 0x3ffb0000 + CONFIG_ESP32_BT_RESERVE_DRAM,
-                         len = 0x50000 - CONFIG_ESP32_TRACEMEM_RESERVE_DRAM - CONFIG_ESP32_BT_RESERVE_DRAM
+                         len = 0x2c200 - CONFIG_ESP32_TRACEMEM_RESERVE_DRAM - CONFIG_ESP32_BT_RESERVE_DRAM
 
   /* Flash mapped constant data */
 
