@@ -60,12 +60,13 @@
  *  modifier, suitable for use within the format argument of a formatted
  *  input/output function when converting the corresponding integer type.
  *  These macros have the general form of PRI (character string literals for
- *  the fprintf() and fwprintf() family of functions) or SCN (character string
- *  literals for the fscanf() and fwscanf() family of functions), followed by
- *  the conversion specifier, followed by a name corresponding to a similar
- *  type name in <stdint.h>. In these names, N represents the width of the
- *  type as described in <stdint.h>. For example, PRIdFAST32 can be used in a
- *  format string to print the value of an integer of type int_fast32_t.
+ *  the fprintf() and fwprintf() family of functions) or SCN (character
+ *  string literals for the fscanf() and fwscanf() family of functions),
+ *  followed by the conversion specifier, followed by a name corresponding
+ *  to a similar type name in <stdint.h>. In these names, N represents the
+ *  width of the type as described in <stdint.h>. For example, PRIdFAST32
+ *  can be used in a format string to print the value of an integer of type
+ *  int_fast32_t.
  *
  * "The fprintf() macros for signed integers are:
  *
