@@ -1334,6 +1334,8 @@ static void cxd56_dma_int_handler(void)
           write_reg(REG_I2S1_INT_CTRL_ERR, 1);
 
           err_code = CXD56_AUDIO_ECODE_DMA_TRANS;
+
+          auderr("ERROR: I2S0 transfer failed.\n");
         }
 
       if (int_i2s & (1 << REG_I2S1_INT_CTRL_CMB.pos))
@@ -1344,6 +1346,8 @@ static void cxd56_dma_int_handler(void)
           write_reg(REG_I2S1_INT_CTRL_CMB, 1);
 
           err_code = CXD56_AUDIO_ECODE_DMA_CMB;
+
+          auderr("ERROR: I2S0 bus error.\n");
         }
     }
   else
