@@ -99,7 +99,7 @@ endif
 
 CHIP_CSRCS += esp32_rtc.c
 
-ifeq ($(CONFIG_XTENSA_USE_SEPERATE_IMEM),y)
+ifeq ($(CONFIG_XTENSA_USE_SEPARATE_IMEM),y)
 CHIP_CSRCS += esp32_imm.c
 endif
 

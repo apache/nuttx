@@ -34,7 +34,7 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-#ifdef CONFIG_XTENSA_USE_SEPERATE_IMEM
+#ifdef CONFIG_XTENSA_USE_SEPARATE_IMEM
 #  define UMM_MALLOC(s)      xtensa_imm_malloc(s)
 #  define UMM_MEMALIGN(a,s)  xtensa_imm_memalign(a,s)
 #  define UMM_FREE(p)        xtensa_imm_free(p)
