@@ -58,6 +58,7 @@
 /* Helpers *******************************************************************/
 
 #define STM32L4_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
+#define STM32L4_TIM_SETFREQ(d,freq)       ((d)->ops->setfreq(d,freq))
 #define STM32L4_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
 #define STM32L4_TIM_GETCLOCK(d)           ((d)->ops->getclock(d))
 #define STM32L4_TIM_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
@@ -173,8 +174,11 @@ struct stm32l4_tim_ops_s
 {
   /* Basic Timers */
 
+  void (*enable)(FAR struct stm32l4_tim_dev_s *dev);
+  void (*disable)(FAR struct stm32l4_tim_dev_s *dev);
   int  (*setmode)(FAR struct stm32l4_tim_dev_s *dev,
                   enum stm32l4_tim_mode_e mode);
+  int  (*setfreq)(FAR struct stm32l4_tim_dev_s *dev, uint32_t freq);
   int  (*setclock)(FAR struct stm32l4_tim_dev_s *dev, uint32_t freq);
   uint32_t (*getclock)(FAR struct stm32l4_tim_dev_s *dev);
   void (*setperiod)(FAR struct stm32l4_tim_dev_s *dev, uint32_t period);
@@ -197,8 +201,9 @@ struct stm32l4_tim_ops_s
   void (*disableint)(FAR struct stm32l4_tim_dev_s *dev, int source);
   void (*ackint)(FAR struct stm32l4_tim_dev_s *dev, int source);
   int  (*checkint)(FAR struct stm32l4_tim_dev_s *dev, int source);
-  void (*enable)(FAR struct stm32l4_tim_dev_s *dev);
-  void (*disable)(FAR struct stm32l4_tim_dev_s *dev);
+
+  /* Debug */
+
   void (*dump_regs)(FAR struct stm32l4_tim_dev_s *dev);
 };
 
