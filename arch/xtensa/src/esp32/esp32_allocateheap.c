@@ -93,7 +93,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
  *
  ****************************************************************************/
 
-#if CONFIG_MM_REGIONS > 1
+#if CONFIG_MM_REGIONS > 1 && defined(CONFIG_ESP32_SPIRAM)
 void xtensa_add_region(void)
 {
   /* Check for any additional memory regions */
