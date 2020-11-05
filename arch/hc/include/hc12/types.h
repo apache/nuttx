@@ -102,7 +102,7 @@ typedef signed short       _ssize_t;
 typedef unsigned short     _size_t;
 #endif
 
-/* This is the size of the interrupt state save returned by up_irq_save()*/
+/* This is the size of the interrupt state save returned by up_irq_save() */
 
 typedef unsigned int       irqstate_t;
 
