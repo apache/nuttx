@@ -62,7 +62,8 @@
  * the user prefers to use the definitions provided by their toolchain header
  * files
  *
- * These are the sizes of the types supported by the ZiLOG Z8Encore! compiler:
+ * These are the sizes of the types supported by the ZiLOG Z8Encore!
+ * compiler:
  *
  *   int    - 16-bits
  *   short  - 16-bits
