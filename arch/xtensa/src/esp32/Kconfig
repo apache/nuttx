@@ -579,6 +579,7 @@ endchoice # ESP32_SPIRAM_SPEED
 
 config ESP32_SPIRAM_BOOT_INIT
 	bool "Initialize SPI RAM during startup"
+	depends on ESP32_SPIRAM
 	default "y"
 	help
 	    If this is enabled, the SPI RAM will be enabled during initial
