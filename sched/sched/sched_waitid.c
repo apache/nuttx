@@ -127,7 +127,12 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
    * distinguish any other events.
    */
 
-  if (options != WEXITED)
+  if ((options & WEXITED) == 0)
+    {
+      return -ENOSYS;
+    }
+
+  if ((options & ~(WEXITED | WNOHANG)) != 0)
     {
       return -ENOSYS;
     }
