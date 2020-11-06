@@ -157,6 +157,37 @@ config ADS7828_FREQUENCY
 
 endif # ADC_ADS7828
 
+config ADC_MAX1161X
+	bool "Maxim MAX11612-11617 support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the MAX1161X 12-Bit I2C powered ADC Family.
+
+		This driver supports reading single or multiple ADC conversion result
+		as well as onfiguring the ADC, via ioctl calls.
+
+if ADC_MAX1161X
+
+config MAX1161X_FREQUENCY
+	int "Maxim MAX1161X I2C frequency"
+	default 100000
+	---help---
+		MAX1161X supports standard, fast, and high-speed I2C modes.
+
+choice
+	prompt "Maxim MAX1161X Chip Type"
+
+	config MAX1161X_4CHAN
+		bool "MAX11612/MAX11613 4 Channels"
+	config MAX1161X_8CHAN
+		bool "MAX11614/MAX11615 8 Channels"
+	config MAX1161X_12CHAN
+		bool "MAX11616/MAX11617 12 Channels"
+endchoice
+
+endif # ADC_MAX1161X
+
 endif # ADC
 
 config COMP

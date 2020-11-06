@@ -107,6 +107,10 @@ ifeq ($(CONFIG_ADC_ADS7828),y)
   CSRCS += ads7828.c
 endif
 
+ifeq ($(CONFIG_ADC_MAX1161X),y)
+  CSRCS += max1161x.c
+endif
+
 ifeq ($(CONFIG_ADC_LTC1867L),y)
   CSRCS += ltc1867l.c
 endif
