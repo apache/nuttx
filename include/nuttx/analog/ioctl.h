@@ -91,6 +91,11 @@
                           AN_LMP92001_NCMDS)
 #define AN_ADS7828_NCMDS 6
 
+/* See arch/arm/src/stm32l4/stm32l4_adc.h */
+
+#define AN_STM32L4_FIRST (AN_ADS7828_FIRST + AN_ADS7828_NCMDS)
+#define AN_STM32L4_NCMDS 2
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
