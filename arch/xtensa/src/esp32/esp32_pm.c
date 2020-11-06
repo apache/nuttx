@@ -853,7 +853,9 @@ int esp32_light_sleep_start(void)
 {
   uint32_t pd_flags;
   uint32_t flash_enable_time_us;
+#ifndef CONFIG_ESP32_SPIRAM
   uint32_t vddsdio_pd_sleep_duration;
+#endif
   struct rtc_vddsdio_config_s vddsdio_config;
   int ret = OK;
 
@@ -876,6 +878,7 @@ int esp32_light_sleep_start(void)
   flash_enable_time_us = VDD_SDIO_POWERUP_TO_FLASH_READ_US
                          + CONFIG_ESP32_DEEP_SLEEP_WAKEUP_DELAY;
 
+#ifndef CONFIG_ESP32_SPIRAM
   vddsdio_pd_sleep_duration = MAX(FLASH_PD_MIN_SLEEP_TIME_US,
               flash_enable_time_us + LIGHT_SLEEP_TIME_OVERHEAD_US
                                         + LIGHT_SLEEP_MIN_TIME_US);
@@ -885,6 +888,7 @@ int esp32_light_sleep_start(void)
       pd_flags |= RTC_SLEEP_PD_VDDSDIO;
       s_config.sleep_time_adjustment += flash_enable_time_us;
     }
+#endif
 
   esp32_get_vddsdio_config(&vddsdio_config);
 
