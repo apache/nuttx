@@ -72,6 +72,7 @@
  ****************************************************************************/
 
 /* Delays *******************************************************************/
+
 /* Time out for INAK bit */
 
 #define INAK_TIMEOUT 65535
@@ -162,9 +163,12 @@ static bool stm32l4can_txempty(FAR struct can_dev_s *dev);
 /* CAN interrupt handling */
 
 static int  stm32l4can_rxinterrupt(int irq, FAR void *context, int rxmb);
-static int  stm32l4can_rx0interrupt(int irq, FAR void *context, FAR void *arg);
-static int  stm32l4can_rx1interrupt(int irq, FAR void *context, FAR void *arg);
-static int  stm32l4can_txinterrupt(int irq, FAR void *context, FAR void *arg);
+static int  stm32l4can_rx0interrupt(int irq, FAR void *context,
+                                    FAR void *arg);
+static int  stm32l4can_rx1interrupt(int irq, FAR void *context,
+                                    FAR void *arg);
+static int  stm32l4can_txinterrupt(int irq, FAR void *context,
+                                   FAR void *arg);
 
 /* Initialization */
 
@@ -272,7 +276,7 @@ static uint32_t stm32l4can_vgetreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          caninfo("[repeats %d more times]\n", count-3);
+          caninfo("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -293,7 +297,8 @@ static uint32_t stm32l4can_getreg(FAR struct stm32l4_can_s *priv, int offset)
   return stm32l4can_vgetreg(priv->base + offset);
 }
 
-static uint32_t stm32l4can_getfreg(FAR struct stm32l4_can_s *priv, int offset)
+static uint32_t stm32l4can_getfreg(FAR struct stm32l4_can_s *priv,
+                                   int offset)
 {
   return stm32l4can_vgetreg(priv->fbase + offset);
 }
@@ -304,7 +309,8 @@ static uint32_t stm32l4can_getreg(FAR struct stm32l4_can_s *priv, int offset)
   return getreg32(priv->base + offset);
 }
 
-static uint32_t stm32l4can_getfreg(FAR struct stm32l4_can_s *priv, int offset)
+static uint32_t stm32l4can_getfreg(FAR struct stm32l4_can_s *priv,
+                                   int offset)
 {
   return getreg32(priv->fbase + offset);
 }
@@ -815,11 +821,14 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
 
           DEBUGASSERT(bt != NULL);
           regval       = stm32l4can_getreg(priv, STM32L4_CAN_BTR_OFFSET);
-          bt->bt_sjw   = ((regval & CAN_BTR_SJW_MASK) >> CAN_BTR_SJW_SHIFT) + 1;
-          bt->bt_tseg1 = ((regval & CAN_BTR_TS1_MASK) >> CAN_BTR_TS1_SHIFT) + 1;
-          bt->bt_tseg2 = ((regval & CAN_BTR_TS2_MASK) >> CAN_BTR_TS2_SHIFT) + 1;
-
-          brp          = ((regval & CAN_BTR_BRP_MASK) >> CAN_BTR_BRP_SHIFT) + 1;
+          bt->bt_sjw   = ((regval & CAN_BTR_SJW_MASK) >>
+                           CAN_BTR_SJW_SHIFT) + 1;
+          bt->bt_tseg1 = ((regval & CAN_BTR_TS1_MASK) >>
+                           CAN_BTR_TS1_SHIFT) + 1;
+          bt->bt_tseg2 = ((regval & CAN_BTR_TS2_MASK) >>
+                           CAN_BTR_TS2_SHIFT) + 1;
+          brp          = ((regval & CAN_BTR_BRP_MASK) >>
+                           CAN_BTR_BRP_SHIFT) + 1;
           bt->bt_baud  = STM32L4_PCLK1_FREQUENCY /
                          (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
           ret = OK;
@@ -839,8 +848,8 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
        * REVISIT: There is probably a limitation here:  If there are multiple
        * threads trying to send CAN packets, when one of these threads
        * reconfigures the bitrate, the MCAN hardware will be reset and the
-       * context of operation will be lost.  Hence, this IOCTL can only safely
-       * be executed in quiescent time periods.
+       * context of operation will be lost.  Hence, this IOCTL can only
+       * safely be executed in quiescent time periods.
        */
 
       case CANIOC_SET_BITTIMING:
@@ -860,8 +869,9 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
 
           regval = stm32l4can_getreg(priv, STM32L4_CAN_BTR_OFFSET);
 
-          /* Extract bit timing data */
-          /* tmp is in clocks per bit time */
+          /* Extract bit timing data.
+           * tmp is in clocks per bit time.
+           */
 
           tmp = STM32L4_PCLK1_FREQUENCY / bt->bt_baud;
 
@@ -884,7 +894,7 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
 
           else
             {
-              brp = (tmp + (can_bit_quanta/2)) / can_bit_quanta;
+              brp = (tmp + (can_bit_quanta / 2)) / can_bit_quanta;
               DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
             }
 
@@ -1013,7 +1023,7 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
         {
           DEBUGASSERT(arg != 0);
           ret = stm32l4can_addextfilter(priv,
-                                        (FAR struct canioc_extfilter_s *)arg);
+                                      (FAR struct canioc_extfilter_s *)arg);
         }
         break;
 
@@ -1050,7 +1060,7 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
         {
           DEBUGASSERT(arg != 0);
           ret = stm32l4can_addstdfilter(priv,
-                                        (FAR struct canioc_stdfilter_s *)arg);
+                                      (FAR struct canioc_stdfilter_s *)arg);
         }
         break;
 
@@ -1081,6 +1091,7 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
             {
               return ret;
             }
+
           regval = stm32l4can_getreg(priv, STM32_CAN_MCR_OFFSET);
           if (arg == 1)
             {
@@ -1090,6 +1101,7 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
             {
               regval &= ~CAN_MCR_NART;
             }
+
           stm32l4can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
           return stm32l4can_exitinitmode(priv);
         }
@@ -1103,6 +1115,7 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
             {
               return ret;
             }
+
           regval = stm32l4can_getreg(priv, STM32_CAN_MCR_OFFSET);
           if (arg == 1)
             {
@@ -1112,6 +1125,7 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
             {
               regval &= ~CAN_MCR_ABOM;
             }
+
           stm32l4can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
           return stm32l4can_exitinitmode(priv);
         }
@@ -1226,7 +1240,8 @@ static int stm32l4can_send(FAR struct can_dev_s *dev,
       regval |= msg->cm_hdr.ch_id << CAN_TIR_STID_SHIFT;
     }
 #else
-   regval |= ( ( (uint32_t) msg->cm_hdr.ch_id << CAN_TIR_STID_SHIFT) & CAN_TIR_STID_MASK );
+  regval |= (((uint32_t) msg->cm_hdr.ch_id << CAN_TIR_STID_SHIFT) &
+             CAN_TIR_STID_MASK);
 
 #ifdef CONFIG_CAN_USE_RTR
   regval |= (msg->cm_hdr.ch_rtr ? CAN_TIR_RTR : 0);
@@ -1728,16 +1743,16 @@ static int stm32l4can_bittiming(FAR struct stm32l4_can_s *priv)
         }
     }
 
-  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_STM32L4_CAN_TSEG1, ts2 is
-   * CONFIG_STM32L4_CAN_TSEG2 and we calculate brp to achieve CAN_BIT_QUANTA quanta
-   * in the bit time
+  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_STM32L4_CAN_TSEG1,
+   * ts2 is CONFIG_STM32L4_CAN_TSEG2 and we calculate brp to achieve
+   * CAN_BIT_QUANTA quanta in the bit time
    */
 
   else
     {
       ts1 = CONFIG_STM32L4_CAN_TSEG1;
       ts2 = CONFIG_STM32L4_CAN_TSEG2;
-      brp = (tmp + (CAN_BIT_QUANTA/2)) / CAN_BIT_QUANTA;
+      brp = (tmp + (CAN_BIT_QUANTA / 2)) / CAN_BIT_QUANTA;
       DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }
 
@@ -1756,7 +1771,8 @@ static int stm32l4can_bittiming(FAR struct stm32l4_can_s *priv)
   tmp = ((brp - 1) << CAN_BTR_BRP_SHIFT) | ((ts1 - 1) << CAN_BTR_TS1_SHIFT) |
         ((ts2 - 1) << CAN_BTR_TS2_SHIFT) | ((1 - 1) << CAN_BTR_SJW_SHIFT);
 #ifdef CONFIG_CAN_LOOPBACK
-//tmp |= (CAN_BTR_LBKM | CAN_BTR_SILM);
+  /* tmp |= (CAN_BTR_LBKM | CAN_BTR_SILM); */
+
   tmp |= CAN_BTR_LBKM;
 #endif
 
