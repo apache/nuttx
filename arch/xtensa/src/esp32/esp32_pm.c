@@ -562,7 +562,7 @@ static int IRAM_ATTR esp32_sleep_start(uint32_t pd_flags)
 
   /* Save current frequency and switch to XTAL */
 
-  cur_freq = esp_clk_cpu_freq() / MHZ;
+  cur_freq = esp_rtc_clk_get_cpu_freq();
   esp32_rtc_cpu_freq_set_xtal();
 
   /* Enter sleep */
@@ -851,6 +851,7 @@ void esp32_sleep_enable_timer_wakeup(uint64_t time_in_us)
 
 int esp32_light_sleep_start(void)
 {
+  irqstate_t flags;
   uint32_t pd_flags;
   uint32_t flash_enable_time_us;
 #ifndef CONFIG_ESP32_SPIRAM
@@ -859,6 +860,7 @@ int esp32_light_sleep_start(void)
   struct rtc_vddsdio_config_s vddsdio_config;
   int ret = OK;
 
+  flags = enter_critical_section();
   s_config.rtc_ticks_at_sleep_start = esp32_rtc_time_get();
 
   /* Decide which power domains can be powered down */
@@ -896,7 +898,7 @@ int esp32_light_sleep_start(void)
 
   ret = esp32_light_sleep_inner(pd_flags, flash_enable_time_us,
                                                vddsdio_config);
-
+  leave_critical_section(flags);
   return ret;
 }
 

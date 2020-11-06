@@ -47,6 +47,23 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name:  esp32_update_cpu_freq
+ *
+ * Description:
+ *   Set the real CPU ticks per us to the ets, so that ets_delay_us
+ *   will be accurate. Call this function when CPU frequency is changed.
+ *
+ * Input Parameters:
+ *   ticks_per_us - CPU ticks per us
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32_update_cpu_freq(uint32_t ticks_per_us);
+
+/****************************************************************************
  * Name: esp32_set_cpu_freq
  *
  * Description:
