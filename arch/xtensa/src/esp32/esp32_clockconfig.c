@@ -168,12 +168,13 @@ void IRAM_ATTR esp32_set_cpu_freq(int cpu_freq_mhz)
 
   value = (((80 * MHZ) >> 12) & UINT16_MAX) |
           ((((80 * MHZ) >> 12) & UINT16_MAX) << 16);
-  putreg32(value, RTC_APB_FREQ_REG);
   putreg32(per_conf, DPORT_CPU_PER_CONF_REG);
   REG_SET_FIELD(RTC_CNTL_REG, RTC_CNTL_DIG_DBIAS_WAK, dbias);
   REG_SET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_SOC_CLK_SEL,
                 RTC_CNTL_SOC_CLK_SEL_PLL);
-  g_ticks_per_us_pro = cpu_freq_mhz;
+  putreg32(value, RTC_APB_FREQ_REG);
+  esp32_update_cpu_freq(cpu_freq_mhz);
+  esp32_rtc_wait_for_slow_cycle();
 }
 
 /****************************************************************************
@@ -189,9 +190,15 @@ void IRAM_ATTR esp32_set_cpu_freq(int cpu_freq_mhz)
 void esp32_clockconfig(void)
 {
   uint32_t freq_mhz = CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ;
-
+  uint32_t old_freq_mhz;
   uint32_t source_freq_mhz;
   enum esp32_rtc_xtal_freq_e xtal_freq = RTC_XTAL_FREQ_40M;
+
+  old_freq_mhz = esp_rtc_clk_get_cpu_freq();
+  if (old_freq_mhz == freq_mhz)
+    {
+      return;
+    }
 
   switch (freq_mhz)
     {
@@ -204,6 +211,9 @@ void esp32_clockconfig(void)
         break;
 
       case 80:
+        source_freq_mhz = RTC_PLL_FREQ_320M;
+        break;
+
       default:
         return;
     }
@@ -252,3 +262,4 @@ int IRAM_ATTR esp_clk_apb_freq(void)
 {
   return MIN(g_ticks_per_us_pro, 80) * MHZ;
 }
+
