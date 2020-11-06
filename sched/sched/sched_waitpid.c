@@ -168,7 +168,7 @@ errout:
 
 /****************************************************************************
  *
- * If CONFIG_SCHED_HAVE_PARENT is defined, then waitpid will use the SIGHCLD
+ * If CONFIG_SCHED_HAVE_PARENT is defined, then waitpid will use the SIGCHLD
  * signal.  It can also handle the pid == (pid_t)-1 argument.  This is
  * slightly more spec-compliant.
  *
