@@ -912,8 +912,8 @@ static int nrf52_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
  *
  ****************************************************************************/
 
-struct adc_dev_s *nrf52_adcinitialize(FAR struct nrf52_adc_channel_s *chan,
-                                      int channels)
+struct adc_dev_s *nrf52_adcinitialize(
+    FAR const struct nrf52_adc_channel_s *chan, int channels)
 {
   FAR struct adc_dev_s   *dev  = NULL;
   FAR struct nrf52_adc_s *priv = NULL;
