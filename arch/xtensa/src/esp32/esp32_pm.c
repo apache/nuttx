@@ -577,11 +577,11 @@ static int IRAM_ATTR esp32_sleep_start(uint32_t pd_flags)
       esp32_timer_wakeup_prepare();
     }
 
-  esp32_rtc_sleep_start(s_config.wakeup_triggers, 0);
+  result = esp32_rtc_sleep_start(s_config.wakeup_triggers, 0);
 
   /* Restore CPU frequency */
 
-  result = esp32_configure_cpu_freq(cur_freq);
+  esp32_configure_cpu_freq(cur_freq);
   esp32_resume_uarts();
 
   return result;

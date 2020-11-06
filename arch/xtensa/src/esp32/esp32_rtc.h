@@ -289,7 +289,7 @@ void esp32_rtc_sleep_init(uint32_t flags);
  *
  ****************************************************************************/
 
-void esp32_rtc_sleep_start(uint32_t wakeup_opt, uint32_t reject_opt);
+int esp32_rtc_sleep_start(uint32_t wakeup_opt, uint32_t reject_opt);
 
 #ifdef __cplusplus
 }
