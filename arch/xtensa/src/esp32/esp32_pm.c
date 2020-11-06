@@ -581,7 +581,14 @@ static int IRAM_ATTR esp32_sleep_start(uint32_t pd_flags)
 
   /* Restore CPU frequency */
 
-  esp32_configure_cpu_freq(cur_freq);
+  if (esp32_configure_cpu_freq(cur_freq) != OK)
+    {
+      pwrwarn("WARNING: Faile to restore CPU frequency"
+              "Configure cpu frequency %d.\n", cur_freq);
+    }
+
+  /* Re-enable UART output */
+
   esp32_resume_uarts();
 
   return result;
