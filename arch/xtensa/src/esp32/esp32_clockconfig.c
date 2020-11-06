@@ -98,6 +98,34 @@ static inline void esp32_uart_tx_wait_idle(uint8_t uart_no)
  ****************************************************************************/
 
 extern uint32_t g_ticks_per_us_pro;
+#ifdef CONFIG_SMP
+extern uint32_t g_ticks_per_us_app;
+#endif
+
+/****************************************************************************
+ * Name:  esp32_update_cpu_freq
+ *
+ * Description:
+ *   Set the real CPU ticks per us to the ets, so that ets_delay_us
+ *   will be accurate. Call this function when CPU frequency is changed.
+ *
+ * Input Parameters:
+ *   ticks_per_us - CPU ticks per us
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp32_update_cpu_freq(uint32_t ticks_per_us)
+{
+  /* Update scale factors used by esp_rom_delay_us */
+
+  g_ticks_per_us_pro = ticks_per_us;
+#ifdef CONFIG_SMP
+  g_ticks_per_us_app = ticks_per_us;
+#endif
+}
 
 /****************************************************************************
  * Name: esp32_set_cpu_freq
