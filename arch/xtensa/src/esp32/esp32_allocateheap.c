@@ -93,13 +93,15 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
  *
  ****************************************************************************/
 
-#if CONFIG_MM_REGIONS > 1 && defined(CONFIG_ESP32_SPIRAM)
+#if CONFIG_MM_REGIONS > 1
 void xtensa_add_region(void)
 {
+#if defined(CONFIG_ESP32_SPIRAM)
   /* Check for any additional memory regions */
 
-#if defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_SIZE)
-  umm_addregion((FAR void *)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+#  if defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_SIZE)
+    umm_addregion((FAR void *)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+#  endif
 #endif
 }
 #endif
