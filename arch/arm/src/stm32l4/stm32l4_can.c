@@ -1076,12 +1076,12 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
       case CANIOC_SET_NART:
         {
           uint32_t regval;
-          ret = stm32can_enterinitmode(priv);
+          ret = stm32l4can_enterinitmode(priv);
           if (ret != 0)
             {
               return ret;
             }
-          regval = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+          regval = stm32l4can_getreg(priv, STM32_CAN_MCR_OFFSET);
           if (arg == 1)
             {
               regval |= CAN_MCR_NART;
@@ -1090,20 +1090,20 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
             {
               regval &= ~CAN_MCR_NART;
             }
-          stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
-          return stm32can_exitinitmode(priv);
+          stm32l4can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+          return stm32l4can_exitinitmode(priv);
         }
         break;
 
       case CANIOC_SET_ABOM:
         {
           uint32_t regval;
-          ret = stm32can_enterinitmode(priv);
+          ret = stm32l4can_enterinitmode(priv);
           if (ret != 0)
             {
               return ret;
             }
-          regval = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+          regval = stm32l4can_getreg(priv, STM32_CAN_MCR_OFFSET);
           if (arg == 1)
             {
               regval |= CAN_MCR_ABOM;
@@ -1112,8 +1112,8 @@ static int stm32l4can_ioctl(FAR struct can_dev_s *dev, int cmd,
             {
               regval &= ~CAN_MCR_ABOM;
             }
-          stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
-          return stm32can_exitinitmode(priv);
+          stm32l4can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+          return stm32l4can_exitinitmode(priv);
         }
         break;
 
