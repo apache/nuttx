@@ -203,11 +203,6 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
       child = group_find_child(group, getpid());
       if (child)
         {
-#ifndef HAVE_GROUP_MEMBERS
-          /* No group members? Save the exit status */
-
-          child->ch_status = status;
-#endif
           /* Save the exit status..  For the case of HAVE_GROUP_MEMBERS,
            * the child status will be as exited until the last member
            * of the task group exits.
