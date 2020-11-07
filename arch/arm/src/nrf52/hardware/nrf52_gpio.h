@@ -57,6 +57,8 @@
 #  define NRF52_GPIO_NPORTS         1
 #endif
 
+#define NRF52_GPIO_NPINS            32
+
 /* Register offsets *****************************************************************/
 
 #define NRF52_GPIO_OUT_OFFSET        0x0504 /* Write GPIO port */
@@ -95,6 +97,9 @@
 
 /* Register bit definitions *********************************************************/
 
+#define GPIO_DETECTMODE_DEFAULT         (0)
+#define GPIO_DETECTMODE_LDETECT         (1)
+
 #define GPIO_CNF_DIR                    (1 << 0) /* Bit 0: Pin direction */
 #define GPIO_CNF_INPUT                  (1 << 1) /* Bit 1: Input buffer disconnect */
 #define GPIO_CNF_PULL_SHIFT             (2)
@@ -102,5 +107,20 @@
 #  define GPIO_CNF_PULL_DISABLED        (0 << GPIO_CNF_PULL_SHIFT)
 #  define GPIO_CNF_PULL_DOWN            (1 << GPIO_CNF_PULL_SHIFT)
 #  define GPIO_CNF_PULL_UP              (3 << GPIO_CNF_PULL_SHIFT)
+#define GPIO_CNF_DRIVE_SHIFT            (8)
+#define GPIO_CNF_DRIVE_MASK             (0x7 << GPIO_CNF_DRIVE_SHIFT)
+#  define GPIO_CNF_DRIVE_S0S1           (0 << GPIO_CNF_DRIVE_SHIFT)
+#  define GPIO_CNF_DRIVE_H0S1           (1 << GPIO_CNF_DRIVE_SHIFT)
+#  define GPIO_CNF_DRIVE_S0H1           (2 << GPIO_CNF_DRIVE_SHIFT)
+#  define GPIO_CNF_DRIVE_H0H1           (3 << GPIO_CNF_DRIVE_SHIFT)
+#  define GPIO_CNF_DRIVE_D0S1           (4 << GPIO_CNF_DRIVE_SHIFT)
+#  define GPIO_CNF_DRIVE_D0H1           (5 << GPIO_CNF_DRIVE_SHIFT)
+#  define GPIO_CNF_DRIVE_S0D1           (6 << GPIO_CNF_DRIVE_SHIFT)
+#  define GPIO_CNF_DRIVE_H0D1           (7 << GPIO_CNF_DRIVE_SHIFT)
+#define GPIO_CNF_SENSE_SHIFT            (16)
+#define GPIO_CNF_SENSE_MASK             (0x3 << GPIO_CNF_SENSE_SHIFT)
+#  define GPIO_CNF_SENSE_DISABLED       (0 << GPIO_CNF_SENSE_SHIFT)
+#  define GPIO_CNF_SENSE_HIGH           (2 << GPIO_CNF_SENSE_SHIFT)
+#  define GPIO_CNF_SENSE_LOW            (3 << GPIO_CNF_SENSE_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_GPIO_H */
