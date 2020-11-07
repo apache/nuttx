@@ -49,17 +49,19 @@ enum nrf52_gpiote_outcfg_e
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nrf52_gpiosetevent
+ * Name: nrf52_gpiote_set_ch_event
  *
  * Description:
- *   Sets/clears GPIO based event and interrupt triggers.
+ *   Configures a GPIOTE channel in EVENT mode, assigns it to a given pin
+ *   and sets a handler for the corresponding channel events.
  *
  * Input Parameters:
- *  - pinset: gpio pin configuration
- *  - rising/falling edge: enables
- *  - event:  generate event when set
- *  - func:   when non-NULL, generate interrupt
- *  - arg:    Argument passed to the interrupt callback
+ *  - pinset:      GPIO pin configuration
+ *  - risingedge:  Enables interrupt on rising edges
+ *  - fallingedge: Enables interrupt on falling edges
+ *  - event:       Generate event when set
+ *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure indicating the
@@ -67,11 +69,65 @@ enum nrf52_gpiote_outcfg_e
  *
  ****************************************************************************/
 
-int nrf52_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                       bool event, xcpt_t func, FAR void *arg);
+void nrf52_gpiote_set_ch_event(uint32_t pinset, int channel,
+                               bool risingedge, bool fallingedge,
+                               xcpt_t func, FAR void *arg);
+
+#ifdef CONFIG_NRF52_PER_PIN_INTERRUPTS
+/****************************************************************************
+ * Name: nrf52_gpiote_set_pin_event
+ *
+ * Description:
+ *   Sets/clears a handler for a given pin for the GPIO PORT event. This
+ *   will mean edge-sensitive or level-sensitive according to GPIO detect
+ *   mode configuration for the port (see nrf52_gpio_detectmode()). Pin
+ *   will be sensitive to high/low according to GPIO_SENSE_LOW/HIGH
+ *   (set via nrf52_gpio_config()).
+ *
+ *   The passed handler will be invoked from the main ISR for the PORT
+ *   event and will take care of clearing the LATCH register.
+ *
+ * Input Parameters:
+ *  - pinset:      GPIO pin configuration
+ *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
+ *
+ ****************************************************************************/
+
+void nrf52_gpiote_set_pin_event(uint32_t pinset, xcpt_t func, FAR void *arg);
+#else
 
 /****************************************************************************
- * Name: nrf52_gpiotaskset
+ * Name: nrf52_gpiote_set_port_event
+ *
+ * Description:
+ *   Sets/clears the handler for the GPIO PORT event.
+ *
+ *   The passed handler will be invoked from the main ISR for the PORT
+ *   event and will take care of clearing the LATCH register.
+ *
+ * Input Parameters:
+ *  - pinset:      GPIO port will be extracted from this parameter
+ *  - func:        When non-NULL, generate interrupt
+ *  - arg:         Argument passed to the interrupt callback
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure indicating the
+ *   nature of the failure.
+ *
+ ****************************************************************************/
+
+void nrf52_gpiote_set_port_event(uint32_t pinset, xcpt_t func,
+                                 FAR void *arg);
+
+#endif
+
+/****************************************************************************
+ * Name: nrf52_gpio_set_task
  *
  * Description:
  *   Configure GPIO in TASK mode (to be controlled via tasks).
@@ -93,8 +149,8 @@ int nrf52_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  *
  ****************************************************************************/
 
-int nrf52_gpiotaskset(uint32_t pinset, int channel, bool output_high,
-                      enum nrf52_gpiote_outcfg_e outcfg);
+void nrf52_gpio_set_task(uint32_t pinset, int channel,
+                        bool output_high, enum nrf52_gpiote_outcfg_e outcfg);
 
 /****************************************************************************
  * Name: nrf52_gpiote_init

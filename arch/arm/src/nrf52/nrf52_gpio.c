@@ -144,17 +144,49 @@ static inline void nrf52_gpio_mode(nrf52_pinset_t cfgset,
   mode = cfgset & GPIO_MODE_MASK;
 
   regval = getreg32(offset);
-  regval &= GPIO_CNF_PULL_MASK;
+  regval &= ~GPIO_CNF_PULL_MASK;
 
   if (mode == GPIO_PULLUP)
     {
-      regval &= GPIO_CNF_PULL_MASK;
       regval |= GPIO_CNF_PULL_UP;
     }
   else if (mode == GPIO_PULLDOWN)
     {
-      regval &= GPIO_CNF_PULL_MASK;
       regval |= GPIO_CNF_PULL_DOWN;
+    }
+
+  putreg32(regval, offset);
+}
+
+/****************************************************************************
+ * Name: nrf52_gpio_sense
+ *
+ * Description:
+ *   Set SENSE configuration for an input pin
+ *
+ ****************************************************************************/
+
+static inline void nrf52_gpio_sense(nrf52_pinset_t cfgset,
+                                    unsigned int port, unsigned int pin)
+{
+  uint32_t mode;
+  uint32_t regval;
+  uint32_t offset;
+
+  mode = cfgset & GPIO_SENSE_MASK;
+
+  offset = nrf52_gpio_regget(port, NRF52_GPIO_PIN_CNF_OFFSET(pin));
+  regval = getreg32(offset);
+
+  regval &= ~GPIO_CNF_SENSE_MASK;
+
+  if (mode == GPIO_SENSE_HIGH)
+    {
+      regval |= GPIO_CNF_SENSE_HIGH;
+    }
+  else
+    {
+      regval |= GPIO_CNF_SENSE_LOW;
     }
 
   putreg32(regval, offset);
@@ -204,7 +236,8 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
       switch (cfgset & GPIO_FUNC_MASK)
         {
         case GPIO_INPUT:   /* GPIO input pin */
-          break;           /* Already configured */
+          nrf52_gpio_sense(cfgset, port, pin);
+          break;
 
         case GPIO_OUTPUT:  /* GPIO outpout pin */
           nrf52_gpio_output(cfgset, port, pin);
@@ -312,4 +345,21 @@ bool nrf52_gpio_read(nrf52_pinset_t pinset)
   regval = getreg32(offset);
 
   return (regval >> pin) & 1UL;
+}
+
+/****************************************************************************
+ * Name: nrf52_gpio_detectmode
+ *
+ * Description:
+ *  Set DETECTMODE to either default or latched
+ *
+ ****************************************************************************/
+
+void nrf52_gpio_detectmode(int port, enum nrf52_gpio_detectmode_e mode)
+{
+  uint32_t offset = nrf52_gpio_regget(port, NRF52_GPIO_DETECTMODE_OFFSET);
+
+  putreg32(mode == NRF52_GPIO_DETECTMODE_DETECT ?
+           GPIO_DETECTMODE_DEFAULT :
+           GPIO_DETECTMODE_LDETECT, offset);
 }
