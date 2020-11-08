@@ -729,21 +729,15 @@
 #define FLASH_FTCTL_TEST_EN                  (1 << 1)  /* Bit 1 */
 #define FLASH_FTCTL_WDATA_BLK_CLR            (1 << 16) /* Bit 16 */
 
-/* TIVA_FLASH_FWPWRITE0 (32-bit value) */
-
-/* TIVA_FLASH_FWPWRITE1 (32-bit value) */
-
-/* TIVA_FLASH_FWPWRITE2 (32-bit value) */
-
-/* TIVA_FLASH_FWPWRITE3 (32-bit value) */
-
-/* TIVA_FLASH_FWPWRITE4 (32-bit value) */
-
-/* TIVA_FLASH_FWPWRITE5 (32-bit value) */
-
-/* TIVA_FLASH_FWPWRITE6 (32-bit value) */
-
-/* TIVA_FLASH_FWPWRITE7 (32-bit value) */
+/* TIVA_FLASH_FWPWRITE0 (32-bit value)
+ * TIVA_FLASH_FWPWRITE1 (32-bit value)
+ * TIVA_FLASH_FWPWRITE2 (32-bit value)
+ * TIVA_FLASH_FWPWRITE3 (32-bit value)
+ * TIVA_FLASH_FWPWRITE4 (32-bit value)
+ * TIVA_FLASH_FWPWRITE5 (32-bit value)
+ * TIVA_FLASH_FWPWRITE6 (32-bit value)
+ * TIVA_FLASH_FWPWRITE7 (32-bit value)
+ */
 
 /* TIVA_FLASH_FWPWRITE_ECC */
 
@@ -1001,17 +995,17 @@
 #define FLASH_FSM_EXECUTE_SUSPEND_NOW_SHIFT  (16)      /* Bits 16-19 */
 #define FLASH_FSM_EXECUTE_SUSPEND_NOW_MASK   (15 << FLASH_FSM_EXECUTE_SUSPEND_NOW_SHIFT)
 
-/* TIVA_FLASH_FSM_SECTOR1 (32-bit value) */
+/* TIVA_FLASH_FSM_SECTOR1 (32-bit value)
+ * TIVA_FLASH_FSM_SECTOR2 (32-bit value)
+ */
 
-/* TIVA_FLASH_FSM_SECTOR2 (32-bit value) */
+/* TIVA_FLASH_FSM_BSLE0 (32-bit value)
+ * TIVA_FLASH_FSM_BSLE1 (32-bit value)
+ */
 
-/* TIVA_FLASH_FSM_BSLE0 (32-bit value) */
-
-/* TIVA_FLASH_FSM_BSLE1 (32-bit value) */
-
-/* TIVA_FLASH_FSM_BSLP0 (32-bit value) */
-
-/* TIVA_FLASH_FSM_BSLP1 (32-bit value) */
+/* TIVA_FLASH_FSM_BSLP0 (32-bit value)
+ * TIVA_FLASH_FSM_BSLP1 (32-bit value)
+ */
 
 /* TIVA_FLASH_FSM_PGM128 */
 
