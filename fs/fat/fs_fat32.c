@@ -128,7 +128,7 @@ const struct mountpt_operations fat_operations =
   fat_unbind,        /* unbind */
   fat_statfs,        /* statfs */
 
-  fat_unlink,        /* unlinke */
+  fat_unlink,        /* unlink */
   fat_mkdir,         /* mkdir */
   fat_rmdir,         /* rmdir */
   fat_rename,        /* rename */

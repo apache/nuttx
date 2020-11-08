@@ -60,7 +60,7 @@
  *
  * Description:
  *   Remove an inode from FLASH.  This is the internal implementation of
- *   the file system unlinke operation.
+ *   the file system unlink operation.
  *
  * Input Parameters:
  *   volume - Describes the NXFFS volume.

@@ -244,8 +244,8 @@ struct stm32h7_qspidev_s
 /* The QSPI transaction specification
  *
  * This is mostly the values of the CCR and DLR, AR, ABR, broken out into a C
- * structure  since these fields need to be considered at various phases of
- * thee transaction processing activity.
+ * structure since these fields need to be considered at various phases of
+ * the transaction processing activity.
  */
 
 struct qspi_xctnspec_s
