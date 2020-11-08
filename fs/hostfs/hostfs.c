@@ -157,7 +157,7 @@ const struct mountpt_operations hostfs_operations =
   hostfs_unbind,        /* unbind */
   hostfs_statfs,        /* statfs */
 
-  hostfs_unlink,        /* unlinke */
+  hostfs_unlink,        /* unlink */
   hostfs_mkdir,         /* mkdir */
   hostfs_rmdir,         /* rmdir */
   hostfs_rename,        /* rename */

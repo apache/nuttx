@@ -515,7 +515,7 @@ static int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
     }
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
-  /* Pre-calcuate the watermark level that we will need to test against.
+  /* Pre-calculate the watermark level that we will need to test against.
    * Note that the range of the the upper watermark is from 1 to 99 percent
    * and that the actual capacity of the RX buffer is (recv->size - 1).
    */

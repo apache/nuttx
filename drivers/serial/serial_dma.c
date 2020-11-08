@@ -264,7 +264,7 @@ void uart_recvchars_dma(FAR uart_dev_t *dev)
   is_full = nexthead == rxbuf->tail;
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
-  /* Pre-calcuate the watermark level that we will need to test against. */
+  /* Pre-calculate the watermark level that we will need to test against. */
 
   watermark = (CONFIG_SERIAL_IFLOWCONTROL_UPPER_WATERMARK * rxbuf->size) /
               100;

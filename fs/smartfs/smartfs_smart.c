@@ -156,7 +156,7 @@ const struct mountpt_operations smartfs_operations =
   smartfs_unbind,        /* unbind */
   smartfs_statfs,        /* statfs */
 
-  smartfs_unlink,        /* unlinke */
+  smartfs_unlink,        /* unlink */
   smartfs_mkdir,         /* mkdir */
   smartfs_rmdir,         /* rmdir */
   smartfs_rename,        /* rename */
@@ -592,7 +592,7 @@ static ssize_t smartfs_read(FAR struct file *filep, char *buffer,
           sizeof(struct smartfs_chain_header_s));
       if (bytestoread + bytesread > buflen)
         {
-          /* Truncate bytesto read based on buffer len */
+          /* Truncate bytes to read based on buffer len */
 
           bytestoread = buflen - bytesread;
         }
