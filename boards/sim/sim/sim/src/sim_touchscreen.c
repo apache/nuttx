@@ -205,9 +205,11 @@ int sim_tsc_setup(int minor)
       pthread_attr_setstacksize(&attr, CONFIG_SIM_LISTENER_STACKSIZE);
 
       ret = pthread_create(&thread, &attr, sim_listener, NULL);
+      pthread_attr_destroy(&attr);
       if (ret != 0)
         {
           gerr("ERROR: pthread_create failed: %d\n", ret);
+          nx_disconnect(g_simtc.hnx);
           return -ret;
         }
 
