@@ -150,7 +150,7 @@ jobs:
           command: docker pull docker.pkg.github.com/apache/incubator-nuttx-testing/nuttx-ci-linux
 
       - name: Export NuttX Repo SHA
-        run:  echo "::set-env name=nuttx_sha::`git -C sources/nuttx rev-parse HEAD`"
+        run:  echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
       - name: Run builds
         uses: ./sources/testing/.github/actions/ci-container
         env:
@@ -193,7 +193,7 @@ jobs:
           key: ${{ runner.os }}-tools-${{ hashFiles('./sources/testing/cibuild.sh') }}
 
       - name: Export NuttX Repo SHA
-        run:  echo "::set-env name=nuttx_sha::`git -C sources/nuttx rev-parse HEAD`"
+        run:  echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
       - name: Run Builds
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
