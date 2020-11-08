@@ -52,16 +52,12 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* A reference to a structure of this type must be passed to the initialization
- * method. It provides some board-specific hooks used by driver to manage the
- * timer and gpio (IRQ and DISP).
+/* A reference to a structure of this type must be passed to the
+ * initialization method. It provides some board-specific hooks used by
+ * driver to manage the timer and gpio (IRQ and DISP).
  *
  * Memory for this structure is provided by the caller.  It is not copied
  * by the driver and is presumed to persist while the driver is active.
@@ -73,11 +69,11 @@ struct memlcd_priv_s
    * callbacks to isolate the Memory LCD driver from differences in GPIO
    * interrupt handling by varying boards and MCUs.
    *
-   * irqattach   - Attach the driver interrupt handler to the GPIO interrupt
+   * attachirq   - Attach the driver interrupt handler to the GPIO interrupt
    *               If isr is NULL, detach and disable it.
    * dispcontrol - Enable or disable the DISP pin and EXTCOMIN interrupt.
-   * setpolarity - Board specified method to set EXTCOMIN.
-   *               Needed only when CONFIG_MEMLCD_EXTCOMIN_MODE_HW is not set.
+   * setpolarity - Board specified method to set EXTCOMIN.  Needed only when
+   *               CONFIG_MEMLCD_EXTCOMIN_MODE_HW is not set.
    * setvcomfreq - Set timer frequency for EXTCOMIN.
    */
 
@@ -88,10 +84,6 @@ struct memlcd_priv_s
 #endif
   void (*setvcomfreq) (unsigned int freq);
 };
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes
@@ -105,9 +97,9 @@ struct memlcd_priv_s
  * Input Parameters:
  *
  *   spi - A reference to the SPI driver instance.
+ *   priv - Board specific structure
  *   devno - A value in the range of 0 through CONFIG_MEMLCD_NINTERFACES-1.
  *   This allows support for multiple devices.
- *   memlcd_priv_s - Board specific structure
  *
  * Returned Value:
  *
