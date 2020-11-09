@@ -33,6 +33,7 @@
 #include <arch/board/board.h>
 
 #include "arm_arch.h"
+#include "barriers.h"
 
 #include "nrf52_gpio.h"
 #include "nrf52_spi.h"
@@ -75,9 +76,7 @@ struct nrf52_spidev_s
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
   uint32_t         irq;        /* SPI IRQ number */
 #endif
-  uint32_t         sck_pin;    /* SCK pin configuration */
-  uint32_t         mosi_pin;   /* MOSI pin configuration */
-  uint32_t         miso_pin;   /* MISO pin configuration */
+  nrf52_pinset_t   sck_pin;    /* SCK pin configuration */
   uint32_t         frequency;  /* Requested clock frequency */
   uint8_t          mode;       /* Mode 0,1,2,3 */
 
@@ -131,6 +130,10 @@ static int nrf52_spi_isr(int irq, FAR void *context, FAR void *arg);
 /* Initialization */
 
 static int nrf52_spi_init(FAR struct nrf52_spidev_s *priv);
+static void nrf52_spi_pselinit(FAR struct nrf52_spidev_s *priv,
+                               uint32_t offset, nrf52_pinset_t pinset);
+static void nrf52_spi_gpioinit(FAR struct nrf52_spidev_s *priv);
+static void nrf52_spi_gpiodeinit(FAR struct nrf52_spidev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -182,10 +185,6 @@ static struct nrf52_spidev_s g_spi0dev =
   .irq       = NRF52_IRQ_SPI_TWI_0,
 #endif
   .sck_pin   = BOARD_SPI0_SCK_PIN,
-  .mosi_pin  = BOARD_SPI0_MOSI_PIN,
-#ifdef BOARD_SPI0_MISO_PIN
-  .miso_pin  = BOARD_SPI0_MISO_PIN,
-#endif
   .frequency = 0,
   .mode      = 0
 };
@@ -237,8 +236,6 @@ static struct nrf52_spidev_s g_spi1dev =
   .irq       = NRF52_IRQ_SPI_TWI_1,
 #endif
   .sck_pin   = BOARD_SPI1_SCK_PIN,
-  .mosi_pin  = BOARD_SPI1_MOSI_PIN,
-  .miso_pin  = BOARD_SPI1_MISO_PIN,
   .frequency = 0,
   .mode      = 0
 };
@@ -290,8 +287,6 @@ static struct nrf52_spidev_s g_spi2dev =
   .irq       = NRF52_IRQ_SPI2,
 #endif
   .sck_pin   = BOARD_SPI2_SCK_PIN,
-  .mosi_pin  = BOARD_SPI2_MOSI_PIN,
-  .miso_pin  = BOARD_SPI2_MISO_PIN,
   .frequency = 0,
   .mode      = 0
 };
@@ -343,8 +338,6 @@ static struct nrf52_spidev_s g_spi3dev =
   .irq       = NRF52_IRQ_SPI3,
 #endif
   .sck_pin   = BOARD_SPI3_SCK_PIN,
-  .mosi_pin  = BOARD_SPI3_MOSI_PIN,
-  .miso_pin  = BOARD_SPI3_MISO_PIN,
   .frequency = 0,
   .mode      = 0
 };
@@ -395,7 +388,6 @@ static inline uint32_t nrf52_spi_getreg(FAR struct nrf52_spidev_s *priv,
 static int nrf52_spi_isr(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct nrf52_spidev_s *priv = (FAR struct nrf52_spidev_s *)arg;
-  uint32_t regval = 0;
 
   /* Get interrupt event */
 
@@ -424,63 +416,20 @@ static int nrf52_spi_isr(int irq, FAR void *context, FAR void *arg)
 
 static int nrf52_spi_init(FAR struct nrf52_spidev_s *priv)
 {
-  uint32_t regval = 0;
-  int      pin    = 0;
-  int      port   = 0;
-
   /* Disable SPI */
 
   nrf52_spi_putreg(priv, NRF52_SPIM_ENABLE_OFFSET, SPIM_ENABLE_DIS);
 
   /* Configure SPI pins */
 
-  nrf52_gpio_config(priv->sck_pin);
-  nrf52_gpio_config(priv->mosi_pin);
-
-#ifdef BOARD_SPI0_MISO_PIN
-  nrf52_gpio_config(priv->miso_pin);
-#endif
-
-  /* Select SCK pins */
-
-  pin  = GPIO_PIN_DECODE(priv->sck_pin);
-  port = GPIO_PORT_DECODE(priv->sck_pin);
-
-  regval = (pin << SPIM_PSELSCK_PIN_SHIFT);
-  regval |= (port << SPIM_PSELSCK_PORT_SHIFT);
-  nrf52_spi_putreg(priv, NRF52_SPIM_PSELSCK_OFFSET, regval);
-
-  /* Select MOSI pins */
-
-  pin  = GPIO_PIN_DECODE(priv->mosi_pin);
-  port = GPIO_PORT_DECODE(priv->mosi_pin);
-
-  regval = (pin << SPIM_PSELMOSI_PIN_SHIFT);
-  regval |= (port << SPIM_PSELMOSI_PORT_SHIFT);
-  nrf52_spi_putreg(priv, NRF52_SPIM_PSELMOSI_OFFSET, regval);
-
-  /* According to manual we have to write 0 to MOSI pin */
-
-  nrf52_gpio_write(priv->mosi_pin, false);
-
-#ifdef BOARD_SPI0_MISO_PIN
-  /* Select MISO pins */
-
-  pin   = GPIO_PIN_DECODE(priv->miso_pin);
-  port  = GPIO_PORT_DECODE(priv->miso_pin);
-
-  regval = (pin << SPIM_PSELMISO_PIN_SHIFT);
-  regval |= (port << SPIM_PSELMISO_PORT_SHIFT);
-  nrf52_spi_putreg(priv, NRF52_SPIM_PSELMISO_OFFSET, regval);
-#endif
+  nrf52_spi_gpioinit(priv);
 
   /* NOTE: Chip select pin must be configured by board-specific logic */
 
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
   /* Enable interrupts for RX and TX done */
 
-  regval = SPIM_INT_END;
-  nrf52_spi_putreg(priv, NRF52_SPIM_INTENSET_OFFSET, regval);
+  nrf52_spi_putreg(priv, NRF52_SPIM_INTENSET_OFFSET, SPIM_INT_END);
 #endif
 
   /* Enable SPI */
@@ -488,6 +437,202 @@ static int nrf52_spi_init(FAR struct nrf52_spidev_s *priv)
   nrf52_spi_putreg(priv, NRF52_SPIM_ENABLE_OFFSET, SPIM_ENABLE_EN);
 
   return OK;
+}
+
+
+/****************************************************************************
+ * Name: nrf52_spi_deinit
+ *
+ * Description:
+ *   Configure SPI
+ *
+ ****************************************************************************/
+
+static int nrf52_spi_deinit(FAR struct nrf52_spidev_s *priv)
+{
+  /* Disable SPI */
+
+  nrf52_spi_putreg(priv, NRF52_SPIM_ENABLE_OFFSET, SPIM_ENABLE_DIS);
+
+#ifdef CONFIG_ARCH_CHIP_NRF52832
+  /* Apply workaround for errata 89 (replace dummy read by barrier to avoid
+   * compiler optimizing it away)
+   */
+
+  nrf52_spi_putreg(priv, NRF52_SPIM_POWER_OFFSET, 0);
+  ARM_DSB();
+  ARM_ISB();
+  nrf52_spi_putreg(priv, NRF52_SPIM_POWER_OFFSET, 1);
+#endif
+
+  /* Unconfigure SPI pins */
+
+  nrf52_spi_gpiodeinit(priv);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nrf52_spi_pselinit
+ *
+ * Description:
+ *   Configure PSEL for SPI devices
+ *
+ ****************************************************************************/
+
+static void nrf52_spi_pselinit(FAR struct nrf52_spidev_s *priv,
+                               uint32_t offset, nrf52_pinset_t pinset)
+{
+  uint32_t regval;
+  int pin  = GPIO_PIN_DECODE(pinset);
+  int port = GPIO_PORT_DECODE(pinset);
+
+  regval = (pin << SPIM_PSEL_PIN_SHIFT);
+  regval |= (port << SPIM_PSEL_PORT_SHIFT);
+  nrf52_spi_putreg(priv, offset, regval);
+}
+
+/****************************************************************************
+ * Name: nrf52_spi_gpioinit
+ *
+ * Description:
+ *   Configure GPIO for SPI pins
+ *
+ ****************************************************************************/
+
+static void nrf52_spi_gpioinit(FAR struct nrf52_spidev_s *priv)
+{
+  nrf52_gpio_config(priv->sck_pin);
+  nrf52_spi_pselinit(priv, NRF52_SPIM_PSELSCK_OFFSET, priv->sck_pin);
+
+#ifdef CONFIG_NRF52_SPI0_MASTER
+  if (priv == &g_spi0dev)
+    {
+#ifdef BOARD_SPI0_MISO_PIN
+      nrf52_gpio_config(BOARD_SPI0_MISO_PIN);
+      nrf52_spi_pselinit(priv, NRF52_SPIM_PSELMISO_OFFSET,
+                         BOARD_SPI0_MISO_PIN);
+#endif
+#ifdef BOARD_SPI0_MOSI_PIN
+      nrf52_gpio_config(BOARD_SPI0_MOSI_PIN);
+      nrf52_spi_pselinit(priv, NRF52_SPIM_PSELMOSI_OFFSET,
+                         BOARD_SPI0_MOSI_PIN);
+      nrf52_gpio_write(BOARD_SPI0_MOSI_PIN, false);
+#endif
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SPI1_MASTER
+  if (priv == &g_spi1dev)
+    {
+#ifdef BOARD_SPI1_MISO_PIN
+      nrf52_gpio_config(BOARD_SPI1_MISO_PIN);
+      nrf52_spi_pselinit(priv, NRF52_SPIM_PSELMISO_OFFSET,
+                         BOARD_SPI1_MISO_PIN);
+#endif
+#ifdef BOARD_SPI1_MOSI_PIN
+      nrf52_gpio_config(BOARD_SPI1_MOSI_PIN);
+      nrf52_spi_pselinit(priv, NRF52_SPIM_PSELMOSI_OFFSET,
+                         BOARD_SPI1_MOSI_PIN);
+      nrf52_gpio_write(BOARD_SPI1_MOSI_PIN, false);
+#endif
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SPI2_MASTER
+  if (priv == &g_spi2dev)
+    {
+#ifdef BOARD_SPI2_MISO_PIN
+      nrf52_gpio_config(BOARD_SPI2_MISO_PIN);
+      nrf52_spi_pselinit(priv, NRF52_SPIM_PSELMISO_OFFSET,
+                         BOARD_SPI2_MISO_PIN);
+#endif
+#ifdef BOARD_SPI2_MOSI_PIN
+      nrf52_gpio_config(BOARD_SPI2_MOSI_PIN);
+      nrf52_spi_pselinit(priv, NRF52_SPIM_PSELMOSI_OFFSET,
+                         BOARD_SPI2_MOSI_PIN);
+      nrf52_gpio_write(BOARD_SPI2_MOSI_PIN, false);
+#endif
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SPI3_MASTER
+  if (priv == &g_spi3dev)
+    {
+#ifdef BOARD_SPI3_MISO_PIN
+      nrf52_gpio_config(BOARD_SPI3_MISO_PIN);
+      nrf52_spi_pselinit(priv, NRF52_SPIM_PSELMISO_OFFSET,
+                         BOARD_SPI3_MISO_PIN);
+#endif
+#ifdef BOARD_SPI3_MOSI_PIN
+      nrf52_gpio_config(BOARD_SPI3_MOSI_PIN);
+      nrf52_spi_pselinit(priv, NRF52_SPIM_PSELMOSI_OFFSET,
+                         BOARD_SPI3_MOSI_PIN);
+      nrf52_gpio_write(BOARD_SPI3_MOSI_PIN, false);
+#endif
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: nrf52_spi_gpioinit
+ *
+ * Description:
+ *   Configure GPIO for SPI pins
+ *
+ ****************************************************************************/
+
+static void nrf52_spi_gpiodeinit(FAR struct nrf52_spidev_s *priv)
+{
+  nrf52_gpio_unconfig(priv->sck_pin);
+
+#ifdef CONFIG_NRF52_SPI0_MASTER
+  if (priv == &g_spi0dev)
+    {
+#ifdef BOARD_SPI0_MISO_PIN
+      nrf52_gpio_unconfig(BOARD_SPI0_MISO_PIN);
+#endif
+#ifdef BOARD_SPI0_MOSI_PIN
+      nrf52_gpio_unconfig(BOARD_SPI0_MOSI_PIN);
+#endif
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SPI1_MASTER
+  if (priv == &g_spi1dev)
+    {
+#ifdef BOARD_SPI1_MISO_PIN
+      nrf52_gpio_unconfig(BOARD_SPI1_MISO_PIN);
+#endif
+#ifdef BOARD_SPI1_MOSI_PIN
+      nrf52_gpio_unconfig(BOARD_SPI1_MOSI_PIN);
+#endif
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SPI2_MASTER
+  if (priv == &g_spi2dev)
+    {
+#ifdef BOARD_SPI2_MISO_PIN
+      nrf52_gpio_unconfig(BOARD_SPI2_MISO_PIN);
+#endif
+#ifdef BOARD_SPI2_MOSI_PIN
+      nrf52_gpio_unconfig(BOARD_SPI2_MOSI_PIN);
+#endif
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SPI3_MASTER
+  if (priv == &g_spi3dev)
+    {
+#ifdef BOARD_SPI3_MISO_PIN
+      nrf52_gpio_unconfig(BOARD_SPI3_MISO_PIN);
+#endif
+#ifdef BOARD_SPI3_MOSI_PIN
+      nrf52_gpio_unconfig(BOARD_SPI3_MOSI_PIN);
+#endif
+    }
+#endif
 }
 
 /****************************************************************************
@@ -969,7 +1114,7 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
 
       nrf52_spi_putreg(priv, NRF52_SPIM_TASK_START_OFFSET, SPIM_TASKS_START);
 
-    #ifndef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
+#ifndef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
       /* Wait for RX done and TX done */
 
       while (nrf52_spi_getreg(priv, NRF52_SPIM_EVENTS_END_OFFSET) != 1);
@@ -977,11 +1122,11 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
       /* Clear event */
 
       nrf52_spi_putreg(priv, NRF52_SPIM_EVENTS_END_OFFSET, 0);
-    #else
+#else
       /* Wait for transfer complete */
 
       nxsem_wait_uninterruptible(&priv->sem_isr);
-    #endif
+#endif
 
       if (nrf52_spi_getreg(priv, NRF52_SPIM_TXDAMOUNT_OFFSET) !=
           transfer_size)
