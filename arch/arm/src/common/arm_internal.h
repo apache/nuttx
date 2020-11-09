@@ -212,7 +212,7 @@ EXTERN volatile uint32_t *g_current_regs[1];
  * CONFIG_RAM_END
  */
 
-EXTERN const uint32_t g_idle_topstack;
+EXTERN const uintptr_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 

@@ -77,7 +77,7 @@
  * Public Data
  ****************************************************************************/
 
-const uint32_t g_idle_topstack = IDLE_STACK;
+const uintptr_t g_idle_topstack = IDLE_STACK;
 
 /****************************************************************************
  * Private Functions
