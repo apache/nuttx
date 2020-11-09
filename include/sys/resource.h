@@ -63,7 +63,7 @@
 #define RUSAGE_CHILDREN 1           /* Returns information about children of
                                      * the current process */
 
-/* Possible values for the resource argument of getrlimit() and setrlimit(): */
+/* Possible values for the resource argument of getrlimit() and setrlimit() */
 
 #define RLIMIT_CORE     1           /* Limit on size of core dump file */
 #define RLIMIT_CPU      2           /* Limit on CPU time per process. */
@@ -89,8 +89,8 @@
  * Type Definitions
  ****************************************************************************/
 
-/* All resource limits are represented with this type.  It must be an unsigned
- * integral type.
+/* All resource limits are represented with this type.
+ * It must be an unsigned integral type.
  */
 
 typedef uint32_t rlim_t;
