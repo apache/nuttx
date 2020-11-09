@@ -630,9 +630,9 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
       return totalsize;
     }
 
-  /* Show the signal mask */
+  /* Show the signal mask. Note: sigset_t is uint32_t on NuttX. */
 
-  linesize = snprintf(procfile->line, STATUS_LINELEN, "%-12s%08x\n",
+  linesize = snprintf(procfile->line, STATUS_LINELEN, "%-12s%08" PRIx32 "\n",
                       "SigMask:", tcb->sigprocmask);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
