@@ -232,7 +232,7 @@ struct pm_governor_s
    *
    *   NOTE: since this will be called from pm_initialize(), the system
    *   is in very early boot state when this callback is invoked. Thus,
-   *   only ver basic initialization should be performed (e.g. no memory
+   *   only very basic initialization should be performed (e.g. no memory
    *   should be allocated).
    *
    **************************************************************************/

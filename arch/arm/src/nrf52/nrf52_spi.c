@@ -31,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 #include <arch/board/board.h>
+#include <nuttx/power/pm.h>
 
 #include "arm_arch.h"
 #include "barriers.h"
@@ -86,6 +87,7 @@ struct nrf52_spidev_s
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
   sem_t            sem_isr;    /* Interrupt wait semaphore */
 #endif
+  bool             initialized;
 };
 
 /****************************************************************************
@@ -133,11 +135,28 @@ static int nrf52_spi_init(FAR struct nrf52_spidev_s *priv);
 static void nrf52_spi_pselinit(FAR struct nrf52_spidev_s *priv,
                                uint32_t offset, nrf52_pinset_t pinset);
 static void nrf52_spi_gpioinit(FAR struct nrf52_spidev_s *priv);
+
+#ifdef CONFIG_PM
+static int nrf52_spi_deinit(FAR struct nrf52_spidev_s *priv);
 static void nrf52_spi_gpiodeinit(FAR struct nrf52_spidev_s *priv);
+
+static int nrf52_spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
+                                enum pm_state_e pmstate);
+static void nrf52_spi_pm_notify(FAR struct pm_callback_s *cb, int domain,
+                                enum pm_state_e pmstate);
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#ifdef CONFIG_PM
+struct pm_callback_s g_pm_callbacks =
+{
+  .prepare = nrf52_spi_pm_prepare,
+  .notify  = nrf52_spi_pm_notify
+};
+#endif
 
 /* SPI0 */
 
@@ -439,7 +458,7 @@ static int nrf52_spi_init(FAR struct nrf52_spidev_s *priv)
   return OK;
 }
 
-
+#ifdef CONFIG_PM
 /****************************************************************************
  * Name: nrf52_spi_deinit
  *
@@ -471,6 +490,7 @@ static int nrf52_spi_deinit(FAR struct nrf52_spidev_s *priv)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: nrf52_spi_pselinit
@@ -574,6 +594,7 @@ static void nrf52_spi_gpioinit(FAR struct nrf52_spidev_s *priv)
 #endif
 }
 
+#ifdef CONFIG_PM
 /****************************************************************************
  * Name: nrf52_spi_gpioinit
  *
@@ -634,6 +655,7 @@ static void nrf52_spi_gpiodeinit(FAR struct nrf52_spidev_s *priv)
     }
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: nrf52_spi_lock
@@ -1079,7 +1101,7 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
    * in batches
    */
 
-  if (nwords > 0xFF)
+  if (nwords > 0xff)
     {
       if (rxbuffer != NULL)
         {
@@ -1159,7 +1181,7 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
 
   /* Clear list mode */
 
-  if (nwords > 0xFF)
+  if (nwords > 0xff)
     {
       nrf52_spi_putreg(priv, NRF52_SPIM_RXDLIST_OFFSET, 0);
       nrf52_spi_putreg(priv, NRF52_SPIM_TXDLIST_OFFSET, 0);
@@ -1251,6 +1273,126 @@ static int nrf52_spi_trigger(FAR struct spi_dev_s *dev)
 }
 #endif
 
+#ifdef CONFIG_PM
+/****************************************************************************
+ * Name: nrf52_spi_pm_prepare
+ ****************************************************************************/
+
+static int nrf52_spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
+                                enum pm_state_e pmstate)
+{
+  if (pmstate == PM_STANDBY || pmstate == PM_SLEEP)
+    {
+      bool active = false;
+
+#ifdef CONFIG_NRF52_SPI0_MASTER
+      active |= nrf52_spi_getreg(&g_spi0dev, SPIM_EVENTS_STARTED);
+#endif
+#ifdef CONFIG_NRF52_SPI1_MASTER
+      active |= nrf52_spi_getreg(&g_spi0dev, SPIM_EVENTS_STARTED);
+#endif
+#ifdef CONFIG_NRF52_SPI2_MASTER
+      active |= nrf52_spi_getreg(&g_spi0dev, SPIM_EVENTS_STARTED);
+#endif
+#ifdef CONFIG_NRF52_SPI3_MASTER
+      active |= nrf52_spi_getreg(&g_spi0dev, SPIM_EVENTS_STARTED);
+#endif
+
+      if (active)
+        {
+          /* SPI is being used, cannot disable */
+
+          return -1;
+        }
+      else
+        {
+          /* SPI is inactive, can go to sleep */
+
+          return 0;
+        }
+    }
+  else
+    {
+      /* We can always go to any other state */
+
+      return 0;
+    }
+}
+
+/****************************************************************************
+ * Name: nrf52_spi_pm_notify
+ ****************************************************************************/
+
+static void nrf52_spi_pm_notify(FAR struct pm_callback_s *cb, int domain,
+                                enum pm_state_e pmstate)
+{
+  if (pmstate == PM_SLEEP || pmstate == PM_STANDBY)
+    {
+      /* Deinit SPI peripheral on each initialized device */
+
+#ifdef CONFIG_NRF52_SPI0_MASTER
+      if (g_spi0dev.initialized)
+        {
+          nrf52_spi_deinit(&g_spi0dev);
+        }
+#endif
+
+#ifdef CONFIG_NRF52_SPI1_MASTER
+      if (g_spi1dev.initialized)
+        {
+          nrf52_spi_deinit(&g_spi1dev);
+        }
+#endif
+
+#ifdef CONFIG_NRF52_SPI2_MASTER
+      if (g_spi2dev.initialized)
+        {
+          nrf52_spi_deinit(&g_spi2dev);
+        }
+#endif
+
+#ifdef CONFIG_NRF52_SPI3_MASTER
+      if (g_spi3dev.initialized)
+        {
+          nrf52_spi_deinit(&g_spi3dev);
+        }
+#endif
+    }
+  else
+    {
+      /* Reinit SPI peripheral on each initialized device */
+
+#ifdef CONFIG_NRF52_SPI0_MASTER
+      if (g_spi0dev.initialized)
+        {
+          nrf52_spi_init(&g_spi0dev);
+        }
+#endif
+
+#ifdef CONFIG_NRF52_SPI1_MASTER
+      if (g_spi1dev.initialized)
+        {
+          nrf52_spi_init(&g_spi1dev);
+        }
+#endif
+
+#ifdef CONFIG_NRF52_SPI2_MASTER
+      if (g_spi2dev.initialized)
+        {
+          nrf52_spi_init(&g_spi2dev);
+        }
+#endif
+
+#ifdef CONFIG_NRF52_SPI3_MASTER
+      if (g_spi3dev.initialized)
+        {
+          nrf52_spi_init(&g_spi3dev);
+        }
+#endif
+    }
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1318,6 +1460,10 @@ FAR struct spi_dev_s *nrf52_spibus_initialize(int port)
   /* Initialize the SPI */
 
   nrf52_spi_init(priv);
+
+  /* Mark device as initialized */
+
+  priv->initialized = true;
 
   /* Initialize the SPI semaphore */
 
