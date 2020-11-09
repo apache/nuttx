@@ -102,6 +102,15 @@ int nxtask_exit(void)
 
   nxsched_remove_readytorun(dtcb);
 
+  /* If there are any pending tasks, then add them to the ready-to-run
+   * task list now
+   */
+
+  if (g_pendingtasks.head != NULL)
+    {
+      nxsched_merge_pending();
+    }
+
   /* Get the new task at the head of the ready to run list */
 
 #ifdef CONFIG_SMP
@@ -189,15 +198,6 @@ int nxtask_exit(void)
                   &g_cpu_schedlock);
     }
 #endif
-
-  /* If there are any pending tasks, then add them to the ready-to-run
-   * task list now
-   */
-
-  if (g_pendingtasks.head != NULL)
-    {
-      nxsched_merge_pending();
-    }
 
   return ret;
 }
