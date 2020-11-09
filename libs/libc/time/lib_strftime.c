@@ -397,8 +397,8 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
 
            case 's':
              {
-               len = snprintf(dest, chleft, "%d",
-                              mktime((FAR struct tm *)tm));
+               len = snprintf(dest, chleft, "%ju",
+                              (uintmax_t)mktime((FAR struct tm *)tm));
              }
              break;
 
