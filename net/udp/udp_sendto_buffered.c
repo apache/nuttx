@@ -500,8 +500,8 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
-                         size_t len, int flags, FAR const struct sockaddr *to,
-                         socklen_t tolen)
+                         size_t len, int flags,
+                         FAR const struct sockaddr *to, socklen_t tolen)
 {
   FAR struct udp_conn_s *conn;
   FAR struct udp_wrbuffer_s *wrb;
@@ -696,7 +696,8 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
               addr6->sin6_family = AF_INET6;
               addr6->sin6_port   = conn->rport;
-              net_ipv6addr_copy(addr6->sin6_addr.s6_addr, conn->u.ipv6.raddr);
+              net_ipv6addr_copy(addr6->sin6_addr.s6_addr,
+                                conn->u.ipv6.raddr);
             }
 #endif /* CONFIG_NET_IPv6 */
         }
