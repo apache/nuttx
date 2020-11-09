@@ -178,36 +178,61 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
       goto errout;
     }
 
+  /* Get the stream list from the TCB */
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+  slist = tcb->group->tg_streamlist;
+#else
+  slist = &tcb->group->tg_streamlist;
+#endif
+
   /* Allocate FILE structure */
 
-#ifdef CONFIG_STDIO_DISABLE_BUFFERING
-  stream = group_zalloc(tcb->group, sizeof(FILE));
-  if (stream == NULL)
+  if (fd >= 3)
     {
-      ret = -ENOMEM;
-      goto errout;
+      stream = group_zalloc(tcb->group, sizeof(FILE));
+      if (stream == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout;
+        }
+
+      /* Add FILE structure to the stream list */
+
+      ret = nxsem_wait(&slist->sl_sem);
+      if (ret < 0)
+        {
+          group_free(tcb->group, stream);
+          goto errout;
+        }
+
+      if (slist->sl_tail)
+        {
+          slist->sl_tail->fs_next = stream;
+          slist->sl_tail = stream;
+        }
+      else
+        {
+          slist->sl_head = stream;
+          slist->sl_tail = stream;
+        }
+
+      nxsem_post(&slist->sl_sem);
+
+      /* Initialize the semaphore the manages access to the buffer */
+
+      lib_sem_initialize(stream);
     }
-#else
-  stream = group_malloc(tcb->group, sizeof(FILE) +
-                        CONFIG_STDIO_BUFFER_SIZE);
-  if (stream == NULL)
+  else
     {
-      ret = -ENOMEM;
-      goto errout;
+      stream = &slist->sl_std[fd];
     }
 
-  /* Zero the structure */
-
-  memset(stream, 0, sizeof(FILE));
-
-  /* Initialize the semaphore the manages access to the buffer */
-
-  lib_sem_initialize(stream);
-
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
 #if CONFIG_STDIO_BUFFER_SIZE > 0
   /* Set up pointers */
 
-  stream->fs_bufstart = (FAR unsigned char *)(stream + 1);
+  stream->fs_bufstart = stream->fs_buffer;
   stream->fs_bufend   = &stream->fs_bufstart[CONFIG_STDIO_BUFFER_SIZE];
   stream->fs_bufpos   = stream->fs_bufstart;
   stream->fs_bufread  = stream->fs_bufstart;
@@ -229,43 +254,12 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
   stream->fs_fd       = fd;
   stream->fs_oflags   = oflags;
 
-  /* Get the stream list from the TCB */
-
-#ifdef CONFIG_MM_KERNEL_HEAP
-  slist = tcb->group->tg_streamlist;
-#else
-  slist = &tcb->group->tg_streamlist;
-#endif
-
-  /* Add FILE structure to the stream list */
-
-  ret = nxsem_wait(&slist->sl_sem);
-  if (ret < 0)
-    {
-      goto errout_with_mem;
-    }
-
-  if (slist->sl_tail)
-    {
-      slist->sl_tail->fs_next = stream;
-      slist->sl_tail = stream;
-    }
-  else
-    {
-      slist->sl_head = stream;
-      slist->sl_tail = stream;
-    }
-
-  nxsem_post(&slist->sl_sem);
   if (filep != NULL)
     {
       *filep = stream;
     }
 
   return OK;
-
-errout_with_mem:
-  group_free(tcb->group, stream);
 
 errout:
   if (filep != NULL)

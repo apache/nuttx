@@ -469,6 +469,9 @@ struct file_struct
   FAR unsigned char      *fs_bufend;    /* Pointer to 1 past end of buffer */
   FAR unsigned char      *fs_bufpos;    /* Current position in buffer */
   FAR unsigned char      *fs_bufread;   /* Pointer to 1 past last buffered read char. */
+#  if CONFIG_STDIO_BUFFER_SIZE > 0
+  unsigned char           fs_buffer[CONFIG_STDIO_BUFFER_SIZE];
+#  endif
 #endif
   uint16_t                fs_oflags;    /* Open mode flags */
   uint8_t                 fs_flags;     /* Stream flags */
@@ -481,6 +484,7 @@ struct file_struct
 struct streamlist
 {
   sem_t                   sl_sem;   /* For thread safety */
+  struct file_struct      sl_std[3];
   FAR struct file_struct *sl_head;
   FAR struct file_struct *sl_tail;
 };

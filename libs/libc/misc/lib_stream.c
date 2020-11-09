@@ -85,6 +85,15 @@ void lib_stream_initialize(FAR struct task_group_s *group)
   _SEM_INIT(&list->sl_sem, 0, 1);
   list->sl_head = NULL;
   list->sl_tail = NULL;
+
+  /* Initialize stdin, stdout and stderr stream */
+
+  list->sl_std[0].fs_fd = -1;
+  lib_sem_initialize(&list->sl_std[0]);
+  list->sl_std[1].fs_fd = -1;
+  lib_sem_initialize(&list->sl_std[1]);
+  list->sl_std[2].fs_fd = -1;
+  lib_sem_initialize(&list->sl_std[2]);
 }
 #endif /* CONFIG_FILE_STREAM */
 
@@ -147,6 +156,14 @@ void lib_stream_release(FAR struct task_group_s *group)
           group_free(group, stream);
         }
     }
+
+  /* Destroy stdin, stdout and stderr stream */
+
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+  _SEM_DESTROY(&list->sl_std[0].fs_sem);
+  _SEM_DESTROY(&list->sl_std[1].fs_sem);
+  _SEM_DESTROY(&list->sl_std[2].fs_sem);
+#endif
 }
 
 #endif /* CONFIG_FILE_STREAM */
