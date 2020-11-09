@@ -402,6 +402,10 @@ int nx_bringup(void)
    * by all of the threads created by the IDLE task.
    */
 
+#ifdef CONFIG_LIB_HOMEDIR
+  setenv("PWD", CONFIG_LIB_HOMEDIR, 1);
+#endif
+
 #ifdef CONFIG_PATH_INITIAL
   setenv("PATH", CONFIG_PATH_INITIAL, 1);
 #endif
