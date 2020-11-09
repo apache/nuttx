@@ -167,7 +167,7 @@ static int  efm32_attach(struct uart_dev_s *dev);
 static void efm32_detach(struct uart_dev_s *dev);
 static int  efm32_interrupt(int irq, void *context, FAR void *arg);
 static int  efm32_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  efm32_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  efm32_receive(struct uart_dev_s *dev, unsigned int *status);
 static void efm32_rxint(struct uart_dev_s *dev, bool enable);
 static bool efm32_rxavailable(struct uart_dev_s *dev);
 static void efm32_send(struct uart_dev_s *dev, int ch);
@@ -583,7 +583,7 @@ static int efm32_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int efm32_receive(struct uart_dev_s *dev, uint32_t *status)
+static int efm32_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
   uint32_t rxdatax;
