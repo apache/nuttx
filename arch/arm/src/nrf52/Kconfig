@@ -109,14 +109,6 @@ config NRF52_RTC
 	bool
 	default n
 
-config NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
-	bool "SPI Master 1 Byte transfer anomaly workaround"
-	depends on NRF52_SPI_MASTER && ARCH_CHIP_NRF52832
-	default y
-	---help---
-		Enable the workaround to fix SPI Master 1 byte transfer bug
-		which occurs in NRF52832 revision 1 and revision 2.
-
 menu "NRF52 Peripheral Selection"
 
 config NRF52_I2C0_MASTER
@@ -623,3 +615,14 @@ config NRF52_SAADC_LIMITS
 endif # NRF52_SAADC
 
 endmenu # SAADC Configuration
+
+menu "SPI Configuration"
+
+config NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
+	bool "Master 1 Byte transfer anomaly workaround"
+	depends on NRF52_SPI_MASTER && ARCH_CHIP_NRF52832
+	default y
+	---help---
+		Enable the workaround to fix SPI Master 1 byte transfer bug
+		which occurs in NRF52832 revision 1 and revision 2.
+endmenu
