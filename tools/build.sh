@@ -71,7 +71,11 @@ function build_board()
     echo "Error: ############# save ${1} fail ##############"
     exit 3
   fi
-  cp ${NUTTXDIR}/defconfig ${ROOTDIR}/nuttx/boards/*/*/${1/[:|\/]//configs/}
+  if [ ! -d ${ROOTDIR}/nuttx/$1 ]; then
+    cp ${NUTTXDIR}/defconfig ${ROOTDIR}/nuttx/boards/*/*/${1/[:|\/]//configs/}
+  else
+    cp ${NUTTXDIR}/defconfig ${ROOTDIR}/nuttx/$1
+  fi
 }
 
 function pack_sdk()
