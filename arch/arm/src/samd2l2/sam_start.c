@@ -138,7 +138,9 @@ void __start(void)
 
   sam_clockconfig();
 
-  /* Configure the uart early so that we can get debug output as soon as possible */
+  /* Configure the uart early so that we can get debug output as soon as
+   * possible
+   */
 
   sam_lowsetup();
   showprogress('A');
