@@ -52,6 +52,10 @@
 #include "photon.h"
 #include "stm32_wdg.h"
 
+#ifdef CONFIG_USBADB
+#  include <nuttx/usb/adb.h>
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -60,10 +64,10 @@
  * Name: stm32_bringup
  *
  * Description:
- *   Called either by board_initialize() if CONFIG_BOARD_LATE_INITIALIZE or by
- *   board_app_initialize if CONFIG_LIB_BOARDCTL is selected.  This function
- *   initializes and configures all on-board features appropriate for the
- *   selected configuration.
+ *   Called either by board_initialize() if CONFIG_BOARD_LATE_INITIALIZE or
+ *   by board_app_initialize if CONFIG_LIB_BOARDCTL is selected.
+ *   This function initializes and configures all on-board features
+ *   appropriate for the selected configuration.
  *
  ****************************************************************************/
 
@@ -153,5 +157,26 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_USBDEV_COMPOSITE
+
+#ifndef CONFIG_BOARDCTL_USBDEVCTRL
+  ret = board_composite_initialize(0);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to initialize composite: %d\n", ret);
+      return ret;
+    }
+
+  if (board_composite_connect(0, 0) == NULL)
+    {
+      syslog(LOG_ERR, "Failed to connect composite: %d\n", ret);
+      return ret;
+    }
+#endif /* !CONFIG_BOARDCTL_USBDEVCTRL */
+#else
+#ifdef CONFIG_USBADB
+  usbdev_adb_initialize();
+#endif
+#endif /* CONFIG_USBDEV_COMPOSITE */
   return ret;
 }
