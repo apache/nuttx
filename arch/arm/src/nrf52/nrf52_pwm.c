@@ -153,7 +153,7 @@ struct nrf52_pwm_s g_nrf52_pwm0 =
 struct nrf52_pwm_s g_nrf52_pwm1 =
 {
   .ops     = &g_nrf52_pwmops,
-  .base    = NRF52_PWM1_BASE
+  .base    = NRF52_PWM1_BASE,
 #ifdef CONFIG_NRF52_PWM1_CH0
   .ch0_pin = NRF52_PWM1_CH0_PIN,
 #endif
