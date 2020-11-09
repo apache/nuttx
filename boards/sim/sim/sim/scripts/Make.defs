@@ -36,7 +36,10 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
 endif
 
 ARCHCPUFLAGS = -fno-builtin
-ARCHCPUFLAGSXX = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
+ARCHCPUFLAGSXX = -fno-builtin -nostdinc++ -fcheck-new
+ifeq ($(CONFIG_CXX_EXCEPTION),)
+  ARCHCPUFLAGSXX += -fno-exceptions
+endif
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
