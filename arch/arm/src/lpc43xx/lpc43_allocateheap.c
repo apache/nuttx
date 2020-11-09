@@ -340,7 +340,8 @@
  * aligned).
  */
 
-const uint32_t g_idle_topstack = (uint32_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
+const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
+    CONFIG_IDLETHREAD_STACKSIZE;
 
 #ifdef MM_HAVE_REGION
 static uint8_t g_mem_region_next = 0;

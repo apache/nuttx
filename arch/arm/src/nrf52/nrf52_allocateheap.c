@@ -97,7 +97,8 @@
  * aligned).
  */
 
-const uint32_t g_idle_topstack = (uint32_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
+const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
+    CONFIG_IDLETHREAD_STACKSIZE;
 
 /****************************************************************************
  * Public Functions
