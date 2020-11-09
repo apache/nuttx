@@ -111,9 +111,9 @@ ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt);
  * Description:
  *   The writev() function is equivalent to write(), except as described
  *   below. The writev() function will gather output data from the 'iovcnt'
- *   buffers specified by the members of the 'iov' array: iov[0], iov[1], ...,
- *   iov[iovcnt-1]. The 'iovcnt' argument is valid if greater than 0 and less
- *   than or equal to IOV_MAX, as defined in limits.h.
+ *   buffers specified by the members of the 'iov' array: iov[0], iov[1],
+ *   ..., iov[iovcnt-1]. The 'iovcnt' argument is valid if greater than 0
+ *   and less than or equal to IOV_MAX, as defined in limits.h.
  *
  *   Each iovec entry specifies the base address and length of an area in
  *   memory from which data should be written. The writev() function always
