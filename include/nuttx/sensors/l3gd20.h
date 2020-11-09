@@ -229,16 +229,6 @@ struct l3gd20_config_s
   int (*attach)(FAR struct l3gd20_config_s *, xcpt_t);
 };
 
-/* Data returned by reading from the L3GD20 is returned in this format. */
-
-struct l3gd20_sensor_data_s
-{
-  int16_t x_gyr;              /* Measurement result for x axis */
-  int16_t y_gyr;              /* Measurement result for y axis */
-  int16_t z_gyr;              /* Measurement result for z axis */
-  int8_t temperature;         /* Measurement result for temperature sensor */
-};
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -258,7 +248,8 @@ extern "C"
  *   Register the L3DF20 character device as 'devpath'.
  *
  * Input Parameters:
- *   devno   - The device number, used to build the device path as /dev/sensor/gyro_uncalN
+ *   devno   - The device number, used to build the device path
+ *             as /dev/sensor/gyro_uncalN
  *   spi     - An SPI driver instance.
  *   config  - configuration for the L3GD20 driver. For details see
  *             description above.
