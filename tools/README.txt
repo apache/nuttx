@@ -1002,6 +1002,7 @@ testbuild.sh
          Default $WD/../nuttx, where $WD is the parent directory of
          the directory where this script is.
       -p only print the list of configs without running any builds
+      -C Skip tree cleanness check.
       -G Use "git clean -xfdq" instead of "make distclean" to clean the tree.
          This option may speed up the builds. However, note that:
            * This assumes that your trees are git based.
