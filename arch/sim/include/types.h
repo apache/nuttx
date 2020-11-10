@@ -72,8 +72,18 @@ typedef unsigned short     _uint16_t;
 typedef signed int         _int32_t;
 typedef unsigned int       _uint32_t;
 
+/* Note about host OS types:
+ * - int64_t is long long for 64-bit macOS
+ * - int64_t is long for Ubuntu x86-64
+ */
+
+#if defined(CONFIG_HOST_MACOS) || !defined(_LP64)
 typedef signed long long   _int64_t;
 typedef unsigned long long _uint64_t;
+#else
+typedef signed long        _int64_t;
+typedef unsigned long      _uint64_t;
+#endif
 #define __INT64_DEFINED
 
 #if defined(__APPLE_CC__)
