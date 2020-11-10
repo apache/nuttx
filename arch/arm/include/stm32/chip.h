@@ -2486,6 +2486,44 @@
 #  error "Unsupported STM32 chip"
 #endif
 
+/* Peripheral IP versions *************************************************************************/
+
+/* Peripheral IP versions are invariant and should be decided here, not in
+ * Kconfig.
+ *
+ * REVISIT: Currently only SPI IP version is handled here, with others being
+ *          handled in Kconfig. Those others need to be gradually refactored
+ *          and resolved here.
+ */
+
+#if defined(CONFIG_STM32_STM32F10XX)
+#  define STM32_HAVE_IP_SPI_V1
+
+#elif defined(CONFIG_STM32_STM32F20XX)
+#  define STM32_HAVE_IP_SPI_V2
+
+#elif defined(CONFIG_STM32_STM32F30XX)
+#  define STM32_HAVE_IP_SPI_V3
+
+#elif defined(CONFIG_STM32_STM32F33XX)
+#  define STM32_HAVE_IP_SPI_V1
+
+#elif defined(CONFIG_STM32_STM32F37XX)
+#  define STM32_HAVE_IP_SPI_V3
+
+#elif defined(CONFIG_STM32_STM32F4XXX)
+#  define STM32_HAVE_IP_SPI_V2
+
+#elif defined(CONFIG_STM32_STM32G47XX)
+#  define STM32_HAVE_IP_SPI_V4
+
+#elif defined(CONFIG_STM32_STM32L15XX)
+#  define STM32_HAVE_IP_SPI_V1
+
+#else
+#  error "Did not resolve peripheral IP versions!"
+#endif
+
 /* NVIC priority levels ***************************************************************************/
 
 #define NVIC_SYSH_PRIORITY_MIN     0xf0 /* All bits set in minimum priority */
