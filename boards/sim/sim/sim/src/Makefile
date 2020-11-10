@@ -77,6 +77,7 @@ ifeq ($(CONFIG_NSH_ROMFSETC),y)
 ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
   RCSRCS = etc/init.d/rcS
   RCRAWS = etc/group etc/passwd
+  RCRAWS += etc/ssl/curl/cacert.pem
 endif
 endif
 
