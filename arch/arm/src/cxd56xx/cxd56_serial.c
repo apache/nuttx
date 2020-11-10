@@ -121,7 +121,7 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static bool up_rxflowcontrol(FAR struct uart_dev_s *dev,
                              unsigned int nbuffered, bool upper);
 #endif
-static int up_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status);
+static int up_receive(FAR struct uart_dev_s *dev, FAR unsigned int *status);
 static void up_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(FAR struct uart_dev_s *dev);
 static void up_send(FAR struct uart_dev_s *dev, int ch);
@@ -916,7 +916,7 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status)
+static int up_receive(FAR struct uart_dev_s *dev, FAR unsigned int *status)
 {
   FAR struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t rbr;
