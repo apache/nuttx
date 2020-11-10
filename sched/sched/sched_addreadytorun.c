@@ -174,10 +174,6 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
   int cpu;
   int me;
 
-  /* Lock the tasklists before accessing */
-
-  irqstate_t lock = nxsched_lock_tasklist();
-
   /* Check if the blocked TCB is locked to this CPU */
 
   if ((btcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
@@ -276,9 +272,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 
       if (cpu != me)
         {
-          nxsched_unlock_tasklist(lock);
           DEBUGVERIFY(up_cpu_pause(cpu));
-          lock = nxsched_lock_tasklist();
         }
 
       /* Add the task to the list corresponding to the selected state
@@ -433,9 +427,6 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
         }
     }
 
-  /* Unlock the tasklists */
-
-  nxsched_unlock_tasklist(lock);
   return doswitch;
 }
 
