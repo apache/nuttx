@@ -57,7 +57,7 @@
 /* These SPI configuration options affect the form of the SPI interface:
  *
  * CONFIG_SPI_EXCHANGE - Driver supports a single exchange method
- *   (vs a recvblock() and sndblock ()methods).
+ *   (vs a recvblock() and sndblock() methods).
  * CONFIG_SPI_CMDDATA - Devices on the SPI bus require out-of-band support
  *   to distinguish command transfers from data transfers.  Such devices
  *   will often support either 9-bit SPI (yech) or 8-bit SPI and a GPIO
@@ -95,7 +95,7 @@
  * Name: SPI_SELECT
  *
  * Description:
- *   Enable/disable the SPI chip select.   The implementation of this method
+ *   Enable/disable the SPI chip select.  The implementation of this method
  *   must include handshaking:  If a device is selected, it must hold off
  *   all other attempts to select the device until the device is deselected.
  *   Required.
@@ -173,7 +173,7 @@
  * Name: SPI_SETBITS
  *
  * Description:
- *   Set the number if bits per word.
+ *   Set the number of bits per word.
  *
  * Input Parameters:
  *   dev -  Device-specific state data
@@ -290,7 +290,7 @@
  * Name: SPI_CMDDATA
  *
  * Description:
- *   Some devices require and additional out-of-band bit to specify if the
+ *   Some devices require an additional out-of-band bit to specify if the
  *   next word sent to the device is a command or data. This is typical, for
  *   example, in "9-bit" displays where the 9th bit is the CMD/DATA bit.
  *   This function provides selection of command or data.
@@ -322,7 +322,7 @@
  *
  * Input Parameters:
  *   dev - Device-specific state data
- *   wd  - The word to send.  the size of the data is determined by the
+ *   wd  - The word to send.  The size of the data is determined by the
  *         number of bits selected for the SPI interface.
  *
  * Returned Value:
@@ -341,7 +341,7 @@
  * Input Parameters:
  *   dev    - Device-specific state data
  *   buffer - A pointer to the buffer of data to be sent
- *   nwords - the length of data to send from the buffer in number of words.
+ *   nwords - The length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
  *            packed into uint8_t's; if nbits >8, the data is packed into
@@ -367,10 +367,10 @@
  * Input Parameters:
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to receive data
- *   nwords - the length of data that can be received in the buffer in number
+ *   nwords - The length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-
  *            per-word selected for the SPI interface.  If nbits <= 8, the
- *            data is packed into uint8_t's; if nbits >8, the data is packed
+ *            data is packed into uint8_t's; if nbits > 8, the data is packed
  *            into uint16_t's
  *
  * Returned Value:
@@ -394,8 +394,8 @@
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
  *   rxbuffer - A pointer to the buffer in which to receive data
- *   nwords   - the length of data that to be exchanged in units of words.
- *              The wordsize is determined by the number of bits-per-word
+ *   nwords   - The length of data to be exchanged in units of words. The
+ *              wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
  *              packed into uint8_t's; if nbits >8, the data is packed into
  *              uint16_t's
@@ -413,8 +413,8 @@
  * Name: SPI_REGISTERCALLBACK
  *
  * Description:
- *   Register a callback that that will be invoked on any media status
- *   change (i.e, anything that would be reported differently by SPI_STATUS).
+ *   Register a callback that will be invoked on any media status change
+ *   (i.e, anything that would be reported differently by SPI_STATUS).
  *   Optional
  *
  * Input Parameters:
