@@ -118,17 +118,17 @@
 #  define UINT64_C(x) x ## ull
 
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
-#  define PRIdPTR     "lld"
-#  define PRIiPTR     "lli"
-#  define PRIoPTR     "llo"
-#  define PRIuPTR     "llu"
-#  define PRIxPTR     "llx"
-#  define PRIXPTR     "llX"
-#  define SCNdPTR     "lld"
-#  define SCNiPTR     "lli"
-#  define SCNoPTR     "llo"
-#  define SCNuPTR     "llu"
-#  define SCNxPTR     "llx"
+#  define PRIdPTR     "ld"
+#  define PRIiPTR     "li"
+#  define PRIoPTR     "lo"
+#  define PRIuPTR     "lu"
+#  define PRIxPTR     "lx"
+#  define PRIXPTR     "lX"
+#  define SCNdPTR     "ld"
+#  define SCNiPTR     "li"
+#  define SCNoPTR     "lo"
+#  define SCNuPTR     "lu"
+#  define SCNxPTR     "lx"
 #else
 #  define PRIdPTR     "d"
 #  define PRIiPTR     "i"
