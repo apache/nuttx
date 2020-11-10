@@ -71,6 +71,12 @@ ifeq ($(CONFIG_RGBLED),y)
   CSRCS += stm32_rgbled.c
 endif
 
+ifeq ($(CONFIG_NSH_ROMFSETC),y)
+ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
+  RCSRCS = etc/init.d/rcS
+endif
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
