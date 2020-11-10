@@ -140,10 +140,6 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
   bool doswitch = false;
   int cpu;
 
-  /* Lock the tasklists before accessing */
-
-  irqstate_t lock = nxsched_lock_tasklist();
-
   /* Which CPU (if any) is the task running on?  Which task list holds the
    * TCB?
    */
@@ -188,9 +184,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
       me = this_cpu();
       if (cpu != me)
         {
-          nxsched_unlock_tasklist(lock);
           DEBUGVERIFY(up_cpu_pause(cpu));
-          lock = nxsched_lock_tasklist();
         }
 
       /* The task is running but the CPU that it was running on has been
@@ -336,9 +330,6 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
 
   rtcb->task_state = TSTATE_TASK_INVALID;
 
-  /* Unlock the tasklists */
-
-  nxsched_unlock_tasklist(lock);
   return doswitch;
 }
 #endif /* CONFIG_SMP */

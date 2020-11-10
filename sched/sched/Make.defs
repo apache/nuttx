@@ -85,7 +85,6 @@ CSRCS += sched_processtimer.c
 endif
 
 ifeq ($(CONFIG_SMP),y)
-CSRCS += sched_tasklistlock.c
 CSRCS += sched_thistask.c
 endif
 

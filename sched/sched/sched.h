@@ -417,9 +417,6 @@ FAR struct tcb_s *this_task(void);
 int  nxsched_select_cpu(cpu_set_t affinity);
 int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
 
-irqstate_t nxsched_lock_tasklist(void);
-void nxsched_unlock_tasklist(irqstate_t lock);
-
 #  define nxsched_islocked_global() spin_islocked(&g_cpu_schedlock)
 #  define nxsched_islocked_tcb(tcb) nxsched_islocked_global()
 
