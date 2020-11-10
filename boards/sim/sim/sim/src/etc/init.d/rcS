@@ -25,10 +25,50 @@
 
 #ifdef CONFIG_NSH_ROMFSETC
 
+#ifndef CONFIG_NSH_DISABLE_UNAME
+uname -a > /dev/syslog
+#endif /* CONFIG_NSH_DISABLE_UNAME */
+
+#ifdef CONFIG_FS_FAT
+
 /* Create a RAMDISK and mount it at /tmp */
 
 mkrd -m CONFIG_NSH_FATDEVNO -s CONFIG_NSH_FATSECTSIZE CONFIG_NSH_FATNSECTORS
 mkfatfs CONCAT(/dev/ram, CONFIG_NSH_FATDEVNO)
 mount -t vfat CONCAT(/dev/ram, CONFIG_NSH_FATDEVNO) CONFIG_NSH_FATMOUNTPT
 
+#endif /* CONFIG_FS_FAT */
+
+#ifdef CONFIG_FS_HOSTFS
+
+mount -t hostfs -o fs=../apps /system
+mount -t hostfs -o fs=. /data
+
+#ifdef CONFIG_TESTING_TESTRUNNER
+
+testrunner >/system/testing/testrunner.log &
+
+#endif /* CONFIG_TESTING_TESTRUNNER */
+
+#endif /* CONFIG_FS_HOSTFS */
+
 #endif /* CONFIG_NSH_ROMFSETC */
+
+#ifdef CONFIG_UORB
+
+uorb start &
+
+#endif /* CONFIG_UORB */
+
+#ifdef CONFIG_BT_TESTER
+
+bt init
+bttester
+
+#endif /* CONFIG_BT_TESTER */
+
+#ifdef CONFIG_SENSOR_MANAGER
+
+sensor &
+
+#endif /* CONFIG_SENSOR_MANAGER */
