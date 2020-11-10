@@ -60,13 +60,12 @@
 
 /* .data is positioned first in the primary RAM followed immediately by .bss.
  * The IDLE thread stack lies just after .bss and has size give by
- * CONFIG_IDLETHREAD_STACKSIZE;  The heap then begins just after the IDLE.
+ * CONFIG_IDLETHREAD_STACKSIZE;
  * ARM EABI requires 64 bit stack alignment.
  */
 
 #define IDLE_STACKSIZE (CONFIG_IDLETHREAD_STACKSIZE & ~7)
 #define IDLE_STACK     ((uintptr_t)&_ebss + IDLE_STACKSIZE)
-#define HEAP_BASE      ((uintptr_t)&_ebss + IDLE_STACKSIZE)
 
 /****************************************************************************
  * Public Data
@@ -77,12 +76,11 @@
  * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
  * The IDLE thread is the thread that the system boots on and, eventually,
  * becomes the IDLE, do nothing task that runs only when there is nothing
- * else to run.  The heap continues from there until the end of memory.
- * g_idle_topstack is a read-only variable the provides this computed
- * address.
+ * else to run. g_idle_topstack is a read-only variable the provides this
+ *  computed address.
  */
 
-const uintptr_t g_idle_topstack = HEAP_BASE;
+const uintptr_t g_idle_topstack = IDLE_STACK;
 
 /****************************************************************************
  * Private Function prototypes
