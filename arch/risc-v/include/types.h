@@ -69,11 +69,19 @@ typedef unsigned char      _uint8_t;
 typedef signed short       _int16_t;
 typedef unsigned short     _uint16_t;
 
+#ifdef __LP64__
 typedef signed int         _int32_t;
 typedef unsigned int       _uint32_t;
 
 typedef signed long        _int64_t;
 typedef unsigned long      _uint64_t;
+#else /* __LP64__ */
+typedef signed long        _int32_t;
+typedef unsigned long      _uint32_t;
+
+typedef signed long long   _int64_t;
+typedef unsigned long long _uint64_t;
+#endif /* __LP64__ */
 #define __INT64_DEFINED
 
 #ifdef __LP64__
