@@ -69,8 +69,9 @@
 unsigned long strtoul(FAR const char *nptr, FAR char **endptr, int base)
 {
   unsigned long accum = 0;
-  unsigned long prev;
+  unsigned long limit;
   int value;
+  int last_digit;
   char sign = 0;
 
   if (nptr)
@@ -98,22 +99,24 @@ unsigned long strtoul(FAR const char *nptr, FAR char **endptr, int base)
         }
       else
         {
+          limit = ULONG_MAX / base;
+          last_digit = ULONG_MAX % base;
+
           /* Accumulate each "digit" */
 
           while (lib_isbasedigit(*nptr, base, &value))
             {
-              prev = accum;
-              accum = accum * base + value;
-              nptr++;
-
               /* Check for overflow */
 
-              if (accum < prev)
+              if (accum > limit || (accum == limit && value > last_digit))
                 {
                   set_errno(ERANGE);
                   accum = ULONG_MAX;
                   break;
                 }
+
+              accum = accum * base + value;
+              nptr++;
             }
 
           if (sign == '-')
