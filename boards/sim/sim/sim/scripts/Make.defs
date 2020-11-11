@@ -59,8 +59,8 @@ ifeq ($(CONFIG_CXX_EXCEPTION),)
   ARCHCPUFLAGSXX += -fno-exceptions
 endif
 ARCHPICFLAGS = -fpic
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHWARNINGSXX = -Wall -Wshadow -Wundef
+ARCHWARNINGS = -Wstrict-prototypes -Wundef
+ARCHWARNINGSXX = -Wundef
 
 # Add -fvisibility=hidden
 # Because we don't want export nuttx's symbols to share libraries
