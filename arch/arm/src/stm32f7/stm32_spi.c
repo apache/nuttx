@@ -1820,9 +1820,9 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   /* If this bus uses a in driver DMA aligned buffers we can skip the test */
 
   if ((txbuffer && priv->txbuf == 0 &&
-      !stm32_dmacapable((uint32_t)txbuffer, nwords, priv->txccr)) ||
+      !stm32_dmacapable((uintptr_t)txbuffer, nwords, priv->txccr)) ||
       (rxbuffer && priv->rxbuf == 0 &&
-       !stm32_dmacapable((uint32_t)rxbuffer, nwords, priv->rxccr)))
+       !stm32_dmacapable((uintptr_t)rxbuffer, nwords, priv->rxccr)))
     {
       /* Unsupported memory region or not in driver buffers
        * fall back to non-DMA method.
