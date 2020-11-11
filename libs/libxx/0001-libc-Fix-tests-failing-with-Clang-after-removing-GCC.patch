@@ -1,0 +1,26 @@
+From 81b6aa0e27abc3037c84d1ff2065bf60207f9b8b Mon Sep 17 00:00:00 2001
+From: Louis Dionne <ldionne@apple.com>
+Date: Fri, 30 Oct 2020 14:55:37 -0400
+Subject: [PATCH] [libc++] Fix tests failing with Clang after removing GCC
+ warnings
+
+---
+ src/filesystem/filesystem_common.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/filesystem/filesystem_common.h libcxx/src/filesystem/filesystem_common.h
+index a7828ef3863..dc55f93da70 100644
+--- a/src/filesystem/filesystem_common.h
++++ libcxx/src/filesystem/filesystem_common.h
+@@ -198,7 +198,7 @@ private:
+ using chrono::duration;
+ using chrono::duration_cast;
+ 
+-using TimeSpec = std::timespec;
++using TimeSpec = timespec;
+ using StatT = struct stat;
+ 
+ template <class FileTimeT, class TimeT,
+-- 
+2.17.1
+
