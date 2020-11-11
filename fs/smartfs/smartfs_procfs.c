@@ -847,10 +847,11 @@ static size_t smartfs_status_read(FAR struct file *filep, FAR char *buffer,
                          "Total Sectors:     %d\nSector Size:       %d\n"
                          "Format Sector:     %d\nDir Sector:        %d\n"
                          "Free Sectors:      %d\nReleased Sectors:  %d\n"
-                         "Unused Sectors:    %d\nBlock Erases:      %d\n"
+                         "Unused Sectors:    %" PRIu32 "\n"
+                         "Block Erases:      %" PRIu32 "\n"
                          "Sectors Per Block: %d\nSector Utilization:%d%%\n"
 #ifdef CONFIG_MTD_SMART_WEAR_LEVEL
-                         "Uneven Wear Count: %d\n"
+                         "Uneven Wear Count: %" PRIu32 "\n"
 #endif
                   ,
                   procfs_data.formatversion, procfs_data.namelen,
