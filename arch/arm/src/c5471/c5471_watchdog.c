@@ -74,7 +74,7 @@
 #define C5471_DISABLE_VALUE2   (0xa0 << 22)
 
 #define CLOCK_KHZ              47500
-#define CLOCK_MHZx2            95
+#define CLOCK_MHZ_X2           95
 
 /* Macros to manage access to the watchdog timer */
 
@@ -99,7 +99,8 @@ static int     wdt_interrupt(int irq, void *context, FAR void *arg);
 static int     wdt_open(struct file *filep);
 static int     wdt_close(struct file *filep);
 static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen);
-static ssize_t wdt_write(struct file *filep, const char *buffer, size_t buflen);
+static ssize_t wdt_write(struct file *filep, const char *buffer,
+                         size_t buflen);
 static int     wdt_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -184,7 +185,7 @@ static int wdt_setusec(uint32_t usec)
 
   do
     {
-      divisor = (CLOCK_MHZx2 * usec) / (prescaler * 2);
+      divisor = (CLOCK_MHZ_X2 * usec) / (prescaler * 2);
       wdinfo("divisor=0x%x prescaler=0x%x\n", divisor, prescaler);
 
       if (divisor >= 0x10000)
@@ -264,6 +265,7 @@ static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen)
       sprintf(buffer, "%08x %08x\n", c5471_wdt_cntl, c5471_wdt_count);
       return 18;
     }
+
   return 0;
 }
 
@@ -271,7 +273,8 @@ static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen)
  * Name: wdt_write
  ****************************************************************************/
 
-static ssize_t wdt_write(struct file *filep, const char *buffer, size_t buflen)
+static ssize_t wdt_write(struct file *filep, const char *buffer,
+                         size_t buflen)
 {
   wdinfo("buflen=%d\n", buflen);
   if (buflen)
