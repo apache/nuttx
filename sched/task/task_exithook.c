@@ -634,6 +634,12 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
 
   nxtask_recover(tcb);
 
+  /* NOTE: signal handling needs to be done in a criticl section */
+
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
+
   /* Send the SIGCHLD signal to the parent task group */
 
   nxtask_signalparent(tcb, status);
@@ -667,6 +673,10 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
   /* Deallocate anything left in the TCB's queues */
 
   nxsig_cleanup(tcb); /* Deallocate Signal lists */
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
 
   /* This function can be re-entered in certain cases.  Set a flag
    * bit in the TCB to not that we have already completed this exit
