@@ -121,6 +121,7 @@ endif
 ifeq ($(CONFIG_ESP32_SPIRAM),y)
 CHIP_CSRCS += esp32_spiram.c
 CHIP_CSRCS += esp32_psram.c
+CHIP_CSRCS += esp32_himem.c
 endif
 
 ifeq ($(CONFIG_ESP32_EMAC),y)
