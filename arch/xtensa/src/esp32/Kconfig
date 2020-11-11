@@ -591,6 +591,37 @@ config ESP32_SPIRAM_2T_MODE
 	    Applications will not be affected unless the use the esp_himem
 	    APIs, which are not supported in 2T mode.
 
+config SPIRAM_BANKSWITCH_ENABLE
+	bool "Enable bank switching for >4MiB external RAM"
+	default y
+	help
+		The ESP32 only supports 4MiB of external RAM in its address
+		space. The hardware does support larger memories, but these
+		have to be bank-switched in and out of this address space.
+		Enabling this allows you to reserve some MMU pages for this,
+		which allows the use of the esp_himem api to manage these
+		banks.
+		#Note that this is limited to 62 banks, as
+		#esp_spiram_writeback_cache needs some kind of mapping of
+		#some banks below that mark to work. We cannot at this
+		#moment guarantee this to exist when himem is enabled.
+		If spiram 2T mode is enabled, the size of 64Mbit psram will
+		be changed as 32Mbit, so himem will be unusable.
+
+config SPIRAM_BANKSWITCH_RESERVE
+	int "Amount of 32K pages to reserve for bank switching"
+	depends on SPIRAM_BANKSWITCH_ENABLE
+	default 8
+	range 1 62
+	help
+		Select the amount of banks reserved for bank switching. Note
+		that the amount of RAM allocatable with malloc will decrease
+		by 32K for each page reserved here.
+		Note that this reservation is only actually done if your
+		program actually uses the himem API. Without any himem
+		calls, the reservation is not done and the original amount
+		of memory will be available.
+
 endmenu #SPI RAM Config
 
 menu "Ethernet configuration"

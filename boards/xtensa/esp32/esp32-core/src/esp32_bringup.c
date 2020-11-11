@@ -61,6 +61,7 @@
 
 #include <syslog.h>
 #include <sys/errno.h>
+#include <nuttx/himem/himem.h>
 
 #include "esp32_procfs_imm.h"
 #include "esp32-core.h"
@@ -140,6 +141,14 @@ int esp32_bringup(void)
              ret);
     }
 
+#endif
+
+#if defined(CONFIG_ESP32_SPIRAM)
+  ret = esp_himem_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init HIMEM: %d\n", ret);
+    }
 #endif
 
 #ifdef CONFIG_FS_PROCFS
