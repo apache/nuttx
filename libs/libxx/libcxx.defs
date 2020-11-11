@@ -25,6 +25,10 @@ $(TOPDIR)/include/libcxx:
 	$(Q) tar -xf libcxx-$(VERSION).src.tar.xz
 	$(Q) $(DELFILE) libcxx-$(VERSION).src.tar.xz
 	$(Q) mv libcxx-$(VERSION).src libcxx
+	$(Q) patch -p0 < 0001-libc-Fix-a-few-warnings.patch
+	$(Q) patch -p0 < 0001-libc-NFC-Fix-several-GCC-warnings-in-the-test-suite.patch
+	$(Q) patch -p0 < 0001-libc-Fix-tests-failing-with-Clang-after-removing-GCC.patch
+	$(Q) patch -p0 < 0001-libcxx-Check-_LIBCPP_PROVIDES_DEFAULT_RUNE_TABLE-fir.patch
 	$(Q) patch -p0 < 0001-libcxx-Port-to-NuttX-https-nuttx.apache.org-RTOS.patch
 	$(Q) $(DIRLINK) $(CURDIR)/libcxx/include $(TOPDIR)/include/libcxx
 
