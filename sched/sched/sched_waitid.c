@@ -143,6 +143,14 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
   sigemptyset(&set);
   nxsig_addset(&set, SIGCHLD);
 
+  /* NOTE: sched_lock() is not enough for SMP
+   * because the child task is running on another CPU
+   */
+
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
+
   /* Disable pre-emption so that nothing changes while the loop executes */
 
   sched_lock();
@@ -379,6 +387,11 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
 
 errout:
   sched_unlock();
+
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
+
   return ret;
 }
 
