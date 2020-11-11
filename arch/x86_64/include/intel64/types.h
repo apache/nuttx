@@ -58,8 +58,8 @@ typedef unsigned short     _uint16_t;
 typedef signed int         _int32_t;
 typedef unsigned int       _uint32_t;
 
-typedef signed long long   _int64_t;
-typedef unsigned long long _uint64_t;
+typedef signed long        _int64_t;
+typedef unsigned long      _uint64_t;
 #define __INT64_DEFINED
 
 /* A pointer is 8 bytes */
