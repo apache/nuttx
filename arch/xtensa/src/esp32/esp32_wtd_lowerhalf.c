@@ -78,6 +78,7 @@ struct esp32_wtd_lowerhalf_s
   uint32_t lastreset;                          /* The last reset time */
   bool     started;                            /* True: Timer has been started */
   xcpt_t handler;                              /* User Handler */
+  void   *upper;                               /* Pointer to watchdog_upperhalf_s */
 };
 
 /****************************************************************************
@@ -559,7 +560,7 @@ static xcpt_t esp32_wtd_capture(FAR struct watchdog_lowerhalf_s *lower,
 
       if (priv->peripheral == TIMER)
         {
-            ESP32_WTD_STG_CONF(priv->wtd, STAGE_0, RESET_SYSTEM_TIMER);
+          ESP32_WTD_STG_CONF(priv->wtd, STAGE_0, RESET_SYSTEM_TIMER);
         }
       else
         {
@@ -590,7 +591,7 @@ static int    esp32_wdt_handler(int irq, FAR void *context, FAR void *arg)
 
   /* Run the user callback */
 
-  priv->handler(irq, context, NULL);
+  priv->handler(irq, context, priv->upper);
 
   ESP32_WTD_ACKINT(priv->wtd);        /* Clear the Interrupt */
   ESP32_WTD_LOCK(priv->wtd);
@@ -623,7 +624,6 @@ static int    esp32_wdt_handler(int irq, FAR void *context, FAR void *arg)
 int esp32_wtd_initialize(FAR const char *devpath, uint8_t wdt)
 {
   struct esp32_wtd_lowerhalf_s *lower = NULL;
-  FAR void                    *handle = NULL;
   int                             ret = OK;
 
   DEBUGASSERT(devpath);
@@ -694,14 +694,15 @@ int esp32_wtd_initialize(FAR const char *devpath, uint8_t wdt)
 
   ESP32_WTD_LOCK(lower->wtd);
 
-  /* Register the watchdog driver as /dev/watchdogX.  The returned value from
-   * watchdog_register is a handle that could be used with
-   *  watchdog_unregister(). REVISIT: The returned handle is discarded here.
+  /* Register the watchdog driver as /dev/watchdogX. If the registration goes
+   * right the returned value from watchdog_register is a pointer to
+   * watchdog_upperhalf_s that can be either used with watchdog_unregister()
+   * or with the handler's arg.
    */
 
-  handle = watchdog_register(devpath,
+  lower->upper = watchdog_register(devpath,
                              (FAR struct watchdog_lowerhalf_s *)lower);
-  if (handle == NULL)
+  if (lower->upper == NULL)
     {
       /* The actual cause of the failure may have been a failure to allocate
        * perhaps a failure to register the watchdog driver (such as if the
