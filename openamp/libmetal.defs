@@ -47,10 +47,10 @@ CSRCS += libmetal/lib/version.c
 CFLAGS += -DMETAL_INTERNAL
 
 LIBMETAL_HDRS_SEDEXP := \
-	"s/@PROJECT_VER_MAJOR@/0/g; \
-	 s/@PROJECT_VER_MINOR@/1/g; \
-	 s/@PROJECT_VER_PATCH@/0/g; \
-	 s/@PROJECT_VER@/0.1.0/g; \
+	"s/@PROJECT_VERSION_MAJOR@/0/g; \
+	 s/@PROJECT_VERSION_MINOR@/1/g; \
+	 s/@PROJECT_VERSION_PATCH@/0/g; \
+	 s/@PROJECT_VERSION@/0.1.0/g; \
 	 s/@PROJECT_SYSTEM@/nuttx/g; \
 	 s/@PROJECT_PROCESSOR@/$(LIBMETAL_ARCH)/g; \
 	 s/@PROJECT_MACHINE@/$(CONFIG_ARCH_CHIP)/g; \
@@ -63,7 +63,6 @@ libmetal.zip:
 	$(Q) curl -L https://github.com/OpenAMP/libmetal/archive/v$(VERSION).zip -o libmetal.zip
 	$(Q) unzip -o libmetal.zip
 	$(Q) mv libmetal-$(VERSION) libmetal
-	$(Q) patch -p0 < 0001-system-nuttx-change-clock_systimespec-to-clock_systi.patch
 
 .libmetal_headers: libmetal.zip
 	$(eval headers := $(wildcard libmetal/lib/compiler/gcc/*.h))

@@ -1,18 +1,19 @@
-From 8a55f0f3c2fec8c817ad579b070040ee8058c536 Mon Sep 17 00:00:00 2001
-From: ligd <liguiding@pinecone.net>
+From b84c7f48996a9bbacdddcef9929405f674a73a81 Mon Sep 17 00:00:00 2001
+From: Guiding Li <liguiding@pinecone.net>
 Date: Wed, 20 Feb 2019 11:36:57 +0800
-Subject: [PATCH 04/10] rpmsg: wait ept ready in rpmsg_send
+Subject: [PATCH 3/3] rpmsg: wait endpoint ready in rpmsg_send and
+ rpmsg_send_nocopy
 
-since the destination address need time to return from peer
+because the remote need time to return the destination address
 
-Signed-off-by: ligd <liguiding@pinecone.net>
+Signed-off-by: Guiding Li <liguiding@pinecone.net>
 ---
- lib/include/openamp/rpmsg.h | 48 ++++++++++++++++++++++++-------------
- lib/rpmsg/rpmsg_virtio.c    |  7 ------
- 2 files changed, 32 insertions(+), 23 deletions(-)
+ lib/include/openamp/rpmsg.h | 59 ++++++++++++++++++++++++++-----------
+ lib/rpmsg/rpmsg_virtio.c    |  7 -----
+ 2 files changed, 42 insertions(+), 24 deletions(-)
 
 diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
-index 3403240..7000453 100644
+index efdfb2b..5c8b45c 100644
 --- a/lib/include/openamp/rpmsg.h
 +++ open-amp/lib/include/openamp/rpmsg.h
 @@ -15,6 +15,7 @@
@@ -36,8 +37,8 @@ index 3403240..7000453 100644
  /* Error macros. */
  #define RPMSG_SUCCESS			0
  #define RPMSG_ERROR_BASE		-2000
-@@ -129,6 +136,20 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
- 			      uint32_t dst, const void *data, int size,
+@@ -141,6 +148,19 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
+ 			      uint32_t dst, const void *data, int len,
  			      int wait);
  
 +/**
@@ -50,14 +51,13 @@ index 3403240..7000453 100644
 + */
 +static inline unsigned int is_rpmsg_ept_ready(struct rpmsg_endpoint *ept)
 +{
-+	return (ept->dest_addr != RPMSG_ADDR_ANY) &&
-+		(ept->addr != RPMSG_ADDR_ANY);
++	return ept && ept->rdev && ept->dest_addr != RPMSG_ADDR_ANY;
 +}
 +
  /**
   * rpmsg_send() - send a message across to the remote processor
   * @ept: the rpmsg endpoint
-@@ -147,8 +168,17 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
+@@ -159,8 +179,17 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
  static inline int rpmsg_send(struct rpmsg_endpoint *ept, const void *data,
  			     int len)
  {
@@ -77,7 +77,27 @@ index 3403240..7000453 100644
  }
  
  /**
-@@ -328,20 +358,6 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
+@@ -433,8 +462,17 @@ static inline int rpmsg_sendto_nocopy(struct rpmsg_endpoint *ept,
+ static inline int rpmsg_send_nocopy(struct rpmsg_endpoint *ept,
+ 				    const void *data, int len)
+ {
+-	return rpmsg_send_offchannel_nocopy(ept, ept->addr,
+-					    ept->dest_addr, data, len);
++	int tc = 0;
++
++	for (; tc < RPMSG_TICK_COUNT; tc += RPMSG_TICKS_PER_INTERVAL) {
++		if (is_rpmsg_ept_ready(ept))
++			return rpmsg_send_offchannel_nocopy(ept, ept->addr,
++							    ept->dest_addr,
++							    data, len);
++		metal_sleep_usec(RPMSG_TICKS_PER_INTERVAL);
++	}
++
++	return RPMSG_ERR_ADDR;
+ }
+ 
+ /**
+@@ -507,19 +545,6 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
   */
  void rpmsg_destroy_ept(struct rpmsg_endpoint *ept);
  
@@ -91,15 +111,14 @@ index 3403240..7000453 100644
 - */
 -static inline unsigned int is_rpmsg_ept_ready(struct rpmsg_endpoint *ept)
 -{
--	return (ept->dest_addr != RPMSG_ADDR_ANY) &&
--		(ept->addr != RPMSG_ADDR_ANY);
+-	return ept && ept->rdev && ept->dest_addr != RPMSG_ADDR_ANY;
 -}
 -
  #if defined __cplusplus
  }
  #endif
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index 4dea4c0..44b46d4 100644
+index 164dc70..c357ba8 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
 @@ -8,7 +8,6 @@
