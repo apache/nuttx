@@ -133,16 +133,20 @@
 
 /* DMAMUX12 request line multiplexer channel x configuration register */
 
-#define DMAMUX_CCR_DMAREQID_SHIFT (0)  /* Bits 0-6: DMA request identification */
+#define DMAMUX_CCR_DMAREQID_SHIFT (0)                              /* Bits 0-6: DMA request identification */
 #define DMAMUX_CCR_DMAREQID_MASK  (0x7f << DMAMUX_CCR_DMAREQID_SHIFT)
-#define DMAMUX_CCR_SOIE           (8)  /* Bit 8: Synchronization overrun interrupt enable */
-#define DMAMUX_CCR_EGE            (9)  /* Bit 9: Event generation enable */
-#define DMAMUX_CCR_SE             (16) /* Bit 16: Synchronization enable */
-#define DMAMUX_CCR_SPOL_SHIFT     (17) /* Bits 17-18: Synchronization polarity */
-#define DMAMUX_CCR_SPOL_MASK      (3 << DMAMUX_CCR_SPOL_SHIFT)
-#define DMAMUX_CCR_NBREQ_SHIFT    (19) /* Bits 19-23: Number of DMA request - 1 to forward */
+#define DMAMUX_CCR_SOIE           (8)                              /* Bit 8: Synchronization overrun interrupt enable */
+#define DMAMUX_CCR_EGE            (9)                              /* Bit 9: Event generation enable */
+#define DMAMUX_CCR_SE             (16)                             /* Bit 16: Synchronization enable */
+#define DMAMUX_CCR_SPOL_SHIFT     (17)                             /* Bits 17-18: Synchronization polarity */
+#define DMAMUX_CCR_SPOL_MASK      (0x3 << DMAMUX_CCR_SPOL_SHIFT)
+#  define DMAMUX_CCR_SPOL_NONE    (0x0 << DMAMUX_CCR_SPOL_SHIFT)   /* No event: No trigger detection or generation */
+#  define DMAMUX_CCR_SPOL_RISING  (0x1 << DMAMUX_CCR_SPOL_SHIFT)   /* Rising edge */
+#  define DMAMUX_CCR_SPOL_FALLING (0x2 << DMAMUX_CCR_SPOL_SHIFT)   /* Falling edge */
+#  define DMAMUX_CCR_SPOL_BOTH    (0x3 << DMAMUX_CCR_SPOL_SHIFT)   /* Both rising and falling edges */
+#define DMAMUX_CCR_NBREQ_SHIFT    (19)                             /* Bits 19-23: Number of DMA request - 1 to forward */
 #define DMAMUX_CCR_NBREQ_MASK     (0x1f << DMAMUX_CCR_NBREQ_SHIFT)
-#define DMAMUX_CCR_SYNCID_SHIFT   (24) /* Bits 24-26: Synchronization identification */
+#define DMAMUX_CCR_SYNCID_SHIFT   (24)                             /* Bits 24-26: Synchronization identification */
 #define DMAMUX_CCR_SYNCID_MASK    (7 << DMAMUX_CCR_SYNCID_SHIFT)
 
 /* DMAMUX12 request line multiplexer interrupt channel status register */
