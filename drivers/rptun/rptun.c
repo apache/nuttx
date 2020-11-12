@@ -93,14 +93,17 @@ static FAR struct remoteproc *rptun_init(FAR struct remoteproc *rproc,
                                          FAR struct remoteproc_ops *ops,
                                          FAR void *arg);
 static void rptun_remove(FAR struct remoteproc *rproc);
-static int rptun_mmap(FAR struct remoteproc *rproc,
-                      FAR metal_phys_addr_t *pa, FAR metal_phys_addr_t *da,
-                      FAR void **va, size_t size, unsigned int attribute,
-                      FAR struct metal_io_region **io_);
 static int rptun_config(struct remoteproc *rproc, void *data);
 static int rptun_start(FAR struct remoteproc *rproc);
 static int rptun_stop(FAR struct remoteproc *rproc);
 static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id);
+static FAR struct remoteproc_mem *
+rptun_get_mem(FAR struct remoteproc *rproc,
+              FAR const char *name,
+              metal_phys_addr_t pa,
+              metal_phys_addr_t da,
+              FAR void *va, size_t size,
+              FAR struct remoteproc_mem *buf);
 
 static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
                           FAR const char *name, uint32_t dest);
@@ -130,13 +133,13 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 
 static struct remoteproc_ops g_rptun_ops =
 {
-  .init   = rptun_init,
-  .remove = rptun_remove,
-  .mmap   = rptun_mmap,
-  .config = rptun_config,
-  .start  = rptun_start,
-  .stop   = rptun_stop,
-  .notify = rptun_notify,
+  .init    = rptun_init,
+  .remove  = rptun_remove,
+  .config  = rptun_config,
+  .start   = rptun_start,
+  .stop    = rptun_stop,
+  .notify  = rptun_notify,
+  .get_mem = rptun_get_mem,
 };
 
 static const struct file_operations g_rptun_devops =
@@ -207,55 +210,6 @@ static void rptun_remove(FAR struct remoteproc *rproc)
   rproc->priv = NULL;
 }
 
-static int rptun_mmap(FAR struct remoteproc *rproc,
-                      FAR metal_phys_addr_t *pa, FAR metal_phys_addr_t *da,
-                      FAR void **va, size_t size, unsigned int attribute,
-                      FAR struct metal_io_region **io_)
-{
-  FAR struct rptun_priv_s *priv = rproc->priv;
-  FAR struct metal_io_region *io = metal_io_get_region();
-
-  if (*pa != METAL_BAD_PHYS)
-    {
-      *da = rptun_pa_to_da(priv->dev, *pa);
-      *va = metal_io_phys_to_virt(io, *pa);
-      if (!*va)
-        {
-          return -RPROC_EINVAL;
-        }
-    }
-  else if (*da != METAL_BAD_PHYS)
-    {
-      *pa = rptun_da_to_pa(priv->dev, *da);
-      *va = metal_io_phys_to_virt(io, *pa);
-      if (!*va)
-        {
-          return -RPROC_EINVAL;
-        }
-    }
-  else if (*va)
-    {
-      *pa = metal_io_virt_to_phys(io, *va);
-      if (*pa == METAL_BAD_PHYS)
-        {
-          return -RPROC_EINVAL;
-        }
-
-      *da = rptun_pa_to_da(priv->dev, *pa);
-    }
-  else
-    {
-      return -RPROC_EINVAL;
-    }
-
-  if (io_)
-    {
-      *io_ = io;
-    }
-
-  return 0;
-}
-
 static int rptun_config(struct remoteproc *rproc, void *data)
 {
   struct rptun_priv_s *priv = rproc->priv;
@@ -299,6 +253,45 @@ static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id)
   RPTUN_NOTIFY(priv->dev, RPTUN_NOTIFY_ALL);
 
   return 0;
+}
+
+static FAR struct remoteproc_mem *
+rptun_get_mem(FAR struct remoteproc *rproc,
+              FAR const char *name,
+              metal_phys_addr_t pa,
+              metal_phys_addr_t da,
+              FAR void *va, size_t size,
+              FAR struct remoteproc_mem *buf)
+{
+  FAR struct rptun_priv_s *priv = rproc->priv;
+
+  metal_list_init(&buf->node);
+  strcpy(buf->name, name ? name : "");
+  buf->io = metal_io_get_region();
+  buf->size = size;
+
+  if (pa != METAL_BAD_PHYS)
+    {
+      buf->pa = pa;
+      buf->da = rptun_pa_to_da(priv->dev, pa);
+    }
+  else if (da != METAL_BAD_PHYS)
+    {
+      buf->pa = rptun_da_to_pa(priv->dev, da);
+      buf->da = da;
+    }
+  else
+    {
+      buf->pa = metal_io_virt_to_phys(buf->io, va);
+      buf->da = rptun_pa_to_da(priv->dev, buf->pa);
+    }
+
+  if (buf->pa == METAL_BAD_PHYS || buf->da == METAL_BAD_PHYS)
+    {
+      return NULL;
+    }
+
+  return buf;
 }
 
 static void *rptun_get_priv_by_rdev(FAR struct rpmsg_device *rdev)
@@ -420,6 +413,9 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       FAR void *va0;
       FAR void *va1;
       FAR void *shbuf;
+      FAR struct metal_io_region *io;
+      metal_phys_addr_t pa0;
+      metal_phys_addr_t pa1;
 
       align0 = B2C(rsc->rpmsg_vring0.align);
       align1 = B2C(rsc->rpmsg_vring1.align);
@@ -428,13 +424,17 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       v0sz = ALIGN_UP(vring_size(rsc->rpmsg_vring0.num, align0), align0);
       v1sz = ALIGN_UP(vring_size(rsc->rpmsg_vring1.num, align1), align1);
 
-      va0 = (char *)rsc + tbsz;
-      va1 = (char *)rsc + tbsz + v0sz;
+      va0 = (FAR char *)rsc + tbsz;
+      va1 = (FAR char *)rsc + tbsz + v0sz;
+
+      io  = metal_io_get_region();
+      pa0 = metal_io_virt_to_phys(io, va0);
+      pa1 = metal_io_virt_to_phys(io, va1);
 
       da0 = da1 = METAL_BAD_PHYS;
 
-      remoteproc_mmap(rproc, NULL, &da0, &va0, v0sz, 0, NULL);
-      remoteproc_mmap(rproc, NULL, &da1, &va1, v1sz, 0, NULL);
+      remoteproc_mmap(rproc, &pa0, &da0, v0sz, 0, NULL);
+      remoteproc_mmap(rproc, &pa1, &da1, v1sz, 0, NULL);
 
       rsc->rpmsg_vring0.da = da0;
       rsc->rpmsg_vring1.da = da1;
