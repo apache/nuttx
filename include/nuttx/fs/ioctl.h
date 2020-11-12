@@ -546,7 +546,7 @@
 #define _RCIOCVALID(c)    (_IOC_TYPE(c)==_RCIOCBASE)
 #define _RCIOC(nr)        _IOC(_RCIOCBASE,nr)
 
-/* Hime drivers **********************************************************/
+/* Hime drivers *************************************************************/
 
 #define _HIMEMIOCVALID(c)   (_IOC_TYPE(c) == _HIMEMBASE)
 #define _HIMEMIOC(nr)       _IOC(_HIMEMBASE, nr)
