@@ -661,6 +661,34 @@ endmenu # ESP32_EMAC
 menu "WiFi configuration"
 	depends on ESP32_WIRELESS
 
+config ESP32_WIFI_STATIC_RXBUF_NUM
+    int "WiFi static RX buffer number"
+	default 10
+
+config ESP32_WIFI_DYNAMIC_RXBUF_NUM
+    int "WiFi dynamic RX buffer number"
+	default 32
+
+config ESP32_WIFI_DYNAMIC_TXBUF_NUM
+    int "WiFi dynamic TX buffer number"
+	default 32
+
+config ESP32_WIFI_TX_AMPDU
+	bool "WiFi TX AMPDU"
+	default y
+
+config ESP32_WIFI_RX_AMPDU
+	bool "WiFi RX AMPDU"
+	default y
+
+config ESP32_WIFI_RXBA_AMPDU_WZ
+    int "WiFi RX BA AMPDU windown size"
+	default 6
+
+config ESP32_WLAN_RXBUF_NUM
+	int "WLAN netcard RX buffer number"
+	default 16
+
 config ESP32_WIFI_CONNECT_TIMEOUT
 	int "Connect timeout by second"
 	default 10

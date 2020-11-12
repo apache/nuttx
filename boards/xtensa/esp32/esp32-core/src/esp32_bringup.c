@@ -207,7 +207,7 @@ int esp32_bringup(void)
 #endif
 
 #ifdef CONFIG_NET
-  ret = esp32_wlan_initialize();
+  ret = esp32_wlan_sta_initialize();
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize WiFi\n");
