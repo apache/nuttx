@@ -147,32 +147,37 @@
 
 /* DMAMUX12 request line multiplexer interrupt channel status register */
 
-#define DMAMUX1_CSR_SOF(x)         (1 << x) /* Synchronization overrun event flag */
+#define DMAMUX1_CSR_SOF(x)         (1 << (x)) /* Synchronization overrun event flag */
 
 /* DMAMUX12 request line multiplexer interrupt clear flag register */
 
-#define DMAMUX1_CFR_SOF(x)         (1 << x) /* Clear synchronization overrun event flag */
+#define DMAMUX1_CFR_CSOF(x)        (1 << (x)) /* Clear synchronization overrun event flag */
 
 /* DMAMUX12 request generator channel x configuration register */
 
-#define DMAMUX_RGCR_SIGID_SHIFT    (0)  /* Bits 0-4: Signal identifiaction
-                                         * WARNING: different length for DMAMUX1 and DMAMUX2 !
-                                         */
+#define DMAMUX_RGCR_SIGID_SHIFT    (0)                             /* Bits 0-4: Signal identification
+                                                                    * WARNING: different length for DMAMUX1 and DMAMUX2!
+                                                                    * DMAMUX1: 3 bits; DMAMUX2: 5 bits
+                                                                    */
 #define DMAMUX_RGCR_SIGID_MASK     (0x1f << DMAMUX_RGCR_SIGID_SHIFT)
-#define DMAMUX_RGCR_OIE            (8)  /* Bit 8: Trigger overrun interrupt enable */
-#define DMAMUX_RGCR_GE             (16) /* Bit 16: DMA request generator channel X enable*/
-#define DMAMUX_RGCR_GPOL_SHIFT     (17) /* Bits 17-18: DMA request generator trigger polarity */
-#define DMAMUX_RGCR_GPOL_MASK      (7 << DMAMUX_RGCR_GPOL_SHIFT)
-#define DMAMUX_RGCR_GNBREQ_SHIFT   (17) /* Bits 19-23: Number of DMA requests to be generated -1 */
-#define DMAMUX_RGCR_GNBREQL_MASK   (7 << DMAMUX_RGCR_GNBREQ_SHIFT)
+#define DMAMUX_RGCR_OIE            (8)                             /* Bit 8: Trigger overrun interrupt enable */
+#define DMAMUX_RGCR_GE             (16)                            /* Bit 16: DMA request generator channel X enable*/
+#define DMAMUX_RGCR_GPOL_SHIFT     (17)                            /* Bits 17-18: DMA request generator trigger polarity */
+#define DMAMUX_RGCR_GPOL_MASK      (0x3 << DMAMUX_RGCR_GPOL_SHIFT)
+#  define DMAMUX_RGCR_GPOL_NONE    (0x0 << DMAMUX_RGCR_GPOL_SHIFT) /* No event: No trigger detection or generation */
+#  define DMAMUX_RGCR_GPOL_RISING  (0x1 << DMAMUX_RGCR_GPOL_SHIFT) /* Rising edge */
+#  define DMAMUX_RGCR_GPOL_FALLING (0x2 << DMAMUX_RGCR_GPOL_SHIFT) /* Falling edge */
+#  define DMAMUX_RGCR_GPOL_BOTH    (0x3 << DMAMUX_RGCR_GPOL_SHIFT) /* Both rising and falling edges */
+#define DMAMUX_RGCR_GNBREQ_SHIFT   (19)                            /* Bits 19-23: Number of DMA requests to be generated -1 */
+#define DMAMUX_RGCR_GNBREQL_MASK   (0x1f << DMAMUX_RGCR_GNBREQ_SHIFT)
 
 /* DMAMUX12 request generator interrupt status register */
 
-#define DMAMUX1_RGSR_SOF(x)        (1 << x) /* Trigger overrun event flag */
+#define DMAMUX1_RGSR_OF(x)         (1 << (x)) /* Trigger overrun event flag */
 
 /* DMAMUX12 request generator interrupt clear flag register */
 
-#define DMAMUX1_RGCFR_SOF(x)       (1 << x) /* Clear trigger overrun event flag */
+#define DMAMUX1_RGCFR_COF(x)       (1 << (x)) /* Clear trigger overrun event flag */
 
 /* DMA channel mapping
  *
@@ -182,7 +187,7 @@
  * X - free bits
  */
 
-#define DMAMAP_MAP(d,c)           ((d) << 8 | c)
+#define DMAMAP_MAP(d,c)           ((d) << 8 | (c))
 #define DMAMAP_CONTROLLER(m)      ((m) >> 8 & 0x07)
 #define DMAMAP_REQUEST(m)         ((m) >> 0 & 0xff)
 
