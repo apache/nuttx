@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 #include <debug.h>
 
 #include <netinet/ether.h>
@@ -542,7 +543,8 @@ static int netprocfs_errors(FAR struct netprocfs_file_s *netfile)
   dev = netfile->dev;
   stats = &dev->d_statistics;
 
-  return snprintf(netfile->line, NET_LINELEN , "\tTotal Errors: %08x\n\n",
+  return snprintf(netfile->line, NET_LINELEN,
+                  "\tTotal Errors: %08" PRIx32 "\n\n",
                   stats->errors);
 }
 #endif /* CONFIG_NETDEV_STATISTICS */
