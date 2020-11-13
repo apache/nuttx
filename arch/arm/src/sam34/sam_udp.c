@@ -1044,9 +1044,9 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           privreq->inflight = 0;
 
           /* Set TXPKTRDY to notify the USB hardware that there is (null)
-           * TX packet available.  We will be notified that the endpoint’s
+           * TX packet available.  We will be notified that the endpoint's
            * FIFO has been released by the USB device when TXCOMP in the
-           * endpoint’s UDPEP_CSRx register has been set.
+           * endpoint's UDPEP_CSRx register has been set.
            */
 
           usbtrace(TRACE_WRITE(epno), 0);
@@ -1284,8 +1284,8 @@ static void sam_ep0_wrstatus(const uint8_t *buffer, size_t buflen)
     }
 
   /* Set TXPKTRDY to notify the USB hardware that there is TX data in the
-   * endpoint FIFO.  We will be notified that the endpoint’s FIFO has been
-   * released by the USB device when TXCOMP in the endpoint’s UDPEP_CSRx
+   * endpoint FIFO.  We will be notified that the endpoint's FIFO has been
+   * released by the USB device when TXCOMP in the endpoint's UDPEP_CSRx
    * register has been set.
    */
 
