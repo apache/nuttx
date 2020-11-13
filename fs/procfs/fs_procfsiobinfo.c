@@ -169,6 +169,9 @@ static FAR const char *g_iob_user_names[] =
 #ifdef CONFIG_WIRELESS_BLUETOOTH
   "bluetooth",
 #endif
+#ifdef CONFIG_NET_CAN
+  "can",
+#endif
   "global",
 };
 
