@@ -139,10 +139,10 @@ int can_getsockopt(FAR struct socket *psock, int option,
           }
         else
           {
-            FAR int *loopback  = (FAR int32_t *)value;
-            *loopback          = conn->loopback;
-            *value_len         = sizeof(conn->loopback);
-            ret                = OK;
+            FAR int32_t *loopback  = (FAR int32_t *)value;
+            *loopback              = conn->loopback;
+            *value_len             = sizeof(conn->loopback);
+            ret                    = OK;
           }
         break;
 
@@ -158,10 +158,10 @@ int can_getsockopt(FAR struct socket *psock, int option,
           }
         else
           {
-            FAR int *recv_own_msgs = (FAR int32_t *)value;
-            *recv_own_msgs         = conn->recv_own_msgs;
-            *value_len             = sizeof(conn->recv_own_msgs);
-            ret                    = OK;
+            FAR int32_t *recv_own_msgs = (FAR int32_t *)value;
+            *recv_own_msgs             = conn->recv_own_msgs;
+            *value_len                 = sizeof(conn->recv_own_msgs);
+            ret                        = OK;
           }
         break;
 
@@ -178,10 +178,10 @@ int can_getsockopt(FAR struct socket *psock, int option,
           }
         else
           {
-            FAR int *fd_frames = (FAR int32_t *)value;
-            *fd_frames         = conn->fd_frames;
-            *value_len         = sizeof(conn->fd_frames);
-            ret                = OK;
+            FAR int32_t *fd_frames = (FAR int32_t *)value;
+            *fd_frames             = conn->fd_frames;
+            *value_len             = sizeof(conn->fd_frames);
+            ret                    = OK;
           }
         break;
 #endif
@@ -202,10 +202,10 @@ int can_getsockopt(FAR struct socket *psock, int option,
           }
         else
           {
-            FAR int *tx_deadline = (FAR int32_t *)value;
-            *tx_deadline         = conn->tx_deadline;
-            *value_len         = sizeof(conn->tx_deadline);
-            ret                = OK;
+            FAR int32_t *tx_deadline = (FAR int32_t *)value;
+            *tx_deadline             = conn->tx_deadline;
+            *value_len               = sizeof(conn->tx_deadline);
+            ret                      = OK;
           }
         break;
 #endif
