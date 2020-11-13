@@ -43,6 +43,7 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -87,7 +88,7 @@ static inline void local_cs_name(FAR struct local_conn_s *conn,
     }
   else
     {
-      snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_CS_SUFFIX "%x",
+      snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_CS_SUFFIX "%" PRIx32,
                conn->lc_path, conn->lc_instance_id);
     }
 
@@ -114,7 +115,7 @@ static inline void local_sc_name(FAR struct local_conn_s *conn,
     }
   else
     {
-      snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_SC_SUFFIX "%x",
+      snprintf(path, LOCAL_FULLPATH_LEN - 1, "%s" LOCAL_SC_SUFFIX "%" PRIx32,
                conn->lc_path, conn->lc_instance_id);
     }
 
