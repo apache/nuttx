@@ -263,7 +263,7 @@ static int  xmc4_attach(struct uart_dev_s *dev);
 static void xmc4_detach(struct uart_dev_s *dev);
 static int  xmc4_interrupt(int irq, void *context, FAR void *arg);
 static int  xmc4_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  xmc4_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  xmc4_receive(struct uart_dev_s *dev, unsigned int *status);
 static void xmc4_rxint(struct uart_dev_s *dev, bool enable);
 static bool xmc4_rxavailable(struct uart_dev_s *dev);
 static void xmc4_send(struct uart_dev_s *dev, int ch);
@@ -851,7 +851,7 @@ static int xmc4_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int xmc4_receive(struct uart_dev_s *dev, uint32_t *status)
+static int xmc4_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct xmc4_dev_s *priv = (struct xmc4_dev_s *)dev->priv;
   uint32_t outr;
