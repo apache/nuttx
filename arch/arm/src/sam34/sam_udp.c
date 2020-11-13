@@ -731,7 +731,7 @@ static void sam_putreg(uint32_t regval, uintptr_t regaddr)
   putreg32(regval, regaddr);
 }
 #else
-static inline void sam_putreg(uint32_t regval, uint32_t regaddr)
+static inline void sam_putreg(uint32_t regval, uintptr_t regaddr)
 {
   putreg32(regval, regaddr);
 }
