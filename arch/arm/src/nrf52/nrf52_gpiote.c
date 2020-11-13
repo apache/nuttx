@@ -532,6 +532,14 @@ void nrf52_gpiote_set_task(uint32_t pinset, int channel,
 
 int nrf52_gpiote_init(void)
 {
+  /* Clear LATCH register(s) */
+
+  putreg32(0, NRF52_GPIO_P0_BASE + NRF52_GPIO_LATCH_OFFSET);
+
+#ifdef CONFIG_NRF52_HAVE_PORT1
+  putreg32(0, NRF52_GPIO_P1_BASE + NRF52_GPIO_LATCH_OFFSET);
+#endif
+
   /* Reset GPIOTE data */
 
   memset(&g_gpiote_ch_callbacks, 0, sizeof(g_gpiote_ch_callbacks));

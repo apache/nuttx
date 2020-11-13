@@ -184,7 +184,7 @@ static inline void nrf52_gpio_sense(nrf52_pinset_t cfgset,
     {
       regval |= GPIO_CNF_SENSE_HIGH;
     }
-  else
+  else if (mode == GPIO_SENSE_LOW)
     {
       regval |= GPIO_CNF_SENSE_LOW;
     }
