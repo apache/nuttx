@@ -80,7 +80,7 @@ static int  eoss3_attach(struct uart_dev_s *dev);
 static void eoss3_detach(struct uart_dev_s *dev);
 static int  eoss3_interrupt(int irq, void *context, FAR void *arg);
 static int  eoss3_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  eoss3_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  eoss3_receive(struct uart_dev_s *dev, unsigned int *status);
 static void eoss3_rxint(struct uart_dev_s *dev, bool enable);
 static bool eoss3_rxavailable(struct uart_dev_s *dev);
 static void eoss3_send(struct uart_dev_s *dev, int ch);
@@ -414,7 +414,7 @@ static int eoss3_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int eoss3_receive(struct uart_dev_s *dev, uint32_t *status)
+static int eoss3_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   *status = getreg32(EOSS3_UART_RSR_ECR);
   return (getreg32(EOSS3_UART_DR) & UART_DR_DATA_MASK);
