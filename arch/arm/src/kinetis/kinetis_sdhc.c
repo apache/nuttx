@@ -310,7 +310,7 @@ static void  kinetis_blocksetup(FAR struct sdio_dev_s *dev,
 static int  kinetis_recvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t nbytes);
 static int  kinetis_sendsetup(FAR struct sdio_dev_s *dev,
-              FAR const uint8_t *buffer, uint32_t nbytes);
+              FAR const uint8_t *buffer, size_t nbytes);
 #endif
 
 static int  kinetis_cancel(FAR struct sdio_dev_s *dev);
