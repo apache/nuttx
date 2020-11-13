@@ -158,7 +158,7 @@ static int  max326_attach(struct uart_dev_s *dev);
 static void max326_detach(struct uart_dev_s *dev);
 static int  max326_interrupt(int irq, void *context, void *arg);
 static int  max326_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  max326_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  max326_receive(struct uart_dev_s *dev, unsigned int *status);
 static void max326_rxint(struct uart_dev_s *dev, bool enable);
 static bool max326_rxavailable(struct uart_dev_s *dev);
 static void max326_send(struct uart_dev_s *dev, int ch);
@@ -631,7 +631,7 @@ static int max326_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int max326_receive(struct uart_dev_s *dev, uint32_t *status)
+static int max326_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct max326_dev_s *priv = (struct max326_dev_s *)dev->priv;
 
