@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
@@ -769,7 +770,8 @@ static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
       fracpart = 0;
     }
 
-  linesize = snprintf(procfile->line, STATUS_LINELEN, "%3d.%01d%%",
+  linesize = snprintf(procfile->line, STATUS_LINELEN,
+                      "%3" PRId32 ".%01" PRId32 "%%",
                       intpart, fracpart);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                            &offset);
