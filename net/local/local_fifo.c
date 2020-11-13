@@ -379,7 +379,8 @@ int local_create_fifos(FAR struct local_conn_s *conn)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_LOCAL_DGRAM
-int local_create_halfduplex(FAR struct local_conn_s *conn, FAR const char *path)
+int local_create_halfduplex(FAR struct local_conn_s *conn,
+                            FAR const char *path)
 {
   char fullpath[LOCAL_FULLPATH_LEN];
 
