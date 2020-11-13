@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -175,8 +176,9 @@ int highpri_main(int argc, char *argv[])
   g_highpri.dev = dev;
 
   prescaler = STM32_TIM_SETCLOCK(dev, CONFIG_VIEWTOOL_TIM6_FREQUENCY);
-  printf("TIM6 CLKIN=%d Hz, Frequency=%d Hz, prescaler=%d\n",
-         STM32_APB1_TIM6_CLKIN, CONFIG_VIEWTOOL_TIM6_FREQUENCY, prescaler);
+  printf("TIM6 CLKIN=%jd Hz, Frequency=%d Hz, prescaler=%d\n",
+         (uintmax_t)STM32_APB1_TIM6_CLKIN, CONFIG_VIEWTOOL_TIM6_FREQUENCY,
+         prescaler);
 
   STM32_TIM_SETPERIOD(dev, CONFIG_VIEWTOOL_TIM6_PERIOD);
   printf("TIM6 period=%d cyles; interrupt rate=%d Hz\n",
@@ -233,7 +235,7 @@ int highpri_main(int argc, char *argv[])
 
       /* Then print out what is happening */
 
-      printf("Elapsed time: %d seconds\n\n", seconds);
+      printf("Elapsed time: %" PRId32 " seconds\n\n", seconds);
       for (i = 0, total = 0; i < 16; i++)
         {
           total += basepri[i];
