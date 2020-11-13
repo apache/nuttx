@@ -158,7 +158,7 @@ int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev)
     {
       if ((i & 15) == 0)
         {
-          len = sprintf(buf, "%02x: ", i & 0xff);
+          len = sprintf(buf, "%02" PRIx32 ": ", i & 0xff);
         }
 
       len += sprintf(buf + len, "%02x ", mrf24j40_getreg(dev->spi, i));
