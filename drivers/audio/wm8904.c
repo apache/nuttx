@@ -53,6 +53,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
@@ -1603,7 +1604,8 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
 
   /* Create a message queue for the worker thread */
 
-  snprintf(priv->mqname, sizeof(priv->mqname), "/tmp/%X", priv);
+  snprintf(priv->mqname, sizeof(priv->mqname), "/tmp/%" PRIXPTR,
+           (uintptr_t)priv);
 
   attr.mq_maxmsg  = 16;
   attr.mq_msgsize = sizeof(struct audio_msg_s);
