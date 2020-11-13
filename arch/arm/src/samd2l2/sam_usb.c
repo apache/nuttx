@@ -2270,7 +2270,9 @@ static void sam_resume(struct sam_usbdev_s *priv)
 
       sam_enableclks();
 
-      /* Restore full power -- whatever that means for this particular board */
+      /* Restore full power -- whatever that means for this particular
+       * board
+       */
 
       sam_usb_suspend((struct usbdev_s *)priv, true);
 
