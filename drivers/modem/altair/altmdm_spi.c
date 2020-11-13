@@ -719,8 +719,8 @@ static void show_txheader(FAR struct altmdm_dev_s *priv)
  ****************************************************************************/
 
 static void parse_rxheader(FAR struct altmdm_dev_s *priv,
-                           FAR int *total_size, FAR int *actual_size,
-                           FAR int *is_reset, FAR int *is_bufful)
+                           FAR int32_t *total_size, FAR int32_t *actual_size,
+                           FAR int *is_reset, FAR int32_t *is_bufful)
 {
   FAR struct altmdm_spi_xferhdr_s *rx_header = &priv->spidev.rx_param.header;
 
@@ -1286,9 +1286,9 @@ static int do_xfersleep(FAR struct altmdm_dev_s *priv, uint32_t is_rcvrready)
   int ret;
   int resp = 0;
   int is_reset = 0;
-  int total_size;
-  int actual_size;
-  int is_bufful;
+  int32_t total_size;
+  int32_t actual_size;
+  int32_t is_bufful;
 
   /* Transfer header for sleep request */
 
