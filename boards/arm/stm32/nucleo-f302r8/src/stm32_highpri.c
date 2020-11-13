@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -501,10 +502,10 @@ int highpri_main(int argc, char *argv[])
       g_highpri.lock = true;
 
 #ifndef CONFIG_STM32_ADC1_DMA
-      printf("%d [%d] %0.3fV\n", g_highpri.cntr1, g_highpri.current,
+      printf("%" PRId32 " [%d] %0.3fV\n", g_highpri.cntr1, g_highpri.current,
               g_highpri.r_volt[g_highpri.current]);
 #else
-      printf("%d ", g_highpri.cntr1);
+      printf("%" PRId32 " ", g_highpri.cntr1);
 
       for (i = 0; i < REG_NCHANNELS; i += 1)
         {
@@ -517,7 +518,7 @@ int highpri_main(int argc, char *argv[])
 #ifdef HIGHPRI_HAVE_INJECTED
       /* Print data from injected channels */
 
-      printf("%d ", g_highpri.cntr2);
+      printf("%" PRId32 " ", g_highpri.cntr2);
 
       for (i = 0; i < INJ_NCHANNELS; i += 1)
         {
