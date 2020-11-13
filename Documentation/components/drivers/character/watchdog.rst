@@ -154,3 +154,50 @@ This command registers an user callback that will be triggered on timeout. It re
 .. c:macro:: WDIOC_KEEPALIVE
 
  This command resets the watchdog timer ("ping",  "pet the dog",  "feed the dog"). 
+
+Using the Auto-monitor feature to keep the chip alive
+------------------------------------------------------
+
+The auto-monitor provides an OS-internal mechanism for automatically start the watchdog timer and repeatedly reset the counting after the watchdog is register.
+
+To enable it, follow the next instructions:
+
+1. Select a Watchdog Timer Instance
+
+ To select the wdt browse in the ``menuconfig`` using the following path:
+
+ Go into menu :menuselection:`System Type --> <Chip> Peripheral Selection` and press :kbd:`Enter`. Then select one watchdog timer.
+
+2. Enable the Auto-monitor option
+
+ Go into menu :menuselection:`Device Drivers --> Timer Driver Support` and press :kbd:`Enter`. Then enable:
+
+ - [x] Watchdog Timer Support
+
+ Then press :kbd:`Enter` again to enter into the Watchdog Timer Support menu. And finally enable the Auto-monitor option:
+
+ - [x] Auto-monitor
+
+ After selecting the option you may want to configure some parameters:
+
+ * **Timeout**: It is the watchdog timer expiration time in seconds.
+ * **Keep a live interval**: This is the interval in which the watchdog will be fed. It is in seconds. It can't be bigger than the timeout. If this interval is equal to timeout interval, than this interval will automatically change to half timeout. 
+ * **Keep alive by**: This is a choice to determine who is going to feed the dog. There are 4 possible choices that are described as follows.
+
+ ``Capture callback``: This choice registers a watchdog timer callback to reset the watchdog every time it expires, i.e., on timeout. 
+
+ ``Timer callback``: This choice also uses a timer callback to reset the watchdog, but it will reset the watchdog every "keep a live interval".
+
+ ``Worker callback``: This choice uses the Low Priority Work Queue to reset the watchog every "keep a live interval". This choice depends on having the Low Priority Work Queue enabled. 
+ 
+ So, before enabling it, go into menu :menuselection:`RTOS Features --> Work queue support` and press :kbd:`Enter`.
+
+ - [x] Low priority (kernel) worker thread
+
+ ``Idle callback``: This choise sets an Idle callback to feed the dog. It depends on the PM module, because this callback is triggered by the PM state change. To enable it do the following:
+
+ Go into menu :menuselection:`Device Drivers --> Timer Driver Support` and press :kbd:`Enter`. Then enable:
+
+ - [x] Power Management Support  
+ 
+After selecting one of these choices, the chip will keep itself alive by one of these options. 
