@@ -89,7 +89,8 @@ static inline void rcc_reset(void)
 
   putreg32(0, STM32_RCC_APB2RSTR);          /* Disable APB2 Peripheral Reset */
   putreg32(0, STM32_RCC_APB1RSTR);          /* Disable APB1 Peripheral Reset */
-  putreg32(RCC_AHBENR_FLITFEN | RCC_AHBENR_SRAMEN, STM32_RCC_AHBENR); /* FLITF and SRAM Clock ON */
+  putreg32(RCC_AHBENR_FLITFEN | RCC_AHBENR_SRAMEN,
+           STM32_RCC_AHBENR);               /* FLITF and SRAM Clock ON */
   putreg32(0, STM32_RCC_APB2ENR);           /* Disable APB2 Peripheral Clock */
   putreg32(0, STM32_RCC_APB1ENR);           /* Disable APB1 Peripheral Clock */
 
@@ -555,40 +556,40 @@ static void stm32_stdclockconfig(void)
   /* If the PLL is using the HSE, or the HSE is the system clock */
 
 #if (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
-  {
-    volatile int32_t timeout;
+    {
+      volatile int32_t timeout;
 
-    /* Enable External High-Speed Clock (HSE) */
+      /* Enable External High-Speed Clock (HSE) */
 
-    regval  = getreg32(STM32_RCC_CR);
-    regval &= ~RCC_CR_HSEBYP;         /* Disable HSE clock bypass */
-    regval |= RCC_CR_HSEON;           /* Enable HSE */
-    putreg32(regval, STM32_RCC_CR);
+      regval  = getreg32(STM32_RCC_CR);
+      regval &= ~RCC_CR_HSEBYP;         /* Disable HSE clock bypass */
+      regval |= RCC_CR_HSEON;           /* Enable HSE */
+      putreg32(regval, STM32_RCC_CR);
 
-    /* Wait until the HSE is ready (or until a timeout elapsed) */
+      /* Wait until the HSE is ready (or until a timeout elapsed) */
 
-    for (timeout = HSERDY_TIMEOUT; timeout > 0; timeout--)
-      {
-        /* Check if the HSERDY flag is the set in the CR */
+      for (timeout = HSERDY_TIMEOUT; timeout > 0; timeout--)
+        {
+          /* Check if the HSERDY flag is the set in the CR */
 
-        if ((getreg32(STM32_RCC_CR) & RCC_CR_HSERDY) != 0)
-          {
-            /* If so, then break-out with timeout > 0 */
+          if ((getreg32(STM32_RCC_CR) & RCC_CR_HSERDY) != 0)
+            {
+              /* If so, then break-out with timeout > 0 */
 
-            break;
-          }
-      }
+              break;
+            }
+        }
 
-    if (timeout == 0)
-      {
-        /* In the case of a timeout starting the HSE, we really don't have a
-         * strategy.  This is almost always a hardware failure or
-         * misconfiguration.
-         */
+      if (timeout == 0)
+        {
+          /* In the case of a timeout starting the HSE, we really don't have
+           * a strategy.  This is almost always a hardware failure or
+           * misconfiguration.
+           */
 
-        return;
-      }
-  }
+          return;
+        }
+    }
 
 # if defined(CONFIG_STM32_VALUELINE) && (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC)
   /* If this is a value-line part and we are using the HSE as the PLL */
@@ -607,6 +608,7 @@ static void stm32_stdclockconfig(void)
 
 #ifndef CONFIG_STM32_VALUELINE
   /* Value-line devices don't implement flash prefetch/waitstates */
+
   /* Enable FLASH prefetch buffer and set FLASH wait states */
 
   regval  = getreg32(STM32_FLASH_ACR);
@@ -638,6 +640,7 @@ static void stm32_stdclockconfig(void)
 
 #if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
   /* If we are using the PLL, configure and start it */
+
   /* Set the PLL divider and multiplier */
 
   regval = getreg32(STM32_RCC_CFGR);
