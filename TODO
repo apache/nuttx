@@ -448,34 +448,6 @@ o Task/Scheduler (sched/)
 o SMP
   ^^^
 
-  Title:       SMP AND DATA CACHES
-  Description: When spinlocks, semaphores, etc. are used in an SMP system with
-               a data cache, then there may be problems with cache coherency
-               in some CPU architectures:  When one CPU modifies the shared
-               object, the changes may not be visible to another CPU if it
-               does not share the data cache. That would cause failure in
-               the IPC logic.
-
-               Flushing the D-cache on writes and invalidating before a read is
-               not really an option.  That would essentially effect every memory
-               access and there may be side-effects due to cache line sizes
-               and alignment.
-
-               For the same reason a separate, non-cacheable memory region is
-               not an option.  Essentially all data would have to go in the
-               non-cached region and you would have no benefit from the data
-               cache.
-
-               On ARM Cortex-A, each CPU has a separate data cache.  However,
-               the MPCore's Snoop Controller Unit supports coherency among
-               the different caches.  The SCU is enabled by the SCU control
-               register and each CPU participates in the SMP coherency by
-               setting the ACTLR_SMP bit in the auxiliary control register
-               (ACTLR).
-
-  Status:      Closed
-  Priority:    High on platforms that may have the issue.
-
   Title:       MISUSE OF sched_lock() IN SMP MODE
   Description: The OS API sched_lock() disables pre-emption and locks a
                task in place.  In the single CPU case, it is also often
