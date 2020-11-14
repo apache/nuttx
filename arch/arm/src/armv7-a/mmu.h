@@ -584,8 +584,15 @@
 
 #define MMU_ROMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_R1 | PMD_CACHEABLE | \
                               PMD_SECT_DOM(0))
+
+#ifdef CONFIG_SMP
+#define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
+                              PMD_SECT_S | PMD_SECT_DOM(0))
+#else
 #define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
                               PMD_SECT_DOM(0))
+#endif
+
 #define MMU_IOFLAGS          (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_DEVICE | \
                               PMD_SECT_DOM(0) | PMD_SECT_XN)
 #define MMU_STRONGLY_ORDERED (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | \
