@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_1wire.h
  *
  *   Copyright (C) 2016 Aleksandr Vyhovanec. All rights reserved.
@@ -31,30 +31,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_STM32_1WIRE_H
 #define __ARCH_ARM_SRC_STM32_STM32_1WIRE_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "stm32_uart.h"
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_1wireinitialize
  *
  * Description:
- *   Initialize the selected 1-Wire port. And return a unique instance of struct
- *   struct onewire_dev_s.  This function may be called to obtain multiple
- *   instances of the interface, each of which may be set up with a
+ *   Initialize the selected 1-Wire port. And return a unique instance of
+ *   struct struct onewire_dev_s.  This function may be called to obtain
+ *   multiple instances of the interface, each of which may be set up with a
  *   different frequency and slave address.
  *
  * Input Parameters:
