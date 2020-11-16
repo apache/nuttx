@@ -333,7 +333,7 @@ void arm_l2ccinitialize(void)
 #if defined(CONFIG_ARMV7A_ASSOCIATIVITY_8WAY)
   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == 0);
 #elif defined(CONFIG_ARMV7A_ASSOCIATIVITY_16WAY)
-  DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == 1);
+  DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == L2CC_ACR_ASS);
 #else
 #  error No associativity selected
 #endif
