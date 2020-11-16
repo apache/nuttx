@@ -117,6 +117,10 @@ endif
 
 CMN_CSRCS += arm_cache.c
 
+ifeq ($(CONFIG_ARCH_L2CACHE),y)
+CMN_CSRCS += arm_l2cc_pl310.c
+endif
+
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_savefpu.S arm_restorefpu.S
 CMN_CSRCS += arm_copyarmstate.c
