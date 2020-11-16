@@ -52,7 +52,7 @@
  * header file as L2CC_VBASE.
  */
 
-#include "chip/chip.h"
+#include "chip.h"
 
 /************************************************************************************
  * Pre-processor Definitions
