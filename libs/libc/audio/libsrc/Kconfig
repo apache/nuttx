@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config AUDIO_SRC
+       bool "Audio Samplerate Convertor Library"
+       default n
+       ---help---
+               Enable build for various SRC functions
+
+if AUDIO_SRC
+
+config AUDIO_SRC_QUALITY
+       int "Audio Conversion Quality [0/1/2]"
+       default 2
+       ---help---
+               Audio Conversion Quality [0/1/2]
+               0 Slowest conversion speed with best quality.
+               1 Medium conversion speed with medium qulity
+               2 Fastest conversion with lowest Quality
+
+endif # LIBSRC
