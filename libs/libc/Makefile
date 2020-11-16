@@ -149,7 +149,7 @@ endif
 
 # Context
 
-context:
+context::
 ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
 	$(Q) $(MAKE) -C zoneinfo context BIN=$(BIN)
 endif
@@ -166,11 +166,11 @@ ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
 endif
 	$(Q) touch $@
 
-depend: .depend
+depend:: .depend
 
 # Clean most derived files, retaining the configuration
 
-clean:
+clean::
 	$(Q) $(MAKE) -C bin  clean
 	$(Q) $(MAKE) -C kbin clean
 	$(Q) $(MAKE) -C zoneinfo clean BIN=$(BIN)
@@ -180,7 +180,7 @@ clean:
 
 # Deep clean -- removes all traces of the configuration
 
-distclean: clean
+distclean:: clean
 	$(Q) $(MAKE) -C bin  distclean
 	$(Q) $(MAKE) -C kbin distclean
 	$(Q) $(MAKE) -C zoneinfo distclean BIN=$(BIN)
