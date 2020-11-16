@@ -311,19 +311,6 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
                            FAR struct tcp_conn_s *conn,
                            FAR struct tcp_hdr_s *tcp)
 {
-  /* If keepalive is outstanding, cancel it  */
-
-#ifdef CONFIG_NET_TCP_KEEPALIVE
-  if (conn->keepretries > 0)
-    {
-      uint32_t saveseq = tcp_getsequence(conn->sndseq);
-      saveseq += conn->tx_unacked;
-      tcp_setsequence(conn->sndseq, saveseq);
-      conn->tx_unacked--;
-      conn->keepretries = 0;
-    }
-#endif /* CONFIG_NET_TCP_KEEPALIVE */
-
   /* Copy the IP address into the IPv6 header */
 
 #ifdef CONFIG_NET_IPv6
