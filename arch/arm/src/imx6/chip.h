@@ -61,6 +61,12 @@
 
 #define CHIP_MPCORE_VBASE IMX_ARMMP_VSECTION
 
+/* arch/arm/src/armv7-a/l2cc_pl310.h includes this file and expects it
+ * to provide the address of the L2CC-PL310 implementation.
+ */
+
+#define L2CC_VBASE IMX_PL310_VBASE
+
 /****************************************************************************
  * Macro Definitions
  ****************************************************************************/
