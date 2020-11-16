@@ -171,10 +171,6 @@ int up_cpu_start(int cpu)
   sched_note_cpu_start(this_task(), cpu);
 #endif
 
-  /* Make the content of CPU0 L1 cache has been written to coherent L2 */
-
-  cp15_clean_dcache(CONFIG_RAM_START, CONFIG_RAM_END - 1);
-
   /* Execute SGI1 */
 
   return arm_cpu_sgi(GIC_IRQ_SGI1, (1 << cpu));
