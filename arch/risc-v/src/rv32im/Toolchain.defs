@@ -77,9 +77,9 @@ endif
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
   CROSSDEV ?= riscv64-unknown-elf-
   ifeq ($(CONFIG_ARCH_FPU),y)
-      ARCHCPUFLAGS = -march=rv32imf -mabi=ilp32f
+      ARCHCPUFLAGS = -march=rv32imfc -mabi=ilp32f
   else
-      ARCHCPUFLAGS = -march=rv32im -mabi=ilp32
+      ARCHCPUFLAGS = -march=rv32imc -mabi=ilp32
   endif
   ifeq ($(CONFIG_RV32IM_HW_MULDIV),y)
     ARCHCPUFLAGS += -mdiv
