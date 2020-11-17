@@ -22,12 +22,12 @@ Files supporting PWM can be found in the following locations:
    file includes both the application level interface to the PWM
    driver as well as the interface between the "upper half" and
    "lower half" drivers. The PWM module uses a standard character
-   driver framework. However, since the PWM driver is a devices
+   driver framework. However, since the PWM driver is a device
    control interface and not a data transfer interface, the
    majority of the functionality available to the application is
    implemented in driver ioctl calls.
 -  **"Upper Half" Driver**. The generic, "upper half" PWM driver
-   resides at ``drivers/pwm.c``.
+   resides at ``drivers/timers/pwm.c``.
 -  **"Lower Half" Drivers**. Platform-specific PWM drivers reside
    in ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>*
    directory for the specific processor *<architecture>* and for
