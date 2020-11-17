@@ -139,6 +139,7 @@ static inline void apa102_write32(FAR struct apa102_dev_s *priv,
   apa102_configspi(priv->spi);
 
   /* Note: APA102 doesn't use chip select */
+
   /* Send 32 bits (4 bytes) */
 
   SPI_SEND(priv->spi, (value & 0xff));
@@ -181,7 +182,8 @@ static int apa102_close(FAR struct file *filep)
  * Name: apa102_read
  ****************************************************************************/
 
-static ssize_t apa102_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t apa102_read(FAR struct file *filep, FAR char *buffer,
+                          size_t buflen)
 {
   return -ENOSYS;
 }
@@ -217,7 +219,8 @@ static ssize_t apa102_write(FAR struct file *filep, FAR const char *buffer,
 
   if ((buflen % 4) != 0)
     {
-      snerr("ERROR: Each LED uses 4 bytes, so (buflen % 4) needs to be 0!\n");
+      snerr("ERROR: Each LED uses 4 bytes, so (buflen % 4)"
+            " needs to be 0!\n");
       return -1;
     }
 
@@ -240,7 +243,7 @@ static ssize_t apa102_write(FAR struct file *filep, FAR const char *buffer,
 
   apa102_write32(priv, APA102_END_FRAME);
 
-  for (i = 0; i < (1 + nleds/32); i++)
+  for (i = 0; i < (1 + nleds / 32); i++)
     {
       apa102_write32(priv, 0);
     }
