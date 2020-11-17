@@ -88,6 +88,9 @@ typedef unsigned int       _uint16_t;
 typedef signed long        _int32_t;
 typedef unsigned long      _uint32_t;
 
+typedef _int32_t           _intmax_t;
+typedef _uint32_t          _uintmax_t;
+
 /* A size is 2 bytes */
 
 #if defined(__SIZE_TYPE__)
