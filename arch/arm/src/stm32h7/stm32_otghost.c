@@ -1231,7 +1231,7 @@ static void stm32_chan_wakeup(FAR struct stm32_usbhost_s *priv,
  ****************************************************************************/
 
 static int stm32_ctrlchan_alloc(FAR struct stm32_usbhost_s *priv,
-                                uint8_t epno, uint8_t funcaddr
+                                uint8_t epno, uint8_t funcaddr,
                                 uint8_t speed,
                                 FAR struct stm32_ctrlinfo_s *ctrlep)
 {
@@ -4237,6 +4237,7 @@ static int stm32_epalloc(FAR struct usbhost_driver_s *drvr,
 static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
   FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
+  int ret;
 
   DEBUGASSERT(priv);
 
