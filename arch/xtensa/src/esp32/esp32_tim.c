@@ -935,7 +935,7 @@ FAR struct esp32_tim_dev_s *esp32_tim0_init(void)
 
   if (tim->inuse == true)
     {
-      tmrerr("ERROR: TIMER %d is already in use\n", timer);
+      tmrerr("ERROR: Timer0 is already in use\n");
       tim = NULL;
     }
 
