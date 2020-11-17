@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <unistd.h>
+#include <getopt.h>
 #include <string.h>
 
 /****************************************************************************
@@ -293,4 +293,12 @@ int getopt(int argc, FAR char * const argv[], FAR const char *optstring)
 
   g_binitialized = false;
   return ERROR;
+}
+
+int getopt_long(int argc, FAR char *const argv[],
+                FAR const char *shortopts,
+                FAR const struct option *longopts,
+                FAR int *longind)
+{
+  return getopt(argc, argv, shortopts);
 }
