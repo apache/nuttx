@@ -245,8 +245,7 @@ long sysconf(int name)
 #ifdef CONFIG_MM_PGSIZE
         return CONFIG_MM_PGSIZE;
 #else
-#define PAGESIZE 4096
-        return PAGESIZE;
+        return 1;
 #endif
 
       default:
