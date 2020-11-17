@@ -52,6 +52,7 @@
  ****************************************************************************/
 
 FAR char *optarg; /* Optional argument following option */
+int opterr = 0;   /* Print error message */
 int optind = 1;   /* Index into argv */
 int optopt = '?'; /* unrecognized option character */
 
