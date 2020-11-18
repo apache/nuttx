@@ -226,13 +226,6 @@ config SENSORS_L3GD20
 	---help---
 		Enable driver support for the STMicro L3GD20 gyroscope sensor.
 
-config SENSORS_L3GD20_DEVNO
-	int "The device number"
-	default 0
-	depends on SENSORS_L3GD20
-	---help---
-		The device number, used to build the device path as /dev/sensor/gyro_uncalN
-
 config SENSORS_L3GD20_BUFFER_SIZE
 	int "size of buffer"
 	default 1

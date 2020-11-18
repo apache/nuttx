@@ -47,7 +47,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_SCHED_HPWORK)
+#if CONFIG_SENSORS_L3GD20_BUFFER_SIZE > 0 && !defined(CONFIG_SCHED_HPWORK)
 #  error Hi-priority work queue support is required (CONFIG_SCHED_HPWORK)
 #endif
 
@@ -235,9 +235,9 @@ static void l3gd20_read_measurement_data(FAR struct l3gd20_dev_s *dev,
 
   l3gd20_read_temperature(dev, &temperature);
 
-  data->x = ((int16_t)x_gyr / 180.0f) * M_PI_F;
-  data->y = ((int16_t)y_gyr / 180.0f) * M_PI_F;
-  data->z = ((int16_t)z_gyr / 180.0f) * M_PI_F;
+  data->x = ((int16_t)x_gyr / 180.0f) * (float)M_PI;
+  data->y = ((int16_t)y_gyr / 180.0f) * (float)M_PI;
+  data->z = ((int16_t)z_gyr / 180.0f) * (float)M_PI;
   data->temperature = temperature;
   data->timestamp   = dev->timestamp;
 
