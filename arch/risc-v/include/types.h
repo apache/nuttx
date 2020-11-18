@@ -84,6 +84,9 @@ typedef unsigned long long _uint64_t;
 #endif /* __LP64__ */
 #define __INT64_DEFINED
 
+typedef _int64_t           _intmax_t;
+typedef _uint64_t          _uintmax_t;
+
 #ifdef __LP64__
 /* A size is 8 bytes */
 
