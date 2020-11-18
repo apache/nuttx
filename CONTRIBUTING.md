@@ -19,6 +19,7 @@ it is very important you follow these guidelines:
       (unless context is really clear), such as:
       
           <keyword>: <message>
+          i.e sched: Fixed compiler warning
 
   * Be sure to **fill in** the pull-request template with
     meaningful content (be very descriptive, take your time).
