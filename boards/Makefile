@@ -98,14 +98,13 @@ $(CXXOBJS): %$(OBJEXT): %.cxx
 
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
+  
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(CXXSRCS:.cxx=.ddx)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
 
 .depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
-ifneq ($(SRCS),)
-	$(Q) $(MKDEP) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-endif
-ifneq ($(CXXSRCS),)
-	$(Q) $(MKDEP) "$(CXX)" -- $(CXXFLAGS) -- $(CXXSRCS) >>Make.dep
-endif
+	$(Q) $(MAKE) makedepfile
 	$(Q) touch $@
 
 depend: .depend

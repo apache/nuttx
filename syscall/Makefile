@@ -93,9 +93,12 @@ $(BIN3): $(WRAP_OBJS)
 
 $(SYSCALLWRAPS): .context
 
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
+
 .depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
-	$(Q) $(MKDEP) $(PROXYDEPPATH) $(STUBDEPPATH) $(WRAPDEPPATH) \
-	  "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MAKE) makedepfile DEPPATH="$(PROXYDEPPATH) $(STUBDEPPATH) $(WRAPDEPPATH)"
 	$(Q) touch $@
 
 depend: .depend
