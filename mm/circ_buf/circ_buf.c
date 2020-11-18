@@ -63,10 +63,8 @@
 
 int circ_buf_init(FAR struct circ_buf_s *circ, FAR void *base, size_t bytes)
 {
-  if (!circ || (base && !bytes))
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(circ);
+  DEBUGASSERT(!base || bytes);
 
   circ->external = !!base;
 
@@ -107,10 +105,8 @@ int circ_buf_resize(FAR struct circ_buf_s *circ, size_t bytes)
   FAR void *tmp;
   size_t len;
 
-  if (!circ || circ->external)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(circ);
+  DEBUGASSERT(!circ->external);
 
   tmp = kmm_malloc(bytes);
   if (!tmp)
@@ -149,10 +145,8 @@ int circ_buf_resize(FAR struct circ_buf_s *circ, size_t bytes)
 
 void circ_buf_reset(FAR struct circ_buf_s *circ)
 {
-  if (circ)
-    {
-      circ->head = circ->tail = 0;
-    }
+  DEBUGASSERT(circ);
+  circ->head = circ->tail = 0;
 }
 
 /****************************************************************************
@@ -167,10 +161,14 @@ void circ_buf_reset(FAR struct circ_buf_s *circ)
 
 void circ_buf_uninit(FAR struct circ_buf_s *circ)
 {
-  if (circ && !circ->external)
+  DEBUGASSERT(circ);
+
+  if (!circ->external)
     {
       kmm_free(circ->base);
     }
+
+  memset(circ, 0, sizeof(*circ));
 }
 
 /****************************************************************************
@@ -185,12 +183,8 @@ void circ_buf_uninit(FAR struct circ_buf_s *circ)
 
 size_t circ_buf_size(FAR struct circ_buf_s *circ)
 {
-  if (circ)
-    {
-      return circ->size;
-    }
-
-  return 0;
+  DEBUGASSERT(circ);
+  return circ->size;
 }
 
 /****************************************************************************
@@ -205,12 +199,8 @@ size_t circ_buf_size(FAR struct circ_buf_s *circ)
 
 size_t circ_buf_used(FAR struct circ_buf_s *circ)
 {
-  if (circ)
-    {
-      return circ->head - circ->tail;
-    }
-
-  return 0;
+  DEBUGASSERT(circ);
+  return circ->head - circ->tail;
 }
 
 /****************************************************************************
@@ -284,10 +274,7 @@ ssize_t circ_buf_peek(FAR struct circ_buf_s *circ,
   size_t len;
   size_t off;
 
-  if (!circ)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(circ);
 
   len = circ_buf_used(circ);
   off = circ->tail % circ->size;
@@ -332,10 +319,8 @@ ssize_t circ_buf_peek(FAR struct circ_buf_s *circ,
 ssize_t circ_buf_read(FAR struct circ_buf_s *circ,
                       FAR void *dst, size_t bytes)
 {
-  if (!circ || !dst)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(circ);
+  DEBUGASSERT(dst || !bytes);
 
   bytes = circ_buf_peek(circ, dst, bytes);
   circ->tail += bytes;
@@ -366,10 +351,7 @@ ssize_t circ_buf_skip(FAR struct circ_buf_s *circ, size_t bytes)
 {
   size_t len;
 
-  if (!circ)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(circ);
 
   len = circ_buf_used(circ);
 
@@ -409,10 +391,8 @@ ssize_t circ_buf_write(FAR struct circ_buf_s *circ,
   size_t space;
   size_t off;
 
-  if (!circ || !src)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(circ);
+  DEBUGASSERT(src || !bytes);
 
   space = circ_buf_space(circ);
   off = circ->head % circ->size;
@@ -463,10 +443,8 @@ ssize_t circ_buf_overwrite(FAR struct circ_buf_s *circ,
   size_t space;
   size_t off;
 
-  if (!circ || !src)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(circ);
+  DEBUGASSERT(src || !bytes);
 
   if (bytes > circ->size)
     {
