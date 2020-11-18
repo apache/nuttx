@@ -79,6 +79,9 @@ typedef double double_t;
 
 #define __INT64_DEFINED
 
+typedef _int64_t           _intmax_t;
+typedef _uint64_t          _uintmax_t;
+
 /* A (near) size is 2 bytes */
 
 #if defined(__SIZE_TYPE__)
