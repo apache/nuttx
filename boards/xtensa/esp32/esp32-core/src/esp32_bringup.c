@@ -143,7 +143,8 @@ int esp32_bringup(void)
 
 #endif
 
-#if defined(CONFIG_ESP32_SPIRAM)
+#if defined(CONFIG_ESP32_SPIRAM) && \
+    defined(CONFIG_ESP32_SPIRAM_BANKSWITCH_ENABLE)
   ret = esp_himem_init();
   if (ret < 0)
     {
