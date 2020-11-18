@@ -76,6 +76,14 @@ typedef signed long long   _int64_t;
 typedef unsigned long long _uint64_t;
 #define __INT64_DEFINED
 
+#if defined(__APPLE_CC__)
+typedef signed long        _intmax_t;
+typedef unsigned long      _uintmax_t;
+#else
+typedef _int64_t           _intmax_t;
+typedef _uint64_t          _uintmax_t;
+#endif
+
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
 /* 64-bit build on 64-bit machine: A size is 8 bytes */
 
