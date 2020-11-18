@@ -60,9 +60,9 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-/* XTENSA requires at least a 4-byte stack alignment. */
+/* XTENSA requires at least a 16-byte stack alignment. */
 
-#define STACK_ALIGNMENT     4
+#define STACK_ALIGNMENT     16
 
 /* Stack alignment macros */
 
