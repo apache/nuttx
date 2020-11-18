@@ -68,7 +68,7 @@ struct sensor_upperhalf_s
 
   FAR struct pollfd             *fds[CONFIG_SENSORS_NPOLLWAITERS];
   FAR struct sensor_lowerhalf_s *lower;  /* the handle of lower half driver */
-  struct circ_buf_s  buffer;             /* The circualr buffer of sensor device */
+  struct circ_buf_s  buffer;             /* The circular buffer of sensor device */
   uint8_t            crefs;              /* Number of times the device has been opened */
   sem_t              exclsem;            /* Manages exclusive access to file operations */
   sem_t              buffersem;          /* Wakeup user waiting for data in circular buffer */
@@ -171,6 +171,8 @@ static int sensor_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
+  FAR struct sensor_lowerhalf_s *lower = upper->lower;
+  size_t bytes;
   uint8_t tmp;
   int ret;
 
@@ -190,7 +192,14 @@ static int sensor_open(FAR struct file *filep)
     }
   else if (tmp == 1)
     {
-      circ_buf_reset(&upper->buffer);
+      /* Initialize sensor buffer */
+
+      bytes = ROUNDUP(lower->buffer_size, g_sensor_info[lower->type].esize);
+      ret = circ_buf_init(&upper->buffer, NULL, bytes);
+      if (ret < 0)
+        {
+          goto err;
+        }
     }
 
   upper->crefs = tmp;
@@ -219,6 +228,7 @@ static int sensor_close(FAR struct file *filep)
       if (ret >= 0)
         {
           upper->enabled = false;
+          circ_buf_uninit(&upper->buffer);
         }
     }
 
@@ -606,7 +616,6 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
   FAR struct sensor_upperhalf_s *upper;
   char path[DEVNAME_MAX];
   int ret = -EINVAL;
-  size_t bytes;
 
   DEBUGASSERT(lower != NULL);
 
@@ -652,15 +661,6 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
       lower->notify_event = sensor_notify_event;
     }
 
-  /* Initialize sensor buffer */
-
-  bytes = ROUNDUP(lower->buffer_size, g_sensor_info[lower->type].esize);
-  ret = circ_buf_init(&upper->buffer, NULL, bytes);
-  if (ret < 0)
-    {
-      goto buf_err;
-    }
-
   snprintf(path, DEVNAME_MAX, DEVNAME_FMT,
            g_sensor_info[lower->type].name,
            lower->uncalibrated ? DEVNAME_UNCAL : "",
@@ -676,8 +676,6 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
   return ret;
 
 drv_err:
-  circ_buf_uninit(&upper->buffer);
-buf_err:
   nxsem_destroy(&upper->exclsem);
   nxsem_destroy(&upper->buffersem);
 
@@ -720,6 +718,5 @@ void sensor_unregister(FAR struct sensor_lowerhalf_s *lower, int devno)
   nxsem_destroy(&upper->exclsem);
   nxsem_destroy(&upper->buffersem);
 
-  circ_buf_uninit(&upper->buffer);
   kmm_free(upper);
 }
