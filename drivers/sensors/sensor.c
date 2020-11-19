@@ -69,6 +69,7 @@ struct sensor_upperhalf_s
   FAR struct pollfd             *fds[CONFIG_SENSORS_NPOLLWAITERS];
   FAR struct sensor_lowerhalf_s *lower;  /* the handle of lower half driver */
   struct circ_buf_s  buffer;             /* The circular buffer of sensor device */
+  uint8_t            esize;              /* The element size of circular buffer */
   uint8_t            crefs;              /* Number of times the device has been opened */
   sem_t              exclsem;            /* Manages exclusive access to file operations */
   sem_t              buffersem;          /* Wakeup user waiting for data in circular buffer */
@@ -98,6 +99,7 @@ static int     sensor_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct sensor_info g_sensor_info[] =
 {
+  {1,                                 "custom"},
   {sizeof(struct sensor_event_accel), "accel"},
   {sizeof(struct sensor_event_mag),   "mag"},
   {sizeof(struct sensor_event_gyro),  "gyro"},
@@ -172,7 +174,6 @@ static int sensor_open(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
-  size_t bytes;
   uint8_t tmp;
   int ret;
 
@@ -194,8 +195,7 @@ static int sensor_open(FAR struct file *filep)
     {
       /* Initialize sensor buffer */
 
-      bytes = ROUNDUP(lower->buffer_size, g_sensor_info[lower->type].esize);
-      ret = circ_buf_init(&upper->buffer, NULL, bytes);
+      ret = circ_buf_init(&upper->buffer, NULL, lower->buffer_size);
       if (ret < 0)
         {
           goto err;
@@ -243,7 +243,6 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   ssize_t ret;
-  size_t bytes;
 
   if (!buffer || !len)
     {
@@ -319,9 +318,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
           circ_buf_size(&upper->buffer) > lower->buffer_size &&
           circ_buf_used(&upper->buffer) <= lower->buffer_size)
         {
-          bytes = ROUNDUP(lower->buffer_size,
-                          g_sensor_info[lower->type].esize);
-          ret = circ_buf_resize(&upper->buffer, bytes);
+          ret = circ_buf_resize(&upper->buffer, lower->buffer_size);
         }
     }
 
@@ -404,10 +401,8 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   /* Adjust length of buffer in batch mode */
 
                   bytes = ROUNDUP(ROUNDUP(*val, upper->interval) /
-                                  upper->interval *
-                                  g_sensor_info[lower->type].esize +
-                                  lower->buffer_size,
-                                  g_sensor_info[lower->type].esize);
+                                  upper->interval * upper->esize +
+                                  lower->buffer_size, upper->esize);
 
                   ret = circ_buf_resize(&upper->buffer, bytes);
                 }
@@ -417,7 +412,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_GET_NEVENTBUF:
         {
-          *val = lower->buffer_size / g_sensor_info[lower->type].esize;
+          *val = lower->buffer_size / upper->esize;
         }
         break;
 
@@ -425,11 +420,8 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           if (*val != 0)
             {
-              lower->buffer_size = ROUNDUP(*val,
-                                   g_sensor_info[lower->type].esize);
-              bytes = ROUNDUP(lower->buffer_size,
-                              g_sensor_info[lower->type].esize);
-              ret = circ_buf_resize(&upper->buffer, bytes);
+              lower->buffer_size = ROUNDUP(*val, upper->esize);
+              ret = circ_buf_resize(&upper->buffer, lower->buffer_size);
               if (ret >= 0)
                 {
                   *val = lower->buffer_size;
@@ -613,15 +605,53 @@ static void sensor_notify_event(FAR void *priv)
 
 int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
 {
-  FAR struct sensor_upperhalf_s *upper;
   char path[DEVNAME_MAX];
+
+  DEBUGASSERT(lower != NULL);
+
+  snprintf(path, DEVNAME_MAX, DEVNAME_FMT,
+           g_sensor_info[lower->type].name,
+           lower->uncalibrated ? DEVNAME_UNCAL : "",
+           devno);
+  return sensor_custom_register(lower, path,
+                                g_sensor_info[lower->type].esize);
+}
+
+/****************************************************************************
+ * Name: sensor_custom_register
+ *
+ * Description:
+ *   This function binds an instance of a "lower half" Sensor driver with the
+ *   "upper half" Sensor device and registers that device so that can be used
+ *   by application code.
+ *
+ *   You can register the character device type by specific path and esize.
+ *   This API corresponds to the sensor_custom_unregister.
+ *
+ * Input Parameters:
+ *   dev   - A pointer to an instance of lower half sensor driver. This
+ *           instance is bound to the sensor driver and must persists as long
+ *           as the driver persists.
+ *   path  - The user specifies path of device. ex: /dev/sensor/xxx.
+ *   esize - The element size of intermediate circular buffer.
+ *
+ * Returned Value:
+ *   OK if the driver was successfully register; A negated errno value is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
+                           FAR const char *path, uint8_t esize)
+{
+  FAR struct sensor_upperhalf_s *upper;
   int ret = -EINVAL;
 
   DEBUGASSERT(lower != NULL);
 
-  if (lower->type >= SENSOR_TYPE_COUNT)
+  if (lower->type >= SENSOR_TYPE_COUNT || !esize)
     {
-      snerr("ERROR: Type is invalid\n");
+      snerr("ERROR: type is invalid\n");
       return ret;
     }
 
@@ -637,6 +667,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
   /* Initialize the upper-half data structure */
 
   upper->lower = lower;
+  upper->esize = esize;
 
   nxsem_init(&upper->exclsem, 0, 1);
   nxsem_init(&upper->buffersem, 0, 0);
@@ -651,7 +682,11 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
     {
       if (!lower->buffer_size)
         {
-          lower->buffer_size = g_sensor_info[lower->type].esize;
+          lower->buffer_size = esize;
+        }
+      else
+        {
+          lower->buffer_size = ROUNDUP(lower->buffer_size, esize);
         }
 
       lower->push_event = sensor_push_event;
@@ -659,14 +694,10 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
   else
     {
       lower->notify_event = sensor_notify_event;
+      lower->buffer_size = 0;
     }
 
-  snprintf(path, DEVNAME_MAX, DEVNAME_FMT,
-           g_sensor_info[lower->type].name,
-           lower->uncalibrated ? DEVNAME_UNCAL : "",
-           devno);
   sninfo("Registering %s\n", path);
-
   ret = register_driver(path, &g_sensor_fops, 0666, upper);
   if (ret)
     {
@@ -700,18 +731,39 @@ drv_err:
 
 void sensor_unregister(FAR struct sensor_lowerhalf_s *lower, int devno)
 {
-  FAR struct sensor_upperhalf_s *upper;
   char path[DEVNAME_MAX];
+
+  snprintf(path, DEVNAME_MAX, DEVNAME_FMT,
+           g_sensor_info[lower->type].name,
+           lower->uncalibrated ? DEVNAME_UNCAL : "",
+           devno);
+  sensor_custom_unregister(lower, path);
+}
+
+/****************************************************************************
+ * Name: sensor_custom_unregister
+ *
+ * Description:
+ *   This function unregister character node and release all resource about
+ *   upper half driver. This API corresponds to the sensor_custom_register.
+ *
+ * Input Parameters:
+ *   dev   - A pointer to an instance of lower half sensor driver. This
+ *           instance is bound to the sensor driver and must persists as long
+ *           as the driver persists.
+ *   path  - The user specifies path of device, ex: /dev/sensor/xxx
+ ****************************************************************************/
+
+void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *lower,
+                              FAR const char *path)
+{
+  FAR struct sensor_upperhalf_s *upper;
 
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT(lower->priv != NULL);
 
   upper = lower->priv;
 
-  snprintf(path, DEVNAME_MAX, DEVNAME_FMT,
-           g_sensor_info[lower->type].name,
-           lower->uncalibrated ? DEVNAME_UNCAL : "",
-           devno);
   sninfo("UnRegistering %s\n", path);
   unregister_driver(path);
 
