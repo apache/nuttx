@@ -592,24 +592,7 @@ Debugging with QEMU
 
 The nuttx ELF image can be debugged with QEMU.
 
-1. Before debugging, following change (enabling wfi instruction in up_idle)
-   is recommended to reduce CPU usage on host PC.
-
-diff --git a/arch/arm/src/common/up_idle.c b/arch/arm/src/common/up_idle.c
-index 45fab0b7c6..c54c1178a1 100644
---- a/arch/arm/src/common/up_idle.c
-+++ b/arch/arm/src/common/up_idle.c
-@@ -71,7 +71,7 @@ void up_idle(void)
-
-   /* Sleep until an interrupt occurs to save power */
-
--#if 0
-+#if 1
-   asm("WFI");  /* For example */
- #endif
- #endif
-
-2. Also, to debug the nuttx (ELF) with symbols, following change must
+1. To debug the nuttx (ELF) with symbols, following change must
    be applied to defconfig.
 
 diff --git a/boards/arm/imx6/sabre-6quad/configs/nsh/defconfig b/boards/arm/imx6/sabre-6quad/configs/nsh/defconfig
@@ -624,6 +607,33 @@ index b15becbb51..3ad4d13ad7 100644
 +CONFIG_DEBUG_SYMBOLS=y
  CONFIG_DEV_ZERO=y
 
+2. Please note that QEMU does not report PL310 (L2CC) related
+   registers correctly, so if you enable CONFIG_DEBUG_ASSERTION
+   the nuttx will stop with DEBUGASSERT(). To avoid this,
+   comment out the following lines.
+
+--- a/arch/arm/src/armv7-a/arm_l2cc_pl310.c
++++ b/arch/arm/src/armv7-a/arm_l2cc_pl310.c
+@@ -333,7 +333,7 @@ void arm_l2ccinitialize(void)
+ #if defined(CONFIG_ARMV7A_ASSOCIATIVITY_8WAY)
+   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == 0);
+ #elif defined(CONFIG_ARMV7A_ASSOCIATIVITY_16WAY)
+- DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == L2CC_ACR_ASS);
++ //DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == L2CC_ACR_ASS);
+ #else
+ # error No associativity selected
+ #endif
+@@ -345,8 +345,8 @@ void arm_l2ccinitialize(void)
+   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
+               L2CC_ACR_WAYSIZE_32KB);
+ #elif defined(CONFIG_ARMV7A_WAYSIZE_64KB)
+- DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
+- L2CC_ACR_WAYSIZE_64KB);
++ // DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
++ // L2CC_ACR_WAYSIZE_64KB);
+ #elif defined(CONFIG_ARMV7A_WAYSIZE_128KB)
+   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) ==
+               L2CC_ACR_WAYSIZE_128KB);
 
 3. Run QEMU
 
