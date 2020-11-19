@@ -76,8 +76,6 @@
 #  define PRIu32      "u"
 #  define PRIu64      _PRI64PREFIX "u"
 
-#  define PRIuMAX     "llu"
-
 #  define PRIx8       "x"
 #  define PRIx16      "x"
 #  define PRIx32      "x"
@@ -93,21 +91,15 @@
 #  define SCNd32      "d"
 #  define SCNd64      _SCN64PREFIX "d"
 
-#  define SCNdMAX     "lld"
-
 #  define SCNi8       "hhi"
 #  define SCNi16      "hi"
 #  define SCNi32      "i"
 #  define SCNi64      _SCN64PREFIX "i"
 
-#  define SCNiMAX     "lli"
-
 #  define SCNo8       "hho"
 #  define SCNo16      "ho"
 #  define SCNo32      "o"
 #  define SCNo64      _SCN64PREFIX "o"
-
-#  define SCNoMAX     "llo"
 
 #  define SCNu8       "hhu"
 #  define SCNu16      "hu"
