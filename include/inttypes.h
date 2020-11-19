@@ -306,6 +306,21 @@
 #define SCNxFAST64  SCNx64
 #endif
 
+/* intmax_t/uintmax_t */
+
+#define PRIdMAX     "jd"
+#define PRIiMAX     "ji"
+#define PRIoMAX     "jo"
+#define PRIuMAX     "ju"
+#define PRIxMAX     "jx"
+#define PRIXMAX     "jX"
+
+#define SCNdMAX     "jd"
+#define SCNiMAX     "ji"
+#define SCNoMAX     "jo"
+#define SCNuMAX     "ju"
+#define SCNxMAX     "jx"
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
