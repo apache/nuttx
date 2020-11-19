@@ -47,10 +47,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if CONFIG_SENSORS_L3GD20_BUFFER_SIZE > 0 && !defined(CONFIG_SCHED_HPWORK)
-#  error Hi-priority work queue support is required (CONFIG_SCHED_HPWORK)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

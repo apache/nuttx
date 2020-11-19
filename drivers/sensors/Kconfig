@@ -223,6 +223,7 @@ config SENSORS_L3GD20
 	bool "STMicro L3GD20 Gyroscope Sensor support"
 	default n
 	select SPI
+	select SCHED_HPWORK if SENSORS_L3GD20_BUFFER_SIZE > 0
 	---help---
 		Enable driver support for the STMicro L3GD20 gyroscope sensor.
 
