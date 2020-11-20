@@ -254,7 +254,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   rf = (FAR struct romfs_file_s *)kmm_zalloc(sizeof(struct romfs_file_s));
   if (!rf)
     {
-      ferr("ERROR: Failed to allocate private data\n", ret);
+      ferr("ERROR: Failed to allocate private data\n");
       ret = -ENOMEM;
       goto errout_with_semaphore;
     }
@@ -375,7 +375,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
   int                         sectorndx;
   int                         ret;
 
-  finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+  finfo("Read %zu bytes from offset %d\n", buflen, filep->f_pos);
 
   /* Sanity checks */
 
@@ -676,7 +676,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newrf = (FAR struct romfs_file_s *)kmm_malloc(sizeof(struct romfs_file_s));
   if (!newrf)
     {
-      ferr("ERROR: Failed to allocate private data\n", ret);
+      ferr("ERROR: Failed to allocate private data\n");
       ret = -ENOMEM;
       goto errout_with_semaphore;
     }
@@ -824,7 +824,7 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
     {
       /* The entry is not a directory */
 
-      ferr("ERROR: '%s' is not a directory: %d\n", relpath);
+      ferr("ERROR: '%s' is not a directory\n", relpath);
       ret = -ENOTDIR;
       goto errout_with_semaphore;
     }
