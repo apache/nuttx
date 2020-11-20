@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -314,7 +315,7 @@ static void addregion (uintptr_t start, uint32_t size, const char *desc)
 {
   /* Display memory ranges to help debugging */
 
-  minfo("%uKb of %s at %p\n", size / 1024, desc, (FAR void *)start);
+  minfo("%" PRIu32 "Kb of %s at %p\n", size / 1024, desc, (FAR void *)start);
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
