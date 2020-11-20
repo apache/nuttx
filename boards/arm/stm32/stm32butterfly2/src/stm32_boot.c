@@ -78,7 +78,7 @@ int board_app_initialize(uintptr_t arg)
   ret = stm32_mmcsd_initialize(CONFIG_NSH_MMCSDMINOR);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize SD slot: %d\n", ret);
       return ret;
     }
 #endif
