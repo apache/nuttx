@@ -44,7 +44,6 @@
 #include <syslog.h>
 #include <errno.h>
 
-
 #define HAVE_USBHOST 1
 #define CONFIG_USBMONITOR 1
 
@@ -56,7 +55,6 @@
 #include "stm32_usbhost.h"
 #include "stm32_usb.h"
 #endif
-
 
 #include "nucleo-h743zi.h"
 
@@ -236,9 +234,7 @@ int stm32_bringup(void)
     }
 #endif /* CONFIG_BUTTONS */
 
-
 #ifdef HAVE_USBHOST
-
   /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
    * will monitor for USB connection and disconnection events.
    */
@@ -263,7 +259,6 @@ int stm32_bringup(void)
              ret);
     }
 #endif
-
 
 #ifdef CONFIG_ADC
   /* Initialize ADC and register the ADC driver. */
