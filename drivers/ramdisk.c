@@ -26,6 +26,7 @@
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -414,7 +415,7 @@ int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
   char devname[16];
   int ret = -ENOMEM;
 
-  finfo("buffer: %p nsectors: %d sectsize: %d\n",
+  finfo("buffer: %p nsectors: %" PRIu32 " sectsize: %" PRIu16 "\n",
         buffer, nsectors, sectsize);
 
   /* Sanity check */
