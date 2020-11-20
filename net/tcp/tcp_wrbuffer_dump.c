@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <debug.h>
 
@@ -63,7 +64,7 @@
 void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
                        unsigned int len, unsigned int offset)
 {
-  syslog(LOG_DEBUG, "%s: wrb=%p segno=%d sent=%d nrtx=%d\n",
+  syslog(LOG_DEBUG, "%s: wrb=%p segno=%" PRIu32 " sent=%d nrtx=%d\n",
          msg, wrb, TCP_WBSEQNO(wrb), TCP_WBSENT(wrb), TCP_WBNRTX(wrb));
   iob_dump("I/O Buffer Chain", TCP_WBIOB(wrb), len, offset);
 }
