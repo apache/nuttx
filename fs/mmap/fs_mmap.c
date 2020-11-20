@@ -152,7 +152,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 
   if (length == 0)
     {
-      ferr("ERROR: Invalid length, length=%d\n", length);
+      ferr("ERROR: Invalid length, length=%zu\n", length);
       errcode = EINVAL;
       goto errout;
     }
