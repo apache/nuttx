@@ -339,7 +339,9 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
               goto errout_with_infd;
             }
 
-          /* Adjust the number of bytes remaining to be read from the packet */
+          /* Adjust the number of bytes remaining to be read from the
+           * packet
+           */
 
           DEBUGASSERT(tmplen <= remaining);
           remaining -= tmplen;
