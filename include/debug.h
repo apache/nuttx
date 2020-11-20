@@ -105,7 +105,9 @@
  */
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
-#  define _none(x...)
+/* don't call syslog while performing the compiler's format check. */
+#  define _none(format, ...) \
+    do { if (0) syslog(LOG_ERR, format, ##__VA_ARGS__); } while (0)
 #else
 #  define _none       (void)
 #endif
