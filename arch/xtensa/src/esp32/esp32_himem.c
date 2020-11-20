@@ -267,8 +267,8 @@ int esp_himem_init(void)
 
   /* Allocate data structures */
 
-  g_ram_descriptor = kmm_malloc(sizeof(ramblock_t) * g_ramblockcnt);
-  g_range_descriptor = kmm_malloc(sizeof(rangeblock_t) * \
+  g_ram_descriptor = kmm_zalloc(sizeof(ramblock_t) * g_ramblockcnt);
+  g_range_descriptor = kmm_zalloc(sizeof(rangeblock_t) * \
                               SPIRAM_BANKSWITCH_RESERVE);
 
   if (g_ram_descriptor == NULL || g_range_descriptor == NULL)
@@ -320,7 +320,7 @@ static bool allocate_blocks(int count, uint16_t *blocks_out)
       for (i = 0; i < count; i++)
         {
           g_ram_descriptor[blocks_out[i]].is_alloced = true;
-          g_ram_descriptor[blocks_out[i]].is_mapped  = false;
+          assert(g_ram_descriptor[blocks_out[i]].is_mapped  == false);
         }
 
       return true;
