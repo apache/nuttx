@@ -205,6 +205,7 @@ int up_cpu_paused(int cpu)
 int arm_pause_handler(int irq, FAR void *context, FAR void *arg)
 {
   int cpu = this_cpu();
+  int ret = OK;
 
   /* Check for false alarms.  Such false could occur as a consequence of
    * some deadlock breaking logic that might have already serviced the SG2
@@ -214,10 +215,21 @@ int arm_pause_handler(int irq, FAR void *context, FAR void *arg)
 
   if (spin_islocked(&g_cpu_paused[cpu]))
     {
-      return up_cpu_paused(cpu);
+      /* NOTE: up_cpu_paused() needs to be executed in a critical section
+       * to ensure that this CPU holds g_cpu_irqlock. However, adding
+       * a critical section in up_cpu_paused() is not a good idea,
+       * because it is also called in enter_critical_section() to break
+       * a deadlock
+       */
+
+      irqstate_t flags = enter_critical_section();
+
+      ret = up_cpu_paused(cpu);
+
+      leave_critical_section(flags);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
