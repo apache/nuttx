@@ -110,7 +110,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
   ret = psock->s_sockif->si_send(psock, buf, len, flags);
   if (ret < 0)
     {
-      nerr("ERROR: socket si_send() (or usrsock_sendto()) failed: %d\n",
+      nerr("ERROR: socket si_send() (or usrsock_sendto()) failed: %zd\n",
            ret);
     }
 
