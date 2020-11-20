@@ -155,7 +155,7 @@ config MM_FILL_ALLOCATIONS
 		Fill all malloc() allocations with 0xAA. This helps
 		detecting uninitialized variable errors.
 
-config MM_CIRC_BUF
+config MM_CIRCBUF
 	bool "Circular buffer support"
 	default n
 	---help---

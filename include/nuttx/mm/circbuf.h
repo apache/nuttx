@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/mm/circ_buf.h
+ * include/nuttx/mm/circbuf.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MM_CIRC_BUF_H
-#define __INCLUDE_NUTTX_MM_CIRC_BUF_H
+#ifndef __INCLUDE_NUTTX_MM_CIRCBUF_H
+#define __INCLUDE_NUTTX_MM_CIRCBUF_H
 
 /* Note about locking: There is no locking required while only one reader
  * and one writer is using the circular buffer.
@@ -41,7 +41,7 @@
 
 /* This structure describes circular buffer */
 
-struct circ_buf_s
+struct circbuf_s
 {
   FAR void *base;     /* The pointer to buffer space */
   size_t    size;     /* The size of buffer space */
@@ -64,7 +64,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: circ_buf_init
+ * Name: circbuf_init
  *
  * Description:
  *   Initialize a circular buffer.
@@ -82,11 +82,11 @@ extern "C"
  *
  ****************************************************************************/
 
-int circ_buf_init(FAR struct circ_buf_s *circ,
+int circbuf_init(FAR struct circbuf_s *circ,
                   FAR void *base, size_t bytes);
 
 /****************************************************************************
- * Name: circ_buf_resize
+ * Name: circbuf_resize
  *
  * Description:
  *   Resize a circular buffer (change buffer size).
@@ -100,10 +100,10 @@ int circ_buf_init(FAR struct circ_buf_s *circ,
  *
  ****************************************************************************/
 
-int circ_buf_resize(FAR struct circ_buf_s *circ, size_t bytes);
+int circbuf_resize(FAR struct circbuf_s *circ, size_t bytes);
 
 /****************************************************************************
- * Name: circ_buf_uninit
+ * Name: circbuf_uninit
  *
  * Description:
  *   Free the circular buffer.
@@ -112,10 +112,10 @@ int circ_buf_resize(FAR struct circ_buf_s *circ, size_t bytes);
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-void circ_buf_uninit(FAR struct circ_buf_s *circ);
+void circbuf_uninit(FAR struct circbuf_s *circ);
 
 /****************************************************************************
- * Name: circ_buf_reset
+ * Name: circbuf_reset
  *
  * Description:
  *   Remove the entire circular buffer content.
@@ -124,10 +124,10 @@ void circ_buf_uninit(FAR struct circ_buf_s *circ);
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-void circ_buf_reset(FAR struct circ_buf_s *circ);
+void circbuf_reset(FAR struct circbuf_s *circ);
 
 /****************************************************************************
- * Name: circ_buf_is_full
+ * Name: circbuf_is_full
  *
  * Description:
  *   Return true if the circular buffer is full.
@@ -136,10 +136,10 @@ void circ_buf_reset(FAR struct circ_buf_s *circ);
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-bool circ_buf_is_full(FAR struct circ_buf_s *circ);
+bool circbuf_is_full(FAR struct circbuf_s *circ);
 
 /****************************************************************************
- * Name: circ_buf_is_empty
+ * Name: circbuf_is_empty
  *
  * Description:
  *   Return true if the circular buffer is empty.
@@ -148,10 +148,10 @@ bool circ_buf_is_full(FAR struct circ_buf_s *circ);
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-bool circ_buf_is_empty(FAR struct circ_buf_s *circ);
+bool circbuf_is_empty(FAR struct circbuf_s *circ);
 
 /****************************************************************************
- * Name: circ_buf_size
+ * Name: circbuf_size
  *
  * Description:
  *   Return size of the circular buffer.
@@ -160,10 +160,10 @@ bool circ_buf_is_empty(FAR struct circ_buf_s *circ);
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-size_t circ_buf_size(FAR struct circ_buf_s *circ);
+size_t circbuf_size(FAR struct circbuf_s *circ);
 
 /****************************************************************************
- * Name: circ_buf_used
+ * Name: circbuf_used
  *
  * Description:
  *   Return the used bytes of the circular buffer.
@@ -172,10 +172,10 @@ size_t circ_buf_size(FAR struct circ_buf_s *circ);
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-size_t circ_buf_used(FAR struct circ_buf_s *circ);
+size_t circbuf_used(FAR struct circbuf_s *circ);
 
 /****************************************************************************
- * Name: circ_buf_space
+ * Name: circbuf_space
  *
  * Description:
  *   Return the remaing space of the circular buffer.
@@ -184,10 +184,10 @@ size_t circ_buf_used(FAR struct circ_buf_s *circ);
  *   circ  - Address of the circular buffer to be used.
  ****************************************************************************/
 
-size_t circ_buf_space(FAR struct circ_buf_s *circ);
+size_t circbuf_space(FAR struct circbuf_s *circ);
 
 /****************************************************************************
- * Name: circ_buf_peek
+ * Name: circbuf_peek
  *
  * Description:
  *   Get data form the circular buffer without removing
@@ -206,11 +206,11 @@ size_t circ_buf_space(FAR struct circ_buf_s *circ);
  *   A negated errno value is returned on any failure.
  ****************************************************************************/
 
-ssize_t circ_buf_peek(FAR struct circ_buf_s *circ,
+ssize_t circbuf_peek(FAR struct circbuf_s *circ,
                       FAR void *dst, size_t bytes);
 
 /****************************************************************************
- * Name: circ_buf_read
+ * Name: circbuf_read
  *
  * Description:
  *   Get data form the circular buffer.
@@ -229,11 +229,11 @@ ssize_t circ_buf_peek(FAR struct circ_buf_s *circ,
  *   A negated errno value is returned on any failure.
  ****************************************************************************/
 
-ssize_t circ_buf_read(FAR struct circ_buf_s *circ,
+ssize_t circbuf_read(FAR struct circbuf_s *circ,
                       FAR void *dst, size_t bytes);
 
 /****************************************************************************
- * Name: circ_buf_skip
+ * Name: circbuf_skip
  *
  * Description:
  *   Skip data form the circular buffer.
@@ -251,10 +251,10 @@ ssize_t circ_buf_read(FAR struct circ_buf_s *circ,
  *   A negated errno value is returned on any failure.
  ****************************************************************************/
 
-ssize_t circ_buf_skip(FAR struct circ_buf_s *circ, size_t bytes);
+ssize_t circbuf_skip(FAR struct circbuf_s *circ, size_t bytes);
 
 /****************************************************************************
- * Name: circ_buf_write
+ * Name: circbuf_write
  *
  * Description:
  *   Write data to the circular buffer.
@@ -273,18 +273,18 @@ ssize_t circ_buf_skip(FAR struct circ_buf_s *circ, size_t bytes);
  *   A negated errno value is returned on any failure.
  ****************************************************************************/
 
-ssize_t circ_buf_write(FAR struct circ_buf_s *circ,
+ssize_t circbuf_write(FAR struct circbuf_s *circ,
                        FAR const void *src, size_t bytes);
 
 /****************************************************************************
- * Name: circ_buf_overwrite
+ * Name: circbuf_overwrite
  *
  * Description:
  *   Write data to the circular buffer. It can overwrite old data when
  *   circular buffer don't have enough space to store data.
  *
  * Note:
- *   Usage circ_buf_overwrite () is dangerous. It should be only called
+ *   Usage circbuf_overwrite () is dangerous. It should be only called
  *   when the buffer is exclusived locked or when it is secured that no
  *   other thread is accessing the buffer.
  *
@@ -298,7 +298,7 @@ ssize_t circ_buf_write(FAR struct circ_buf_s *circ,
  *   A negated errno value is returned on any failure.
  ****************************************************************************/
 
-ssize_t circ_buf_overwrite(FAR struct circ_buf_s *circ,
+ssize_t circbuf_overwrite(FAR struct circbuf_s *circ,
                            FAR const void *src, size_t bytes);
 
 #undef EXTERN

@@ -1,5 +1,5 @@
 ############################################################################
-# mm/circ_buf/Make.defs
+# mm/circbuf/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,11 +20,11 @@
 
 # Circular buffer management
 
-ifeq ($(CONFIG_MM_CIRC_BUF),y)
-CSRCS += circ_buf.c
+ifeq ($(CONFIG_MM_CIRCBUF),y)
+CSRCS += circbuf.c
 
 # Add the circular buffer directory to the build
 
-DEPPATH += --dep-path circ_buf
-VPATH += :circ_buf
+DEPPATH += --dep-path circbuf
+VPATH += :circbuf
 endif

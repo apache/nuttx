@@ -43,7 +43,7 @@ include kmm_heap/Make.defs
 include mm_gran/Make.defs
 include shm/Make.defs
 include iob/Make.defs
-include circ_buf/Make.defs
+include circbuf/Make.defs
 
 BINDIR ?= bin
 

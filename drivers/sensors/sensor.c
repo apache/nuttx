@@ -34,8 +34,8 @@
 #include <poll.h>
 #include <fcntl.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mm/circbuf.h>
 #include <nuttx/sensors/sensor.h>
-#include <nuttx/mm/circ_buf.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,7 +68,7 @@ struct sensor_upperhalf_s
 
   FAR struct pollfd             *fds[CONFIG_SENSORS_NPOLLWAITERS];
   FAR struct sensor_lowerhalf_s *lower;  /* the handle of lower half driver */
-  struct circ_buf_s  buffer;             /* The circular buffer of sensor device */
+  struct circbuf_s   buffer;             /* The circular buffer of sensor device */
   uint8_t            esize;              /* The element size of circular buffer */
   uint8_t            crefs;              /* Number of times the device has been opened */
   sem_t              exclsem;            /* Manages exclusive access to file operations */
@@ -195,7 +195,7 @@ static int sensor_open(FAR struct file *filep)
     {
       /* Initialize sensor buffer */
 
-      ret = circ_buf_init(&upper->buffer, NULL, lower->buffer_size);
+      ret = circbuf_init(&upper->buffer, NULL, lower->buffer_size);
       if (ret < 0)
         {
           goto err;
@@ -228,7 +228,7 @@ static int sensor_close(FAR struct file *filep)
       if (ret >= 0)
         {
           upper->enabled = false;
-          circ_buf_uninit(&upper->buffer);
+          circbuf_uninit(&upper->buffer);
         }
     }
 
@@ -283,7 +283,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
        * that have just entered the buffer.
        */
 
-      while (circ_buf_is_empty(&upper->buffer))
+      while (circbuf_is_empty(&upper->buffer))
         {
           if (filep->f_oflags & O_NONBLOCK)
             {
@@ -307,7 +307,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
             }
         }
 
-      ret = circ_buf_read(&upper->buffer, buffer, len);
+      ret = circbuf_read(&upper->buffer, buffer, len);
 
       /* Release some buffer space when current mode isn't batch mode
        * and last mode is batch mode, and the number of bytes avaliable
@@ -315,10 +315,10 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
        */
 
       if (upper->latency == 0 &&
-          circ_buf_size(&upper->buffer) > lower->buffer_size &&
-          circ_buf_used(&upper->buffer) <= lower->buffer_size)
+          circbuf_size(&upper->buffer) > lower->buffer_size &&
+          circbuf_used(&upper->buffer) <= lower->buffer_size)
         {
-          ret = circ_buf_resize(&upper->buffer, lower->buffer_size);
+          ret = circbuf_resize(&upper->buffer, lower->buffer_size);
         }
     }
 
@@ -404,7 +404,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                                   upper->interval * upper->esize +
                                   lower->buffer_size, upper->esize);
 
-                  ret = circ_buf_resize(&upper->buffer, bytes);
+                  ret = circbuf_resize(&upper->buffer, bytes);
                 }
             }
         }
@@ -421,7 +421,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           if (*val != 0)
             {
               lower->buffer_size = ROUNDUP(*val, upper->esize);
-              ret = circ_buf_resize(&upper->buffer, lower->buffer_size);
+              ret = circbuf_resize(&upper->buffer, lower->buffer_size);
               if (ret >= 0)
                 {
                   *val = lower->buffer_size;
@@ -504,7 +504,7 @@ static int sensor_poll(FAR struct file *filep,
                 }
             }
         }
-      else if (!circ_buf_is_empty(&upper->buffer))
+      else if (!circbuf_is_empty(&upper->buffer))
         {
           eventset |= (fds->events & POLLIN);
         }
@@ -543,7 +543,7 @@ static void sensor_push_event(FAR void *priv, FAR const void *data,
       return;
     }
 
-  circ_buf_overwrite(&upper->buffer, data, bytes);
+  circbuf_overwrite(&upper->buffer, data, bytes);
   sensor_pollnotify(upper, POLLIN);
   nxsem_get_value(&upper->buffersem, &semcount);
   if (semcount < 1)
