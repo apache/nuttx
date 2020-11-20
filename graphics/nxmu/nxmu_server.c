@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -331,7 +332,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
       DEBUGASSERT(nbytes >= sizeof(struct nxsvrmsg_releasebkgd_s));
       msg = (FAR struct nxsvrmsg_s *)buffer;
 
-      ginfo("Received opcode=%d nbytes=%d\n", msg->msgid, nbytes);
+      ginfo("Received opcode=%" PRId32 " nbytes=%d\n", msg->msgid, nbytes);
       switch (msg->msgid)
         {
           /* Messages sent from clients to the NX server ********************/
@@ -609,7 +610,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
           case NX_CLIMSG_CONNECTED:    /* Shouldn't happen */
           case NX_CLIMSG_DISCONNECTED:
           default:
-            gerr("ERROR: Unrecognized command: %d\n", msg->msgid);
+            gerr("ERROR: Unrecognized command: %" PRId32 "\n", msg->msgid);
             break;
         }
     }
