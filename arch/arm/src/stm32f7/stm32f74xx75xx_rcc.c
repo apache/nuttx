@@ -241,7 +241,7 @@ static inline void rcc_enableahb1(void)
 
   regval |= RCC_AHB1ENR_OTGHSEN;
 #endif
-#endif /* CONFIG_STM32F7_OTGFSHS */
+#endif  /* CONFIG_STM32F7_OTGFSHS */
 
   putreg32(regval, STM32_RCC_AHB1ENR);   /* Enable peripherals */
 }
@@ -1005,3 +1005,40 @@ static inline void rcc_enableperipherals(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_rcc_dump_regs
+ *
+ * Description:
+ *   Dump the contents of all rcc block registers
+ *
+ * Input Parameters:
+ *   msg - Message to print before the register data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_INFO
+void stm32_rcc_dump_regs(const char *msg)
+{
+  if (msg)
+      i2sinfo("%s\n", msg);
+
+  /**************RCC_PLLSAICFGR******************/
+  uint32_t pll_sai_cfgr = getreg32(STM32_RCC_PLLSAICFGR);
+  _info("PLLSAICFGR = %08x\n", pll_sai_cfgr);
+
+  uint32_t pllsain = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIN_MASK) >> RCC_PLLSAICFGR_PLLSAIN_SHIFT;
+  _info("\t\tPLLSAICFGR PLLSAIN[14:6] = %d\n", pllsain);
+  uint32_t pllsaip = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIP_MASK) >> RCC_PLLSAICFGR_PLLSAIP_SHIFT;
+  _info("\t\tPLLSAICFGR PLLSAIP[17:16] = %d\n", pllsaip);
+  uint32_t pllsaiq = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIQ_MASK) >> RCC_PLLSAICFGR_PLLSAIQ_SHIFT;
+  _info("\t\tPLLSAICFGR PLLSAIQ[27:24] = %d\n", pllsaiq);
+
+  uint32_t pllsair = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIR_MASK) >> RCC_PLLSAICFGR_PLLSAIP_SHIFT;
+  _info("\t\tPLLSAICFGR PLLSAIR[30:28] = %d\n", pllsair);
+
+}
+#endif

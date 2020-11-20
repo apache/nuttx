@@ -1,7 +1,7 @@
 /****************************************************************************
  * boards/arm/stm32f7/stm32f746g-disco/include/board.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -154,15 +154,22 @@
 
 /* Configure factors for  PLLSAI clock */
 
+#define CONFIG_STM32F7_PLLSAI           1 
 #define STM32_RCC_PLLSAICFGR_PLLSAIN    RCC_PLLSAICFGR_PLLSAIN(BOARD_LTDC_PLLSAIN)
 #define STM32_RCC_PLLSAICFGR_PLLSAIP    RCC_PLLSAICFGR_PLLSAIP(2)
 #define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(2)
 #define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(BOARD_LTDC_PLLSAIR)
 
+/* SAIx input frequency = 25 / M * N / Q / P 
+ *   25000000 / 25 * 192 / 2 / 1
+*/
+#define STM32F7_SAI1_FREQUENCY           (96000000)
+#define STM32F7_SAI2_FREQUENCY           (96000000)
+
 /* Configure Dedicated Clock Configuration Register */
 
 #define STM32_RCC_DCKCFGR1_PLLI2SDIVQ  RCC_DCKCFGR1_PLLI2SDIVQ(1)
-#define STM32_RCC_DCKCFGR1_PLLSAIDIVQ  RCC_DCKCFGR1_PLLSAIDIVQ(1)
+#define STM32_RCC_DCKCFGR1_PLLSAIDIVQ  RCC_DCKCFGR1_PLLSAIDIVQ(0)
 #define STM32_RCC_DCKCFGR1_PLLSAIDIVR  RCC_DCKCFGR1_PLLSAIDIVR(1)
 #define STM32_RCC_DCKCFGR1_SAI1SRC     RCC_DCKCFGR1_SAI1SEL(0)
 #define STM32_RCC_DCKCFGR1_SAI2SRC     RCC_DCKCFGR1_SAI2SEL(0)
@@ -172,6 +179,7 @@
 
 /* Configure factors for  PLLI2S clock */
 
+#define CONFIG_STM32F7_PLLI2S          1
 #define STM32_RCC_PLLI2SCFGR_PLLI2SN   RCC_PLLI2SCFGR_PLLI2SN(192)
 #define STM32_RCC_PLLI2SCFGR_PLLI2SP   RCC_PLLI2SCFGR_PLLI2SP(2)
 #define STM32_RCC_PLLI2SCFGR_PLLI2SQ   RCC_PLLI2SCFGR_PLLI2SQ(2)
@@ -366,7 +374,7 @@
 
 #define GPIO_TP_INT  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTI|GPIO_PIN13)
 
-#define FT5x06_I2C_ADDRESS          0x38
+#define FT5x06_I2C_ADDRESS          (0x70 >> 1) 
 
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *
@@ -513,4 +521,32 @@
 #  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 #endif
 
-#endif /* __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H */
+/* SAI2 pinset */
+#if defined(CONFIG_STM32F7_SAI2) && defined(CONFIG_STM32F7_SAI2_A)
+#define GPIO_SAI2_SD_A                  GPIO_SAI2_SD_A_2
+#define GPIO_SAI2_FS_A                  GPIO_SAI2_FS_A_2
+#define GPIO_SAI2_SCK_A                 GPIO_SAI2_SCK_A_2
+#define GPIO_SAI2_MCLK_A                GPIO_SAI2_MCLK_A_2
+#define GPIO_SAI2_SD_B                  GPIO_SAI2_SD_B_4
+
+#define DMACHAN_SAI2_A                  DMAMAP_SAI2_A
+#define DMACHAN_SAI2_B                  DMAMAP_SAI2_B
+
+#else
+
+#define GPIO_SAI1_SD_B                  GPIO_SAI1_SD_B_1
+#define DMACHAN_SAI1_B                  DMAMAP_SAI1_B
+
+//#define GPIO_SAI1_SD_B_1      (GPIO_ALT|GPIO_AF6|GPIO_PORTE|GPIO_PIN3)
+//#define GPIO_SAI1_FS_B        (GPIO_ALT|GPIO_AF6|GPIO_PORTF|GPIO_PIN9)
+//#define GPIO_SAI1_MCLK_B      (GPIO_ALT|GPIO_AF6|GPIO_PORTF|GPIO_PIN7)
+//#define GPIO_SAI1_SCK_B       (GPIO_ALT|GPIO_AF6|GPIO_PORTF|GPIO_PIN8)
+//#define DMAMAP_SAI1_B_2            STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN0)
+//#define DMAMAP_SAI1_B_1            STM32_DMA_MAP(DMA2,DMA_STREAM5,DMA_CHAN0)
+//#define DMAMAP_SAI1_B              STM32_DMA_MAP(DMA2,DMA_STREAM4,DMA_CHAN1)
+
+#endif
+
+
+
+#endif  /* __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H */

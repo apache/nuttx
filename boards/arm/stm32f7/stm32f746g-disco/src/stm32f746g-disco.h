@@ -234,6 +234,10 @@ int stm32_n25qxxx_setup(void);
 int stm32_sdio_initialize(void);
 #endif
 
+#ifdef CONFIG_AUDIO_WM8994
+int stm32_wm8994_initialize(int minor);
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* __BOARDS_ARM_STM32F7_STM32F746G_DISCO_SRC_STM32F746G_DISCO_H */
