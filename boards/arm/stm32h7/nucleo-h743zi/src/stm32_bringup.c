@@ -44,6 +44,20 @@
 #include <syslog.h>
 #include <errno.h>
 
+
+#define HAVE_USBHOST 1
+#define CONFIG_USBMONITOR 1
+
+#ifdef CONFIG_USBMONITOR
+#include <nuttx/usb/usbmonitor.h>
+#endif
+
+#ifdef CONFIG_STM32_OTGFS
+#include "stm32_usbhost.h"
+#include "stm32_usb.h"
+#endif
+
+
 #include "nucleo-h743zi.h"
 
 #ifdef CONFIG_BUTTONS
@@ -221,6 +235,35 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
 #endif /* CONFIG_BUTTONS */
+
+
+#ifdef HAVE_USBHOST
+
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
+   * will monitor for USB connection and disconnection events.
+   */
+
+  ret = stm32_usbhost_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize USB host: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef HAVE_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to start USB monitor: %d\n",
+             ret);
+    }
+#endif
+
 
 #ifdef CONFIG_ADC
   /* Initialize ADC and register the ADC driver. */
