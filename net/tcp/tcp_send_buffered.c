@@ -734,7 +734,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           sndlen = conn->winsize;
         }
 
-      ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%u mss=%u "
+      ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%zu mss=%u "
             "winsize=%u\n",
             wrb, TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb), sndlen, conn->mss,
             conn->winsize);
