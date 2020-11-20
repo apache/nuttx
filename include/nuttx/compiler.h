@@ -144,6 +144,7 @@
 #  define noinline_function __attribute__ ((noinline))
 
 #  define printflike(a, b) __attribute__((__format__ (__printf__, a, b)))
+#  define sysloglike(a, b) __attribute__((__format__ (__printf__, a, b)))
 #  define scanflike(a, b) __attribute__((__format__ (__scanf__, a, b)))
 
 /* GCC does not use storage classes to qualify addressing */
@@ -362,6 +363,7 @@
 #  define noinline_function
 
 #  define printflike(a, b)
+#  define sysloglike(a, b)
 #  define scanflike(a, b)
 
 /* The reentrant attribute informs SDCC that the function
@@ -491,6 +493,7 @@
 #  define inline_function
 #  define noinline_function
 #  define printflike(a, b)
+#  define sysloglike(a, b)
 #  define scanflike(a, b)
 
 /* REVISIT: */
@@ -593,6 +596,7 @@
 #  define inline_function
 #  define noinline_function
 #  define printflike(a, b)
+#  define sysloglike(a, b)
 #  define scanflike(a, b)
 
 #  define FAR
@@ -650,6 +654,7 @@
 #  define inline_function
 #  define noinline_function
 #  define printflike(a, b)
+#  define sysloglike(a, b)
 #  define scanflike(a, b)
 
 #  define FAR
