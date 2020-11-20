@@ -273,9 +273,9 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
 {
   DEBUGASSERT(iface == 0);
 
-  /* Set the Power Switch by driving the active low enable pin */
+  /* Set the Power Switch by driving the active high enable pin */
 
-  stm32_gpiowrite(GPIO_OTGFS_PWRON, !enable);
+  stm32_gpiowrite(GPIO_OTGFS_PWRON, enable);
 }
 #endif
 
