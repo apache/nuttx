@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <string.h>
 #include <signal.h>
 #include <debug.h>
@@ -101,7 +102,7 @@ static void nxsig_notification_worker(FAR void *arg)
 int nxsig_notification(pid_t pid, FAR struct sigevent *event,
                        int code, FAR struct sigwork_s *work)
 {
-  sinfo("pid=%p signo=%d code=%d sival_ptr=%p\n",
+  sinfo("pid=%" PRIu16 " signo=%d code=%d sival_ptr=%p\n",
          pid, event->sigev_signo, code, event->sigev_value.sival_ptr);
 
   /* Notify client via a signal? */
