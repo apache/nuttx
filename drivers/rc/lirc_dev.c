@@ -676,8 +676,7 @@ static ssize_t lirc_read_scancode(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct lirc_fh_s *fh = filep->f_priv;
   irqstate_t flags;
-  ssize_t len;
-  int ret;
+  ssize_t ret;
 
   if (length < sizeof(struct lirc_scancode) ||
       length % sizeof(struct lirc_scancode))
@@ -703,13 +702,13 @@ static ssize_t lirc_read_scancode(FAR struct file *filep, FAR char *buffer,
             }
         }
 
-      len = circbuf_read(&fh->buffer, buffer, length);
+      ret = circbuf_read(&fh->buffer, buffer, length);
     }
-  while (len <= 0);
+  while (ret <= 0);
 
 err:
   leave_critical_section(flags);
-  return ret < 0 ? ret : len;
+  return ret;
 }
 
 static ssize_t lirc_read_mode2(FAR struct file *filep, FAR char *buffer,
@@ -717,8 +716,7 @@ static ssize_t lirc_read_mode2(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct lirc_fh_s *fh = filep->f_priv;
   irqstate_t flags;
-  ssize_t len = 0;
-  int ret;
+  ssize_t ret = 0;
 
   if (length < sizeof(unsigned int) || length % sizeof(unsigned int))
     {
@@ -743,13 +741,13 @@ static ssize_t lirc_read_mode2(FAR struct file *filep, FAR char *buffer,
             }
         }
 
-      len = circbuf_read(&fh->buffer, buffer, length);
+      ret = circbuf_read(&fh->buffer, buffer, length);
     }
-  while (len <= 0);
+  while (ret <= 0);
 
 err:
   leave_critical_section(flags);
-  return ret < 0 ? ret : len;
+  return ret;
 }
 
 static ssize_t lirc_read(FAR struct file *filep, FAR char *buffer,
