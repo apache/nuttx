@@ -292,7 +292,7 @@ static int local_bind(FAR struct socket *psock,
 
   if (addr->sa_family != AF_LOCAL || addrlen < sizeof(sa_family_t))
     {
-      nerr("ERROR: Invalid address length: %d < %d\n",
+      nerr("ERROR: Invalid address length: %d < %zu\n",
            addrlen, sizeof(sa_family_t));
       return -EBADF;
     }
