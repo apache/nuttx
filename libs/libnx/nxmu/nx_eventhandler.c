@@ -167,7 +167,7 @@ int nx_eventhandler(NXHANDLE handle)
   /* Dispatch the message appropriately */
 
   msg = (struct nxsvrmsg_s *)buffer;
-  ginfo("Received msgid=%d\n", msg->msgid);
+  ginfo("Received msgid=%" PRId32 "\n", msg->msgid);
   switch (msg->msgid)
     {
     case NX_CLIMSG_CONNECTED:
@@ -253,7 +253,7 @@ int nx_eventhandler(NXHANDLE handle)
       break;
 
     default:
-      gerr("ERROR: Unrecognized message opcode: %d\n",
+      gerr("ERROR: Unrecognized message opcode: %" PRId32 "\n",
            ((FAR struct nxsvrmsg_s *)buffer)->msgid);
       break;
     }
