@@ -74,7 +74,7 @@ int dump_module(FAR const struct binary_s *bin)
       binfo("  filename:  %s\n", bin->filename);
       binfo("  argv:      %p\n", bin->argv);
       binfo("  entrypt:   %p\n", bin->entrypt);
-      binfo("  mapped:    %p size=%d\n", bin->mapped, bin->mapsize);
+      binfo("  mapped:    %p size=%zd\n", bin->mapped, bin->mapsize);
       binfo("  alloc:     %p %p %p\n", bin->alloc[0],
                                        bin->alloc[1],
                                        bin->alloc[2]);
@@ -85,7 +85,7 @@ int dump_module(FAR const struct binary_s *bin)
 #ifdef CONFIG_ARCH_ADDRENV
       binfo("  addrenv:   %p\n", bin->addrenv);
 #endif
-      binfo("  stacksize: %d\n", bin->stacksize);
+      binfo("  stacksize: %zd\n", bin->stacksize);
       binfo("  unload:    %p\n", bin->unload);
     }
 
