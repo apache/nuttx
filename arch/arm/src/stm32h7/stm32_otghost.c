@@ -5482,7 +5482,7 @@ FAR struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
   /* Enable VDD33USB supply level detector */
 
   regval |= STM32_PWR_CR3_USB33DEN;
-  stm32_putreg( STM32_PWR_CR3, regval );
+  stm32_putreg(STM32_PWR_CR3, regval);
 
   while ((stm32_getreg(STM32_PWR_CR3) & STM32_PWR_CR3_USB33RDY) == 0)
     {
