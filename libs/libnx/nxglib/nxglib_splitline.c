@@ -41,6 +41,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <debug.h>
 
@@ -220,7 +221,8 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
       traps[1].bot.x2 = traps[1].bot.x1;
       traps[1].bot.y  = line.pt2.y;
 
-      ginfo("Vertical traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
+      ginfo("Vertical traps[1]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+            "(%08" PRIx32 ",%08" PRIx32 ", %d)\n",
             traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
             traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
 
@@ -256,7 +258,8 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           traps[1].bot.x1 = tmp;
         }
 
-      ginfo("Horizontal traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
+      ginfo("Horizontal traps[1]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+            "(%08" PRIx32 ",%08" PRIx32 ", %d)\n",
             traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
             traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
 
@@ -304,8 +307,8 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
   sinangle   =  b16sin(angle);
   b16xoffset = (linewidth * sinangle + 1) >> 1;
 
-  ginfo("height: %d width: %d angle: %08x "
-        "b16yoffset: %08x b16xoffset: %08x\n",
+  ginfo("height: %d width: %d angle: %08" PRIx32 " "
+        "b16yoffset: %08" PRIx32 " b16xoffset: %08" PRIx32 "\n",
         iheight, iwidth, angle, b16yoffset, b16xoffset);
 
   /* Now we know all four points of the rotated rectangle */
@@ -335,8 +338,10 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           quad[2].x = b16x + b16xoffset;
           quad[3].x = b16x - b16xoffset;
 
-          ginfo("Southeast: quad (%08x,%08x),(%08x,%08x),"
-                "(%08x,%08x),(%08x,%08x)\n",
+          ginfo("Southeast: quad (%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 ")\n",
                 quad[0].x, quad[0].y, quad[1].x, quad[1].y,
                 quad[2].x, quad[2].y, quad[3].x, quad[3].y);
 
@@ -451,8 +456,10 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           quad[2].x = b16x - b16xoffset;
           quad[3].x = b16x + b16xoffset;
 
-          ginfo("Southwest: quad (%08x,%08x),(%08x,%08x),"
-                "(%08x,%08x),(%08x,%08x)\n",
+          ginfo("Southwest: quad (%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 "),"
+                "(%08" PRIx32 ",%08" PRIx32 ")\n",
                 quad[0].x, quad[0].y, quad[1].x, quad[1].y,
                 quad[2].x, quad[2].y, quad[3].x, quad[3].y);
 
@@ -556,13 +563,16 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
           traps[2].bot.y  = b16toi(quad[3].y + b16HALF);
         }
 
-      ginfo("traps[0]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
+      ginfo("traps[0]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+            "(%08" PRIx32 ",%08" PRIx32 ",%d)\n",
             traps[0].top.x1, traps[0].top.x2, traps[0].top.y,
             traps[0].bot.x1, traps[0].bot.x2, traps[0].bot.y);
-      ginfo("traps[1]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
+      ginfo("traps[1]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+            "(%08" PRIx32 ",%08" PRIx32 ",%d)\n",
             traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
             traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
-      ginfo("traps[2]: (%08x,%08x,%d),(%08x,%08x,%d)\n",
+      ginfo("traps[2]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+            "(%08" PRIx32 ",%08" PRIx32 ",%d)\n",
             traps[2].top.x1, traps[2].top.x2, traps[2].top.y,
             traps[2].bot.x1, traps[2].bot.x2, traps[2].bot.y);
 
@@ -581,7 +591,8 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
   traps[1].bot.x2 = traps[1].bot.x1 + itob16(linewidth - 1);
   traps[1].bot.y  = line.pt2.y;
 
-  ginfo("Horizontal traps[1]: (%08x,%08x,%d),(%08x,%08x, %d)\n",
+  ginfo("Horizontal traps[1]: (%08" PRIx32 ",%08" PRIx32 ",%d),"
+        "(%08" PRIx32 ",%08" PRIx32 ", %d)\n",
         traps[1].top.x1, traps[1].top.x2, traps[1].top.y,
         traps[1].bot.x1, traps[1].bot.x2, traps[1].bot.y);
 
