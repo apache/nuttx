@@ -231,7 +231,7 @@ static ssize_t rd_read(FAR struct inode *inode, unsigned char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct rd_struct_s *)inode->i_private;
 
-  finfo("sector: %d nsectors: %d sectorsize: %d\n",
+  finfo("sector: %zd nsectors: %d sectorsize: %d\n",
         start_sector, dev->rd_sectsize, nsectors);
 
   if (start_sector < dev->rd_nsectors &&
@@ -265,7 +265,7 @@ static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct rd_struct_s *)inode->i_private;
 
-  finfo("sector: %d nsectors: %d sectorsize: %d\n",
+  finfo("sector: %zd nsectors: %d sectorsize: %d\n",
         start_sector, dev->rd_sectsize, nsectors);
 
   if (!RDFLAG_IS_WRENABLED(dev->rd_flags))
@@ -313,7 +313,7 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
 
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      finfo("nsectors: %d sectorsize: %d\n",
+      finfo("nsectors: %zd sectorsize: %zd\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;
