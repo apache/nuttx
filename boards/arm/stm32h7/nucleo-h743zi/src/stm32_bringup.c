@@ -235,8 +235,9 @@ int stm32_bringup(void)
 #endif /* CONFIG_BUTTONS */
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
+  /* Initialize USB host operation.  stm32_usbhost_initialize()
+   * starts a thread will monitor for USB connection and
+   * disconnection events.
    */
 
   ret = stm32_usbhost_initialize();
