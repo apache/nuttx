@@ -14,11 +14,7 @@ Debug Logging
 NuttX has a powerful system logging facility (syslog) with ``info``, ``warn``, and ``error`` levels. You can enable
 debugging for your build for the subsystem or feature by using the ``menuconfig`` system.
 
-.. code-block:: console
-
-   $ make menuconfig
-
-The debug options are available under ``Build Setup`` > ``Debug Options``. You will most likely have to enable the
+The debug options are available under :menuselection:`Build Setup --> Debug Options`. You will most likely have to enable the
 following options:
 
 * ``Enable Debug Features`` — selecting this will turn on subsystem-level debugging options, they will become visible
@@ -44,81 +40,139 @@ the area you're interested in, and leave the rest disabled, save the config, and
 list of debug feature logging functions in the file
 `debug.h <https://github.com/apache/incubator-nuttx/blob/master/include/debug.h>`__.
 
-Syslog timestamps can be enabled in the ``menuconfig`` system using ``Device Drivers`` > ``System Logging`` > ``Prepend
-timestamp to syslog message`` (``CONFIG_SYSLOG_TIMESTAMP``).
+Syslog timestamps can be enabled in the configuration in :menuselection:`Device Drivers --> System Logging --> Prepend
+timestamp to syslog message` (``CONFIG_SYSLOG_TIMESTAMP``).
 
 You may need to do a little bit of experimenting to find the combination of logging settings that work for the problem
 you're trying to solve. See the file `debug.h <https://github.com/apache/incubator-nuttx/blob/master/include/debug.h>`_
-for available debug settings that are available. This can also be configured via the ``menuconfig`` system.
+for available debug settings that are available.
 
 There are also subsystems that enable USB trace debugging, and you can log to memory too, if you need the logging to be
 faster than what the console can output.
 
-Changing Debug Settings Quickly
--------------------------------
+Debugging with ``openocd`` and ``gdb``
+--------------------------------------
 
-You can use the ``kconfig-tweak`` script that comes with the ``kconfig-frontends`` tools to quickly change debug settings,
-for instance turning them on or off before doing a build:
-
-.. code-block:: console
-
-   $ kconfig-tweak --disable CONFIG_DEBUG_NET
-   $ make olddefconfig  # needed to have the kconfig system check the config
-   $ kconfig-tweak --enable CONFIG_DEBUG_NET
-   $ make olddefconfig
-
-You can put a bunch of these into a simple script to configure the logging the way you want:
+To debug our Nucleo board using its embedded SWD debug adapter,
+start ``openocd`` with the following command:
 
 .. code-block:: console
 
-   #!/bin/bash
+  $ openocd -f interface/st-link-v2.cfg -f target/stm32f1x.cfg
 
-   kconfig-tweak --disable CONFIG_DEBUG_ALERT
-   kconfig-tweak --disable CONFIG_DEBUG_FEATURES
-   kconfig-tweak --disable CONFIG_DEBUG_ERROR
-   kconfig-tweak --disable CONFIG_DEBUG_WARN
-   kconfig-tweak --disable CONFIG_DEBUG_INFO
-   kconfig-tweak --disable CONFIG_DEBUG_ASSERTIONS
-   kconfig-tweak --disable CONFIG_DEBUG_NET
-   kconfig-tweak --disable CONFIG_DEBUG_NET_ERROR
-   kconfig-tweak --disable CONFIG_DEBUG_NET_WARN
-   kconfig-tweak --disable CONFIG_DEBUG_NET_INFO
-   kconfig-tweak --disable CONFIG_DEBUG_SYMBOLS
-   kconfig-tweak --disable CONFIG_DEBUG_NOOPT
-   kconfig-tweak --disable CONFIG_SYSLOG_TIMESTAMP
-   make oldconfig
+This will start a ``gdb`` server. Then, start ``gdb`` with:
 
+.. code-block:: console
 
-JTAG/SWD Debugging
-------------------
+  $ cd nuttx/
+  $ gdb-multiarch nuttx/nuttx
 
-`JTAG <https://en.wikipedia.org/wiki/JTAG>`_ is a set of standards that specify a way to attach a hardware device to
-your embedded board, and then remotely control the CPU. You can load code, start, stop, step through the program, and
-examine variables and memory. `SWD <https://en.wikipedia.org/wiki/JTAG#Similar_interface_standards>`_ is an
-Arm-specific interface with a reduced number of signals which can be used alternatively.
+Inside ``gdb`` console, connect to the ``gdb`` server with:
 
-The NuttX operating system uses `threads <https://en.wikipedia.org/wiki/Thread_(computing)>`_, so you need a
-thread-aware debugger to do more than load code, start, and stop it. A thread-aware debugger will allow you to switch
-threads to the one that is running the code you're interested in, for instance your application, or an operating system
-network thread. So far, `OpenOCD <http://openocd.org/>`_ is the only supported NuttX thread-aware debugger.
+.. code-block::
 
-.. note::
-  OpenOCD hasn't announced a stable release for a few years but the development remains active. You'll need to use a
-  version of OpenOCD recent enough so that it includes NuttX support as `contributed by Sony upstream
-  <http://openocd.zylin.com/#/c/4103/>`_. The version included in official OS repositories will probably be too old.
-  You should build from source or use one of the unofficial, more recent builds. See `Getting OpenOCD
-  <http://openocd.org/getting-openocd/>`_ for more details.
+  (gdb) target extended-remote :3333
 
-You will need a board with a JTAG or SWD connector and an `OpenOCD-compatible hardware adapter
-<http://openocd.org/supported-jtag-interfaces/>`_, ideally a fast one (USB 2.0 High Speed). For example an `Olimex
-ARM USB TINY H <https://www.olimex.com/Products/ARM/JTAG/ARM-USB-TINY-H/>`_ or a `Segger J-Link
-<https://www.segger.com/products/debug-probes/j-link/>`_. Many other adapters work too, follow the OpenOCD
-instructions and the instructions that came with your adapter.
+You can now use standard ``gdb`` commands.
+
+Debugging with an external JTAG adapter
+---------------------------------------
+
+.. todo::
+  Explain this with openocd. It gives the impression that JTAG requires
+  a specific tool. Also, some of the example commands apply to both cases.
+  This repeats some of the above.
+
+If your board does not have an embedded programmer and uses
+`JTAG <https://en.wikipedia.org/wiki/JTAG>`_ connector instead,
+things are a bit different. This guide assumes you have a JTAG hardware debugger like a
+`Segger J-Link <https://www.segger.com/products/debug-probes/j-link/>`_.
+JTAG is a set of standards that let you
+attach a hardware device to your embedded board, and then remotely control the CPU.
+You can load code, start, stop, step through the program, and examine variables and memory.
+
+#. Attach the Debugger Cables
+
+#. Start the Debugger
+
+   Refer to your JTAG debugger's documentation for information on how to start a GDB Server process that gdb can
+   communicate with to load code and start, stop, and step the embedded board's CPU. Your command line may be
+   different from this one.
+
+    .. code-block:: console
+
+       $ JLinkGDBServer -device ATSAMA5D27 -if JTAG -speed 1000 -JTAGConf -1,-1
+
+#. Launch the GNU Debugger
+
+   In another terminal window, launch the GDB. In the case of this guide, this came with the
+   ARM Embedded GNU Toolchain we downloaded in the Install step.
+
+    .. code-block:: console
+
+       $ cd nuttx/
+       $ gdb-multiarch nuttx/nuttx
+
+#. Set gdb to talk with the J-Link
+
+    ::
+
+       (gdb) target extended-remote :2331
+
+#. Reset the board
+
+    ::
+
+       (gdb) mon reset
+
+#. You may need to switch to the serial console to hit a key to stop the board from booting from its boot monitor
+   (U-Boot, in the case of the SAMA5 boards from Microchip).
+
+#. Halt the board
+
+    ::
+
+       (gdb) mon halt
+
+#. Load nuttx
+
+    ::
+
+       (gdb) load nuttx
+       `/home/adamf/src/nuttx-sama5d36-xplained/nuttx/nuttx' has changed; re-reading symbols.
+       Loading section .text, size 0x9eae4 lma 0x20008000
+       Loading section .ARM.exidx, size 0x8 lma 0x200a6ae4
+       Loading section .data, size 0x125c lma 0x200a6aec
+       Start address 0x20008040, load size 654664
+       Transfer rate: 75 KB/sec, 15587 bytes/write.
+       (gdb)
+
+#. Set a breakpoint
+
+    ::
+
+       (gdb) breakpoint nsh_main
+
+#. Start nuttx
+
+    ::
+
+       (gdb) continue
+       Continuing.
+
+       Breakpoint 1, nsh_main (argc=1, argv=0x200ddfac) at nsh_main.c:208
+       208	  sched_getparam(0, &param);
+       (gdb) continue
+       Continuing.
+
+Debugging Shortcuts
+-------------------
+
+Note that you can abbreviate ``gdb`` commands, ``info b`` is a shortcut for
+``information breakpoints``; ``c`` works the same as ``continue``, etc.
 
 See this article for more info:
 `Debugging a Apache NuttX target with GDB and OpenOCD <https://micro-ros.github.io/docs/tutorials/advanced/nuttx/debugging/>`_.
-
-See the section :ref:`Running <running>` for a brief tutorial on how to use GDB.
 
 ----
 
