@@ -1,5 +1,3 @@
-.. todo:: Revise status of NuttX trademark
-
 ==========
 Trademarks
 ==========
