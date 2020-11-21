@@ -280,6 +280,10 @@ static int nrf52_adc_configure(FAR struct nrf52_adc_s *priv)
 
 static int nrf52_adc_calibrate(FAR struct nrf52_adc_s *priv)
 {
+  /* Clear Event */
+
+  nrf52_adc_putreg(priv, NRF52_SAADC_EVENTS_CALDONE_OFFSET, 0);
+
   /* Start calibration */
 
   nrf52_adc_putreg(priv, NRF52_SAADC_TASKS_CALOFFSET_OFFSET, 1);
@@ -648,7 +652,7 @@ static int nrf52_adc_chancfg(FAR struct nrf52_adc_s *priv, uint8_t chan,
 
   /* Configure negative input */
 
-  regval = nrf52_adc_chanpsel(cfg->p_psel);
+  regval = nrf52_adc_chanpsel(cfg->n_psel);
   nrf52_adc_putreg(priv, NRF52_SAADC_CHPSELN_OFFSET(chan), regval);
 
   /* Get channel configuration */
@@ -732,16 +736,16 @@ static int nrf52_adc_setup(FAR struct adc_dev_s *dev)
   DEBUGASSERT(dev);
   DEBUGASSERT(priv);
 
-  /* Enable ADC */
+  /* Disable ADC */
 
-  nrf52_adc_putreg(priv, NRF52_SAADC_ENABLE_OFFSET, 1);
+  nrf52_adc_putreg(priv, NRF52_SAADC_ENABLE_OFFSET, 0);
 
-  /* Calibrate ADC */
+  /* Configure ADC */
 
-  ret = nrf52_adc_calibrate(priv);
+  ret = nrf52_adc_configure(priv);
   if (ret < 0)
     {
-      aerr("ERROR: adc calibration failed: %d\n", ret);
+      aerr("ERROR: nrf52_adc_configure failed: %d\n", ret);
       goto errout;
     }
 
@@ -757,12 +761,16 @@ static int nrf52_adc_setup(FAR struct adc_dev_s *dev)
         }
     }
 
-  /* Confgiure ADC */
+  /* Enable ADC */
 
-  ret = nrf52_adc_configure(priv);
+  nrf52_adc_putreg(priv, NRF52_SAADC_ENABLE_OFFSET, 1);
+
+  /* Calibrate ADC */
+
+  ret = nrf52_adc_calibrate(priv);
   if (ret < 0)
     {
-      aerr("ERROR: nrf52_adc_configure failed: %d\n", ret);
+      aerr("ERROR: adc calibration failed: %d\n", ret);
       goto errout;
     }
 
