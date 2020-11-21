@@ -45,6 +45,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -427,7 +428,8 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
            */
 
           seqno = pstate->snd_sent + pstate->snd_isn;
-          ninfo("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
+          ninfo("SEND: sndseq %08" PRIx32 "->%08" PRIx32 "\n",
+                tcp_getsequence(conn->sndseq), seqno);
           tcp_setsequence(conn->sndseq, seqno);
 
 #ifdef NEED_IPDOMAIN_SUPPORT
