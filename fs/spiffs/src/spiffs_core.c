@@ -1523,12 +1523,10 @@ void spiffs_fobj_event(FAR struct spiffs_s *fs,
                        int ev, int16_t objid_raw, int16_t spndx,
                        int16_t new_pgndx, uint32_t new_size)
 {
-#ifdef CONFIG_DEBUG_FS_INFO
   FAR static const char *evname[] =
   {
     "UPD", "NEW", "DEL", "MOV", "HUP", "???"
   };
-#endif
 
   FAR struct spiffs_file_s *fobj;
   FAR struct spiffs_file_s *next;
