@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if ARCH_BOARD_STM32FL_DISCOVERY
+if ARCH_BOARD_STM32L_DISCOVERY
 
 config STM32LDISCO_QETIMER
 	int "Timer to use with QE encoder"
