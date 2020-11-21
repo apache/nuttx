@@ -42,6 +42,7 @@
 #include <nuttx/irq.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -550,7 +551,7 @@ static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
   uint32_t freqin;
   int prescaler;
 
-  tmrinfo("Set clock=%d\n", freq);
+  tmrinfo("Set clock=%" PRId32 "\n", freq);
 
   DEBUGASSERT(dev != NULL);
 
@@ -624,7 +625,7 @@ static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
    */
 
   prescaler = freqin / freq;
-  tmrinfo("  timer freq=%d\n", freqin);
+  tmrinfo("  timer freq=%" PRId32 "\n", freqin);
   tmrinfo("  prescaler=%d\n", prescaler);
 
   /* We need to decrement value for '1', but only, if that will not to
@@ -725,7 +726,7 @@ static uint32_t stm32_tim_getclock(FAR struct stm32_tim_dev_s *dev)
 static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
                                 uint32_t period)
 {
-  tmrinfo("Set period=%d\n", period);
+  tmrinfo("Set period=%" PRId32 "\n", period);
   DEBUGASSERT(dev != NULL);
 
   /* ARR_OFFSET is the same for ATIM, BTIM or GTIM */
