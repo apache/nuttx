@@ -47,6 +47,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
@@ -425,8 +426,8 @@ static int stm32_getstatus(FAR struct timer_lowerhalf_s *lower,
 
   counter    = STM32_TIM_GETCOUNTER(priv->tim);
   status->timeleft = ((uint64_t) (timeout - counter) * clock) / 1000000;
-  tmrinfo("timeout=%u counter=%u\n", timeout, counter);
-  tmrinfo("timeleft=%u\n", status->timeleft);
+  tmrinfo("timeout=%" PRIu32 " counter=%" PRIu32 "\n", timeout, counter);
+  tmrinfo("timeleft=%" PRIu32 "\n", status->timeleft);
   return OK;
 }
 
@@ -459,7 +460,7 @@ static int stm32_settimeout(FAR struct timer_lowerhalf_s *lower,
       return -EPERM;
     }
 
-  tmrinfo("Set timeout=%d\n", timeout);
+  tmrinfo("Set timeout=%" PRId32 "\n", timeout);
 
   maxtimeout = ((uint64_t)1 << priv->resolution) - 1;
   if (timeout > maxtimeout)
