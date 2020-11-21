@@ -45,6 +45,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
@@ -3418,7 +3419,8 @@ ssize_t spiffs_object_read(FAR struct spiffs_s *fs,
 
       len_to_read = MIN(len_to_read, fobj->size);
 
-      finfo("Read offset=%d rd=%d data spndx=%d is data_pgndx=%d addr=%p\n",
+      finfo("Read offset=%d rd=%d data spndx=%d is "
+            "data_pgndx=%d addr=%" PRIu32 "\n",
             cur_offset, len_to_read, data_spndx, data_pgndx,
             (SPIFFS_PAGE_TO_PADDR(fs, data_pgndx) +
              sizeof(struct spiffs_page_header_s) +
