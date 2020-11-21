@@ -73,9 +73,7 @@
 #include "stm32_otg.h"
 #include "stm32_usbhost.h"
 
-#if defined(CONFIG_USBHOST) && defined(CONFIG_STM32H7_OTGFS) && defined(CONFIG_EXPERIMENTAL)
-
-#warning OTG host not tested for STM32H7!
+#if defined(CONFIG_USBHOST) && defined(CONFIG_STM32H7_OTGFS)
 
 /****************************************************************************
  * Pre-processor Definitions

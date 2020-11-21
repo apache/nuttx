@@ -44,16 +44,12 @@
 #include <syslog.h>
 #include <errno.h>
 
-#define HAVE_USBHOST 1
-#define CONFIG_USBMONITOR 1
-
 #ifdef CONFIG_USBMONITOR
 #include <nuttx/usb/usbmonitor.h>
 #endif
 
-#ifdef CONFIG_STM32_OTGFS
+#ifdef CONFIG_STM32H7_OTGFS
 #include "stm32_usbhost.h"
-#include "stm32_usb.h"
 #endif
 
 #include "nucleo-h743zi.h"
