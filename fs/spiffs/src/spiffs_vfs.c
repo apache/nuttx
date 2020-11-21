@@ -1838,7 +1838,7 @@ static int spiffs_rename(FAR struct inode *mountpt,
                                  &oldpgndx);
   if (ret < 0)
     {
-      fwarn("WARNING: spiffs_find_objhdr_pgndx failed: %d\n");
+      fwarn("WARNING: spiffs_find_objhdr_pgndx failed: %d\n", ret);
       goto errout_with_lock;
     }
 
