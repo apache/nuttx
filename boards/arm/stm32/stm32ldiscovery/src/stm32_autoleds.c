@@ -55,7 +55,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 2 LEDs on
+
+/* If CONFIG_ARCH_LEDS is defined, then NuttX will control the 2 LEDs on
  * board the STM32L-Discovery.  The following definitions describe how NuttX
  * controls the LEDs:
  *
