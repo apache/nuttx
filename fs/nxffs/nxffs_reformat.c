@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -106,7 +107,8 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
       nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->pack);
       if (nxfrd != volume->blkper)
         {
-          ferr("ERROR: Write erase block %d failed: %d\n", lblock, nxfrd);
+          ferr("ERROR: Write erase block %jd failed: %zd\n",
+               (intmax_t)lblock, nxfrd);
           return -EIO;
         }
     }
@@ -157,7 +159,8 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
       nxfrd  = MTD_BREAD(volume->mtd, lblock, volume->blkper, volume->pack);
       if (nxfrd != volume->blkper)
         {
-          ferr("ERROR: Read erase block %d failed: %d\n", lblock, nxfrd);
+          ferr("ERROR: Read erase block %jd failed: %zd\n",
+               (intmax_t)lblock, nxfrd);
           return -EIO;
         }
 #endif
@@ -249,8 +252,8 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
                              volume->pack);
           if (nxfrd != volume->blkper)
             {
-              ferr("ERROR: Write erase block %d failed: %d\n",
-                   lblock, nxfrd);
+              ferr("ERROR: Write erase block %jd failed: %zd\n",
+                   (intmax_t)lblock, nxfrd);
               return -EIO;
             }
         }
