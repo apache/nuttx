@@ -92,6 +92,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* RCC reset ****************************************************************/
 
 #define STM32_RCC_RSTR   STM32_RCC_APB2RSTR
@@ -124,7 +125,8 @@
 #define ADC_IER_ALLINTS (ADC_IER_EOC | ADC_IER_AWD | ADC_IER_JEOC | \
                          ADC_IER_OVR)
 
-/* ADC Channels/DMA ********************************************************/
+/* ADC Channels/DMA *********************************************************/
+
 /* The maximum number of channels that can be sampled.  If DMA support is
  * not enabled, then only a single channel can be sampled.  Otherwise,
  * data overruns would occur.
@@ -174,7 +176,9 @@
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP8_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP9_SHIFT))
 
-/* The last external channel on ADC 1 to enable Reading Vref or Vbat / Vsence */
+/* The last external channel on ADC 1 to enable Reading Vref or
+ * Vbat / Vsence
+ */
 
 #define ADC_LAST_EXTERNAL_CHAN 15
 
@@ -284,7 +288,8 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable);
 static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
 static void adc_enable(FAR struct stm32_dev_s *priv, bool enable);
 
-static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first, int last,
+static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first,
+                            int last,
                             int offset);
 static int      adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch);
 static bool     adc_internal(FAR struct stm32_dev_s * priv);
@@ -809,7 +814,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
   /* Set the reload and prescaler values */
 
-  tim_putreg(priv, STM32_GTIM_PSC_OFFSET, prescaler-1);
+  tim_putreg(priv, STM32_GTIM_PSC_OFFSET, prescaler - 1);
   tim_putreg(priv, STM32_GTIM_ARR_OFFSET, reload);
 
   /* Clear the advanced timers repetition counter in TIM1 */
@@ -910,6 +915,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
       case 4: /* TimerX TRGO event */
         {
           /* TODO: TRGO support not yet implemented */
+
           /* Set the event TRGO */
 
           ccenable = 0;
@@ -1014,9 +1020,11 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
  *
  * Description:
  *   Called by power management framework when it wants to enter low power
- *   states. Check if ADC is in progress and if so prevent from entering STOP.
+ *   states. Check if ADC is in progress and if so prevent from entering
+ *   STOP.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_PM
 static int adc_pm_prepare(struct pm_callback_s *cb, int domain,
                           enum pm_state_e state)
@@ -1151,7 +1159,6 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
 
 static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
 {
-
   ainfo("enable: %d\n", enable ? 1 : 0);
 
   if (enable)
@@ -1182,7 +1189,8 @@ static void adc_enable(FAR struct stm32_dev_s *priv, bool enable)
  ****************************************************************************/
 
 #ifdef ADC_HAVE_DMA
-static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
+static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr,
+                                FAR void *arg)
 {
   FAR struct adc_dev_s   *dev  = (FAR struct adc_dev_s *)arg;
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
@@ -1199,7 +1207,8 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
 
       for (i = 0; i < priv->nchannels; i++)
         {
-          priv->cb->au_receive(dev, priv->chanlist[priv->current], priv->dmabuffer[priv->current]);
+          priv->cb->au_receive(dev, priv->chanlist[priv->current],
+                               priv->dmabuffer[priv->current]);
           priv->current++;
           if (priv->current >= priv->nchannels)
             {
@@ -1221,8 +1230,8 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
  * Name: adc_bind
  *
  * Description:
- *   Bind the upper-half driver callbacks to the lower-half implementation.  This
- *   must be called early in order to receive ADC event notifications.
+ *   Bind the upper-half driver callbacks to the lower-half implementation.
+ *   This must be called early in order to receive ADC event notifications.
  *
  ****************************************************************************/
 
@@ -1415,7 +1424,6 @@ static void adc_reset(FAR struct adc_dev_s *dev)
         adc_getreg(priv, STM32_ADC_SQR3_OFFSET));
 
   ainfo("CCR:  0x%08x\n", getreg32(STM32_ADC_CCR));
-
 }
 
 /****************************************************************************
@@ -1524,7 +1532,8 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
  * Name: adc_sqrbits
  ****************************************************************************/
 
-static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first, int last,
+static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first,
+                            int last,
                             int offset)
 {
   uint32_t bits = 0;
@@ -1556,7 +1565,6 @@ static bool adc_internal(FAR struct stm32_dev_s * priv)
             {
               return true;
             }
-
         }
     }
 
@@ -1602,14 +1610,17 @@ static int adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
       priv->nchannels = 1;
     }
 
-  bits = adc_sqrbits(priv, ADC_SQR3_FIRST, ADC_SQR3_LAST, ADC_SQR3_SQ_OFFSET);
+  bits = adc_sqrbits(priv, ADC_SQR3_FIRST, ADC_SQR3_LAST,
+                     ADC_SQR3_SQ_OFFSET);
   adc_modifyreg(priv, STM32_ADC_SQR3_OFFSET, ~ADC_SQR3_RESERVED, bits);
 
-  bits = adc_sqrbits(priv, ADC_SQR2_FIRST, ADC_SQR2_LAST, ADC_SQR2_SQ_OFFSET);
+  bits = adc_sqrbits(priv, ADC_SQR2_FIRST, ADC_SQR2_LAST,
+                     ADC_SQR2_SQ_OFFSET);
   adc_modifyreg(priv, STM32_ADC_SQR2_OFFSET, ~ADC_SQR2_RESERVED, bits);
 
   bits = ((uint32_t)priv->nchannels - 1) << ADC_SQR1_L_SHIFT |
-         adc_sqrbits(priv, ADC_SQR1_FIRST, ADC_SQR1_LAST, ADC_SQR1_SQ_OFFSET);
+         adc_sqrbits(priv, ADC_SQR1_FIRST, ADC_SQR1_LAST,
+                     ADC_SQR1_SQ_OFFSET);
   adc_modifyreg(priv, STM32_ADC_SQR1_OFFSET, ~ADC_SQR1_RESERVED, bits);
 
   return OK;
