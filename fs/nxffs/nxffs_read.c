@@ -101,7 +101,9 @@ static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
   datend = 0;
   do
     {
-      /* Check if the next data block contains the sought after file position */
+      /* Check if the next data block contains the sought after file
+       * position
+       */
 
       ret = nxffs_nextblock(volume, offset, blkentry);
       if (ret < 0)
@@ -124,7 +126,8 @@ static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
   /* Return the offset to the data within the current data block */
 
   blkentry->foffset = fpos - datstart;
-  nxffs_ioseek(volume, blkentry->hoffset + SIZEOF_NXFFS_DATA_HDR + blkentry->foffset);
+  nxffs_ioseek(volume, blkentry->hoffset + SIZEOF_NXFFS_DATA_HDR +
+               blkentry->foffset);
   return OK;
 }
 
@@ -322,7 +325,8 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
           if (ch != g_datamagic[nmagic])
             {
               /* Ooops... this is the not the right character for the magic
-               * Sequence.  Check if we need to restart or to cancel the sequence:
+               * Sequence.  Check if we need to restart or to cancel the
+               * sequence:
                */
 
               if (ch == g_datamagic[0])
@@ -355,7 +359,8 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
 
               /* Read the block header and verify the block at that address */
 
-              ret = nxffs_rdblkhdr(volume, blkentry->hoffset, &blkentry->datlen);
+              ret = nxffs_rdblkhdr(volume, blkentry->hoffset,
+                                   &blkentry->datlen);
               if (ret == OK)
                 {
                   finfo("Found a valid data block, offset: %d datlen: %d\n",
@@ -386,8 +391,8 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
  *
  * Input Parameters:
  *   volume - Describes the current volume.
- *   offset - The byte offset from the beginning of FLASH where the data block
- *     header is expected.
+ *   offset - The byte offset from the beginning of FLASH where the data
+ *     block header is expected.
  *   datlen  - A memory location to return the data block length.
  *
  * Returned Value:
@@ -406,7 +411,9 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
   uint16_t dlen;
   int ret;
 
-  /* Make sure that the block containing the data block header is in the cache */
+  /* Make sure that the block containing the data block header is in the
+   * cache
+   */
 
   nxffs_ioseek(volume, offset);
   ret = nxffs_rdcache(volume, volume->ioblock);
@@ -433,7 +440,8 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
 
   if ((uint32_t)doffset + (uint32_t)dlen > (uint32_t)volume->geo.blocksize)
     {
-      ferr("ERROR: Data length=%d is unreasonable at offset=%d\n", dlen, doffset);
+      ferr("ERROR: Data length=%d is unreasonable at offset=%d\n", dlen,
+           doffset);
       return -EIO;
     }
 
