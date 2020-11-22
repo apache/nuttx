@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -2789,7 +2790,7 @@ static inline void stm32_epout_interrupt(FAR struct stm32_usbdev_s *priv)
           if ((daint & 1) != 0)
             {
               regval = stm32_getreg(STM32_OTG_DOEPINT(epno));
-              uerr("DOEPINT(%d) = %08x\n", epno, regval);
+              uerr("DOEPINT(%d) = %08" PRIx32 "\n", epno, regval);
               stm32_putreg(0xff, STM32_OTG_DOEPINT(epno));
             }
 
@@ -3028,7 +3029,7 @@ static inline void stm32_epin_interrupt(FAR struct stm32_usbdev_s *priv)
         {
           if ((daint & 1) != 0)
             {
-              uerr("DIEPINT(%d) = %08x\n",
+              uerr("DIEPINT(%d) = %08" PRIx32 "\n",
                    epno, stm32_getreg(STM32_OTG_DIEPINT(epno)));
               stm32_putreg(0xff, STM32_OTG_DIEPINT(epno));
             }
@@ -5764,7 +5765,7 @@ void arm_usbinitialize(void)
   ret = irq_attach(STM32_IRQ_OTG, stm32_usbinterrupt, NULL);
   if (ret < 0)
     {
-      uerr("irq_attach failed\n", ret);
+      uerr("irq_attach failed: %d\n", ret);
       goto errout;
     }
 
