@@ -26,9 +26,8 @@ Last Updated: |today|
    boards/index.rst
    components/index.rst
    applications/index.rst
-   guides/index.rst
    reference/index.rst
-   releases/index.rst
+   guides/index.rst
    contributing/index.rst
    glossary.rst
 
