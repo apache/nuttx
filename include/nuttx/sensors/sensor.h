@@ -40,142 +40,151 @@
 
 /* sensor type definition */
 
+/* Custom Sensor
+ * Some special sensor whose event size is not fixed or dynamically change,
+ * are called sensor of custom type. You should treat its events as byte
+ * streams and use sensor_custom_register to register character device
+ * with specific path, ex: "/dev/sensor/custom_dummy".
+ */
+
+#define SENSOR_TYPE_CUSTOM                          0
+
 /* Accelerometer
  * All values are in SI units (m/s^2), and measure the acceleration of the
  * device minus the acceleration dut to gravity.
  */
 
-#define SENSOR_TYPE_ACCELEROMETER                   0
+#define SENSOR_TYPE_ACCELEROMETER                   1
 
 /* Magneric Field
  * All values are in micro-Tesla (uT) and measure the geomagnetic field
  * in X, Y and Z axis.
  */
 
-#define SENSOR_TYPE_MAGNETIC_FIELD                  1
+#define SENSOR_TYPE_MAGNETIC_FIELD                  2
 
 /* Gyroscope
  * All values are in radians/second and measure the rate of rotation around
  * the X, Y and Z axis.
  */
 
-#define SENSOR_TYPE_GYROSCOPE                       2
+#define SENSOR_TYPE_GYROSCOPE                       3
 
 /* Ambient Light
  * The ambient light sensor value is returned in SI units lux.
  */
 
-#define SENSOR_TYPE_LIGHT                           3
+#define SENSOR_TYPE_LIGHT                           4
 
 /* Barometer
- * All values are in hectopascal (hPa) and measure the athmospheric pressure
- * we can calculate altitude by perssure.
+ * All values are in hectopascal (hPa) and measure the athmospheric pressure.
+ * You can calculate altitude by perssure.
  */
 
-#define SENSOR_TYPE_BAROMETER                       4
+#define SENSOR_TYPE_BAROMETER                       5
 
 /* Proximity
  * The values correspond to the distance to the nearest
  * object in centimeters.
  */
 
-#define SENSOR_TYPE_PROXIMITY                       5
+#define SENSOR_TYPE_PROXIMITY                       6
 
 /* Relative Humidity
  * A relative humidity sensor measure relative ambient air humidity and
  * return a value in percent.
  */
 
-#define SENSOR_TYPE_RELATIVE_HUMIDITY               6
+#define SENSOR_TYPE_RELATIVE_HUMIDITY               7
 
 /* Ambient Temperature
  * The ambient (room) temperature in degree Celsius
  */
 
-#define SENSOR_TYPE_AMBIENT_TEMPERATURE             7
+#define SENSOR_TYPE_AMBIENT_TEMPERATURE             8
 
 /* RGB
  * We use these values of RGB to weighted to obtain the color of LED.
  * These values is in unit percent.
  */
 
-#define SENSOR_TYPE_RGB                             8
+#define SENSOR_TYPE_RGB                             9
 
 /* Hall
  * All values are in bool type (0 or 1) and it often is used to as switch.
  * A values of 1 indicates that switch on.
  */
 
-#define SENSOR_TYPE_HALL                            9
+#define SENSOR_TYPE_HALL                            10
 
 /* IR (Infrared Ray)
  * This sensor can detect a human approach and outputs a signal from
  * interrupt pins. This sensor value is in lux.
  */
 
-#define SENSOR_TYPE_IR                              10
+#define SENSOR_TYPE_IR                              11
 
 /* GPS
  * A sensor of this type returns gps data. Include year, month, day,
  * hour, minutes, seconds, altitude, longitude, latitude.
  */
 
-#define SENSOR_TYPE_GPS                             11
+#define SENSOR_TYPE_GPS                             12
 
 /* Ultraviolet light sensor
  * This sensor can identify the UV index in ambient light help people
  * to effectively protect themselves from sunburns, cancer or eye damage.
  * This value range is 0 - 15.
  */
-#define SENSOR_TYPE_ULTRAVIOLET                     12
+#define SENSOR_TYPE_ULTRAVIOLET                     13
 
 /* Noise Loudness
  * A sensor of this type returns the loudness of noise in SI units (db)
  */
 
-#define SENSOR_TYPE_NOISE                           13
+#define SENSOR_TYPE_NOISE                           14
 
 /* PM25
  * A sensor of this type returns the content of pm2.5 in the air
  * This value is in SI units (ug/m^3)
  */
 
-#define SENSOR_TYPE_PM25                            14
+#define SENSOR_TYPE_PM25                            15
 
 /* PM1P0
  * A sensor of this type returns the content of pm1.0 in the air
  * This value is in SI units (ug/m^3)
  */
 
-#define SENSOR_TYPE_PM1P0                           15
+#define SENSOR_TYPE_PM1P0                           16
 
 /* PM10
  * A sensor of this type returns the content of pm10 in the air
  * This value is in SI units (ug/m^3)
  */
 
-#define SENSOR_TYPE_PM10                            16
+#define SENSOR_TYPE_PM10                            17
 
 /* CO2
  * A sensor of this type returns the content of CO2 in the air
  * This vaule is in units (ppm-part per million).
  */
 
-#define SENSOR_TYPE_CO2                             17
+#define SENSOR_TYPE_CO2                             18
 
 /* HCHO
  * The HCHO pollution is an important indicator of household air
  * pollution. This value is in units (ppm-part per million).
  */
 
-#define SENSOR_TYPE_HCHO                            18
+#define SENSOR_TYPE_HCHO                            19
 
 /* TVOC (total volatile organic compounds)
  * The indoor TVOC is cause indoor air pollution is one of the
  * main reasons why. This value is in units (ppb-part per billion).
  */
 
-#define SENSOR_TYPE_TVOC                            19
+#define SENSOR_TYPE_TVOC                            20
 
 /* PH
  * The acid-base degree describes the strength of the aqueous
@@ -184,21 +193,21 @@
  * pH<7 is acidic, and pH>7 is alkaline.
  */
 
-#define SENSOR_TYPE_PH                              20
+#define SENSOR_TYPE_PH                              21
 
 /* Dust
  * A sensor of this type returns the content of dust in the air
  * values is in ug/m^3.
  */
 
-#define SENSOR_TYPE_DUST                            21
+#define SENSOR_TYPE_DUST                            22
 
 /* Heart Rate
  * A sensor of this type returns the current heart rate.
  * Current heart rate is in beats per minute (BPM).
  */
 
-#define SENSOR_TYPE_HEART_RATE                      22
+#define SENSOR_TYPE_HEART_RATE                      23
 
 /* Heart Beat
  * A sensor of this type returns an event evetytime
@@ -206,11 +215,11 @@
  * to the positive peak in the QRS complex of and ECG signal.
  */
 
-#define SENSOR_TYPE_HEART_BEAT                      23
+#define SENSOR_TYPE_HEART_BEAT                      24
 
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           24
+#define SENSOR_TYPE_COUNT                           25
 
 /****************************************************************************
  * Inline Functions
@@ -532,7 +541,7 @@ struct sensor_ops_s
   /**************************************************************************
    * Name: control
    *
-   * In this method, we allow user to set some special config for the sensor,
+   * With this method, the user can set some special config for the sensor,
    * such as changing the custom mode, setting the custom resolution, reset,
    * etc, which are all parsed and implemented by lower half driver.
    *
@@ -648,9 +657,10 @@ extern "C"
  *   "upper half" Sensor device and registers that device so that can be used
  *   by application code.
  *
- *   We will register the chararter device by node name format based on the
+ *   You can register the character device by node name format based on the
  *   type of sensor. Multiple types of the same type are distinguished by
- *   numbers. eg: accel0, accel1
+ *   numbers. eg: accel0, accel1. This type of sensor must be less than
+ *   SENSOR_TYPE_COUNT. This API corresponds to the sensor_unregister.
  *
  * Input Parameters:
  *   dev   - A pointer to an instance of lower half sensor driver. This
@@ -668,21 +678,64 @@ extern "C"
 int sensor_register(FAR struct sensor_lowerhalf_s *dev, int devno);
 
 /****************************************************************************
- * Name: sensor_unregister
+ * Name: sensor_custom_register
  *
  * Description:
- *   This function unregister character node and release all resource about
- *   upper half driver.
+ *   This function binds an instance of a "lower half" Sensor driver with the
+ *   "upper half" Sensor device and registers that device so that can be used
+ *   by application code.
+ *
+ *   You can register the character device type by specific path and esize.
+ *   This API corresponds to the sensor_custom_unregister.
  *
  * Input Parameters:
  *   dev   - A pointer to an instance of lower half sensor driver. This
  *           instance is bound to the sensor driver and must persist as long
+ *           as the driver persists.
+ *   path  - The user specifies path of device. ex: /dev/sensor/xxx.
+ *   esize - The element size of intermediate circular buffer.
+ *
+ * Returned Value:
+ *   OK if the driver was successfully register; A negated errno value is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+int sensor_custom_register(FAR struct sensor_lowerhalf_s *dev,
+                           FAR const char *path, uint8_t esize);
+
+/****************************************************************************
+ * Name: sensor_unregister
+ *
+ * Description:
+ *   This function unregisters character node and releases all resource from
+ *   upper half driver. This API corresponds to the sensor_register.
+ *
+ * Input Parameters:
+ *   dev   - A pointer to an instance of lower half sensor driver. This
+ *           instance is bound to the sensor driver and must persists as long
  *           as the driver persists.
  *   devno - The user specifies which device of this type, from 0.
  ****************************************************************************/
 
 void sensor_unregister(FAR struct sensor_lowerhalf_s *dev, int devno);
 
+/****************************************************************************
+ * Name: sensor_custom_unregister
+ *
+ * Description:
+ *   This function unregisters character node and releases all resource from
+ *   upper half driver. This API corresponds to the sensor_custom_register.
+ *
+ * Input Parameters:
+ *   dev   - A pointer to an instance of lower half sensor driver. This
+ *           instance is bound to the sensor driver and must persists as long
+ *           as the driver persists.
+ *   path  - The user specifies path of device, ex: /dev/sensor/xxx
+ ****************************************************************************/
+
+void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *dev,
+                              FAR const char *path);
 #undef EXTERN
 #if defined(__cplusplus)
 }
