@@ -44,6 +44,8 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <inttypes.h>
+#include <stdint.h>
 
 #include <nuttx/mtd/mtd.h>
 
@@ -82,7 +84,8 @@ int nxffs_rdcache(FAR struct nxffs_volume_s *volume, off_t block)
       nxfrd = MTD_BREAD(volume->mtd, block, 1, volume->cache);
       if (nxfrd != 1)
         {
-          ferr("ERROR: Read block %d failed: %d\n", block, nxfrd);
+          ferr("ERROR: Read block %jd failed: %zu\n",
+               (intmax_t)block, nxfrd);
           return -EIO;
         }
 
@@ -117,7 +120,8 @@ int nxffs_wrcache(FAR struct nxffs_volume_s *volume)
   nxfrd = MTD_BWRITE(volume->mtd, volume->cblock, 1, volume->cache);
   if (nxfrd != 1)
     {
-      ferr("ERROR: Write block %d failed: %d\n", volume->cblock, nxfrd);
+      ferr("ERROR: Write block %jd failed: %zu\n",
+           (intmax_t)volume->cblock, nxfrd);
       return -EIO;
     }
 
