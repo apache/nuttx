@@ -1114,7 +1114,9 @@ static int smart_setsectorsize(FAR struct smart_struct_s *dev, uint16_t size)
     }
   else
     {
-      /* Set the sectors per erase block and available sectors per erase block */
+      /* Set the sectors per erase block and available sectors per erase
+       * block
+       */
 
       dev->sectorsperblk = erasesize / dev->sectorsize;
       if (dev->sectorsperblk == 256)
@@ -1473,7 +1475,9 @@ static int smart_add_sector_to_cache(FAR struct smart_struct_s *dev,
     }
   else
     {
-      /* Cache is full.  We must find the least accessed entry and replace it */
+      /* Cache is full.  We must find the least accessed entry and replace
+       * it
+       */
 
       oldest = 0xffff;
       for (x = 0; x < CONFIG_MTD_SMART_SECTOR_CACHE_SIZE; x++)
@@ -1642,7 +1646,9 @@ static uint16_t smart_cache_lookup(FAR struct smart_struct_s *dev,
 
               if (logicalsector == logical)
                 {
-                  /* This is the sector we are looking for!  Add it to the cache */
+                  /* This is the sector we are looking for!  Add it to the
+                   * cache
+                   */
 
                   physical = block * dev->sectorsperblk + sector;
                   smart_add_sector_to_cache(dev, logical, physical,
@@ -2318,7 +2324,9 @@ static int smart_scan(FAR struct smart_struct_s *dev)
                   continue;
                 }
 
-              /* Now compare if this logical sector matches the current sector */
+              /* Now compare if this logical sector matches the current
+               * sector
+               */
 
               if (duplogsector == logicalsector)
                 {
@@ -2948,7 +2956,9 @@ static int smart_relocate_static_data(FAR struct smart_struct_s *dev,
                   continue;
                 }
 
-              /* Find a new sector where it can live, NOT in this erase block */
+              /* Find a new sector where it can live, NOT in this erase
+               * block
+               */
 
               newsector = nextsector++;
 
@@ -5286,7 +5296,9 @@ static inline int smart_allocsector(FAR struct smart_struct_s *dev,
 
 #else /* CONFIG_MTD_SMART_ENABLE_CRC */
 
-  /* Write the logical sector to the flash.  We will fill it in with data later. */
+  /* Write the logical sector to the flash.  We will fill it in with data
+   * later.
+   */
 
   ret = smart_write_alloc_sector(dev, logsector, physicalsector);
   if (ret != 1)
@@ -5478,7 +5490,9 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
         }
 #endif
 
-      /* Just change the BIOC_XIPBASE command to the MTDIOC_XIPBASE command. */
+      /* Just change the BIOC_XIPBASE command to the MTDIOC_XIPBASE
+       * command.
+       */
 
       cmd = MTDIOC_XIPBASE;
       break;
