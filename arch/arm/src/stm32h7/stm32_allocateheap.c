@@ -345,9 +345,15 @@ static void addregion (uintptr_t start, uint32_t size, const char *desc)
 
 void arm_addregion(void)
 {
-  addregion (SRAM123_START, SRAM123_END - SRAM123_START, "SRAM1,2,3");
+  /* At this point there is already one region allocated for "kernel" heap */
 
   unsigned mm_regions = 1;
+
+  if (mm_regions < CONFIG_MM_REGIONS)
+    {
+      addregion (SRAM123_START, SRAM123_END - SRAM123_START, "SRAM1,2,3");
+      mm_regions++;
+    }
 
   if (mm_regions < CONFIG_MM_REGIONS)
     {
