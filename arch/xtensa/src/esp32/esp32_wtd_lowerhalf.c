@@ -169,7 +169,7 @@ static int esp32_wtd_start(FAR struct watchdog_lowerhalf_s *lower)
   int ret = OK;
   irqstate_t flags;
 
-  wdinfo("Entry: started=%d\n");
+  wdinfo("Entry: started\n");
   DEBUGASSERT(priv);
 
   if (priv->started == true)
