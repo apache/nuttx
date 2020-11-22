@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -416,7 +417,8 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
 {
   int ret;
 
-  finfo("sector: %d cached: %d sectorsize: %d XIP base: %p buffer: %p\n",
+  finfo("sector: %" PRId32 " cached: %" PRId32
+        " sectorsize: %d XIP base: %p buffer: %p\n",
         sector, rf->rf_cachesector, rm->rm_hwsectorsize,
         rm->rm_xipbase, rf->rf_buffer);
 
