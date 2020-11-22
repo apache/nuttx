@@ -469,7 +469,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
       else
         {
           ferr("ERROR: File %s exists and we were not asked to "
-               "truncate it\n");
+               "truncate it\n", name);
           ret = -ENOSYS;
           goto errout_with_exclsem;
         }
