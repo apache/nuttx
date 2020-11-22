@@ -92,7 +92,8 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
 
   if (ehdr->e_ident[EI_CLASS] != ELFCLASS32)
     {
-      berr("ERROR: Need 32-bit objects: e_ident[EI_CLASS]=%02x\n", ehdr->e_ident[EI_CLASS]);
+      berr("ERROR: Need 32-bit objects: e_ident[EI_CLASS]=%02x\n",
+           ehdr->e_ident[EI_CLASS]);
       return false;
     }
 
@@ -104,11 +105,13 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
   if (ehdr->e_ident[EI_DATA] != ELFDATA2LSB)
 #endif
     {
-      berr("ERROR: Wrong endian-ness: e_ident[EI_DATA]=%02x\n", ehdr->e_ident[EI_DATA]);
+      berr("ERROR: Wrong endian-ness: e_ident[EI_DATA]=%02x\n",
+           ehdr->e_ident[EI_DATA]);
       return false;
     }
 
   /* TODO:  Check ABI here. */
+
   return true;
 }
 
@@ -166,8 +169,10 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_CALL:
     case R_ARM_JUMP24:
       {
-        binfo("Performing PC24 [%d] link at addr %08lx [%08lx] to sym '%p' st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr, (long)(*(uint32_t *)addr),
+        binfo("Performing PC24 [%d] link at "
+              "addr %08lx [%08lx] to sym '%p' st_value=%08lx\n",
+              ELF32_R_TYPE(rel->r_info), (long)addr,
+              (long)(*(uint32_t *)addr),
               sym, (long)sym->st_value);
 
         offset = (*(uint32_t *)addr & 0x00ffffff) << 2;
@@ -177,9 +182,11 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
           }
 
         offset += sym->st_value - addr;
-        if (offset & 3 || offset < (int32_t) 0xfe000000 || offset >= (int32_t) 0x02000000)
+        if (offset & 3 || offset < (int32_t) 0xfe000000 ||
+            offset >= (int32_t) 0x02000000)
           {
-            berr("ERROR:   ERROR: PC24 [%d] relocation out of range, offset=%08lx\n",
+            berr("ERROR:   ERROR: PC24 [%d] relocation out of range, "
+                 "offset=%08lx\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -195,8 +202,10 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_ABS32:
     case R_ARM_TARGET1:  /* New ABI:  TARGET1 always treated as ABS32 */
       {
-        binfo("Performing ABS32 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
+        binfo("Performing ABS32 link at addr=%08lx [%08lx] "
+              "to sym=%p st_value=%08lx\n",
+              (long)addr, (long)(*(uint32_t *)addr), sym,
+              (long)sym->st_value);
 
         *(uint32_t *)addr += sym->st_value;
       }
@@ -243,8 +252,10 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         upper_insn = (uint32_t)(*(uint16_t *)addr);
         lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
 
-        binfo("Performing THM_JUMP24 [%d] link at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr, (int)upper_insn, (int)lower_insn,
+        binfo("Performing THM_JUMP24 [%d] link "
+              "at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
+              ELF32_R_TYPE(rel->r_info), (long)addr,
+              (int)upper_insn, (int)lower_insn,
               sym, (long)sym->st_value);
 
         /* Extract the 25-bit offset from the 32-bit instruction:
@@ -288,7 +299,8 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
         if (ELF32_ST_TYPE(sym->st_info) == STT_FUNC && (offset & 1) == 0)
           {
-            berr("ERROR:   ERROR: JUMP24 [%d] requires odd offset, offset=%08lx\n",
+            berr("ERROR:   ERROR: JUMP24 [%d] "
+                 "requires odd offset, offset=%08lx\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -298,7 +310,8 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
         if (offset < (int32_t)0xff000000 || offset >= (int32_t)0x01000000)
           {
-            berr("ERROR:   ERROR: JUMP24 [%d] relocation out of range, branch target=%08lx\n",
+            berr("ERROR:   ERROR: JUMP24 [%d] "
+                 "relocation out of range, branch target=%08lx\n",
                  ELF32_R_TYPE(rel->r_info), offset);
 
             return -EINVAL;
@@ -312,10 +325,12 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         J1 = S ^ (~(offset >> 23) & 1);
         J2 = S ^ (~(offset >> 22) & 1);
 
-        upper_insn = ((upper_insn & 0xf800) | (S << 10) | ((offset >> 12) & 0x03ff));
+        upper_insn = ((upper_insn & 0xf800) | (S << 10) |
+                      ((offset >> 12) & 0x03ff));
         *(uint16_t *)addr = (uint16_t)upper_insn;
 
-        lower_insn = ((lower_insn & 0xd000) | (J1 << 13) | (J2 << 11) | ((offset >> 1) & 0x07ff));
+        lower_insn = ((lower_insn & 0xd000) | (J1 << 13) | (J2 << 11) |
+                      ((offset >> 1) & 0x07ff));
         *(uint16_t *)(addr + 2) = (uint16_t)lower_insn;
 
         binfo("  S=%d J1=%d J2=%d insn [%04x %04x]\n",
@@ -340,8 +355,10 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
     case R_ARM_PREL31:
       {
-        binfo("Performing PREL31 link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              (long)addr, (long)(*(uint32_t *)addr), sym, (long)sym->st_value);
+        binfo("Performing PREL31 link "
+              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+              (long)addr, (long)(*(uint32_t *)addr),
+              sym, (long)sym->st_value);
 
         offset            = *(uint32_t *)addr + sym->st_value - addr;
         *(uint32_t *)addr = offset & 0x7fffffff;
@@ -351,8 +368,10 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
     case R_ARM_MOVW_ABS_NC:
     case R_ARM_MOVT_ABS:
       {
-        binfo("Performing MOVx_ABS [%d] link at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr, (long)(*(uint32_t *)addr),
+        binfo("Performing MOVx_ABS [%d] link "
+              "at addr=%08lx [%08lx] to sym=%p st_value=%08lx\n",
+              ELF32_R_TYPE(rel->r_info),
+              (long)addr, (long)(*(uint32_t *)addr),
               sym, (long)sym->st_value);
 
         offset = *(uint32_t *)addr;
@@ -405,8 +424,10 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         upper_insn = (uint32_t)(*(uint16_t *)addr);
         lower_insn = (uint32_t)(*(uint16_t *)(addr + 2));
 
-        binfo("Performing THM_MOVx [%d] link at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
-              ELF32_R_TYPE(rel->r_info), (long)addr, (int)upper_insn, (int)lower_insn,
+        binfo("Performing THM_MOVx [%d] link "
+              "at addr=%08lx [%04x %04x] to sym=%p st_value=%08lx\n",
+              ELF32_R_TYPE(rel->r_info), (long)addr,
+              (int)upper_insn, (int)lower_insn,
               sym, (long)sym->st_value);
 
         /* Extract the 16-bit offset from the 32-bit instruction */
@@ -423,8 +444,9 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 
         offset += sym->st_value;
 
-        /* Update the immediate value in the instruction.  For MOVW we want the bottom
-         * 16-bits; for MOVT we want the top 16-bits.
+        /* Update the immediate value in the instruction.
+         * For MOVW we want the bottom 16-bits; for MOVT we want
+         * the top 16-bits.
          */
 
         if (ELF32_R_TYPE(rel->r_info) == R_ARM_THM_MOVT_ABS)
@@ -432,10 +454,12 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
             offset >>= 16;
           }
 
-        upper_insn = ((upper_insn & 0xfbf0) | ((offset & 0xf000) >> 12) | ((offset & 0x0800) >> 1));
+        upper_insn = ((upper_insn & 0xfbf0) | ((offset & 0xf000) >> 12) |
+                      ((offset & 0x0800) >> 1));
         *(uint16_t *)addr = (uint16_t)upper_insn;
 
-        lower_insn = ((lower_insn & 0x8f00) | ((offset & 0x0700) << 4) | (offset & 0x00ff));
+        lower_insn = ((lower_insn & 0x8f00) | ((offset & 0x0700) << 4) |
+                      (offset & 0x00ff));
         *(uint16_t *)(addr + 2) = (uint16_t)lower_insn;
 
         binfo("  insn [%04x %04x]\n",
