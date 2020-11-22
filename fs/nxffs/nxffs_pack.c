@@ -709,7 +709,7 @@ static int nxffs_wrinodehdr(FAR struct nxffs_volume_s *volume,
       ret = nxffs_updateinode(volume, &pack->dest.entry);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to update inode info: %s\n", -ret);
+          ferr("ERROR: Failed to update inode info: %d\n", -ret);
         }
     }
 
