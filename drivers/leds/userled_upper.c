@@ -490,7 +490,7 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      lederr("ERROR: Unrecognized command: %ld\n", cmd);
+      lederr("ERROR: Unrecognized command: %d\n", cmd);
       ret = -ENOTTY;
       break;
     }
