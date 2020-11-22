@@ -36,6 +36,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <inttypes.h>
 #include <debug.h>
 #include <nuttx/spi/spi.h>
 
@@ -76,7 +77,8 @@ void stm32_spidev_initialize(void)
 void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
                       bool select)
 {
-  spiinfo("INFO: Selecting spi dev: %d, state: %d\n", devid, select);
+  spiinfo("INFO: Selecting spi dev: %" PRId32 ", state: %d\n",
+          devid, select);
 
   if (devid == SPIDEV_MMCSD(0))
     {
@@ -93,7 +95,7 @@ void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
 
 uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
-  spiinfo("INFO: Requesting info from spi dev: %d\n", devid);
+  spiinfo("INFO: Requesting info from spi dev: %" PRId32 "\n", devid);
 
   if (devid == SPIDEV_MMCSD(0))
     {
