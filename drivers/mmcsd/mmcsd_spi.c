@@ -959,7 +959,7 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
         }
     }
 
-  ferr("ERROR: %d. Did not find start of block\n");
+  ferr("ERROR: Did not find start of block\n");
   return -EIO;
 }
 
