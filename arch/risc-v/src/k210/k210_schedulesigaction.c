@@ -173,7 +173,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               up_savestate(tcb->xcp.regs);
 
               sinfo("PC/STATUS Saved: %016x/%016x New: %016x/%016x\n",
-                    tcb->xcp.saved_epc, tcb->xcp.saved_status,
+                    tcb->xcp.saved_epc, tcb->xcp.saved_int_ctx,
                     CURRENT_REGS[REG_EPC], CURRENT_REGS[REG_INT_CTX]);
             }
         }
@@ -208,7 +208,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_INT_CTX]  = int_ctx;
 
           sinfo("PC/STATUS Saved: %016x/%016x New: %016x/%016x\n",
-                tcb->xcp.saved_epc, tcb->xcp.saved_status,
+                tcb->xcp.saved_epc, tcb->xcp.saved_int_ctx,
                 tcb->xcp.regs[REG_EPC], tcb->xcp.regs[REG_INT_CTX]);
         }
     }
