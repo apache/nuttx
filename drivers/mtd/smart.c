@@ -876,8 +876,8 @@ static ssize_t smart_reload(struct smart_struct_s *dev, FAR uint8_t *buffer,
   nread = MTD_BREAD(dev->mtd, mtdstartblock, mtdblocks, buffer);
   if (nread != mtdblocks)
     {
-      ferr("ERROR: Read %d blocks starting at block %d failed: %d\n",
-           nblocks, startblock, nread);
+      ferr("ERROR: Read %zd blocks starting at block %jd failed: %zd\n",
+           nblocks, (intmax_t)startblock, nread);
     }
 
   return nread;
@@ -956,7 +956,8 @@ static ssize_t smart_write(FAR struct inode *inode,
   mtdblockcount = nsectors * dev->mtdblkspersector;
   mtdblkspererase = dev->mtdblkspersector * dev->sectorsperblk;
 
-  finfo("mtdsector: %d mtdnsectors: %d\n", mtdstartblock, mtdblockcount);
+  finfo("mtdsector: %jd mtdnsectors: %jd\n",
+        (intmax_t)mtdstartblock, (intmax_t)mtdblockcount);
 
   /* Start at first block to be written */
 
@@ -978,7 +979,8 @@ static ssize_t smart_write(FAR struct inode *inode,
           ret = MTD_ERASE(dev->mtd, eraseblock, 1);
           if (ret < 0)
             {
-              ferr("ERROR: Erase block=%d failed: %d\n", eraseblock, ret);
+              ferr("ERROR: Erase block=%jd failed: %d\n",
+                   (intmax_t)eraseblock, ret);
 
               /* Unlock the mutex if we add one */
 
@@ -1001,13 +1003,15 @@ static ssize_t smart_write(FAR struct inode *inode,
 
       /* Try to write to the sector. */
 
-      finfo("Write MTD block %d from offset %d\n", nextblock, offset);
+      finfo("Write MTD block %jd from offset %jd\n",
+            (intmax_t)nextblock, (intmax_t)offset);
       nxfrd = MTD_BWRITE(dev->mtd, nextblock, blkstowrite, &buffer[offset]);
       if (nxfrd != blkstowrite)
         {
           /* The block is not empty!!  What to do? */
 
-          ferr("ERROR: Write block %d failed: %d.\n", nextblock, nxfrd);
+          ferr("ERROR: Write block %jd failed: %zd.\n",
+               (intmax_t)nextblock, nxfrd);
 
           /* Unlock the mutex if we add one */
 
@@ -3128,11 +3132,11 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev,
 
       ferr("ERROR:  Invalid geometery ... "
           "Sectors per erase block must be 1-256\n");
-      ferr("        Erase block size    = %d\n",
+      ferr("        Erase block size    = %" PRId32 "\n",
            dev->erasesize);
       ferr("        Sector size         = %d\n",
            dev->sectorsize);
-      ferr("        Sectors/erase block = %d\n",
+      ferr("        Sectors/erase block = %" PRId32 "\n",
            dev->erasesize / dev->sectorsize);
 
       return -EINVAL;
