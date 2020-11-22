@@ -47,6 +47,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -1413,17 +1414,19 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 
   leave_critical_section(flags);
 
-  ainfo("SR:   0x%08x CR1:  0x%08x CR2:  0x%08x\n",
+  ainfo("SR:   0x%08" PRIx32 " CR1:  0x%08" PRIx32
+        " CR2:  0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR1_OFFSET),
         adc_getreg(priv, STM32_ADC_CR2_OFFSET));
 
-  ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
+  ainfo("SQR1: 0x%08" PRIx32 " SQR2: 0x%08" PRIx32
+        " SQR3: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR3_OFFSET));
 
-  ainfo("CCR:  0x%08x\n", getreg32(STM32_ADC_CCR));
+  ainfo("CCR:  0x%08" PRIx32 "\n", getreg32(STM32_ADC_CCR));
 }
 
 /****************************************************************************
