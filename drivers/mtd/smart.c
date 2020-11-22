@@ -45,6 +45,7 @@
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -1183,7 +1184,7 @@ static int smart_setsectorsize(FAR struct smart_struct_s *dev, uint16_t size)
 
   if (totalsectors > 65536)
     {
-      ferr("ERROR: Invalid SMART sector count %ld\n", totalsectors);
+      ferr("ERROR: Invalid SMART sector count %" PRIu32 "\n", totalsectors);
       return -EINVAL;
     }
   else if (totalsectors == 65536)
@@ -5363,7 +5364,7 @@ static inline int smart_freesector(FAR struct smart_struct_s *dev,
             (1 << (logicalsector & 0x07))))
 #endif
         {
-          ferr("ERROR: Invalid release - sector %d not allocated\n",
+          ferr("ERROR: Invalid release - sector %ld not allocated\n",
                logicalsector);
           ret = -EINVAL;
           goto errout;
@@ -5393,7 +5394,7 @@ static inline int smart_freesector(FAR struct smart_struct_s *dev,
        * code?
        */
 
-      ferr("ERROR: Sector %d logical sector in header doesn't match\n",
+      ferr("ERROR: Sector %ld logical sector in header doesn't match\n",
            logicalsector);
       ret = -EINVAL;
       goto errout;
