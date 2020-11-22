@@ -431,7 +431,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   ret = DRVR_CTRLOUT(hport->drvr, hport->ep0, ctrlreq, NULL);
   if (ret < 0)
     {
-      uerr("ERROR: Failed to set address: %d\n");
+      uerr("ERROR: Failed to set address: %d\n", ret);
       goto errout;
     }
 
