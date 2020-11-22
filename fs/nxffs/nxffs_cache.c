@@ -179,8 +179,9 @@ off_t nxffs_iotell(FAR struct nxffs_volume_s *volume)
  *   over bad blocks and block headers as necessary.
  *
  * Input Parameters:
- *   volume - Describes the NXFFS volume.  The parameters ioblock and iooffset
- *     in the volume structure determine the behavior of nxffs_getc().
+ *   volume - Describes the NXFFS volume.  The parameters ioblock and
+ *     iooffset in the volume structure determine the behavior of
+ *     nxffs_getc().
  *   reserve - If less than this much space is available at the end of the
  *     block, then skip to the next block.
  *
@@ -200,7 +201,9 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume, uint16_t reserve)
 
   do
     {
-      /* Check if we have the reserve amount at the end of the current block */
+      /* Check if we have the reserve amount at the end of the current
+       * block
+       */
 
       if (volume->iooffset + reserve > volume->geo.blocksize)
         {
