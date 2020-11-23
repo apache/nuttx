@@ -43,6 +43,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -174,8 +175,8 @@ static int mtd_erase(FAR struct mtd_dev_s *dev, off_t block, size_t nblocks)
   size_t nsectors;
   int ret;
 
-  finfo("block: %08lx nsectors: %lu\n",
-        (unsigned long)block, (unsigned int)nsectors);
+  finfo("block: %08zx nsectors: %zu\n",
+        (intmax_t)block, nsectors);
 
   /* Convert to logical sectors and sector numbers */
 
