@@ -365,7 +365,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
       buf->data = buf->frame->io_data + reserve_head;
     }
 
-  wlinfo("buf %p type %d reserve %u\n", buf, buf->type, reserve_head);
+  wlinfo("buf %p type %d reserve %zu\n", buf, buf->type, reserve_head);
   return buf;
 }
 
@@ -531,7 +531,7 @@ FAR void *bt_buf_extend(FAR struct bt_buf_s *buf, size_t len)
 {
   FAR uint8_t *tail = bt_buf_tail(buf);
 
-  wlinfo("buf %p len %u\n", buf, len);
+  wlinfo("buf %p len %zu\n", buf, len);
 
   DEBUGASSERT(bt_buf_tailroom(buf) >= len);
 
@@ -582,7 +582,7 @@ void bt_buf_put_le16(FAR struct bt_buf_s *buf, uint16_t value)
 
 FAR void *bt_buf_provide(FAR struct bt_buf_s *buf, size_t len)
 {
-  wlinfo("buf %p len %u\n", buf, len);
+  wlinfo("buf %p len %zu\n", buf, len);
 
   DEBUGASSERT(buf != NULL && buf->frame != NULL &&
               bt_buf_headroom(buf) >= len);
@@ -609,7 +609,7 @@ FAR void *bt_buf_provide(FAR struct bt_buf_s *buf, size_t len)
 
 FAR void *bt_buf_consume(FAR struct bt_buf_s *buf, size_t len)
 {
-  wlinfo("buf %p len %u\n", buf, len);
+  wlinfo("buf %p len %zu\n", buf, len);
 
   DEBUGASSERT(buf->len >= len);
 
