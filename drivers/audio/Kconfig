@@ -234,6 +234,67 @@ config WM8776_SWAP_HPOUT
 
 endif # AUDIO_WM8776
 
+config AUDIO_WM8994
+	bool "WM8994 audio chip"
+	default n
+	depends on AUDIO
+	---help---
+		Select to enable support for the WM8994 Audio codec by Wolfson
+		Microelectonics.  This chip is a lower level audio chip.. basically
+		an exotic D-to-A.  It includes no built-in support for audio CODECS
+		The WM8994 provides:
+
+			- Low power consumption
+			- High SNR
+			- Stereo digital microphone input
+			- Digital Dynamic Range Controller (compressor / limiter)
+			- Digital sidetone mixing
+			- Ground-referenced headphone driver
+			- Ground-referenced line outputs
+
+		NOTE: This driver also depends on both I2C and I2S support although
+		that dependency is not explicit here.
+
+if AUDIO_WM8994
+
+config WM8994_INITVOLUME
+	int "WM8994 initial volume setting"
+	default 250
+
+config WM8994_INFLIGHT
+	int "WM8994 maximum in-flight audio buffers"
+	default 2
+
+config WM8994_MSG_PRIO
+	int "WM8994 message priority"
+	default 1
+
+config WM8994_BUFFER_SIZE
+	int "WM8994 preferred buffer size"
+	default 8192
+
+config WM8994_NUM_BUFFERS
+	int "WM8994 preferred number of buffers"
+	default 4
+
+config WM8994_WORKER_STACKSIZE
+	int "WM8994 worker thread stack size"
+	default 768
+
+config WM8994_REGDUMP
+	bool "WM8994 register dump"
+	default n
+	---help---
+		Enable logic to dump the contents of all WM8994 registers.
+
+config WM8994_CLKDEBUG
+	bool "WM8994 clock analysis"
+	default n
+	---help---
+		Enable logic to analyze WM8994 clock configuation.
+
+endif # AUDIO_WM8994
+
 config AUDIO_WM8904
 	bool "WM8904 audio chip"
 	default n
