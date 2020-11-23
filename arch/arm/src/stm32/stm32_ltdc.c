@@ -43,6 +43,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
@@ -2648,7 +2649,7 @@ static int stm32_setchromakey(FAR struct fb_vtable_s *vtable,
   FAR struct stm32_ltdcdev_s *priv = (FAR struct stm32_ltdcdev_s *)vtable;
 
   DEBUGASSERT(vtable != NULL && priv == &g_vtable && oinfo != NULL);
-  lcdinfo("vtable=%p, overlay=%d, chromakey=%08x\n", vtable,
+  lcdinfo("vtable=%p, overlay=%d, chromakey=%08" PRIx32 "\n", vtable,
           oinfo->overlay, oinfo->chromakey);
 
   if (oinfo->overlay < LTDC_NLAYERS)
@@ -2674,7 +2675,8 @@ static int stm32_setchromakey(FAR struct fb_vtable_s *vtable,
 #  ifdef CONFIG_STM32_FB_CMAP
       if (oinfo->chromakey >= g_vtable.cmap.len)
         {
-          lcderr("ERROR: Clut index %d is out of range\n", oinfo->chromakey);
+          lcderr("ERROR: Clut index %" PRId32 " is out of range\n",
+                 oinfo->chromakey);
           ret = -EINVAL;
         }
       else
@@ -2714,7 +2716,8 @@ static int stm32_setcolor(FAR struct fb_vtable_s *vtable,
                           FAR const struct fb_overlayinfo_s *oinfo)
 {
   DEBUGASSERT(vtable != NULL && vtable == &g_vtable.vtable && oinfo != NULL);
-  lcdinfo("vtable=%p, overlay=%d, color=%08x\n", vtable, oinfo->color);
+  lcdinfo("vtable=%p, overlay=%d, color=%08" PRIx32 "\n",
+          vtable, oinfo->overlay, oinfo->color);
 
   if (oinfo->overlay < LTDC_NOVERLAYS)
     {
@@ -2762,7 +2765,8 @@ static int stm32_setblank(FAR struct fb_vtable_s *vtable,
   FAR struct stm32_ltdcdev_s *priv = (FAR struct stm32_ltdcdev_s *)vtable;
 
   DEBUGASSERT(vtable != NULL && priv == &g_vtable && oinfo != NULL);
-  lcdinfo("vtable=%p, overlay=%d, blank=%02x\n", vtable, oinfo->blank);
+  lcdinfo("vtable=%p, overlay=%d, blank=%02x\n",
+          vtable, oinfo->overlay, oinfo->blank);
 
   if (oinfo->overlay < LTDC_NLAYERS)
     {
