@@ -46,6 +46,8 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <inttypes.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <queue.h>
@@ -106,7 +108,7 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
 {
   FAR struct igmp_group_s *group;
 
-  ninfo("addr: %08x dev: %p\n", *addr, dev);
+  ninfo("addr: %08" PRIx32 " dev: %p\n", (uint32_t)*addr, dev);
   group = (FAR struct igmp_group_s *)kmm_zalloc(sizeof(struct igmp_group_s));
 
   grpinfo("group: %p\n", group);
@@ -160,7 +162,8 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
        group;
        group = group->next)
     {
-      grpinfo("Compare: %08x vs. %08x\n", group->grpaddr, *addr);
+      grpinfo("Compare: %08" PRIx32 " vs. %08" PRIx32 "\n",
+              (uint32_t)group->grpaddr, (uint32_t)*addr);
       if (net_ipv4addr_cmp(group->grpaddr, *addr))
         {
           grpinfo("Match!\n");
