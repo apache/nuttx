@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
@@ -319,13 +320,14 @@ static void stm32_dma2d_control(uint32_t setbits, uint32_t clrbits)
 {
   uint32_t   cr;
 
-  lcdinfo("setbits=%08x, clrbits=%08x\n", setbits, clrbits);
+  lcdinfo("setbits=%08" PRIx32 ", clrbits=%08" PRIx32 "\n",
+          setbits, clrbits);
 
   cr = getreg32(STM32_DMA2D_CR);
   cr &= ~clrbits;
   cr |= setbits;
 
-  lcdinfo("cr=%08x\n", cr);
+  lcdinfo("cr=%08" PRIx32 "\n", cr);
   putreg32(cr, STM32_DMA2D_CR);
 }
 
@@ -547,7 +549,8 @@ static uint32_t stm32_dma2d_memaddress(
 
   offset = xpos * DMA2D_PF_BYPP(poverlay->bpp) + poverlay->stride * ypos;
 
-  lcdinfo("%p, offset=%d\n", ((uint32_t) poverlay->fbmem) + offset, offset);
+  lcdinfo("%" PRIx32 ", offset=%" PRId32 "\n",
+          ((uint32_t) poverlay->fbmem) + offset, offset);
   return ((uint32_t) poverlay->fbmem) + offset;
 }
 
@@ -575,7 +578,7 @@ static uint32_t stm32_dma2d_lineoffset(
 
   loffset = oinfo->xres - area->w;
 
-  lcdinfo("%d\n", loffset);
+  lcdinfo("%" PRId32 "\n", loffset);
   return loffset;
 }
 
@@ -596,7 +599,7 @@ static void stm32_dma2d_lfifo(FAR struct stm32_dma2d_overlay_s *oinfo,
                               int lid, uint32_t xpos, uint32_t ypos,
                               FAR const struct fb_area_s *area)
 {
-  lcdinfo("oinfo=%p, lid=%d, xpos=%d, ypos=%d, area=%p\n",
+  lcdinfo("oinfo=%p, lid=%d, xpos=%" PRId32 ", ypos=%" PRId32 ", area=%p\n",
            oinfo, lid, xpos, ypos, area);
 
   putreg32(stm32_dma2d_memaddress(oinfo, xpos, ypos),
@@ -618,7 +621,7 @@ static void stm32_dma2d_lfifo(FAR struct stm32_dma2d_overlay_s *oinfo,
 
 static void stm32_dma2d_lcolor(int lid, uint32_t argb)
 {
-  lcdinfo("lid=%d, argb=%08x\n", lid, argb);
+  lcdinfo("lid=%d, argb=%08" PRIx32 "\n", lid, argb);
   putreg32(argb, stm32_color_layer_t[lid]);
 }
 
@@ -684,7 +687,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 {
   uint32_t   pfccrreg;
 
-  lcdinfo("lid=%d, blendmode=%08x, alpha=%02x, fmt=%d\n",
+  lcdinfo("lid=%d, blendmode=%08" PRIx32 ", alpha=%02x, fmt=%d\n",
           lid, blendmode, alpha, fmt);
 
   /* Set color format */
@@ -831,7 +834,7 @@ static int stm32_dma2d_fillcolor(FAR struct stm32_dma2d_overlay_s *oinfo,
   FAR struct stm32_dma2d_s * priv = &g_dma2ddev;
   DEBUGASSERT(oinfo != NULL && oinfo->oinfo != NULL && area != NULL);
 
-  lcdinfo("oinfo=%p, argb=%08x\n", oinfo, argb);
+  lcdinfo("oinfo=%p, argb=%08" PRIx32 "\n", oinfo, argb);
 
 #ifdef CONFIG_STM32_FB_CMAP
   if (oinfo->fmt == DMA2D_PF_L8)
@@ -913,7 +916,8 @@ static int stm32_dma2d_blit(FAR struct stm32_dma2d_overlay_s *doverlay,
   uint32_t  mode;
   FAR struct stm32_dma2d_s * priv = &g_dma2ddev;
 
-  lcdinfo("doverlay=%p, destxpos=%d, destypos=%d, soverlay=%p, sarea=%p\n",
+  lcdinfo("doverlay=%p, destxpos=%" PRId32 ", destypos=%" PRId32
+          ", soverlay=%p, sarea=%p\n",
           doverlay, destxpos, destypos, soverlay, sarea);
 
   nxsem_wait(priv->lock);
@@ -1011,8 +1015,8 @@ static int stm32_dma2d_blend(FAR struct stm32_dma2d_overlay_s *doverlay,
   int          ret;
   FAR struct stm32_dma2d_s * priv = &g_dma2ddev;
 
-  lcdinfo("doverlay=%p, destxpos=%d, destypos=%d, "
-          "foverlay=%p, forexpos=%d, foreypos=%d, "
+  lcdinfo("doverlay=%p, destxpos=%" PRId32 ", destypos=%" PRId32 ", "
+          "foverlay=%p, forexpos=%" PRId32 ", foreypos=%" PRId32 ", "
           "boverlay=%p, barea=%p, barea.x=%d, barea.y=%d, barea.w=%d, "
           "barea.h=%d\n", doverlay, destxpos, destypos, foverlay, forexpos,
           foreypos, boverlay, barea, barea->x, barea->y, barea->w, barea->h);
