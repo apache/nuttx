@@ -116,7 +116,8 @@
  *
  ****************************************************************************/
 
-int igmp_joingroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
+int igmp_joingroup(struct net_driver_s *dev,
+                   FAR const struct in_addr *grpaddr)
 {
   struct igmp_group_s *group;
   int ret;
