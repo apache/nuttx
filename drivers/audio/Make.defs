@@ -65,6 +65,17 @@ ifeq ($(CONFIG_AUDIO_CS4344),y)
 CSRCS += cs4344.c
 endif
 
+ifeq ($(CONFIG_AUDIO_WM8994),y)
+CSRCS += wm8994.c
+ifeq ($(CONFIG_WM8994_REGDUMP),y)
+CSRCS += wm8994_debug.c
+else
+ifeq ($(CONFIG_WM8994_CLKDEBUG),y)
+CSRCS += wm8994_debug.c
+endif
+endif
+endif
+
 ifeq ($(CONFIG_AUDIO_WM8904),y)
 CSRCS += wm8904.c
 ifeq ($(CONFIG_WM8904_REGDUMP),y)
