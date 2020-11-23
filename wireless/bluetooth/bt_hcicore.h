@@ -327,10 +327,8 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
  * not multi-threading safe
  */
 
-#ifdef CONFIG_DEBUG_WIRELESS_ERROR
 FAR const char *bt_addr_str(FAR const bt_addr_t *addr);
 FAR const char *bt_addr_le_str(FAR const bt_addr_le_t *addr);
-#endif
 
 /****************************************************************************
  * Name: bt_start_advertising
