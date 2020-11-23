@@ -73,6 +73,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -788,7 +789,7 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
    * still pending.
    */
 
-  i2cinfo("Timeout with CR1: %04x SR1: %04x\n", cr1, sr1);
+  i2cinfo("Timeout with CR1: %04" PRIx32 " SR1: %04" PRIx32 "\n", cr1, sr1);
 }
 
 /************************************************************************************
@@ -1364,7 +1365,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
     {
       /* Start bit is set */
 
-      i2cinfo("Entering address handling, status = %i\n", status);
+      i2cinfo("Entering address handling, status = %" PRIi32 "\n", status);
 
       /* Check for empty message (for robustness) */
 
@@ -1451,7 +1452,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
   else if ((status & I2C_SR1_ADDR) == 0 && priv->check_addr_ack)
     {
       i2cinfo("Invalid Address. Setting stop bit and clearing message\n");
-      i2cinfo("status %i\n", status);
+      i2cinfo("status %" PRIi32 "\n", status);
 
       /* Set condition to terminate msg chain transmission as address is invalid. */
 
@@ -1842,7 +1843,8 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
 
       status |= (stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET) << 16);
 
-      i2cinfo("Entering read mode dcnt = %i msgc = %i, status 0x%04x\n",
+      i2cinfo("Entering read mode dcnt = %i msgc = %i, "
+              "status 0x%04" PRIx32 "\n",
               priv->dcnt, priv->msgc, status);
 
       /* Byte #N-3W, we don't want to manage RxNE interrupt anymore, bytes
@@ -1941,7 +1943,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
         }
 
       i2cinfo(" No correct state detected(start bit, read or write) \n");
-      i2cinfo(" state %i\n", status);
+      i2cinfo(" state %" PRIi32 "\n", status);
 
       /* Set condition to terminate ISR and wake waiting thread */
 
@@ -2338,7 +2340,7 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev,
       status = stm32_i2c_getstatus(priv);
       ret = -ETIMEDOUT;
 
-      i2cerr("ERROR: Timed out: CR1: 0x%04x status: 0x%08x\n",
+      i2cerr("ERROR: Timed out: CR1: 0x%04x status: 0x%08" PRIx32 "\n",
              stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET), status);
 
       /* "Note: When the STOP, START or PEC bit is set, the software must
