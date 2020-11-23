@@ -71,10 +71,10 @@ function build_board()
     echo "Error: ############# save ${1} fail ##############"
     exit 3
   fi
-  if [ ! -d ${ROOTDIR}/nuttx/$1 ]; then
+  if [ ! -d $1 ]; then
     cp ${NUTTXDIR}/defconfig ${ROOTDIR}/nuttx/boards/*/*/${1/[:|\/]//configs/}
   else
-    cp ${NUTTXDIR}/defconfig ${ROOTDIR}/nuttx/$1
+    cp ${NUTTXDIR}/defconfig $1
   fi
 }
 
@@ -171,5 +171,10 @@ fi
 
 TOOLSDIR=${NUTTXDIR}/tools
 
-build_board $*
+if [ -d ${ROOTDIR}/${1} ]; then
+  build_board ${ROOTDIR}/${1} ${@:2}
+else
+  build_board $*
+fi
+
 pack_sdk $*
