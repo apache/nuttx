@@ -259,7 +259,8 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)
+                                           ((uintptr_t)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -384,6 +385,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
   DEBUGASSERT((size_t)priv->spb * geo.blocksize == geo.erasesize);
 
   /* Values must be provided to rwb_initialize() */
+
   /* Supported geometry */
 
   priv->rwb.blocksize = geo.blocksize;
