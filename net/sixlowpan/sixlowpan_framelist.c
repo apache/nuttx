@@ -421,7 +421,7 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
   iob->io_pktlen = 0;
   fptr           = iob->io_data;
 
-  ninfo("Sending packet length %d\n", buflen);
+  ninfo("Sending packet length %zd\n", buflen);
 
   /* Get the metadata that describes the MAC header on the packet */
 
@@ -548,7 +548,7 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
        * The following fragments contain only the fragn dispatch.
        */
 
-      ninfo("Sending fragmented packet length %d\n", buflen);
+      ninfo("Sending fragmented packet length %zd\n", buflen);
 
       /* Create 1st Fragment */
 
