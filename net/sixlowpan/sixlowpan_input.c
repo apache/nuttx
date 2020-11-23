@@ -412,7 +412,7 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
         {
           /* The packet is a fragment but its size does not match. */
 
-          nwarn("WARNING: Dropping 6LoWPAN packet. Bad fragsize: %u vs &u\n",
+          nwarn("WARNING: Dropping 6LoWPAN packet. Bad fragsize: %u vs %u\n",
                 fragsize, reass->rb_pktlen);
           ret = -EPERM;
           goto errout_with_reass;
@@ -855,7 +855,7 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
 
                   if (hdrlen > radio->r_dev.d_len)
                     {
-                      nwarn("WARNING: Packet too small: Have %u need >%u\n",
+                      nwarn("WARNING: Packet too small: Have %u need >%zu\n",
                             radio->r_dev.d_len, hdrlen);
                       goto drop;
                     }
