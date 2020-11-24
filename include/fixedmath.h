@@ -95,10 +95,10 @@
 #define b32PI           0x00000003243f6b4fLL     /* 3.14159269980 */
 #define b32TWOPI        0x00000006487ae7fdLL     /* 6.28312539984 */
 
-#define b32MAX          0x7fffffffffffffffLL     /* Max value of b16_t */
-#define ub32MAX         0xffffffffffffffffLL     /* Max value of ub16_t */
-#define b32MIN          0x8000000000000000LL     /* Min value of b16_t */
-#define ub32MIN         0x0000000000000000LL     /* Min value of ub16_t */
+#define b32MAX          0x7fffffffffffffffLL     /* Max value of b32_t */
+#define ub32MAX         0xffffffffffffffffLL     /* Max value of ub32_t */
+#define b32MIN          0x8000000000000000LL     /* Min value of b32_t */
+#define ub32MIN         0x0000000000000000LL     /* Min value of ub32_t */
 
 /* Conversions between b32, b16, and b8 ***********************************/
 
