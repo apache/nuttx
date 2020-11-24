@@ -1729,7 +1729,8 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
   int ret = OK;
   int ret2;
 
-  finfo("Append %d bytes @ offs=%d of size=%d\n", len, offset, fobj->size);
+  finfo("Append %zu bytes @ offs=%jd of size=%jd\n",
+        len, (intmax_t)offset, (intmax_t)fobj->size);
 
   if (offset > fobj->size)
     {
@@ -1776,7 +1777,7 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
             {
               /* Store previous object index page, unless first pass */
 
-              finfo("objid=%04x store objndx %04x:%04x, nwritten=%d\n",
+              finfo("objid=%04x store objndx %04x:%04x, nwritten=%zu\n",
                     fobj->objid, cur_objndx_pgndx, prev_objndx_spndx,
                     nwritten);
 
@@ -1833,7 +1834,7 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                         }
 
                       finfo("objid=%04x store new objhdr, "
-                            "%04x:%04x, nwritten=%d\n",
+                            "%04x:%04x, nwritten=%zu\n",
                             fobj->objid, new_objhdr_page, 0, nwritten);
                     }
                 }
@@ -1882,9 +1883,10 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                       return ret;
                     }
 
-                  finfo("objid=%04x store new size I %d in objhdr, "
-                        "%04x:%04x, nwritten=%d\n",
-                        fobj->objid, offset + nwritten, new_objhdr_page, 0,
+                  finfo("objid=%04x store new size I %jd in objhdr, "
+                        "%04x:%04x, nwritten=%zu\n",
+                        fobj->objid, (intmax_t)(offset + nwritten),
+                        new_objhdr_page, 0,
                         nwritten);
                 }
 
@@ -1963,7 +1965,7 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                                     cur_objndx_spndx, cur_objndx_pgndx, 0);
 
                   finfo("objid=%04x create objndx page, "
-                        "%04x:%04x, nwritten=%d\n",
+                        "%04x:%04x, nwritten=%zu\n",
                         fobj->objid, cur_objndx_pgndx, cur_objndx_spndx,
                         nwritten);
                 }
@@ -2053,8 +2055,8 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                                           &phdr, &data[nwritten], to_write,
                                           page_offs, 1, &data_page);
 
-          finfo("objid=%04x store new data page, %04x:%04x offset=%d, "
-                "len=%d nwritten=%d\n",
+          finfo("objid=%04x store new data page, %04x:%04x "
+                "offset=%" PRId32 ", len=%zu nwritten=%zu\n",
                 fobj->objid, data_page, data_spndx, page_offs, to_write,
                 nwritten);
         }
@@ -2095,8 +2097,8 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                                    to_write, &data[nwritten]);
 
           finfo("objid=%04x store to existing data page, "
-                "%04x:%04x offset=%d, "
-                "len=%d, nwritten=%d\n",
+                "%04x:%04x offset=%" PRId32 ", "
+                "len=%zu, nwritten=%zu\n",
                 fobj->objid, data_page, data_spndx, page_offs, to_write,
                 nwritten);
         }
@@ -2157,7 +2159,7 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
        * index page, unless object header index page
        */
 
-      finfo("objid=%04x store objndx page, %04x:%04x, nwritten=%d\n",
+      finfo("objid=%04x store objndx page, %04x:%04x, nwritten=%zu\n",
             fobj->objid, cur_objndx_pgndx, cur_objndx_spndx, nwritten);
 
       ret2 = spiffs_page_index_check(fs, fobj, cur_objndx_pgndx,
@@ -2190,9 +2192,10 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                                        offset + nwritten,
                                        &new_objhdr_page);
 
-      finfo("objid=%04x store new size II %d in objhdr, %04x:%04x, "
-            "nwritten=%d, ret=%d\n",
-            fobj->objid, offset + nwritten, new_objhdr_page, 0, nwritten,
+      finfo("objid=%04x store new size II %jd in objhdr, %04x:%04x, "
+            "nwritten=%zu, ret=%d\n",
+            fobj->objid, (intmax_t)(offset + nwritten),
+            new_objhdr_page, 0, nwritten,
             ret2);
 
       if (ret2 < 0)
@@ -2215,7 +2218,7 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
           objhdr->size = offset + nwritten;
 
           finfo("objid=%04x store fresh objhdr page, "
-                "%04x:%04x, nwritten=%d\n",
+                "%04x:%04x, nwritten=%zu\n",
                 fobj->objid, cur_objndx_pgndx, cur_objndx_spndx, nwritten);
 
           ret2 = spiffs_page_index_check(fs, fobj, cur_objndx_pgndx,
@@ -2256,7 +2259,7 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                                            &new_objhdr_page);
 
           finfo("objid=%04x store modified objhdr page, %04x:%04x, "
-                "nwritten=%d\n",
+                "nwritten=%zu\n",
                 fobj->objid, new_objhdr_page, 0, nwritten);
 
           if (ret2 < 0)
@@ -2350,7 +2353,7 @@ ssize_t spiffs_fobj_modify(FAR struct spiffs_s *fs,
                                                   &new_objhdr_pgndx);
 
                   finfo("Store modified objhdr page, "
-                        "%04x:%04x, nwritten=%d\n",
+                        "%04x:%04x, nwritten=%zu\n",
                         new_objhdr_pgndx, 0, nwritten);
 
                   if (ret < 0)
@@ -2381,7 +2384,7 @@ ssize_t spiffs_fobj_modify(FAR struct spiffs_s *fs,
                                          &new_objndx_pgndx);
 
                   finfo("Store previous modified objndx page, %04x:%04x, "
-                        "nwritten=%d\n",
+                        "nwritten=%zu\n",
                         new_objndx_pgndx, objndx->phdr.spndx, nwritten);
 
                   if (ret < 0)
@@ -2522,8 +2525,8 @@ ssize_t spiffs_fobj_modify(FAR struct spiffs_s *fs,
                                           ~SPIFFS_OBJID_NDXFLAG,
                                           &phdr, &data[nwritten], to_write,
                                           page_offs, 1, &data_pgndx);
-          finfo("Store new data page, %04x:%04x offset=%d, "
-                "len=%d, nwritten=%d\n",
+          finfo("Store new data page, %04x:%04x offset=%" PRId32 ", "
+                "len=%zu, nwritten=%zu\n",
                 data_pgndx, data_spndx, page_offs, to_write, nwritten);
         }
       else
@@ -2618,7 +2621,7 @@ ssize_t spiffs_fobj_modify(FAR struct spiffs_s *fs,
             }
 
           finfo("Store to existing data page, src=%04x, dest=%04x:%04x "
-                "offset=%d, len=%d, nwritten=%d\n",
+                "offset=%" PRId32 ", len=%zu, nwritten=%zu\n",
                 orig_data_pgndx, data_pgndx, data_spndx, page_offs,
                 to_write, nwritten);
         }
@@ -2693,7 +2696,7 @@ ssize_t spiffs_fobj_modify(FAR struct spiffs_s *fs,
                               fobj->objid, 0, cur_objndx_pgndx,
                               &new_objndx_pgndx);
 
-      finfo("Store modified objndx page, %04x:%04x, nwritten=%d\n",
+      finfo("Store modified objndx page, %04x:%04x, nwritten=%zu\n",
             new_objndx_pgndx, cur_objndx_spndx, nwritten);
 
       fobj->objndx_pgndx = new_objndx_pgndx;
@@ -2717,7 +2720,7 @@ ssize_t spiffs_fobj_modify(FAR struct spiffs_s *fs,
                                        fobj->objhdr_pgndx, fs->work, 0, 0,
                                        &new_objhdr_pgndx);
 
-      finfo("Store modified objhdr page, %04x:%04x, nwritten=%d\n",
+      finfo("Store modified objhdr page, %04x:%04x, nwritten=%zu\n",
             new_objhdr_pgndx, 0, nwritten);
 
       if (ret2 < 0)
@@ -3422,7 +3425,7 @@ ssize_t spiffs_object_read(FAR struct spiffs_s *fs,
       finfo("Read offset=%d rd=%d data spndx=%d is "
             "data_pgndx=%d addr=%" PRIu32 "\n",
             cur_offset, len_to_read, data_spndx, data_pgndx,
-            (SPIFFS_PAGE_TO_PADDR(fs, data_pgndx) +
+            (uint32_t)(SPIFFS_PAGE_TO_PADDR(fs, data_pgndx) +
              sizeof(struct spiffs_page_header_s) +
              (cur_offset % SPIFFS_DATA_PAGE_SIZE(fs))));
 
