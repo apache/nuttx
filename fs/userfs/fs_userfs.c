@@ -371,7 +371,7 @@ static ssize_t userfs_read(FAR struct file *filep, char *buffer,
   int respsize;
   int ret;
 
-  finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+  finfo("Read %zu bytes from offset %jd\n", buflen, (intmax_t)filep->f_pos);
 
   DEBUGASSERT(filep != NULL &&
               filep->f_inode != NULL &&
@@ -462,7 +462,7 @@ static ssize_t userfs_write(FAR struct file *filep, FAR const char *buffer,
   ssize_t nrecvd;
   int ret;
 
-  finfo("Write %d bytes to offset %d\n", buflen, filep->f_pos);
+  finfo("Write %zu bytes to offset %jd\n", buflen, (intmax_t)filep->f_pos);
 
   DEBUGASSERT(filep != NULL &&
               filep->f_inode != NULL &&
