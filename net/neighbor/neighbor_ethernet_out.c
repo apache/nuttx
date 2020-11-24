@@ -174,18 +174,28 @@ void neighbor_ethernet_out(FAR struct net_driver_s *dev)
           net_ipv6addr_copy(ipaddr, ip->destipaddr);
         }
 
-      /* Check if we already have this destination address in the Neighbor Table */
+      /* Check if we already have this destination address in the
+       * Neighbor Table.
+       */
 
       if (neighbor_lookup(ipaddr, &laddr) < 0)
         {
+#ifdef CONFIG_NET_ICMPv6
            ninfo("IPv6 Neighbor solicitation for IPv6\n");
 
           /* The destination address was not in our Neighbor Table, so we
-           * overwrite the IPv6 packet with an ICMDv6 Neighbor Solicitation
+           * overwrite the IPv6 packet with an ICMPv6 Neighbor Solicitation
            * message.
            */
 
           icmpv6_solicit(dev, ipaddr);
+#else
+          /* What to do here? We need the laddr, but no way to get it. */
+
+          nerr("ERROR: IPv6 needs link layer address for ethernet.\n");
+          DEBUGPANIC();
+          return;
+#endif
         }
     }
 
@@ -198,7 +208,8 @@ void neighbor_ethernet_out(FAR struct net_driver_s *dev)
     }
   else
     {
-      memcpy(eth->dest, laddr.u.na_ethernet.ether_addr_octet, ETHER_ADDR_LEN);
+      memcpy(eth->dest, laddr.u.na_ethernet.ether_addr_octet,
+             ETHER_ADDR_LEN);
     }
 
   /* Finish populating the Ethernet header */
