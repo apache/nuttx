@@ -27,7 +27,6 @@ libsamplerate:
 	$(Q) wget https://codeload.github.com/libsndfile/libsamplerate/zip/master -O libsamplerate.zip
 	$(Q) unzip -o libsamplerate.zip
 	$(Q) mv libsamplerate-master libsamplerate
-	$(Q) patch -Np1 -d libsamplerate <audio/libsrc/0001-add-audio-quality-options.patch
 	$(Q) cp -rf libsamplerate/src/samplerate.h $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)audio$(DELIM)
 
 context:: libsamplerate
@@ -39,6 +38,18 @@ CSRCS += src_zoh.c
 
 CFLAGS += -DPACKAGE=\"$(PACKAGE)\" -DVERSION=\"$(VERSION)\"
 
+ifeq ($(CONFIG_SINC_FAST_CONVERTER),y)
+CFLAGS += -DENABLE_SINC_FAST_CONVERTER
+endif
+
+ifeq ($(CONFIG_SINC_MEDIUM_CONVERTER),y)
+CFLAGS += -DENABLE_SINC_MEDIUM_CONVERTER
+endif
+
+ifeq ($(CONFIG_SINC_BEST_CONVERTER),y)
+CFLAGS += -DENABLE_SINC_BEST_CONVERTER
+endif
+
 VPATH += libsamplerate/src
 SUBDIRS += libsamplerate/src
 DEPPATH += --dep-path libsamplerate/src
@@ -49,5 +60,3 @@ distclean::
 	$(call DELFILE, libsamplerate.zip)
 
 endif
-
-
