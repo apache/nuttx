@@ -336,7 +336,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   size_t bytes;
   int ret;
 
-  sninfo("cmd=%x arg=%08x\n", cmd, arg);
+  sninfo("cmd=%x arg=%08lx\n", cmd, arg);
 
   ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
