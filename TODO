@@ -10,7 +10,7 @@ issues related to each board port.
 nuttx/:
 
  (16)  Task/Scheduler (sched/)
-  (2)  SMP
+  (3)  SMP
   (1)  Memory Management (mm/)
   (0)  Power Management (drivers/pm)
   (5)  Signals (sched/signal, arch/)
@@ -484,6 +484,70 @@ o SMP
   Prioity:     Medium.  This is a logical problem but I have never seen
                an bugs caused by this.  But I believe that failures are
                possible.
+
+  Title:       POSSIBLE FOR TWO CPUs TO HOLD A CRITICAL SECTION?
+  Description: The SMP design includes logic that will support multiple
+               CPUs holding a critical section.  Is this necessary?  How
+               can that occur?  I think it can occur in the following
+               situation:
+
+               The log below was reported is NuttX running on two cores
+               Cortex-A7 architecture in SMP mode.  You can notice see that
+               when nxsched_add_readytorun() was called, the g_cpu_irqset is 3.
+
+                 nxsched_add_readytorun: irqset cpu 1, me 0 btcbname init, irqset 1 irqcount 2.
+                 nxsched_add_readytorun: nxsched_add_readytorun line 338 g_cpu_irqset = 3.
+
+               This can happen, but only under a very certain condition.
+               g_cpu_irqset only exists to support this certain condition:
+
+                 a. A task running on CPU 0 takes the critical section.  So
+                    g_cpu_irqset == 0x1.
+
+                 b. A task exits on CPU 1 and a waiting, ready-to-run task
+                    is re-started on CPU 1.  This new task also holds the
+                    critical section.  So when the task is re-restarted on
+                    CPU 1, we than have g_cpu_irqset == 0x3
+
+               So we are in a very perverse state!  There are two tasks
+               running on two different CPUs and both hold the critical
+               section.  I believe that is a dangerous situation and there
+               could be undiscovered bugs that could happen in that case.
+               However, as of this moment, I have not heard of any specific
+               problems caused by this weird behavior.
+
+               A possible solution would be to add a new task state that
+               would exist only for SMP.
+
+               - Add a new SMP-only task list and state.  Say,
+                 g_csection_wait[].  It should be prioritized.
+               - When a task acquires the critical section, all tasks in
+                 g_readytorun[] that need the critical section would be
+                 moved to g_csection_wait[].
+               - When any task is unblocked for any reason and moved to the
+                 g_readytorun[] list, if that unblocked task needs the
+                 critical section, it would also be moved to the
+                 g_csection_wait[] list.  No task that needs the critical
+                 section can be in the ready-to-run list if the critical
+                 section is not available.
+               - When the task releases the critical section, all tasks in
+                 the g_csection_wait[] needs to be moved back to
+                 g_readytorun[].
+              - This may result in a context switch.  The tasks should be
+                 moved back to g_readytorun[] highest priority first.  If a
+                 context switch occurs and the critical section to re-taken
+                 by the re-started task, the lower priority tasks in
+                 g_csection_wait[] must stay in that list.
+
+               That is really not as much work as it sounds.  It is
+               something that could be done in 2-3 days of work if you know
+               what you are doing.  Getting the proper test setup and
+               verifying the change would be the more difficult task.
+
+Status:        Open
+Priority:      Unknown.  Might be high, but first we would need to confirm
+               that this situation can occur and that is actually causes
+               a failure.
 
 o Memory Management (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^^
