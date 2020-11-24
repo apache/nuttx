@@ -48,6 +48,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
@@ -1074,7 +1075,7 @@ static int stm32_ili93414ws_sendgram(FAR struct ili9341_lcd_s *lcd,
 {
   FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
 
-  lcdinfo("wd=%p, nwords=%d\n", wd, nwords);
+  lcdinfo("wd=%p, nwords=%" PRId32 "\n", wd, nwords);
 
   /* Set to 16-bit mode transfer mode, spi device is in disabled state */
 
@@ -1109,7 +1110,7 @@ static int stm32_ili93414ws_recvparam(FAR struct ili9341_lcd_s *lcd,
   stm32_ili93414ws_set8bitmode(priv);
 #endif
 
-  lcdinfo("param=%04x\n", param);
+  lcdinfo("param=%p\n", param);
   return stm32_ili93414ws_recvblock(priv, (uint16_t *)param, 1);
 }
 
@@ -1134,7 +1135,7 @@ static int stm32_ili93414ws_recvgram(FAR struct ili9341_lcd_s *lcd,
 {
   FAR struct ili93414ws_lcd_s *priv = (FAR struct ili93414ws_lcd_s *)lcd;
 
-  lcdinfo("wd=%p, nwords=%d\n", wd, nwords);
+  lcdinfo("wd=%p, nwords=%" PRId32 "\n", wd, nwords);
 
   /* Set to 16-bit mode in disabled state */
 
