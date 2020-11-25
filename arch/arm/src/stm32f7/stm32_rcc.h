@@ -265,19 +265,6 @@ void stm32f7x9_rcc_dsisrcphy(void);
 void stm32f7x9_rcc_dsisrcpllr(void);
 #endif
 
-#ifdef CONFIG_DEBUG_INFO
-
-/************************************************************************************
- * Name: stm32_rcc_dump_regs
- *
- * Description:
- *   Dump the contents of all rcc block registers
- *
- ************************************************************************************/
-
-void stm32_rcc_dump_regs(const char *msg);
-#endif
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
