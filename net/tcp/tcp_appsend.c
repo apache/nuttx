@@ -223,10 +223,10 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       if (dev->d_sndlen > 0)
         {
           /* Remember how much data we send out now so that we know
-           * when everything has been acknowledged.  Just increment the amount
-           * of data sent.  This will be needed in sequence number calculations
-           * and we know that this is not a re-transmission.  Retransmissions
-           * do not go through this path.
+           * when everything has been acknowledged.  Just increment the
+           * amount of data sent.  This will be needed in sequence number
+           * calculations and we know that this is not a re-transmission.
+           * Retransmissions do not go through this path.
            */
 
           conn->tx_unacked += dev->d_sndlen;
@@ -315,7 +315,9 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + hdrlen);
     }
 
-  /* If there is no data to send, just send out a pure ACK if one is requested`. */
+  /* If there is no data to send, just send out a pure ACK if one is
+   * requested.
+   */
 
   else if ((result & TCP_SNDACK) != 0)
     {
