@@ -229,8 +229,8 @@ int efm32_timer_set_freq(uintptr_t base, uint32_t clk_freq, uint32_t freq)
 
   reload = (clk_freq / prescaler / freq);
 
-  tmrinfo("Source: %4xHz Div: %4x Reload: %4x \n", clk_freq, prescaler,
-          reload);
+  tmrinfo("Source: %4" PRIx32 "Hz Div: %4x Reload: %4x \n",
+          clk_freq, prescaler, reload);
 
   putreg32(reload, base + EFM32_TIMER_TOP_OFFSET);
 
