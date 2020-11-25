@@ -552,9 +552,7 @@ static void lpc17can_reset(FAR struct can_dev_s *dev)
 
 static int lpc17can_setup(FAR struct can_dev_s *dev)
 {
-#ifdef CONFIG_DEBUG_CAN_INFO
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
-#endif
   int ret;
 
   caninfo("CAN%d\n", priv->port);
