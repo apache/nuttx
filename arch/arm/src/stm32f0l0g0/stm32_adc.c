@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -1648,17 +1649,19 @@ static void adc_dumpregs(FAR struct stm32_dev_s *priv)
 {
   UNUSED(priv);
 
-  ainfo("ISR:  0x%08x IER:  0x%08x CR:   0x%08x CFGR1: 0x%08x\n",
+  ainfo("ISR:  0x%08" PRIx32 " IER:  0x%08" PRIx32
+        " CR:   0x%08" PRIx32 " CFGR1: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_ISR_OFFSET),
         adc_getreg(priv, STM32_ADC_IER_OFFSET),
         adc_getreg(priv, STM32_ADC_CR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR1_OFFSET));
 
-  ainfo("SMPR: 0x%08x CHSELR: 0x%08x\n",
+  ainfo("SMPR: 0x%08" PRIx32 " CHSELR: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SMPR_OFFSET),
         adc_getreg(priv, STM32_ADC_CHSELR_OFFSET));
 
-  ainfo("CCR:  0x%08x\n", adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
+  ainfo("CCR:  0x%08" PRIx32 "\n",
+        adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
 }
 
 /****************************************************************************
