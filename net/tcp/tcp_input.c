@@ -511,7 +511,8 @@ found:
               nwarn("WARNING: ackseq > unackseq\n");
               nwarn("sndseq=%" PRIu32 " tx_unacked=%" PRIu32
                     " unackseq=%" PRIu32 " ackseq=%" PRIu32 "\n",
-                    tcp_getsequence(conn->sndseq), conn->tx_unacked,
+                    tcp_getsequence(conn->sndseq),
+                    (uint32_t)conn->tx_unacked,
                     unackseq, ackseq);
 
               conn->tx_unacked = 0;
@@ -526,7 +527,7 @@ found:
       ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
             " unackseq: %08" PRIx32 " new tx_unacked: %" PRId32 "\n",
             tcp_getsequence(conn->sndseq), ackseq, unackseq,
-            conn->tx_unacked);
+            (uint32_t)conn->tx_unacked);
       tcp_setsequence(conn->sndseq, ackseq);
 
       /* Do RTT estimation, unless we have done retransmissions. */
