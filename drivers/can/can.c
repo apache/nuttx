@@ -44,6 +44,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -1237,7 +1238,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
   int                      errcode = -ENOMEM;
   int                      i;
 
-  caninfo("ID: %d DLC: %d\n", hdr->ch_id, hdr->ch_dlc);
+  caninfo("ID: %" PRId32 " DLC: %d\n", (uint32_t)hdr->ch_id, hdr->ch_dlc);
 
   /* Check if adding this new message would over-run the drivers ability to
    * enqueue read data.
