@@ -44,8 +44,6 @@
 #include <sys/types.h>
 #include <nuttx/compiler.h>
 
-#include <getopt.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -291,6 +289,23 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/* Used by getopt (obviously NOT thread safe!).  These variables cannot be
+ * accessed directly by an external NXFLAT module.  In that case, accessor
+ * functions must be used.
+ */
+
+#ifndef __NXFLAT__
+EXTERN FAR char *optarg; /* Optional argument following option */
+EXTERN int       opterr; /* Print error message */
+EXTERN int       optind; /* Index into argv */
+EXTERN int       optopt; /* Unrecognized option character */
+#else
+#  define optarg  (*(getoptargp()))
+#  define opterr  (*(getopterrp()))
+#  define optind  (*(getoptindp()))
+#  define optopt  (*(getoptoptp()))
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -365,6 +380,20 @@ int     execv(FAR const char *path, FAR char * const argv[]);
 /* Byte operations */
 
 void    swab(FAR const void *src, FAR void *dest, ssize_t nbytes);
+
+/* getopt and friends */
+
+int     getopt(int argc, FAR char * const argv[], FAR const char *optstring);
+
+/* Accessor functions intended for use only by external NXFLAT
+ * modules.  The global variables optarg, optind, and optopt cannot
+ * be referenced directly from external modules.
+ */
+
+FAR char **getoptargp(void);  /* Optional argument following option */
+FAR int   *getopterrp(void);  /* Print error message */
+FAR int   *getoptindp(void);  /* Index into argv */
+FAR int   *getoptoptp(void);  /* Unrecognized option character */
 
 int     gethostname(FAR char *name, size_t size);
 int     sethostname(FAR const char *name, size_t size);
