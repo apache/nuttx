@@ -44,6 +44,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
@@ -85,7 +86,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 {
   uint8_t hdrlen;
 
-  ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %d\n",
+  ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %" PRId32 "\n",
         result, dev->d_sndlen, conn->tx_unacked);
 
 #ifdef CONFIG_NET_TCP_DELAYED_ACK
@@ -271,7 +272,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 {
   uint8_t hdrlen;
 
-  ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %d\n",
+  ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %" PRId32 "\n",
         result, dev->d_sndlen, conn->tx_unacked);
 
   /* Get the IP header length associated with the IP domain configured for
