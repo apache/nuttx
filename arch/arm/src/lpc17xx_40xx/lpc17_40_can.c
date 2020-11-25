@@ -52,6 +52,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -753,8 +754,8 @@ static int lpc17can_send(FAR struct can_dev_s *dev,
   irqstate_t flags;
   int ret = OK;
 
-  caninfo("CAN%d ID: %d DLC: %d\n",
-          priv->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  caninfo("CAN%d ID: %" PRId32 " DLC: %d\n",
+          priv->port, (uint32_t)msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   if (msg->cm_hdr.ch_rtr)
     {
@@ -884,7 +885,8 @@ static int lpc17can_send(FAR struct can_dev_s *dev,
     }
   else
     {
-      canerr("ERROR: No available transmission buffer, SR: %08x\n", regval);
+      canerr("ERROR: No available transmission buffer, SR: %08" PRIx32 "\n",
+             regval);
       ret = -EBUSY;
     }
 
@@ -966,7 +968,7 @@ static void can_interrupt(FAR struct can_dev_s *dev)
    */
 
   regval = can_getreg(priv, LPC17_40_CAN_ICR_OFFSET);
-  caninfo("CAN%d ICR: %08x\n",  priv->port, regval);
+  caninfo("CAN%d ICR: %08" PRIx32 "\n", priv->port, regval);
 
   /* Check for a receive interrupt */
 
@@ -1152,8 +1154,8 @@ static int can_bittiming(struct up_dev_s *priv)
   uint32_t ts2;
   uint32_t sjw;
 
-  caninfo("CAN%d PCLK: %d baud: %d\n", priv->port,
-          CAN_CLOCK_FREQUENCY(priv->divisor), priv->baud);
+  caninfo("CAN%d PCLK: %" PRId32 " baud: %" PRId32 "\n", priv->port,
+          (uint32_t)CAN_CLOCK_FREQUENCY(priv->divisor), priv->baud);
 
   /* Try to get CAN_BIT_QUANTA quanta in one bit_time.
    *
@@ -1205,7 +1207,9 @@ static int can_bittiming(struct up_dev_s *priv)
 
   sjw = 1;
 
-  caninfo("TS1: %d TS2: %d BRP: %d SJW= %d\n", ts1, ts2, brp, sjw);
+  caninfo("TS1: %" PRId32 " TS2: %" PRId32
+          " BRP: %" PRId32 " SJW= %" PRId32 "\n",
+          ts1, ts2, brp, sjw);
 
   /* Configure bit timing */
 
@@ -1222,7 +1226,7 @@ static int can_bittiming(struct up_dev_s *priv)
   btr |= CAN_BTR_SAM;
 #endif
 
-  caninfo("Setting CANxBTR= 0x%08x\n", btr);
+  caninfo("Setting CANxBTR= 0x%08" PRIx32 "\n", btr);
   can_putreg(priv, LPC17_40_CAN_BTR_OFFSET, btr);        /* Set bit timing */
   return OK;
 }
