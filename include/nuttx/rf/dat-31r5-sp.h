@@ -3,8 +3,6 @@
  * Character driver for the Mini-Circuits DAT-31R5-SP+ digital step
  * attenuator.
  *
- * Copyright 2019-2020 Augusto Fraga Giachero <afg@augustofg.net>
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
