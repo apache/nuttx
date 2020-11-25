@@ -260,46 +260,11 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
                       &g_cpu_schedlock);
         }
 
-      /* Adjust global IRQ controls.  If irqcount is greater than zero,
-       * then this task/this CPU holds the IRQ lock
+      /* NOTE: If the task runs on another CPU(cpu), adjusting global IRQ
+       * controls will be done in the pause handler on the new CPU(cpu).
+       * If the task is scheduled on this CPU(me), do nothing because
+       * this CPU already has a critical section
        */
-
-      if (nxttcb->irqcount > 0)
-        {
-          /* Yes... make sure that scheduling logic on other CPUs knows
-           * that we hold the IRQ lock.
-           */
-
-          spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                      &g_cpu_irqlock);
-        }
-
-      /* No.. This CPU will be relinquishing the lock.  But this works
-       * differently if we are performing a context switch from an
-       * interrupt handler and the interrupt handler has established
-       * a critical section.  We can detect this case when
-       * g_cpu_nestcount[me] > 0.
-       */
-
-      else if (g_cpu_nestcount[me] <= 0)
-        {
-          /* Do nothing here
-           * NOTE: spin_clrbit() will be done in sched_resumescheduler()
-           */
-        }
-
-      /* Sanity check.  g_cpu_netcount should be greater than zero
-       * only while we are within the critical section and within
-       * an interrupt handler.  If we are not in an interrupt handler
-       * then there is a problem; perhaps some logic previously
-       * called enter_critical_section() with no matching call to
-       * leave_critical_section(), leaving the non-zero count.
-       */
-
-      else
-        {
-          DEBUGASSERT(up_interrupt_context());
-        }
 
       nxttcb->task_state = TSTATE_TASK_RUNNING;
 

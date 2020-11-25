@@ -283,6 +283,7 @@ int up_cpu_paused(int cpu)
 int arm_pause_handler(int irq, void *c, FAR void *arg)
 {
   int cpu = up_cpu_index();
+  int ret = OK;
 
   DPRINTF("cpu%d will be paused \n", cpu);
 
@@ -295,12 +296,37 @@ int arm_pause_handler(int irq, void *c, FAR void *arg)
    * interrupt by calling up_cpu_paused.
    */
 
-  if (spin_islocked(&g_cpu_paused[cpu]))
+  if (up_cpu_pausereq(cpu))
     {
-      return up_cpu_paused(cpu);
+      /* NOTE: The following enter_critical_section() would call
+       * up_cpu_paused() to process a pause request to break a deadlock
+       * because the caller held a critical section. Once up_cpu_paused()
+       * finished, the caller will proceed and release the g_cpu_irqlock.
+       * Then this CPU will acquire g_cpu_irqlock in the function.
+       */
+
+      irqstate_t flags = enter_critical_section();
+
+      /* NOTE: Normally, we do not call up_cpu_paused() here because
+       * the above enter_critical_setion() would call up_cpu_paused()
+       * inside because the caller holds a crtical section.
+       * Howerver, cxd56's remote IRQ control logic also uses this handler
+       * and a caller might not take a critical section to avoid a deadlock
+       * during up_enable_irq() and up_disable_irq(). This is allowed
+       * because IRQ control logic does not interact wtih the scheduler.
+       * This means that if the request was not handled above, we need
+       * to call up_cpu_puased() here again.
+       */
+
+      if (up_cpu_pausereq(cpu))
+        {
+          ret = up_cpu_paused(cpu);
+        }
+
+      leave_critical_section(flags);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

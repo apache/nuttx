@@ -190,9 +190,22 @@ void xtensa_pause_handler(void)
    * interrupt by calling up_cpu_paused.
    */
 
-  if (spin_islocked(&g_cpu_paused[cpu]))
+  if (up_cpu_pausereq(cpu))
     {
-      up_cpu_paused(cpu);
+      /* NOTE: The following enter_critical_section() will call
+       * up_cpu_paused() to process a pause request to break a deadlock
+       * because the caller held a critical section. Once up_cpu_paused()
+       * finished, the caller will proceed and release the g_cpu_irqlock.
+       * Then this CPU will acquire g_cpu_irqlock in the function.
+       */
+
+      irqstate_t flags = enter_critical_section();
+
+      /* NOTE: the pause request should not exist here */
+
+      DEBUGVERIFY(!up_cpu_pausereq(cpu));
+
+      leave_critical_section(flags);
     }
 }
 

@@ -353,16 +353,12 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               DEBUGASSERT(tcb->irqcount < INT16_MAX);
               tcb->irqcount++;
 
-              /* In an SMP configuration, the interrupt disable logic also
-               * involves spinlocks that are configured per the TCB irqcount
-               * field.  This is logically equivalent to
-               * enter_critical_section().  The matching call to
-               * leave_critical_section() will be performed in
-               * up_sigdeliver().
+              /* NOTE: If the task runs on another CPU(cpu), adjusting
+               * global IRQ controls will be done in the pause handler
+               * on the CPU(cpu) by taking a critical section.
+               * If the task is scheduled on this CPU(me), do nothing
+               * because this CPU already took a critical section
                */
-
-              spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                          &g_cpu_irqlock);
 
               /* RESUME the other CPU if it was PAUSED */
 

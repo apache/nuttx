@@ -164,6 +164,13 @@ int nxtask_exit(void)
 
   if (rtcb->irqcount == 0)
     {
+      /* NOTE: Need to aquire g_cpu_irqlock here again before
+       * calling spin_setbit() becauses it was released in
+       * the above nxsched_resume_scheduler()
+       */
+
+      DEBUGVERIFY(irq_waitlock(this_cpu()));
+
       spin_setbit(&g_cpu_irqset, this_cpu(), &g_cpu_irqsetlock,
                   &g_cpu_irqlock);
     }
