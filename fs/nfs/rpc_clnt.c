@@ -84,6 +84,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <string.h>
 #include <debug.h>
 
@@ -816,7 +817,7 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
     }
   else
     {
-      ferr("ERROR: Unsupported RPC type: %d\n", tmp);
+      ferr("ERROR: Unsupported RPC type: %" PRId32 "\n", tmp);
       return -EOPNOTSUPP;
     }
 
