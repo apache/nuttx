@@ -100,9 +100,9 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
 
   /* Calculate the extra space we need to allocate.  This extra space will be
    * the size of the BSS section.  This extra space will also be used
-   * temporarily to hold relocation information.  So the allocated size of this
-   * region will either be the size of .data + size of.bss section OR, the
-   * size of .data + the relocation entries, whichever is larger
+   * temporarily to hold relocation information.  So the allocated size of
+   * this region will either be the size of .data + size of.bss section OR,
+   * the size of .data + the relocation entries, whichever is larger
    *
    * This is the amount of memory that we have to have to hold the
    * relocations.
@@ -142,19 +142,21 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
    */
 
   /* The following call will give as a pointer to the mapped file ISpace.
-   * This may be in ROM, RAM, Flash, ... We don't really care where the memory
-   * resides as long as it is fully initialized and ready to execute.
+   * This may be in ROM, RAM, Flash, ... We don't really care where the
+   * memory resides as long as it is fully initialized and ready to execute.
    */
 
   loadinfo->ispace = (uint32_t)mmap(NULL, loadinfo->isize, PROT_READ,
-                                    MAP_SHARED | MAP_FILE, loadinfo->filfd, 0);
+                                    MAP_SHARED | MAP_FILE, loadinfo->filfd,
+                                    0);
   if (loadinfo->ispace == (uint32_t)MAP_FAILED)
     {
       berr("Failed to map NXFLAT ISpace: %d\n", errno);
       return -errno;
     }
 
-  binfo("Mapped ISpace (%d bytes) at %08x\n", loadinfo->isize, loadinfo->ispace);
+  binfo("Mapped ISpace (%d bytes) at %08x\n",
+        loadinfo->isize, loadinfo->ispace);
 
   /* The following call allocate D-Space memory and will provide a pointer
    * to the allocated (but still uninitialized) D-Space memory.
