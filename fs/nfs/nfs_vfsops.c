@@ -53,6 +53,7 @@
 #include <sys/statfs.h>
 #include <sys/stat.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -511,7 +512,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
       tmp = fxdr_unsigned(uint32_t, fattr.fa_mode);
       if ((tmp & (NFSMODE_IWOTH | NFSMODE_IWGRP | NFSMODE_IWUSR)) == 0)
         {
-          ferr("ERROR: File is read-only: %08x\n", tmp);
+          ferr("ERROR: File is read-only: %08" PRIx32 "\n", tmp);
           return -EACCES;
         }
     }
@@ -795,7 +796,8 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
   FAR uint32_t              *ptr;
   int                        ret = 0;
 
-  finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+  finfo("Read %zu bytes from offset %jd\n",
+        buflen, (intmax_t)filep->f_pos);
 
   /* Sanity checks */
 
@@ -969,7 +971,8 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
   int                    committed = NFSV3WRITE_FILESYNC;
   int                    ret;
 
-  finfo("Write %d bytes to offset %d\n", buflen, filep->f_pos);
+  finfo("Write %zu bytes to offset %jd\n",
+        buflen, (intmax_t)filep->f_pos);
 
   /* Sanity checks */
 
@@ -1322,7 +1325,7 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   objtype = fxdr_unsigned(uint32_t, obj_attributes.fa_type);
   if (objtype != NFDIR)
     {
-      ferr("ERROR:  Not a directory, type=%d\n", objtype);
+      ferr("ERROR:  Not a directory, type=%" PRId32 "\n", objtype);
       ret = -ENOTDIR;
       goto errout_with_semaphore;
     }
