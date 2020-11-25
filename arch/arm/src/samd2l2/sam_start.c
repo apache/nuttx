@@ -77,7 +77,7 @@
  * Public Data
  ****************************************************************************/
 
-const uint32_t g_idle_topstack = IDLE_STACK;
+const uintptr_t g_idle_topstack = IDLE_STACK;
 
 /****************************************************************************
  * Private Functions
@@ -138,7 +138,9 @@ void __start(void)
 
   sam_clockconfig();
 
-  /* Configure the uart early so that we can get debug output as soon as possible */
+  /* Configure the uart early so that we can get debug output as soon as
+   * possible
+   */
 
   sam_lowsetup();
   showprogress('A');

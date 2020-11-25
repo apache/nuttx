@@ -89,7 +89,7 @@ static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 static int  up_interrupt(int irq, void *context, FAR void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
 static void up_send(struct uart_dev_s *dev, int ch);
@@ -280,7 +280,9 @@ static inline void up_configbaud(void)
 
               if (tmperr < errval)
                 {
-                  /* Yes, save these settings as the new, candidate optimal settings */
+                  /* Yes, save these settings as the new, candidate optimal
+                   * settings
+                   */
 
                   mulval    = tmulval ;
                   divaddval = tdivaddval;
@@ -427,11 +429,11 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Description:
  *   Configure the UART to operation in interrupt driven mode.  This method
  *   is called when the serial port is opened.  Normally, this is just after
- *   he the setup() method is called, however, the serial console may operate in
+ *   he the setup() method is called, however, the serial console may operate
  *   in a non-interrupt driven mode during the boot phase.
  *
  *   RX and TX interrupts are not enabled when by the attach method (unless
- *   the hardware supports multiple levels of interrupt enabling).  The RX and TX
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
  *   and TX interrupts are not enabled until the txint() and rxint() methods
  *   are called.
  *
@@ -519,8 +521,8 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
         {
           /* Handle incoming, receive bytes (with or without timeout) */
 
-          case UART_IIR_INTID_RDA: /* Received Data Available */
-          case UART_IIR_INTID_TIMEOUT:  /* Character time-out */
+          case UART_IIR_INTID_RDA:     /* Received Data Available */
+          case UART_IIR_INTID_TIMEOUT: /* Character time-out */
             {
               uart_recvchars(dev);
               break;
@@ -565,6 +567,7 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
             }
         }
     }
+
     return OK;
 }
 
@@ -637,7 +640,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, uint32_t *status)
+static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   uint32_t rbr;
 
@@ -667,6 +670,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     {
       priv->ier &= ~UART_IER_RDAINTEN;
     }
+
   putreg32(priv->ier, LPC31_UART_IER);
 }
 
@@ -717,6 +721,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       priv->ier &= ~UART_IER_THREINTEN;
     }
+
   putreg32(priv->ier, LPC31_UART_IER);
 }
 

@@ -1408,9 +1408,9 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
 #ifdef CONFIG_STM32F0L0G0_DMACAPABLE
   if ((txbuffer &&
-      !stm32_dmacapable((uint32_t)txbuffer, nwords, priv->txccr)) ||
+      !stm32_dmacapable((uintptr_t)txbuffer, nwords, priv->txccr)) ||
       (rxbuffer &&
-      !stm32_dmacapable((uint32_t)rxbuffer, nwords, priv->rxccr)))
+      !stm32_dmacapable((uintptr_t)rxbuffer, nwords, priv->rxccr)))
     {
       /* Unsupported memory region, fall back to non-DMA method. */
 

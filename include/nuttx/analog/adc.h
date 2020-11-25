@@ -298,6 +298,22 @@ FAR struct adc_dev_s *lmp92001_adc_initialize(FAR struct i2c_master_s *i2c,
 FAR struct adc_dev_s *ads7828_initialize(FAR struct i2c_master_s *i2c,
                                                uint8_t addr);
 
+/****************************************************************************
+ * Name: max1161x_initialize
+ *
+ * Description:
+ *   Initialize ADC
+ *
+ * Input Parameters:
+ *   i2c - Pointer to a valid I2C master struct.
+ *
+ * Returned Value:
+ *   Valid MX1161X device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct adc_dev_s *max1161x_initialize(FAR struct i2c_master_s *i2c);
+
 #if defined(__cplusplus)
 }
 #endif

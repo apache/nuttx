@@ -100,6 +100,7 @@
 #define _NOTECTLBASE    (0x2c00) /* Note filter control ioctl commands*/
 #define _NOTERAMBASE    (0x2d00) /* Noteram device ioctl commands*/
 #define _RCIOCBASE      (0x2e00) /* Remote Control device ioctl commands */
+#define _HIMEMBASE      (0x2f00) /* Himem device ioctl commands*/
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -544,6 +545,11 @@
 
 #define _RCIOCVALID(c)    (_IOC_TYPE(c)==_RCIOCBASE)
 #define _RCIOC(nr)        _IOC(_RCIOCBASE,nr)
+
+/* Hime drivers *************************************************************/
+
+#define _HIMEMIOCVALID(c)   (_IOC_TYPE(c) == _HIMEMBASE)
+#define _HIMEMIOC(nr)       _IOC(_HIMEMBASE, nr)
 
 /* Wireless driver network ioctl definitions ********************************/
 

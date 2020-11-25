@@ -68,7 +68,8 @@
  *
  ****************************************************************************/
 
-unsigned long long strtoull(FAR const char *nptr, FAR char **endptr, int base)
+unsigned long long strtoull(FAR const char *nptr,
+                            FAR char **endptr, int base)
 {
   unsigned long long accum = 0;
   unsigned long long limit;

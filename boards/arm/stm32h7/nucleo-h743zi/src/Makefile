@@ -51,6 +51,10 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
 endif
 
+ifeq ($(CONFIG_STM32_ROMFS),y)
+CSRCS += stm32_romfs_initialize.c
+endif
+
 ifeq ($(CONFIG_STM32H7_SPI),y)
 CSRCS += stm32_spi.c
 endif

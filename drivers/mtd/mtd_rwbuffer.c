@@ -43,6 +43,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -174,8 +175,8 @@ static int mtd_erase(FAR struct mtd_dev_s *dev, off_t block, size_t nblocks)
   size_t nsectors;
   int ret;
 
-  finfo("block: %08lx nsectors: %lu\n",
-        (unsigned long)block, (unsigned int)nsectors);
+  finfo("block: %08zx nsectors: %zu\n",
+        (intmax_t)block, nsectors);
 
   /* Convert to logical sectors and sector numbers */
 
@@ -259,7 +260,8 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)
+                                           ((uintptr_t)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -384,6 +386,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
   DEBUGASSERT((size_t)priv->spb * geo.blocksize == geo.erasesize);
 
   /* Values must be provided to rwb_initialize() */
+
   /* Supported geometry */
 
   priv->rwb.blocksize = geo.blocksize;

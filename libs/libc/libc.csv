@@ -55,6 +55,7 @@
 "gethostname","unistd.h","","int","FAR char *","size_t"
 "getopt","unistd.h","","int","int","FAR char * const []|FAR char * const *","FAR const char *"
 "getoptargp","unistd.h","","FAR char **"
+"getopterrp","unistd.h","","FAR int *"
 "getoptindp","unistd.h","","FAR int *"
 "getoptoptp","unistd.h","","FAR int *"
 "gets","stdio.h","defined(CONFIG_FILE_STREAM)","FAR char *","FAR char *"

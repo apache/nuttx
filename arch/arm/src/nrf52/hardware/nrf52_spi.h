@@ -68,6 +68,7 @@
 #define NRF52_SPIM_PSELDCX_OFFSET         (0x056c) /* Pin select for DCX signal */
 #define NRF52_SPIM_DCXCNT_OFFSET          (0x0570) /* DCX configuration */
 #define NRF52_SPIM_ORC_OFFSET             (0x05c0) /* ORC */
+#define NRF52_SPIM_POWER_OFFSET           (0x0ffc) /* Hidden POWER register, for applying errata workaround */
 
 /* Register offsets for SPI slave (SPIS) ************************************/
 
@@ -153,12 +154,12 @@
 #define SPIM_ENABLE_DIS             (0)        /* Disable SPIM */
 #define SPIM_ENABLE_EN              (0x7 << 0) /* Enable SPIM */
 
-/* PSEL(MOSI/MISO/SCK/CSN) Register */
+/* PSEL* Registers */
 
-#define SPIM_PSEL_PIN_SHIFT         (0)       /* Bits 0-4: pin number */
-#define SPIM_PSEL_PIN_MASK          (0x1f << SPIM_PSEL_PIN_SHIFT)
-#define SPIM_PSEL_PORT_SHIFT        (5)       /* Bit 5: port number */
-#define SPIM_PSEL_PORT_MASK         (0x1 << SPIM_PSEL_PORT_SHIFT)
+#define SPIM_PSEL_PIN_SHIFT         (0)       /* Bits 0-4: SCK pin number */
+#define SPIM_PSEL_PIN_MASK          (0x1f << SPIM_PSELSCK_PIN_SHIFT)
+#define SPIM_PSEL_PORT_SHIFT        (5)       /* Bit 5: SCK port number */
+#define SPIM_PSEL_PORT_MASK         (0x1 << SPIM_PSELSCK_PORT_SHIFT)
 #define SPIM_PSEL_CONNECTED         (1 << 31) /* Bit 31: Connection */
 #define SPIM_PSEL_RESET             (0xffffffff)
 

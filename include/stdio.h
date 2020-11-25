@@ -78,9 +78,9 @@
 
 /* The first three _iob entries are reserved for standard I/O */
 
-#define stdin      (nxsched_get_streams()->sl_head)
-#define stdout     (nxsched_get_streams()->sl_head->fs_next)
-#define stderr     (nxsched_get_streams()->sl_head->fs_next->fs_next)
+#define stdin      (&nxsched_get_streams()->sl_std[0])
+#define stdout     (&nxsched_get_streams()->sl_std[1])
+#define stderr     (&nxsched_get_streams()->sl_std[2])
 
 /* Path to the directory where temporary files can be created */
 
@@ -141,13 +141,15 @@ int    fgetc(FAR FILE *stream);
 int    fgetpos(FAR FILE *stream, FAR fpos_t *pos);
 FAR char *fgets(FAR char *s, int n, FAR FILE *stream);
 FAR FILE *fopen(FAR const char *path, FAR const char *type);
-int    fprintf(FAR FILE *stream, FAR const IPTR char *format, ...);
+int    fprintf(FAR FILE *stream, FAR const IPTR char *format, ...)
+       printflike(2, 3);
 int    fputc(int c, FAR FILE *stream);
 int    fputs(FAR const IPTR char *s, FAR FILE *stream);
 size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream);
 FAR FILE *freopen(FAR const char *path, FAR const char *mode,
          FAR FILE *stream);
-int    fscanf(FAR FILE *stream, FAR const IPTR char *fmt, ...);
+int    fscanf(FAR FILE *stream, FAR const IPTR char *fmt, ...)
+       scanflike(2, 3);
 int    fseek(FAR FILE *stream, long int offset, int whence);
 int    fseeko(FAR FILE *stream, off_t offset, int whence);
 int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
@@ -174,28 +176,35 @@ int    ungetc(int c, FAR FILE *stream);
  */
 
 void   perror(FAR const char *s);
-int    printf(FAR const IPTR char *fmt, ...);
+int    printf(FAR const IPTR char *fmt, ...) printflike(1, 2);
 int    putc(int c, FAR FILE *stream);
 int    putchar(int c);
 int    puts(FAR const IPTR char *s);
 int    rename(FAR const char *oldpath, FAR const char *newpath);
-int    sprintf(FAR char *buf, FAR const IPTR char *fmt, ...);
-int    asprintf(FAR char **ptr, FAR const IPTR char *fmt, ...);
+int    sprintf(FAR char *buf, FAR const IPTR char *fmt, ...)
+       printflike(2, 3);
+int    asprintf(FAR char **ptr, FAR const IPTR char *fmt, ...)
+       printflike(2, 3);
 int    snprintf(FAR char *buf, size_t size,
-         FAR const IPTR char *fmt, ...);
-int    sscanf(FAR const char *buf, FAR const IPTR char *fmt, ...);
+         FAR const IPTR char *fmt, ...) printflike(3, 4);
+int    sscanf(FAR const char *buf, FAR const IPTR char *fmt, ...)
+       scanflike(2, 3);
 
-int    scanf(FAR const IPTR char *fmt, ...);
-int    vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap);
+int    scanf(FAR const IPTR char *fmt, ...) scanflike(1, 2);
+int    vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
+       printflike(2, 0);
 int    vfprintf(FAR FILE *stream, FAR const IPTR char *fmt,
-         va_list ap);
-int    vfscanf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap);
-int    vprintf(FAR const IPTR char *fmt, va_list ap);
-int    vscanf(FAR const IPTR char *fmt, va_list ap);
+         va_list ap) printflike(2, 0);
+int    vfscanf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
+       scanflike(2, 0);
+int    vprintf(FAR const IPTR char *fmt, va_list ap) printflike(1, 0);
+int    vscanf(FAR const IPTR char *fmt, va_list ap) scanflike(1, 0);
 int    vsnprintf(FAR char *buf, size_t size, FAR const IPTR char *fmt,
-         va_list ap);
-int    vsprintf(FAR char *buf, FAR const IPTR char *fmt, va_list ap);
-int    vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap);
+         va_list ap) printflike(3, 0);
+int    vsprintf(FAR char *buf, FAR const IPTR char *fmt, va_list ap)
+       printflike(2, 0);
+int    vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap)
+       scanflike(2, 0);
 
 /* Operations on file descriptors including:
  *
@@ -205,8 +214,9 @@ int    vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap);
  */
 
 FAR FILE *fdopen(int fd, FAR const char *type);
-int    dprintf(int fd, FAR const IPTR char *fmt, ...);
-int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap);
+int    dprintf(int fd, FAR const IPTR char *fmt, ...) printflike(2, 3);
+int    vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
+       printflike(2, 0);
 
 /* Operations on paths */
 

@@ -273,9 +273,15 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
 {
   DEBUGASSERT(iface == 0);
 
-  /* Set the Power Switch by driving the active low enable pin */
+  /* Set the Power Switch by driving the active high enable pin */
 
+#if defined(CONFIG_STM_NUCLEO144_MB1137)
+  stm32_gpiowrite(GPIO_OTGFS_PWRON, enable);
+#elif defined(CONFIG_STM_NUCLEO144_MB1364)
   stm32_gpiowrite(GPIO_OTGFS_PWRON, !enable);
+#else
+# error "Non-supported board"
+#endif
 }
 #endif
 

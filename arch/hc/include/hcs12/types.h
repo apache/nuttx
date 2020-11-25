@@ -86,6 +86,9 @@ typedef signed long long   _int64_t;
 typedef unsigned long long _uint64_t;
 #define __INT64_DEFINED
 
+typedef _int64_t           _intmax_t;
+typedef _uint64_t          _uintmax_t;
+
 /* A size is two bytes */
 
 #if defined(__SIZE_TYPE__)
@@ -103,7 +106,7 @@ typedef signed short       _ssize_t;
 typedef unsigned short     _size_t;
 #endif
 
-/* This is the size of the interrupt state save returned by up_irq_save()*/
+/* This is the size of the interrupt state save returned by up_irq_save() */
 
 typedef unsigned char      irqstate_t;
 

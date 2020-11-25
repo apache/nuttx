@@ -76,11 +76,6 @@ typedef signed long long   _int64_t;
 typedef unsigned long long _uint64_t;
 #define __INT64_DEFINED
 
-/* A pointer is 4 bytes */
-
-typedef signed int         _intptr_t;
-typedef unsigned int       _uintptr_t;
-
 /* This is the size of the interrupt state save returned by
  * up_irq_save()
  */

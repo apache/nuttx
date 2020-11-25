@@ -328,7 +328,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
 
   if (!nxsched_verify_tcb(htcb))
     {
-      swarn("WARNING: TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      swarn("WARNING: TCB %p is a stale handle, counts lost\n", htcb);
       nxsem_freeholder(sem, pholder);
     }
 
@@ -492,7 +492,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
 
   if (!nxsched_verify_tcb(htcb))
     {
-      swarn("WARNING: TCB 0x%08x is a stale handle, counts lost\n", htcb);
+      swarn("WARNING: TCB %p is a stale handle, counts lost\n", htcb);
 
       pholder = nxsem_findholder(sem, htcb);
       if (pholder != NULL)

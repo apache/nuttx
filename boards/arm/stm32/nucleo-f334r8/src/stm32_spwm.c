@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -453,8 +454,8 @@ static int slaves_configure(FAR struct spwm_s *spwm)
   per = fclk / CONFIG_NUCLEOF334R8_SPWM_PWM_FREQ;
   if (per > HRTIM_PER_MAX)
     {
-      printf("ERROR: can not achieve pwm freq=%llu if fclk=%llu\n",
-             CONFIG_NUCLEOF334R8_SPWM_PWM_FREQ, fclk);
+      printf("ERROR: can not achieve pwm freq=%ju if fclk=%llu\n",
+             (uintmax_t)CONFIG_NUCLEOF334R8_SPWM_PWM_FREQ, fclk);
       ret = -EINVAL;
       goto errout;
     }

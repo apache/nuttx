@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -265,7 +266,7 @@ int highpri_main(int argc, char *argv[])
 
       /* Then print out what is happening */
 
-      printf("Elapsed time: %d seconds\n\n", seconds);
+      printf("Elapsed time: %" PRId32 " seconds\n\n", seconds);
       for (i = 0, total = 0; i < 16; i++)
         {
           total += basepri[i];

@@ -45,6 +45,8 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <inttypes.h>
+#include <stdint.h>
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/ip.h>
@@ -79,8 +81,8 @@ static void igmp_mcastmac(in_addr_t *ip, FAR uint8_t *mac)
   mac[4] = ip4_addr3(*ip);
   mac[5] = ip4_addr4(*ip);
 
-  ninfo("IP: %08x -> MAC: %02x%02x%02x%02x%02x%02x\n",
-        *ip, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  ninfo("IP: %08" PRIx32 " -> MAC: %02x%02x%02x%02x%02x%02x\n",
+        (uint32_t)*ip, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 
 /****************************************************************************
@@ -99,7 +101,7 @@ void igmp_addmcastmac(FAR struct net_driver_s *dev, FAR in_addr_t *ip)
 {
   uint8_t mcastmac[6];
 
-  ninfo("Adding: IP %08x\n", *ip);
+  ninfo("Adding: IP %08" PRIx32 "\n", (uint32_t)*ip);
   if (dev->d_addmac)
     {
       igmp_mcastmac(ip, mcastmac);
@@ -119,7 +121,7 @@ void igmp_removemcastmac(FAR struct net_driver_s *dev, FAR in_addr_t *ip)
 {
   uint8_t mcastmac[6];
 
-  ninfo("Removing: IP %08x\n", *ip);
+  ninfo("Removing: IP %08" PRIx32 "\n", (uint32_t)*ip);
   if (dev->d_rmmac)
     {
       igmp_mcastmac(ip, mcastmac);

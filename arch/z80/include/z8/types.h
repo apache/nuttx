@@ -62,7 +62,8 @@
  * the user prefers to use the definitions provided by their toolchain header
  * files
  *
- * These are the sizes of the types supported by the ZiLOG Z8Encore! compiler:
+ * These are the sizes of the types supported by the ZiLOG Z8Encore!
+ * compiler:
  *
  *   int    - 16-bits
  *   short  - 16-bits
@@ -86,6 +87,9 @@ typedef unsigned int       _uint16_t;
 
 typedef signed long        _int32_t;
 typedef unsigned long      _uint32_t;
+
+typedef _int32_t           _intmax_t;
+typedef _uint32_t          _uintmax_t;
 
 /* A size is 2 bytes */
 

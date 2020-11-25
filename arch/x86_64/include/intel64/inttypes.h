@@ -32,88 +32,88 @@
 #define PRId8       "d"
 #define PRId16      "d"
 #define PRId32      "d"
-#define PRId64      "lld"
+#define PRId64      "ld"
 
-#define PRIdPTR     "lld"
+#define PRIdPTR     "ld"
 
 #define PRIi8       "i"
 #define PRIi16      "i"
 #define PRIi32      "i"
-#define PRIi64      "lli"
+#define PRIi64      "li"
 
-#define PRIiPTR     "lli"
+#define PRIiPTR     "li"
 
 #define PRIo8       "o"
 #define PRIo16      "o"
 #define PRIo32      "o"
-#define PRIo64      "llo"
+#define PRIo64      "lo"
 
-#define PRIoPTR     "llo"
+#define PRIoPTR     "lo"
 
 #define PRIu8       "u"
 #define PRIu16      "u"
 #define PRIu32      "u"
-#define PRIu64      "llu"
+#define PRIu64      "lu"
 
-#define PRIuPTR     "llu"
+#define PRIuPTR     "lu"
 
 #define PRIx8       "x"
 #define PRIx16      "x"
 #define PRIx32      "x"
-#define PRIx64      "llx"
+#define PRIx64      "lx"
 
-#define PRIxPTR     "llx"
+#define PRIxPTR     "lx"
 
 #define PRIX8       "X"
 #define PRIX16      "X"
 #define PRIX32      "X"
-#define PRIX64      "llX"
+#define PRIX64      "lX"
 
-#define PRIXPTR     "llX"
+#define PRIXPTR     "lX"
 
 #define SCNd8       "hhd"
 #define SCNd16      "hd"
 #define SCNd32      "d"
-#define SCNd64      "lld"
+#define SCNd64      "ld"
 
-#define SCNdPTR     "lld"
+#define SCNdPTR     "ld"
 
 #define SCNi8       "hhi"
 #define SCNi16      "hi"
 #define SCNi32      "i"
-#define SCNi64      "lli"
+#define SCNi64      "li"
 
-#define SCNiPTR     "lli"
+#define SCNiPTR     "li"
 
 #define SCNo8       "hho"
 #define SCNo16      "ho"
 #define SCNo32      "o"
-#define SCNo64      "llo"
+#define SCNo64      "lo"
 
-#define SCNoPTR     "llo"
+#define SCNoPTR     "lo"
 
 #define SCNu8       "hhu"
 #define SCNu16      "hu"
 #define SCNu32      "u"
-#define SCNu64      "llu"
+#define SCNu64      "lu"
 
 #define SCNuPTR     "u"
 
 #define SCNx8       "hhx"
 #define SCNx16      "hx"
 #define SCNx32      "x"
-#define SCNx64      "llx"
+#define SCNx64      "lx"
 
-#define SCNxPTR     "x"
+#define SCNxPTR     "lx"
 
 #define INT8_C(x)   x
 #define INT16_C(x)  x
 #define INT32_C(x)  x
-#define INT64_C(x)  x ## ll
+#define INT64_C(x)  x ## l
 
 #define UINT8_C(x)  x
 #define UINT16_C(x) x
 #define UINT32_C(x) x ## u
-#define UINT64_C(x) x ## ull
+#define UINT64_C(x) x ## ul
 
 #endif /* __ARCH_X86_64_INCLUDE_INTEL64_INTTYPES_H */

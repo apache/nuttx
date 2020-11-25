@@ -85,7 +85,8 @@
 #if defined(HAVE_LPUART_DEVICE) && defined(USE_SERIALDRIVER)
 
 /* Which LPUART with be tty0/console and which tty1?  The console will always
- * be ttyS0.  If there is no console then will use the lowest numbered LPUART.
+ * be ttyS0.  If there is no console then will use the lowest numbered
+ * LPUART.
  */
 
 /* First pick the console and ttys0.  This could be any of LPUART0-4 */
@@ -130,7 +131,9 @@
 #  endif
 #endif
 
-/* Pick ttys1. This could be any of LPUART0-4 excluding the console/ttyS0 LPUART. */
+/* Pick ttys1. This could be any of LPUART0-4 excluding the console/ttyS0
+ * LPUART.
+ */
 
 #if defined(CONFIG_KINETIS_LPUART0) && !defined(LPUART0_ASSIGNED)
 #  define TTYS1_DEV             g_lpuart0port /* LPUART0 is ttyS1 */
@@ -149,7 +152,9 @@
 #  define LPUART4_ASSIGNED      1
 #endif
 
-/* Pick ttys2. This could be any of LPUART1-4 excluding the console/ttyS0 LPUART. */
+/* Pick ttys2. This could be any of LPUART1-4 excluding the console/ttyS0
+ * LPUART.
+ */
 
 #if defined(CONFIG_KINETIS_LPUART1) && !defined(LPUART1_ASSIGNED)
 #  define TTYS2_DEV             g_lpuart1port /* LPUART1 is ttyS2 */
@@ -165,7 +170,9 @@
 #  define LPUART4_ASSIGNED      1
 #endif
 
-/* Pick ttys3. This could be any of LPUART2-4 excluding the console/ttyS0 LPUART. */
+/* Pick ttys3. This could be any of LPUART2-4 excluding the console/ttyS0
+ * LPUART.
+ */
 
 #if defined(CONFIG_KINETIS_LPUART2) && !defined(LPUART2_ASSIGNED)
 #  define TTYS3_DEV             g_lpuart2port /* LPUART2 is ttyS3 */
@@ -178,7 +185,9 @@
 #  define LPUART4_ASSIGNED      1
 #endif
 
-/* Pick ttys3. This could be any of LPUART3-4 excluding the console/ttyS0 LPUART. */
+/* Pick ttys3. This could be any of LPUART3-4 excluding the console/ttyS0
+ * LPUART.
+ */
 
 #if defined(CONFIG_KINETIS_LPUART3) && !defined(LPUART3_ASSIGNED)
 #  define TTYS4_DEV             g_lpuart3port /* LPUART3 is ttyS4 */
@@ -248,7 +257,7 @@ static int  kinetis_attach(struct uart_dev_s *dev);
 static void kinetis_detach(struct uart_dev_s *dev);
 static int  kinetis_interrupt(int irq, void *context, void *arg);
 static int  kinetis_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  kinetis_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  kinetis_receive(struct uart_dev_s *dev, unsigned int *status);
 static void kinetis_rxint(struct uart_dev_s *dev, bool enable);
 static bool kinetis_rxavailable(struct uart_dev_s *dev);
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -338,7 +347,7 @@ static uart_dev_t g_lpuart0port =
   {
     .size   = CONFIG_LPUART0_TXBUFSIZE,
     .buffer = g_lpuart0txbuffer,
-   },
+  },
   .ops      = &g_lpuart_ops,
   .priv     = &g_lpuart0priv,
 };
@@ -377,7 +386,7 @@ static uart_dev_t g_lpuart1port =
   {
     .size   = CONFIG_LPUART1_TXBUFSIZE,
     .buffer = g_lpuart1txbuffer,
-   },
+  },
   .ops      = &g_lpuart_ops,
   .priv     = &g_lpuart1priv,
 };
@@ -416,7 +425,7 @@ static uart_dev_t g_lpuart2port =
   {
     .size   = CONFIG_LPUART2_TXBUFSIZE,
     .buffer = g_lpuart2txbuffer,
-   },
+  },
   .ops      = &g_lpuart_ops,
   .priv     = &g_lpuart2priv,
 };
@@ -455,7 +464,7 @@ static uart_dev_t g_lpuart3port =
   {
     .size   = CONFIG_LPUART3_TXBUFSIZE,
     .buffer = g_lpuart3txbuffer,
-   },
+  },
   .ops      = &g_lpuart_ops,
   .priv     = &g_lpuart3priv,
 };
@@ -494,7 +503,7 @@ static uart_dev_t g_lpuart4port =
   {
     .size   = CONFIG_LPUART4_TXBUFSIZE,
     .buffer = g_lpuart4txbuffer,
-   },
+  },
   .ops      = &g_lpuart_ops,
   .priv     = &g_lpuart4priv,
 };
@@ -533,7 +542,9 @@ static void kinetis_setuartint(struct kinetis_dev_s *priv)
   irqstate_t flags;
   uint32_t regval;
 
-  /* Re-enable/re-disable interrupts corresponding to the state of bits in ie */
+  /* Re-enable/re-disable interrupts corresponding to the state of bits in
+   * ie
+   */
 
   flags    = enter_critical_section();
   regval   = kinetis_serialin(priv, KINETIS_LPUART_CTRL_OFFSET);
@@ -551,7 +562,9 @@ static void kinetis_restoreuartint(struct kinetis_dev_s *priv, uint32_t ie)
 {
   irqstate_t flags;
 
-  /* Re-enable/re-disable interrupts corresponding to the state of bits in ie */
+  /* Re-enable/re-disable interrupts corresponding to the state of bits in
+   * ie
+   */
 
   flags    = enter_critical_section();
   priv->ie = ie & LPUART_CTRL_ALL_INTS;
@@ -645,7 +658,8 @@ static void kinetis_shutdown(struct uart_dev_s *dev)
  *   Configure the LPUART to operation in interrupt driven mode.  This
  *   method is called when the serial port is opened.  Normally, this is
  *   just after the setup() method is called, however, the serial
- *   console may operate in a non-interrupt driven mode during the boot phase.
+ *   console may operate in a non-interrupt driven mode during the boot
+ *   phase.
  *
  *   RX and TX interrupts are not enabled when by the attach method (unless
  *   the hardware supports multiple levels of interrupt enabling).  The RX
@@ -718,14 +732,15 @@ static int kinetis_interrupt(int irq, void *context, void *arg)
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct kinetis_dev_s *)dev->priv;
 
-  /* Read status register and qualify it with STAT bit corresponding CTRL IE bits */
+  /* Read status register and qualify it with STAT bit corresponding CTRL IE
+   * bits
+   */
 
   stat = kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET);
   ctrl = kinetis_serialin(priv, KINETIS_LPUART_CTRL_OFFSET);
   stat &= LPUART_CTRL2STAT(ctrl);
   do
     {
-
       /* Handle errors.  This interrupt may be caused by:
        *
        * OR: Receiver Overrun Flag. To clear OR, when STAT read with OR set,
@@ -740,7 +755,6 @@ static int kinetis_interrupt(int irq, void *context, void *arg)
 
       if (stat & LPUART_STAT_ERRORS)
         {
-
           /* Only Overrun error does not need a read operation */
 
           if ((stat & LPUART_STAT_OR) != LPUART_STAT_OR)
@@ -781,7 +795,9 @@ static int kinetis_interrupt(int irq, void *context, void *arg)
           uart_xmitchars(dev);
         }
 
-      /* Read status register and requalify it with STAT bit corresponding CTRL IE bits */
+      /* Read status register and requalify it with STAT bit corresponding
+       * CTRL IE bits
+       */
 
       stat = kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET);
       ctrl = kinetis_serialin(priv, KINETIS_LPUART_CTRL_OFFSET);
@@ -850,7 +866,7 @@ static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
       {
         if ((arg & SER_SINGLEWIRE_PULLUP) != 0)
           {
-            ret = -EINVAL; // Not supported
+            ret = -EINVAL; /* Not supported */
             break;
           }
 
@@ -888,9 +904,9 @@ static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         cfsetispeed(termiosp, priv->baud);
 
-        /* Note: CSIZE only supports 5-8 bits. The driver only support 8/9 bit
-         * modes and therefore is no way to report 9-bit mode, we always claim
-         * 8 bit mode.
+        /* Note: CSIZE only supports 5-8 bits. The driver only support 8/9
+         * bit modes and therefore is no way to report 9-bit mode, we always
+         * claim 8 bit mode.
          */
 
         termiosp->c_cflag =
@@ -1060,7 +1076,7 @@ static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int kinetis_receive(struct uart_dev_s *dev, uint32_t *status)
+static int kinetis_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev->priv;
   uint32_t regval;
@@ -1363,7 +1379,7 @@ unsigned int kinetis_lpuart_serialinit(unsigned int first)
   char devname[] = "/dev/ttySx";
 #endif
 
-/* Register the console */
+  /* Register the console */
 
 #ifdef HAVE_LPUART_CONSOLE
   uart_register("/dev/console", &CONSOLE_DEV);
@@ -1387,22 +1403,22 @@ unsigned int kinetis_lpuart_serialinit(unsigned int first)
 
 #else
 
-  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  devname[(sizeof(devname) / sizeof(devname[0])) - 2] = '0' + first++;
   uart_register(devname, &TTYS0_DEV);
 #ifdef TTYS1_DEV
-  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  devname[(sizeof(devname) / sizeof(devname[0])) - 2] = '0' + first++;
   uart_register(devname, &TTYS1_DEV);
 #endif
 #ifdef TTYS2_DEV
-  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  devname[(sizeof(devname) / sizeof(devname[0])) - 2] = '0' + first++;
   uart_register(devname, &TTYS2_DEV);
 #endif
 #ifdef TTYS3_DEV
-  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  devname[(sizeof(devname) / sizeof(devname[0])) - 2] = '0' + first++;
   uart_register(devname, &TTYS3_DEV);
 #endif
 #ifdef TTYS4_DEV
-  devname[(sizeof(devname)/sizeof(devname[0]))-2] = '0' + first++;
+  devname[(sizeof(devname) / sizeof(devname[0])) - 2] = '0' + first++;
   uart_register(devname, &TTYS4_DEV);
 #endif
 #endif

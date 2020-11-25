@@ -52,6 +52,38 @@
 
 /* Configuration ************************************************************/
 
+#define HAVE_PROC       1
+#define HAVE_USBDEV     1
+#define HAVE_USBHOST    1
+#define HAVE_USBMONITOR 1
+
+/* Can't support USB host or device features if USB OTG FS is not enabled */
+
+#ifndef CONFIG_STM32H7_OTGFS
+#  undef HAVE_USBDEV
+#  undef HAVE_USBHOST
+#  undef HAVE_USBMONITOR
+#endif
+
+/* Can't support USB device monitor if USB device is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef HAVE_USBDEV
+#  undef HAVE_USBMONITOR
+#endif
+
+/* Can't support USB host is USB host is not enabled */
+
+#ifndef CONFIG_USBHOST
+#  undef HAVE_USBHOST
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
+#  undef HAVE_USBMONITOR
+#endif
+
 /* procfs File System */
 
 #ifdef CONFIG_FS_PROCFS
@@ -112,8 +144,13 @@
 #define GPIO_OTGFS_VBUS   (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz| \
                            GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
 
-#define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|  \
+#if defined(CONFIG_STM_NUCLEO144_MB1137)
+# define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|  \
                            GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN6)
+#elif defined(CONFIG_STM_NUCLEO144_MB1364)
+# define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|  \
+                           GPIO_PUSHPULL|GPIO_PORTD|GPIO_PIN10)
+#endif
 
 #ifdef CONFIG_USBHOST
 #  define GPIO_OTGFS_OVER (GPIO_INPUT|GPIO_EXTI|GPIO_FLOAT| \
@@ -234,12 +271,26 @@ int stm32_gpio_initialize(void);
  *
  * Description:
  *   Called from stm32_usbinitialize very early in inialization to setup
- *   USB-related GPIO pins for the nucleo-144 board.
+ *   USB-related GPIO pins for the NUCLEO-H743ZI board.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_STM32H7_OTGFS
-void stm32_usbinitialize(void);
+void weak_function stm32_usbinitialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_usbhost_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the USB host
+ *   functionality. This function will start a thread that will monitor for
+ *   device connection/disconnection events.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STM32H7_OTGFS) && defined(CONFIG_USBHOST)
+int stm32_usbhost_initialize(void);
 #endif
 
 /****************************************************************************

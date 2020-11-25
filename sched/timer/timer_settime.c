@@ -285,12 +285,9 @@ int timer_settime(timer_t timerid, int flags,
 
   if ((flags & TIMER_ABSTIME) != 0)
     {
-      /* Calculate a delay corresponding to the absolute time in 'value'.
-       * NOTE:  We have internal knowledge the clock_abstime2ticks only
-       * returns an error if clockid != CLOCK_REALTIME.
-       */
+      /* Calculate a delay corresponding to the absolute time in 'value' */
 
-      clock_abstime2ticks(CLOCK_REALTIME, &value->it_value, &delay);
+      clock_abstime2ticks(timer->pt_clock, &value->it_value, &delay);
     }
   else
     {

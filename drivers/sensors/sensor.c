@@ -99,7 +99,7 @@ static int     sensor_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct sensor_info g_sensor_info[] =
 {
-  {1,                                 "custom"},
+  {0,                                 NULL},
   {sizeof(struct sensor_event_accel), "accel"},
   {sizeof(struct sensor_event_mag),   "mag"},
   {sizeof(struct sensor_event_gyro),  "gyro"},

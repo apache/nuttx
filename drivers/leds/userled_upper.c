@@ -169,7 +169,8 @@ static int userled_open(FAR struct file *filep)
 
   /* Allocate a new open structure */
 
-  opriv = (FAR struct userled_open_s *)kmm_zalloc(sizeof(struct userled_open_s));
+  opriv = (FAR struct userled_open_s *)
+          kmm_zalloc(sizeof(struct userled_open_s));
   if (!opriv)
     {
       lederr("ERROR: Failed to allocate open structure\n");
@@ -347,7 +348,8 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR const struct userled_lowerhalf_s *lower;
   int ret;
 
-  DEBUGASSERT(filep != NULL && filep->f_priv != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep != NULL && filep->f_priv != NULL &&
+              filep->f_inode != NULL);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
   priv  = (FAR struct userled_upperhalf_s *)inode->i_private;
@@ -370,8 +372,8 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
      * Description: Report the set of LEDs supported by the hardware;
      * Argument:    A pointer to writeable userled_set_t value in which to
      *              return the set of supported LEDs.
-     * Return:      Zero (OK) on success.  Minus one will be returned on failure
-     *              with the errno value set appropriately.
+     * Return:      Zero (OK) on success.  Minus one will be returned on
+     *              failure with the errno value set appropriately.
      */
 
     case ULEDIOC_SUPPORTED:
@@ -391,13 +393,14 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     /* Command:     ULEDIOC_SETLED
      * Description: Set the state of one LED.
      * Argument:    A read-only pointer to an instance of struct userled_s
-     * Return:      Zero (OK) on success.  Minus one will be returned on failure
-     *              with the errno value set appropriately.
+     * Return:      Zero (OK) on success.  Minus one will be returned on
+     *              failure with the errno value set appropriately.
      */
 
     case ULEDIOC_SETLED:
       {
-        FAR struct userled_s *userled = (FAR struct userled_s *)((uintptr_t)arg);
+        FAR struct userled_s *userled = (FAR struct userled_s *)
+                                        ((uintptr_t)arg);
         int led;
         bool ledon;
 
@@ -438,8 +441,8 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     /* Command:     ULEDIOC_SETALL
      * Description: Set the state of all LEDs.
      * Argument:    A value of type userled_set_t cast to unsigned long
-     * Return:      Zero (OK) on success.  Minus one will be returned on failure
-     *              with the errno value set appropriately.
+     * Return:      Zero (OK) on success.  Minus one will be returned on
+     *              failure with the errno value set appropriately.
      */
 
     case ULEDIOC_SETALL:
@@ -466,10 +469,10 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     /* Command:     ULEDIOC_GETALL
      * Description: Get the state of one LED.
-     * Argument:    A write-able pointer to a userled_set_t memory location in
-     *              which to return the LED state.
-     * Return:      Zero (OK) on success.  Minus one will be returned on failure
-     *              with the errno value set appropriately.
+     * Argument:    A write-able pointer to a userled_set_t memory location
+     *              in which to return the LED state.
+     * Return:      Zero (OK) on success.  Minus one will be returned on
+     *              failure with the errno value set appropriately.
      */
 
     case ULEDIOC_GETALL:
@@ -487,7 +490,7 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     default:
-      lederr("ERROR: Unrecognized command: %ld\n", cmd);
+      lederr("ERROR: Unrecognized command: %d\n", cmd);
       ret = -ENOTTY;
       break;
     }

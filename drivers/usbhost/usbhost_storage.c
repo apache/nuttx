@@ -2144,7 +2144,7 @@ static ssize_t usbhost_write(FAR struct inode *inode,
   ssize_t nbytes;
   int ret;
 
-  uinfo("sector: %d nsectors: %d sectorsize: %d\n");
+  uinfo("sector: %zu nsectors: %u\n", startsector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct usbhost_state_s *)inode->i_private;

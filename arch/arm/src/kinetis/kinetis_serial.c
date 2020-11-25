@@ -343,7 +343,7 @@ static int  up_interrupts(int irq, void *context, FAR void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 #if !defined(SERIAL_HAVE_ALL_DMA)
-static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
+static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static bool up_rxavailable(struct uart_dev_s *dev);
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -1567,7 +1567,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #if !defined(SERIAL_HAVE_ALL_DMA)
-static int up_receive(struct uart_dev_s *dev, uint32_t *status)
+static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint8_t s1;

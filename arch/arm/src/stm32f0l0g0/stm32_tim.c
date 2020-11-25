@@ -1,4 +1,4 @@
-/***************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_tim.c
  *
  *   Copyright (C) 2019 Fundação CERTI. All rights reserved.
@@ -42,6 +42,7 @@
 #include <nuttx/irq.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -57,9 +58,9 @@
 #include "stm32_gpio.h"
 #include "stm32_tim.h"
 
-/***************************************************************************
+/****************************************************************************
  * Private Types
- ***************************************************************************/
+ ****************************************************************************/
 
 /* Configuration ************************************************************/
 
@@ -67,9 +68,9 @@
  * include:
  *
  * - To generate modulated outputs for such things as motor control.  If
- *   CONFIG_STM32F0L0G0_TIMn is defined then the CONFIG_STM32F0L0G0_TIMn_PWM may
- *   also be defined to indicate that the timer is intended to be used for
- *   pulsed output modulation.
+ *   CONFIG_STM32F0L0G0_TIMn is defined then the CONFIG_STM32F0L0G0_TIMn_PWM
+ *   may also be defined to indicate that the timer is intended to be used
+ *   for pulsed output modulation.
  *
  * - To control periodic ADC input sampling.  If CONFIG_STM32F0L0G0_TIMn is
  *   defined then CONFIG_STM32F0L0G0_TIMn_ADC may also be defined to indicate
@@ -80,8 +81,8 @@
  *   timer "n" is intended to be used for that purpose.
  *
  * - To use a Quadrature Encoder.  If CONFIG_STM32F0L0G0_TIMn is defined then
- *   CONFIG_STM32F0L0G0_TIMn_QE may also be defined to indicate that timer "n"
- *   is intended to be used for that purpose.
+ *   CONFIG_STM32F0L0G0_TIMn_QE may also be defined to indicate that timer
+ *   "n" is intended to be used for that purpose.
  *
  * In any of these cases, the timer will not be used by this timer module.
  */
@@ -267,22 +268,28 @@ struct stm32_tim_priv_s
 
 /* Timer methods */
 
-static int  stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
-static int  stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
+static int  stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev,
+                              stm32_tim_mode_t mode);
+static int  stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev,
+                               uint32_t freq);
 static uint32_t stm32_tim_getclock(FAR struct stm32_tim_dev_s *dev);
 static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
                                 uint32_t period);
 static uint32_t stm32_tim_getperiod(FAR struct stm32_tim_dev_s *dev);
 static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev);
-static int  stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
+static int  stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev,
+                                 uint8_t channel,
                                  stm32_tim_channel_t mode);
-static int  stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
+static int  stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev,
+                                 uint8_t channel,
                                  uint32_t compare);
-static int  stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
+static int  stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev,
+                                 uint8_t channel);
 static int  stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
                              void *arg, int source);
 static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source);
-static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source);
+static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev,
+                                 int source);
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source);
 
 /****************************************************************************
@@ -503,7 +510,9 @@ static void stm32_tim_disable(FAR struct stm32_tim_dev_s *dev)
   stm32_putreg16(dev, STM32_BTIM_CR1_OFFSET, val);
 }
 
-/* Reset timer into system default state, but do not affect output/input pins */
+/* Reset timer into system default state, but do not affect output/input
+ * pins
+ */
 
 static void stm32_tim_reset(FAR struct stm32_tim_dev_s *dev)
 {
@@ -542,7 +551,7 @@ static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
   uint32_t freqin;
   int prescaler;
 
-  tmrinfo("Set clock=%d\n", freq);
+  tmrinfo("Set clock=%" PRId32 "\n", freq);
 
   DEBUGASSERT(dev != NULL);
 
@@ -616,7 +625,7 @@ static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
    */
 
   prescaler = freqin / freq;
-  tmrinfo("  timer freq=%d\n", freqin);
+  tmrinfo("  timer freq=%" PRId32 "\n", freqin);
   tmrinfo("  prescaler=%d\n", prescaler);
 
   /* We need to decrement value for '1', but only, if that will not to
@@ -638,6 +647,7 @@ static int stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq)
   tmrinfo("  prescaler (adjusted)=%d\n", prescaler);
 
   /* PSC_OFFSET is the same for ATIM, BTIM or GTIM */
+
   stm32_putreg16(dev, STM32_BTIM_PSC_OFFSET, prescaler);
   stm32_tim_enable(dev);
 
@@ -716,9 +726,11 @@ static uint32_t stm32_tim_getclock(FAR struct stm32_tim_dev_s *dev)
 static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
                                 uint32_t period)
 {
-  tmrinfo("Set period=%d\n", period);
+  tmrinfo("Set period=%" PRId32 "\n", period);
   DEBUGASSERT(dev != NULL);
+
   /* ARR_OFFSET is the same for ATIM, BTIM or GTIM */
+
   stm32_putreg32(dev, STM32_BTIM_ARR_OFFSET, period);
 }
 
@@ -734,11 +746,12 @@ static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev)
   /* According to STM32G0x0 datasheet, TIMx_CNT registers are 32-bits but
    * CNT field is 16-bits [15:0].
    * TIM 1, 3, 6-7, 14-17
-   *
    */
+
   /* In datasheet page 988, there is a useless bit named UIFCPY in TIMx_CNT.
    * reset it it result when not TIM2 or TIM5.
    */
+
   uint32_t counter = stm32_getreg32(dev, STM32_BTIM_CNT_OFFSET);
   counter &= 0xffff;
   return counter;
@@ -837,20 +850,25 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
 static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
   DEBUGASSERT(dev != NULL);
+
   /* DIER_OFFSET is the same for ATIM, BTIM or GTIM */
+
   stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, 0, source);
 }
 
 static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
   DEBUGASSERT(dev != NULL);
+
   /* DIER_OFFSET is the same for ATIM, BTIM or GTIM */
+
   stm32_modifyreg16(dev, STM32_BTIM_DIER_OFFSET, source, 0);
 }
 
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source)
 {
   /* SR_OFFSET is the same for ATIM, BTIM or GTIM */
+
   stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~source);
 }
 
@@ -908,14 +926,16 @@ static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev,
     }
 
   stm32_tim_reload_counter(dev);
+
   /* CR1_OFFSET is the same for ATIM, BTIM or GTIM */
+
   stm32_putreg16(dev, STM32_BTIM_CR1_OFFSET, val);
 
   /* Advanced registers require Main Output Enable */
 #if defined(CONFIG_STM32F0L0G0_TIM1) || defined(CONFIG_STM32F0L0G0_TIM8)
   if (((struct stm32_tim_priv_s *)dev)->base == STM32_TIM1_BASE
 #  if defined(CONFIG_STM32F0L0G0_TIM8)
-      ||((struct stm32_tim_priv_s *)dev)->base == STM32_TIM8_BASE
+      || ((struct stm32_tim_priv_s *)dev)->base == STM32_TIM8_BASE
 #  endif
   )
       {
@@ -932,7 +952,9 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev,
   uint16_t ccmr_orig   = 0;
   uint16_t ccmr_val    = 0;
   uint16_t ccmr_mask   = 0xff;
+
   /* CCER_OFFSET and CCMR1_OFFSET are the same for ATIM and GTIM */
+
   uint16_t ccer_val    = stm32_getreg16(dev, STM32_GTIM_CCER_OFFSET);
   uint8_t  ccmr_offset = STM32_GTIM_CCMR1_OFFSET;
 
@@ -1180,6 +1202,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev,
         break;
 #endif
     }
+
   return OK;
 }
 

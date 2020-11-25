@@ -45,6 +45,8 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <inttypes.h>
+#include <stdint.h>
 
 #include <nuttx/wdog.h>
 #include <nuttx/net/netconfig.h>
@@ -157,7 +159,8 @@ void igmp_input(struct net_driver_s *dev)
   group = igmp_grpallocfind(dev, &destipaddr);
   if (group == NULL)
     {
-      nerr("ERROR: Failed to find/allocate group: %08x\n", destipaddr);
+      nerr("ERROR: Failed to find/allocate group: %08" PRIx32 "\n",
+           (uint32_t)destipaddr);
       return;
     }
 

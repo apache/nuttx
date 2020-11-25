@@ -64,7 +64,10 @@ void uuid_to_string(const uuid_t *u, char **s, uint32_t *status)
     }
 
   c = asprintf(s,
-        "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+        "%08" PRIx32 "-%04" PRIx16 "-%04" PRIx16
+        "-%02" PRIx8 "%02" PRIx8
+        "-%02" PRIx8 "%02" PRIx8 "%02" PRIx8
+        "%02" PRIx8 "%02" PRIx8 "%02" PRIx8,
         u->time_low, u->time_mid, u->time_hi_and_version,
         u->clock_seq_hi_and_reserved, u->clock_seq_low, u->node[0],
         u->node[1], u->node[2], u->node[3], u->node[4], u->node[5]);

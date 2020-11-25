@@ -77,7 +77,8 @@ static const char * const g_abbrev_wdayname[7] =
 
 static const char * const g_wdayname[7] =
 {
-  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+  "Saturday"
 };
 
 static const char * const g_abbrev_monthname[12] =
@@ -120,8 +121,10 @@ static const char * const g_monthname[12] =
  *   %e     Like %d, the day of the month as a decimal number, but a leading
  *          zero is replaced by a space.
  *   %h     Equivalent to %b.  (SU)
- *   %H     The hour as a decimal number using a 24-hour clock (range 00 to 23).
- *   %I     The  hour as a decimal number using a 12-hour clock (range 01 to 12).
+ *   %H     The hour as a decimal number using a 24-hour clock
+ *          (range 00 to 23).
+ *   %I     The  hour as a decimal number using a 12-hour clock
+ *          (range 01 to 12).
  *   %j     The day of the year as a decimal number (range 001 to 366).
  *   %k     The hour (24-hour clock) as a decimal number (range  0  to  23);
  *          single digits are preceded by a blank.  (See also %H.)  (TZ)
@@ -207,7 +210,9 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
 
            case 'h':
 
-           /* %b: The abbreviated month name according to the current locale. */
+           /* %b: The abbreviated month name according to the current
+            * locale.
+            */
 
            case 'b':
              {
@@ -231,7 +236,9 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
-           /* %y: The year as a decimal number without a century (range 00 to 99). */
+           /* %y: The year as a decimal number without a century
+            * (range 00 to 99).
+            */
 
            case 'y':
              {
@@ -247,7 +254,9 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
-           /* %d: The day of the month as a decimal number (range 01 to 31). */
+           /* %d: The day of the month as a decimal number
+            * (range 01 to 31).
+            */
 
            case 'd':
              {
@@ -255,8 +264,8 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
-           /* %e: Like %d, the day of the month as a decimal number, but a leading
-            * zero is replaced by a space.
+           /* %e: Like %d, the day of the month as a decimal number, but
+            * a leading zero is replaced by a space.
             */
 
            case 'e':
@@ -265,7 +274,9 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
-           /* %H: The hour as a decimal number using a 24-hour clock (range 00  to 23). */
+           /* %H: The hour as a decimal number using a 24-hour clock
+            * (range 00  to 23).
+            */
 
            case 'H':
              {
@@ -273,7 +284,9 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
-           /* %I: The  hour as a decimal number using a 12-hour clock (range 01 to 12). */
+           /* %I: The  hour as a decimal number using a 12-hour clock
+            * (range 01 to 12).
+            */
 
            case 'I':
              {
@@ -281,21 +294,23 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
-           /* %j: The day of the year as a decimal number (range 001 to 366). */
+           /* %j: The day of the year as a decimal number
+            * (range 001 to 366).
+            */
 
            case 'j':
              {
                if (tm->tm_mon < 12)
                  {
                    value = clock_daysbeforemonth(tm->tm_mon,
-                                                 clock_isleapyear(tm->tm_year)) +
-                                                 tm->tm_mday;
+                           clock_isleapyear(tm->tm_year)) + tm->tm_mday;
                    len   = snprintf(dest, chleft, "%03d", value);
                  }
              }
              break;
 
-           /* %k: The hour (24-hour clock) as a decimal number (range  0  to  23);
+           /* %k: The hour (24-hour clock) as a decimal number
+            * (range  0  to  23);
             * single digits are preceded by a blank.
             */
 
@@ -305,7 +320,8 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
-           /* %l: The  hour  (12-hour  clock) as a decimal number (range 1 to 12);
+           /* %l: The  hour  (12-hour  clock) as a decimal number
+            * (range 1 to 12);
             * single digits are preceded by a blank.
             */
 
@@ -374,18 +390,20 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              }
              break;
 
-           /* %s: The number of seconds since the Epoch, that is, since 1970-01-01
-            * 00:00:00 UTC.  Hmmm... mktime argume is not 'const'.
+           /* %s: The number of seconds since the Epoch, that is,
+            * since 1970-01-01 00:00:00 UTC.
+            * Hmmm... mktime argume is not 'const'.
             */
 
            case 's':
              {
-               len = snprintf(dest, chleft, "%d", mktime((FAR struct tm *)tm));
+               len = snprintf(dest, chleft, "%ju",
+                              (uintmax_t)mktime((FAR struct tm *)tm));
              }
              break;
 
-           /* %S: The second as a decimal number (range 00 to 60).  (The range  is
-            * up to 60 to allow for occasional leap seconds.)
+           /* %S: The second as a decimal number (range 00 to 60).
+            * (The range is up to 60 to allow for occasional leap seconds.)
             */
 
            case 'S':

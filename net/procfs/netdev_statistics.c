@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 #include <debug.h>
 
 #include <netinet/ether.h>
@@ -72,11 +73,13 @@ static int netprocfs_inet6draddress(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_blank_line(FAR struct netprocfs_file_s *netfile);
 #endif
 #ifdef CONFIG_NETDEV_STATISTICS
-static int netprocfs_rxstatistics_header(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_rxstatistics_header(
+    FAR struct netprocfs_file_s *netfile);
 static int netprocfs_rxstatistics(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_rxpackets_header(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_rxpackets(FAR struct netprocfs_file_s *netfile);
-static int netprocfs_txstatistics_header(FAR struct netprocfs_file_s *netfile);
+static int netprocfs_txstatistics_header(
+    FAR struct netprocfs_file_s *netfile);
 static int netprocfs_txstatistics(FAR struct netprocfs_file_s *netfile);
 static int netprocfs_errors(FAR struct netprocfs_file_s *netfile);
 #endif /* CONFIG_NETDEV_STATISTICS */
@@ -380,7 +383,8 @@ static int netprocfs_blank_line(FAR struct netprocfs_file_s *netfile)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_STATISTICS
-static int netprocfs_rxstatistics_header(FAR struct netprocfs_file_s *netfile)
+static int netprocfs_rxstatistics_header(
+    FAR struct netprocfs_file_s *netfile)
 {
   DEBUGASSERT(netfile != NULL);
   return snprintf(netfile->line, NET_LINELEN , "\tRX: %-8s %-8s %-8s\n",
@@ -492,7 +496,8 @@ static int netprocfs_rxpackets(FAR struct netprocfs_file_s *netfile)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_STATISTICS
-static int netprocfs_txstatistics_header(FAR struct netprocfs_file_s *netfile)
+static int netprocfs_txstatistics_header(
+    FAR struct netprocfs_file_s *netfile)
 {
   DEBUGASSERT(netfile != NULL);
 
@@ -515,7 +520,8 @@ static int netprocfs_txstatistics(FAR struct netprocfs_file_s *netfile)
   dev = netfile->dev;
   stats = &dev->d_statistics;
 
-  return snprintf(netfile->line, NET_LINELEN, "\t    %08lx %08lx %08lx %08lx\n",
+  return snprintf(netfile->line, NET_LINELEN,
+                  "\t    %08lx %08lx %08lx %08lx\n",
                   (unsigned long)stats->tx_packets,
                   (unsigned long)stats->tx_done,
                   (unsigned long)stats->tx_errors,
@@ -537,7 +543,8 @@ static int netprocfs_errors(FAR struct netprocfs_file_s *netfile)
   dev = netfile->dev;
   stats = &dev->d_statistics;
 
-  return snprintf(netfile->line, NET_LINELEN , "\tTotal Errors: %08x\n\n",
+  return snprintf(netfile->line, NET_LINELEN,
+                  "\tTotal Errors: %08" PRIx32 "\n\n",
                   stats->errors);
 }
 #endif /* CONFIG_NETDEV_STATISTICS */

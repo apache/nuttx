@@ -783,7 +783,7 @@ static void sam_putreg32(uint32_t regval, uintptr_t regaddr)
   putreg32(regval, regaddr);
 }
 #else
-static inline void sam_putreg32(uint32_t regval, uint32_t regaddr)
+static inline void sam_putreg32(uint32_t regval, uintptr_t regaddr)
 {
   putreg32(regval, regaddr);
 }
@@ -836,7 +836,7 @@ static void sam_putreg16(uint16_t regval, uintptr_t regaddr)
   putreg16(regval, regaddr);
 }
 #else
-static inline void sam_putreg16(uint16_t regval, uint32_t regaddr)
+static inline void sam_putreg16(uint16_t regval, uintptr_t regaddr)
 {
   putreg16(regval, regaddr);
 }
@@ -889,7 +889,7 @@ static void sam_putreg8(uint8_t regval, uintptr_t regaddr)
   putreg8(regval, regaddr);
 }
 #else
-static inline void sam_putreg8(uint8_t regval, uint32_t regaddr)
+static inline void sam_putreg8(uint8_t regval, uintptr_t regaddr)
 {
   putreg8(regval, regaddr);
 }
@@ -2270,7 +2270,9 @@ static void sam_resume(struct sam_usbdev_s *priv)
 
       sam_enableclks();
 
-      /* Restore full power -- whatever that means for this particular board */
+      /* Restore full power -- whatever that means for this particular
+       * board
+       */
 
       sam_usb_suspend((struct usbdev_s *)priv, true);
 

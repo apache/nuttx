@@ -1,37 +1,20 @@
 /****************************************************************************
- * include/nuttx/power/pm.h
- * NuttX Power Management Interfaces
+ * arch/arm/src/nrf52/nrf52_pminitialize.c
  *
- *   Copyright (C) 2011-2012, 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *   Author: Matias Nitsche <mnitsche@dc.uba.ar>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -227,12 +210,12 @@ struct pm_governor_s
    *
    * Description:
    *   Invoked by the PM system during initialization, to allow the governor
-   *   to initialize its internal data. This can be left to NULL if not needed
-   *   by the governor.
+   *   to initialize its internal data. This can be left to NULL if not
+   *   needed by the governor.
    *
    *   NOTE: since this will be called from pm_initialize(), the system
    *   is in very early boot state when this callback is invoked. Thus,
-   *   only ver basic initialization should be performed (e.g. no memory
+   *   only very basic initialization should be performed (e.g. no memory
    *   should be allocated).
    *
    **************************************************************************/
@@ -379,8 +362,9 @@ int pm_unregister(FAR struct pm_callback_s *callbacks);
  *     higher priorities.  Higher priority activity can prevent the system
  *     from entering reduced power states for a longer period of time.
  *
- *     As an example, a button press might be higher priority activity because
- *     it means that the user is actively interacting with the device.
+ *     As an example, a button press might be higher priority activity
+ *     because it means that the user is actively interacting with the
+ *     device.
  *
  * Returned Value:
  *   None.
@@ -405,7 +389,8 @@ void pm_activity(int domain, int priority);
  *   domain - The domain of the PM activity
  *   state - The state want to stay.
  *
- *     As an example, media player might stay in normal state during playback.
+ *     As an example, media player might stay in normal state during
+ *     playback.
  *
  * Returned Value:
  *   None.
@@ -465,15 +450,15 @@ uint32_t pm_staycount(int domain, enum pm_state_e state);
  *
  * Description:
  *   This function is called from the MCU-specific IDLE loop to monitor the
- *   the power management conditions.  This function returns the "recommended"
- *   power management state based on the PM configuration and activity
- *   reported in the last sampling periods.  The power management state is
- *   not automatically changed, however.  The IDLE loop must call
+ *   the power management conditions.  This function returns the
+ *   "recommended" power management state based on the PM configuration and
+ *   activity reported in the last sampling periods.  The power management
+ *   state is not automatically changed, however.  The IDLE loop must call
  *   pm_changestate() in order to make the state change.
  *
- *   These two steps are separated because the platform-specific IDLE loop may
- *   have additional situational information that is not available to the
- *   the PM sub-system.  For example, the IDLE loop may know that the
+ *   These two steps are separated because the platform-specific IDLE loop
+ *   may have additional situational information that is not available to
+ *   the the PM sub-system.  For example, the IDLE loop may know that the
  *   battery charge level is very low and may force lower power states
  *   even if there is activity.
  *

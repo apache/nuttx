@@ -72,9 +72,34 @@ typedef unsigned short     _uint16_t;
 typedef signed int         _int32_t;
 typedef unsigned int       _uint32_t;
 
+/* Note about host OS types:
+ * - int64_t is long long for 64-bit macOS
+ * - int64_t is long for Ubuntu x86-64
+ *
+ * Note for sim/macOS modules:
+ * For sim/macOS, usually x86_64-elf-gcc from homebrew is used
+ * as MODULECC. It seems to be configured as __INT64_TYPE__ == long int.
+ * The __APPLE_CC__ check below is to workaround it.
+ * (The host cc defines __APPLE_CC__, while x86_64-elf-gcc doesn't.)
+ * XXX It is a problem if you need C++ symbols in symtabs for modules.
+ */
+
+#if defined(__APPLE_CC__) || !defined(_LP64)
 typedef signed long long   _int64_t;
 typedef unsigned long long _uint64_t;
+#else
+typedef signed long        _int64_t;
+typedef unsigned long      _uint64_t;
+#endif
 #define __INT64_DEFINED
+
+#if defined(__APPLE_CC__)
+typedef signed long        _intmax_t;
+typedef unsigned long      _uintmax_t;
+#else
+typedef _int64_t           _intmax_t;
+typedef _uint64_t          _uintmax_t;
+#endif
 
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
 /* 64-bit build on 64-bit machine: A size is 8 bytes */

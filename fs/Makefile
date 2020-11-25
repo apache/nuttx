@@ -97,9 +97,13 @@ $(BIN):	$(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 context::
+  
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
 
 .depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MAKE) makedepfile
 	$(Q) touch $@
 
 depend: .depend

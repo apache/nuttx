@@ -228,7 +228,7 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
                              nsectors * dev->sectsize);
       if (nbytesread < 0 && nbytesread != -EINTR)
         {
-          ferr("ERROR: Read failed: %d\n", nbytesread);
+          ferr("ERROR: Read failed: %zd\n", nbytesread);
           return (int)nbytesread;
         }
     }
@@ -275,7 +275,7 @@ static ssize_t loop_write(FAR struct inode *inode,
                                  nsectors * dev->sectsize);
       if (nbyteswritten < 0 && nbyteswritten != -EINTR)
         {
-          ferr("ERROR: nx_write failed: %d\n", nbyteswritten);
+          ferr("ERROR: nx_write failed: %zd\n", nbyteswritten);
           return nbyteswritten;
         }
     }

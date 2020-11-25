@@ -446,7 +446,7 @@ struct sensor_ops_s
    *   If *period_us > max_delay it will be truncated to max_dealy and if
    *   *period_us < min_delay it will be replaced by min_delay.
    *
-   *   Before changing the interval, You need to push the prepared data to
+   *   Before changing the interval, you need to push the prepared data to
    *   ensure that they are not lost.
    *
    * Input Parameters:
@@ -471,7 +471,7 @@ struct sensor_ops_s
    *   This function can be called while the sensor is activated,
    *   in which case it must not cause any sensor measurements to be lost.
    *   So, it is necessary to flush fifo or read ready data from data
-   *   register to prevent data lost before You using batch mode.
+   *   register to prevent data lost before you using batch mode.
    *
    *   This sensor default mode isn't batch mode, so you need call this
    *   function and *latency_us != 0.
@@ -509,15 +509,16 @@ struct sensor_ops_s
   /**************************************************************************
    * Name: fetch
    *
-   * We can fetch sensor register data by this function. It will use buffer
-   * of sensor_read provided and disables intermediate buffer of upper half.
-   * We recommend lowerhalf driver writer to use this function for slower
-   * ODR(output data rate) of sensor because this way saves space and simple.
+   * Fetch sensor register data by this function. It will use buffer of
+   * userspace provided and disables intermediate buffer of upper half. It's
+   * recommend that the lowerhalf driver writer to use this function for
+   * slower sensor ODR (output data rate) of sensor because this way saves
+   * space and it's simple.
    *
-   * If fectch isn't NULL, upper half driver will disable intermediate
+   * If fetch isn't NULL, upper half driver will disable intermediate
    * buffer and userspace can't set buffer size by ioctl.
    *
-   * You can call this function to read sensor register data by i2c/spi bus
+   * You can call this function to read sensor register data by I2C/SPI bus
    * when open mode is non-block, and poll are always successful.
    * When you call this function and open mode is block, you will wait
    * until sensor data ready, then read sensor data.
@@ -540,7 +541,7 @@ struct sensor_ops_s
   /**************************************************************************
    * Name: control
    *
-   * In this method, user can set some special config for the sensor,
+   * With this method, the user can set some special config for the sensor,
    * such as changing the custom mode, setting the custom resolution, reset,
    * etc, which are all parsed and implemented by lower half driver.
    *
@@ -656,14 +657,14 @@ extern "C"
  *   "upper half" Sensor device and registers that device so that can be used
  *   by application code.
  *
- *   You can register the chararter device by node name format based on the
+ *   You can register the character device by node name format based on the
  *   type of sensor. Multiple types of the same type are distinguished by
  *   numbers. eg: accel0, accel1. This type of sensor must be less than
  *   SENSOR_TYPE_COUNT. This API corresponds to the sensor_unregister.
  *
  * Input Parameters:
  *   dev   - A pointer to an instance of lower half sensor driver. This
- *           instance is bound to the sensor driver and must persists as long
+ *           instance is bound to the sensor driver and must persist as long
  *           as the driver persists.
  *   devno - The user specifies which device of this type, from 0. If the
  *           devno alerady exists, -EEXIST will be returned.
@@ -689,7 +690,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *dev, int devno);
  *
  * Input Parameters:
  *   dev   - A pointer to an instance of lower half sensor driver. This
- *           instance is bound to the sensor driver and must persists as long
+ *           instance is bound to the sensor driver and must persist as long
  *           as the driver persists.
  *   path  - The user specifies path of device. ex: /dev/sensor/xxx.
  *   esize - The element size of intermediate circular buffer.
@@ -707,7 +708,7 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *dev,
  * Name: sensor_unregister
  *
  * Description:
- *   This function unregister character node and release all resource about
+ *   This function unregisters character node and releases all resource from
  *   upper half driver. This API corresponds to the sensor_register.
  *
  * Input Parameters:
@@ -723,7 +724,7 @@ void sensor_unregister(FAR struct sensor_lowerhalf_s *dev, int devno);
  * Name: sensor_custom_unregister
  *
  * Description:
- *   This function unregister character node and release all resource about
+ *   This function unregisters character node and releases all resource from
  *   upper half driver. This API corresponds to the sensor_custom_register.
  *
  * Input Parameters:

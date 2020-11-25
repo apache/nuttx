@@ -357,7 +357,7 @@ void esp32_gpioirqenable(int irq, gpio_intrtype_t intrtype)
 #endif
   int pin;
 
-  DEBUGASSERT(irq <= ESP32_FIRST_GPIOIRQ && irq <= ESP32_LAST_GPIOIRQ);
+  DEBUGASSERT(irq >= ESP32_FIRST_GPIOIRQ && irq <= ESP32_LAST_GPIOIRQ);
 
   /* Convert the IRQ number to a pin number */
 
@@ -418,7 +418,7 @@ void esp32_gpioirqdisable(int irq)
   uint32_t regval;
   int pin;
 
-  DEBUGASSERT(irq <= ESP32_FIRST_GPIOIRQ && irq <= ESP32_LAST_GPIOIRQ);
+  DEBUGASSERT(irq >= ESP32_FIRST_GPIOIRQ && irq <= ESP32_LAST_GPIOIRQ);
 
   /* Convert the IRQ number to a pin number */
 

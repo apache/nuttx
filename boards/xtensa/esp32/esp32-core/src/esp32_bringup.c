@@ -61,6 +61,7 @@
 
 #include <syslog.h>
 #include <sys/errno.h>
+#include <nuttx/himem/himem.h>
 
 #include "esp32_procfs_imm.h"
 #include "esp32-core.h"
@@ -142,6 +143,15 @@ int esp32_bringup(void)
 
 #endif
 
+#if defined(CONFIG_ESP32_SPIRAM) && \
+    defined(CONFIG_ESP32_SPIRAM_BANKSWITCH_ENABLE)
+  ret = esp_himem_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init HIMEM: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -156,12 +166,17 @@ int esp32_bringup(void)
   ret = esp32_mmcsd_initialize(0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize SD slot: %d\n", ret);
       return ret;
     }
 #endif
 
 #ifdef CONFIG_ESP32_SPIFLASH
+
+#ifdef CONFIG_ESP32_SPIFLASH_ENCRYPTION_TEST
+  esp32_spiflash_encrypt_test();
+#endif 
+
   ret = esp32_spiflash_init();
   if (ret)
     {

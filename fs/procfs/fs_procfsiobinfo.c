@@ -169,6 +169,9 @@ static FAR const char *g_iob_user_names[] =
 #ifdef CONFIG_WIRELESS_BLUETOOTH
   "bluetooth",
 #endif
+#ifdef CONFIG_NET_CAN
+  "can",
+#endif
   "global",
 };
 
@@ -294,7 +297,7 @@ static ssize_t iobinfo_read(FAR struct file *filep, FAR char *buffer,
   /* The first line is the headers */
 
   linesize  = snprintf(iobfile->line, IOBINFO_LINELEN,
-                        "                           TOTAL           TOTAL\n");
+                       "                           TOTAL           TOTAL\n");
 
   copysize  = procfs_memcpy(iobfile->line, linesize, buffer, buflen,
                             &offset);
@@ -306,7 +309,8 @@ static ssize_t iobinfo_read(FAR struct file *filep, FAR char *buffer,
       buflen    -= copysize;
 
       linesize  = snprintf(iobfile->line, IOBINFO_LINELEN,
-                        "        USER            CONSUMED        PRODUCED\n");
+                           "        USER            CONSUMED        "
+                           "PRODUCED\n");
 
       copysize  = procfs_memcpy(iobfile->line, linesize, buffer, buflen,
                                 &offset);

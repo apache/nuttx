@@ -27,3 +27,130 @@ following locations:
    ``arch/``\ *<architecture>*\ ``/src/``\ *<hardware>* directory
    for the specific processor *<architecture>* and for the
    specific *<chip>* watchdog timer peripheral devices.
+
+There are two ways to enable Watchdog Timer Support along with the Watchdog Example. The first is faster and simpler. Just run the following command to use a ready config file with watchdog timer support and example included. You need to check if there's a watchdog config file for your specific chip. You may check it at the specific board's path: ``/boards/<arch>/<chip>/<board>/config``.
+
+.. code-block:: console
+
+   $ ./tools/configure.sh <board>:watchdog
+
+And the second way is creating your own config file. To do so, follow the next instructions.
+
+Enabling the Watchdog Support and Example in ``menuconfing``
+------------------------------------------------------------
+
+1. Select Watchdog Timer Instances
+
+ To select these wdts browse in the ``menuconfig`` using the following path:
+
+ Go into menu :menuselection:`System Type --> <Chip> Peripheral Selection` and press :kbd:`Enter`. Then select one or more watchdog timers according to availability of your chip.
+
+2. Enable the Watchdog Timer Support
+
+ Go into menu :menuselection:`Device Drivers --> Timer Driver Support` and press :kbd:`Enter`. Then enable:
+
+ - [x] Watchdog Timer Support
+
+3. Include the Watchdog Timer Example
+
+ Go into menu :menuselection:`Application Configuration --> Examples` and press :kbd:`Enter`. Then select the Watchdog Timer example.
+
+ - [x] Watchdog Timer example
+
+ Below the option, it is possible to manually configure some standard parameters that will be used by the example, but they also can be passed as command line arguments later.
+ The parameters are the following: the standard timer device path (which defines the WDT instance), the timeout period (which is the period on which the watchdog will expire),
+ the ping delay (which is the interval period between feeding the dog) and the ping time (which is the total interval that the example will feed the dog, after this interval,
+ the dog will starve and the chip will trigger an interrupt or reset.
+
+4. Include the Debug Watchdog Feature
+
+ In order to get the watchdog timer status, you need to enable it. For production code and for your application you may disable it.
+ 
+ Go into menu :menuselection:`Build Setup --> Debug Options` and press :kbd:`Enter`. Then enable:
+
+ - [x] Enable Debug Features
+ - [x] Watchdog Timer Debug Features
+
+Watchdog Timer Example
+----------------------
+
+The previously selected example will basically do the following:
+
+* Open the watchdog device
+* Set the watchdog timeout
+* Start the watchdog timer
+* Ping (feed the dog) during the ``pingtime`` with a delay of ``pingdelay`` and print out the wdt status in case debug was enabled. 
+* Enter into an endless loop without pinging. It will cause the watchdog timer to reset the chip on timeout, i.e., after timer expiration.
+
+
+The `example code <https://github.com/apache/incubator-nuttx-apps/blob/master/examples/watchdog/watchdog_main.c>`_  may be explored, its path is at ``/examples/watchdog/watchdog_main.c`` in the apps' repository.
+
+In NuttX, the watchdog timer driver is a character driver and when a chip supports multiple watchdog timers, each one is accessible through its respective special file in ``/dev`` directory. Each watchdog timer is registered using a unique numeric identifier (i.e. ``/dev/watchdog0``, ``/dev/watchdog1``, ...).
+
+Use the following command to run the example:
+
+.. code-block:: console
+
+  nsh> wdog
+
+This command will use the watchdog timer 0. To use the others, specify it through a parameter (where x is the timer number):
+
+.. code-block:: console
+
+  nsh> wdog -i /dev/watchdogx
+
+Application Level Interface
+----------------------------
+
+The first necessary thing to be done in order to use the watchdog timer driver in an application is to include the header file for the NuttX Watchdog timer driver. It contains the Application Level Interface to the timer driver. To do so, include:
+
+.. code-block:: c
+
+  #include <nuttx/timers/watchdog.h>
+
+
+At an application level, the watchdog timer functionalities may be accessed through ``ioctl`` systems calls. These ``ioctl`` commands internally call lower-half layer operations and the parameters are forwarded to these operations through the ``ioctl`` system call. The example provides a great resource to demonstrate how to use those ``ioctl`` commands. The available ``ioctl`` commands are:
+
+.. c:macro:: WDIOC_START
+
+This command starts the watchdog timer.
+
+.. c:macro:: WDIOC_STOP
+
+This command stops the watchdog timer.
+
+.. c:macro:: WDIOC_GETSTATUS
+
+This command gets the status of the watchdog timer. It receives a writeable pointer to struct ``watchdog_status_s`` as parameter. The lower-half driver writes the current status in this struct.
+
+.. c:struct:: watchdog_status_s
+.. code-block:: c
+
+	struct watchdog_status_s
+	{
+	  uint32_t  flags;          /* See WDFLAGS_* definitions above */
+	  uint32_t  timeout;        /* The current timeout setting (in milliseconds) */
+	  uint32_t  timeleft;       /* Time left until the watchdog expiration
+		                     * (in milliseconds) */
+	};
+
+.. c:macro:: WDIOC_SETTIMEOUT
+
+This command sets the timeout value, i.e., the value that will trigger the reset or interrupt. The argument is a ``uint32_t`` value in miliseconds.
+
+.. c:macro:: WDIOC_CAPTURE
+
+This command registers an user callback that will be triggered on timeout. It receives as argument a pointer to struct ``watchdog_capture_s``. If the user callback is NULL, then it configures only to reset. Not all chips support interrupt on timeout. This command is optional, i.e., if it's not used, the standard behaviour is to reset on timeout.
+
+.. c:struct:: watchdog_capture_s
+.. code-block:: c
+
+	struct watchdog_capture_s
+	{
+	  CODE xcpt_t newhandler;   /* The new watchdog capture handler */
+	  CODE xcpt_t oldhandler;   /* The previous watchdog capture handler (if any) */
+	};
+
+.. c:macro:: WDIOC_KEEPALIVE
+
+ This command resets the watchdog timer ("ping",  "pet the dog",  "feed the dog"). 

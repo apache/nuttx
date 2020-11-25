@@ -23,6 +23,24 @@ include $(TOPDIR)/tools/Config.mk
 
 HOSTOS = ${shell uname -o 2>/dev/null || uname -s 2>/dev/null || echo "Other"}
 
+# NuttX is sometimes built as a native target.
+# In that case, the __NuttX__ macro is predefined by the compiler.
+# https://github.com/NuttX/buildroot
+#
+# In other cases, __NuttX__ is an ordinary user-definded macro.
+# It's especially the case for NuttX sim, which is a target to run
+# the entire NuttX as a program on the host OS, which can be Linux,
+# macOS, Windows, etc.
+# https://cwiki.apache.org/confluence/display/NUTTX/NuttX+Simulation
+# In that case, the host OS compiler is used to build NuttX.
+# Thus, eg. NuttX sim on macOS is built with __APPLE__.
+# We #undef predefined macros for those possible host OSes here
+# because the OS APIs this library should use are of NuttX,
+# not the host OS.
+
+ARCHDEFINES += -U_AIX -U_WIN32 -U__APPLE__ -U__FreeBSD__
+ARCHDEFINES += -U__NetBSD__ -U__linux__ -U__sun__ -U__unix__
+
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
 endif
@@ -41,8 +59,8 @@ ifeq ($(CONFIG_CXX_EXCEPTION),)
   ARCHCPUFLAGSXX += -fno-exceptions
 endif
 ARCHPICFLAGS = -fpic
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHWARNINGSXX = -Wall -Wshadow -Wundef
+ARCHWARNINGS = -Wstrict-prototypes -Wundef
+ARCHWARNINGSXX = -Wundef
 
 # Add -fvisibility=hidden
 # Because we don't want export nuttx's symbols to share libraries
@@ -146,7 +164,7 @@ ifeq ($(CONFIG_SIM_M32),y)
 endif
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+   $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -pipe
 
 ifeq ($(CONFIG_BT_LIBUSB),y)
   STDLIBS += -lusb-1.0

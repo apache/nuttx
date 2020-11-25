@@ -131,7 +131,7 @@ static struct progmem_dev_s g_progmem =
  *
  ****************************************************************************/
 
-static int32_t progmem_log2(uint32_t blocksize)
+static int32_t progmem_log2(size_t blocksize)
 {
   uint32_t log2 = 0;
 
@@ -280,8 +280,9 @@ static ssize_t progmem_write(FAR struct mtd_dev_s *dev, off_t offset,
   off_t startblock;
   ssize_t result;
 
-  /* Write the specified blocks from the provided user buffer and return status
-   * (The positive, number of blocks actually written or a negated errno)
+  /* Write the specified blocks from the provided user buffer and return
+   * status (The positive number of blocks actually written or a negated
+   * errno).
    */
 
   startblock = offset >> priv->blkshift;
@@ -295,7 +296,8 @@ static ssize_t progmem_write(FAR struct mtd_dev_s *dev, off_t offset,
  * Name: progmem_ioctl
  ****************************************************************************/
 
-static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
+static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+                         unsigned long arg)
 {
   FAR struct progmem_dev_s *priv = (FAR struct progmem_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
@@ -307,13 +309,13 @@ static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
           if (geo)
             {
-              /* Populate the geometry structure with information needed to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information needed to
+               * know the capacity and how to access the device.
                *
-               * NOTE: that the device is treated as though it where just an array
-               * of fixed size blocks.  That is most likely not true, but the client
-               * will expect the device logic to do whatever is necessary to make it
-               * appear so.
+               * NOTE: that the device is treated as though it where just an
+               * array of fixed size blocks.  That is most likely not true,
+               * but the client will expect the device logic to do whatever
+               * is necessary to make it appear so.
                */
 
               geo->blocksize    = (1 << priv->blkshift);     /* Size of one read/write block */

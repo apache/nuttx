@@ -141,7 +141,7 @@ struct twi_dev_s
 
 /* Low-level helper functions */
 
-static void twi_takesem(sem_t *sem);
+static int twi_takesem(sem_t *sem);
 #define     twi_givesem(sem) (nxsem_post(sem))
 
 #ifdef CONFIG_SAM34_TWI_REGDEBUG
@@ -220,7 +220,8 @@ static const struct i2c_ops_s g_twiops =
  *   dev - Instance of the SDIO device driver state structure.
  *
  * Returned Value:
- *   None
+ *     EINVAL - Invalid attempt to get the semaphore
+ *     EINTR  - The wait was interrupted by the receipt of a signal.
  *
  ****************************************************************************/
 

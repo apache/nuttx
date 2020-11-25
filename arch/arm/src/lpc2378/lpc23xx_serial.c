@@ -97,7 +97,7 @@ static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 static int  up_interrupt(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  up_receive(struct uart_dev_s *dev, uint32_t * status);
+static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
 static void up_send(struct uart_dev_s *dev, int ch);
@@ -177,7 +177,6 @@ static struct up_dev_s g_uart2priv =
   .parity    = CONFIG_UART2_PARITY,
   .bits      = CONFIG_UART2_BITS,
   .stopbits2 = CONFIG_UART2_2STOP,
-
 };
 
 static uart_dev_t g_uart2port =
@@ -229,7 +228,8 @@ static inline uint8_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint8_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint8_t value)
 {
   putreg8(value, priv->uartbase + offset);
 }
@@ -305,9 +305,9 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
 /****************************************************************************
  * Name: up_configbaud
  ****************************************************************************/
+
 static inline void up_configbaud(struct up_dev_s *priv)
 {
-
   /* In a buckled-up, embedded system, there is no reason to constantly
    * calculate the following.  The calculation can be skipped if the MULVAL,
    * DIVADDVAL, and DIVISOR values are provided in the configuration file.
@@ -347,12 +347,14 @@ static inline void up_configbaud(struct up_dev_s *priv)
 
   qtrclk = U0_PCLK >> 4;        /* TODO: Different Uart port with different clocking */
 
-  /* Try every valid multiplier, tmulval (or until a perfect match is found). */
+  /* Try every valid multiplier, tmulval
+   * (or until a perfect match is found).
+   */
 
   for (tmulval = 1; tmulval <= 15 && errval > 0; tmulval++)
     {
-      /* Try every valid pre-scale div, tdivaddval (or until a perfect match is
-       * found).
+      /* Try every valid pre-scale div, tdivaddval
+       * (or until a perfect match is found).
        */
 
       for (tdivaddval = 0; tdivaddval <= 15 && errval > 0; tdivaddval++)
@@ -408,6 +410,7 @@ static inline void up_configbaud(struct up_dev_s *priv)
 #else
 
   /* Configure the MS and LS DLAB registers */
+
   up_serialout(priv, UART_DLM_OFFSET, DLMVAL >> 8);
   up_serialout(priv, UART_DLL_OFFSET, DLLVAL & 0xff);
 
@@ -436,7 +439,8 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Clear fifos */
 
-  up_serialout(priv, UART_FCR_OFFSET, (FCR_RX_FIFO_RESET | FCR_TX_FIFO_RESET));
+  up_serialout(priv, UART_FCR_OFFSET,
+               (FCR_RX_FIFO_RESET | FCR_TX_FIFO_RESET));
 
   /* Set trigger */
 
@@ -484,10 +488,11 @@ static int up_setup(struct uart_dev_s *dev)
                (FCR_FIFO_TRIG8 | FCR_TX_FIFO_RESET |
                 FCR_RX_FIFO_RESET | FCR_FIFO_ENABLE));
 
-  /* The NuttX serial driver waits for the first THRE interrupt before sending
-   * serial data... However, it appears that the LPC2378 hardware too does not
-   * generate that interrupt until a transition from not-empty to empty.  So,
-   * the current kludge here is to send one NULL at startup to kick things off.
+  /* The NuttX serial driver waits for the first THRE interrupt before
+   * sending serial data... However, it appears that the LPC2378 hardware
+   * too does not generate that interrupt until a transition from not-empty
+   * to empty.  So, the current kludge here is to send one NULL at startup
+   * to kick things off.
    */
 
   up_serialout(priv, UART_THR_OFFSET, '\0');
@@ -514,14 +519,15 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -536,7 +542,8 @@ static int up_attach(struct uart_dev_s *dev)
   if (ret == OK)
     {
       /* Enable the interrupt (RX and TX interrupts are still disabled in the
-       * UART */
+       * UART
+       */
 
       up_enable_irq(priv->irq);
     }
@@ -549,8 +556,8 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -585,11 +592,14 @@ static int up_interrupt(int irq, void *context, void *arg)
   priv = (struct up_dev_s *)dev->priv;
 
   /* Loop until there are no characters to be transferred or, until we have
-   * been looping for a long time. */
+   * been looping for a long time.
+   */
 
   for (passes = 0; passes < 256; passes++)
     {
-      /* Get the current UART status and check for loop termination conditions */
+      /* Get the current UART status and check for loop termination
+       * conditions
+       */
 
       status = up_serialin(priv, UART_IIR_OFFSET);
 
@@ -597,7 +607,9 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       if ((status & IIR_NO_INT) != 0)
         {
-          /* Break out of the loop when there is no longer a pending interrupt */
+          /* Break out of the loop when there is no longer a pending
+           * interrupt
+           */
 
           break;
         }
@@ -654,6 +666,7 @@ static int up_interrupt(int irq, void *context, void *arg)
           }
         }
     }
+
   return OK;
 }
 
@@ -727,7 +740,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int up_receive(struct uart_dev_s *dev, uint32_t * status)
+static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint8_t rbr;
@@ -758,6 +771,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     {
       priv->ier &= ~IER_ERBFI;
     }
+
   up_serialout(priv, UART_IER_OFFSET, priv->ier);
 }
 
@@ -810,6 +824,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       priv->ier &= ~IER_ETBEI;
     }
+
   up_serialout(priv, UART_IER_OFFSET, priv->ier);
 }
 

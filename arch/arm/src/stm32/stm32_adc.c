@@ -45,6 +45,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -3134,7 +3135,7 @@ static void adc_ioc_enable_tvref_register(FAR struct adc_dev_s *dev,
         }
     }
 
-  ainfo("STM32_ADC_CR2 value: 0x%08x\n",
+  ainfo("STM32_ADC_CR2 value: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_CR2_OFFSET));
 #  endif /* CONFIG_STM32_ADC1 */
 #else    /* !HAVE_BASIC_ADC */
@@ -3147,7 +3148,7 @@ static void adc_ioc_enable_tvref_register(FAR struct adc_dev_s *dev,
       adccmn_modifyreg(priv, STM32_ADC_CCR_OFFSET, ADC_CCR_TSVREFE, 0);
     }
 
-  ainfo("STM32_ADC_CCR value: 0x%08x\n",
+  ainfo("STM32_ADC_CCR value: 0x%08" PRIx32 "\n",
         adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
 #endif
 }
@@ -3277,24 +3278,27 @@ static void adc_dumpregs(FAR struct stm32_dev_s *priv)
   UNUSED(priv);
 
 #if defined(HAVE_IP_ADC_V2)
-  ainfo("ISR:  0x%08x IER:  0x%08x CR:   0x%08x CFGR1: 0x%08x\n",
+  ainfo("ISR:  0x%08" PRIx32 " IER:  0x%08" PRIx32
+        " CR:   0x%08" PRIx32 " CFGR1: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_ISR_OFFSET),
         adc_getreg(priv, STM32_ADC_IER_OFFSET),
         adc_getreg(priv, STM32_ADC_CR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR1_OFFSET));
 #else
-  ainfo("SR:   0x%08x CR1:  0x%08x CR2:  0x%08x\n",
+  ainfo("SR:   0x%08" PRIx32 " CR1:  0x%08" PRIx32
+        " CR2:  0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SR_OFFSET),
         adc_getreg(priv, STM32_ADC_CR1_OFFSET),
         adc_getreg(priv, STM32_ADC_CR2_OFFSET));
 #endif
 
-  ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x\n",
+  ainfo("SQR1: 0x%08" PRIx32 " SQR2: 0x%08" PRIx32
+        " SQR3: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
         adc_getreg(priv, STM32_ADC_SQR3_OFFSET));
 
-  ainfo("SMPR1: 0x%08x SMPR2: 0x%08x\n",
+  ainfo("SMPR1: 0x%08" PRIx32 " SMPR2: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SMPR1_OFFSET),
         adc_getreg(priv, STM32_ADC_SMPR2_OFFSET));
 
@@ -3304,16 +3308,17 @@ static void adc_dumpregs(FAR struct stm32_dev_s *priv)
 #endif
 
 #if defined(STM32_ADC_SQR5_OFFSET)
-  ainfo("SQR5: 0x%08x\n",
+  ainfo("SQR5: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SQR5_OFFSET));
 #endif
 
 #ifdef ADC_HAVE_INJECTED
-  ainfo("JSQR: 0x%08x\n", adc_getreg(priv, STM32_ADC_JSQR_OFFSET));
+  ainfo("JSQR: 0x%08" PRIx32 "\n", adc_getreg(priv, STM32_ADC_JSQR_OFFSET));
 #endif
 
 #if defined(HAVE_IP_ADC_V2) || (defined(HAVE_IP_ADC_V1) && !defined(HAVE_BASIC_ADC))
-  ainfo("CCR:  0x%08x\n", adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
+  ainfo("CCR:  0x%08" PRIx32 "\n",
+        adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
 #endif
 }
 

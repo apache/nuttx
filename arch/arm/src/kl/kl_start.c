@@ -80,7 +80,7 @@
  * Public Data
  ****************************************************************************/
 
-const uint32_t g_idle_topstack = IDLE_STACK;
+const uintptr_t g_idle_topstack = IDLE_STACK;
 
 /****************************************************************************
  * Private Functions
@@ -135,6 +135,7 @@ void __start(void)
     {
       *dest++ = 0;
     }
+
   showprogress('B');
 
   /* Move the initialized data section from his temporary holding spot in
@@ -147,6 +148,7 @@ void __start(void)
     {
       *dest++ = *src++;
     }
+
   showprogress('C');
 
   /* Perform early serial initialization */

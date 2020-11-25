@@ -259,6 +259,7 @@ static void esp_coex_condition_set(uint32_t type, bool dissatisfy);
 static int32_t esp_coex_wifi_request(uint32_t event, uint32_t latency,
                                      uint32_t duration);
 static int32_t esp_coex_wifi_release(uint32_t event);
+static unsigned long esp_random_ulong(void);
 
 /****************************************************************************
  * Public Functions declaration
@@ -389,7 +390,7 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._nvs_erase_key = esp_nvs_erase_key,
   ._get_random = esp_get_random,
   ._get_time = esp_get_time,
-  ._random = esp_random,
+  ._random = esp_random_ulong,
   ._log_write = esp_log_write,
   ._log_writev = esp_log_writev,
   ._log_timestamp = esp_log_timestamp,
@@ -1154,7 +1155,7 @@ static void *esp_queue_create(uint32_t queue_len, uint32_t item_size)
     }
 
   snprintf(mq_adpt->name, sizeof(mq_adpt->name),
-           "/tmp/%X", mq_adpt);
+           "/tmp/%p", mq_adpt);
 
   attr.mq_maxmsg  = queue_len;
   attr.mq_msgsize = item_size;
@@ -3670,6 +3671,20 @@ static int32_t esp_coex_wifi_request(uint32_t event, uint32_t latency,
 static int32_t esp_coex_wifi_release(uint32_t event)
 {
   return 0;
+}
+
+/****************************************************************************
+ * Name: esp_random_ulong
+ *
+ * Description:
+ *   A simpler wrapper of esp_random.
+ *   Just convert the return value from uint32_t to unsigned long.
+ *
+ ****************************************************************************/
+
+static unsigned long esp_random_ulong(void)
+{
+  return esp_random();
 }
 
 /****************************************************************************

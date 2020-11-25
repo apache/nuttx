@@ -471,7 +471,7 @@ ssize_t spiffs_mtd_erase(FAR struct spiffs_s *fs, off_t offset, size_t len)
   nerased = MTD_ERASE(fs->mtd, eblkstart, eblkend - eblkstart);
   if (nerased < 0)
     {
-      ferr("ERROR: MTD_ERASE() failed: %d\n");
+      ferr("ERROR: MTD_ERASE() failed: %zd\n", nerased);
       return nerased;
     }
 

@@ -40,6 +40,14 @@ if AUDIO_CXD56
 
 if AUDIO_DRIVER_SPECIFIC_BUFFERS
 
+config AUDIO_CXD56_SRC
+	bool "CXD56 audio sample rate convertor"
+	select AUDIO_SRC
+	default n
+	---help---
+		Enable support for audio playback using the CXD5247 chip on the
+		CXD56 Spresense board with sample rate convertor.
+
 config CXD56_AUDIO_NUM_BUFFERS
 	int "Number of audio buffers to use"
 	default 4

@@ -312,6 +312,15 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
+  /* Check if the IEEE802.15.4 network driver went down */
+
+  if ((flags & NETDEV_DOWN) != 0)
+    {
+      nwarn("WARNING: Device is down\n");
+      sinfo->s_result = -ENOTCONN;
+      goto end_wait;
+    }
+
   /* The TCP socket is connected and, hence, should be bound to a device.
    * Make sure that the polling device is the one that we are bound to.
    */
@@ -323,16 +332,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
-  /* Check if the IEEE802.15.4 network driver went down */
-
-  if ((flags & NETDEV_DOWN) != 0)
-    {
-      nwarn("WARNING: Device is down\n");
-      sinfo->s_result = -ENOTCONN;
-      goto end_wait;
-    }
-
-  ninfo("flags: %04x acked: %u sent: %u\n",
+  ninfo("flags: %04x acked: %u sent: %zu\n",
         flags, sinfo->s_acked, sinfo->s_sent);
 
   /* If this packet contains an acknowledgement, then update the count of
@@ -350,7 +350,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
        */
 
       sinfo->s_acked = tcp_getsequence(tcp->ackno) - sinfo->s_isn;
-      ninfo("ACK: acked=%d sent=%d buflen=%d\n",
+      ninfo("ACK: acked=%d sent=%zd buflen=%zd\n",
             sinfo->s_acked, sinfo->s_sent, sinfo->s_buflen);
 
       /* Have all of the bytes in the buffer been sent and acknowledged? */
@@ -451,7 +451,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
           sndlen = winleft;
         }
 
-      ninfo("s_buflen=%u s_sent=%u mss=%u winsize=%u sndlen=%d\n",
+      ninfo("s_buflen=%zu s_sent=%zu mss=%u winsize=%u sndlen=%d\n",
             sinfo->s_buflen, sinfo->s_sent, conn->mss, conn->winsize,
             sndlen);
 
@@ -518,7 +518,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
           g_netstats.tcp.sent++;
 #endif
 
-          ninfo("Sent: acked=%d sent=%d buflen=%d tx_unacked=%d\n",
+          ninfo("Sent: acked=%d sent=%zd buflen=%zd tx_unacked=%d\n",
                 sinfo->s_acked, sinfo->s_sent, sinfo->s_buflen,
                 conn->tx_unacked);
         }
@@ -868,7 +868,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
 
       if (ipv6hdr->ipv6.proto != IP_PROTO_TCP)
         {
-          nwarn("WARNING: Expected TCP prototype: %u vs %s\n",
+          nwarn("WARNING: Expected TCP prototype: %u vs %u\n",
                 ipv6hdr->ipv6.proto, IP_PROTO_TCP);
         }
       else

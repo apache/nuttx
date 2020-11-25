@@ -1,6 +1,7 @@
 .. include:: /substitutions.rst
 .. _debugging:
 
+=========
 Debugging
 =========
 
@@ -9,27 +10,23 @@ to use debugging techniques to understand how the system works. Two tools that a
 debugging using the GNU Debugger (gdb).
 
 Debug Logging
--------------
+=============
 
 NuttX has a powerful system logging facility (syslog) with ``info``, ``warn``, and ``error`` levels. You can enable
 debugging for your build for the subsystem or feature by using the ``menuconfig`` system.
 
-.. code-block:: console
-
-   $ make menuconfig
-
-The debug options are available under ``Build Setup`` > ``Debug Options``. You will most likely have to enable the
+The debug options are available under :menuselection:`Build Setup --> Debug Options`. You will most likely have to enable the
 following options:
 
-* ``Enable Debug Features`` — selecting this will turn on subsystem-level debugging options, they will become visible
+* :menuselection:`Enable Debug Features` — selecting this will turn on subsystem-level debugging options, they will become visible
   on the page below. You can then select the ones you want.
-* ``Enable Error Output`` — this will only log errors.
-* ``Enable Warnings Output`` — this will log warnings and errors.
-* ``Enable Informational Debug Output`` — this will produce informational output, warnings, and errors.
+* :menuselection:`Enable Error Output` — this will only log errors.
+* :menuselection:`Enable Warnings Output` — this will log warnings and errors.
+* :menuselection:`Enable Informational Debug Output` — this will produce informational output, warnings, and errors.
 
 You can then select from the subsystems that are available, Network, Scheduler, USB, etc. Note that you will need to
 separately enable the subsystem elsewhere in the ``menuconfig`` system. To see the ``CONFIG`` define that is set,
-use the arrow keys to highlight the subsystem (for instance, ``Network Debug Features``) and type '?'. This will show
+use the arrow keys to highlight the subsystem (for instance, :menuselection:`Network Debug Features`) and type :kbd:`?`. This will show
 you that the C macro that is set is called ``CONFIG_DEBUG_NET``. ``debug.h`` defines the ``netinfo()`` logging
 function that will log output if this macro is set. You can search the source code for ``netinfo`` to see how it is
 used.
@@ -44,82 +41,228 @@ the area you're interested in, and leave the rest disabled, save the config, and
 list of debug feature logging functions in the file
 `debug.h <https://github.com/apache/incubator-nuttx/blob/master/include/debug.h>`__.
 
-Syslog timestamps can be enabled in the ``menuconfig`` system using ``Device Drivers`` > ``System Logging`` > ``Prepend
-timestamp to syslog message`` (``CONFIG_SYSLOG_TIMESTAMP``).
+Syslog timestamps can be enabled in the configuration in :menuselection:`Device Drivers --> System Logging --> Prepend
+timestamp to syslog message` (``CONFIG_SYSLOG_TIMESTAMP``).
 
 You may need to do a little bit of experimenting to find the combination of logging settings that work for the problem
 you're trying to solve. See the file `debug.h <https://github.com/apache/incubator-nuttx/blob/master/include/debug.h>`_
-for available debug settings that are available. This can also be configured via the ``menuconfig`` system.
+for available debug settings that are available.
 
 There are also subsystems that enable USB trace debugging, and you can log to memory too, if you need the logging to be
 faster than what the console can output.
 
-Changing Debug Settings Quickly
--------------------------------
+Debugging with ``openocd`` and ``gdb``
+======================================
 
-You can use the ``kconfig-tweak`` script that comes with the ``kconfig-frontends`` tools to quickly change debug settings,
-for instance turning them on or off before doing a build:
-
-.. code-block:: console
-
-   $ kconfig-tweak --disable CONFIG_DEBUG_NET
-   $ make olddefconfig  # needed to have the kconfig system check the config
-   $ kconfig-tweak --enable CONFIG_DEBUG_NET
-   $ make olddefconfig
-
-You can put a bunch of these into a simple script to configure the logging the way you want:
+To debug our Nucleo board using its embedded SWD debug adapter,
+start ``openocd`` with the following command:
 
 .. code-block:: console
 
-   #!/bin/bash
+  $ openocd -f interface/st-link-v2.cfg -f target/stm32f1x.cfg
 
-   kconfig-tweak --disable CONFIG_DEBUG_ALERT
-   kconfig-tweak --disable CONFIG_DEBUG_FEATURES
-   kconfig-tweak --disable CONFIG_DEBUG_ERROR
-   kconfig-tweak --disable CONFIG_DEBUG_WARN
-   kconfig-tweak --disable CONFIG_DEBUG_INFO
-   kconfig-tweak --disable CONFIG_DEBUG_ASSERTIONS
-   kconfig-tweak --disable CONFIG_DEBUG_NET
-   kconfig-tweak --disable CONFIG_DEBUG_NET_ERROR
-   kconfig-tweak --disable CONFIG_DEBUG_NET_WARN
-   kconfig-tweak --disable CONFIG_DEBUG_NET_INFO
-   kconfig-tweak --disable CONFIG_DEBUG_SYMBOLS
-   kconfig-tweak --disable CONFIG_DEBUG_NOOPT
-   kconfig-tweak --disable CONFIG_SYSLOG_TIMESTAMP
-   make oldconfig
+This will start a ``gdb`` server. Then, start ``gdb`` with:
 
+.. code-block:: console
 
-JTAG/SWD Debugging
-------------------
+  $ cd nuttx/
+  $ gdb-multiarch nuttx/nuttx
 
-`JTAG <https://en.wikipedia.org/wiki/JTAG>`_ is a set of standards that specify a way to attach a hardware device to
-your embedded board, and then remotely control the CPU. You can load code, start, stop, step through the program, and
-examine variables and memory. `SWD <https://en.wikipedia.org/wiki/JTAG#Similar_interface_standards>`_ is an
-Arm-specific interface with a reduced number of signals which can be used alternatively.
+Inside ``gdb`` console, connect to the ``gdb`` server with:
 
-The NuttX operating system uses `threads <https://en.wikipedia.org/wiki/Thread_(computing)>`_, so you need a
-thread-aware debugger to do more than load code, start, and stop it. A thread-aware debugger will allow you to switch
-threads to the one that is running the code you're interested in, for instance your application, or an operating system
-network thread. So far, `OpenOCD <http://openocd.org/>`_ is the only supported NuttX thread-aware debugger.
+.. code-block::
 
-.. note::
-  OpenOCD hasn't announced a stable release for a few years but the development remains active. You'll need to use a
-  version of OpenOCD recent enough so that it includes NuttX support as `contributed by Sony upstream
-  <http://openocd.zylin.com/#/c/4103/>`_. The version included in official OS repositories will probably be too old.
-  You should build from source or use one of the unofficial, more recent builds. See `Getting OpenOCD
-  <http://openocd.org/getting-openocd/>`_ for more details.
+  (gdb) target extended-remote :3333
 
-You will need a board with a JTAG or SWD connector and an `OpenOCD-compatible hardware adapter
-<http://openocd.org/supported-jtag-interfaces/>`_, ideally a fast one (USB 2.0 High Speed). For example an `Olimex
-ARM USB TINY H <https://www.olimex.com/Products/ARM/JTAG/ARM-USB-TINY-H/>`_ or a `Segger J-Link
-<https://www.segger.com/products/debug-probes/j-link/>`_. Many other adapters work too, follow the OpenOCD
-instructions and the instructions that came with your adapter.
+You can now use standard ``gdb`` commands. For example, to
+reset the board:
 
-See this article for more info:
-`Debugging a Apache NuttX target with GDB and OpenOCD <https://micro-ros.github.io/docs/tutorials/advanced/nuttx/debugging/>`_.
+.. code-block::
 
-See the section :ref:`Running <running>` for a brief tutorial on how to use GDB.
+  (gdb) mon reset
 
-----
+To halt the board:
 
-Next up is :ref:`organization`.
+.. code-block::
+
+  (gdb) mon halt
+  
+To set a breakpoint:
+
+.. code-block::
+
+  (gdb) breakpoint nsh_main
+
+and to finally start nuttx:
+
+.. code-block::
+
+  (gdb) continue
+  Continuing.
+
+  Breakpoint 1, nsh_main (argc=1, argv=0x200ddfac) at nsh_main.c:208
+  208	  sched_getparam(0, &param);
+  (gdb) continue
+  Continuing.
+  
+.. tip::
+
+  You can abbreviate ``gdb`` commands: ``info b`` is a shortcut for
+  ``information breakpoints``; ``c`` works the same as ``continue``, etc.
+
+NuttX aware debugging
+---------------------
+
+Since NuttX is actually an RTOS, it is useful to have ``gdb`` be aware of the different
+tasks/threads that are running. There are two ways to do this: via ``openocd``
+itself or via ``gdb``. Note that in both cases, you need to enable debug symbols
+(``CONFIG_DEBUG_SYMBOLS``).
+
+With openocd
+~~~~~~~~~~~~
+
+``openocd`` supports various RTOS directly, including NuttX. It works by reading
+into internal NuttX symbols which define the active tasks and their properties.
+As a result, the ``gdb`` server will directly be aware of each task as a different
+`thread`. The downside of this approach is that it depends on how you build NuttX
+as there are some options hardcoded into
+opencd. By default, it assumes:
+
+  * ``CONFIG_DISABLE_MQUEUE=y``
+  * ``CONFIG_PAGING=n``
+  
+If you need these options to be set differently, you will have to edit ``./src/rtos/nuttx_header.h`` from ``openocd``, 
+change the corresponding settings and then rebuild it.
+
+Finally, to enable NuttX integration, you need to supply an additional ``openocd`` argument:
+
+.. code-block:: console
+
+  $ openocd -f interface/st-link-v2.cfg -f target/stm32f1x.cfg -c '$_TARGETNAME configure -rtos nuttx'
+  
+Since ``openocd`` also needs to know the memory layout of certain datastructures, you need to have ``gdb``
+run the following commands once the ``nuttx`` binary is loaded:
+
+.. code-block::
+
+  eval "monitor nuttx.pid_offset %d", &((struct tcb_s *)(0))->pid
+  eval "monitor nuttx.xcpreg_offset %d", &((struct tcb_s *)(0))->xcp.regs
+  eval "monitor nuttx.state_offset %d", &((struct tcb_s *)(0))->task_state
+  eval "monitor nuttx.name_offset %d", &((struct tcb_s *)(0))->name
+  eval "monitor nuttx.name_size %d", sizeof(((struct tcb_s *)(0))->name)
+  
+One way to do this is to define a gdb `hook` function that will be called when running ``file`` command:
+
+.. code-block::
+
+  define hookpost-file
+    eval "monitor nuttx.pid_offset %d", &((struct tcb_s *)(0))->pid
+    eval "monitor nuttx.xcpreg_offset %d", &((struct tcb_s *)(0))->xcp.regs
+    eval "monitor nuttx.state_offset %d", &((struct tcb_s *)(0))->task_state
+    eval "monitor nuttx.name_offset %d", &((struct tcb_s *)(0))->name
+    eval "monitor nuttx.name_size %d", sizeof(((struct tcb_s *)(0))->name)
+  end
+  
+You will see that ``openocd`` has received the memory offsets in its output:
+
+.. code-block::
+
+  Open On-Chip Debugger 0.10.0+dev-01514-ga8edbd020-dirty (2020-11-20-14:23)
+  Licensed under GNU GPL v2
+  For bug reports, read
+	  http://openocd.org/doc/doxygen/bugs.html
+  Info : auto-selecting first available session transport "swd". To override use 'transport select <transport>'.
+  Info : target type name = cortex_m
+  Info : Listening on port 6666 for tcl connections
+  Info : Listening on port 4444 for telnet connections
+  15:41:23: Debugging starts
+  Info : CMSIS-DAP: SWD  Supported
+  Info : CMSIS-DAP: FW Version = 1.10
+  Info : CMSIS-DAP: Interface Initialised (SWD)
+  Info : SWCLK/TCK = 1 SWDIO/TMS = 1 TDI = 0 TDO = 0 nTRST = 0 nRESET = 1
+  Info : CMSIS-DAP: Interface ready
+  Info : clock speed 1000 kHz
+  Info : SWD DPIDR 0x2ba01477
+  Info : nrf52.cpu: hardware has 6 breakpoints, 4 watchpoints
+  Info : starting gdb server for nrf52.cpu on 3333
+  Info : Listening on port 3333 for gdb connections
+  Info : accepting 'gdb' connection on tcp/3333
+  Error: No symbols for NuttX
+  Info : nRF52832-QFAA(build code: B0) 512kB Flash, 64kB RAM
+  undefined debug reason 8 - target needs reset
+  Warn : Prefer GDB command "target extended-remote 3333" instead of "target remote 3333"
+  Info : pid_offset: 12
+  Info : xcpreg_offset: 132
+  Info : state_offset: 26
+  Info : name_offset: 208
+  Info : name_size: 32
+  target halted due to debug-request, current mode: Thread 
+  xPSR: 0x01000000 pc: 0x000000dc msp: 0x20000cf0
+  target halted due to debug-request, current mode: Thread xPSR: 0x01000000 pc: 0x000000dc msp: 0x20000cf0
+  
+.. note:: You will probably see the ``Error: No symbols for NuttX`` error appear once at startup. This is OK
+  unless you see it every time you step the debugger. In this case, it would mean you did not enable debug symbols.
+
+Now, You can now inspect threads:
+
+.. code-block::
+
+  (gdb) info threads
+    Id   Target Id         Frame 
+  * 1    Remote target     nx_start_application () at init/nx_bringup.c:261  
+  (gdb) info registers
+  r0             0x0                 0
+  r1             0x2f                47
+  r2             0x0                 0
+  r3             0x0                 0
+  r4             0x0                 0
+  r5             0x0                 0
+  r6             0x0                 0
+  r7             0x20000ca0          536874144
+  r8             0x0                 0
+  r9             0x0                 0
+  r10            0x0                 0
+  r11            0x0                 0
+  r12            0x9                 9
+  sp             0x20000c98          0x20000c98
+  lr             0x19c5              6597
+  pc             0x1996              0x1996 <nx_start_application+10>
+  xPSR           0x41000000          1090519040
+  fpscr          0x0                 0
+  msp            0x20000c98          0x20000c98
+  psp            0x0                 0x0 <_vectors>
+  primask        0x0                 0
+  basepri        0xe0                -32
+  faultmask      0x0                 0
+  control        0x0                 0
+
+With gdb
+~~~~~~~~
+
+You can also do NuttX aware debugging using ``gdb`` scripting support.
+The benefit is that it works also for the sim build where ``openocd`` is
+not applicable. For this to work, you will need to enable PROC filesystem support
+which will expose required task information (``CONFIG_FS_PROCFS=y``). 
+
+To use this approach, you can load the ``nuttx/tools/nuttx-gdbinit`` file. An
+easy way to do this is to create a symbolic link:
+
+.. code-block:: console
+
+  $ cd $HOME
+  $ ln -s nuttx/tools/nuttx-gdbinit .gdbinit
+  
+This way whenever gdb is started it will run the appropriate commands. To inspect
+the threads you can now use the following ``gdb`` command:
+
+.. code-block::
+
+  (gdb) info_nxthreads
+  target examined 
+  _target_arch.name=armv7e-m
+  $_target_has_fpu : 0 
+  $_target_has_smp : 0 
+  saved current_tcb (pid=0) 
+  * 0 Thread 0x20000308  (Name: Idle Task, State: Running, Priority: 0) 0xdc in __start()
+    1 Thread 0x20001480  (Name: init, State: Waiting,Semaphore, Priority: 100) 0x7e08 in arm_switchcontext()
+

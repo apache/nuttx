@@ -484,7 +484,7 @@ static int  stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
 static int  stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
               size_t nbytes);
 static int  stm32_sendsetup(FAR struct sdio_dev_s *dev,
-              FAR const uint8_t *buffer, uint32_t nbytes);
+              FAR const uint8_t *buffer, size_t nbytes);
 static int  stm32_cancel(FAR struct sdio_dev_s *dev);
 
 static int  stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);

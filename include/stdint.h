@@ -147,19 +147,6 @@
 #  define UINTMAX_MIN       UINT64_MIN
 #  define UINTMAX_MAX       UINT64_MAX
 
-#  define PRIdMAX           PRId64
-#  define PRIiMAX           PRIi64
-#  define PRIoMAX           PRIo64
-#  define PRIuMAX           PRIu64
-#  define PRIxMAX           PRIx64
-#  define PRIXMAX           PRIX64
-
-#  define SCNdMAX           SCNd64
-#  define SCNiMAX           SCNi64
-#  define SCNoMAX           SCNo64
-#  define SCNuMAX           SCNu64
-#  define SCNxMAX           SCNx64
-
 #  define INTMAX_C(x)       INT64_C(x)
 #  define UINTMAX_C(x)      UINT64_C(x)
 #else
@@ -168,19 +155,6 @@
 
 #  define UINTMAX_MIN       UINT32_MIN
 #  define UINTMAX_MAX       UINT32_MAX
-
-#  define PRIdMAX           PRId32
-#  define PRIiMAX           PRIi32
-#  define PRIoMAX           PRIo32
-#  define PRIuMAX           PRIu32
-#  define PRIxMAX           PRIx32
-#  define PRIXMAX           PRIX32
-
-#  define SCNdMAX           SCNd32
-#  define SCNiMAX           SCNi32
-#  define SCNoMAX           SCNo32
-#  define SCNuMAX           SCNu32
-#  define SCNxMAX           SCNx32
 
 #  define INTMAX_C(x)       INT32_C(x)
 #  define UINTMAX_C(x)      UINT32_C(x)
@@ -300,13 +274,8 @@ typedef _uint_farptr_t      uint_farptr_t;
 
 /* Greatest-width integer types */
 
-#ifdef __INT64_DEFINED
-typedef _int64_t            intmax_t;
-typedef _uint64_t           uintmax_t;
-#else
-typedef _int32_t            intmax_t;
-typedef _uint32_t           uintmax_t;
-#endif
+typedef _intmax_t           intmax_t;
+typedef _uintmax_t          uintmax_t;
 
 #endif /* CONFIG_ARCH_STDINT_H */
 #endif /* __INCLUDE_STDINT_H */

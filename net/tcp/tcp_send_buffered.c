@@ -327,6 +327,30 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
 
+  /* Check for a loss of connection */
+
+  if ((flags & TCP_DISCONN_EVENTS) != 0)
+    {
+      ninfo("Lost connection: %04x\n", flags);
+
+      /* We could get here recursively through the callback actions of
+       * tcp_lost_connection().  So don't repeat that action if we have
+       * already been disconnected.
+       */
+
+      if (psock->s_conn != NULL && _SS_ISCONNECTED(psock->s_flags))
+        {
+          /* Report not connected */
+
+          tcp_lost_connection(psock, psock->s_sndcb, flags);
+        }
+
+      /* Free write buffers and terminate polling */
+
+      psock_lost_connection(psock, psock->s_conn, !!(flags & NETDEV_DOWN));
+      return flags;
+    }
+
   /* The TCP socket is connected and, hence, should be bound to a device.
    * Make sure that the polling device is the one that we are bound to.
    */
@@ -492,30 +516,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           ninfo("ACK: wrb=%p seqno=%u pktlen=%u sent=%u\n",
                 wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb));
         }
-    }
-
-  /* Check for a loss of connection */
-
-  else if ((flags & TCP_DISCONN_EVENTS) != 0)
-    {
-      ninfo("Lost connection: %04x\n", flags);
-
-      /* We could get here recursively through the callback actions of
-       * tcp_lost_connection().  So don't repeat that action if we have
-       * already been disconnected.
-       */
-
-      if (psock->s_conn != NULL && _SS_ISCONNECTED(psock->s_flags))
-        {
-          /* Report not connected */
-
-          tcp_lost_connection(psock, psock->s_sndcb, flags);
-        }
-
-      /* Free write buffers and terminate polling */
-
-      psock_lost_connection(psock, conn, !!(flags & NETDEV_DOWN));
-      return flags;
     }
 
   /* Check if we are being asked to retransmit data */
@@ -734,7 +734,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           sndlen = conn->winsize;
         }
 
-      ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%u mss=%u "
+      ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%zu mss=%u "
             "winsize=%u\n",
             wrb, TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb), sndlen, conn->mss,
             conn->winsize);

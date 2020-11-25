@@ -277,7 +277,7 @@ static inline void cxd56_prioritize_syscall(int priority)
 }
 #endif
 
-static int excinfo(int irq, uint32_t *regaddr, uint32_t *bit)
+static int excinfo(int irq, uintptr_t *regaddr, uint32_t *bit)
 {
   *regaddr = NVIC_SYSHCON;
   switch (irq)

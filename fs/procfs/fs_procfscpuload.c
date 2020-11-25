@@ -46,6 +46,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <time.h>
 #include <string.h>
 #include <fcntl.h>
@@ -252,7 +253,8 @@ static ssize_t cpuload_read(FAR struct file *filep, FAR char *buffer,
           fracpart = 0;
         }
 
-      linesize = snprintf(attr->line, CPULOAD_LINELEN, "%3d.%01d%%\n",
+      linesize = snprintf(attr->line, CPULOAD_LINELEN,
+                          "%3" PRId32 ".%01" PRId32 "%%\n",
                           intpart, fracpart);
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */

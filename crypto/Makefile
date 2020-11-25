@@ -89,10 +89,14 @@ $(COBJS): %$(OBJEXT): %.c
 
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
+  
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
+	$(call CATFILE, Make.dep, $^)
+	$(call DELFILE, $^)
 
 .depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
 ifeq ($(CONFIG_CRYPTO),y)
-	$(Q) $(MKDEP) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MAKE) makedepfile
 endif
 	$(Q) touch $@
 

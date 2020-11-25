@@ -341,36 +341,13 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
                   case TCP_ESTABLISHED:
 
-                    /* In the ESTABLISHED state, we have to differentiate
-                     * between a keepalive and actual transmitted data.
+                    /* In the ESTABLISHED state, we call upon the application
+                     * to do the actual retransmit after which we jump into
+                     * the code for sending out the packet.
                      */
 
-#ifdef CONFIG_NET_TCP_KEEPALIVE
-                    if (conn->keepretries > 0)
-                      {
-                        /* In case of a keepalive timeout (based on RTT) the
-                         * state has to be set back into idle so that a new
-                         * keepalive can be fired.
-                         */
-
-                        uint32_t saveseq = tcp_getsequence(conn->sndseq);
-                        saveseq += conn->tx_unacked;
-                        tcp_setsequence(conn->sndseq, saveseq);
-                        conn->tx_unacked--;
-                      }
-                    else
-#endif
-                      {
-                        /* If there is a timeout on outstanding data we call
-                         * upon the application to do the actual retransmit
-                         * after which we jump into the code for sending out
-                         * the packet.
-                         */
-
-                        result = tcp_callback(dev, conn, TCP_REXMIT);
-                        tcp_rexmit(dev, conn, result);
-                      }
-
+                    result = tcp_callback(dev, conn, TCP_REXMIT);
+                    tcp_rexmit(dev, conn, result);
                     goto done;
 
                   case TCP_FIN_WAIT_1:
@@ -466,14 +443,13 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                             }
 #endif
 
-                          /* And send the probe (along with a garbage byte).
-                           * The packet we sned must have these properties:
+                          /* And send the probe.
+                           * The packet we send must have these properties:
                            *
                            *   - TCP_ACK flag (only) is set.
                            *   - Sequence number is the sequence number of
                            *     previously ACKed data, i.e., the expected
                            *     sequence number minus one.
-                           *   - The data payload is one or two bytes.
                            *
                            * tcp_send() will send the TCP sequence number as
                            * conn->sndseq.  Rather than creating a new
@@ -483,13 +459,9 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                           saveseq = tcp_getsequence(conn->sndseq);
                           tcp_setsequence(conn->sndseq, saveseq - 1);
 
-                          tcp_send(dev, conn, TCP_ACK, tcpiplen + 1);
+                          tcp_send(dev, conn, TCP_ACK, tcpiplen);
 
-                          /* Increment the number of un-ACKed bytes due to
-                           * the dummy byte that we just sent.
-                           */
-
-                          conn->tx_unacked++;
+                          tcp_setsequence(conn->sndseq, saveseq);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
                           /* Increment the un-ACKed sequence number */

@@ -67,7 +67,8 @@
 #define GPIOTE_INT_IN_MASK          (0xff << GPIOTE_INT_IN_SHIFT)
 #  define GPIOTE_INT_IN(i)          ((1 << (i + GPIOTE_INT_IN_SHIFT)) & GPIOTE_INT_IN_MASK)
 
-#define GPIOTE_INT_PORT             31   /* Bit 31: Enable interrupt for event PORT */
+#define GPIOTE_INT_PORT_SHIFT       31   /* Bit 31: Enable interrupt for event PORT */
+#define GPIOTE_INT_PORT             (1 << GPIOTE_INT_PORT_SHIFT)
 
 /* CONFIG Register */
 
