@@ -262,9 +262,7 @@ static void adc_modifyreg(FAR struct stm32_dev_s *priv, int offset,
 static uint32_t adccmn_base_get(FAR struct stm32_dev_s *priv);
 static void adccmn_modifyreg(FAR struct stm32_dev_s *priv, uint32_t offset,
                               uint32_t clrbits, uint32_t setbits);
-#  ifdef CONFIG_DEBUG_ANALOG_INFO
 static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset);
-#  endif
 #endif
 #ifdef ADC_HAVE_TIMER
 static uint16_t tim_getreg(FAR struct stm32_dev_s *priv, int offset);
@@ -575,7 +573,6 @@ static void adccmn_modifyreg(FAR struct stm32_dev_s *priv, uint32_t offset,
  * Name: adccmn_getreg
  ****************************************************************************/
 
-#  ifdef CONFIG_DEBUG_ANALOG_INFO
 static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset)
 {
   uint32_t base = 0;
@@ -588,7 +585,6 @@ static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset)
 
   return getreg32(base + offset);
 }
-#  endif
 #endif /* HAVE_ADC_CMN_REGS */
 
 /****************************************************************************
