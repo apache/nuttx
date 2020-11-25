@@ -509,8 +509,8 @@ found:
           if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
             {
               nwarn("WARNING: ackseq > unackseq\n");
-              nwarn("sndseq=%" PRIu32 " tx_unacked=%u "
-                    "unackseq=%" PRIu32 " ackseq=%" PRIu32 "\n",
+              nwarn("sndseq=%" PRIu32 " tx_unacked=%" PRIu32
+                    " unackseq=%" PRIu32 " ackseq=%" PRIu32 "\n",
                     tcp_getsequence(conn->sndseq), conn->tx_unacked,
                     unackseq, ackseq);
 
@@ -524,7 +524,7 @@ found:
        */
 
       ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
-            " unackseq: %08" PRIx32 " new tx_unacked: %d\n",
+            " unackseq: %08" PRIx32 " new tx_unacked: %" PRId32 "\n",
             tcp_getsequence(conn->sndseq), ackseq, unackseq,
             conn->tx_unacked);
       tcp_setsequence(conn->sndseq, ackseq);
