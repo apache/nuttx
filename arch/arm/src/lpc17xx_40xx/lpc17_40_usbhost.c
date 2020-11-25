@@ -1382,11 +1382,15 @@ static inline int lpc17_40_reminted(struct lpc17_40_usbhost_s *priv,
   DEBUGASSERT(curr != NULL);
   if (curr != NULL)
     {
-      /* Clear all current entries in the interrupt table for this direction */
+      /* Clear all current entries in the interrupt table for this
+       * direction
+       */
 
       lpc17_40_setinttab(0, 2, offset);
 
-      /* Remove the ED from the list..  Is this ED the first on in the list? */
+      /* Remove the ED from the list..  Is this ED the first on in the
+       * list?
+       */
 
       if (prev == NULL)
         {
@@ -1723,7 +1727,9 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
               uint32_t rhstatus = lpc17_40_getreg(LPC17_40_USBHOST_RHSTATUS);
               uinfo("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
 
-              /* If DRWE is set, Connect Status Change indicates a remote wake-up event */
+              /* If DRWE is set, Connect Status Change indicates a remote
+               * wake-up event
+               */
 
               if (rhstatus & OHCI_RHSTATUS_DRWE)
                 {
@@ -1805,7 +1811,9 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
                           priv->rhport.hport.devclass = NULL;
                         }
 
-                      /* Notify any waiters for the Root Hub Status change event */
+                      /* Notify any waiters for the Root Hub Status change
+                       * event
+                       */
 
                       if (priv->pscwait)
                         {
@@ -1901,7 +1909,9 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
 #ifdef CONFIG_DEBUG_USB
                   if (xfrinfo->tdstatus != TD_CC_NOERROR)
                     {
-                      /* The transfer failed for some reason... dump some diagnostic info. */
+                      /* The transfer failed for some reason... dump some
+                       * diagnostic info.
+                       */
 
                       uerr("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d "
                            "RHPORTST1:%08x\n",
@@ -3500,7 +3510,9 @@ static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr,
               ctrl  = lpc17_40_getreg(LPC17_40_USBHOST_CTRL);
               lpc17_40_putreg(ctrl & ~OHCI_CTRL_BLE, LPC17_40_USBHOST_CTRL);
 
-              /* Remove the TDs attached to the ED, keeping the ED in the list */
+              /* Remove the TDs attached to the ED, keeping the ED in the
+               * list
+               */
 
               td           = (struct lpc17_40_gtd_s *)
                              (ed->hw.headp & ED_HEADP_ADDR_MASK);
