@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -1297,7 +1298,7 @@ static inline int lpc17_40_addinted(struct lpc17_40_usbhost_s *priv,
 
   ed->hw.nexted = head;
   lpc17_40_setinttab((uint32_t)ed, interval, offset);
-  uinfo("head: %08x next: %08x\n", ed, head);
+  uinfo("head: %p next: %08" PRIx32 "\n", ed, head);
 
   /* Re-enabled periodic list processing */
 
@@ -1368,7 +1369,7 @@ static inline int lpc17_40_reminted(struct lpc17_40_usbhost_s *priv,
    */
 
   head = (struct lpc17_40_ed_s *)HCCA->inttbl[offset];
-  uinfo("ed: %08x head: %08x next: %08x offset: %d\n",
+  uinfo("ed: %p head: %p next: %08" PRIx32 " offset: %d\n",
         ed, head, head ? head->hw.nexted : 0, offset);
 
   /* Find the ED to be removed in the ED list */
@@ -1407,7 +1408,7 @@ static inline int lpc17_40_reminted(struct lpc17_40_usbhost_s *priv,
           prev->hw.nexted = ed->hw.nexted;
         }
 
-        uinfo("ed: %08x head: %08x next: %08x\n",
+        uinfo("ed: %p head: %p next: %08" PRIx32 "\n",
               ed, head, head ? head->hw.nexted : 0);
 
       /* Calculate the new minimum interval for this list */
@@ -1710,7 +1711,7 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
 
   intst  = lpc17_40_getreg(LPC17_40_USBHOST_INTST);
   regval = lpc17_40_getreg(LPC17_40_USBHOST_INTEN);
-  uinfo("INST: %08x INTEN: %08x\n", intst, regval);
+  uinfo("INST: %08" PRIx32 " INTEN: %08" PRIx32 "\n", intst, regval);
 
   pending = intst & regval;
   if (pending != 0)
@@ -1720,12 +1721,14 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
       if ((pending & OHCI_INT_RHSC) != 0)
         {
           uint32_t rhportst1 = lpc17_40_getreg(LPC17_40_USBHOST_RHPORTST1);
-          uinfo("Root Hub Status Change, RHPORTST1: %08x\n", rhportst1);
+          uinfo("Root Hub Status Change, RHPORTST1: %08" PRIx32 "\n",
+                rhportst1);
 
           if ((rhportst1 & OHCI_RHPORTST_CSC) != 0)
             {
               uint32_t rhstatus = lpc17_40_getreg(LPC17_40_USBHOST_RHSTATUS);
-              uinfo("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
+              uinfo("Connect Status Change, RHSTATUS: %08" PRIx32 "\n",
+                    rhstatus);
 
               /* If DRWE is set, Connect Status Change indicates a remote
                * wake-up event
@@ -2254,7 +2257,7 @@ static int lpc17_40_ep0configure(struct usbhost_driver_s *drvr,
 
   lpc17_40_givesem(&priv->exclsem);
 
-  uinfo("EP0 CTRL:%08x\n", ed->hw.ctrl);
+  uinfo("EP0 CTRL:%08" PRIx32 "\n", ed->hw.ctrl);
   return OK;
 }
 
@@ -2362,7 +2365,7 @@ static int lpc17_40_epalloc(struct usbhost_driver_s *drvr,
         }
 #endif
 
-      uinfo("EP%d CTRL:%08x\n", epdesc->addr, ed->hw.ctrl);
+      uinfo("EP%d CTRL:%08" PRIx32 "\n", epdesc->addr, ed->hw.ctrl);
 
       /* Initialize the semaphore that is used to wait for the endpoint
        * WDH event. The wdhsem semaphore is used for signaling and, hence,
@@ -2854,12 +2857,14 @@ static int lpc17_40_transfer_common(struct lpc17_40_usbhost_s *priv,
   xfrinfo = ed->xfrinfo;
   in      = (ed->hw.ctrl & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
 
-  uinfo("EP%u %s toggle:%u maxpacket:%u buflen:%lu\n",
-        (ed->hw.ctrl  & ED_CONTROL_EN_MASK) >> ED_CONTROL_EN_SHIFT,
+  uinfo("EP%" PRIu32 " %s toggle:%u maxpacket:%" PRIu32 " buflen:%zu\n",
+        (uint32_t)((ed->hw.ctrl  & ED_CONTROL_EN_MASK) >>
+                   ED_CONTROL_EN_SHIFT),
         in ? "IN" : "OUT",
         (ed->hw.headp & ED_HEADP_C) != 0 ? 1 : 0,
-        (ed->hw.ctrl  & ED_CONTROL_MPS_MASK) >> ED_CONTROL_MPS_SHIFT,
-        (unsigned long)buflen);
+        (uint32_t)((ed->hw.ctrl  & ED_CONTROL_MPS_MASK) >>
+                   ED_CONTROL_MPS_SHIFT),
+        buflen);
 
   /* Get the direction of the endpoint */
 
