@@ -2897,8 +2897,8 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
   priv->nblocks = (buffer[215] << 24) | (buffer[214] << 16) |
                   (buffer[213] << 8) | buffer[212];
 
-  finfo("MMC ext CSD read succsesfully, number of block %d\n",
-         priv->nblocks);
+  finfo("MMC ext CSD read succsesfully, number of block %" PRId32 "\n",
+        priv->nblocks);
 
   /* Return value:  One sector read */
 
