@@ -87,7 +87,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   uint8_t hdrlen;
 
   ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %" PRId32 "\n",
-        result, dev->d_sndlen, conn->tx_unacked);
+        result, dev->d_sndlen, (uint32_t)conn->tx_unacked);
 
 #ifdef CONFIG_NET_TCP_DELAYED_ACK
   /* Did the caller request that an ACK be sent? */
@@ -273,7 +273,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   uint8_t hdrlen;
 
   ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %" PRId32 "\n",
-        result, dev->d_sndlen, conn->tx_unacked);
+        result, dev->d_sndlen, (uint32_t)conn->tx_unacked);
 
   /* Get the IP header length associated with the IP domain configured for
    * this TCP connection.
