@@ -42,6 +42,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <limits.h>
 #include <errno.h>
@@ -351,9 +352,9 @@ static int cxd56_getstatus(FAR struct timer_lowerhalf_s *lower,
   status->timeleft =
     (uint32_t)(remaining * 1000000ULL * TIMER_DIVIDER / priv->clkticks);
 
-  tmrinfo("  flags    : %08x\n", status->flags);
-  tmrinfo("  timeout  : %d\n", status->timeout);
-  tmrinfo("  timeleft : %d\n", status->timeleft);
+  tmrinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  tmrinfo("  timeout  : %" PRId32 "\n", status->timeout);
+  tmrinfo("  timeleft : %" PRId32 "\n", status->timeleft);
   return OK;
 }
 
@@ -386,7 +387,7 @@ static int cxd56_settimeout(FAR struct timer_lowerhalf_s *lower,
       return -EPERM;
     }
 
-  tmrinfo("Entry: timeout=%d\n", timeout);
+  tmrinfo("Entry: timeout=%" PRId32 "\n", timeout);
 
   /* Can this timeout be represented? */
 
@@ -410,8 +411,8 @@ static int cxd56_settimeout(FAR struct timer_lowerhalf_s *lower,
   modifyreg32(priv->base + CXD56_TIMER_CONTROL, 0,
               TIMERCTRL_PERIODIC | TIMERCTRL_INTENABLE);
 
-  tmrinfo("clkticks=%d timeout=%d load=%d\n", priv->clkticks, priv->timeout,
-         load);
+  tmrinfo("clkticks=%" PRId32 " timeout=%" PRId32 " load=%" PRId32 "\n",
+          priv->clkticks, priv->timeout, load);
 
   return OK;
 }
