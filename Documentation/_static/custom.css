@@ -78,3 +78,16 @@ kbd {
   -webkit-border-radius: 3px;
   text-shadow: 0 1px 0 #fff;
 }
+
+span.menuselection
+{
+  margin: 0px 0.1em;
+  padding: 0.1em 0.1em;
+  border-radius: 3px;
+  border: 1px solid rgb(204, 204, 204);
+}
+
+div.version-selector
+{
+  margin-bottom: 1em;
+}
