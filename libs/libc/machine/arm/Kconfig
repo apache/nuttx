@@ -26,8 +26,12 @@ endif
 
 if ARCH_ARMV8M
 <<<<<<< HEAD
+<<<<<<< HEAD
 source libs/libc/machine/arm/armv8-m/Kconfig
 =======
 source libs/libc/machine/arm/armv8/Kconfig
 >>>>>>> libc/machine/arm: Use the correct arch Kconfig for variant check
+=======
+source libs/libc/machine/arm/armv8-m/Kconfig
+>>>>>>> libs/libc/machine/arm: Rename armv8 to armv8-m
 endif

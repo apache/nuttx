@@ -55,10 +55,14 @@ else ifeq ($(CONFIG_ARCH_ARMV7M),y)     # All ARMv7-M
 include $(TOPDIR)/libs/libc/machine/arm/armv7-m/Make.defs
 else ifeq ($(CONFIG_ARCH_ARMV8M),y)     # All ARMv8-M
 <<<<<<< HEAD
+<<<<<<< HEAD
 include $(TOPDIR)/libs/libc/machine/arm/armv8-m/Make.defs
 =======
 include $(TOPDIR)/libs/libc/machine/arm/armv8/Make.defs
 >>>>>>> libc/machine/arm: Use the correct arch Kconfig for variant check
+=======
+include $(TOPDIR)/libs/libc/machine/arm/armv8-m/Make.defs
+>>>>>>> libs/libc/machine/arm: Rename armv8 to armv8-m
 endif
 
 ifeq ($(CONFIG_CXX_EXCEPTION),y)
