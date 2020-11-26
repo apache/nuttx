@@ -729,7 +729,7 @@ static int st7567_getpower(struct lcd_dev_s *dev)
 {
   struct st7567_dev_s *priv = (struct st7567_dev_s *)dev;
   DEBUGASSERT(priv);
-  ginfo("powered: %s\n", st7567_powerstring(priv->powered));
+
   return priv->powered;
 }
 
@@ -747,8 +747,6 @@ static int st7567_setpower(struct lcd_dev_s *dev, int power)
   struct st7567_dev_s *priv = (struct st7567_dev_s *)dev;
 
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
-  ginfo("power: %s powered: %s\n",
-        st7567_powerstring(power), st7567_powerstring(priv->powered));
 
   /* Select and lock the device */
 
