@@ -123,7 +123,6 @@ static void *sim_idle_trampoline(void *arg)
 #ifdef CONFIG_SIM_WALLTIME
   uint64_t now = 0;
 #endif
-  sigset_t set;
   int ret;
 
   /* Set the CPU number for the CPU thread */
@@ -137,14 +136,7 @@ static void *sim_idle_trampoline(void *arg)
 
   /* Make sure the SIGUSR1 is not masked */
 
-  sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
-
-  ret = pthread_sigmask(SIG_UNBLOCK, &set, NULL);
-  if (ret < 0)
-    {
-      return NULL;
-    }
+  up_cpu_set_pause_handler(SIGUSR1);
 
   /* Let up_cpu_start() continue */
 
@@ -181,28 +173,6 @@ static void *sim_idle_trampoline(void *arg)
 }
 
 /****************************************************************************
- * Name: sim_handle_signal
- *
- * Description:
- *   This is the SIGUSR signal handler.  It implements the core logic of
- *   up_cpu_pause() on the thread of execution the simulated CPU.
- *
- * Input Parameters:
- *   arg - Standard sigaction arguments
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void sim_handle_signal(int signo, siginfo_t *info, void *context)
-{
-  int cpu = (int)((uintptr_t)pthread_getspecific(g_cpu_key));
-
-  up_cpu_paused(cpu);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -223,8 +193,6 @@ static void sim_handle_signal(int signo, siginfo_t *info, void *context)
 
 void sim_cpu0_start(void)
 {
-  struct sigaction act;
-  sigset_t set;
   int ret;
 
   g_cpu_thread[0] = pthread_self();
@@ -247,26 +215,7 @@ void sim_cpu0_start(void)
 
   /* Register the common signal handler for all threads */
 
-  act.sa_sigaction = sim_handle_signal;
-  act.sa_flags     = SA_SIGINFO;
-  sigemptyset(&act.sa_mask);
-
-  ret = sigaction(SIGUSR1, &act, NULL);
-  if (ret < 0)
-    {
-      return;
-    }
-
-  /* Make sure the SIGUSR1 is not masked */
-
-  sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
-
-  ret = pthread_sigmask(SIG_UNBLOCK, &set, NULL);
-  if (ret < 0)
-    {
-      return;
-    }
+  up_cpu_set_pause_handler(SIGUSR1);
 }
 
 /****************************************************************************
