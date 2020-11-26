@@ -70,6 +70,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* PWM/Timer Definitions ****************************************************/
 
 /* Debug ********************************************************************/
@@ -83,6 +84,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure represents the state of one PWM timer */
 
 struct kl_pwmtimer_s
@@ -98,10 +100,12 @@ struct kl_pwmtimer_s
 /****************************************************************************
  * Static Function Prototypes
  ****************************************************************************/
+
 /* Register access */
 
 static uint32_t pwm_getreg(struct kl_pwmtimer_s *priv, int offset);
-static void pwm_putreg(struct kl_pwmtimer_s *priv, int offset, uint32_t value);
+static void pwm_putreg(struct kl_pwmtimer_s *priv, int offset,
+                       uint32_t value);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
 static void pwm_dumpregs(struct kl_pwmtimer_s *priv, FAR const char *msg);
@@ -129,7 +133,10 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* This is the list of lower half PWM driver methods used by the upper half driver */
+
+/* This is the list of lower half PWM driver methods used by the upper half
+ * driver
+ */
 
 static const struct pwm_ops_s g_pwmops =
 {
@@ -215,7 +222,8 @@ static uint32_t pwm_getreg(struct kl_pwmtimer_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void pwm_putreg(struct kl_pwmtimer_s *priv, int offset, uint32_t value)
+static void pwm_putreg(struct kl_pwmtimer_s *priv, int offset,
+                       uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
@@ -328,7 +336,10 @@ static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
   uint32_t cv;
   uint8_t i;
 
-  static const uint8_t presc_values[8] = {1, 2, 4, 8, 16, 32, 64, 128};
+  static const uint8_t presc_values[8] =
+    {
+      1, 2, 4, 8, 16, 32, 64, 128
+    };
 
   /* Register contents */
 
@@ -340,8 +351,8 @@ static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
   DEBUGASSERT(info->frequency > 0 && info->duty > 0 &&
               info->duty < uitoub16(100));
 
-  /* Calculate optimal values for the timer prescaler and for the timer modulo
-   * register.  If' frequency' is the desired frequency, then
+  /* Calculate optimal values for the timer prescaler and for the timer
+   * modulo register.  If' frequency' is the desired frequency, then
    *
    *   modulo = tpmclk / frequency
    *   tpmclk = pclk / presc
@@ -404,7 +415,8 @@ static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
 
   cv = b16toi(info->duty * modulo + b16HALF);
 
-  pwminfo("TPM%d PCLK: %d frequency: %d TPMCLK: %d prescaler: %d modulo: %d c0v: %d\n",
+  pwminfo("TPM%d PCLK: %d frequency: %d TPMCLK: %d "
+          "prescaler: %d modulo: %d c0v: %d\n",
           priv->tpmid, priv->pclk, info->frequency, tpmclk,
           presc_values[prescaler], modulo, cv);
 
@@ -606,7 +618,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
   /* Disable interrupts momentary to stop any ongoing timer processing and
    * to prevent any concurrent access to the reset register.
-  */
+   */
 
   flags = enter_critical_section();
 
@@ -670,7 +682,8 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
+static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
+                     unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct kl_pwmtimer_s *priv = (FAR struct kl_pwmtimer_s *)dev;
