@@ -74,6 +74,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -664,7 +665,7 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 
   while (priv->intstate != INTSTATE_DONE && elapsed < timeout);
 
-  i2cinfo("intstate: %d elapsed: %ld threshold: %ld status: %08x\n",
+  i2cinfo("intstate: %d elapsed: %ld threshold: %ld status: %08" PRIx32 "\n",
           priv->intstate, (long)elapsed, (long)timeout, priv->status);
 
   /* Set the interrupt state back to IDLE */
@@ -737,7 +738,7 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
    * still pending.
    */
 
-  i2cinfo("Timeout with CR1: %04x SR1: %04x\n", cr1, sr1);
+  i2cinfo("Timeout with CR1: %04" PRIx32 " SR1: %04" PRIx32 "\n", cr1, sr1);
 }
 
 /************************************************************************************
@@ -1648,7 +1649,7 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev,
       status = stm32_i2c_getstatus(priv);
       ret = -ETIMEDOUT;
 
-      i2cerr("ERROR: Timed out: CR1: 0x%04x status: 0x%08x\n",
+      i2cerr("ERROR: Timed out: CR1: 0x%04x status: 0x%08" PRIx32 "\n",
              stm32_i2c_getreg(priv, STM32_I2C_CR1_OFFSET), status);
 
       /* "Note: When the STOP, START or PEC bit is set, the software must
