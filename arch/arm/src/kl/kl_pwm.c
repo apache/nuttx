@@ -416,8 +416,13 @@ static int pwm_timer(FAR struct kl_pwmtimer_s *priv,
 
   cv = b16toi(info->duty * modulo + b16HALF);
 
+<<<<<<< HEAD
   pwminfo("TPM%d PCLK: %" PRId32 " frequency: %" PRId32 " TPMCLK: %" PRId32
           " prescaler: %d modulo: %" PRId32 " c0v: %" PRId32 "\n",
+=======
+  pwminfo("TPM%d PCLK: %d frequency: %d TPMCLK: %d "
+          "prescaler: %d modulo: %d c0v: %d\n",
+>>>>>>> arch/arm/src/kl/kl_pwm.c: Appease nxstyle
           priv->tpmid, priv->pclk, info->frequency, tpmclk,
           presc_values[prescaler], modulo, cv);
 
