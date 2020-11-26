@@ -66,31 +66,53 @@ bool up_interrupt_context(void)
  * Name: up_doirq
  ****************************************************************************/
 
-void *up_doirq(int irq, void *regs)
+void *up_doirq(int irq, void *context)
 {
-  /* Current regs non-zero indicates that we are processing an interrupt;
+  /* Allocate temporary context on the stack */
+
+  xcpt_reg_t tmp[XCPTCONTEXT_REGS];
+  void *regs = (void *)tmp;
+
+  /* CURRENT_REGS non-zero indicates that we are processing an interrupt.
    * CURRENT_REGS is also used to manage interrupt level context switches.
    */
 
-  CURRENT_REGS = regs;
+#ifdef CONFIG_SMP
+  if (up_setjmp(regs) == 0)
+    {
+#endif
 
-  /* Deliver the IRQ */
+      CURRENT_REGS = regs;
 
-  irq_dispatch(irq, regs);
+      /* Deliver the IRQ */
 
-  /* If a context switch occurred while processing the interrupt then
-   * CURRENT_REGS may have change value.  If we return any value different
-   * from the input regs, then the lower level will know that a context
-   * switch occurred during interrupt processing.
-   */
+      irq_dispatch(irq, regs);
 
-  regs = (void *)CURRENT_REGS;
+      /* If a context switch occurred while processing the interrupt then
+       * CURRENT_REGS may have change value.  If we return any value
+       * different from the input regs, then the lower level will know that
+       * context switch occurred during interrupt processing.
+       */
 
-  /* Restore the previous value of CURRENT_REGS.  NULL would indicate that
-   * we are no longer in an interrupt handler.  It will be non-NULL if we
-   * are returning from a nested interrupt.
-   */
+      regs = (void *)CURRENT_REGS;
 
-  CURRENT_REGS = NULL;
+      /* Restore the previous value of CURRENT_REGS.  NULL would indicate
+       * that we are no longer in an interrupt handler.  It will be non-NULL
+       * if we are returning from a nested interrupt.
+       */
+
+      CURRENT_REGS = NULL;
+
+#ifdef CONFIG_SMP
+      /* Handle signal */
+
+      sim_sigdeliver();
+
+      /* Then switch contexts */
+
+      up_longjmp(regs, 1);
+    }
+#endif
+
   return regs;
 }

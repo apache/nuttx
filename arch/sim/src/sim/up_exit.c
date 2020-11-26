@@ -67,6 +67,12 @@ void up_exit(int status)
 {
   FAR struct tcb_s *tcb;
 
+  /* Make sure that we are in a critical section with local interrupts.
+   * The IRQ state will be restored when the next task is started.
+   */
+
+  enter_critical_section();
+
   sinfo("TCB=%p exiting\n", this_task());
 
   /* Destroy the task at the head of the ready to run list. */
