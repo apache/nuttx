@@ -33,6 +33,10 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
+CSRCS += arch_elf.c
+endif
+
 ifeq ($(CONFIG_ARMV8M_LIBM),y)
 
 ifeq ($(LIBM_ARCH_CEIL),y)
