@@ -47,6 +47,32 @@
 #include "up_internal.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sim_cpupause_handler
+ *
+ * Description:
+ *   This is the SIGUSR signal handler.  It implements the core logic of
+ *   up_cpu_pause() on the thread of execution the simulated CPU.
+ *
+ * Input Parameters:
+ *   irq - the interrupt number
+ *   context  - not used
+ *   arg      - not used
+ *
+ * Returned Value:
+ *   In case of success OK (0) is returned otherwise a negative value.
+ *
+ ****************************************************************************/
+
+static int sim_cpupause_handler(int irq, FAR void *context, FAR void *arg)
+{
+  return up_cpu_paused(this_cpu());
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -203,4 +229,23 @@ void up_cpu_started(void)
 struct tcb_s *up_this_task(void)
 {
   return this_task();
+}
+
+/****************************************************************************
+ * Name: up_cpu_set_pause_handler
+ *
+ * Description:
+ *   Attach the CPU pause request interrupt to the NuttX logic.
+ *
+ * Input Parameters:
+ *   irq - the SIGUSR1 interrupt number
+ *
+ * Returned Value:
+ *   On success returns OK (0), otherwise a negative value.
+ ****************************************************************************/
+
+int up_cpu_set_pause_handler(int irq)
+{
+  up_enable_irq(irq);
+  return irq_attach(irq, sim_cpupause_handler, NULL);
 }
