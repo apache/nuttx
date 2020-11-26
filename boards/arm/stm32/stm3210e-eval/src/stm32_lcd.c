@@ -63,6 +63,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -1754,25 +1755,25 @@ static void stm3210e_backlight(void)
 
   /* Dump timer1 registers */
 
-  lcdinfo("APB2ENR: %08x\n", getreg32(STM32_RCC_APB2ENR));
-  lcdinfo("CR1:     %04x\n", getreg32(STM32_TIM1_CR1));
-  lcdinfo("CR2:     %04x\n", getreg32(STM32_TIM1_CR2));
-  lcdinfo("SMCR:    %04x\n", getreg32(STM32_TIM1_SMCR));
-  lcdinfo("DIER:    %04x\n", getreg32(STM32_TIM1_DIER));
-  lcdinfo("SR:      %04x\n", getreg32(STM32_TIM1_SR));
-  lcdinfo("BDTR:    %04x\n", getreg32(STM32_TIM1_BDTR));
-  lcdinfo("CCMR1:   %04x\n", getreg32(STM32_TIM1_CCMR1));
-  lcdinfo("CCMR2:   %04x\n", getreg32(STM32_TIM1_CCMR2));
-  lcdinfo("CCER:    %04x\n", getreg32(STM32_TIM1_CCER));
-  lcdinfo("CNT:     %04x\n", getreg32(STM32_TIM1_CNT));
-  lcdinfo("PSC:     %04x\n", getreg32(STM32_TIM1_PSC));
-  lcdinfo("ARR:     %04x\n", getreg32(STM32_TIM1_ARR));
-  lcdinfo("RCR:     %04x\n", getreg32(STM32_TIM1_RCR));
-  lcdinfo("CCR1:    %04x\n", getreg32(STM32_TIM1_CCR1));
-  lcdinfo("CCR2:    %04x\n", getreg32(STM32_TIM1_CCR2));
-  lcdinfo("CCR3:    %04x\n", getreg32(STM32_TIM1_CCR3));
-  lcdinfo("CCR4:    %04x\n", getreg32(STM32_TIM1_CCR4));
-  lcdinfo("DMAR:    %04x\n", getreg32(STM32_TIM1_DMAR));
+  lcdinfo("APB2ENR: %08" PRIx32 "\n", getreg32(STM32_RCC_APB2ENR));
+  lcdinfo("CR1:     %04" PRIx32 "\n", getreg32(STM32_TIM1_CR1));
+  lcdinfo("CR2:     %04" PRIx32 "\n", getreg32(STM32_TIM1_CR2));
+  lcdinfo("SMCR:    %04" PRIx32 "\n", getreg32(STM32_TIM1_SMCR));
+  lcdinfo("DIER:    %04" PRIx32 "\n", getreg32(STM32_TIM1_DIER));
+  lcdinfo("SR:      %04" PRIx32 "\n", getreg32(STM32_TIM1_SR));
+  lcdinfo("BDTR:    %04" PRIx32 "\n", getreg32(STM32_TIM1_BDTR));
+  lcdinfo("CCMR1:   %04" PRIx32 "\n", getreg32(STM32_TIM1_CCMR1));
+  lcdinfo("CCMR2:   %04" PRIx32 "\n", getreg32(STM32_TIM1_CCMR2));
+  lcdinfo("CCER:    %04" PRIx32 "\n", getreg32(STM32_TIM1_CCER));
+  lcdinfo("CNT:     %04" PRIx32 "\n", getreg32(STM32_TIM1_CNT));
+  lcdinfo("PSC:     %04" PRIx32 "\n", getreg32(STM32_TIM1_PSC));
+  lcdinfo("ARR:     %04" PRIx32 "\n", getreg32(STM32_TIM1_ARR));
+  lcdinfo("RCR:     %04" PRIx32 "\n", getreg32(STM32_TIM1_RCR));
+  lcdinfo("CCR1:    %04" PRIx32 "\n", getreg32(STM32_TIM1_CCR1));
+  lcdinfo("CCR2:    %04" PRIx32 "\n", getreg32(STM32_TIM1_CCR2));
+  lcdinfo("CCR3:    %04" PRIx32 "\n", getreg32(STM32_TIM1_CCR3));
+  lcdinfo("CCR4:    %04" PRIx32 "\n", getreg32(STM32_TIM1_CCR4));
+  lcdinfo("DMAR:    %04" PRIx32 "\n", getreg32(STM32_TIM1_DMAR));
 #endif
 }
 #endif
