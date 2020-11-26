@@ -37,9 +37,9 @@
        more modern -->
 
   <div class="version-selector">
-    <select>
-    {% for nuttx_version in nuttx_versions %}
-      <option value="{{ nuttx_version }}" {% if nuttx_version == version %}selected="selected"{% endif %}>{{ nuttx_version }}</option>
+    <select onchange="javascript:location.href = this.value;">
+    {% for nuttx_version in nuttx_versions.split(',') %}
+    <option value="{{ url_root }}../{{ nuttx_version }}" {% if nuttx_version == version %}selected="selected"{% endif %}>{{ nuttx_version }}</option>
     {% endfor %}
     </select>
   </div>
