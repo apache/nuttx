@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -495,7 +496,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spiinfo("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
   return actual;
 }
 
@@ -685,7 +686,7 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
   /* Get the value from the RX FIFO and return it */
 
   regval = spi_getreg(priv, CXD56_SPI_DR_OFFSET);
-  spiinfo("%04x->%04x\n", wd, regval);
+  spiinfo("%04" PRIx32 "->%04" PRIx32 "\n", wd, regval);
 
   if (priv->port == 3)
     {
@@ -771,7 +772,7 @@ static void spi_do_exchange(FAR struct spi_dev_s *dev,
        * and (3) there are more bytes to be sent.
        */
 
-      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      spiinfo("TX: rxpending: %" PRId32 " nwords: %d\n", rxpending, nwords);
       while ((spi_getreg(priv, CXD56_SPI_SR_OFFSET) & SPI_SR_TNF) &&
              (rxpending < CXD56_SPI_FIFOSZ) && nwords)
         {
@@ -796,7 +797,7 @@ static void spi_do_exchange(FAR struct spi_dev_s *dev,
        * while the RX FIFO is not empty
        */
 
-      spiinfo("RX: rxpending: %d\n", rxpending);
+      spiinfo("RX: rxpending: %" PRId32 "\n", rxpending);
       while (spi_getreg(priv, CXD56_SPI_SR_OFFSET) & SPI_SR_RNE)
         {
           data = spi_getreg(priv, CXD56_SPI_DR_OFFSET);
