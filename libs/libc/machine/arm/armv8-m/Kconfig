@@ -5,7 +5,7 @@
 
 if ARCH_ARMV8M
 
-config ARMV8_LIBM
+config ARMV8M_LIBM
 	bool "Architecture specific optimizations"
 	default n
 	select LIBM_ARCH_CEIL if CONFIG_ARCH_DPFPU
