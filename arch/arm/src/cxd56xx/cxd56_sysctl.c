@@ -102,7 +102,7 @@ static int sysctl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       default:
         {
-          _err("cmd %x(%x)\n", cmd, arg);
+          _err("cmd %x(%lx)\n", cmd, arg);
           ret = cxd56_sysctlcmd(cmd & 0xff, arg);
           if (ret)
             {
