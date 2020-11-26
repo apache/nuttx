@@ -1413,7 +1413,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
   else if ((status & I2C_SR1_ADDR) == 0 && priv->check_addr_ack)
     {
       i2cinfo("Invalid Address. Setting stop bit and clearing message\n");
-      i2cinfo("status %i\n", status);
+      i2cinfo("status %" PRIi32 "\n", status);
 
       /* Set condition to terminate msg chain transmission as address is invalid. */
 
@@ -1821,7 +1821,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
       status |= (stm32_i2c_getreg(priv, STM32_I2C_SR2_OFFSET) << 16);
 
       i2cerr("ERROR:  No correct state detected(start bit, read or write) \n");
-      i2cerr("   state %i\n", status);
+      i2cerr("   state %" PRIi32 "\n", status);
 
       /* Set condition to terminate ISR and wake waiting thread */
 
