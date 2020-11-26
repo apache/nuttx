@@ -115,24 +115,6 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
   niob_avail    = iob_navail(true);
   nqentry_avail = iob_qentry_navail();
 
-  /* Are the read-ahead allocations throttled?  If so, then not all of these
-   * IOBs are available for read-ahead buffering.
-   *
-   * REVISIT: Should also check that there is at least one available IOB
-   * chain.
-   */
-
-#if CONFIG_IOB_THROTTLE > 0
-  if (niob_avail > CONFIG_IOB_THROTTLE)
-    {
-      niob_avail -= CONFIG_IOB_THROTTLE;
-    }
-  else
-    {
-      niob_avail = 0;
-    }
-#endif
-
   /* Is there a a queue entry and IOBs available for read-ahead buffering? */
 
   if (nqentry_avail > 0 && niob_avail > 0)
