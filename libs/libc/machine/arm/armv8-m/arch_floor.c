@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm/armv8/arch_round.c
+ * libs/libc/machine/arm/armv8-m/arch_floor.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *
@@ -45,13 +45,13 @@
 
 #if __ARM_ARCH >= 8 && (__ARM_FP & 0x8) && !defined (__SOFTFP__)
 
-double round(double x)
+double floor(double x)
 {
   double result;
-  asm volatile ("vrinta.f64\t%P0, %P1" : "=w" (result) : "w" (x));
+  asm volatile ("vrintm.f64\t%P0, %P1" : "=w" (result) : "w" (x));
   return result;
 }
 
 #else
-#  warning round() not built
+#  warning floor() not built
 #endif

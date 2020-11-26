@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm/armv8/arch_ceil.c
+ * libs/libc/machine/arm/armv8-m/arch_rintf.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *
@@ -43,15 +43,15 @@
  * Public Functions
  ****************************************************************************/
 
-#if __ARM_ARCH >= 8 && (__ARM_FP & 0x8) && !defined (__SOFTFP__)
+#if __ARM_ARCH >= 8 && !defined (__SOFTFP__)
 
-double ceil(double x)
+float rintf(float x)
 {
-  double result;
-  asm volatile ( "vrintp.f64\t%P0, %P1" : "=w" (result) : "w" (x) );
+  float result;
+  asm volatile ("vrintx.f32\t%0, %1" : "=t" (result) : "t" (x));
   return result;
 }
 
 #else
-#  warning ceil() not built
+#  warning rintf() not built
 #endif
