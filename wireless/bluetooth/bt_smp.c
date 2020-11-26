@@ -1443,7 +1443,7 @@ static int bt_smp_aes_cmac(FAR const uint8_t *key, FAR const uint8_t *in,
         }
     }
 
-  wlinfo("len %u n %u flag %u\n", len, n, flag);
+  wlinfo("len %zu n %u flag %u\n", len, n, flag);
 
   /* If flag is true then M_last = M_n XOR K1 */
 
