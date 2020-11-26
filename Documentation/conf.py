@@ -74,10 +74,12 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-# list of documentation versions to offer (besides latest)
+# list of documentation versions to offer (besides latest). this will be
+# overriden by command line option but we can provide a sane default
+# this way
 
 html_context = dict()
-html_context['nuttx_versions'] = ['latest']
+html_context['nuttx_versions'] = 'latest'
 
 # TODO: append other options using releases detected from git (or maybe just
 # a few hand-selected ones, or maybe just a "stable" option)
