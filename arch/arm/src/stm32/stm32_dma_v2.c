@@ -872,7 +872,8 @@ bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr)
   uint32_t burst_length;
   uint32_t mend;
 
-  dmainfo("stm32_dmacapable: 0x%08x/%u 0x%08x\n", maddr, count, ccr);
+  dmainfo("stm32_dmacapable: 0x%08" PRIxPTR "/%" PRIu32 " 0x%08" PRIx32 "\n",
+          maddr, count, ccr);
 
   /* Verify that the address conforms to the memory transfer size.
    * Transfers to/from memory performed by the DMA controller are
