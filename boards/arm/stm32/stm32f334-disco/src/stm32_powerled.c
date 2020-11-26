@@ -486,7 +486,7 @@ static int powerled_limits_set(FAR struct powerled_dev_s *dev,
       limits->current = (float)LED_ABSOLUTE_CURRENT_LIMIT / 1000.0;
       pwrwarn("WARNING: "
               "LED current limiit > LED absolute current limit."
-              " Set current limit to %d.\n",
+              " Set current limit to %lf.\n",
               limits->current);
     }
 
