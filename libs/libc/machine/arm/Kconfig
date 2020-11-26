@@ -25,5 +25,9 @@ source libs/libc/machine/arm/armv7-m/Kconfig
 endif
 
 if ARCH_ARMV8M
+<<<<<<< HEAD
 source libs/libc/machine/arm/armv8-m/Kconfig
+=======
+source libs/libc/machine/arm/armv8/Kconfig
+>>>>>>> libc/machine/arm: Use the correct arch Kconfig for variant check
 endif
