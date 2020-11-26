@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm/armv8/arch_roundf.c
+ * libs/libc/machine/arm/armv8-m/arch_roundf.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *
