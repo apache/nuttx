@@ -211,6 +211,9 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
          * upper_insn:
          *
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Fix nxstyle warning
          *  1  1  1  1  1  1
          *  5  4  3  2  1  0  9  8  7  6  5  4  3  2  1  0
          * +-------+---+----------------------+-----------+
@@ -218,6 +221,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
          * +-------+---+-+---+----------------+-----------+
          * |1  1  1| 1  0| S |          imm10             | BL Instruction
          * +-------+-----+---+----------------------------+
+<<<<<<< HEAD
          *
          * lower_insn:
          *
@@ -247,6 +251,18 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
          * |1   1 |J1 | 1 |J2 |                 imm11                    | BL Instruction
          * +------+---+---+---+------------------------------------------+
 >>>>>>> libc/machine/arch: Support armv8-m relocation
+=======
+         *
+         * lower_insn:
+         *
+         *  1  1  1  1  1  1
+         *  5  4  3  2  1  0  9  8  7  6  5  4  3  2  1  0
+         * +--+-------------------------------------------+
+         * |OP|                                           | 32Bit Instruction
+         * +--+-+--+--+--+--------------------------------+
+         * |1  1|J1| 1|J2|             imm11              | BL Instruction
+         * +----+--+--+--+--------------------------------+
+>>>>>>> Fix nxstyle warning
          *
          * The branch target is encoded in these bits:
          *
@@ -406,6 +422,9 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
          * upper_insn:
          *
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Fix nxstyle warning
          *  1  1  1  1  1  1
          *  5  4  3  2  1  0  9  8  7  6  5  4  3  2  1  0
          * +-------+---+-----------------------+----------+
@@ -413,6 +432,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
          * +-------+---+-+---+-----------------+----------+
          * |1  1  1| 1  0| i | 1 0  1  1  0  0 |  imm4    | MOVT Instruction
          * +-------+-----+---+-----------------+----------+
+<<<<<<< HEAD
          *
          * lower_insn:
          *
@@ -442,6 +462,18 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
          * |0  |   imm3   |      Rd      |            imm8               | MOVT Instruction
          * +---+----------+--------------+-------------------------------+
 >>>>>>> libc/machine/arch: Support armv8-m relocation
+=======
+         *
+         * lower_insn:
+         *
+         *  1  1  1  1  1  1
+         *  5  4  3  2  1  0  9  8  7  6  5  4  3  2  1  0
+         * +--+-------------------------------------------+
+         * |OP|                                           | 32Bit Instruction
+         * +--+--------+----------+-----------------------+
+         * |0 |  imm3  |    Rd    |        imm8           | MOVT Instruction
+         * +--+--------+----------+-----------------------+
+>>>>>>> Fix nxstyle warning
          *
          * The 16-bit immediate value is encoded in these bits:
          *
