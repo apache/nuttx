@@ -71,6 +71,7 @@
 struct null_dev_s
 {
   struct audio_lowerhalf_s dev; /* Audio lower half (this device) */
+  uint32_t      scaler;         /* Data bytes to sec scaler (bytes per sec) */
   mqd_t         mq;             /* Message queue for receiving messages */
   char          mqname[16];     /* Our message queue name */
   pthread_t     threadid;       /* ID of our thread */
@@ -137,6 +138,8 @@ static int      null_release(FAR struct audio_lowerhalf_s *dev,
 #else
 static int      null_release(FAR struct audio_lowerhalf_s *dev);
 #endif
+static int      null_waste(FAR struct audio_lowerhalf_s *dev,
+                           FAR struct ap_buffer_s *apb);
 
 /****************************************************************************
  * Private Data
@@ -169,6 +172,51 @@ static const struct audio_ops_s g_audioops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: null_waste
+ *
+ * Description: Consume audio buffer in queue
+ *
+ ****************************************************************************/
+
+static int null_waste(FAR struct audio_lowerhalf_s *dev,
+                      FAR struct ap_buffer_s *apb)
+{
+  FAR struct null_dev_s *priv = (struct null_dev_s *)dev;
+  uint64_t waste_time;
+
+  if (apb != NULL)
+    {
+      waste_time = USEC_PER_SEC * (uint64_t)apb->nbytes / priv->scaler;
+      usleep(waste_time);
+      apb_free(apb);
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE,
+                      apb, OK, NULL);
+#else
+      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE,
+                      apb, OK);
+#endif
+      if (((apb->flags & AUDIO_APB_FINAL) != 0))
+        {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          priv->dev.upper(priv->dev.priv,
+                          AUDIO_CALLBACK_COMPLETE,
+                          NULL,
+                          OK,
+                          NULL);
+#else
+          priv->dev.upper(priv->dev.priv,
+                          AUDIO_CALLBACK_COMPLETE,
+                          NULL,
+                          OK);
+#endif
+        }
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: null_getcaps
@@ -359,6 +407,7 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
                           FAR const struct audio_caps_s *caps)
 #endif
 {
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
   audinfo("ac_type: %d\n", caps->ac_type);
 
   /* Process the configure operation */
@@ -395,6 +444,9 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
       break;
 
     case AUDIO_TYPE_OUTPUT:
+      priv->scaler = caps->ac_channels
+                   * caps->ac_controls.hw[0]
+                   * caps->ac_controls.b[2] / 8;
       audinfo("  AUDIO_TYPE_OUTPUT:\n");
       audinfo("    Number of channels: %u\n", caps->ac_channels);
       audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
@@ -475,6 +527,7 @@ static void *null_workerthread(pthread_addr_t pvarg)
 #endif
 
           case AUDIO_MSG_ENQUEUE:
+            null_waste(&priv->dev, (FAR struct ap_buffer_s *)msg.u.ptr);
             break;
 
           case AUDIO_MSG_COMPLETE:
@@ -667,46 +720,26 @@ static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
                                 FAR struct ap_buffer_s *apb)
 {
   FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
-  bool done;
+  struct audio_msg_s term_msg;
+  int ret;
 
   DEBUGASSERT(priv && apb && priv->dev.upper);
 
   audinfo("apb=%p curbyte=%d nbytes=%d\n", apb, apb->curbyte, apb->nbytes);
 
-  /* Say that we consumed all of the data */
-
-  apb->curbyte = apb->nbytes;
-
-  /* Check if this was the last buffer in the stream */
-
-  done = ((apb->flags & AUDIO_APB_FINAL) != 0);
-
-  /* The buffer belongs to an upper level.  Just forward the event to the
-   * next level up.
-   */
-
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-  priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
-#else
-  priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
-#endif
-
-  /* Say we are done playing if this was the last buffer in the stream */
-
-  if (done)
+  ret = OK;
+  if (priv->mq != NULL)
     {
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-      priv->dev.upper(priv->dev.priv,
-                      AUDIO_CALLBACK_COMPLETE,
-                      NULL,
-                      OK,
-                      NULL);
-#else
-      priv->dev.upper(priv->dev.priv,
-                      AUDIO_CALLBACK_COMPLETE,
-                      NULL,
-                      OK);
-#endif
+      apb_reference(apb);
+      term_msg.msg_id = AUDIO_MSG_ENQUEUE;
+      term_msg.u.ptr = apb;
+
+      ret = nxmq_send(priv->mq, (FAR const char *)&term_msg,
+                      sizeof(term_msg), CONFIG_AUDIO_NULL_MSG_PRIO);
+      if (ret < 0)
+        {
+          auderr("ERROR: nxmq_send failed: %d\n", ret);
+        }
     }
 
   audinfo("Return OK\n");
