@@ -43,6 +43,7 @@
 #endif
 #include <nuttx/arch.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <errno.h>
 
@@ -411,9 +412,9 @@ static int cxd56_getstatus(FAR struct watchdog_lowerhalf_s *lower,
     }
 
   wdinfo("Status     :\n");
-  wdinfo("  flags    : %08x\n", status->flags);
-  wdinfo("  timeout  : %d\n", status->timeout);
-  wdinfo("  timeleft : %d\n", status->timeleft);
+  wdinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  wdinfo("  timeout  : %" PRId32 "\n", status->timeout);
+  wdinfo("  timeleft : %" PRId32 "\n", status->timeleft);
   return OK;
 }
 
@@ -442,7 +443,7 @@ static int cxd56_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   uint64_t llreload;
 
   DEBUGASSERT(priv);
-  wdinfo("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%" PRId32 "\n", timeout);
 
   if ((timeout == 0) || (timeout > WDT_MAX_TIMEOUT))
     {
@@ -482,7 +483,8 @@ static int cxd56_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   priv->reload = reload;
 
-  wdinfo("reload=%u timeout: %d->%d\n", reload, timeout, priv->timeout);
+  wdinfo("reload=%" PRIu32 " timeout: %" PRId32 "->%" PRId32 "\n",
+         reload, timeout, priv->timeout);
 
   /* Set the WDT register according to calculated value */
 
