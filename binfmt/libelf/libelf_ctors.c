@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -192,9 +193,10 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
               FAR uintptr_t *ptr = (uintptr_t *)
                    ((FAR void *)(&loadinfo->ctors)[i]);
 
-              binfo("ctor %d: %08lx + %08lx = %08lx\n",
-                    i, *ptr, (unsigned long)loadinfo->textalloc,
-                    (unsigned long)(*ptr + loadinfo->textalloc));
+              binfo("ctor %d: "
+                    "%08" PRIxPTR " + %08" PRIxPTR " = %08" PRIxPTR "\n",
+                    i, *ptr, (uintptr_t)loadinfo->textalloc,
+                    (uintptr_t)(*ptr + loadinfo->textalloc));
 
               *ptr += loadinfo->textalloc;
             }
