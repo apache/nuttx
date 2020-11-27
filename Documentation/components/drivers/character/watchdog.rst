@@ -194,7 +194,7 @@ To enable it, follow the next instructions:
 
  - [x] Low priority (kernel) worker thread
 
- ``Idle callback``: This choise sets an Idle callback to feed the dog. It depends on the PM module, because this callback is triggered by the PM state change. To enable it do the following:
+ ``Idle callback``: This choice sets an Idle callback to feed the dog. It depends on the PM module, because this callback is triggered by the PM state change. To enable it do the following:
 
  Go into menu :menuselection:`Device Drivers --> Timer Driver Support` and press :kbd:`Enter`. Then enable:
 
