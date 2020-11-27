@@ -3258,7 +3258,7 @@ static int adc_jextcfg_set(FAR struct stm32_dev_s *priv, uint32_t jextcfg)
       setbits = (jexten | jextsel);
       clrbits = (ADC_JEXTREG_JEXTEN_MASK | ADC_JEXTREG_JEXTSEL_MASK);
 
-      ainfo("Initializing jextsel = 0x%08x\n", jextsel);
+      ainfo("Initializing jextsel = 0x%08" PRIx32 "\n", jextsel);
 
       /* Write register */
 
@@ -3303,7 +3303,7 @@ static void adc_dumpregs(FAR struct stm32_dev_s *priv)
         adc_getreg(priv, STM32_ADC_SMPR2_OFFSET));
 
 #if defined(STM32_ADC_SQR4_OFFSET)
-  ainfo("SQR4: 0x%08x\n",
+  ainfo("SQR4: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
 #endif
 
