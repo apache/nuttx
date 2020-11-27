@@ -241,6 +241,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
                          uint16_t buflen)
 {
   FAR struct iob_s *iob;
+  bool throttled = true;
   int ret;
 
   /* Try to allocate on I/O buffer to start the chain without waiting (and
@@ -248,16 +249,28 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
    * packet.
    */
 
-  iob = iob_tryalloc(true, IOBUSER_NET_TCP_READAHEAD);
+  iob = iob_tryalloc(throttled, IOBUSER_NET_TCP_READAHEAD);
   if (iob == NULL)
     {
-      nerr("ERROR: Failed to create new I/O buffer chain\n");
-      return 0;
+#if CONFIG_IOB_THROTTLE > 0
+      if (IOB_QEMPTY(&conn->readahead))
+        {
+          /* Fallback out of the throttled entry */
+
+          throttled = false;
+          iob = iob_tryalloc(throttled, IOBUSER_NET_TCP_READAHEAD);
+        }
+#endif
+      if (iob == NULL)
+        {
+          nerr("ERROR: Failed to create new I/O buffer chain\n");
+          return 0;
+        }
     }
 
   /* Copy the new appdata into the I/O buffer chain (without waiting) */
 
-  ret = iob_trycopyin(iob, buffer, buflen, 0, true,
+  ret = iob_trycopyin(iob, buffer, buflen, 0, throttled,
                       IOBUSER_NET_TCP_READAHEAD);
   if (ret < 0)
     {

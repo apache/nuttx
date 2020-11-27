@@ -70,7 +70,8 @@
  *
  ****************************************************************************/
 
-uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
+uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
+                            FAR struct tcp_conn_s *conn)
 {
   uint16_t iplen;
   uint16_t mss;
@@ -139,9 +140,9 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
       uint32_t rwnd;
 
       /* The optimal TCP window size is the amount of TCP data that we can
-       * currently buffer via TCP read-ahead buffering plus MSS for the
-       * device packet buffer.  This logic here assumes that all IOBs are
-       * available for TCP buffering.
+       * currently buffer via TCP read-ahead buffering for the device packet
+       * buffer.  This logic here assumes that all IOBs are available for
+       * TCP buffering.
        *
        * Assume that all of the available IOBs are can be used for buffering
        * on this connection.  Also assume that at least one chain is available
@@ -154,7 +155,7 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
        * buffering for this connection.
        */
 
-      rwnd = (niob_avail * CONFIG_IOB_BUFSIZE) + mss;
+      rwnd = (niob_avail * CONFIG_IOB_BUFSIZE);
       if (rwnd > UINT16_MAX)
         {
           rwnd = UINT16_MAX;
@@ -164,17 +165,24 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
 
       recvwndo = (uint16_t)rwnd;
     }
+  else if (IOB_QEMPTY(&conn->readahead))
+    {
+      /* Advertise maximum segment size for window edge if here is no
+       * available iobs on current "free" connection.
+       */
+
+      recvwndo = mss;
+    }
   else /* nqentry_avail == 0 || niob_avail == 0 */
     {
-      /* No IOB chains or noIOBs are available.  The only buffering
-       * available is within the packet buffer itself.  We can buffer no
-       * more than the MSS (unless we are very fast).
+      /* No IOB chains or noIOBs are available.
+       * Advertise the edge of window to zero.
        *
        * NOTE:  If no IOBs are available, then the next packet will be
        * lost if there is no listener on the connection.
        */
 
-      recvwndo = mss;
+      recvwndo = 0;
     }
 
   return recvwndo;
