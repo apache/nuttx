@@ -91,9 +91,9 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
 
   ninfo("option: %d\n", option);
 
-  /* With IPv4, the multicast-related socket options are simply an alternative
-   * way to access IGMP.  That IGMP functionality can also be accessed via
-   * IOCTL commands (see netdev/netdev_ioctl.c)
+  /* With IPv4, the multicast-related socket options are simply an
+   * alternative way to access IGMP.  That IGMP functionality can also be
+   * accessed via IOCTL commands (see netdev/netdev_ioctl.c)
    *
    * REVISIT:  Clone the logic from netdev_ioctl.c here.
    */
@@ -120,7 +120,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
               dev = netdev_findby_lipv4addr(imsf->imsf_interface.s_addr);
               if (dev == NULL)
                 {
-                  nwarn("WARNING: Could not find device for imsf_interface\n");
+                  nwarn("WARNING: Could not find device\n");
                   ret = -ENODEV;
                 }
               else if (imsf->imsf_fmode == MCAST_INCLUDE)
@@ -155,7 +155,9 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
             }
           else
             {
-              /* Use the default network device is imr_interface is INADDRY_ANY. */
+              /* Use the default network device is imr_interface is
+               * INADDRY_ANY.
+               */
 
               if (mrec->imr_interface.s_addr == INADDR_ANY)
                 {
@@ -163,14 +165,16 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
                 }
               else
                 {
-                  /* Get the device associated with the local interface address */
+                  /* Get the device associated with the local interface
+                   * address
+                   */
 
                   dev = netdev_findby_lipv4addr(mrec->imr_interface.s_addr);
                 }
 
               if (dev == NULL)
                 {
-                  nwarn("WARNING: Could not find device for imr_interface\n");
+                  nwarn("WARNING: Could not find device\n");
                   ret = -ENODEV;
                 }
               else if (option == IP_ADD_MEMBERSHIP)
