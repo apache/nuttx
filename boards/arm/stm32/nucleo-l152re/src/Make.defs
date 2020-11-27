@@ -36,6 +36,14 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif
 
+ifeq ($(CONFIG_LCD_ILI9341),y)
+CSRCS += stm32_ili93418b.c
+endif
+
+ifeq ($(CONFIG_MMCSD_SPI),y)
+CSRCS += stm32_spisd.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
