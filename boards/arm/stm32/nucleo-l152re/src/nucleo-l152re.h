@@ -49,6 +49,7 @@
  ****************************************************************************/
 
 /* LED definitions **********************************************************/
+
 /* The Nucleo L152RE board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -72,6 +73,7 @@
 #define LED_DRIVER_PATH "/dev/userleds"
 
 /* Button definitions *******************************************************/
+
 /* The Nucleo L152RE supports two buttons; only one button is controllable
  * by software:
  *
@@ -111,7 +113,6 @@
 #ifdef CONFIG_LCD_ILI9341
 FAR struct lcd_dev_s *stm32_ili93418b_initialize(void);
 #endif
-
 
 /* SPI sd card */
 

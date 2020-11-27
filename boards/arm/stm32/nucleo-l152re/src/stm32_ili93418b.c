@@ -624,6 +624,7 @@ FAR struct lcd_dev_s *stm32_ili93418b_initialize(void)
 
 #ifdef CONFIG_DEBUG_LCD_INFO
   /* Read display identification */
+
   uint8_t param;
 
   lcd->sendcmd(lcd, ILI9341_READ_ID1);
