@@ -336,8 +336,8 @@ static int sam_qh_dump(struct sam_qh_s *qh, uint32_t **bp, void *arg);
 #else
 #  define sam_qtd_print(qtd)
 #  define sam_qh_print(qh)
-#  define sam_qtd_dump(qtd, bp, arg) OK
-#  define sam_qh_dump(qh, bp, arg)   OK
+#  define sam_qtd_dump(qtd, bp, arg)
+#  define sam_qh_dump(qh, bp, arg)
 #endif
 
 static inline uint8_t sam_ehci_speed(uint8_t usbspeed);
