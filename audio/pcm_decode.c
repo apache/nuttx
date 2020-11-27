@@ -44,6 +44,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -264,21 +265,21 @@ static void pcm_dump(FAR const struct wav_header_s *wav)
 {
   _info("Wave file header\n");
   _info("  Header Chunk:\n");
-  _info("    Chunk ID:        0x%08x\n", wav->hdr.chunkid);
-  _info("    Chunk Size:      %u\n",     wav->hdr.chunklen);
-  _info("    Format:          0x%08x\n", wav->hdr.format);
+  _info("    Chunk ID:        0x%08" PRIx32 "\n", wav->hdr.chunkid);
+  _info("    Chunk Size:      %" PRIu32 "\n",     wav->hdr.chunklen);
+  _info("    Format:          0x%08" PRIx32 "\n", wav->hdr.format);
   _info("  Format Chunk:\n");
-  _info("    Chunk ID:        0x%08x\n", wav->fmt.chunkid);
-  _info("    Chunk Size:      %u\n",     wav->fmt.chunklen);
-  _info("    Audio Format:    0x%04x\n", wav->fmt.format);
-  _info("    Num. Channels:   %d\n",     wav->fmt.nchannels);
-  _info("    Sample Rate:     %u\n",     wav->fmt.samprate);
-  _info("    Byte Rate:       %u\n",     wav->fmt.byterate);
-  _info("    Block Align:     %d\n",     wav->fmt.align);
-  _info("    Bits Per Sample: %d\n",     wav->fmt.bpsamp);
+  _info("    Chunk ID:        0x%08" PRIx32 "\n", wav->fmt.chunkid);
+  _info("    Chunk Size:      %" PRIu32 "\n",     wav->fmt.chunklen);
+  _info("    Audio Format:    0x%04x\n",          wav->fmt.format);
+  _info("    Num. Channels:   %d\n",              wav->fmt.nchannels);
+  _info("    Sample Rate:     %" PRIu32 "\n",     wav->fmt.samprate);
+  _info("    Byte Rate:       %" PRIu32 "\n",     wav->fmt.byterate);
+  _info("    Block Align:     %d\n",              wav->fmt.align);
+  _info("    Bits Per Sample: %d\n",              wav->fmt.bpsamp);
   _info("  Data Chunk:\n");
-  _info("    Chunk ID:        0x%08x\n", wav->data.chunkid);
-  _info("    Chunk Size:      %u\n",     wav->data.chunklen);
+  _info("    Chunk ID:        0x%08" PRIx32 "\n", wav->data.chunkid);
+  _info("    Chunk Size:      %" PRIu32 "\n",     wav->data.chunklen);
 }
 #endif
 
@@ -1221,7 +1222,7 @@ static int pcm_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
   lower = priv->lower;
   DEBUGASSERT(lower && lower->ops->ioctl);
 
-  audinfo("Defer to lower ioctl, cmd=%d arg=%ld\n");
+  audinfo("Defer to lower ioctl, cmd=%d arg=%ld\n", cmd, arg);
   return lower->ops->ioctl(lower, cmd, arg);
 }
 
