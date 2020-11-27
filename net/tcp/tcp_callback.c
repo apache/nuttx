@@ -146,16 +146,16 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
 #endif
 
   /* Preserve the TCP_ACKDATA, TCP_CLOSE, and TCP_ABORT in the response.
-   * These is needed by the network to handle responses and buffer state.  The
-   * TCP_NEWDATA indication will trigger the ACK response, but must be
+   * These is needed by the network to handle responses and buffer state.
+   * The TCP_NEWDATA indication will trigger the ACK response, but must be
    * explicitly set in the callback.
    */
 
   ninfo("flags: %04x\n", flags);
 
-  /* Perform the data callback.  When a data callback is executed from 'list',
-   * the input flags are normally returned, however, the implementation
-   * may set one of the following:
+  /* Perform the data callback.  When a data callback is executed from
+   * 'list', the input flags are normally returned, however, the
+   * implementation may set one of the following:
    *
    *   TCP_CLOSE   - Gracefully close the current connection
    *   TCP_ABORT   - Abort (reset) the current connection on an error that
@@ -175,10 +175,10 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
   flags = devif_conn_event(dev, conn, flags, conn->list);
 
   /* There may be no new data handler in place at them moment that the new
-   * incoming data is received.  If the new incoming data was not handled, then
-   * either (1) put the unhandled incoming data in the read-ahead buffer (if
-   * enabled) or (2) suppress the ACK to the data in the hope that it will
-   * be re-transmitted at a better time.
+   * incoming data is received.  If the new incoming data was not handled,
+   * then either (1) put the unhandled incoming data in the read-ahead
+   * buffer (if enabled) or (2) suppress the ACK to the data in the hope
+   * that it will be re-transmitted at a better time.
    */
 
   if ((flags & TCP_NEWDATA) != 0)
@@ -261,6 +261,7 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
           iob = iob_tryalloc(throttled, IOBUSER_NET_TCP_READAHEAD);
         }
 #endif
+
       if (iob == NULL)
         {
           nerr("ERROR: Failed to create new I/O buffer chain\n");

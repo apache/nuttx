@@ -145,8 +145,8 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
        * TCP buffering.
        *
        * Assume that all of the available IOBs are can be used for buffering
-       * on this connection.  Also assume that at least one chain is available
-       * concatenate the IOBs.
+       * on this connection.  Also assume that at least one chain is
+       * available concatenate the IOBs.
        *
        * REVISIT:  In an environment with multiple, active read-ahead TCP
        * sockets (and perhaps multiple network devices) or if there are
