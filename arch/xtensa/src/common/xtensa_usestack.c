@@ -54,9 +54,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* XTENSA requires at least a 4-byte stack alignment. */
+/* XTENSA requires at least a 16-byte stack alignment. */
 
-#define STACK_ALIGNMENT   4
+#define STACK_ALIGNMENT   16
 
 /* Stack alignment macros */
 
@@ -126,15 +126,14 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * as positive word offsets from sp.
    */
 
-  top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
+  top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 16;
 
-  /* The XTENSA stack must be aligned at word (4 byte) or double word
-   * (8 byte) boundaries. If necessary top_of_stack must be rounded down to
-   * the next boundary
+  /* The XTENSA stack must be aligned at 16 bytes boundaries. If necessary
+   * top_of_stack must be rounded down to the next boundary.
    */
 
   top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
-  size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
+  size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 16;
 
   /* Save the adjusted stack values in the struct tcb_s */
 

@@ -234,7 +234,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * the stack are referenced as positive word offsets from sp.
        */
 
-      top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size - 4;
+      top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size - 16;
 
 #if XCHAL_CP_NUM > 0
       /* Allocate the co-processor save area at the top of the (push down)
@@ -269,7 +269,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        */
 
       top_of_stack  = STACK_ALIGN_DOWN(top_of_stack);
-      size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
+      size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 16;
 
       /* Save the adjusted stack values in the struct tcb_s */
 
