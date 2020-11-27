@@ -247,8 +247,8 @@ static void rtc_wprunlock(void)
 
   stm32_pwr_enablebkp(true);
 
-  /* The following steps are required to unlock the write protection on all the
-   * RTC registers (except for RTC_ISR[13:8], RTC_TAFCR, and RTC_BKPxR).
+  /* The following steps are required to unlock the write protection on all
+   * the RTC registers (except for RTC_ISR[13:8], RTC_TAFCR, and RTC_BKPxR):
    *
    * 1. Write 0xCA into the RTC_WPR register.
    * 2. Write 0x53 into the RTC_WPR register.
@@ -867,16 +867,20 @@ static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
    * ranges of values correspond between struct tm and the time register.
    */
 
-  tmp = (data & (RTC_ALRMR_SU_MASK | RTC_ALRMR_ST_MASK)) >> RTC_ALRMR_SU_SHIFT;
+  tmp = (data & (RTC_ALRMR_SU_MASK | RTC_ALRMR_ST_MASK)) >>
+        RTC_ALRMR_SU_SHIFT;
   tp->tm_sec = rtc_bcd2bin(tmp);
 
-  tmp = (data & (RTC_ALRMR_MNU_MASK | RTC_ALRMR_MNT_MASK)) >> RTC_ALRMR_MNU_SHIFT;
+  tmp = (data & (RTC_ALRMR_MNU_MASK | RTC_ALRMR_MNT_MASK)) >>
+        RTC_ALRMR_MNU_SHIFT;
   tp->tm_min = rtc_bcd2bin(tmp);
 
-  tmp = (data & (RTC_ALRMR_HU_MASK | RTC_ALRMR_HT_MASK)) >> RTC_ALRMR_HU_SHIFT;
+  tmp = (data & (RTC_ALRMR_HU_MASK | RTC_ALRMR_HT_MASK)) >>
+        RTC_ALRMR_HU_SHIFT;
   tp->tm_hour = rtc_bcd2bin(tmp);
 
-  tmp = (data & (RTC_ALRMR_DU_MASK | RTC_ALRMR_DT_MASK)) >> RTC_ALRMR_DU_SHIFT;
+  tmp = (data & (RTC_ALRMR_DU_MASK | RTC_ALRMR_DT_MASK)) >>
+        RTC_ALRMR_DU_SHIFT;
   tp->tm_mday = rtc_bcd2bin(tmp);
 
   return OK;
@@ -981,13 +985,16 @@ int up_rtc_initialize(void)
 #if defined(CONFIG_STM32_RTC_HSECLOCK)
           /* Change to the new clock as the input to the RTC block */
 
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_HSE);
+          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK,
+                      RCC_XXX_RTCSEL_HSE);
 
 #elif defined(CONFIG_STM32_RTC_LSICLOCK)
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSI);
+          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK,
+                      RCC_XXX_RTCSEL_LSI);
 
 #elif defined(CONFIG_STM32_RTC_LSECLOCK)
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSE);
+          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK,
+                      RCC_XXX_RTCSEL_LSE);
 #endif
 
           putreg32(tr_bkp, STM32_RTC_TR);
@@ -997,7 +1004,9 @@ int up_rtc_initialize(void)
 
           putreg32(RTC_MAGIC, RTC_MAGIC_REG);
 
-          /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
+          /* Enable the RTC Clock by setting the RTCEN bit in the RCC
+           * register
+           */
 
           modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_RTCEN);
         }
