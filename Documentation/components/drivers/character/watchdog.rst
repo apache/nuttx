@@ -158,7 +158,7 @@ This command registers an user callback that will be triggered on timeout. It re
 Using the Auto-monitor feature to keep the chip alive
 ------------------------------------------------------
 
-The auto-monitor provides an OS-internal mechanism for automatically start the watchdog timer and repeatedly reset the counting after the watchdog is register.
+The auto-monitor provides an OS-internal mechanism to automatically start the watchdog timer and repeatedly reset the counting after the watchdog is registered.
 
 To enable it, follow the next instructions:
 
