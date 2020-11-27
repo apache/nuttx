@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -258,7 +259,7 @@ static int cxd56_ili93404ws_sendgram(FAR struct ili9340_lcd_s *lcd,
 {
   FAR struct ili93404ws_lcd_s *priv = (FAR struct ili93404ws_lcd_s *)lcd;
 
-  lcdinfo("lcd:%p, wd=%p, nwords=%d\n", lcd, wd, nwords);
+  lcdinfo("lcd:%p, wd=%p, nwords=%" PRId32 "\n", lcd, wd, nwords);
 
   SPI_SETBITS(priv->spi, 16);
   SPI_SNDBLOCK(priv->spi, wd, nwords);
@@ -311,7 +312,7 @@ static int cxd56_ili93404ws_recvparam(FAR struct ili9340_lcd_s *lcd,
 static int cxd56_ili93404ws_recvgram(FAR struct ili9340_lcd_s *lcd,
                                      uint16_t *wd, uint32_t nwords)
 {
-  lcdinfo("wd=%p, nwords=%d\n", wd, nwords);
+  lcdinfo("wd=%p, nwords=%" PRId32 "\n", wd, nwords);
 
   return OK;
 };
