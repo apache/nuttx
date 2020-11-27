@@ -126,12 +126,14 @@ _xtensa_context_save:
 	s32i	a10, a2, (4 * REG_A10)
 	s32i	a11, a2, (4 * REG_A11)
 
-	/* Call0 ABI callee-saved regs a12-15 */
+	/* Call0 ABI callee-saved regs a12-15 do not need to be saved here */
 
+#ifndef __XTENSA_CALL0_ABI__
 	s32i	a12, a2, (4 * REG_A12)
 	s32i	a13, a2, (4 * REG_A13)
 	s32i	a14, a2, (4 * REG_A14)
 	s32i	a15, a2, (4 * REG_A15)
+#endif
 
 	rsr		a3, SAR
 	s32i	a3, a2, (4 * REG_SAR)
@@ -482,10 +484,12 @@ _xtensa_context_restore:
 
 	/* Call0 ABI callee-saved regs a12-15 */
 
+#ifndef __XTENSA_CALL0_ABI__
 	l32i	a12, a2, (4 * REG_A12)
 	l32i	a13, a2, (4 * REG_A13)
 	l32i	a14, a2, (4 * REG_A14)
 	l32i	a15, a2, (4 * REG_A15)
+#endif
 
 	ret
 
