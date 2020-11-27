@@ -54,6 +54,11 @@ struct sigwork_s
   sigev_notify_function_t func; /* Notification function */
 };
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -554,6 +559,10 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 void nxsig_cancel_notification(FAR struct sigwork_s *work);
 #else
   #define nxsig_cancel_notification(work) (void)(work)
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* __INCLUDE_NUTTX_SIGNAL_H */
