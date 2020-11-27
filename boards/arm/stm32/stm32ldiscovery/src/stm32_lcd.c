@@ -48,6 +48,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -556,7 +557,7 @@ static int slcd_setcontrast(uint8_t contrast)
   regval |= contrast << LCD_FCR_CC_SHIFT;
   putreg32(regval, STM32_LCD_FCR);
 
-  lcdinfo("contrast: %d FCR: %08x\n",
+  lcdinfo("contrast: %" PRId32 " FCR: %08x\n",
           getreg32(STM32_LCD_FCR), contrast);
 
   return ret;
@@ -1524,7 +1525,7 @@ int stm32_slcd_initialize(void)
 
       stm32_rcc_enablelse();
 
-      lcdinfo("APB1ENR: %08x CSR: %08x\n",
+      lcdinfo("APB1ENR: %08" PRIx32 " CSR: %08" PRIx32 "\n",
               getreg32(STM32_RCC_APB1ENR), getreg32(STM32_RCC_CSR));
 
       /* Set the LCD prescaler and divider values */
@@ -1536,7 +1537,7 @@ int stm32_slcd_initialize(void)
 
       /* Wait for the FCRSF flag to be set */
 
-      lcdinfo("Wait for FCRSF, FSR: %08x SR: %08x\n",
+      lcdinfo("Wait for FCRSF, FSR: %08" PRIx32 " SR: %08" PRIx32 "\n",
               getreg32(STM32_LCD_FCR), getreg32(STM32_LCD_SR));
 
       while ((getreg32(STM32_LCD_SR) & LCD_SR_FCRSF) == 0);
@@ -1575,7 +1576,7 @@ int stm32_slcd_initialize(void)
 
       /* Wait Until the LCD FCR register is synchronized */
 
-      lcdinfo("Wait for FCRSF, FSR: %08x SR: %08x\n",
+      lcdinfo("Wait for FCRSF, FSR: %08" PRIx32 " SR: %08" PRIx32 "\n",
               getreg32(STM32_LCD_FCR), getreg32(STM32_LCD_SR));
 
       while ((getreg32(STM32_LCD_SR) & LCD_SR_FCRSF) == 0);
@@ -1586,7 +1587,8 @@ int stm32_slcd_initialize(void)
 
       /* Wait Until the LCD is enabled and the LCD booster is ready */
 
-      lcdinfo("Wait for LCD_SR_ENS and LCD_SR_RDY, CR: %08x SR: %08x\n",
+      lcdinfo("Wait for LCD_SR_ENS and LCD_SR_RDY, "
+              "CR: %08" PRIx32 " SR: %08" PRIx32 "\n",
               getreg32(STM32_LCD_CR), getreg32(STM32_LCD_SR));
 
       while ((getreg32(STM32_LCD_SR) & (LCD_SR_ENS | LCD_SR_RDY)) !=
