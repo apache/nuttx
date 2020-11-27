@@ -30,18 +30,19 @@
 #include "xtensa_abi.h"
 
 /*
- * This is how the stack looks like when calling the function below:
+ * This is how the call stack looks like when calling the function below
+ * from xtensa_dumpstate():
  *
  *         High Addr
  *     ..................
  *     |    i-3 BSA     |
- *     |   i-1 locals   | Function B
+ *     |   i-1 locals   | xtensa_assert()
  *     .................. i-1 SP
  *     |    i-2 BSA     |
- *     |    i locals    | Function A (Start of backtrace)
+ *     |    i locals    | xtensa_dumpstate()
  *     ------------------ i SP
  *     |    i-1 BSA     |
- *     |   i+1 locals   | Backtracing function (e.g. xtensa_btdump())
+ *     |   i+1 locals   | xtensa_btdump()
  *     ------------------ i+1 SP
  *     |     i BSA      |
  *     |   i+2 locals   | xtensa_backtrace_start()
@@ -56,7 +57,7 @@
  * Name: xtensa_backtrace_start
  *
  * Description:
- *   Get the first frame of the current stack's backtrace
+ *   Get the first frame of the current stack's backtrace.
  *
  *   Given the following function call flow (B -> A -> X -> xtensa_backtrace_start),
  *   this function will do the following:
