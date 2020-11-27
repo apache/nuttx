@@ -58,14 +58,12 @@ typedef unsigned short     _uint16_t;
 typedef signed int         _int32_t;
 typedef unsigned int       _uint32_t;
 
-typedef signed long long   _int64_t;
-typedef unsigned long long _uint64_t;
+typedef signed long        _int64_t;
+typedef unsigned long      _uint64_t;
 #define __INT64_DEFINED
 
-/* A pointer is 8 bytes */
-
-typedef signed long long         _intptr_t;
-typedef unsigned long long       _uintptr_t;
+typedef _int64_t           _intmax_t;
+typedef _uint64_t          _uintmax_t;
 
 #if defined(__SIZE_TYPE__)
 /* If __SIZE_TYPE__ is defined we define ssize_t based on size_t.

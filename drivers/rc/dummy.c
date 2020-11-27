@@ -29,6 +29,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
 #include <debug.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <errno.h>
 
@@ -184,7 +185,8 @@ static int dummy_tx_ir(FAR struct lirc_lowerhalf_s *lower,
 static int dummy_tx_scancode(FAR struct lirc_lowerhalf_s *lower,
                              FAR struct lirc_scancode *txbuf)
 {
-  rcinfo("Dummy RC send scancode data:%u to device\n", txbuf->scancode);
+  rcinfo("Dummy RC send scancode data:%" PRIu64 " to device\n",
+         txbuf->scancode);
   return 0;
 }
 

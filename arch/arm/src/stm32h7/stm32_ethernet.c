@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -41,6 +42,7 @@
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
+#include <crc64.h>
 
 #if defined(CONFIG_NET_PKT)
 #  include <nuttx/net/pkt.h>
@@ -1102,7 +1104,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  ninfo("d_len: %d d_buf: %p txhead: %p tdes3: %08x\n",
+  ninfo("d_len: %d d_buf: %p txhead: %p tdes3: %08" PRIx32 "\n",
         priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->des3);
 
   DEBUGASSERT(txdesc);
@@ -1823,7 +1825,8 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                    * next frame.
                    */
 
-                  nwarn("WARNING: DROPPED RX descriptor errors: %08x\n",
+                  nwarn("WARNING: DROPPED RX descriptor errors: "
+                        "%08" PRIx32 "\n",
                         rxdesc->des3);
                   stm32_freesegment(priv, rxcurr, priv->segments);
                 }
@@ -2082,7 +2085,8 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
            * TX descriptors.
            */
 
-          ninfo("txtail: %p des0: %08x des2: %08x des3: %08x\n",
+          ninfo("txtail: %p des0: %08" PRIx32
+                " des2: %08" PRIx32 " des3: %08" PRIx32 "\n",
                 txdesc, txdesc->des0, txdesc->des2, txdesc->des3);
 
           DEBUGASSERT(txdesc->des0 != 0);
@@ -2564,8 +2568,8 @@ static int stm32_ifup(struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff), (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff), (int)(dev->d_ipaddr >> 24));
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",

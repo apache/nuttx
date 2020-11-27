@@ -99,8 +99,8 @@ function check_required_files() {
       echo " - NOTICE file not present."
       MISSING_FILE=1
     fi
-    if [ ! -f "$RELEASE_DIR/README.txt" ]; then
-      echo " - README.txt file not present."
+    if [ ! -f "$RELEASE_DIR/README.md" ]; then
+      echo " - README.md file not present."
       MISSING_FILE=1
     fi
     if [ ! -f "$RELEASE_DIR/DISCLAIMER-WIP" ]; then

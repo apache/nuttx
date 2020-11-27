@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -117,12 +118,12 @@ static void pwm_dump(FAR const char *msg, FAR const struct pwm_info_s *info,
   int i;
 #endif
 
-  pwminfo("%s: frequency: %d\n", msg, info->frequency);
+  pwminfo("%s: frequency: %" PRId32 "\n", msg, info->frequency);
 
 #ifdef CONFIG_PWM_MULTICHAN
   for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
     {
-      pwminfo(" channel: %d duty: %08x\n",
+      pwminfo(" channel: %d duty: %08" PRIx32 "\n",
               info->channels[i].channel, info->channels[i].duty);
     }
 #else
@@ -248,7 +249,7 @@ static int pwm_close(FAR struct file *filep)
       /* Disable the PWM device */
 
       DEBUGASSERT(lower->ops->shutdown != NULL);
-      pwminfo("calling shutdown: %d\n");
+      pwminfo("calling shutdown\n");
 
       lower->ops->shutdown(lower);
     }

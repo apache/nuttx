@@ -42,6 +42,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <inttypes.h>
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
@@ -339,7 +340,9 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
               goto errout_with_infd;
             }
 
-          /* Adjust the number of bytes remaining to be read from the packet */
+          /* Adjust the number of bytes remaining to be read from the
+           * packet
+           */
 
           DEBUGASSERT(tmplen <= remaining);
           remaining -= tmplen;
@@ -443,7 +446,7 @@ ssize_t local_recvfrom(FAR struct socket *psock, FAR void *buf,
 #endif
     {
       DEBUGPANIC();
-      nerr("ERROR: Unrecognized socket type: %s\n", psock->s_type);
+      nerr("ERROR: Unrecognized socket type: %" PRIu8 "\n", psock->s_type);
       return -EINVAL;
     }
 }

@@ -102,7 +102,7 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
         {
           if (nwritten != -EINTR)
             {
-              nerr("ERROR: nx_write failed: %d\n", nwritten);
+              nerr("ERROR: nx_write failed: %zd\n", nwritten);
               return (int)nwritten;
             }
 

@@ -44,91 +44,93 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if defined(__APPLE_CC__) || !defined(_LP64)
+#  define _PRI64PREFIX "ll"
+#  define _SCN64PREFIX "ll"
+#  define INT64_C(x)  x ## ll
+#  define UINT64_C(x) x ## ull
+#else
+#  define _PRI64PREFIX "l"
+#  define _SCN64PREFIX "l"
+#  define INT64_C(x)  x ## l
+#  define UINT64_C(x) x ## ul
+#endif
+
 #  define PRId8       "d"
 #  define PRId16      "d"
 #  define PRId32      "d"
-#  define PRId64      "lld"
+#  define PRId64      _PRI64PREFIX "d"
 
 #  define PRIi8       "i"
 #  define PRIi16      "i"
 #  define PRIi32      "i"
-#  define PRIi64      "lli"
+#  define PRIi64      _PRI64PREFIX "i"
 
 #  define PRIo8       "o"
 #  define PRIo16      "o"
 #  define PRIo32      "o"
-#  define PRIo64      "llo"
+#  define PRIo64      _PRI64PREFIX "o"
 
 #  define PRIu8       "u"
 #  define PRIu16      "u"
 #  define PRIu32      "u"
-#  define PRIu64      "llu"
-
-#  define PRIuMAX     "llu"
+#  define PRIu64      _PRI64PREFIX "u"
 
 #  define PRIx8       "x"
 #  define PRIx16      "x"
 #  define PRIx32      "x"
-#  define PRIx64      "llx"
+#  define PRIx64      _PRI64PREFIX "x"
 
 #  define PRIX8       "X"
 #  define PRIX16      "X"
 #  define PRIX32      "X"
-#  define PRIX64      "llX"
+#  define PRIX64      _PRI64PREFIX "X"
 
 #  define SCNd8       "hhd"
 #  define SCNd16      "hd"
 #  define SCNd32      "d"
-#  define SCNd64      "lld"
-
-#  define SCNdMAX     "lld"
+#  define SCNd64      _SCN64PREFIX "d"
 
 #  define SCNi8       "hhi"
 #  define SCNi16      "hi"
 #  define SCNi32      "i"
-#  define SCNi64      "lli"
-
-#  define SCNiMAX     "lli"
+#  define SCNi64      _SCN64PREFIX "i"
 
 #  define SCNo8       "hho"
 #  define SCNo16      "ho"
 #  define SCNo32      "o"
-#  define SCNo64      "llo"
-
-#  define SCNoMAX     "llo"
+#  define SCNo64      _SCN64PREFIX "o"
 
 #  define SCNu8       "hhu"
 #  define SCNu16      "hu"
 #  define SCNu32      "u"
-#  define SCNu64      "llu"
+#  define SCNu64      _SCN64PREFIX "u"
 
 #  define SCNx8       "hhx"
 #  define SCNx16      "hx"
 #  define SCNx32      "x"
-#  define SCNx64      "llx"
+#  define SCNx64      _SCN64PREFIX "x"
 
 #  define INT8_C(x)   x
 #  define INT16_C(x)  x
 #  define INT32_C(x)  x
-#  define INT64_C(x)  x ## ll
 
 #  define UINT8_C(x)  x
 #  define UINT16_C(x) x
 #  define UINT32_C(x) x ## u
-#  define UINT64_C(x) x ## ull
 
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
-#  define PRIdPTR     "lld"
-#  define PRIiPTR     "lli"
-#  define PRIoPTR     "llo"
-#  define PRIuPTR     "llu"
-#  define PRIxPTR     "llx"
-#  define PRIXPTR     "llX"
-#  define SCNdPTR     "lld"
-#  define SCNiPTR     "lli"
-#  define SCNoPTR     "llo"
-#  define SCNuPTR     "llu"
-#  define SCNxPTR     "llx"
+#  define PRIdPTR     "ld"
+#  define PRIiPTR     "li"
+#  define PRIoPTR     "lo"
+#  define PRIuPTR     "lu"
+#  define PRIxPTR     "lx"
+#  define PRIXPTR     "lX"
+#  define SCNdPTR     "ld"
+#  define SCNiPTR     "li"
+#  define SCNoPTR     "lo"
+#  define SCNuPTR     "lu"
+#  define SCNxPTR     "lx"
 #else
 #  define PRIdPTR     "d"
 #  define PRIiPTR     "i"

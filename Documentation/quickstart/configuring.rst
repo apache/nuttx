@@ -6,48 +6,31 @@ Configuring
 
 Apache NuttX is a very configurable operating system. Nearly all features can be configured in or
 out of the system. This makes it possible to compile a build tailored for your hardware and
-application. It also makes configuring the system complex at times.
-
-There is a configuration system that can be used on the commandline or in a GUI. I've found
-the easiest way to configured Apache NuttX is to use the ``menuconfig`` system. This is used
-via a terminal program and allows quick access to all of Apache NuttX's features via a system of
-menus.
+application.
 
 The Apache NuttX configuration system uses Linux's
-`kconfig system <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`_ adapted for use with Apache
-NuttX. Here's info on Linux's kconfig `menuconfig <https://en.wikipedia.org/wiki/Menuconfig>`_ system.
+`kconfig system <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`_ which
+includes various frontends that allow you to modify configuration easily. Usually, the ``menuconfig``
+frontend is used, which is a console based menu system (more info `here <https://en.wikipedia.org/wiki/Menuconfig>`_).
 
-After you've configured your board (see :ref:`compiling`), you can use the menuconfig system
-to change the configuration. Once you've configured, you can compile to make a build that
-has your configuration options selected.
+As previously explained in :doc:`compiling`, the first step is to load a premade configuration for
+your board. Then, you can modify this configuration to your liking.
+
+In this example, we will show how you modify the default configuration of the ``sim`` build.
 
 #. Initialize Board Configuration
 
-   Here we'll use the simulator since that's the simplest to explain. You can do this with
-   any board and base configuration.  Note here you should be supplying `configure.sh` the correct flag
-   for your build environment:
-
-    .. code-block:: bash
-
-       -l selects the Linux (l) host environment.
-       -m selects the macOS (m) host environment.
-       -c selects the Windows host and Cygwin (c) environment.
-       -g selects the Windows host and MinGW/MSYS environment.
-       -n selects the Windows host and Windows native (n) environment.
-
-   Select the simulator configuration for a Linux host:
-
-    .. code-block:: bash
+    .. code-block:: console
 
        $ cd nuttx
-       $ make distclean  # make a clean start, clearing out old configurations
        $ ./tools/configure.sh -l sim:nsh
          Copy files
          Select CONFIG_HOST_LINUX=y
          Refreshing...
-#. Make
+         
+#. Build & run
 
-    .. code-block:: bash
+    .. code-block:: console
 
        $ make clean; make
        $ ./nuttx
@@ -55,15 +38,16 @@ has your configuration options selected.
 
    From another terminal window, kill the simulator:
 
-    .. code-block:: bash
+    .. code-block:: console
 
        $ pkill nuttx
 
-#. Menu Configuration
+#. Modify configuration
 
-   Showing that ``login:`` is annyoing. Let's use the ``menuconfig`` system to turn it off.
+   In this case we will remove the login feature (which will boot straight to the prompt). To
+   do so, we use the ``menuconfig`` frontend.
 
-    .. code-block:: bash
+    .. code-block:: console
 
        $ make menuconfig
 
@@ -76,27 +60,24 @@ has your configuration options selected.
 
    |br|
 
-#. Application Configuration
+   The NSH Login setting is under :menuselection:`Application Configuration --> NSH Library`. You
+   can use :kbd:`🢁` and :kbd:`🢃` keys to navigate and :kbd:`↵` to enter a submenu.
+   To disable the corresponding setting go to :menuselection:`Console Login` and press :kbd:`spacebar` to
+   it (so that it has a blank space instead of a star in it).
 
-   The NSH Login setting is under ``Application Configuration > NSH Library``. Use
-   the up and down arrows to navigate to ``Application Configuration``; hit ``<return>`` to
-   select it. Now you're in the ``Application Configuration`` menu. Use the arrows to go
-   down to ``NSH Library`` and select that. Now navigate down to ``Console Login`` and use
-   the spacebar to uncheck that setting (so that it has a blank space instead of a star in it).
+   Now you need to exit ``menuconfig`` and save the modified configuration. Use the :kbd:`🡸` and
+   :kbd:`🡺` arrow keys to navigate the lower menu. If you select :menuselection:`Exit` you will be
+   prompted to save the config.
 
-   Now let's save. Use the right and left arrow keys to select the ``Exit`` menu item at the
-   bottom of the screen. Hit ``<return>`` to select it, hit ``<return>`` again, and again, finally
-   hitting ``<return>`` in the ``Save Configuration`` dialog box.
+#. Build with the new Configuration
 
-#. Make the New Configuration
+    .. code-block:: console
 
-    .. code-block:: bash
-
-       $ make clean; make
+       $ make
 
 #. Run
 
-    .. code-block:: bash
+    .. code-block:: console
 
        $ ./nuttx
        NuttShell (NSH) NuttX-8.2
@@ -104,8 +85,42 @@ has your configuration options selected.
 
    Success!
 
+.. tip::
    If you find that message of the day (MOTD) annoying and want to turn that off, it's
-   configured in ``Application Configuration > NSH Library >> Message of the Day (MOTD)``.
+   configured in :menuselection:`Application Configuration --> NSH Library --> Message of the Day (MOTD)`.
+   
+Fast configuration changes
+--------------------------
+
+If you know exactly which configuration symbol you want to change, you can use the ``kconfig-tweak`` tool (comes with the ``kconfig-frontends`` package) to quickly change a setting without going into the configuration frontend. This is useful to change settings such as debug options:
+
+.. code-block:: console
+
+   $ kconfig-tweak --disable CONFIG_DEBUG_NET
+   $ make olddefconfig  # needed to have the kconfig system check the config
+   $ kconfig-tweak --enable CONFIG_DEBUG_NET
+   $ make olddefconfig
+
+This is also useful to script configuration changes that you perform often:
+
+.. code-block:: console
+
+   #!/bin/bash
+
+   kconfig-tweak --disable CONFIG_DEBUG_ALERT
+   kconfig-tweak --disable CONFIG_DEBUG_FEATURES
+   kconfig-tweak --disable CONFIG_DEBUG_ERROR
+   kconfig-tweak --disable CONFIG_DEBUG_WARN
+   kconfig-tweak --disable CONFIG_DEBUG_INFO
+   kconfig-tweak --disable CONFIG_DEBUG_ASSERTIONS
+   kconfig-tweak --disable CONFIG_DEBUG_NET
+   kconfig-tweak --disable CONFIG_DEBUG_NET_ERROR
+   kconfig-tweak --disable CONFIG_DEBUG_NET_WARN
+   kconfig-tweak --disable CONFIG_DEBUG_NET_INFO
+   kconfig-tweak --disable CONFIG_DEBUG_SYMBOLS
+   kconfig-tweak --disable CONFIG_DEBUG_NOOPT
+   kconfig-tweak --disable CONFIG_SYSLOG_TIMESTAMP
+   make oldconfig
 
 ----
 

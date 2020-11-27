@@ -193,7 +193,8 @@ static ssize_t binfs_read(FAR struct file *filep,
 {
   /* Reading is not supported.  Just return end-of-file */
 
-  finfo("Read %d bytes from offset %d\n", buflen, filep->f_pos);
+  finfo("Read %zu bytes from offset %jd\n",
+        buflen, (intmax_t)filep->f_pos);
   return 0;
 }
 

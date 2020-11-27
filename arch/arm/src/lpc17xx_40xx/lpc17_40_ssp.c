@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -463,7 +464,7 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev,
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spiinfo("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
   return actual;
 }
 
@@ -604,7 +605,7 @@ static uint32_t ssp_send(FAR struct spi_dev_s *dev, uint32_t wd)
   /* Get the value from the RX FIFO and return it */
 
   regval = ssp_getreg(priv, LPC17_40_SSP_DR_OFFSET);
-  spiinfo("%04x->%04x\n", wd, regval);
+  spiinfo("%04" PRId32 "->%04" PRId32 "\n", wd, regval);
   return regval;
 }
 
@@ -739,7 +740,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
    * has occurred)
    */
 
-  spiinfo("nwords: %d\n", nwords);
+  spiinfo("nwords: %zd\n", nwords);
   u.pv = buffer;
   while (nwords || rxpending)
     {
@@ -749,7 +750,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
        * and (3) there are more bytes to be sent.
        */
 
-      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      spiinfo("TX: rxpending: %" PRId32 " nwords: %zd\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC17_40_SSP_SR_OFFSET) & SSP_SR_TNF) &&
              (rxpending < LPC17_40_SSP_FIFOSZ) && nwords)
         {
@@ -762,7 +763,7 @@ static void ssp_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
        * not empty.
        */
 
-      spiinfo("RX: rxpending: %d\n", rxpending);
+      spiinfo("RX: rxpending: %" PRId32 "\n", rxpending);
       while (ssp_getreg(priv, LPC17_40_SSP_SR_OFFSET) & SSP_SR_RNE)
         {
           data = (uint8_t)ssp_getreg(priv, LPC17_40_SSP_DR_OFFSET);

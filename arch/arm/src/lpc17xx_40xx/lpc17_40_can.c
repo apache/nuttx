@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_can.c
  *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
@@ -42,12 +42,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -71,23 +76,24 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_LPC17_40_CAN1
 
-   /* A CAN bit rate must be provided */
+/* A CAN bit rate must be provided */
 
 #  ifndef CONFIG_LPC17_40_CAN1_BAUD
 #    error "CONFIG_LPC17_40_CAN1_BAUD is not defined"
 #  endif
 
-   /* If no divsor is provided, use a divisor of 4 */
+/* If no divsor is provided, use a divisor of 4 */
 
 #  ifndef CONFIG_LPC17_40_CAN1_DIVISOR
 #    define CONFIG_LPC17_40_CAN1_DIVISOR 4
 #  endif
 
-   /* Get the SYSCON_PCLKSEL value for CAN1 the implements this divisor */
+/* Get the SYSCON_PCLKSEL value for CAN1 the implements this divisor */
 
 #  if CONFIG_LPC17_40_CAN1_DIVISOR == 1
 #    define CAN1_CCLK_DIVISOR SYSCON_PCLKSEL_CCLK
@@ -104,19 +110,19 @@
 
 #ifdef CONFIG_LPC17_40_CAN2
 
-   /* A CAN bit rate must be provided */
+/* A CAN bit rate must be provided */
 
 #  ifndef CONFIG_LPC17_40_CAN2_BAUD
 #    error "CONFIG_LPC17_40_CAN2_BAUD is not defined"
 #  endif
 
-   /* If no divsor is provided, use a divisor of 4 */
+/* If no divsor is provided, use a divisor of 4 */
 
 #  ifndef CONFIG_LPC17_40_CAN2_DIVISOR
 #    define CONFIG_LPC17_40_CAN2_DIVISOR 4
 #  endif
 
-   /* Get the SYSCON_PCLKSEL value for CAN2 the implements this divisor */
+/* Get the SYSCON_PCLKSEL value for CAN2 the implements this divisor */
 
 #  if CONFIG_LPC17_40_CAN2_DIVISOR == 1
 #    define CAN2_CCLK_DIVISOR SYSCON_PCLKSEL_CCLK
@@ -157,6 +163,7 @@
 #define CAN_BIT_QUANTA (CONFIG_LPC17_40_CAN_TSEG1 + CONFIG_LPC17_40_CAN_TSEG2 + 1)
 
 /* Debug ********************************************************************/
+
 /* Non-standard debug that may be enabled just for testing CAN */
 
 #ifndef CONFIG_DEBUG_CAN_INFO
@@ -164,6 +171,7 @@
 #endif
 
 /* Timing *******************************************************************/
+
 /* CAN clocking is provided at CCLK divided by the configured divisor */
 
 #ifdef BOARD_CCLKSEL_DIVIDER
@@ -188,6 +196,7 @@ struct up_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* CAN Register access */
 
 #ifdef CONFIG_LPC17_40_CAN_REGDEBUG
@@ -212,9 +221,11 @@ static int  lpc17can_setup(FAR struct can_dev_s *dev);
 static void lpc17can_shutdown(FAR struct can_dev_s *dev);
 static void lpc17can_rxint(FAR struct can_dev_s *dev, bool enable);
 static void lpc17can_txint(FAR struct can_dev_s *dev, bool enable);
-static int  lpc17can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg);
+static int  lpc17can_ioctl(FAR struct can_dev_s *dev, int cmd,
+                           unsigned long arg);
 static int  lpc17can_remoterequest(FAR struct can_dev_s *dev, uint16_t id);
-static int  lpc17can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg);
+static int  lpc17can_send(FAR struct can_dev_s *dev,
+                          FAR struct can_msg_s *msg);
 static bool lpc17can_txready(FAR struct can_dev_s *dev);
 static bool lpc17can_txempty(FAR struct can_dev_s *dev);
 
@@ -280,6 +291,7 @@ static struct can_dev_s g_can2dev =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: can_printreg
  *
@@ -329,7 +341,7 @@ static void can_printreg(uint32_t addr, uint32_t value)
         {
           /* Yes.. then show how many times the value repeated */
 
-          caninfo("[repeats %d more times]\n", count-3);
+          caninfo("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -653,8 +665,8 @@ static void lpc17can_txint(FAR struct can_dev_s *dev, bool enable)
 
   if (!enable)
     {
-      /* TX interrupts are also disabled from the interrupt handler, so we have
-       * to protect this code section.
+      /* TX interrupts are also disabled from the interrupt handler, so we
+       * have to protect this code section.
        */
 
       flags = enter_critical_section();
@@ -666,7 +678,6 @@ static void lpc17can_txint(FAR struct can_dev_s *dev, bool enable)
       can_putreg(priv, LPC17_40_CAN_IER_OFFSET, regval);
       leave_critical_section(flags);
     }
-
 }
 
 /****************************************************************************
@@ -683,7 +694,8 @@ static void lpc17can_txint(FAR struct can_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-static int lpc17can_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
+static int lpc17can_ioctl(FAR struct can_dev_s *dev, int cmd,
+                          unsigned long arg)
 {
   canerr("ERROR: Fix me -- Not Implemented\n");
   return 0;
@@ -732,7 +744,8 @@ static int lpc17can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  ****************************************************************************/
 
-static int lpc17can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
+static int lpc17can_send(FAR struct can_dev_s *dev,
+                         FAR struct can_msg_s *msg)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->cd_priv;
   uint32_t tid = (uint32_t)msg->cm_hdr.ch_id;
@@ -741,8 +754,8 @@ static int lpc17can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   irqstate_t flags;
   int ret = OK;
 
-  caninfo("CAN%d ID: %d DLC: %d\n",
-          priv->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  caninfo("CAN%d ID: %" PRId32 " DLC: %d\n",
+          priv->port, (uint32_t)msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   if (msg->cm_hdr.ch_rtr)
     {
@@ -793,8 +806,10 @@ static int lpc17can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
       can_putreg(priv, LPC17_40_CAN_TFI1_OFFSET, tfi);
       can_putreg(priv, LPC17_40_CAN_TID1_OFFSET, tid);
-      can_putreg(priv, LPC17_40_CAN_TDA1_OFFSET, *(uint32_t *)&msg->cm_data[0]);
-      can_putreg(priv, LPC17_40_CAN_TDB1_OFFSET, *(uint32_t *)&msg->cm_data[4]);
+      can_putreg(priv, LPC17_40_CAN_TDA1_OFFSET,
+                 *(uint32_t *)&msg->cm_data[0]);
+      can_putreg(priv, LPC17_40_CAN_TDB1_OFFSET,
+                 *(uint32_t *)&msg->cm_data[4]);
 
       /* Send the message */
 
@@ -823,8 +838,10 @@ static int lpc17can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
       can_putreg(priv, LPC17_40_CAN_TFI2_OFFSET, tfi);
       can_putreg(priv, LPC17_40_CAN_TID2_OFFSET, tid);
-      can_putreg(priv, LPC17_40_CAN_TDA2_OFFSET, *(uint32_t *)&msg->cm_data[0]);
-      can_putreg(priv, LPC17_40_CAN_TDB2_OFFSET, *(uint32_t *)&msg->cm_data[4]);
+      can_putreg(priv, LPC17_40_CAN_TDA2_OFFSET,
+                 *(uint32_t *)&msg->cm_data[0]);
+      can_putreg(priv, LPC17_40_CAN_TDB2_OFFSET,
+                 *(uint32_t *)&msg->cm_data[4]);
 
       /* Send the message */
 
@@ -853,8 +870,10 @@ static int lpc17can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
       can_putreg(priv, LPC17_40_CAN_TFI3_OFFSET, tfi);
       can_putreg(priv, LPC17_40_CAN_TID3_OFFSET, tid);
-      can_putreg(priv, LPC17_40_CAN_TDA3_OFFSET, *(uint32_t *)&msg->cm_data[0]);
-      can_putreg(priv, LPC17_40_CAN_TDB3_OFFSET, *(uint32_t *)&msg->cm_data[4]);
+      can_putreg(priv, LPC17_40_CAN_TDA3_OFFSET,
+                 *(uint32_t *)&msg->cm_data[0]);
+      can_putreg(priv, LPC17_40_CAN_TDB3_OFFSET,
+                 *(uint32_t *)&msg->cm_data[4]);
 
       /* Send the message */
 
@@ -866,7 +885,8 @@ static int lpc17can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     }
   else
     {
-      canerr("ERROR: No available transmission buffer, SR: %08x\n", regval);
+      canerr("ERROR: No available transmission buffer, SR: %08" PRIx32 "\n",
+             regval);
       ret = -EBUSY;
     }
 
@@ -943,10 +963,12 @@ static void can_interrupt(FAR struct can_dev_s *dev)
   uint32_t rid;
   uint32_t regval;
 
-  /* Read the interrupt and capture register (also clearing most status bits) */
+  /* Read the interrupt and capture register (also clearing most status
+   * bits)
+   */
 
   regval = can_getreg(priv, LPC17_40_CAN_ICR_OFFSET);
-  caninfo("CAN%d ICR: %08x\n",  priv->port, regval);
+  caninfo("CAN%d ICR: %08" PRIx32 "\n", priv->port, regval);
 
   /* Check for a receive interrupt */
 
@@ -976,7 +998,8 @@ static void can_interrupt(FAR struct can_dev_s *dev)
 
       if ((rfs & CAN_RFS_FF) != 0)
         {
-          canerr("ERROR: Received message with extended identifier.  Dropped\n");
+          canerr("ERROR: Received message with extended identifier.  "
+                 "Dropped\n");
         }
       else
 #endif
@@ -1111,7 +1134,8 @@ static int can12_interrupt(int irq, void *context, FAR void *arg)
  *   Tq = brp * Tcan
  *
  * Where:
- *   Tcan is the period of the APB clock (PCLK = CCLK / CONFIG_LPC17_40_CAN1_DIVISOR).
+ *   Tcan is the period of the APB clock (PCLK =
+ *   CCLK / CONFIG_LPC17_40_CAN1_DIVISOR).
  *
  * Input Parameters:
  *   priv - A reference to the CAN block status
@@ -1130,8 +1154,8 @@ static int can_bittiming(struct up_dev_s *priv)
   uint32_t ts2;
   uint32_t sjw;
 
-  caninfo("CAN%d PCLK: %d baud: %d\n", priv->port,
-          CAN_CLOCK_FREQUENCY(priv->divisor), priv->baud);
+  caninfo("CAN%d PCLK: %" PRId32 " baud: %" PRId32 "\n", priv->port,
+          (uint32_t)CAN_CLOCK_FREQUENCY(priv->divisor), priv->baud);
 
   /* Try to get CAN_BIT_QUANTA quanta in one bit_time.
    *
@@ -1168,9 +1192,9 @@ static int can_bittiming(struct up_dev_s *priv)
         }
     }
 
-  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_LPC17_40_CAN_TSEG1, ts2 is
-   * CONFIG_LPC17_40_CAN_TSEG2 and we calculate brp to achieve CAN_BIT_QUANTA quanta
-   * in the bit time
+  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_LPC17_40_CAN_TSEG1,
+   * ts2 is CONFIG_LPC17_40_CAN_TSEG2 and we calculate brp to achieve
+   * CAN_BIT_QUANTA quanta in the bit time
    */
 
   else
@@ -1178,12 +1202,14 @@ static int can_bittiming(struct up_dev_s *priv)
       ts1 = CONFIG_LPC17_40_CAN_TSEG1;
       ts2 = CONFIG_LPC17_40_CAN_TSEG2;
       brp = (nclks + (CAN_BIT_QUANTA / 2)) / CAN_BIT_QUANTA;
-      DEBUGASSERT(brp >=1 && brp <= CAN_BTR_BRP_MAX);
+      DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }
 
   sjw = 1;
 
-  caninfo("TS1: %d TS2: %d BRP: %d SJW= %d\n", ts1, ts2, brp, sjw);
+  caninfo("TS1: %" PRId32 " TS2: %" PRId32
+          " BRP: %" PRId32 " SJW= %" PRId32 "\n",
+          ts1, ts2, brp, sjw);
 
   /* Configure bit timing */
 
@@ -1200,7 +1226,7 @@ static int can_bittiming(struct up_dev_s *priv)
   btr |= CAN_BTR_SAM;
 #endif
 
-  caninfo("Setting CANxBTR= 0x%08x\n", btr);
+  caninfo("Setting CANxBTR= 0x%08" PRIx32 "\n", btr);
   can_putreg(priv, LPC17_40_CAN_BTR_OFFSET, btr);        /* Set bit timing */
   return OK;
 }
@@ -1208,6 +1234,7 @@ static int can_bittiming(struct up_dev_s *priv)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: lpc17_40_caninitialize
  *

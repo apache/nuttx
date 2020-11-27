@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
@@ -305,7 +306,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
   int masked;
   int ret = OK;
 
-  sinfo("TCB=0x%08x signo=%d code=%d value=%d mask=%08x\n",
+  sinfo("TCB=%p signo=%d code=%d value=%d mask=%08" PRIx32 "\n",
         stcb, info->si_signo, info->si_code,
         info->si_value.sival_int, stcb->sigprocmask);
 

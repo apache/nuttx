@@ -648,8 +648,8 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
   off_t offset;
   int ret;
 
-  finfo("filep=%p buffer=%p buflen=%lu\n",
-        filep, buffer, (unsigned long)buflen);
+  finfo("filep=%p buffer=%p buflen=%zu\n",
+        filep, buffer, buflen);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -765,9 +765,10 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
               offset_in_cpage = offset - fobj->cache_page->offset;
 
               spiffs_cacheinfo("Storing to cache page %d for fobj %d "
-                               "offset=%d:%d buflen=%d\n",
-                               fobj->cache_page->cpndx, fobj->objid, offset,
-                               offset_in_cpage, buflen);
+                               "offset=%jd:%jd buflen=%zu\n",
+                               fobj->cache_page->cpndx, fobj->objid,
+                               (intmax_t)offset,
+                               (intmax_t)offset_in_cpage, buflen);
 
               cache      = spiffs_get_cache(fs);
               cpage_data = spiffs_get_cache_page(fs, cache,
@@ -1838,7 +1839,7 @@ static int spiffs_rename(FAR struct inode *mountpt,
                                  &oldpgndx);
   if (ret < 0)
     {
-      fwarn("WARNING: spiffs_find_objhdr_pgndx failed: %d\n");
+      fwarn("WARNING: spiffs_find_objhdr_pgndx failed: %d\n", ret);
       goto errout_with_lock;
     }
 

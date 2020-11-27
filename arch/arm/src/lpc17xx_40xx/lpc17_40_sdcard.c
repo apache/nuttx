@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -537,7 +538,7 @@ static inline void lpc17_40_setclock(uint32_t clkcr)
   regval |=  clkcr;
   putreg32(regval, LPC17_40_SDCARD_CLOCK);
 
-  mcinfo("CLKCR: %08x PWR: %08x\n",
+  mcinfo("CLKCR: %08" PRIx32 " PWR: %08" PRIx32 "\n",
          getreg32(LPC17_40_SDCARD_CLOCK), getreg32(LPC17_40_SDCARD_PWR));
 }
 
@@ -1515,7 +1516,7 @@ static void lpc17_40_reset(FAR struct sdio_dev_s *dev)
   lpc17_40_setpwrctrl(SDCARD_PWR_CTRL_ON);
   leave_critical_section(flags);
 
-  mcinfo("CLCKR: %08x POWER: %08x\n",
+  mcinfo("CLCKR: %08" PRIx32 " POWER: %08" PRIx32 "\n",
          getreg32(LPC17_40_SDCARD_CLOCK), getreg32(LPC17_40_SDCARD_PWR));
 }
 
@@ -1753,7 +1754,8 @@ static int lpc17_40_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
   cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
   regval |= cmdidx | SDCARD_CMD_CPSMEN;
 
-  mcinfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
+  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32 "\n",
+         cmd, arg, regval);
 
   /* Write the SD card CMD */
 
@@ -1990,8 +1992,9 @@ static int lpc17_40_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     {
       if (--timeout <= 0)
         {
-          mcerr("ERROR: Timeout cmd: %08x events: %08x STA: %08x\n",
-               cmd, events, getreg32(LPC17_40_SDCARD_STATUS));
+          mcerr("ERROR: Timeout cmd: %08" PRIx32
+                " events: %08" PRIx32 " STA: %08" PRIx32 "\n",
+                cmd, events, getreg32(LPC17_40_SDCARD_STATUS));
 
           return -ETIMEDOUT;
         }
@@ -2067,7 +2070,7 @@ static int lpc17_40_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R1B_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R6_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2078,12 +2081,12 @@ static int lpc17_40_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = getreg32(LPC17_40_SDCARD_STATUS);
       if ((regval & SDCARD_STATUS_CTIMEOUT) != 0)
         {
-          mcerr("ERROR: Command timeout: %08x\n", regval);
+          mcerr("ERROR: Command timeout: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
       else if ((regval & SDCARD_STATUS_CCRCFAIL) != 0)
         {
-          mcerr("ERROR: CRC failure: %08x\n", regval);
+          mcerr("ERROR: CRC failure: %08" PRIx32 "\n", regval);
           ret = -EIO;
         }
 #ifdef CONFIG_DEBUG_FEATURES
@@ -2131,7 +2134,7 @@ static int lpc17_40_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2142,12 +2145,12 @@ static int lpc17_40_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = getreg32(LPC17_40_SDCARD_STATUS);
       if (regval & SDCARD_STATUS_CTIMEOUT)
         {
-          mcerr("ERROR: Timeout STA: %08x\n", regval);
+          mcerr("ERROR: Timeout STA: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
       else if (regval & SDCARD_STATUS_CCRCFAIL)
         {
-          mcerr("ERROR: CRC fail STA: %08x\n", regval);
+          mcerr("ERROR: CRC fail STA: %08" PRIx32 "\n", regval);
           ret = -EIO;
         }
     }
@@ -2187,7 +2190,7 @@ static int lpc17_40_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R3_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2200,7 +2203,7 @@ static int lpc17_40_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = getreg32(LPC17_40_SDCARD_STATUS);
       if (regval & SDCARD_STATUS_CTIMEOUT)
         {
-          mcerr("ERROR: Timeout STA: %08x\n", regval);
+          mcerr("ERROR: Timeout STA: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
     }

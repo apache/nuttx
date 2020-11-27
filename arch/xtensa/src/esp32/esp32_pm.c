@@ -562,7 +562,7 @@ static int IRAM_ATTR esp32_sleep_start(uint32_t pd_flags)
 
   /* Save current frequency and switch to XTAL */
 
-  cur_freq = esp_clk_cpu_freq() / MHZ;
+  cur_freq = esp_rtc_clk_get_cpu_freq();
   esp32_rtc_cpu_freq_set_xtal();
 
   /* Enter sleep */
@@ -577,11 +577,18 @@ static int IRAM_ATTR esp32_sleep_start(uint32_t pd_flags)
       esp32_timer_wakeup_prepare();
     }
 
-  esp32_rtc_sleep_start(s_config.wakeup_triggers, 0);
+  result = esp32_rtc_sleep_start(s_config.wakeup_triggers, 0);
 
   /* Restore CPU frequency */
 
-  result = esp32_configure_cpu_freq(cur_freq);
+  if (esp32_configure_cpu_freq(cur_freq) != OK)
+    {
+      pwrwarn("WARNING: Faile to restore CPU frequency"
+              "Configure cpu frequency %d.\n", cur_freq);
+    }
+
+  /* Re-enable UART output */
+
   esp32_resume_uarts();
 
   return result;
@@ -851,12 +858,16 @@ void esp32_sleep_enable_timer_wakeup(uint64_t time_in_us)
 
 int esp32_light_sleep_start(void)
 {
+  irqstate_t flags;
   uint32_t pd_flags;
   uint32_t flash_enable_time_us;
+#ifndef CONFIG_ESP32_SPIRAM
   uint32_t vddsdio_pd_sleep_duration;
+#endif
   struct rtc_vddsdio_config_s vddsdio_config;
   int ret = OK;
 
+  flags = enter_critical_section();
   s_config.rtc_ticks_at_sleep_start = esp32_rtc_time_get();
 
   /* Decide which power domains can be powered down */
@@ -876,6 +887,7 @@ int esp32_light_sleep_start(void)
   flash_enable_time_us = VDD_SDIO_POWERUP_TO_FLASH_READ_US
                          + CONFIG_ESP32_DEEP_SLEEP_WAKEUP_DELAY;
 
+#ifndef CONFIG_ESP32_SPIRAM
   vddsdio_pd_sleep_duration = MAX(FLASH_PD_MIN_SLEEP_TIME_US,
               flash_enable_time_us + LIGHT_SLEEP_TIME_OVERHEAD_US
                                         + LIGHT_SLEEP_MIN_TIME_US);
@@ -885,6 +897,7 @@ int esp32_light_sleep_start(void)
       pd_flags |= RTC_SLEEP_PD_VDDSDIO;
       s_config.sleep_time_adjustment += flash_enable_time_us;
     }
+#endif
 
   esp32_get_vddsdio_config(&vddsdio_config);
 
@@ -892,7 +905,7 @@ int esp32_light_sleep_start(void)
 
   ret = esp32_light_sleep_inner(pd_flags, flash_enable_time_us,
                                                vddsdio_config);
-
+  leave_critical_section(flags);
   return ret;
 }
 

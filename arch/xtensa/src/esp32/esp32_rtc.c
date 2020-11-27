@@ -23,8 +23,10 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <assert.h>
 
 #include "esp32_rtc.h"
+#include "esp32_clockconfig.h"
 #include "hardware/esp32_rtccntl.h"
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_i2s.h"
@@ -622,21 +624,22 @@ void IRAM_ATTR esp32_rtc_update_to_xtal(int freq, int div)
 {
   uint32_t value = (((freq * MHZ) >> 12) & UINT16_MAX)
                    | ((((freq * MHZ) >> 12) & UINT16_MAX) << 16);
-  putreg32(value, RTC_APB_FREQ_REG);
+  esp32_update_cpu_freq(freq);
 
   /* set divider from XTAL to APB clock */
 
   REG_SET_FIELD(APB_CTRL_SYSCLK_CONF_REG, APB_CTRL_PRE_DIV_CNT, div - 1);
 
-  /* switch clock source */
-
-  REG_SET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_SOC_CLK_SEL,
-                RTC_CNTL_SOC_CLK_SEL_XTL);
-
   /* adjust ref_tick */
 
   modifyreg32(APB_CTRL_XTAL_TICK_CONF_REG, 0,
              (freq * MHZ) / REF_CLK_FREQ - 1);
+
+  /* switch clock source */
+
+  REG_SET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_SOC_CLK_SEL,
+                RTC_CNTL_SOC_CLK_SEL_XTL);
+  putreg32(value, RTC_APB_FREQ_REG);
 
   /* lower the voltage */
 
@@ -1153,6 +1156,77 @@ void IRAM_ATTR esp32_rtc_cpu_freq_set_xtal(void)
 }
 
 /****************************************************************************
+ * Name: esp_rtc_clk_get_cpu_freq
+ *
+ * Description:
+ *   Get the currently used CPU frequency configuration.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   CPU frequency
+ *
+ ****************************************************************************/
+
+int IRAM_ATTR esp_rtc_clk_get_cpu_freq(void)
+{
+  uint32_t source_freq_mhz;
+  uint32_t div;
+  uint32_t soc_clk_sel;
+  uint32_t cpuperiod_sel;
+  int freq_mhz = 0;
+
+  soc_clk_sel = REG_GET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_SOC_CLK_SEL);
+  switch (soc_clk_sel)
+    {
+      case RTC_CNTL_SOC_CLK_SEL_XTL:
+        {
+          div = REG_GET_FIELD(APB_CTRL_SYSCLK_CONF_REG,
+                              APB_CTRL_PRE_DIV_CNT) + 1;
+          source_freq_mhz = (uint32_t) esp32_rtc_clk_xtal_freq_get();
+          freq_mhz = source_freq_mhz / div;
+        }
+        break;
+
+      case RTC_CNTL_SOC_CLK_SEL_PLL:
+        {
+          cpuperiod_sel = REG_GET_FIELD(DPORT_CPU_PER_CONF_REG,
+                                        DPORT_CPUPERIOD_SEL);
+          if (cpuperiod_sel == DPORT_CPUPERIOD_SEL_80)
+            {
+              freq_mhz = 80;
+            }
+          else if (cpuperiod_sel == DPORT_CPUPERIOD_SEL_160)
+            {
+              freq_mhz = 160;
+            }
+          else if (cpuperiod_sel == DPORT_CPUPERIOD_SEL_240)
+            {
+              freq_mhz = 240;
+            }
+          else
+            {
+              DEBUGASSERT(0);
+            }
+        }
+        break;
+
+      case RTC_CNTL_SOC_CLK_SEL_8M:
+        {
+          freq_mhz = 8;
+        }
+        break;
+
+      case RTC_CNTL_SOC_CLK_SEL_APLL:
+        default:
+          DEBUGASSERT(0);
+    }
+
+  return freq_mhz;
+}
+
+/****************************************************************************
  * Name: esp32_rtc_sleep_init
  *
  * Description:
@@ -1327,6 +1401,17 @@ void IRAM_ATTR esp32_rtc_sleep_init(uint32_t flags)
       modifyreg32(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_CK8M_FORCE_PU, 0);
     }
 
+  /* Keep the RTC8M_CLK on in light_sleep mode if the
+   * ledc low-speed channel is clocked by RTC8M_CLK.
+   */
+
+  if (!cfg.deep_slp && GET_PERI_REG_MASK(RTC_CNTL_CLK_CONF_REG,
+                                         RTC_CNTL_DIG_CLK8M_EN_M))
+    {
+      REG_CLR_BIT(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_CK8M_FORCE_PD);
+      REG_SET_BIT(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_CK8M_FORCE_PU);
+    }
+
   /* enable VDDSDIO control by state machine */
 
   modifyreg32(RTC_CNTL_SDIO_CONF_REG, RTC_CNTL_SDIO_FORCE, 0);
@@ -1353,9 +1438,10 @@ void IRAM_ATTR esp32_rtc_sleep_init(uint32_t flags)
  *
  ****************************************************************************/
 
-void IRAM_ATTR esp32_rtc_sleep_start(uint32_t wakeup_opt,
+int IRAM_ATTR esp32_rtc_sleep_start(uint32_t wakeup_opt,
                                      uint32_t reject_opt)
 {
+  int reject;
   REG_SET_FIELD(RTC_CNTL_WAKEUP_STATE_REG, RTC_CNTL_WAKEUP_ENA, wakeup_opt);
   putreg32((uint32_t)reject_opt, RTC_CNTL_SLP_REJECT_CONF_REG);
 
@@ -1368,6 +1454,8 @@ void IRAM_ATTR esp32_rtc_sleep_start(uint32_t wakeup_opt,
 
   /* In deep sleep mode, we never get here */
 
+  reject = REG_GET_FIELD(RTC_CNTL_INT_RAW_REG, RTC_CNTL_SLP_REJECT_INT_RAW);
+
   modifyreg32(RTC_CNTL_INT_CLR_REG, 0,
               RTC_CNTL_SLP_REJECT_INT_CLR | RTC_CNTL_SLP_WAKEUP_INT_CLR);
 
@@ -1375,4 +1463,5 @@ void IRAM_ATTR esp32_rtc_sleep_start(uint32_t wakeup_opt,
 
   REG_SET_FIELD(RTC_CNTL_BIAS_CONF_REG, RTC_CNTL_DBG_ATTEN,
                 RTC_CNTL_DBG_ATTEN_DEFAULT);
+  return reject;
 }

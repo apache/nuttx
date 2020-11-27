@@ -275,7 +275,8 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
   irqstate_t flags;
 
   tmrinfo("handler=%p arg=%p, ts=(%lu, %lu)\n",
-         handler, arg, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+         handler, arg, (unsigned long)ts->tv_sec,
+         (unsigned long)ts->tv_nsec);
   DEBUGASSERT(oneshot && handler && ts);
   DEBUGASSERT(oneshot->tch);
 

@@ -452,7 +452,7 @@ int lib_snoflush(FAR struct lib_sostream_s *this);
  ****************************************************************************/
 
 int lib_sprintf(FAR struct lib_outstream_s *obj,
-                FAR const IPTR char *fmt, ...);
+                FAR const IPTR char *fmt, ...) printflike(2, 3);
 
 /****************************************************************************
  * Name: lib_vsprintf
@@ -464,7 +464,7 @@ int lib_sprintf(FAR struct lib_outstream_s *obj,
  ****************************************************************************/
 
 int lib_vsprintf(FAR struct lib_outstream_s *obj,
-                 FAR const IPTR char *src, va_list ap);
+                 FAR const IPTR char *src, va_list ap) printflike(2, 0);
 
 /****************************************************************************
  * Name: lib_vscanf
@@ -476,7 +476,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *obj,
  ****************************************************************************/
 
 int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
-               FAR const IPTR char *src, va_list ap);
+               FAR const IPTR char *src, va_list ap) scanflike(3, 0);
 
 #undef EXTERN
 #if defined(__cplusplus)

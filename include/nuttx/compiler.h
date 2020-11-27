@@ -143,6 +143,9 @@
 #  define inline_function __attribute__ ((always_inline,no_instrument_function))
 #  define noinline_function __attribute__ ((noinline))
 
+#  define printflike(a, b) __attribute__((__format__ (__printf__, a, b)))
+#  define scanflike(a, b) __attribute__((__format__ (__scanf__, a, b)))
+
 /* GCC does not use storage classes to qualify addressing */
 
 #  define FAR
@@ -358,6 +361,9 @@
 #  define inline_function
 #  define noinline_function
 
+#  define printflike(a, b)
+#  define scanflike(a, b)
+
 /* The reentrant attribute informs SDCC that the function
  * must be reentrant.  In this case, SDCC will store input
  * arguments on the stack to support reentrancy.
@@ -484,6 +490,8 @@
 #  define naked_function
 #  define inline_function
 #  define noinline_function
+#  define printflike(a, b)
+#  define scanflike(a, b)
 
 /* REVISIT: */
 
@@ -584,6 +592,8 @@
 #  define naked_function
 #  define inline_function
 #  define noinline_function
+#  define printflike(a, b)
+#  define scanflike(a, b)
 
 #  define FAR
 #  define NEAR
@@ -639,6 +649,8 @@
 #  define naked_function
 #  define inline_function
 #  define noinline_function
+#  define printflike(a, b)
+#  define scanflike(a, b)
 
 #  define FAR
 #  define NEAR

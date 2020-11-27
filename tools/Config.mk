@@ -200,6 +200,23 @@ else
   MKDEP ?= $(TOPDIR)$(DELIM)tools$(DELIM)mkdeps$(HOSTEXEEXT)
 endif
 
+# Per-file dependency generation rules
+
+%.dds: %.S
+	$(Q) $(MKDEP) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $< > $@
+
+%.ddc: %.c
+	$(Q) $(MKDEP) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $< > $@
+
+%.ddp: %.cpp
+	$(Q) $(MKDEP) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CXX)" -- $(CXXFLAGS) -- $< > $@
+
+%.ddx: %.cxx
+	$(Q) $(MKDEP) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CXX)" -- $(CXXFLAGS) -- $< > $@
+
+%.ddh: %.c
+	$(Q) $(MKDEP) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(HOSTCFLAGS) -- $< > $@
+
 # INCDIR - Convert a list of directory paths to a list of compiler include
 #   directories
 # Example: CFFLAGS += ${shell $(INCDIR) [options] "compiler" "dir1" "dir2" "dir2" ...}
@@ -446,7 +463,7 @@ define CATFILE
 endef
 else
 define CATFILE
-	$(Q) cat $(2) > $1
+	$(Q) if [ -z "$(strip $(2))" ]; then echo '' > $(1); else cat $(2) > $1; fi
 endef
 endif
 

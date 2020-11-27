@@ -48,6 +48,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -1348,7 +1349,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
        * will be faster.
        */
 
-      spiinfo("Frequency %d->%d\n", frequency, actual);
+      spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
 
       priv->frequency = frequency;
       priv->actual    = actual;
@@ -1635,11 +1636,15 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 
   if (priv->nbits > 8)
     {
-      spiinfo("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
+      spiinfo("Sent: %04" PRIx32 " Return: %04" PRIx32
+              " Status: %02" PRIx32 "\n",
+              wd, ret, regval);
     }
   else
     {
-      spiinfo("Sent: %02x Return: %02x Status: %02x\n", wd, ret, regval);
+      spiinfo("Sent: %02" PRIx32 " Return: %02" PRIx32
+              " Status: %02" PRIx32 "\n",
+              wd, ret, regval);
     }
 
   UNUSED(regval);

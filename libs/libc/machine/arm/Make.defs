@@ -37,18 +37,24 @@ ifeq ($(CONFIG_ARCH_ARM7TDMI),y)        # ARM7TDMI is ARMv4T
 include $(TOPDIR)/libs/libc/machine/arm/arm/Make.defs
 else ifeq ($(CONFIG_ARCH_ARM920T),y)    # ARM920T is ARMv4T
 include $(TOPDIR)/libs/libc/machine/arm/arm/Make.defs
-else ifeq ($(CONFIG_ARCH_ARM926EJS),y)  # ARM926EJS is ARMv5TE
+else ifeq ($(CONFIG_ARCH_ARM926EJS),y)  # ARM926EJS is ARMv5TEJ
+include $(TOPDIR)/libs/libc/machine/arm/arm/Make.defs
+else ifeq ($(CONFIG_ARCH_ARM1136J),y)   # ARM1136J is ARMv6
+include $(TOPDIR)/libs/libc/machine/arm/arm/Make.defs
+else ifeq ($(CONFIG_ARCH_ARM1156T2),y)  # ARM1156T2 is ARMv6T2
+include $(TOPDIR)/libs/libc/machine/arm/arm/Make.defs
+else ifeq ($(CONFIG_ARCH_ARM1176JZ),y)  # ARM1176JZ is ARMv6Z
 include $(TOPDIR)/libs/libc/machine/arm/arm/Make.defs
 else ifeq ($(CONFIG_ARCH_ARMV7A),y)     # All ARMv7-A
 include $(TOPDIR)/libs/libc/machine/arm/armv7-a/Make.defs
 else ifeq ($(CONFIG_ARCH_ARMV7R),y)     # All ARMv7-R
 include $(TOPDIR)/libs/libc/machine/arm/armv7-r/Make.defs
-else ifeq ($(CONFIG_ARCH_CORTEXM0),y)   # Cortex-M0 is ARMv6-M
+else ifeq ($(CONFIG_ARCH_ARMV6M),y)     # All ARMv6-M
 include $(TOPDIR)/libs/libc/machine/arm/armv6-m/Make.defs
 else ifeq ($(CONFIG_ARCH_ARMV7M),y)     # All ARMv7-M
 include $(TOPDIR)/libs/libc/machine/arm/armv7-m/Make.defs
-else ifeq ($(CONFIG_ARCH_CORTEXM33),y)  # Cortex-M33 is ARMv8-M
-include $(TOPDIR)/libs/libc/machine/arm/armv8/Make.defs
+else ifeq ($(CONFIG_ARCH_ARMV8M),y)     # All ARMv8-M
+include $(TOPDIR)/libs/libc/machine/arm/armv8-m/Make.defs
 endif
 
 ifeq ($(CONFIG_CXX_EXCEPTION),y)

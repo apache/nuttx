@@ -45,6 +45,8 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <inttypes.h>
+#include <stdint.h>
 
 #include <netinet/in.h>
 
@@ -116,7 +118,8 @@
  *
  ****************************************************************************/
 
-int igmp_joingroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
+int igmp_joingroup(struct net_driver_s *dev,
+                   FAR const struct in_addr *grpaddr)
 {
   struct igmp_group_s *group;
   int ret;
@@ -130,7 +133,7 @@ int igmp_joingroup(struct net_driver_s *dev, FAR const struct in_addr *grpaddr)
     {
       /* No... allocate a new entry */
 
-      ninfo("Join to new group: %08x\n", grpaddr->s_addr);
+      ninfo("Join to new group: %08" PRIx32 "\n", (uint32_t)grpaddr->s_addr);
       group = igmp_grpalloc(dev, &grpaddr->s_addr);
       IGMP_STATINCR(g_netstats.igmp.joins);
 

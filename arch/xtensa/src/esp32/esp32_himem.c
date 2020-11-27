@@ -267,8 +267,8 @@ int esp_himem_init(void)
 
   /* Allocate data structures */
 
-  g_ram_descriptor = kmm_malloc(sizeof(ramblock_t) * g_ramblockcnt);
-  g_range_descriptor = kmm_malloc(sizeof(rangeblock_t) * \
+  g_ram_descriptor = kmm_zalloc(sizeof(ramblock_t) * g_ramblockcnt);
+  g_range_descriptor = kmm_zalloc(sizeof(rangeblock_t) * \
                               SPIRAM_BANKSWITCH_RESERVE);
 
   if (g_ram_descriptor == NULL || g_range_descriptor == NULL)
@@ -320,7 +320,7 @@ static bool allocate_blocks(int count, uint16_t *blocks_out)
       for (i = 0; i < count; i++)
         {
           g_ram_descriptor[blocks_out[i]].is_alloced = true;
-          g_ram_descriptor[blocks_out[i]].is_mapped  = false;
+          DEBUGASSERT(g_ram_descriptor[blocks_out[i]].is_mapped  == false);
         }
 
       return true;
@@ -496,11 +496,12 @@ int esp_himem_free_map_range(esp_himem_rangehandle_t handle)
 
   for (i = 0; i < handle->block_ct; i++)
     {
-      assert(rangeblock_idx_valid(handle->block_start + i));
+      DEBUGASSERT(rangeblock_idx_valid(handle->block_start + i));
 
       /* should be allocated, if handle is valid */
 
-      assert(g_range_descriptor[i + handle->block_start].is_alloced == 1);
+      DEBUGASSERT(g_range_descriptor[i + \
+                  handle->block_start].is_alloced == 1);
 
       HIMEM_CHECK(g_range_descriptor[i + handle->block_start].is_mapped,
                   "memory still mapped to range", -EINVAL);
@@ -575,7 +576,7 @@ int esp_himem_map(esp_himem_handle_t handle,
 
   for (i = 0; i < blockcount; i++)
     {
-      assert(ramblock_idx_valid(handle->block[i + ram_block]));
+      DEBUGASSERT(ramblock_idx_valid(handle->block[i + ram_block]));
       g_ram_descriptor[handle->block[i + ram_block]].is_mapped = 1;
       g_range_descriptor[range->block_start + i + range_block].is_mapped = 1;
       g_range_descriptor[range->block_start + i + range_block].ram_block =
@@ -630,7 +631,7 @@ int esp_himem_unmap(esp_himem_rangehandle_t range, void *ptr,
       int ramblock = g_range_descriptor[range->block_start + i +
                      range_block].ram_block;
 
-      assert(ramblock_idx_valid(ramblock));
+      DEBUGASSERT(ramblock_idx_valid(ramblock));
       g_ram_descriptor[ramblock].is_mapped = 0;
       g_range_descriptor[range->block_start + i + range_block].is_mapped = 0;
     }

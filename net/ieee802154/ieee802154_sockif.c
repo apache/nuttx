@@ -395,8 +395,9 @@ static int ieee802154_bind(FAR struct socket *psock,
   if (addr->sa_family != AF_IEEE802154 ||
       addrlen < sizeof(struct sockaddr_ieee802154_s))
     {
-      nerr("ERROR: Invalid family: %u or address length: %d < %d\n",
-           addr->sa_family, addrlen, sizeof(struct sockaddr_ieee802154_s));
+      nerr("ERROR: Invalid family: %u or address length: %zu < %zu\n",
+           addr->sa_family, (size_t)addrlen,
+           sizeof(struct sockaddr_ieee802154_s));
       return -EBADF;
     }
 

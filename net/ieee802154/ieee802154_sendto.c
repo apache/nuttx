@@ -298,7 +298,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
   pstate = (FAR struct ieee802154_sendto_s *)pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
 
-  ninfo("flags: %04x sent: %d\n", flags, pstate->is_sent);
+  ninfo("flags: %04x sent: %zd\n", flags, pstate->is_sent);
 
   if (pstate != NULL && (flags & IEEE802154_POLL) != 0)
     {

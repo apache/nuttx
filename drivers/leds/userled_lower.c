@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <assert.h>
 #include <debug.h>
+#include <inttypes.h>
 
 #include <nuttx/board.h>
 #include <nuttx/leds/userled.h>
@@ -89,7 +90,7 @@ static const struct userled_lowerhalf_s g_userled_lower =
 static userled_set_t
 userled_supported(FAR const struct userled_lowerhalf_s *lower)
 {
-  ledinfo("BOARD_NLEDS: %02x\n", g_lednum);
+  ledinfo("BOARD_NLEDS: %02" PRIx32 "\n", g_lednum);
   return (userled_set_t)((1 << g_lednum) - 1);
 }
 

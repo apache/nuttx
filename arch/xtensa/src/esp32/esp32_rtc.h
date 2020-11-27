@@ -259,6 +259,22 @@ void esp32_rtc_wait_for_slow_cycle(void);
 void esp32_rtc_cpu_freq_set_xtal(void);
 
 /****************************************************************************
+ * Name: esp_rtc_clk_get_cpu_freq
+ *
+ * Description:
+ *   Get the currently used CPU frequency configuration.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   CPU frequency
+ *
+ ****************************************************************************/
+
+int esp_rtc_clk_get_cpu_freq(void);
+
+/****************************************************************************
  * Name: esp32_rtc_sleep_init
  *
  * Description:
@@ -289,7 +305,7 @@ void esp32_rtc_sleep_init(uint32_t flags);
  *
  ****************************************************************************/
 
-void esp32_rtc_sleep_start(uint32_t wakeup_opt, uint32_t reject_opt);
+int esp32_rtc_sleep_start(uint32_t wakeup_opt, uint32_t reject_opt);
 
 #ifdef __cplusplus
 }

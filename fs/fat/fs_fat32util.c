@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -106,10 +107,11 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   if (FBR_GETSIGNATURE(fs->fs_buffer) != BOOT_SIGNATURE16 ||
       FBR_GETBYTESPERSEC(fs->fs_buffer) != fs->fs_hwsectorsize)
     {
-      fwarn("WARNING: Signature: %04x FS sectorsize: %d HW sectorsize: %d\n",
+      fwarn("WARNING: Signature: %04x FS sectorsize: %d "
+            "HW sectorsize: %jd\n",
             FBR_GETSIGNATURE(fs->fs_buffer),
             FBR_GETBYTESPERSEC(fs->fs_buffer),
-            fs->fs_hwsectorsize);
+            (intmax_t)fs->fs_hwsectorsize);
 
       return -EINVAL;
     }
@@ -146,7 +148,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   if (!fs->fs_nfatsects || fs->fs_nfatsects >= fs->fs_hwnsectors)
     {
-      fwarn("WARNING: fs_nfatsects %d fs_hwnsectors: %d\n",
+      fwarn("WARNING: fs_nfatsects %" PRId32 " fs_hwnsectors: %" PRId32 "\n",
             fs->fs_nfatsects, fs->fs_hwnsectors);
 
       return -EINVAL;
@@ -166,8 +168,8 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 
   if (!fs->fs_fattotsec || fs->fs_fattotsec > fs->fs_hwnsectors)
     {
-      fwarn("WARNING: fs_fattotsec %d fs_hwnsectors: %d\n",
-            fs->fs_fattotsec, fs->fs_hwnsectors);
+      fwarn("WARNING: fs_fattotsec %" PRId32 " fs_hwnsectors: %jd\n",
+            fs->fs_fattotsec, (intmax_t)fs->fs_hwnsectors);
 
       return -EINVAL;
     }
@@ -177,8 +179,8 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   fs->fs_fatresvdseccount = FBR_GETRESVDSECCOUNT(fs->fs_buffer);
   if (fs->fs_fatresvdseccount > fs->fs_hwnsectors)
     {
-      fwarn("WARNING: fs_fatresvdseccount %d fs_hwnsectors: %d\n",
-            fs->fs_fatresvdseccount, fs->fs_hwnsectors);
+      fwarn("WARNING: fs_fatresvdseccount %d fs_hwnsectors: %jd\n",
+            fs->fs_fatresvdseccount, (intmax_t)fs->fs_hwnsectors);
 
       return -EINVAL;
     }
@@ -196,8 +198,8 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
                  ntotalfatsects - rootdirsectors;
   if (ndatasectors > fs->fs_hwnsectors)
     {
-      fwarn("WARNING: ndatasectors %d fs_hwnsectors: %d\n",
-            ndatasectors, fs->fs_hwnsectors);
+      fwarn("WARNING: ndatasectors %" PRId32 " fs_hwnsectors: %jd\n",
+            ndatasectors, (intmax_t)fs->fs_hwnsectors);
 
       return -EINVAL;
     }
@@ -229,7 +231,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
     }
   else
     {
-      fwarn("WARNING: notfat32: %d fs_nclusters: %d\n",
+      fwarn("WARNING: notfat32: %d fs_nclusters: %" PRId32 "\n",
             notfat32, fs->fs_nclusters);
 
       return -EINVAL;
@@ -634,21 +636,21 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
   /* We did it! */
 
   finfo("FAT%d:\n", fs->fs_type == 0 ? 12 : fs->fs_type == 1  ? 16 : 32);
-  finfo("\tHW  sector size:     %d\n", fs->fs_hwsectorsize);
-  finfo("\t    sectors:         %d\n", fs->fs_hwnsectors);
+  finfo("\tHW  sector size:     %jd\n", (intmax_t)fs->fs_hwsectorsize);
+  finfo("\t    sectors:         %jd\n", (intmax_t)fs->fs_hwnsectors);
   finfo("\tFAT reserved:        %d\n", fs->fs_fatresvdseccount);
-  finfo("\t    sectors:         %d\n", fs->fs_fattotsec);
-  finfo("\t    start sector:    %d\n", fs->fs_fatbase);
-  finfo("\t    root sector:     %d\n", fs->fs_rootbase);
+  finfo("\t    sectors:         %" PRId32 "\n", fs->fs_fattotsec);
+  finfo("\t    start sector:    %jd\n", (intmax_t)fs->fs_fatbase);
+  finfo("\t    root sector:     %jd\n", (intmax_t)fs->fs_rootbase);
   finfo("\t    root entries:    %d\n", fs->fs_rootentcnt);
-  finfo("\t    data sector:     %d\n", fs->fs_database);
-  finfo("\t    FSINFO sector:   %d\n", fs->fs_fsinfo);
+  finfo("\t    data sector:     %jd\n", (intmax_t)fs->fs_database);
+  finfo("\t    FSINFO sector:   %jd\n", (intmax_t)fs->fs_fsinfo);
   finfo("\t    Num FATs:        %d\n", fs->fs_fatnumfats);
-  finfo("\t    FAT sectors:     %d\n", fs->fs_nfatsects);
+  finfo("\t    FAT sectors:     %" PRId32 "\n", fs->fs_nfatsects);
   finfo("\t    sectors/cluster: %d\n", fs->fs_fatsecperclus);
-  finfo("\t    max clusters:    %d\n", fs->fs_nclusters);
-  finfo("\tFSI free count       %d\n", fs->fs_fsifreecount);
-  finfo("\t    next free        %d\n", fs->fs_fsinextfree);
+  finfo("\t    max clusters:    %" PRId32 "\n", fs->fs_nclusters);
+  finfo("\tFSI free count       %" PRId32 "\n", fs->fs_fsifreecount);
+  finfo("\t    next free        %" PRId32 "\n", fs->fs_fsinextfree);
 
   return OK;
 
@@ -2160,8 +2162,9 @@ int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
 
       ff->ff_sectorsincluster = fs->fs_fatsecperclus - sectoroffset;
 
-      finfo("position=%d currentsector=%d sectorsincluster=%d\n",
-            position, ff->ff_currentsector, ff->ff_sectorsincluster);
+      finfo("position=%jd currentsector=%jd sectorsincluster=%d\n",
+            (intmax_t)position, (intmax_t)ff->ff_currentsector,
+            ff->ff_sectorsincluster);
 
       return OK;
     }

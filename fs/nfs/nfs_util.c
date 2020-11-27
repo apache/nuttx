@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -85,7 +86,7 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
         }
       else if (nbytes >= NAME_MAX)
         {
-          ferr("ERROR: File name segment is too long: %d\n", *path);
+          ferr("ERROR: File name segment is too long: %d\n", nbytes);
           return -EFBIG;
         }
       else
@@ -236,7 +237,7 @@ int nfs_lookup(FAR struct nfsmount *nmp, FAR const char *filename,
   value = fxdr_unsigned(uint32_t, value);
   if (value > NFSX_V3FHMAX)
     {
-      ferr("ERROR: Bad file handle length: %d\n", value);
+      ferr("ERROR: Bad file handle length: %" PRId32 "\n", value);
       return -EIO;
     }
 

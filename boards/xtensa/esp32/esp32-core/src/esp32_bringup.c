@@ -166,7 +166,7 @@ int esp32_bringup(void)
   ret = esp32_mmcsd_initialize(0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize SD slot: %d\n", ret);
       return ret;
     }
 #endif

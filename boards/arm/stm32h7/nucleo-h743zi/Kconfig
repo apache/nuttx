@@ -5,4 +5,42 @@
 
 if ARCH_BOARD_NUCLEO_H743ZI
 
+choice
+        prompt "STM Nucleo-144 Board Variant"
+        default STM_NUCLEO144_MB1364
+
+config STM_NUCLEO144_MB1364
+        bool "Nucleo-H743ZI2 (MB1364)"
+        ---help---
+                This is the current version of the Nucelo-144 for the H743ZI
+
+config STM_NUCLEO144_MB1137
+        bool "Nucleo-H743ZI (MB1137)"
+        ---help---
+                This is the origional version of the Nucelo-144 for the H743ZI
+
+endchoice
+
+config STM32_ROMFS
+        bool "Automount baked-in ROMFS image"
+        default n
+        depends on FS_ROMFS
+        ---help---
+                Select STM32_ROMFS_IMAGEFILE, STM32_ROMFS_DEV_MINOR, STM32_ROMFS_MOUNTPOINT
+
+config STM32_ROMFS_DEV_MINOR
+        int "Minor for the block device backing the data"
+        depends on STM32_ROMFS
+        default 64
+
+config STM32_ROMFS_MOUNTPOINT
+        string "Mountpoint of the custom romfs image"
+        depends on STM32_ROMFS
+        default "/rom"
+
+config STM32_ROMFS_IMAGEFILE
+        string "ROMFS image file to include into build"
+        depends on STM32_ROMFS
+        default "../../../rom.img"
+
 endif # ARCH_BOARD_NUCLEO_H743ZI

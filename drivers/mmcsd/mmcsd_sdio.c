@@ -31,6 +31,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -321,7 +322,8 @@ static int mmcsd_sendcmdpoll(FAR struct mmcsd_state_s *priv, uint32_t cmd,
       ret = SDIO_WAITRESPONSE(priv->dev, cmd);
       if (ret != OK)
         {
-          ferr("ERROR: Wait for response to cmd: %08x failed: %d\n",
+          ferr("ERROR: Wait for response to cmd: %08" PRIx32
+               " failed: %d\n",
                cmd, ret);
         }
     }
@@ -395,7 +397,7 @@ static int mmsd_recv_r1(FAR struct mmcsd_state_s *priv, uint32_t cmd)
            * indication for later use.
            */
 
-          ferr("ERROR: R1=%08x\n", r1);
+          ferr("ERROR: R1=%08" PRIx32 "\n", r1);
           priv->locked = ((r1 & MMCSD_R1_CARDISLOCKED) != 0);
           ret = -EIO;
         }
@@ -449,7 +451,7 @@ static int mmsd_recv_r6(FAR struct mmcsd_state_s *priv, uint32_t cmd)
       ret = -EIO;
     }
 
-  ferr("ERROR: Failed to get RCA. R6=%08x: %d\n", r6, ret);
+  ferr("ERROR: Failed to get RCA. R6=%08" PRIx32 ": %d\n", r6, ret);
   return ret;
 }
 
@@ -1066,7 +1068,7 @@ static int mmcsd_get_r1(FAR struct mmcsd_state_s *priv, FAR uint32_t *r1)
 
           /* We must tell someone which error bits were set. */
 
-          fwarn("WARNING: mmcsd_get_r1 returned errors: R1=%08x\n",
+          fwarn("WARNING: mmcsd_get_r1 returned errors: R1=%08" PRIx32 "\n",
                 local_r1);
           ret = -EIO;
         }
@@ -1271,7 +1273,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
            * if this error occurs.
            */
 
-          ferr("ERROR: Unexpected R1 state: %08x\n", r1);
+          ferr("ERROR: Unexpected R1 state: %08" PRIx32 "\n", r1);
           ret = -EINVAL;
           goto errorout;
         }
@@ -1368,7 +1370,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
   off_t offset;
   int ret;
 
-  finfo("startblock=%d\n", startblock);
+  finfo("startblock=%jd\n", (intmax_t)startblock);
   DEBUGASSERT(priv != NULL && buffer != NULL);
 
   /* Check if the card is locked */
@@ -1422,7 +1424,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
       offset = startblock << priv->blockshift;
     }
 
-  finfo("offset=%d\n", offset);
+  finfo("offset=%jd\n", (intmax_t)offset);
 
   /* Select the block size for the card */
 
@@ -1505,7 +1507,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
   off_t  offset;
   int ret;
 
-  finfo("startblock=%d nblocks=%d\n", startblock, nblocks);
+  finfo("startblock=%jd nblocks=%zu\n", (intmax_t)startblock, nblocks);
   DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 1);
 
   /* Check if the card is locked */
@@ -1561,7 +1563,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
       offset = startblock << priv->blockshift;
     }
 
-  finfo("nbytes=%d byte offset=%d\n", nbytes, offset);
+  finfo("nbytes=%zu byte offset=%jd\n", nbytes, (intmax_t)offset);
 
   /* Select the block size for the card */
 
@@ -1713,7 +1715,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
   off_t offset;
   int ret;
 
-  finfo("startblock=%d\n", startblock);
+  finfo("startblock=%jd\n", (intmax_t)startblock);
   DEBUGASSERT(priv != NULL && buffer != NULL);
 
   /* Check if the card is locked or write protected (either via software or
@@ -1769,7 +1771,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       offset = startblock << priv->blockshift;
     }
 
-  finfo("offset=%d\n", offset);
+  finfo("offset=%jd\n", (intmax_t)offset);
 
   /* Select the block size for the card */
 
@@ -1883,7 +1885,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
   int ret;
   int evret = OK;
 
-  finfo("startblock=%d nblocks=%d\n", startblock, nblocks);
+  finfo("startblock=%jd nblocks=%zu\n", (intmax_t)startblock, nblocks);
   DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 1);
 
   /* Check if the card is locked or write protected (either via software or
@@ -1941,7 +1943,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       offset = startblock << priv->blockshift;
     }
 
-  finfo("nbytes=%d byte offset=%d\n", nbytes, offset);
+  finfo("nbytes=%zu byte offset=%jd\n", nbytes, (intmax_t)offset);
 
   /* Select the block size for the card */
 
@@ -2895,8 +2897,8 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
   priv->nblocks = (buffer[215] << 24) | (buffer[214] << 16) |
                   (buffer[213] << 8) | buffer[212];
 
-  finfo("MMC ext CSD read succsesfully, number of block %d\n",
-         priv->nblocks);
+  finfo("MMC ext CSD read succsesfully, number of block %" PRId32 "\n",
+        priv->nblocks);
 
   /* Return value:  One sector read */
 
@@ -3196,7 +3198,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
             }
           else
             {
-              ferr("ERROR: R7: %08x\n", response);
+              ferr("ERROR: R7: %08" PRIx32 "\n", response);
               return -EIO;
             }
         }
@@ -3259,7 +3261,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
                    * must be SD V1.x
                    */
 
-                  finfo("R3: %08x\n", response);
+                  finfo("R3: %08" PRIx32 "\n", response);
                   if (priv->type == MMCSD_CARDTYPE_UNKNOWN)
                     {
                       finfo("SD V1.x card\n");

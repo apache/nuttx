@@ -45,6 +45,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
@@ -887,14 +888,15 @@ static int stm32pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 #endif
 
 #if defined(CONFIG_PWM_MULTICHAN)
-  pwminfo("TIM%u frequency: %u\n",
+  pwminfo("TIM%u frequency: %" PRIu32 "\n",
           priv->timid, info->frequency);
 #elif defined(CONFIG_PWM_PULSECOUNT)
-  pwminfo("TIM%u channel: %u frequency: %u duty: %08x count: %u\n",
+  pwminfo("TIM%u channel: %u frequency: %" PRIu32 " duty: %08" PRIx32
+          " count: %u\n",
           priv->timid, priv->channels[0].channel, info->frequency,
           info->duty, info->count);
 #else
-  pwminfo("TIM%u channel: %u frequency: %u duty: %08x\n",
+  pwminfo("TIM%u channel: %u frequency: %" PRIu32 " duty: %08" PRIx32 "\n",
           priv->timid, priv->channels[0].channel, info->frequency,
           info->duty);
 #endif
@@ -984,8 +986,9 @@ static int stm32pwm_timer(FAR struct stm32_pwmtimer_s *priv,
       reload--;
     }
 
-  pwminfo("TIM%u PCLK: %u frequency: %u "
-          "TIMCLK: %u prescaler: %u reload: %u\n",
+  pwminfo("TIM%u PCLK: %" PRIu32 " frequency: %" PRIu32 " "
+          "TIMCLK: %" PRIu32 " prescaler: %" PRIu32
+          " reload: %" PRIu32 "\n",
           priv->timid, priv->pclk, info->frequency, timclk,
           prescaler, reload);
 
@@ -1191,7 +1194,7 @@ static int stm32pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
       ccr = b16toi(duty * reload + b16HALF);
 
-      pwminfo("ccr: %u\n", ccr);
+      pwminfo("ccr: %" PRIu32 "\n", ccr);
 
       switch (mode)
         {
@@ -1458,7 +1461,7 @@ static  int stm32pwm_update_duty(FAR struct stm32_pwmtimer_s *priv,
 
   DEBUGASSERT(priv != NULL);
 
-  pwminfo("TIM%u channel: %u duty: %08x\n",
+  pwminfo("TIM%u channel: %u duty: %08" PRIx32 "\n",
           priv->timid, channel, duty);
 
 #ifndef CONFIG_PWM_MULTICHAN
@@ -1477,7 +1480,7 @@ static  int stm32pwm_update_duty(FAR struct stm32_pwmtimer_s *priv,
 
   ccr = b16toi(duty * reload + b16HALF);
 
-  pwminfo("ccr: %u\n", ccr);
+  pwminfo("ccr: %" PRIu32 "\n", ccr);
 
   switch (channel)
     {
@@ -1799,7 +1802,7 @@ static int stm32pwm_setup(FAR struct pwm_lowerhalf_s *dev)
       pincfg = priv->channels[i].pincfg;
       if (pincfg != 0)
         {
-          pwminfo("pincfg: %08x\n", pincfg);
+          pwminfo("pincfg: %08" PRIx32 "\n", pincfg);
 
           stm32_configgpio(pincfg);
         }
@@ -1809,7 +1812,7 @@ static int stm32pwm_setup(FAR struct pwm_lowerhalf_s *dev)
       pincfg = priv->channels[i].npincfg;
       if (pincfg != 0)
         {
-          pwminfo("npincfg: %08x\n", pincfg);
+          pwminfo("npincfg: %08" PRIx32 "\n", pincfg);
 
           stm32_configgpio(pincfg);
         }
@@ -1859,7 +1862,7 @@ static int stm32pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
       pincfg = priv->channels[i].pincfg;
       if (pincfg != 0)
         {
-          pwminfo("pincfg: %08x\n", pincfg);
+          pwminfo("pincfg: %08" PRIx32 "\n", pincfg);
 
           pincfg &= (GPIO_PORT_MASK | GPIO_PIN_MASK);
           pincfg |= GPIO_INPUT | GPIO_FLOAT;
@@ -1870,7 +1873,7 @@ static int stm32pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
       pincfg = priv->channels[i].npincfg;
       if (pincfg != 0)
         {
-          pwminfo("npincfg: %08x\n", pincfg);
+          pwminfo("npincfg: %08" PRIx32 "\n", pincfg);
 
           pincfg &= (GPIO_PORT_MASK | GPIO_PIN_MASK);
           pincfg |= GPIO_INPUT | GPIO_FLOAT;
@@ -2109,7 +2112,8 @@ static int stm32pwm_stop(FAR struct pwm_lowerhalf_s *dev)
   putreg32(regval, regaddr);
   leave_critical_section(flags);
 
-  pwminfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
+  pwminfo("regaddr: %08" PRIx32 " resetbit: %08" PRIx32 "\n",
+          regaddr, resetbit);
   stm32pwm_dumpregs(priv, "After stop");
   return OK;
 }

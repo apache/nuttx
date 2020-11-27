@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <nxflat.h>
@@ -100,9 +101,9 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
 
   /* Calculate the extra space we need to allocate.  This extra space will be
    * the size of the BSS section.  This extra space will also be used
-   * temporarily to hold relocation information.  So the allocated size of this
-   * region will either be the size of .data + size of.bss section OR, the
-   * size of .data + the relocation entries, whichever is larger
+   * temporarily to hold relocation information.  So the allocated size of
+   * this region will either be the size of .data + size of.bss section OR,
+   * the size of .data + the relocation entries, whichever is larger
    *
    * This is the amount of memory that we have to have to hold the
    * relocations.
@@ -142,19 +143,21 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
    */
 
   /* The following call will give as a pointer to the mapped file ISpace.
-   * This may be in ROM, RAM, Flash, ... We don't really care where the memory
-   * resides as long as it is fully initialized and ready to execute.
+   * This may be in ROM, RAM, Flash, ... We don't really care where the
+   * memory resides as long as it is fully initialized and ready to execute.
    */
 
   loadinfo->ispace = (uint32_t)mmap(NULL, loadinfo->isize, PROT_READ,
-                                    MAP_SHARED | MAP_FILE, loadinfo->filfd, 0);
+                                    MAP_SHARED | MAP_FILE, loadinfo->filfd,
+                                    0);
   if (loadinfo->ispace == (uint32_t)MAP_FAILED)
     {
       berr("Failed to map NXFLAT ISpace: %d\n", errno);
       return -errno;
     }
 
-  binfo("Mapped ISpace (%d bytes) at %08x\n", loadinfo->isize, loadinfo->ispace);
+  binfo("Mapped ISpace (%" PRId32 " bytes) at %08x\n",
+        loadinfo->isize, loadinfo->ispace);
 
   /* The following call allocate D-Space memory and will provide a pointer
    * to the allocated (but still uninitialized) D-Space memory.
@@ -167,7 +170,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
       return ret;
     }
 
-  binfo("Allocated DSpace (%d bytes) at %p\n",
+  binfo("Allocated DSpace (%" PRId32 " bytes) at %p\n",
         loadinfo->dsize, loadinfo->dspace->region);
 
   /* If CONFIG_ARCH_ADDRENV=y, then the D-Space allocation lies in an address
@@ -197,8 +200,8 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
       goto errout;
     }
 
-  binfo("TEXT: %08x Entry point offset: %08x Data offset: %08x\n",
-      loadinfo->ispace, loadinfo->entryoffs, doffset);
+  binfo("TEXT: %08x Entry point offset: %08" PRIx32 " Data offset: %08jx\n",
+        loadinfo->ispace, loadinfo->entryoffs, (intmax_t)doffset);
 
   /* Restore the original address environment */
 

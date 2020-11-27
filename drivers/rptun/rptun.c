@@ -786,6 +786,8 @@ void rpmsg_unregister_callback(FAR void *priv_,
 
           metal_list_del(&cb->node);
           kmm_free(cb);
+
+          break;
         }
     }
 

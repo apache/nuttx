@@ -389,6 +389,9 @@ config ETH0_PHY_KSZ90x1
 config ETH0_PHY_DP83848C
 	bool "National Semiconductor DP83848C PHY"
 
+config ETH0_PHY_DP83825I
+	bool "Texas Instruments DP83825I PHY"
+
 config ETH0_PHY_TJA1100
 	bool "NXP TJA1100 PHY"
 	select ARCH_PHY_100BASE_T1
@@ -444,6 +447,9 @@ config ETH1_PHY_KSZ90x1
 
 config ETH1_PHY_DP83848C
 	bool "National Semiconductor DP83848C PHY"
+
+config ETH1_PHY_DP83825I
+	bool "Texas Instruments DP83825I PHY"
 
 config ETH1_PHY_TJA1100
 	bool "NXP TJA1100 PHY"

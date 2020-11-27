@@ -924,6 +924,20 @@ static ssize_t uart_read(FAR struct file *filep, FAR char *buffer, size_t buflen
               /* Re-enable UART Rx interrupts */
 
               uart_enablerxint(dev);
+
+              /* Check again if the RX buffer is empty.  The UART driver
+               * might have buffered data received between disabling the
+               * RX interrupt and entering the critical section.  Some
+               * drivers (looking at you, cdcacm...) will push the buffer
+               * to the receive queue during uart_enablerxint().
+               * Just continue processing the RX queue if this happens.
+               */
+
+              if (rxbuf->head != rxbuf->tail)
+                {
+                  leave_critical_section(flags);
+                  continue;
+                }
 #endif
 
 #ifdef CONFIG_SERIAL_REMOVABLE

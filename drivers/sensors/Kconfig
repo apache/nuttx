@@ -5,6 +5,7 @@
 
 menuconfig SENSORS
 	bool "Sensor Device Support"
+	select MM_CIRCBUF
 	default n
 	---help---
 		Drivers for various sensors
@@ -222,8 +223,18 @@ config SENSORS_L3GD20
 	bool "STMicro L3GD20 Gyroscope Sensor support"
 	default n
 	select SPI
+	select SCHED_HPWORK if SENSORS_L3GD20_BUFFER_SIZE > 0
 	---help---
 		Enable driver support for the STMicro L3GD20 gyroscope sensor.
+
+config SENSORS_L3GD20_BUFFER_SIZE
+	int "size of buffer"
+	default 1
+	depends on SENSORS_L3GD20
+	---help---
+		The size of the circular buffer used. If the value equal to zero,
+		indicates that the circular buffer is disabled.
+
 
 config SENSOR_KXTJ9
 	bool "Kionix KXTJ9 Accelerometer support"

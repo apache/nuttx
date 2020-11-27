@@ -652,7 +652,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                               spiffs_gcinfo(
                                 "Wrote page=%04x to objhdr entry=%04x\n",
                                 new_data_pgndx,
-                                SPIFFS_OBJNDX_ENTRY(fs, phdr.spndx));
+                                (int)SPIFFS_OBJNDX_ENTRY(fs, phdr.spndx));
                             }
                           else
                             {
@@ -666,7 +666,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
                               spiffs_gcinfo(
                                 "Wrote page=%04x to objndx entry=%04x\n",
                                 new_data_pgndx,
-                                SPIFFS_OBJNDX_ENTRY(fs, phdr.spndx));
+                                (int)SPIFFS_OBJNDX_ENTRY(fs, phdr.spndx));
                             }
                         }
                     }

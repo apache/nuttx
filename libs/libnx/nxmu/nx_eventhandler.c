@@ -144,8 +144,9 @@ int nx_eventhandler(NXHANDLE handle)
             {
               if (errcode == EAGAIN)
                 {
-                  /* EAGAIN is not an error.  It occurs because the MQ is opened with
-                   * O_NONBLOCK and there is no message available now.
+                  /* EAGAIN is not an error.  It occurs because the MQ is
+                   * opened with O_NONBLOCK and there is no message
+                   * available now.
                    */
 
                   return OK;
@@ -166,7 +167,7 @@ int nx_eventhandler(NXHANDLE handle)
   /* Dispatch the message appropriately */
 
   msg = (struct nxsvrmsg_s *)buffer;
-  ginfo("Received msgid=%d\n", msg->msgid);
+  ginfo("Received msgid=%" PRId32 "\n", msg->msgid);
   switch (msg->msgid)
     {
     case NX_CLIMSG_CONNECTED:
@@ -180,24 +181,28 @@ int nx_eventhandler(NXHANDLE handle)
 
     case NX_CLIMSG_REDRAW:
       {
-        FAR struct nxclimsg_redraw_s *redraw = (FAR struct nxclimsg_redraw_s *)buffer;
+        FAR struct nxclimsg_redraw_s *redraw =
+            (FAR struct nxclimsg_redraw_s *)buffer;
         wnd = redraw->wnd;
         DEBUGASSERT(wnd);
         if (wnd->cb->redraw)
           {
-            wnd->cb->redraw((NXWINDOW)wnd, &redraw->rect, redraw->more, wnd->arg);
+            wnd->cb->redraw((NXWINDOW)wnd, &redraw->rect, redraw->more,
+                            wnd->arg);
           }
       }
       break;
 
     case NX_CLIMSG_NEWPOSITION:
       {
-        FAR struct nxclimsg_newposition_s *postn = (FAR struct nxclimsg_newposition_s *)buffer;
+        FAR struct nxclimsg_newposition_s *postn =
+            (FAR struct nxclimsg_newposition_s *)buffer;
         wnd = postn->wnd;
         DEBUGASSERT(wnd);
         if (wnd->cb->position)
           {
-            wnd->cb->position((NXWINDOW)wnd, &postn->size, &postn->pos, &postn->bounds, wnd->arg);
+            wnd->cb->position((NXWINDOW)wnd, &postn->size, &postn->pos,
+                              &postn->bounds, wnd->arg);
           }
       }
       break;
@@ -205,12 +210,14 @@ int nx_eventhandler(NXHANDLE handle)
 #ifdef CONFIG_NX_XYINPUT
     case NX_CLIMSG_MOUSEIN:
       {
-        FAR struct nxclimsg_mousein_s *mouse = (FAR struct nxclimsg_mousein_s *)buffer;
+        FAR struct nxclimsg_mousein_s *mouse =
+            (FAR struct nxclimsg_mousein_s *)buffer;
         wnd = mouse->wnd;
         DEBUGASSERT(wnd);
         if (wnd->cb->mousein)
           {
-            wnd->cb->mousein((NXWINDOW)wnd, &mouse->pos, mouse->buttons, wnd->arg);
+            wnd->cb->mousein((NXWINDOW)wnd, &mouse->pos, mouse->buttons,
+                             wnd->arg);
           }
         }
       break;
@@ -219,7 +226,8 @@ int nx_eventhandler(NXHANDLE handle)
 #ifdef CONFIG_NX_KBD
     case NX_CLIMSG_KBDIN:
       {
-        FAR struct nxclimsg_kbdin_s *kbd = (FAR struct nxclimsg_kbdin_s *)buffer;
+        FAR struct nxclimsg_kbdin_s *kbd =
+            (FAR struct nxclimsg_kbdin_s *)buffer;
         wnd = kbd->wnd;
         DEBUGASSERT(wnd);
         if (wnd->cb->kbdin)
@@ -232,18 +240,20 @@ int nx_eventhandler(NXHANDLE handle)
 
     case NX_CLIMSG_EVENT:
       {
-        FAR struct nxclimsg_event_s *event = (FAR struct nxclimsg_event_s *)buffer;
+        FAR struct nxclimsg_event_s *event =
+            (FAR struct nxclimsg_event_s *)buffer;
         wnd = event->wnd;
         DEBUGASSERT(wnd);
         if (wnd->cb->event)
           {
-            wnd->cb->event((NXWINDOW)wnd, event->event, wnd->arg, event->arg);
+            wnd->cb->event((NXWINDOW)wnd, event->event, wnd->arg,
+                           event->arg);
           }
         }
       break;
 
     default:
-      gerr("ERROR: Unrecognized message opcode: %d\n",
+      gerr("ERROR: Unrecognized message opcode: %" PRId32 "\n",
            ((FAR struct nxsvrmsg_s *)buffer)->msgid);
       break;
     }

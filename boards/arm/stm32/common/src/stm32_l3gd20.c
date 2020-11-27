@@ -86,7 +86,8 @@ static int l3gd20_attach(FAR struct l3gd20_config_s *cfg, xcpt_t irq)
  *   Initialize and register the L3GD20 3 axis gyroscope sensor driver.
  *
  * Input Parameters:
- *   devno - The device number, used to build the device path as /dev/gyroN
+ *   devno - The device number, used to build the device path as
+ *           /dev/sensor/gyro_uncalN
  *   busno - The SPI bus number
  *
  * Returned Value:
@@ -98,7 +99,6 @@ int board_l3gd20_initialize(int devno, int busno)
 {
   int ret = 0;
   struct spi_dev_s *spi;
-  char devpath[12];
 
   /* Configure DREADY IRQ input */
 
@@ -116,8 +116,7 @@ int board_l3gd20_initialize(int devno, int busno)
 
   /* Then register the gyro */
 
-  snprintf(devpath, 12, "/dev/gyro%d", devno);
-  ret = l3gd20_register(devpath, spi, &g_l3gd20_config);
+  ret = l3gd20_register(devno, spi, &g_l3gd20_config);
   if (ret != OK)
     {
       goto errout;

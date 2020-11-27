@@ -401,8 +401,8 @@ static int bluetooth_bind(FAR struct socket *psock,
           FAR const struct sockaddr_l2 *iaddr;
           if (addrlen < sizeof(struct sockaddr_l2))
             {
-              nerr("ERROR: Invalid address length: %d < %d\n",
-                   addrlen, sizeof(struct sockaddr_l2));
+              nerr("ERROR: Invalid address length: %zu < %zu\n",
+                   (size_t)addrlen, sizeof(struct sockaddr_l2));
               return -EBADF;
             }
 
@@ -415,8 +415,8 @@ static int bluetooth_bind(FAR struct socket *psock,
           FAR const struct sockaddr_hci *hciaddr;
           if (addrlen < sizeof(struct sockaddr_hci))
             {
-              nerr("ERROR: Invalid address length: %d < %d\n",
-                   addrlen, sizeof(struct sockaddr_hci));
+              nerr("ERROR: Invalid address length: %zu < %zu\n",
+                   (size_t)addrlen, sizeof(struct sockaddr_hci));
               return -EBADF;
             }
 

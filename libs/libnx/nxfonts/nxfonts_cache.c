@@ -587,7 +587,7 @@ static FAR struct nxfonts_fcache_s *
 {
   FAR struct nxfonts_fcache_s *fcache;
 
-  ginfo("fontid=%p fgcolor=%u bgcolor=%u bpp=%d\n",
+  ginfo("fontid=%d fgcolor=%u bgcolor=%u bpp=%d\n",
         fontid, fgcolor, bgcolor, bpp);
 
   /* Search for a cache for this font characteristics */
@@ -646,7 +646,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
   FAR struct nxfonts_fcache_s *priv;
   int errcode;
 
-  ginfo("fontid=%p fgcolor=%u bgcolor=%u bpp=%d maxglyphs=%d\n",
+  ginfo("fontid=%d fgcolor=%u bgcolor=%u bpp=%d maxglyphs=%d\n",
         fontid, fgcolor, bgcolor, bpp, maxglyphs);
 
   /* Get exclusive access to the font cache list */

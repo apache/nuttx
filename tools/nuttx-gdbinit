@@ -22,6 +22,9 @@
 # usage: gdb -ix=./tools/nuttx-gdbinit nuttx
 # new commands: info_nxthreads, nxthread pid, nxcontinue, nxthread_all_bt
 
+# Do not stop with SIGUSR1 which is used for the NuttX sim SMP
+handle SIGUSR1 "nostop" "pass" "noprint"
+
 set $_current_tcb = 0x0
 set $_target_examined = 0x0
 
@@ -48,9 +51,15 @@ define _examine_target
   if ($_target_examined == 0x0)
     _examine_arch
 
-    python gdb.execute("set $_target_has_fpu = 0")
-    python if (type(gdb.lookup_global_symbol("fpuconfig")) is gdb.Symbol) : \
-    gdb.execute("set $_target_has_fpu = 1")
+    set $_tcb0 = g_pidhash[0].tcb
+    set $_xcp_nregs = sizeof($_tcb0->xcp.regs) / sizeof($_tcb0->xcp.regs[0])
+    set $_target_has_fpu = 0
+
+    if ($_streq($_target_arch, "armv7e-m") == 1)
+      if ($_xcp_nregs != 19)
+        set $_target_has_fpu = 1
+      end
+    end
 
     python gdb.execute("set $_target_has_smp = 0")
     python if (type(gdb.lookup_global_symbol("g_assignedtasks")) is gdb.Symbol) : \

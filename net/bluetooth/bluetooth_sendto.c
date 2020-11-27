@@ -109,7 +109,7 @@ static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
   pstate = (FAR struct bluetooth_sendto_s *)pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
 
-  ninfo("flags: %04x sent: %d\n", flags, pstate->is_sent);
+  ninfo("flags: %04x sent: %zd\n", flags, pstate->is_sent);
 
   if (pstate != NULL && (flags & BLUETOOTH_POLL) != 0)
     {
