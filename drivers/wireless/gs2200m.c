@@ -49,6 +49,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -2789,7 +2790,7 @@ static int gs2200m_ioctl_iwreq(FAR struct gs2200m_dev_s *dev,
       n = sscanf(pkt_dat.msg[2], "%s CHANNEL=%" SCNd32 " %s",
                  cmd, &res->u.freq.m, cmd2);
       ASSERT(3 == n);
-      wlinfo("CHANNEL:%d\n", res->u.freq.m);
+      wlinfo("CHANNEL:%" PRId32 "\n", res->u.freq.m);
     }
   else if (msg->cmd == SIOCGIWSENS)
     {
@@ -2828,7 +2829,7 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
   bool getreq = false;
   int ret = OK;
 
-  wlinfo("+++ start: cmd=%x \n", msg->cmd);
+  wlinfo("+++ start: cmd=%" PRIx32 " \n", msg->cmd);
 
   inaddr = (FAR struct sockaddr_in *)&msg->ifr.ifr_addr;
 
