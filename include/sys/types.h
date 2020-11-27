@@ -76,16 +76,6 @@
 #  endif
 #endif
 
-/* POSIX-like OS return values: */
-
-#if !defined(__cplusplus)
-#  undef  ERROR
-#  define ERROR -1
-#endif
-
-#undef  OK
-#define OK 0
-
 /* Scheduling Priorities.
  *
  * NOTES:
@@ -304,6 +294,14 @@ typedef uint64_t u_int64_t;
 /* Task entry point */
 
 typedef CODE int (*main_t)(int argc, FAR char *argv[]);
+
+/* POSIX-like OS return values: */
+
+enum
+{
+  ERROR = -1,
+  OK = 0,
+};
 
 #endif /* __ASSEMBLY__ */
 
