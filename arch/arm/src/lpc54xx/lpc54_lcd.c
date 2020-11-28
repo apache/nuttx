@@ -902,16 +902,16 @@ void lpc54_lcdclear(nxgl_mxpixel_t color)
 #if LPC54_BPP > 16
   uint32_t *dest = (uint32_t *)CONFIG_LPC54_LCD_VRAMBASE;
 
-  lcdinfo("Clearing display: color=%08x VRAM=%08x size=%d\n",
-          color, CONFIG_LPC54_LCD_VRAMBASE,
+  lcdinfo("Clearing display: color=%08jx VRAM=%08x size=%d\n",
+          (uintmax_t)color, CONFIG_LPC54_LCD_VRAMBASE,
           CONFIG_LPC54_LCD_HWIDTH * CONFIG_LPC54_LCD_VHEIGHT *
           sizeof(uint32_t));
 
 #else
   uint16_t *dest = (uint16_t *)CONFIG_LPC54_LCD_VRAMBASE;
 
-  lcdinfo("Clearing display: color=%08x VRAM=%08x size=%d\n",
-          color, CONFIG_LPC54_LCD_VRAMBASE,
+  lcdinfo("Clearing display: color=%08jx VRAM=%08x size=%d\n",
+          (uintmax_t)color, CONFIG_LPC54_LCD_VRAMBASE,
           CONFIG_LPC54_LCD_HWIDTH * CONFIG_LPC54_LCD_VHEIGHT *
           sizeof(uint16_t));
 #endif
