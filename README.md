@@ -556,7 +556,7 @@ in the source tree.
 
   * Legacy download locations:
 
-    <https://bitbucket.org/nuttx/nuttx/downloads>  
+    <https://bitbucket.org/nuttx/nuttx/downloads>
     <https://sourceforge.net/projects/nuttx/files/nuttx/>
 
 ## Semi-Optional apps/ Package
@@ -682,8 +682,8 @@ some scripts like configure.sh. Before cloning, do the following:
 
 These are standalone repositories:
 
-  * <https://gitbox.apache.org/repos/asf/incubator-nuttx-apps>  
-    or  
+  * <https://gitbox.apache.org/repos/asf/incubator-nuttx-apps>
+    or
     <https://github.com/apache/incubator-nuttx-apps.git>
 
     This directory holds an optional package of applications and libraries
@@ -993,9 +993,9 @@ The `menuconfig` make target depends on two things:
      case, you can use the modified version of kconfig-frontends
      that can be found at
 
-     <http://uvc.de/posts/linux-kernel-configuration-tool-kconfig-under-windows.html>  
+     <http://uvc.de/posts/linux-kernel-configuration-tool-kconfig-under-windows.html>
 
-     or a more recent port that can be found at  
+     or a more recent port that can be found at
 
      <http://reclonelabs.com/more-kconfig-awesomeness-for-windows/>.
 

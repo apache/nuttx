@@ -50,7 +50,7 @@ menuentry "kernel" {
 Use the following command to create the disk.
 P.S. In some distros, `grub-mkrescue` is called `grub2-mkrescue`
 ```
-grub-mkrescue -o boot.iso iso 
+grub-mkrescue -o boot.iso iso
 ```
 
 
@@ -69,7 +69,7 @@ It supports creations of virtual machines in Linux systems.
 It is usually coupled with Qemu as its I/O supporting layer.
 
 The qemu can be build from source or downloaded from distro repositories.
-However, a modern CPU and KVM support are mandatory because the X2APIC is not available 
+However, a modern CPU and KVM support are mandatory because the X2APIC is not available
 in pure emulator mode.
 This mean using this build with qemu in windows or old x86 machine can be frustrating.
 In such case, looks the next section and use bochs emulator instead.
@@ -85,7 +85,7 @@ Running QEMU
   Use control-a 1 and 2 to switch between.
   Use control-a x to terminate the emulation.
 
-  P.S. Make sure that you CPU supports the mandatory features. Look at Real machine 
+  P.S. Make sure that you CPU supports the mandatory features. Look at Real machine
   section for more information.
 
 Bochs
@@ -98,7 +98,7 @@ Here are some links (which will probably be mostly outdated by the time your rea
   Home Page:     http://bochs.sourceforge.net
 
 The bochs can be build from source.
-Unlike qemu, it do not rely on KVM to support modern hardware features, therefor it can 
+Unlike qemu, it do not rely on KVM to support modern hardware features, therefor it can
 also be used under windows.
 When building bochs, remember to enable x86-64 support with "--enable-x86-64".
 If you also want the support of SIMD instruction, enable them with "--enable-avx --enable-evex".
@@ -121,7 +121,7 @@ Running Bochs
   ```
   com1: enabled=1, mode=file, dev=com1.out
   ```
-  
+
   In the top-level NuttX directory:
 
   ```

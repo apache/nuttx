@@ -222,7 +222,7 @@ CONFIG_EXAMPLES_UDPBLASTER_TARGETIP=0x0a4b189b (10.75.24.155) ---------> Target 
 RSPI
 -----------
 
-For GRROSE board only channel 1 can be tested since RSPI channel1 pinout is only brought out as 
+For GRROSE board only channel 1 can be tested since RSPI channel1 pinout is only brought out as
 Pin number 2 and 3 in CN4 is used for MOSIB and MISOB respectively.
 
 RTC

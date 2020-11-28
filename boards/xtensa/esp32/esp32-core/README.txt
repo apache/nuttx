@@ -23,7 +23,7 @@ Contents
   o Buttons and LEDs
   o Ethernet
   o 64-bit Timers
-  o Watchdog Timers 
+  o Watchdog Timers
   o SMP
   o OpenOCD for the ESP32
   o Executing and Debugging from FLASH and IRAM
@@ -211,7 +211,7 @@ Ethernet
   connect to an external PHY chip. Current driver also only supports RMII option.
 
   The RMII GPIO pins are fixed, but the SMI and functional GPIO pins are optional.
-  
+
   RMII GPIO pins are as following:
 
       ESP32 GPIO          PHY Chip GPIO
@@ -250,12 +250,12 @@ causes failing to bring the ESP32 chip up.
   acessible as character drivers, the configuration along with a guidance on how
   to run the example and the description of the application level interface can be found here:
 
-  https://nuttx.apache.org/docs/latest/components/drivers/character/timer.html  
+  https://nuttx.apache.org/docs/latest/components/drivers/character/timer.html
 
 Watchdog Timers
 ===============
 
-  ESP32 has 3 WDTs. 2 MWDTS from the Timers Module and 1 RWDT from the RTC Module 
+  ESP32 has 3 WDTs. 2 MWDTS from the Timers Module and 1 RWDT from the RTC Module
   (Currently not supported yet). They're acessible as character drivers,
   The configuration along with a guidance on how to run the example and the description
   of the application level interface can be found here:
@@ -824,36 +824,36 @@ NOTES:
     2MB or 4MB depending on PSRAM chip used on your board:
 
         nsh> ramtest -w 0x3F800000 65536
-        RAMTest: Marching ones: 3f800000 65536 
-        RAMTest: Marching zeroes: 3f800000 65536 
+        RAMTest: Marching ones: 3f800000 65536
+        RAMTest: Marching zeroes: 3f800000 65536
         RAMTest: Pattern test: 3f800000 65536 55555555 aaaaaaaa
-        RAMTest: Pattern test: 3f800000 65536 66666666 99999999 
-        RAMTest: Pattern test: 3f800000 65536 33333333 cccccccc 
+        RAMTest: Pattern test: 3f800000 65536 66666666 99999999
+        RAMTest: Pattern test: 3f800000 65536 33333333 cccccccc
         RAMTest: Address-in-address test: 3f800000 65536
 
   timer:
 
     This config test the general use purpose timers. It includes the 4 timers,
     adds driver support, registers the timers as devices and includes the timer
-    example. 
+    example.
 
     To test it, just run the following:
 
     `nsh> timer -d /dev/timerx`
 
-    Where x in the timer instance.  
+    Where x in the timer instance.
 
   watchdog:
 
     This config test the watchdog timers. It includes the 2 MWDTS,
     adds driver support, registers the WDTs as devices and includes the watchdog
-    example. 
+    example.
 
     To test it, just run the following:
 
     `nsh> wdog -d /dev/watchdogx`
 
-    Where x in the watchdog instance.  
+    Where x in the watchdog instance.
 
 Things to Do
 ============
