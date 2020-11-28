@@ -285,6 +285,7 @@ static inline void write_byte(uint8_t data)
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 static inline uint8_t read_byte(void)
 =======
 static inline uint8_t read_byte()
@@ -292,6 +293,9 @@ static inline uint8_t read_byte()
 =======
 static inline uint8_t read_byte(void)
 >>>>>>> Fixed error: function declaration isn t a prototype [-Werror=strict-prototypes]
+=======
+static inline uint8_t read_byte(void)
+>>>>>>> 69b03052e1c40ecdb59bc356a9062ab228ea6a1e
 {
   uint32_t a_idr;
   uint32_t b_idr;
