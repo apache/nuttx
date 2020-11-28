@@ -125,16 +125,14 @@ depend: .depend
 
 context::
 
-clean:
+clean::
 	$(call DELFILE, libboard$(LIBEXT))
 	$(call DELFILE, $(ETCSRC))
 	$(call DELDIR, $(ETCDIR))
 	$(call CLEAN)
-	$(EXTRA_CLEAN)
 
-distclean: clean
+distclean:: clean
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
-	$(EXTRA_DISTCLEAN)
 
 -include Make.dep

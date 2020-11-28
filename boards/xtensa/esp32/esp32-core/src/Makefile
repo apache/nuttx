@@ -79,9 +79,7 @@ endif
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
 
-EXTRA_DISTCLEAN = $(call DELFILE, $(SCRIPTOUT))
-
-.PHONY = context
+.PHONY = context distclean
 
 include $(TOPDIR)/boards/Board.mk
 
@@ -89,3 +87,7 @@ $(SCRIPTOUT): $(SCRIPTIN) $(CONFIGFILE)
 	$(Q) $(CC) -isystem $(TOPDIR)/include -C -P -x c -E $(SCRIPTIN) -o $@
 
 context:: $(SCRIPTOUT)
+
+distclean::
+	$(call DELFILE, $(SCRIPTOUT))
+
