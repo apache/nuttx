@@ -63,7 +63,8 @@
  * Name: lpc43_sspdev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Bambino-200e board.
+ *   Called to configure SPI chip select GPIO pins for the Bambino-200e
+ *   board.
  *
  ****************************************************************************/
 
