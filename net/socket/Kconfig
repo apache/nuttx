@@ -70,8 +70,8 @@ config NET_CMSG
 	default n
 	---help---
 		Enable or disable support for control messages in the recvmsg() and
-		sendmsg() function. Control messages (also defined in POSIX 1003.1g 
-		as ancillary data object information). Includes additional 
+		sendmsg() function. Control messages (also defined in POSIX 1003.1g
+		as ancillary data object information). Includes additional
 		information on the packet received or to be transmitted.
 
 endmenu # Socket Support

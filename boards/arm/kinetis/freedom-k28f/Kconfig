@@ -61,6 +61,6 @@ config FRDMK28F_USB_AUTOMOUNT_NUM_BLKDEV
 config FRDMK28F_USB_AUTOMOUNT_UDELAY
 	int "USB unmount retry delay (milliseconds)"
 	default 2000
-	
+
 endif # FRDMK28F_USB_AUTOMOUNT
 endif # ARCH_BOARD_FREEDOM_K28F

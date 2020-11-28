@@ -23,7 +23,7 @@ config NETDEV_CAN_BITRATE_IOCTL
 	depends on NET_CAN
 	---help---
 		Enable support for ioctl() commands to change CAN bitrate
-		
+
 config NETDEV_WIRELESS_IOCTL
 	bool "Enable Wireless ioctl()"
 	default n

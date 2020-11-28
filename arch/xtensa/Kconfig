@@ -114,7 +114,7 @@ config XTENSA_USE_SEPARATE_IMEM
 	help
 		This is a separate internal heap that's used by drivers when certain operations
 		are not possible with the provided buffer(s).
-		Mainly, when the provided buffer comes from external RAM and a DMA or flash 
+		Mainly, when the provided buffer comes from external RAM and a DMA or flash
 		operation is going to be performed.
 
 		This separate heap will be part of the internal DRAM.  It starts right after .data

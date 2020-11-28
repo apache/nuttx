@@ -128,7 +128,7 @@ config CAN_NPOLLWAITERS
 	---help---
 		The maximum number of threads that may be waiting on the
 		poll method.
-		
+
 config CAN_USE_RTR
 	bool "Include RTR in CAN header"
 	default n
