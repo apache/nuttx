@@ -45,6 +45,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <fixedmath.h>
 #include <errno.h>
@@ -228,7 +229,7 @@ static ssize_t max31855_read(FAR struct file *filep, FAR char *buffer,
   regval |= (regmsb & 0xff00) << 8;
   regval |= (regmsb & 0xff) << 24;
 
-  sninfo("Read from MAX31855 = 0x%08X\n", regval);
+  sninfo("Read from MAX31855 = 0x%08" PRIX32 "\n", regval);
 
   /* Feed sensor data to entropy pool */
 
