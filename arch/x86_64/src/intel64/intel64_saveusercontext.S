@@ -74,8 +74,8 @@
  *  modified upon return from a subroutine call.  On a context switch
  *  back to user mode, it will appear as a return from this function.
  *
- *  According to the SysV x86_64 ABI, the RAX, RDI, RSI, RDX, RCX, r8 and r9 
- *  are to be free for use within a procedure or function, and need not 
+ *  According to the SysV x86_64 ABI, the RAX, RDI, RSI, RDX, RCX, r8 and r9
+ *  are to be free for use within a procedure or function, and need not
  *  be preserved.
  *
  *  On entry,
@@ -87,7 +87,7 @@
     .globl    up_saveusercontext
     .type    up_saveusercontext, @function
 up_saveusercontext:
-    
+
     // callee saved regs
     movq    %rbx, (8*REG_RBX)(%rdi)
     movq    %r12, (8*REG_R12)(%rdi)
