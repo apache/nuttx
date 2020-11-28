@@ -149,11 +149,11 @@ config S32K1XX_HAVE_LPSPI1
 config S32K1XX_HAVE_LPSPI2
 	bool
 	default n
-	
+
 config S32K1XX_HAVE_FLEXCAN1
 	bool
 	default n
-	
+
 config S32K1XX_HAVE_FLEXCAN2
 	bool
 	default n
@@ -192,7 +192,7 @@ config S32K1XX_FLEXCAN
 	bool
 	select NET_CAN_HAVE_CANFD
 	default n
-	
+
 # Peripheral Selection
 
 menu "S32K1XX Peripheral Selection"
@@ -211,14 +211,14 @@ config S32K1XX_FLEXCAN0
 	select S32K1XX_FLEXCAN
 	select NET_CAN_HAVE_TX_DEADLINE
 	default n
-	
+
 config S32K1XX_FLEXCAN1
 	bool "FLEXCAN1"
 	select S32K1XX_FLEXCAN
 	select NET_CAN_HAVE_TX_DEADLINE
 	default n
 	depends on S32K1XX_HAVE_FLEXCAN1
-	
+
 config S32K1XX_FLEXCAN2
 	bool "FLEXCAN2"
 	select S32K1XX_FLEXCAN
@@ -327,7 +327,7 @@ config S32K1XX_LPUART2
 config S32K1XX_RTC
 	bool "RTC"
 	default n
-	
+
 config S32K1XX_PROGMEM
     bool PROGMEM
     default n
@@ -342,7 +342,7 @@ config S32K1XX_EEEPROM
 	default n
     ---help---
        Enables Emulated EEPROM function which uses the FlexRAM and FlexNVM
-       memory to emulate non-volatile memory. The EEEPROM wil be registered 
+       memory to emulate non-volatile memory. The EEEPROM wil be registered
        as a ramdisk block device
 
 endmenu # S32K1XX Peripheral Selection
@@ -691,32 +691,32 @@ config FLEXCAN0_BITRATE
 	int "CAN bitrate"
 	depends on !NET_CAN_CANFD
 	default 1000000
-	
+
 config FLEXCAN0_SAMPLEP
 	int "CAN sample point"
 	depends on !NET_CAN_CANFD
 	default 80
-	
+
 config FLEXCAN0_ARBI_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
 	default 1000000
-	
+
 config FLEXCAN0_ARBI_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
 	depends on NET_CAN_CANFD
 	default 80
-	
+
 config FLEXCAN0_DATA_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
 	default 4000000
-	
+
 config FLEXCAN0_DATA_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
 	depends on NET_CAN_CANFD
 	default 90
-	
+
 endmenu # S32K1XX_FLEXCAN0
 
 menu "FLEXCAN1 Configuration"
@@ -726,32 +726,32 @@ config FLEXCAN1_BITRATE
 	int "CAN bitrate"
 	depends on !NET_CAN_CANFD
 	default 1000000
-	
+
 config FLEXCAN1_SAMPLEP
 	int "CAN sample point"
 	depends on !NET_CAN_CANFD
 	default 80
-	
+
 config FLEXCAN1_ARBI_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
 	default 1000000
-	
+
 config FLEXCAN1_ARBI_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
 	depends on NET_CAN_CANFD
 	default 80
-	
+
 config FLEXCAN1_DATA_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
 	default 4000000
-	
+
 config FLEXCAN1_DATA_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
 	depends on NET_CAN_CANFD
 	default 90
-	
+
 endmenu # S32K1XX_FLEXCAN1
 
 menu "FLEXCAN2 Configuration"
@@ -761,37 +761,37 @@ config FLEXCAN2_BITRATE
 	int "CAN bitrate"
 	depends on !NET_CAN_CANFD
 	default 1000000
-	
+
 config FLEXCAN2_SAMPLEP
 	int "CAN sample point"
 	depends on !NET_CAN_CANFD
 	default 80
-	
+
 config FLEXCAN2_ARBI_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
 	default 1000000
-	
+
 config FLEXCAN2_ARBI_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
 	depends on NET_CAN_CANFD
 	default 80
-	
+
 config FLEXCAN2_DATA_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
 	default 4000000
-	
+
 config FLEXCAN2_DATA_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
 	depends on NET_CAN_CANFD
 	default 90
-	
+
 endmenu # S32K1XX_FLEXCAN0
 
 menu "PROGMEM Configuration"
 	depends on S32K1XX_PROGMEM
-	
+
 config PROGMEM_SIZE
 	int "Progmem size (KB)"
 	default 64 if ARCH_CHIP_S32K14X

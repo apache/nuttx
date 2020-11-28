@@ -108,7 +108,7 @@ config USBHOST_MSC
 	---help---
 		Enable support for the mass storage class driver.  This also depends on
 		NFILE_DESCRIPTORS > 0 && SCHED_WORKQUEUE=y
-		
+
 config USBHOST_MSC_NOTIFIER
 	bool "Support USB Mass Storage notifications"
 	default n
@@ -117,8 +117,8 @@ config USBHOST_MSC_NOTIFIER
 	---help---
 		Enable building of USB MSC notifier logic that will execute a worker
 		function on the low priority work queue when a mass storage device is
-		connected or disconnected. 
-		
+		connected or disconnected.
+
 config USBHOST_CDCACM
 	bool "CDC/ACM support"
 	default n
