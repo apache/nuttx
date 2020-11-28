@@ -299,8 +299,8 @@ else ifneq ($(CONFIG_ARCH_CHIP),)
 endif
 
 dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip drivers\platform
-	$(Q) $(MAKE) -C libs/libxx dirlinks 
-	$(Q) $(MAKE) -C boards dirlinks 
+	$(Q) $(MAKE) -C libs/libxx dirlinks
+	$(Q) $(MAKE) -C boards dirlinks
 	$(Q) $(MAKE) -C openamp dirlinks
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks
 

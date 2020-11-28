@@ -157,7 +157,7 @@ makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board depend
 endif
-	$(Q) $(MAKE) makedepfile DEPPATH="--dep-path chip --dep-path common"	
+	$(Q) $(MAKE) makedepfile DEPPATH="--dep-path chip --dep-path common"
 	$(Q) touch $@
 
 depend: .depend

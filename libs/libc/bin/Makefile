@@ -37,7 +37,7 @@ include $(TOPDIR)/Make.defs
 
 all:
 .PHONY: clean distclean
-  
+
 # Clean Targets:
 
 clean:
