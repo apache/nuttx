@@ -238,7 +238,7 @@ endif
 makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 	$(call CATFILE, bin/Make.dep, $^)
 	$(call DELFILE, $^)
-  
+
 makekdepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 	$(call CATFILE, kbin/Make.dep, $^)
 	$(call DELFILE, $^)

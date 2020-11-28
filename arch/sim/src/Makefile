@@ -199,7 +199,7 @@ endif
 ifeq ($(CONFIG_SIM_HCISOCKET),y)
   HOSTSRCS += up_hcisocket_host.c
   CSRCS += up_hcisocket.c
-endif 
+endif
 
 ifeq ($(CONFIG_I2C_RESET),y)
   HOSTCFLAGS += -DCONFIG_I2C_RESET=1
