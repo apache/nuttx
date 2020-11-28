@@ -80,7 +80,7 @@ $(BINFMT_COBJS): %$(OBJEXT): %.c
 
 $(BIN): $(BINFMT_OBJS)
 	$(call ARCHIVE, $@, $(BINFMT_OBJS))
-  
+
 makedepfile: $(BINFMT_CSRCS:.c=.ddc) $(BINFMT_ASRCS:.S=.dds)
 	$(call CATFILE, Make.dep, $^)
 	$(call DELFILE, $^)

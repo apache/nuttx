@@ -97,7 +97,7 @@ $(BIN):	$(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 context::
-  
+
 makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 	$(call CATFILE, Make.dep, $^)
 	$(call DELFILE, $^)

@@ -85,13 +85,13 @@ endif
 makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 	$(call CATFILE, bin/Make.dep, $^)
 	$(call DELFILE, $^)
-  
+
 makekdepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 	$(call CATFILE, kbin/Make.dep, $^)
 	$(call DELFILE, $^)
 
 .depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
-	$(Q) $(MAKE) makedepfile 
+	$(Q) $(MAKE) makedepfile
 ifneq ($(CONFIG_BUILD_FLAT),y)
 	$(Q) $(MAKE) makekdepfile CFLAGS="$(CFLAGS) $(KDEFINE)"
 endif

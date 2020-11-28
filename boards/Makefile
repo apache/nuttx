@@ -98,7 +98,7 @@ $(CXXOBJS): %$(OBJEXT): %.cxx
 
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
-  
+
 makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(CXXSRCS:.cxx=.ddx)
 	$(call CATFILE, Make.dep, $^)
 	$(call DELFILE, $^)
