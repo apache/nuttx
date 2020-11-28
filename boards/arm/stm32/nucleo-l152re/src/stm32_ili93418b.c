@@ -283,7 +283,11 @@ static inline void write_byte(uint8_t data)
  *
  ****************************************************************************/
 
+<<<<<<< HEAD
 static inline uint8_t read_byte(void)
+=======
+static inline uint8_t read_byte()
+>>>>>>> Add 2.4 Inch TFT LCD Shield ILI9341 for nucleo-l152re, 8080 MCU 8-bit bus interface I
 {
   uint32_t a_idr;
   uint32_t b_idr;
