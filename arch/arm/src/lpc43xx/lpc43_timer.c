@@ -43,6 +43,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <errno.h>
 #include <debug.h>
@@ -551,9 +552,9 @@ static int lpc43_getstatus(FAR struct timer_lowerhalf_s *lower,
   status->timeleft = ((uint64_t)priv->timeout * elapsed) /
     (priv->clkticks + 1);
 
-  tmrinfo("  flags    : %08x\n", status->flags);
-  tmrinfo("  timeout  : %d\n", status->timeout);
-  tmrinfo("  timeleft : %d\n", status->timeleft);
+  tmrinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  tmrinfo("  timeout  : %" PRId32 "\n", status->timeout);
+  tmrinfo("  timeleft : %" PRId32 "\n", status->timeleft);
   return OK;
 }
 
@@ -585,13 +586,13 @@ static int lpc43_settimeout(FAR struct timer_lowerhalf_s *lower,
       return -EPERM;
     }
 
-  tmrinfo("Entry: timeout=%d\n", timeout);
+  tmrinfo("Entry: timeout=%" PRId32 "\n", timeout);
 
   /* Can this timeout be represented? */
 
   if (timeout < 1 || timeout > TMR_MAXTIMEOUT)
     {
-      tmrerr("ERROR: Cannot represent timeout=%lu > %lu\n",
+      tmrerr("ERROR: Cannot represent timeout=%" PRIu32 " > %llu\n",
              timeout, TMR_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -612,7 +613,8 @@ static int lpc43_settimeout(FAR struct timer_lowerhalf_s *lower,
 
   priv->adjustment = priv->timeout - timeout;
 
-  tmrinfo("fclk=%d clkticks=%d timeout=%d, adjustment=%d\n",
+  tmrinfo("fclk=%d clkticks=%" PRId32
+          " timeout=%" PRId32 ", adjustment=%" PRId32 "\n",
           TMR_FCLK, priv->clkticks, priv->timeout, priv->adjustment);
 
   return OK;
