@@ -114,7 +114,7 @@ Ethernet Connections
   P71           ET0_MDIO
   P54           ET0_LINKSTA
   ------         ---------
-  
+
 USB Device
 -----------
 

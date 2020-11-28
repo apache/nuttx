@@ -34,8 +34,8 @@ or a zip file of the required files from this page:
 https://www.starcat.io/starcat-nuttx/
 
 The SD Card has to be FAT formatted, have an AT91Bootstrap binary called boot.bin,
-a U-Boot binary called u-boot.bin as well as a compiled device tree for the 
-SAMA5D27C-D1G called `at91-sama5d27_giantboard.dtb` in the `dtbs/` folder. You can 
+a U-Boot binary called u-boot.bin as well as a compiled device tree for the
+SAMA5D27C-D1G called `at91-sama5d27_giantboard.dtb` in the `dtbs/` folder. You can
 build these yourself using the tools at
 
 https://github.com/Groboards/giantboard-tools
@@ -48,7 +48,7 @@ The layout should look like this:
     u-boot.bin
     dtbs/
       at91-sama5d27_giantboard.dtb
-      
+
 You only need uboot.env if you want to boot automatically. See the U-Boot
 documentation for instructions on how to create this file.
 
@@ -379,7 +379,7 @@ need to know how to configure the subsystem.
     CONFIG_U[S]ARTn_2STOP - Two stop bits
 
 #### AT91SAMA5 USB Host Configuration
-  
+
 Pre-requisites
 
     CONFIG_USBDEV          - Enable USB device support
@@ -447,7 +447,7 @@ NOTES:
      Here are the relevant current settings:
 
      Build Setup:
-     
+
     CONFIG_HOST_WINDOWS=y               : Microsoft Windows
     CONFIG_WINDOWS_CYGWIN=y             : Using Cygwin or other POSIX environment
 
@@ -467,8 +467,8 @@ Board Selection -> CPU Frequency
 Summary:  Some of the descriptions below are long and wordy. Here is the
 concise summary of the available Giant Board configurations:
 
-- nsh:  
-  
+- nsh:
+
     This is a basic NuttShell (NSH) configuration.
 
     There may be issues with some of these configurations. See the details
@@ -609,7 +609,7 @@ concise summary of the available Giant Board configurations:
     on the SD Card.
 
     NuttX will mount the SD Card at `/mnt/mmcsd1`.
-    
+
 - sdmmc-net-nsh:
-  
-    This is a combination of the netnsh and sdmmcnsh configurations.   
+
+    This is a combination of the netnsh and sdmmcnsh configurations.
