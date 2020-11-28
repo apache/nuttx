@@ -82,7 +82,7 @@ void weak_function lpc43_sspdev_initialize(void)
   ret = lpc43_gpio_config(GPIO_MAX31855_CS2);
   if (ret < 0)
     {
-      snerr("ERROR: Error configuring chip select GPIO pin\n")
+      snerr("ERROR: Error configuring chip select GPIO pin\n");
     }
 #endif
 }
