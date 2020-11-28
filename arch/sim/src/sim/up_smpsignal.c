@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_simsmp.c
+ * arch/sim/src/sim/up_smpsignal.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
