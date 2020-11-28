@@ -105,7 +105,7 @@ endif
 
 ifeq ($(CONFIG_S32K1XX_EEEPROM),y)
 CHIP_CSRCS += s32k1xx_eeeprom.c
-endif 
+endif
 
 # Source files specific to the ARM CPU family and to the S32K1xx chip family
 
