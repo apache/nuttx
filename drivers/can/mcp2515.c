@@ -733,7 +733,9 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
             }
           else
             {
-              /* The IDs will be filtered only by the Filter register (Mask == Filter) */
+              /* The IDs will be filtered only by the Filter register
+               * (Mask == Filter)
+               */
 
               /* Setup the Filter */
 
@@ -1031,7 +1033,9 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
             }
           else
             {
-              /* The IDs will be filtered only by the Filter register (Mask == Filter) */
+              /* The IDs will be filtered only by the Filter register
+               * (Mask == Filter)
+               */
 
               /* Setup the Filter */
 
