@@ -26,7 +26,7 @@
 #include <nuttx/irq.h>
 #include <stdbool.h>
 #include "xtensa.h"
-#include "hardware/esp32_tim.h" 
+#include "hardware/esp32_tim.h"
 #include "hardware/esp32_rtccntl.h"
 #include "esp32_wtd.h"
 #include "esp32_cpuint.h"

@@ -269,7 +269,7 @@
 #define ADC_CFGR_DISCEN              (1 << 16)                         /* Bit 16: Discontinuous mode on regular channels */
 #define ADC_CFGR_DISCNUM_SHIFT       (17)                              /* Bits 17-19: Discontinuous mode channel count */
 #define ADC_CFGR_DISCNUM_MASK        (7 << ADC_CFGR_DISCNUM_SHIFT)
-#  define ADC_CFGR_DISCNUM(n)        (((n) - 1) << ADC_CFGR_DISCNUM_SHIFT) 
+#  define ADC_CFGR_DISCNUM(n)        (((n) - 1) << ADC_CFGR_DISCNUM_SHIFT)
                                                                        /* n = 1..8 channels */
 
 #define ADC_CFGR_JDISCEN             (1 << 20) /* Bit 20: Discontinuous mode on injected channels */
@@ -457,7 +457,7 @@
                                                                   /* n=1..4 */
 #define ADC_JSQR_JEXTSEL_SHIFT       (2)                          /* Bits 2-5: External Trigger Selection for injected group */
 #define ADC_JSQR_JEXTSEL_MASK        (15 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC_JSQR_JEXTSEL(event)    ((event) << ADC_JSQR_JEXTSEL_SHIFT) 
+#  define ADC_JSQR_JEXTSEL(event)    ((event) << ADC_JSQR_JEXTSEL_SHIFT)
                                                                   /* Event = 0..15 */
 #  define ADC_JEXTSEL_T1TRGO         ADC_JSQR_JEXTSEL(0)          /* 0000 TIM1_TRGO */
 #  define ADC_JEXTSEL_T1CC4          ADC_JSQR_JEXTSEL(1)          /* 0001 TIM1_CH4 */
@@ -577,7 +577,7 @@
 #    define ADC_CCR_DUAL_ALT         (9 << ADC_CCR_DUAL_SHIFT)   /* Alternate trigger mode only */
 #  define ADC_CCR_DELAY_SHIFT        (8)                         /* Bits 8-11: Delay between 2 sampling phases */
 #  define ADC_CCR_DELAY_MASK         (15 << ADC_CCR_DELAY_SHIFT)
-#    define ADC_CCR_DELAY(n)         (((n)-1) << ADC_CCR_DELAY_SHIFT) 
+#    define ADC_CCR_DELAY(n)         (((n)-1) << ADC_CCR_DELAY_SHIFT)
                                                                  /* n * TADCCLK, 1-13 */
 #  define ADC_CCR_DMACFG             (1 << 13)                   /* Bit 13: DMA configuration (for dual ADC mode) */
 #  define ADC_CCR_MDMA_SHIFT         (14)                        /* Bits 14-15: Direct memory access mode for dual ADC mode */

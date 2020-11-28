@@ -175,7 +175,7 @@ int esp32_bringup(void)
 
 #ifdef CONFIG_ESP32_SPIFLASH_ENCRYPTION_TEST
   esp32_spiflash_encrypt_test();
-#endif 
+#endif
 
   ret = esp32_spiflash_init();
   if (ret)

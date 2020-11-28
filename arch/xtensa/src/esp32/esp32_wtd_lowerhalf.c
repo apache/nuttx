@@ -49,15 +49,15 @@
  */
 
 #define MS_CYCLES_TIMER          2          /* 1 ms/(12.5 ns*PRE_VALUE) */
-#define STAGE_0                  0     
+#define STAGE_0                  0
 #define STAGE_1                  1
 #define STAGE_2                  2
-#define STAGE_3                  3 
+#define STAGE_3                  3
 #define RESET_SYSTEM_RTC         4          /* Reset Main System + RTC */
-#define RESET_SYSTEM_TIMER       3          /* Reset Main System */   
+#define RESET_SYSTEM_TIMER       3          /* Reset Main System */
 #define INTERRUPT_ON_TIMEOUT     1
 #define STAGES                   4
-#define FULL_STAGE               0xffffffff /* ((2^32)-1) */     
+#define FULL_STAGE               0xffffffff /* ((2^32)-1) */
 #define MAX_MWDT_TIMEOUT_MS      0x7fffffff /* ((2^32)-1)/cycles */
 
 /****************************************************************************

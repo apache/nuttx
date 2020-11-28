@@ -84,13 +84,13 @@
  *    End(+1): _ebss + CONFIG_IDLETHREAD_STACKSIZE
  * 6) Optional interrupt stack
  *    Start:   _ebss + CONFIG_IDLETHREAD_STACKSIZE
- *    End(+1): _ebss + CONFIG_IDLETHREAD_STACKSIZE + 
+ *    End(+1): _ebss + CONFIG_IDLETHREAD_STACKSIZE +
                (CONFIG_ARCH_INTERRUPTSTACK & ~3)
  * 6a) Heap (without interrupt stack)
  *    Start:   _ebss + CONFIG_IDLETHREAD_STACKSIZE
  *    End(+1): to the end of memory
  * 6b) Heap (with interrupt stack)
- *    Start: _ebss + CONFIG_IDLETHREAD_STACKSIZE + 
+ *    Start: _ebss + CONFIG_IDLETHREAD_STACKSIZE +
              (CONFIG_ARCH_INTERRUPTSTACK & ~3)
  *    End(+1): to the end of memory
  */
@@ -472,7 +472,7 @@ __start:
 	ehb
 
   la   t0, pic32mz_consoleinit
-  jalr ra, t0 
+  jalr ra, t0
   nop
 
   showprogress 'A'

@@ -89,7 +89,7 @@ xtensa_backtrace_start:
   /* a2, a3, a4 should be out arguments for i SP, i PC, i-1 PC respectively.
    * Use a5 and a6 as scratch.
    */
-  
+
   l32e    a5, sp, -16     /* Get i PC, which is ret addres of i+1 */
   s32i    a5, a2, 0       /* Store i PC to arg *pc */
   l32e    a6, sp, -12     /* Get i+1 SP. Used to access i BS */

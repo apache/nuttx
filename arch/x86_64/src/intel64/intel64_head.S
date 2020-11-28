@@ -172,7 +172,7 @@ start32:
     // Popluate the lower 4GB as non-present
     // for ecx = 0...512 * 4 : Loop and setup the page directories
     mov     $0x800, %ecx // 512 * 4
-epd_loop: 
+epd_loop:
     mov     %esi,   %edx
     or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
     mov     %edx, 0(%edi)
@@ -198,7 +198,7 @@ ept_loop:
 
     // for ecx = 0...64 : Loop and setup 64x 2MB page directories
     mov     $64,    %ecx
-pd_loop: 
+pd_loop:
     mov     %eax, 0(%edi)
     add     $(HUGE_PAGE_SIZE), %eax
     add     $(X86_PAGE_ENTRY_SIZE), %edi
@@ -221,7 +221,7 @@ pd_loop:
     mov     %eax,   %cr4
 
     // Load the 4 level page table
-    // Level 1 and 2 were preset at build time in assembly for this loading 
+    // Level 1 and 2 were preset at build time in assembly for this loading
     // process
     // 4KiB page table is used
     // Kernel mapped to 1GB HiMem
@@ -323,7 +323,7 @@ __revoke_low_memory:
 
     // for ecx = 0...64 : Loop and setup 64x 2MB page directories
     mov     $64,   %ecx
-npd_loop: 
+npd_loop:
     mov     %esi,   %edx
     or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
     mov     %edx, 0(%edi)
@@ -354,12 +354,12 @@ __enable_sse_avx:
     mov     $(X86_CR0_EM), %rbx
     not     %rbx
     and     %rbx,   %rax
-    or      $(X86_CR0_MP), %rax 
+    or      $(X86_CR0_MP), %rax
     mov     %rax,   %cr0
 
     // Enable Saving XMM context
     mov     %cr4,   %rax
-    or      $(X86_CR4_OSXFSR | X86_CR4_XMMEXCPT),   %rax 
+    or      $(X86_CR4_OSXFSR | X86_CR4_XMMEXCPT),   %rax
     mov     %rax,   %cr4
 
     // Setup MXCSR, masking all SSE precision exception
