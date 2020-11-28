@@ -1064,7 +1064,8 @@ static inline void stm32_i2c_sem_init(FAR struct i2c_master_s *dev)
    */
 
   nxsem_init(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, 0, 0);
-  nxsem_set_protocol(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr, SEM_PRIO_NONE);
+  nxsem_set_protocol(&((struct stm32_i2c_inst_s *)dev)->priv->sem_isr,
+                     SEM_PRIO_NONE);
 #endif
 }
 
