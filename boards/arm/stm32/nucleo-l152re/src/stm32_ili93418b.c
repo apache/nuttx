@@ -283,7 +283,7 @@ static inline void write_byte(uint8_t data)
  *
  ****************************************************************************/
 
-static inline uint8_t read_byte()
+static inline uint8_t read_byte(void)
 {
   uint32_t a_idr;
   uint32_t b_idr;
