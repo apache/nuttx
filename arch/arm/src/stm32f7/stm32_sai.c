@@ -236,10 +236,8 @@ struct stm32f7_sai_s
 
 #ifdef CONFIG_DEBUG_I2S_INFO
 static void     sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg);
-static void     rcc_dump_regs(const char *msg);
 #else
 #  define       sai_dump_regs(s,m)
-#  define       rcc_dump_regs(m)
 #endif
 
 /* Semaphore helpers */
@@ -700,51 +698,6 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
   uint32_t sloten = (slotr & SAI_SLOTR_SLOTEN_MASK) >>
                       SAI_SLOTR_SLOTEN_SHIFT;
   i2sinfo("\t\tSLOTR: SLOTEN[31:16] = %08x\n", sloten + 1);
-#endif
-}
-#endif
-
-/****************************************************************************
- * Name: rcc_dump_regs
- *
- * Description:
- *   Dump the contents of all rcc block registers
- *
- * Input Parameters:
- *   msg - Message to print before the register data
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_I2S_INFO
-static void rcc_dump_regs(const char *msg)
-{
-  if (msg)
-    {
-      i2sinfo("%s\n", msg);
-    }
-
-#if 0
-  /* RCC_PLLSAICFGR */
-
-  uint32_t pll_sai_cfgr = getreg32(STM32_RCC_PLLSAICFGR);
-  i2sinfo("PLLSAICFGR = %08x\n", pll_sai_cfgr);
-
-  uint32_t pllsain = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIN_MASK) >>
-                      RCC_PLLSAICFGR_PLLSAIN_SHIFT;
-  i2sinfo("\t\tPLLSAICFGR PLLSAIN[14:6] = %d\n", pllsain);
-  uint32_t pllsaip = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIP_MASK) >>
-                      RCC_PLLSAICFGR_PLLSAIP_SHIFT;
-  i2sinfo("\t\tPLLSAICFGR PLLSAIP[17:16] = %d\n", pllsaip);
-  uint32_t pllsaiq = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIQ_MASK) >>
-                      RCC_PLLSAICFGQ_PLLSAIP_SHIFT;
-  i2sinfo("\t\tPLLSAICFGR PLLSAIQ[27:24] = %d\n", pllsaiq);
-
-  uint32_t pllsair = (pll_sai_cfgr & RCC_PLLSAICFGR_PLLSAIR_MASK) >>
-                      RCC_PLLSAICFGR_PLLSAIP_SHIFT;
-  i2sinfo("\t\tPLLSAICFGR PLLSAIR[30:28] = %d\n", pllsair);
 #endif
 }
 #endif

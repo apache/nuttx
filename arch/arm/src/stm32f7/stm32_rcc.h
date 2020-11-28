@@ -82,8 +82,8 @@ extern uint32_t _vectors[];  /* See stm32_vectors.S */
  * Name: stm32_mco1config
  *
  * Description:
- *   Selects the clock source to output on MCO1 pin (PA8). PA8 should be configured in
- *   alternate function mode.
+ *   Selects the clock source to output on MCO1 pin (PA8). PA8 should be configured
+ *   in alternate function mode.
  *
  * Input Parameters:
  *   source - One of the definitions for the RCC_CFGR_MCO1 definitions from
@@ -103,7 +103,7 @@ static inline void stm32_mco1config(uint32_t source, uint32_t div)
   uint32_t regval;
 
   regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_MCO1_MASK|RCC_CFGR_MCO1PRE_MASK);
+  regval &= ~(RCC_CFGR_MCO1_MASK | RCC_CFGR_MCO1PRE_MASK);
   regval |= (source | div);
   putreg32(regval, STM32_RCC_CFGR);
 }
@@ -112,8 +112,8 @@ static inline void stm32_mco1config(uint32_t source, uint32_t div)
  * Name: stm32_mco2config
  *
  * Description:
- *   Selects the clock source to output on MCO2 pin (PC9). PC9 should be configured in
- *   alternate function mode.
+ *   Selects the clock source to output on MCO2 pin (PC9). PC9 should be configured
+ *   in alternate function mode.
  *
  * Input Parameters:
  *   source - One of the definitions for the RCC_CFGR_MCO2 definitions from
@@ -133,7 +133,7 @@ static inline void stm32_mco2config(uint32_t source, uint32_t div)
   uint32_t regval;
 
   regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_MCO2_MASK|RCC_CFGR_MCO2PRE_MASK);
+  regval &= ~(RCC_CFGR_MCO2_MASK | RCC_CFGR_MCO2PRE_MASK);
   regval |= (source | div);
   putreg32(regval, STM32_RCC_CFGR);
 }
@@ -223,44 +223,44 @@ void stm32_clockenable(void);
 
 void stm32_rcc_enablelse(void);
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32_rcc_enablelsi
  *
  * Description:
  *   Enable the Internal Low-Speed (LSI) RC Oscillator.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 void stm32_rcc_enablelsi(void);
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32_rcc_disablelsi
  *
  * Description:
  *   Disable the Internal Low-Speed (LSI) RC Oscillator.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 void stm32_rcc_disablelsi(void);
 
 #if defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
-/****************************************************************************
+/************************************************************************************
  * Name: stm32f7x9_rcc_dsisrcphy
  *
  * Description:
  *   Set DSI clock source to DSI PHY
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 void stm32f7x9_rcc_dsisrcphy(void);
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32f7x9_rcc_dsisrcpllr
  *
  * Description:
  *   Set DSI clock source to PLLR
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 void stm32f7x9_rcc_dsisrcpllr(void);
 #endif

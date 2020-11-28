@@ -154,6 +154,14 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AUDIO_WM8994
+  ret = stm32_wm8994_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_wm8994_initialize failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);  /* May not be used */
   return OK;
 }
