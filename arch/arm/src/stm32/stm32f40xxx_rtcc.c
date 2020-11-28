@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <sched.h>
 #include <time.h>
@@ -750,7 +751,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
   /* Set the RTC Alarm register */
 
   putreg32(alarmreg, STM32_RTC_ALRMAR);
-  rtcinfo("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
+  rtcinfo("  ALRMAR: %08" PRIx32 "\n", getreg32(STM32_RTC_ALRMAR));
 
   /* Enable RTC alarm */
 
