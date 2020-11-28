@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdint.h>
@@ -923,7 +924,7 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
               DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
             }
 
-          caninfo("TS1: %d TS2: %d BRP: %d\n",
+          caninfo("TS1: %d TS2: %d BRP: %" PRId32 "\n",
                   bt->bt_tseg1, bt->bt_tseg2, brp);
 
           /* Configure bit timing. */
@@ -1380,7 +1381,7 @@ static bool stm32can_txready(FAR struct can_dev_s *dev)
   /* Return true if any mailbox is available */
 
   regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
-  caninfo("CAN%d TSR: %08x\n", priv->port, regval);
+  caninfo("CAN%d TSR: %08" PRIx32 "\n", priv->port, regval);
 
   return stm32can_txmb0empty(regval) || stm32can_txmb1empty(regval) ||
          stm32can_txmb2empty(regval);
@@ -1412,7 +1413,7 @@ static bool stm32can_txempty(FAR struct can_dev_s *dev)
   /* Return true if all mailboxes are available */
 
   regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
-  caninfo("CAN%d TSR: %08x\n", priv->port, regval);
+  caninfo("CAN%d TSR: %08" PRIx32 "\n", priv->port, regval);
 
   return stm32can_txmb0empty(regval) && stm32can_txmb1empty(regval) &&
          stm32can_txmb2empty(regval);
@@ -1718,7 +1719,7 @@ static int stm32can_bittiming(FAR struct stm32_can_s *priv)
   uint32_t ts1;
   uint32_t ts2;
 
-  caninfo("CAN%d PCLK1: %d baud: %d\n",
+  caninfo("CAN%d PCLK1: %ld baud: %" PRId32 "\n",
           priv->port, STM32_PCLK1_FREQUENCY, priv->baud);
 
   /* Try to get CAN_BIT_QUANTA quanta in one bit_time.
@@ -1771,7 +1772,8 @@ static int stm32can_bittiming(FAR struct stm32_can_s *priv)
       DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }
 
-  caninfo("TS1: %d TS2: %d BRP: %d\n", ts1, ts2, brp);
+  caninfo("TS1: %" PRId32 " TS2: %" PRId32 " BRP: %" PRId32 "\n",
+          ts1, ts2, brp);
 
   /* Configure bit timing.  This also does the following, less obvious
    * things.  Unless loopback mode is enabled, it:
@@ -1890,7 +1892,8 @@ static int stm32can_exitinitmode(FAR struct stm32_can_s *priv)
 
   if (timeout < 1)
     {
-      canerr("ERROR: Timed out waiting to exit initialization mode: %08x\n",
+      canerr("ERROR: Timed out waiting to "
+             "exit initialization mode: %08" PRIx32 "\n",
              regval);
       return -ETIMEDOUT;
     }
