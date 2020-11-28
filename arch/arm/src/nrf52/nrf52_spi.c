@@ -26,6 +26,7 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <inttypes.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -771,7 +772,7 @@ static uint32_t nrf52_spi_setfrequency(FAR struct spi_dev_s *dev,
 
       default:
         {
-          spierr("Frequency unsupported %d\n", frequency);
+          spierr("Frequency unsupported %" PRId32 "\n", frequency);
           goto errout;
         }
     }
@@ -784,7 +785,7 @@ static uint32_t nrf52_spi_setfrequency(FAR struct spi_dev_s *dev,
 
   priv->frequency = frequency;
 
-  spiinfo("Frequency %d\n", frequency);
+  spiinfo("Frequency %" PRId32 "\n", frequency);
 
 errout:
   return priv->frequency;
@@ -1153,7 +1154,7 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
       if (nrf52_spi_getreg(priv, NRF52_SPIM_TXDAMOUNT_OFFSET) !=
           transfer_size)
         {
-          spierr("Incomplete transfer wrote %d expected %d\n",
+          spierr("Incomplete transfer wrote %" PRId32 " expected %d\n",
                  regval, nwords);
         }
 
