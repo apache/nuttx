@@ -26,6 +26,7 @@
 
 #include <sys/types.h>
 #include <syslog.h>
+#include <sys/mount.h>
 
 #include <nuttx/board.h>
 #include <nuttx/leds/userled.h>
@@ -88,6 +89,29 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(0, STM32_PROCFS_MOUNTPOINT, "procfs", 0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             STM32_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+
+  /* Initialize the MMC/SD SPI driver (SPI1 is used) */
+
+  ret = stm32_spisd_initialize(1, CONFIG_NSH_MMCSDMINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n",
+             CONFIG_NSH_MMCSDMINOR, ret);
     }
 #endif
 
