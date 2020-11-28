@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -358,7 +359,7 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev,
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spiinfo("Frequency %d->%d\n", frequency, actual);
+  spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
   return actual;
 }
 
@@ -459,7 +460,7 @@ static void ssp_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval |= ((nbits - 1) << SSP_CR0_DSS_SHIFT);
       ssp_putreg(priv, LPC43_SSP_CR0_OFFSET, regval);
       spiinfo("SSP Control Register 0 (CR0) after setting"
-              "DSS: 0x%08X.\n", regval);
+              "DSS: 0x%08" PRIX32 ".\n", regval);
 
       /* Save the selection so that subsequent re-configurations will be
        * faster.
@@ -505,7 +506,7 @@ static uint32_t ssp_send(FAR struct spi_dev_s *dev, uint32_t wd)
   /* Get the value from the RX FIFO and return it */
 
   regval = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
-  spiinfo("%04x->%04x\n", wd, regval);
+  spiinfo("%04" PRIx32 "->%04" PRIx32 "\n", wd, regval);
   return regval;
 }
 
@@ -568,7 +569,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
        * and (3) there are more bytes to be sent.
        */
 
-      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      spiinfo("TX: rxpending: %" PRId32 " nwords: %d\n", rxpending, nwords);
       while ((ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_TNF) &&
              (rxpending < LPC43_SSP_FIFOSZ) && nwords)
         {
@@ -593,7 +594,7 @@ static void ssp_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
        * empty.
        */
 
-      spiinfo("RX: rxpending: %d\n", rxpending);
+      spiinfo("RX: rxpending: %" PRId32 "\n", rxpending);
       while (ssp_getreg(priv, LPC43_SSP_SR_OFFSET) & SSP_SR_RNE)
         {
           data = ssp_getreg(priv, LPC43_SSP_DR_OFFSET);
