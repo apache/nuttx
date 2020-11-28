@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <errno.h>
 #include <debug.h>
@@ -179,7 +180,7 @@ static int nrf52_start(FAR struct watchdog_lowerhalf_s *lower)
     (FAR struct nrf52_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
 
-  wdinfo("Entry: started=%d\n");
+  wdinfo("Entry: started\n");
   DEBUGASSERT(priv);
 
   /* Have we already been started? */
@@ -311,9 +312,9 @@ static int nrf52_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   status->timeleft = status->timeout - elapsed;
 
   wdinfo("Status     :\n");
-  wdinfo("  flags    : %08x\n", status->flags);
-  wdinfo("  timeout  : %d\n", status->timeout);
-  wdinfo("  timeleft : %d\n", status->timeleft);
+  wdinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  wdinfo("  timeout  : %" PRId32 "\n", status->timeout);
+  wdinfo("  timeleft : %" PRId32 "\n", status->timeleft);
   return OK;
 }
 
@@ -339,14 +340,14 @@ static int nrf52_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   FAR struct nrf52_wdt_lowerhalf_s *priv =
     (FAR struct nrf52_wdt_lowerhalf_s *)lower;
 
-  wdinfo("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%" PRId32 "\n", timeout);
   DEBUGASSERT(priv);
 
   /* Can this timeout be represented? */
 
   if (timeout < 1 || timeout > WDT_MAXTIMEOUT)
     {
-      wderr("ERROR: Cannot represent timeout=%d > %d\n",
+      wderr("ERROR: Cannot represent timeout=%" PRId32 " > %d\n",
             timeout, WDT_MAXTIMEOUT);
       return -ERANGE;
     }
