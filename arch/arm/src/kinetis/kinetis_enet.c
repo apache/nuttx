@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_KINETIS_ENET)
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -896,7 +897,7 @@ static void kinetis_interrupt_work(FAR void *arg)
     {
       /* An error has occurred, update statistics */
 
-      nerr("pending %0xd ints %0xd\n", pending, priv->ints);
+      nerr("pending %0" PRIx32 "d ints %0lxd\n", pending, priv->ints);
 
       NETDEV_ERRORS(&priv->dev);
 
@@ -1156,8 +1157,10 @@ static int kinetis_ifup(struct net_driver_s *dev)
   int ret;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
 #if defined(PIN_ENET_PHY_EN)
   kinetis_gpiowrite(PIN_ENET_PHY_EN, true);
@@ -1747,7 +1750,7 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
 
   if (phyaddr >= 32)
     {
-      nerr("ERROR: Failed to read %s PHYID1 at any address\n");
+      nerr("ERROR: Failed to read PHYID1 at any address\n");
       return -ENOENT;
     }
 
