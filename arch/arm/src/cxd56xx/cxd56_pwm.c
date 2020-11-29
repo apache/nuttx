@@ -41,6 +41,7 @@
 #include <nuttx/timers/pwm.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <errno.h>
@@ -250,8 +251,9 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
 
   if ((freq > ((pwmfreq + 1) >> 1)) || (freq <= 0))
     {
-      pwmerr("Frequency out of range. %d [Effective range:%d - %d]\n",
-                freq, 1, (pwmfreq + 1) >> 1);
+      pwmerr("Frequency out of range. %" PRId32
+             " [Effective range:%d - %" PRId32 "]\n",
+             freq, 1, (pwmfreq + 1) >> 1);
       return -1;
     }
 
@@ -259,7 +261,7 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
 
   if ((duty < 0x00000001) || (duty > 0x0000ffff))
     {
-      pwmerr("Duty out of range. %d\n", duty);
+      pwmerr("Duty out of range. %" PRId32 "\n", duty);
       return -1;
     }
 
@@ -297,7 +299,7 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
       offperiod = ((0x10000 - duty) * period + (1 << (16 - prescale))) >> 16;
       if (offperiod < 2)
         {
-          pwmerr("Duty out of range. %d\n", duty);
+          pwmerr("Duty out of range. %" PRId32 "\n", duty);
           return -1;
         }
     }
@@ -311,12 +313,14 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
       offperiod = period;
     }
 
-  pwminfo("Cycle = %d, Low = %d, High = %d, Clock = %d Hz\n",
+  pwminfo("Cycle = %" PRId32 ", Low = %" PRId32
+          ", High = %" PRId32 ", Clock = %" PRId32 " Hz\n",
           (prescale) ? (period << prescale) : period + 1,
           (prescale) ? (offperiod << prescale) - 1 : offperiod,
           (prescale) ? (period << prescale) - (offperiod << prescale) + 1
                      : period + 1 - offperiod, pwmfreq);
-  pwminfo("period/off/on = 0x%04x/0x%04x/0x%04x, prescale = %d\n",
+  pwminfo("period/off/on = 0x%04" PRIx32 "/0x%04" PRIx32
+          "/0x%04" PRIx32 ", prescale = %" PRId32 "\n",
           period, offperiod, period - offperiod, prescale);
 
   *param = (period & 0xffff) |
@@ -533,7 +537,7 @@ FAR struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel)
         break;
 #endif
       default:
-        pwmerr("Illeagal channel number:%d\n", channel);
+        pwmerr("Illeagal channel number:%" PRId32 "\n", channel);
         return NULL;
     }
 
