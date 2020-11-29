@@ -289,7 +289,8 @@ XEN1210_HANDLE xen1210_instantiate(FAR struct spi_dev_s *dev,
 
   /* Allocate the XEN1210 driver instance */
 
-  priv = (FAR struct xen1210_dev_s *)kmm_zalloc(sizeof(struct xen1210_dev_s));
+  priv = (FAR struct xen1210_dev_s *)
+         kmm_zalloc(sizeof(struct xen1210_dev_s));
   if (!priv)
     {
       snerr("ERROR: Failed to allocate the device structure!\n");
