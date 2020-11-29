@@ -99,19 +99,19 @@ void edid_dump(FAR const struct edid_info_s *edid)
       switch (edid->edid_video_input & EDID_DISPLAY_INPUT_LEVELS_MASK)
         {
         case EDID_DISPLAY_INPUT_LEVEL_1:
-          syslog(LOG_INFO, "%-16s-0.7, 0.3V\n", "", "Analog:");
+          syslog(LOG_INFO, "%-16s%s-0.7, 0.3V\n", "", "Analog:");
           break;
 
         case EDID_DISPLAY_INPUT_LEVEL_2:
-          syslog(LOG_INFO, "%-16s-0.714, 0.286V\n", "", "Analog:");
+          syslog(LOG_INFO, "%-16s%s-0.714, 0.286V\n", "", "Analog:");
           break;
 
         case EDID_DISPLAY_INPUT_LEVEL_3:
-          syslog(LOG_INFO, "%-16s-1.0, 0.4V\n", "", "Analog:");
+          syslog(LOG_INFO, "%-16s%s-1.0, 0.4V\n", "", "Analog:");
           break;
 
         case EDID_DISPLAY_INPUT_LEVEL_4:
-          syslog(LOG_INFO, "%-16s-0.7, 0.0V\n", "", "Analog:");
+          syslog(LOG_INFO, "%-16s%s-0.7, 0.0V\n", "", "Analog:");
           break;
         }
 
@@ -143,7 +143,7 @@ void edid_dump(FAR const struct edid_info_s *edid)
 
   syslog(LOG_INFO, "Max Size:      %d cm x %d cm\n",
          edid->edid_max_hsize, edid->edid_max_vsize);
-  syslog(LOG_INFO, "Gamma:         %u.%02\n",
+  syslog(LOG_INFO, "Gamma:         %u.%02u\n",
          edid->edid_gamma / 100, edid->edid_gamma % 100);
 
   syslog(LOG_INFO, "%-16s%02x\n",
