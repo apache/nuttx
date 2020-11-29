@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -1254,7 +1255,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   int ret;
 
   DEBUGASSERT(priv && apb);
-  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%" PRId32 "\n",
           apb, apb->nbytes - apb->curbyte, arg, timeout);
 
   /* Allocate a buffer container in advance */
@@ -1354,7 +1355,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   int ret;
 
   DEBUGASSERT(priv && apb);
-  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%" PRId32 "\n",
           apb, apb->nbytes - apb->curbyte, arg, timeout);
 
   /* Allocate a buffer container in advance */
