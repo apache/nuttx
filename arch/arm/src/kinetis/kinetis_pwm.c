@@ -108,10 +108,12 @@ struct kinetis_pwmtimer_s
 /* Register access */
 
 static uint32_t pwm_getreg(struct kinetis_pwmtimer_s *priv, int offset);
-static void pwm_putreg(struct kinetis_pwmtimer_s *priv, int offset, uint32_t value);
+static void pwm_putreg(struct kinetis_pwmtimer_s *priv, int offset,
+                       uint32_t value);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg);
+static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv,
+                         FAR const char *msg);
 #else
 #  define pwm_dumpregs(priv,msg)
 #endif
@@ -237,7 +239,8 @@ static uint32_t pwm_getreg(struct kinetis_pwmtimer_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void pwm_putreg(struct kinetis_pwmtimer_s *priv, int offset, uint32_t value)
+static void pwm_putreg(struct kinetis_pwmtimer_s *priv, int offset,
+                       uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
@@ -257,7 +260,8 @@ static void pwm_putreg(struct kinetis_pwmtimer_s *priv, int offset, uint32_t val
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv, FAR const char *msg)
+static void pwm_dumpregs(struct kinetis_pwmtimer_s *priv,
+                         FAR const char *msg)
 {
   int nchannels = (priv->tpmid == 0) ? 8 : 2;
 
@@ -368,7 +372,10 @@ static int pwm_timer(FAR struct kinetis_pwmtimer_s *priv,
   uint32_t cv;
   uint8_t i;
 
-  static const uint8_t presc_values[8] = {1, 2, 4, 8, 16, 32, 64, 128};
+  static const uint8_t presc_values[8] =
+    {
+      1, 2, 4, 8, 16, 32, 64, 128
+    };
 
   /* Register contents */
 
@@ -380,8 +387,8 @@ static int pwm_timer(FAR struct kinetis_pwmtimer_s *priv,
   DEBUGASSERT(info->frequency > 0 && info->duty > 0 &&
               info->duty < uitoub16(100));
 
-  /* Calculate optimal values for the timer prescaler and for the timer modulo
-   * register.  If' frequency' is the desired frequency, then
+  /* Calculate optimal values for the timer prescaler and for the timer
+   * modulo register.  If' frequency' is the desired frequency, then
    *
    *   modulo = tpmclk / frequency
    *   tpmclk = pclk / presc
@@ -444,7 +451,8 @@ static int pwm_timer(FAR struct kinetis_pwmtimer_s *priv,
 
   cv = b16toi(info->duty * modulo + b16HALF);
 
-  pwminfo("FTM%d PCLK: %d frequency: %d FTMCLK: %d prescaler: %d modulo: %d c0v: %d\n",
+  pwminfo("FTM%d PCLK: %d frequency: %d FTMCLK: %d "
+          "prescaler: %d modulo: %d c0v: %d\n",
           priv->tpmid, priv->pclk, info->frequency, tpmclk,
           presc_values[prescaler], modulo, cv);
 
@@ -463,55 +471,63 @@ static int pwm_timer(FAR struct kinetis_pwmtimer_s *priv,
     {
       case 0:  /* PWM Mode configuration: Channel 0 */
         {
-          pwm_putreg(priv, KINETIS_FTM_C0SC_OFFSET, FTM_CSC_MSB | FTM_CSC_ELSB);
+          pwm_putreg(priv, KINETIS_FTM_C0SC_OFFSET,
+                     FTM_CSC_MSB | FTM_CSC_ELSB);
           pwm_putreg(priv, KINETIS_FTM_C0V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 1:  /* PWM Mode configuration: Channel 1 */
         {
-          pwm_putreg(priv, KINETIS_FTM_C1SC_OFFSET, FTM_CSC_MSB | FTM_CSC_ELSB);
+          pwm_putreg(priv, KINETIS_FTM_C1SC_OFFSET,
+                     FTM_CSC_MSB | FTM_CSC_ELSB);
           pwm_putreg(priv, KINETIS_FTM_C1V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 2:  /* PWM Mode configuration: Channel 2 */
         {
-          pwm_putreg(priv, KINETIS_FTM_C2SC_OFFSET, FTM_CSC_MSB | FTM_CSC_ELSB);
+          pwm_putreg(priv, KINETIS_FTM_C2SC_OFFSET,
+                     FTM_CSC_MSB | FTM_CSC_ELSB);
           pwm_putreg(priv, KINETIS_FTM_C2V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 3:  /* PWM Mode configuration: Channel 3 */
         {
-          pwm_putreg(priv, KINETIS_FTM_C3SC_OFFSET, FTM_CSC_MSB | FTM_CSC_ELSB);
+          pwm_putreg(priv, KINETIS_FTM_C3SC_OFFSET,
+                     FTM_CSC_MSB | FTM_CSC_ELSB);
           pwm_putreg(priv, KINETIS_FTM_C3V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 4:  /* PWM Mode configuration: Channel 4 */
         {
-          pwm_putreg(priv, KINETIS_FTM_C4SC_OFFSET, FTM_CSC_MSB | FTM_CSC_ELSB);
+          pwm_putreg(priv, KINETIS_FTM_C4SC_OFFSET,
+                     FTM_CSC_MSB | FTM_CSC_ELSB);
           pwm_putreg(priv, KINETIS_FTM_C4V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 5:  /* PWM Mode configuration: Channel 5 */
         {
-          pwm_putreg(priv, KINETIS_FTM_C5SC_OFFSET, FTM_CSC_MSB | FTM_CSC_ELSB);
+          pwm_putreg(priv, KINETIS_FTM_C5SC_OFFSET,
+                     FTM_CSC_MSB | FTM_CSC_ELSB);
           pwm_putreg(priv, KINETIS_FTM_C5V_OFFSET, (uint16_t) cv);
         }
         break;
 
       case 6:  /* PWM Mode configuration: Channel 6 */
         {
-          pwm_putreg(priv, KINETIS_FTM_C6SC_OFFSET, FTM_CSC_MSB | FTM_CSC_ELSB);
+          pwm_putreg(priv, KINETIS_FTM_C6SC_OFFSET,
+                     FTM_CSC_MSB | FTM_CSC_ELSB);
           pwm_putreg(priv, KINETIS_FTM_C6V_OFFSET, (uint16_t) cv);
         }
         break;
       case 7:  /* PWM Mode configuration: Channel 7 */
         {
-          pwm_putreg(priv, KINETIS_FTM_C7SC_OFFSET, FTM_CSC_MSB | FTM_CSC_ELSB);
+          pwm_putreg(priv, KINETIS_FTM_C7SC_OFFSET,
+                     FTM_CSC_MSB | FTM_CSC_ELSB);
           pwm_putreg(priv, KINETIS_FTM_C7V_OFFSET, (uint16_t) cv);
         }
         break;
@@ -738,7 +754,8 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
+static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
+                     unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
   FAR struct kinetis_pwmtimer_s *priv = (FAR struct kinetis_pwmtimer_s *)dev;
