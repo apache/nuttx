@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -191,7 +192,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
         }
     }
 
-  spiinfo("Frequency %d -> %d\n", frequency, sysclk / (4 * (256 - div)));
+  spiinfo("Frequency %" PRId32 " -> %ld\n",
+          frequency, sysclk / (4 * (256 - div)));
 
   actual = sysclk / (4 * (256 - div));
   putreg32(div, LC823450_SPI_BRG);
