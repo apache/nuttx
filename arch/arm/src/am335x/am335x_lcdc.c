@@ -897,8 +897,8 @@ void am335x_lcdclear(nxgl_mxpixel_t color)
 #endif
   int i;
 
-  lcdinfo("Clearing display: color=%04x VRAM=%08lx size=%lu\n",
-          color, (unsigned long)CONFIG_AM335X_LCDC_FB_VBASE,
+  lcdinfo("Clearing display: color=%04jx VRAM=%08lx size=%lu\n",
+          (uintmax_t)color, (unsigned long)CONFIG_AM335X_LCDC_FB_VBASE,
           (unsigned long)priv->fbsize);
 
   for (i = 0; i < priv->fbsize; i += incr)
