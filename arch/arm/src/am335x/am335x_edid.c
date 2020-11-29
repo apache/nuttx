@@ -46,6 +46,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -283,7 +284,7 @@ static const struct videomode_s *
 void am335x_lcd_videomode(FAR const struct videomode_s *videomode,
                           FAR struct am335x_panel_info_s *panel)
 {
-  lcdinfo("Detected videomode: %dx%d @ %dKHz\n",
+  lcdinfo("Detected videomode: %dx%d @ %" PRId32 "KHz\n",
           videomode->hdisplay, videomode->vdisplay,
           am335x_videomode_vrefresh(videomode));
 
