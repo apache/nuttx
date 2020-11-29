@@ -806,7 +806,7 @@ static struct usbdev_ep_s *lc823450_allocep(struct usbdev_s *dev,
 
   if (priv->used & 1 << epphy)
     {
-      uinfo("ep%d is still used\n");
+      uinfo("ep is still used\n");
       return NULL;
     }
 
