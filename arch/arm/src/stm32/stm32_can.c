@@ -1222,8 +1222,8 @@ static int stm32can_send(FAR struct can_dev_s *dev,
   int dlc;
   int txmb;
 
-  caninfo("CAN%d ID: %d DLC: %d\n",
-          priv->port, msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
+  caninfo("CAN%d ID: %" PRId32 " DLC: %d\n",
+          priv->port, (uint32_t)msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
   /* Select one empty transmit mailbox */
 
