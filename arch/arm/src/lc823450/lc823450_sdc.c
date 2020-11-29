@@ -49,6 +49,7 @@
 #include <nuttx/kthread.h>
 #include <arch/board/board.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -456,7 +457,7 @@ int lc823450_sdc_readsector(uint32_t ch,
           break;
         }
 
-      mcinfo("ret=%d ch=%d add=%ld cnt=%d i=%d \n",
+      mcinfo("ret=%d ch=%" PRId32 " add=%ld cnt=%d i=%d \n",
              ret, ch, addr, cnt, i);
     }
 
@@ -532,7 +533,7 @@ int lc823450_sdc_writesector(uint32_t ch,
 
   if (0 > ret)
     {
-      mcinfo("ret=%d ch=%d add=%ld cnt=%d \n", ret, ch, addr, cnt);
+      mcinfo("ret=%d ch=%" PRId32 " add=%ld cnt=%d \n", ret, ch, addr, cnt);
     }
 
   _sdc_semgive(&_sdc_sem[ch]);
@@ -578,7 +579,7 @@ int lc823450_sdc_trimsector(uint32_t ch, unsigned long addr,
   ret = sddr_eraseseq(0x00000001, addr, cnt, _cfg[ch]);
   if (0 > ret)
     {
-      mcinfo("ret=%d ch=%d add=%ld cnt=%d \n", ret, ch, addr, cnt);
+      mcinfo("ret=%d ch=%" PRId32 " add=%ld cnt=%d \n", ret, ch, addr, cnt);
     }
 
   _sdc_semgive(&_sdc_sem[ch]);
@@ -595,7 +596,7 @@ int lc823450_sdc_cachectl(uint32_t ch, int ctrl)
 {
   int ret;
 
-  mcinfo("++++ ch=%d, ctrl=%d \n", ch, ctrl);
+  mcinfo("++++ ch=%" PRId32 ", ctrl=%d \n", ch, ctrl);
 
   ret = _sdc_semtake(&_sdc_sem[ch]);
   if (ret >= 0)
@@ -617,7 +618,7 @@ int lc823450_sdc_changespeedmode(uint32_t ch, int mode)
 {
   int ret;
 
-  mcinfo("++++ ch=%d, mode=%d \n", ch, mode);
+  mcinfo("++++ ch=%" PRId32 ", mode=%d \n", ch, mode);
 
   ret = _sdc_semtake(&_sdc_sem[ch]);
   if (ret < 0)
@@ -659,7 +660,7 @@ int lc823450_sdc_getcid(uint32_t ch, char *cidstr, int length)
   uint8_t cid[16];
   int ret;
 
-  mcinfo("++++ ch=%d \n", ch);
+  mcinfo("++++ ch=%" PRId32 " \n", ch);
 
   ret = _sdc_semtake(&_sdc_sem[ch]);
   if (ret < 0)
