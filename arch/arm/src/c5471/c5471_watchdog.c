@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -173,7 +174,7 @@ static int wdt_setusec(uint32_t usec)
   uint32_t divisor   = 1;
   uint32_t mode;
 
-  wdinfo("usec=%d\n", usec);
+  wdinfo("usec=%" PRId32 "\n", usec);
 
   /* Calculate a value of prescaler and divisor that will be able
    * to count to the usec.  It may not be exact or the best
@@ -186,7 +187,8 @@ static int wdt_setusec(uint32_t usec)
   do
     {
       divisor = (CLOCK_MHZ_X2 * usec) / (prescaler * 2);
-      wdinfo("divisor=0x%x prescaler=0x%x\n", divisor, prescaler);
+      wdinfo("divisor=0x%" PRIx32 " prescaler=0x%" PRIx32 "\n",
+             divisor, prescaler);
 
       if (divisor >= 0x10000)
         {
@@ -194,7 +196,7 @@ static int wdt_setusec(uint32_t usec)
             {
               /* This is the max possible ~2.5 seconds. */
 
-              wderr("ERROR: prescaler=0x%x too big!\n", prescaler);
+              wderr("ERROR: prescaler=0x%" PRIx32 " too big!\n", prescaler);
               return ERROR;
             }
 
@@ -207,19 +209,20 @@ static int wdt_setusec(uint32_t usec)
     }
   while (divisor >= 0x10000);
 
-  wdinfo("prescaler=0x%x divisor=0x%x\n", prescaler, divisor);
+  wdinfo("prescaler=0x%" PRIx32 " divisor=0x%" PRIx32 "\n",
+         prescaler, divisor);
 
   mode  = wdt_prescaletoptv(prescaler);
   mode &= ~C5471_TIMER_AUTORELOAD; /* One shot mode. */
   mode |= divisor << 5;
-  wdinfo("mode=0x%x\n", mode);
+  wdinfo("mode=0x%" PRIx32 "\n", mode);
 
   c5471_wdt_cntl = mode;
 
   /* Now start the watchdog */
 
   c5471_wdt_cntl |= C5471_TIMER_STARTBIT;
-  wdinfo("cntl_timer=0x%x\n", c5471_wdt_cntl);
+  wdinfo("cntl_timer=0x%" PRIx32 "\n", c5471_wdt_cntl);
 
   return 0;
 }
@@ -295,7 +298,7 @@ static ssize_t wdt_write(struct file *filep, const char *buffer,
 
 static int wdt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  wdinfo("ioctl Call: cmd=0x%x arg=0x%x", cmd, arg);
+  wdinfo("ioctl Call: cmd=0x%x arg=0x%lx", cmd, arg);
 
   /* Process the IOCTL command (see arch/watchdog.h) */
 
