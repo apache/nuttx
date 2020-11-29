@@ -332,6 +332,7 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
               /* The child has exited. Return the saved exit status */
 
               *stat_loc = child->ch_status << 8;
+              pid = child->ch_pid;
 
               /* Discard the child entry and break out of the loop */
 
