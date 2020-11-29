@@ -46,6 +46,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET)
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -847,7 +848,7 @@ static inline void c5471_inctxcpu(struct c5471_driver_s *priv)
       priv->c_txcpudesc += 2*sizeof(uint32_t);
     }
 
-  ninfo("TX CPU desc: %08x\n", priv->c_txcpudesc);
+  ninfo("TX CPU desc: %08" PRIx32 "\n", priv->c_txcpudesc);
 }
 
 /****************************************************************************
@@ -870,7 +871,7 @@ static inline void c5471_incrxcpu(struct c5471_driver_s *priv)
       priv->c_rxcpudesc += 2*sizeof(uint32_t);
     }
 
-  ninfo("RX CPU desc: %08x\n", priv->c_rxcpudesc);
+  ninfo("RX CPU desc: %08" PRIx32 "\n", priv->c_rxcpudesc);
 }
 
 /****************************************************************************
@@ -906,7 +907,8 @@ static int c5471_transmit(struct c5471_driver_s *priv)
   bfirstframe           = true;
   priv->c_lastdescstart = priv->c_rxcpudesc;
 
-  ninfo("Packet size: %d RX CPU desc: %08x\n", nbytes, priv->c_rxcpudesc);
+  ninfo("Packet size: %d RX CPU desc: %08" PRIx32 "\n",
+        nbytes, priv->c_rxcpudesc);
   c5471_dumpbuffer("Transmit packet", dev->d_buf, dev->d_len);
 
   while (nbytes)
@@ -1233,7 +1235,7 @@ static void c5471_receive(struct c5471_driver_s *priv)
    * the network.
    */
 
-  ninfo("Reading TX CPU desc: %08x\n", priv->c_txcpudesc);
+  ninfo("Reading TX CPU desc: %08" PRIx32 "\n", priv->c_txcpudesc);
   while (bmore)
     {
       /* Words #0 and #1 of descriptor */
@@ -1281,7 +1283,8 @@ static void c5471_receive(struct c5471_driver_s *priv)
         }
       else
         {
-          ninfo("Discarding framelen: %d packetlen\n", framelen, packetlen);
+          ninfo("Discarding framelen: %d packetlen %d\n",
+                framelen, packetlen);
         }
 
       if (getreg32(priv->c_txcpudesc) & EIM_TXDESC_LIF)
@@ -1882,8 +1885,10 @@ static int c5471_ifup(struct net_driver_s *dev)
   volatile uint32_t clearbits;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Initialize Ethernet interface */
 
@@ -2189,7 +2194,7 @@ static void c5471_eimconfig(struct c5471_driver_s *priv)
 
   /* TX ENET 0 */
 
-  ninfo("TX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
+  ninfo("TX ENET0 desc: %08" PRIx32 " pbuf: %08" PRIx32 "\n", desc, pbuf);
   putreg32((desc & 0x0000ffff), ENET0_TDBA); /* 16-bit offset address */
   for (i = NUM_DESC_TX - 1; i >= 0; i--)
     {
@@ -2216,7 +2221,7 @@ static void c5471_eimconfig(struct c5471_driver_s *priv)
 
   /* RX ENET 0 */
 
-  ninfo("RX ENET0 desc: %08x pbuf: %08x\n", desc, pbuf);
+  ninfo("RX ENET0 desc: %08" PRIx32 " pbuf: %08" PRIx32 "\n", desc, pbuf);
   putreg32((desc & 0x0000ffff), ENET0_RDBA); /* 16-bit offset address */
   for (i = NUM_DESC_RX - 1; i >= 0; i--)
     {
@@ -2243,7 +2248,7 @@ static void c5471_eimconfig(struct c5471_driver_s *priv)
 
   /* TX CPU */
 
-  ninfo("TX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
+  ninfo("TX CPU desc: %08" PRIx32 " pbuf: %08" PRIx32 "\n", desc, pbuf);
   priv->c_txcpudesc = desc;
   putreg32((desc & 0x0000ffff), EIM_CPU_TXBA); /* 16-bit offset address */
   for (i = NUM_DESC_TX - 1; i >= 0; i--)
@@ -2273,7 +2278,7 @@ static void c5471_eimconfig(struct c5471_driver_s *priv)
 
   /* RX CPU */
 
-  ninfo("RX CPU desc: %08x pbuf: %08x\n", desc, pbuf);
+  ninfo("RX CPU desc: %08" PRIx32 " pbuf: %08" PRIx32 "\n", desc, pbuf);
   priv->c_rxcpudesc = desc;
   putreg32((desc & 0x0000ffff), EIM_CPU_RXBA); /* 16-bit offset address */
   for (i = NUM_DESC_RX - 1; i >= 0; i--)
@@ -2301,7 +2306,7 @@ static void c5471_eimconfig(struct c5471_driver_s *priv)
       pbuf += sizeof(uint32_t); /* Ether Module's "Buffer Usage Word" */
     }
 
-  ninfo("END desc: %08x pbuf: %08x\n", desc, pbuf);
+  ninfo("END desc: %08" PRIx32 " pbuf: %08" PRIx32 "\n", desc, pbuf);
 
   /* Save the descriptor packet size */
 
