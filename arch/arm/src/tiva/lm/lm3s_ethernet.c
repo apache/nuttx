@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_TIVA_ETHERNET)
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -377,7 +378,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
   regval  = getreg32(TIVA_SYSCON_RCGC2);
   regval |= (SYSCON_RCGC2_EMAC0 | SYSCON_RCGC2_EPHY0);
   putreg32(regval, TIVA_SYSCON_RCGC2);
-  ninfo("RCGC2: %08x\n", regval);
+  ninfo("RCGC2: %08" PRIx32 "\n", regval);
 
   /* Put the Ethernet controller into the reset state */
 
@@ -393,7 +394,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   regval &= ~(SYSCON_SRCR2_EMAC0 | SYSCON_SRCR2_EPHY0);
   putreg32(regval, TIVA_SYSCON_SRCR2);
-  ninfo("SRCR2: %08x\n", regval);
+  ninfo("SRCR2: %08" PRIx32 "\n", regval);
 
   /* Wait just a bit, again.
    * If we touch the ethernet too soon, we may busfault.
@@ -1303,8 +1304,10 @@ static int tiva_ifup(struct net_driver_s *dev)
 #endif
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Enable and reset the Ethernet controller */
 
@@ -1323,7 +1326,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   div = SYSCLK_FREQUENCY / 2 / TIVA_MAX_MDCCLK;
   tiva_ethout(priv, TIVA_MAC_MDV_OFFSET, div);
-  ninfo("MDV:   %08x\n", div);
+  ninfo("MDV:   %08" PRIx32 "\n", div);
 
   /* Then configure the Ethernet Controller for normal operation
    *
@@ -1335,7 +1338,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~TIVA_TCTCL_CLRBITS;
   regval |= TIVA_TCTCL_SETBITS;
   tiva_ethout(priv, TIVA_MAC_TCTL_OFFSET, regval);
-  ninfo("TCTL:  %08x\n", regval);
+  ninfo("TCTL:  %08" PRIx32 "\n", regval);
 
   /* Setup the receive control register (Disable multicast frames, disable
    * promiscuous mode, disable bad CRC rejection).
@@ -1345,7 +1348,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~TIVA_RCTCL_CLRBITS;
   regval |= TIVA_RCTCL_SETBITS;
   tiva_ethout(priv, TIVA_MAC_RCTL_OFFSET, regval);
-  ninfo("RCTL:  %08x\n", regval);
+  ninfo("RCTL:  %08" PRIx32 "\n", regval);
 
   /* Setup the time stamp configuration register */
 
@@ -1357,7 +1360,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~(MAC_TS_EN);
 #endif
   tiva_ethout(priv, TIVA_MAC_TS_OFFSET, regval);
-  ninfo("TS:    %08x\n", regval);
+  ninfo("TS:    %08" PRIx32 "\n", regval);
 #endif
 
   /* Wait for the link to come up.  This following is not very conservative
@@ -1460,8 +1463,10 @@ static int tiva_ifdown(struct net_driver_s *dev)
   uint32_t regval;
 
   ninfo("Taking down: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Cancel the TX poll timer and TX timeout timers */
 
