@@ -135,6 +135,11 @@ int igmp_joingroup(struct net_driver_s *dev,
 
       ninfo("Join to new group: %08" PRIx32 "\n", (uint32_t)grpaddr->s_addr);
       group = igmp_grpalloc(dev, &grpaddr->s_addr);
+      if (group == NULL)
+        {
+          return -EADDRNOTAVAIL;
+        }
+
       IGMP_STATINCR(g_netstats.igmp.joins);
 
       /* Send the Membership Report */
