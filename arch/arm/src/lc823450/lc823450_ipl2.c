@@ -675,9 +675,6 @@ int ipl2_main(int argc, char *argv[])
 
   UNUSED(ret); /* Not used in all configurations */
 
-  _info("start: %s\n", CONFIG_CURRENT_REVISION);
-  _info("imgsig: %u\n", IMG_SIGNATURE);
-
 #ifdef CONFIG_CHARGER
   /* NOTE:
    * chg_disable() must be done before CMIC_FWAKE L->H.
