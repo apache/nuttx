@@ -42,6 +42,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <sched.h>
 #include <errno.h>
@@ -672,7 +673,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
 
   putreg32(alarmreg, STM32L4_RTC_ALRMAR);
   putreg32(0, STM32L4_RTC_ALRMASSR);
-  rtcinfo("  ALRMAR: %08x\n", getreg32(STM32L4_RTC_ALRMAR));
+  rtcinfo("  ALRMAR: %08" PRIx32 "\n", getreg32(STM32L4_RTC_ALRMAR));
 
   /* Enable RTC alarm A */
 
@@ -715,7 +716,7 @@ static int rtchw_set_alrmbr(rtc_alarmreg_t alarmreg)
 
   putreg32(alarmreg, STM32L4_RTC_ALRMBR);
   putreg32(0, STM32L4_RTC_ALRMBSSR);
-  rtcinfo("  ALRMBR: %08x\n", getreg32(STM32L4_RTC_ALRMBR));
+  rtcinfo("  ALRMBR: %08" PRIx32 "\n", getreg32(STM32L4_RTC_ALRMBR));
 
   /* Enable RTC alarm B */
 
