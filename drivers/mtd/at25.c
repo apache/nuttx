@@ -98,6 +98,7 @@
 #define AT25_AT25DF321_NPAGES        8192
 
 /* Instructions */
+
 /*      Command        Value      N Description             Addr Dummy Data */
 #define AT25_WREN      0x06    /* 1 Write Enable              0   0     0 */
 #define AT25_WRDI      0x04    /* 1 Write Disable             0   0     0 */
@@ -485,7 +486,8 @@ static int at25_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
  * Name: at25_bread
  ************************************************************************************/
 
-static ssize_t at25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
+static ssize_t at25_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+                          size_t nblocks,
                           FAR uint8_t *buffer)
 {
   FAR struct at25_dev_s *priv = (FAR struct at25_dev_s *)dev;
@@ -499,7 +501,7 @@ static ssize_t at25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
                      nblocks << priv->pageshift, buffer);
   if (nbytes > 0)
     {
-        return nbytes >> priv->pageshift;
+      return nbytes >> priv->pageshift;
     }
 
   return (int)nbytes;
@@ -526,7 +528,7 @@ static ssize_t at25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
       at25_pagewrite(priv, buffer + 256, startblock * 2 + 1);
       buffer += 1 << priv->pageshift;
       startblock++;
-   }
+    }
 
   at25_unlock(priv->dev);
   return nblocks;
