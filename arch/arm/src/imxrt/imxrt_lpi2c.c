@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -843,7 +844,7 @@ static inline void
    * still pending.
    */
 
-  i2cinfo("Timeout with Status Register: %x\n", regval);
+  i2cinfo("Timeout with Status Register: %" PRIx32 "\n", regval);
 }
 
 /****************************************************************************
@@ -1719,7 +1720,7 @@ static int imxrt_lpi2c_transfer(FAR struct i2c_master_s *dev,
     {
       ret = -ETIMEDOUT;
 
-      i2cerr("ERROR: Timed out: MCR: status: 0x%x\n", priv->status);
+      i2cerr("ERROR: Timed out: MCR: status: 0x%" PRIx32 "\n", priv->status);
     }
 
   /* Check for error status conditions */
