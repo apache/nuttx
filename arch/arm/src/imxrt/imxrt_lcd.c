@@ -139,12 +139,12 @@ static const struct fb_planeinfo_s g_planeinfo =
 
 struct pixel_format_reg
 {
-    uint32_t regCtrl;  /* Value of register CTRL. */
-    uint32_t regCtrl1; /* Value of register CTRL1. */
+    uint32_t reg_ctrl;  /* Value of register CTRL. */
+    uint32_t reg_ctrl1; /* Value of register CTRL1. */
 };
 
 #if defined (CONFIG_IMXRT_LCD_INPUT_BPP8) || defined (CONFIG_IMXRT_LCD_INPUT_BPP8_LUT)
-  static const struct pixel_format_reg pixelFormat =
+  static const struct pixel_format_reg pixel_format =
   {
     /* Register CTRL. */
 
@@ -154,12 +154,12 @@ struct pixel_format_reg
 
     LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
-  const uint32_t dataBus = LCDIF_CTRL_LCD_DATABUS_WIDTH(1);
+  const uint32_t data_bus = LCDIF_CTRL_LCD_DATABUS_WIDTH(1);
 
 #else
 
 #  if defined (CONFIG_IMXRT_LCD_INPUT_BPP15)
-  static const struct pixel_format_reg pixelFormat =
+  static const struct pixel_format_reg pixel_format =
   {
     /* Register CTRL. */
 
@@ -170,7 +170,7 @@ struct pixel_format_reg
     LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
 #  elif defined (CONFIG_IMXRT_LCD_INPUT_BPP16)
-  static const struct pixel_format_reg pixelFormat =
+  static const struct pixel_format_reg pixel_format =
   {
     /* Register CTRL. */
 
@@ -181,7 +181,7 @@ struct pixel_format_reg
     LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
 #  elif defined (CONFIG_IMXRT_LCD_INPUT_BPP24)
-  static const struct pixel_format_reg pixelFormat =
+  static const struct pixel_format_reg pixel_format =
   {
     /* Register CTRL. 24-bit. */
 
@@ -192,7 +192,7 @@ struct pixel_format_reg
     LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
 #  elif defined (CONFIG_IMXRT_LCD_INPUT_BPP32)
-  static const struct pixel_format_reg pixelFormat =
+  static const struct pixel_format_reg pixel_format =
   {
     /* Register CTRL. 24-bit. */
 
@@ -205,13 +205,13 @@ struct pixel_format_reg
 #  endif
 
 #  if defined (CONFIG_IMXRT_LCD_OUTPUT_8)
-  const uint32_t dataBus = LCDIF_CTRL_LCD_DATABUS_WIDTH(1);
+  const uint32_t data_bus = LCDIF_CTRL_LCD_DATABUS_WIDTH(1);
 #  elif defined (CONFIG_IMXRT_LCD_OUTPUT_16)
-  const uint32_t dataBus = LCDIF_CTRL_LCD_DATABUS_WIDTH(0);
+  const uint32_t data_bus = LCDIF_CTRL_LCD_DATABUS_WIDTH(0);
 #  elif defined (CONFIG_IMXRT_LCD_OUTPUT_18)
-  const uint32_t dataBus = LCDIF_CTRL_LCD_DATABUS_WIDTH(2);
+  const uint32_t data_bus = LCDIF_CTRL_LCD_DATABUS_WIDTH(2);
 #  elif defined (CONFIG_IMXRT_LCD_OUTPUT_24)
-  const uint32_t dataBus = LCDIF_CTRL_LCD_DATABUS_WIDTH(3);
+  const uint32_t data_bus = LCDIF_CTRL_LCD_DATABUS_WIDTH(3);
 #  endif
 
 #endif
@@ -511,12 +511,12 @@ int up_fbinitialize(int display)
 
   lcdinfo("Configuring the LCD controller\n");
 
-  putreg32(pixelFormat.regCtrl | dataBus |
+  putreg32(pixel_format.reg_ctrl | data_bus |
       LCDIF_CTRL_DOTCLK_MODE_MASK |
       LCDIF_CTRL_BYPASS_COUNT_MASK |
       LCDIF_CTRL_MASTER_MASK, IMXRT_LCDIF_CTRL);
 
-  putreg32(pixelFormat.regCtrl1, IMXRT_LCDIF_CTRL1);
+  putreg32(pixel_format.reg_ctrl1, IMXRT_LCDIF_CTRL1);
 
   putreg32((CONFIG_IMXRT_LCD_VHEIGHT << LCDIF_TRANSFER_COUNT_V_COUNT_SHIFT) |
       (CONFIG_IMXRT_LCD_HWIDTH << LCDIF_TRANSFER_COUNT_H_COUNT_SHIFT),
