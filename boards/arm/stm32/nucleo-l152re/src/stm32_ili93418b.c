@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
@@ -432,7 +433,7 @@ static int stm32_ili93418b_sendparam(FAR struct ili9341_lcd_s *lcd,
 static int stm32_ili93418b_sendgram(FAR struct ili9341_lcd_s *lcd,
                                     const uint16_t *wd, uint32_t nwords)
 {
-  lcdinfo("wd=%p , wd=0x%x, nwords=%d\n", wd, *wd, nwords);
+  lcdinfo("wd=%p , wd=0x%x, nwords=%" PRId32 "\n", wd, *wd, nwords);
 
   /* 8-bit parallel mode is enabled for pixel data operations.
    * Each pixel must be transmitted by two write operations.
@@ -471,7 +472,7 @@ static int stm32_ili93418b_recvparam(FAR struct ili9341_lcd_s *lcd,
 {
   LCD_RS_DATA;
   *param = read_byte();
-  lcdinfo("param=%04x\n", param);
+  lcdinfo("param=%p\n", param);
   return OK;
 }
 
@@ -494,7 +495,7 @@ static int stm32_ili93418b_recvparam(FAR struct ili9341_lcd_s *lcd,
 static int stm32_ili93418b_recvgram(FAR struct ili9341_lcd_s *lcd,
                                     uint16_t *wd, uint32_t nwords)
 {
-  lcdinfo("wd=%p, nwords=%d\n", wd, nwords);
+  lcdinfo("wd=%p, nwords=%" PRId32 "\n", wd, nwords);
   return stm32_ili93418b_recvblock(lcd, wd, nwords);
 }
 
