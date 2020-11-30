@@ -152,7 +152,7 @@ struct pixel_format_reg
 
     /* Register CTRL1. */
 
-    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fU)
+    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
   const uint32_t dataBus = LCDIF_CTRL_LCD_DATABUS_WIDTH(1);
 
@@ -167,7 +167,7 @@ struct pixel_format_reg
 
     /* Register CTRL1. */
 
-    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fU)
+    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
 #  elif defined (CONFIG_IMXRT_LCD_INPUT_BPP16)
   static const struct pixel_format_reg pixelFormat =
@@ -178,7 +178,7 @@ struct pixel_format_reg
 
     /* Register CTRL1. */
 
-    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fU)
+    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
 #  elif defined (CONFIG_IMXRT_LCD_INPUT_BPP24)
   static const struct pixel_format_reg pixelFormat =
@@ -189,7 +189,7 @@ struct pixel_format_reg
 
     /* Register CTRL1. */
 
-    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fU)
+    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x0fu)
   };
 #  elif defined (CONFIG_IMXRT_LCD_INPUT_BPP32)
   static const struct pixel_format_reg pixelFormat =
@@ -200,7 +200,7 @@ struct pixel_format_reg
 
     /* Register CTRL1. */
 
-    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x07U)
+    LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x07u)
   };
 #  endif
 
@@ -344,7 +344,6 @@ static int imxrt_putcmap(FAR struct fb_vtable_s *vtable,
 
   for (n = 0; n < cmap->len; n++)
     {
-
 #if defined (CONFIG_IMXRT_LCD_OUTPUT_24)
       putreg32((uint32_t)0xff000000             |
                ((uint32_t)cmap->red[n]   << 16) |
@@ -435,7 +434,6 @@ static void imxrt_lcdreset(void)
 
 int up_fbinitialize(int display)
 {
-
 #if defined (CONFIG_IMXRT_LCD_INPUT_BPP8_LUT) || defined (CONFIG_IMXRT_LCD_INPUT_BPP8)
   uint32_t n;
 #endif
@@ -535,7 +533,8 @@ int up_fbinitialize(int display)
       CONFIG_IMXRT_LCD_VFRONTPORCH + CONFIG_IMXRT_LCD_VBACKPORCH,
       IMXRT_LCDIF_VDCTRL1);
 
-  putreg32((CONFIG_IMXRT_LCD_HPULSE << LCDIF_VDCTRL2_HSYNC_PULSE_WIDTH_SHIFT) |
+  putreg32((CONFIG_IMXRT_LCD_HPULSE <<
+            LCDIF_VDCTRL2_HSYNC_PULSE_WIDTH_SHIFT) |
       ((CONFIG_IMXRT_LCD_HFRONTPORCH + CONFIG_IMXRT_LCD_HBACKPORCH +
         CONFIG_IMXRT_LCD_HWIDTH + CONFIG_IMXRT_LCD_HPULSE)
           << LCDIF_VDCTRL2_HSYNC_PERIOD_SHIFT),
@@ -548,7 +547,8 @@ int up_fbinitialize(int display)
       IMXRT_LCDIF_VDCTRL3);
 
   putreg32(LCDIF_VDCTRL4_SYNC_SIGNALS_ON_MASK |
-      (CONFIG_IMXRT_LCD_HWIDTH << LCDIF_VDCTRL4_DOTCLK_H_VALID_DATA_CNT_SHIFT),
+      (CONFIG_IMXRT_LCD_HWIDTH <<
+       LCDIF_VDCTRL4_DOTCLK_H_VALID_DATA_CNT_SHIFT),
       IMXRT_LCDIF_VDCTRL4);
 
 #ifdef CONFIG_IMXRT_LCD_BGR
@@ -685,7 +685,6 @@ void up_fbuninitialize(int display)
   imxrt_clockoff_lcdif_pix();
 
   imxrt_clockoff_lcd();
-
 }
 
 /****************************************************************************
