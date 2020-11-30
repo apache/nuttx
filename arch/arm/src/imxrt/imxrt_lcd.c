@@ -724,8 +724,8 @@ void imxrt_lcdclear(nxgl_mxpixel_t color)
 #elif IMXRT_BPP > 8
   uint16_t *dest = (uint16_t *)CONFIG_IMXRT_LCD_VRAMBASE;
 
-  lcdinfo("Clearing display: color=%04x VRAM=%08x size=%d\n",
-          color, CONFIG_IMXRT_LCD_VRAMBASE,
+  lcdinfo("Clearing display: color=%04jx VRAM=%08x size=%d\n",
+          (uintmax_t)color, CONFIG_IMXRT_LCD_VRAMBASE,
           size * sizeof(uint16_t));
 #else
   uint8_t *dest = (uint8_t *)CONFIG_IMXRT_LCD_VRAMBASE;
