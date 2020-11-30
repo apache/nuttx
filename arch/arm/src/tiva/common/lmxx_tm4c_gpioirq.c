@@ -42,6 +42,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -269,7 +270,7 @@ static int tiva_gpioporthandler(uint8_t port, void *context)
   irq  = gpioport2irq(port);
   mis  = getreg32(base + TIVA_GPIO_MIS_OFFSET);
 
-  gpioinfo("irq=%d mis=0b%08b\n", irq, mis & 0xff);
+  gpioinfo("irq=%d mis=0x%02" PRIx32 "\n", irq, mis & 0xff);
 
   /* Clear all pending interrupts */
 
