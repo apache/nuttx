@@ -227,7 +227,8 @@ static int lm75_readb16(FAR struct lm75_dev_s *priv, uint8_t regaddr,
  * Name: lm75_writeb16
  *
  * Description:
- *   Write to a 16-bit register (LM75_TEMP_REG, LM75_THYS_REG, or LM75_TOS_REG)
+ *   Write to a 16-bit register (LM75_TEMP_REG, LM75_THYS_REG, or
+ *   LM75_TOS_REG)
  *
  ****************************************************************************/
 
@@ -377,7 +378,8 @@ static int lm75_close(FAR struct file *filep)
  * Name: lm75_read
  ****************************************************************************/
 
-static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen)
 {
   FAR struct inode      *inode = filep->f_inode;
   FAR struct lm75_dev_s *priv   = inode->i_private;
@@ -518,7 +520,9 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         sninfo("THYS: %08x ret: %d\n", (b16_t)arg, ret);
         break;
 
-      /* Read TOS (Over-temp Shutdown Threshold) Register. Arg: b16_t* pointer */
+      /* Read TOS (Over-temp Shutdown Threshold) Register.
+       * Arg: b16_t* pointer
+       */
 
       case SNIOC_READTOS:
         {
@@ -529,7 +533,9 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* Write TOS (Over-temp Shutdown Threshold) Register. Arg: b16_t value */
+      /* Write TOS (Over-temp Shutdown Threshold) Register.
+       * Arg: b16_t value
+       */
 
       case SNIOC_WRITETOS:
         ret = lm75_writeb16(priv, LM75_TOS_REG, (b16_t)arg);
@@ -567,7 +573,8 @@ static int lm75_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int lm75_register(FAR const char *devpath, FAR struct i2c_master_s *i2c, uint8_t addr)
+int lm75_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
+                  uint8_t addr)
 {
   FAR struct lm75_dev_s *priv;
   int ret;
