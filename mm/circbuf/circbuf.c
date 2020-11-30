@@ -102,26 +102,29 @@ int circbuf_init(FAR struct circbuf_s *circ, FAR void *base, size_t bytes)
 
 int circbuf_resize(FAR struct circbuf_s *circ, size_t bytes)
 {
-  FAR void *tmp;
+  FAR void *tmp = NULL;
   size_t len;
 
   DEBUGASSERT(circ);
   DEBUGASSERT(!circ->external);
 
-  tmp = kmm_malloc(bytes);
-  if (!tmp)
+  if (bytes)
     {
-      return -ENOMEM;
-    }
+      tmp = kmm_malloc(bytes);
+      if (!tmp)
+        {
+          return -ENOMEM;
+        }
 
-  len = circbuf_used(circ);
-  if (bytes < len)
-    {
-      circbuf_skip(circ, len - bytes);
-      len = bytes;
-    }
+      len = circbuf_used(circ);
+      if (bytes < len)
+        {
+          circbuf_skip(circ, len - bytes);
+          len = bytes;
+        }
 
-  circbuf_read(circ, tmp, len);
+      circbuf_read(circ, tmp, len);
+    }
 
   kmm_free(circ->base);
 
@@ -276,6 +279,11 @@ ssize_t circbuf_peek(FAR struct circbuf_s *circ,
 
   DEBUGASSERT(circ);
 
+  if (!circ->size)
+    {
+      return 0;
+    }
+
   len = circbuf_used(circ);
   off = circ->tail % circ->size;
 
@@ -394,6 +402,11 @@ ssize_t circbuf_write(FAR struct circbuf_s *circ,
   DEBUGASSERT(circ);
   DEBUGASSERT(src || !bytes);
 
+  if (!circ->size)
+    {
+      return 0;
+    }
+
   space = circbuf_space(circ);
   off = circ->head % circ->size;
   if (bytes > space)
@@ -445,6 +458,11 @@ ssize_t circbuf_overwrite(FAR struct circbuf_s *circ,
 
   DEBUGASSERT(circ);
   DEBUGASSERT(src || !bytes);
+
+  if (!circ->size)
+    {
+      return 0;
+    }
 
   if (bytes > circ->size)
     {
