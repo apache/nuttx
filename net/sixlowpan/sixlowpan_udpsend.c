@@ -428,7 +428,7 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
 
       if (ipv6udp->ipv6.proto != IP_PROTO_UDP)
         {
-          nwarn("WARNING: Expected UDP prototype: %u vs %s\n",
+          nwarn("WARNING: Expected UDP prototype: %u vs %u\n",
                 ipv6udp->ipv6.proto, IP_PROTO_UDP);
         }
       else
