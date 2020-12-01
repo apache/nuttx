@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/can/can_send.c
+ * net/can/can_sendmsg.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -46,9 +46,7 @@
 #include "socket/socket.h"
 #include "can/can.h"
 
-#ifdef CONFIG_NET_CMSG
 #include <sys/time.h>
-#endif
 
 /****************************************************************************
  * Private Types
@@ -65,10 +63,8 @@ struct send_s
   sem_t                   snd_sem;     /* Used to wake up the waiting thread */
   FAR const uint8_t      *snd_buffer;  /* Points to the buffer of data to send */
   size_t                  snd_buflen;  /* Number of bytes in the buffer to send */
-#ifdef CONFIG_NET_CMSG
   size_t                  pr_msglen;   /* Length of msg buffer */
   FAR uint8_t            *pr_msgbuf;   /* Pointer to msg buffer */
-#endif
   ssize_t                 snd_sent;    /* The number of bytes sent */
 };
 
@@ -114,14 +110,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
           devif_can_send(dev, pstate->snd_buffer, pstate->snd_buflen);
           pstate->snd_sent = pstate->snd_buflen;
-#ifdef CONFIG_NET_CMSG
           if (pstate->pr_msglen > 0) /* concat cmsg data after packet */
             {
               memcpy(dev->d_buf + pstate->snd_buflen, pstate->pr_msgbuf,
                       pstate->pr_msglen);
               dev->d_sndlen = pstate->snd_buflen + pstate->pr_msglen;
             }
-#endif
         }
 
       /* Don't allow any further call backs. */
@@ -143,158 +137,26 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_can_send
+ * Name: can_sendmsg
  *
  * Description:
- *   The psock_can_send() call may be used only when the packet socket is in
- *   a connected state (so that the intended recipient is known).
- *
- * Input Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   a negated errno value is retruend.  See send() for the complete list
- *   of return values.
- *
- ****************************************************************************/
-
-ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
-                       size_t len)
-{
-  FAR struct net_driver_s *dev;
-  FAR struct can_conn_s *conn;
-  struct send_s state;
-  int ret = OK;
-
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (psock == NULL || psock->s_conn == NULL)
-    {
-      return -EBADF;
-    }
-
-  conn = (FAR struct can_conn_s *)psock->s_conn;
-
-  /* Get the device driver that will service this transfer */
-
-  dev = conn->dev;
-  if (dev == NULL)
-    {
-      return -ENODEV;
-    }
-#if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
-
-  if (conn->fd_frames)
-    {
-      if (len != CANFD_MTU && len != CAN_MTU)
-        {
-          return -EINVAL;
-        }
-    }
-#endif
-  else
-    {
-      if (len != CAN_MTU)
-        {
-          return -EINVAL;
-        }
-    }
-
-  /* Perform the send operation */
-
-  /* Initialize the state structure. This is done with the network locked
-   * because we don't want anything to happen until we are ready.
-   */
-
-  net_lock();
-  memset(&state, 0, sizeof(struct send_s));
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
-  nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
-
-  state.snd_sock      = psock;          /* Socket descriptor to use */
-  state.snd_buflen    = len;            /* Number of bytes to send */
-  state.snd_buffer    = buf;            /* Buffer to send from */
-
-  /* Allocate resource to receive a callback */
-
-  state.snd_cb = can_callback_alloc(dev, conn);
-  if (state.snd_cb)
-    {
-      /* Set up the callback in the connection */
-
-      state.snd_cb->flags = CAN_POLL;
-      state.snd_cb->priv  = (FAR void *)&state;
-      state.snd_cb->event = psock_send_eventhandler;
-
-      /* Notify the device driver that new TX data is available. */
-
-      netdev_txnotify_dev(dev);
-
-      /* Wait for the send to complete or an error to occur.
-       * net_lockedwait will also terminate if a signal is received.
-       */
-
-      ret = net_lockedwait(&state.snd_sem);
-
-      /* Make sure that no further events are processed */
-
-      can_callback_free(dev, conn, state.snd_cb);
-    }
-
-  nxsem_destroy(&state.snd_sem);
-  net_unlock();
-
-  /* Check for a errors, Errors are signalled by negative errno values
-   * for the send length
-   */
-
-  if (state.snd_sent < 0)
-    {
-      return state.snd_sent;
-    }
-
-  /* If net_lockedwait failed, then we were probably reawakened by a signal.
-   * In this case, net_lockedwait will have returned negated errno
-   * appropriately.
-   */
-
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Return the number of bytes actually sent */
-
-  return state.snd_sent;
-}
-
-/****************************************************************************
- * Name: psock_can_sendmsg
- *
- * Description:
- *   The psock_can_sendmsg() call may be used only when the packet socket is
+ *   The can_sendmsg() call may be used only when the packet socket is
  *   in a connected state (so that the intended recipient is known).
  *
  * Input Parameters:
  *   psock    An instance of the internal socket structure.
- *   msg      msg to send
+ *   msg      CAN frame and optional CMSG
+ *   flags    Send flags (ignored)
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
- *   a negated errno value is retruend.  See send() for the complete list
+ *   a negated errno value is retruend.  See sendmsg() for the complete list
  *   of return values.
  *
  ****************************************************************************/
 
-ssize_t psock_can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg)
+ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                    int flags)
 {
   FAR struct net_driver_s *dev;
   FAR struct can_conn_s *conn;
@@ -306,6 +168,17 @@ ssize_t psock_can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg)
   if (psock == NULL || psock->s_conn == NULL)
     {
       return -EBADF;
+    }
+
+  /* Only SOCK_RAW is supported */
+
+  if (psock->s_type != SOCK_RAW)
+    {
+      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
+       * no peer address is set.
+       */
+
+      return -EDESTADDRREQ;
     }
 
   conn = (FAR struct can_conn_s *)psock->s_conn;

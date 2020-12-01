@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/can/can_recvfrom.c
+ * net/can/can_recvmsg.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -62,10 +62,8 @@ struct can_recvfrom_s
   size_t       pr_buflen;              /* Length of receive buffer */
   FAR uint8_t *pr_buffer;              /* Pointer to receive buffer */
   ssize_t      pr_recvlen;             /* The received length */
-#ifdef CONFIG_NET_CMSG
   size_t       pr_msglen;              /* Length of msg buffer */
   FAR uint8_t *pr_msgbuf;              /* Pointer to msg buffer */
-#endif
   int          pr_result;              /* Success:OK, failure:negated errno */
 };
 
@@ -543,139 +541,6 @@ static ssize_t can_recvfrom_result(int result,
 }
 
 /****************************************************************************
- * Name: can_recvfrom
- *
- * Description:
- *   recvfrom() receives messages from a socket, and may be used to receive
- *   data on a socket whether or not it is connection-oriented.
- *
- *   If from is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in. The argument 'fromlen'
- *   initialized to the size of the buffer associated with from, and modified
- *   on return to indicate the actual size of the address stored there.
- *
- * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   flags    Receive flags (ignored)
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
- *
- ****************************************************************************/
-
-ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf,
-                                size_t len, int flags,
-                                FAR struct sockaddr *from,
-                                FAR socklen_t *fromlen)
-{
-  FAR struct can_conn_s *conn;
-  FAR struct net_driver_s *dev;
-  struct can_recvfrom_s state;
-  int ret;
-
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
-  DEBUGASSERT(from == NULL ||
-              (fromlen != NULL && *fromlen >= sizeof(struct sockaddr_can)));
-
-  conn = (FAR struct can_conn_s *)psock->s_conn;
-
-  if (psock->s_type != SOCK_RAW)
-    {
-      nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
-      ret = -ENOSYS;
-    }
-
-  net_lock();
-
-  /* Initialize the state structure. */
-
-  memset(&state, 0, sizeof(struct can_recvfrom_s));
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_init(&state.pr_sem, 0, 0); /* Doesn't really fail */
-  nxsem_set_protocol(&state.pr_sem, SEM_PRIO_NONE);
-
-  state.pr_buflen = len;
-  state.pr_buffer = buf;
-  state.pr_sock   = psock;
-
-  /* Handle any any CAN data already buffered in a read-ahead buffer.  NOTE
-   * that there may be read-ahead data to be retrieved even after the
-   * socket has been disconnected.
-   */
-
-  ret = can_readahead(&state);
-  if (ret > 0)
-    {
-      goto errout_with_state;
-    }
-
-  ret = state.pr_recvlen;
-
-  /* Handle non-blocking CAN sockets */
-
-  if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
-    {
-      /* Return the number of bytes read from the read-ahead buffer if
-       * something was received (already in 'ret'); EAGAIN if not.
-       */
-
-      if (ret < 0)
-        {
-          /* Nothing was received */
-
-          ret = -EAGAIN;
-          goto errout_with_state;
-        }
-    }
-
-  /* Get the device driver that will service this transfer */
-
-  dev  = conn->dev;
-  if (dev == NULL)
-    {
-      ret = -ENODEV;
-      goto errout_with_state;
-    }
-
-  /* Set up the callback in the connection */
-
-  state.pr_cb = can_callback_alloc(dev, conn);
-  if (state.pr_cb)
-    {
-      state.pr_cb->flags  = (CAN_NEWDATA | CAN_POLL);
-      state.pr_cb->priv   = (FAR void *)&state;
-      state.pr_cb->event  = can_recvfrom_eventhandler;
-
-      /* Wait for either the receive to complete or for an error/timeout to
-       * occur. NOTES:  (1) net_lockedwait will also terminate if a signal
-       * is received, (2) the network is locked!  It will be un-locked while
-       * the task sleeps and automatically re-locked when the task restarts.
-       */
-
-      ret = net_lockedwait(&state.pr_sem);
-
-      /* Make sure that no further events are processed */
-
-      can_callback_free(dev, conn, state.pr_cb);
-      ret = can_recvfrom_result(ret, &state);
-    }
-  else
-    {
-      ret = -EBUSY;
-    }
-
-errout_with_state:
-  net_unlock();
-  nxsem_destroy(&state.pr_sem);
-  return ret;
-}
-
-/****************************************************************************
  * Name: can_recvmsg
  *
  * Description:
@@ -683,18 +548,17 @@ errout_with_state:
  *   data on a socket whether or not it is connection-oriented.
  *
  *   If from is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in. The argument 'fromlen'
+ *   address, this source address is filled in. The argument 'msg_namelen'
  *   initialized to the size of the buffer associated with from, and modified
  *   on return to indicate the actual size of the address stored there.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   msg      Buffer to receive msg
+ *   msg      Buffer to receive the message
  *   flags    Receive flags (ignored)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_CMSG
 ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                     int flags)
 {
@@ -703,7 +567,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   struct can_recvfrom_s state;
   int ret;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && msg != NULL);
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
 
   conn = (FAR struct can_conn_s *)psock->s_conn;
 
@@ -841,6 +705,5 @@ errout_with_state:
   nxsem_destroy(&state.pr_sem);
   return ret;
 }
-#endif
 
 #endif /* CONFIG_NET_CAN */

@@ -25,8 +25,8 @@ ifeq ($(CONFIG_NET_PKT),y)
 # Socket layer
 
 SOCK_CSRCS += pkt_sockif.c
-SOCK_CSRCS += pkt_send.c
-SOCK_CSRCS += pkt_recvfrom.c
+SOCK_CSRCS += pkt_sendmsg.c
+SOCK_CSRCS += pkt_recvmsg.c
 
 # Transport layer
 

@@ -53,9 +53,7 @@
 
 #include <arch/board/board.h>
 
-#ifdef CONFIG_NET_CMSG
 #include <sys/time.h>
-#endif
 
 #ifdef CONFIG_S32K1XX_FLEXCAN
 
@@ -92,11 +90,7 @@
 
 #define POOL_SIZE                   1
 
-#ifdef CONFIG_NET_CMSG
 #define MSG_DATA                    sizeof(struct timeval)
-#else
-#define MSG_DATA                    0
-#endif
 
 /* CAN bit timing values  */
 #define CLK_FREQ                    80000000

@@ -66,11 +66,6 @@ static int        local_accept(FAR struct socket *psock,
 #endif
 static int        local_poll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-static ssize_t    local_send(FAR struct socket *psock, FAR const void *buf,
-                    size_t len, int flags);
-static ssize_t    local_sendto(FAR struct socket *psock, FAR const void *buf,
-                    size_t len, int flags, FAR const struct sockaddr *to,
-                    socklen_t tolen);
 static int        local_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -89,16 +84,8 @@ const struct sock_intf_s g_local_sockif =
   local_connect,     /* si_connect */
   local_accept,      /* si_accept */
   local_poll,        /* si_poll */
-  local_send,        /* si_send */
-  local_sendto,      /* si_sendto */
-#ifdef CONFIG_NET_SENDFILE
-  NULL,              /* si_sendfile */
-#endif
-  local_recvfrom,    /* si_recvfrom */
-#ifdef CONFIG_NET_CMSG
-  NULL,              /* si_recvmsg */
-  NULL,              /* si_sendmsg */
-#endif
+  local_sendmsg,     /* si_sendmsg */
+  local_recvmsg,     /* si_recvmsg */
   local_close        /* si_close */
 };
 
@@ -640,123 +627,6 @@ static int local_poll(FAR struct socket *psock, FAR struct pollfd *fds,
       return local_pollteardown(psock, fds);
     }
 #endif /* HAVE_LOCAL_POLL */
-}
-
-/****************************************************************************
- * Name: local_send
- *
- * Description:
- *   Implements the send() operation for the case of the local, Unix socket.
- *
- * Input Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send() for the list of appropriate error
- *   values.
- *
- ****************************************************************************/
-
-static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
-                          size_t len, int flags)
-{
-  ssize_t ret;
-
-  switch (psock->s_type)
-    {
-#ifdef CONFIG_NET_LOCAL_STREAM
-      case SOCK_STREAM:
-        {
-          /* Local TCP packet send */
-
-          ret = psock_local_send(psock, buf, len, flags);
-        }
-        break;
-#endif /* CONFIG_NET_LOCAL_STREAM */
-
-#ifdef CONFIG_NET_LOCAL_DGRAM
-      case SOCK_DGRAM:
-        {
-          /* Local UDP packet send */
-
-#warning Missing logic
-
-          ret = -ENOSYS;
-        }
-        break;
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-
-      default:
-        {
-          /* EDESTADDRREQ.  Signifies that the socket is not connection-mode
-           * and no peer address is set.
-           */
-
-          ret = -EDESTADDRREQ;
-        }
-        break;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: local_sendto
- *
- * Description:
- *   Implements the sendto() operation for the case of the local Unix socket.
- *
- * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *   to       Address of recipient
- *   tolen    The length of the address structure
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send_to() for the list of appropriate error
- *   values.
- *
- ****************************************************************************/
-
-ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
-                     size_t len, int flags, FAR const struct sockaddr *to,
-                     socklen_t tolen)
-{
-  ssize_t nsent;
-
-  /* Verify that a valid address has been provided */
-
-  if (to->sa_family != AF_LOCAL || tolen < sizeof(sa_family_t))
-    {
-      nerr("ERROR: Unrecognized address family: %d\n",
-           to->sa_family);
-      return -EAFNOSUPPORT;
-    }
-
-#ifdef CONFIG_NET_LOCAL_DGRAM
-  /* If this is a connected socket, then return EISCONN */
-
-  if (psock->s_type != SOCK_DGRAM)
-    {
-      nerr("ERROR: Connected socket\n");
-      return -EISCONN;
-    }
-
-  /* Now handle the local UDP sendto() operation */
-
-  nsent = psock_local_sendto(psock, buf, len, flags, to, tolen);
-#else
-  nsent = -EISCONN;
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-
-  return nsent;
 }
 
 /****************************************************************************

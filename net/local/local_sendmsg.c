@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/local/local_sendto.c
+ * net/local/local_sendmsg.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL_DGRAM)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -38,11 +38,101 @@
 #include "local/local.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_local_sendto
+ * Name: local_send
+ *
+ * Description:
+ *   Send a local packet as a stream.
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags (ignored for now)
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   -1 is returned, and errno is set appropriately (see send() for the
+ *   list of errno numbers).
+ *
+ ****************************************************************************/
+
+static ssize_t local_send(FAR struct socket *psock,
+                          FAR const struct iovec *buf,
+                          size_t len, int flags)
+{
+  ssize_t ret;
+
+  switch (psock->s_type)
+    {
+#ifdef CONFIG_NET_LOCAL_STREAM
+      case SOCK_STREAM:
+        {
+          FAR struct local_conn_s *peer;
+
+          /* Local TCP packet send */
+
+          DEBUGASSERT(psock && psock->s_conn && buf);
+          peer = (FAR struct local_conn_s *)psock->s_conn;
+
+          /* Verify that this is a connected peer socket and that it has
+           * opened the outgoing FIFO for write-only access.
+           */
+
+          if (peer->lc_state != LOCAL_STATE_CONNECTED ||
+              peer->lc_outfile.f_inode == NULL)
+            {
+              nerr("ERROR: not connected\n");
+              return -ENOTCONN;
+            }
+
+          /* Send the packet */
+
+          ret = local_send_packet(&peer->lc_outfile, buf, len);
+
+          /* If the send was successful, then the full packet will have been
+           * sent
+           */
+
+          if (ret >= 0)
+            {
+              ret = len;
+            }
+        }
+        break;
+#endif /* CONFIG_NET_LOCAL_STREAM */
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+      case SOCK_DGRAM:
+        {
+          /* Local UDP packet send */
+
+#warning Missing logic
+
+          ret = -ENOSYS;
+        }
+        break;
+#endif /* CONFIG_NET_LOCAL_DGRAM */
+
+      default:
+        {
+          /* EDESTADDRREQ.  Signifies that the socket is not connection-mode
+           * and no peer address is set.
+           */
+
+          ret = -EDESTADDRREQ;
+        }
+        break;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: local_sendto
  *
  * Description:
  *   This function implements the Unix domain-specific logic of the
@@ -66,22 +156,34 @@
  *
  ****************************************************************************/
 
-ssize_t psock_local_sendto(FAR struct socket *psock,
-                           FAR const void *buf,
-                           size_t len, int flags,
-                           FAR const struct sockaddr *to,
-                           socklen_t tolen)
+static ssize_t local_sendto(FAR struct socket *psock,
+                            FAR const struct iovec *buf,
+                            size_t len, int flags,
+                            FAR const struct sockaddr *to,
+                            socklen_t tolen)
 {
+#ifdef CONFIG_NET_LOCAL_DGRAM
   FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
   FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)to;
   ssize_t nsent;
   int ret;
 
-  /* We keep packet sizes in a uint16_t, so there is a upper limit to the
-   * 'len' that can be supported.
-   */
+  /* Verify that a valid address has been provided */
 
-  DEBUGASSERT(buf && len <= UINT16_MAX);
+  if (to->sa_family != AF_LOCAL || tolen < sizeof(sa_family_t))
+    {
+      nerr("ERROR: Unrecognized address family: %d\n",
+           to->sa_family);
+      return -EAFNOSUPPORT;
+    }
+
+  /* If this is a connected socket, then return EISCONN */
+
+  if (psock->s_type != SOCK_DGRAM)
+    {
+      nerr("ERROR: Connected socket\n");
+      return -EISCONN;
+    }
 
   /* Verify that this is not a connected peer socket.  It need not be
    * bound, however.  If unbound, recvfrom will see this as a nameless
@@ -163,6 +265,43 @@ errout_with_halfduplex:
 
   local_release_halfduplex(conn);
   return nsent;
+#else
+  return -EISCONN;
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL_DGRAM */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: local_sendmsg
+ *
+ * Description:
+ *   Implements the sendmsg() operation for the case of the local Unix socket
+ *
+ * Input Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   msg      msg to send
+ *   flags    Send flags
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error, a negated
+ *   errno value is returned (see sendmsg() for the list of appropriate error
+ *   values.
+ *
+ ****************************************************************************/
+
+ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                      int flags)
+{
+  FAR const struct iovec *buf = msg->msg_iov;
+  size_t len = msg->msg_iovlen;
+  FAR const struct sockaddr *to = msg->msg_name;
+  socklen_t tolen = msg->msg_namelen;
+
+  return to ? local_sendto(psock, buf, len, flags, to, tolen) :
+              local_send(psock, buf, len, flags);
+}
+
+#endif /* CONFIG_NET && CONFIG_NET_LOCAL */

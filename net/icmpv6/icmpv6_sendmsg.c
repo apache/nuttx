@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/icmp/icmp_sendto.c
+ * net/icmpv6/icmpv6_sendmsg.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -43,39 +43,38 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
-#include <nuttx/net/icmp.h>
+#include <nuttx/net/icmpv6.h>
 
 #include "utils/utils.h"
 #include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "inet/inet.h"
-#include "arp/arp.h"
-#include "icmp/icmp.h"
+#include "icmpv6/icmpv6.h"
 
-#ifdef CONFIG_NET_ICMP_SOCKET
+#ifdef CONFIG_NET_ICMPv6_SOCKET
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv4BUF \
-  ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define ICMPBUF \
-  ((struct icmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define IPv6BUF \
+  ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ICMPv6BUF \
+  ((struct icmpv6_echo_request_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct icmp_sendto_s
+struct icmpv6_sendto_s
 {
   FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
   sem_t snd_sem;                       /* Use to manage the wait for send
                                         * complete */
-  in_addr_t snd_toaddr;                /* The peer to send the request to */
-  FAR const uint8_t *snd_buf;          /* ICMP header + data payload */
-  uint16_t snd_buflen;                 /* Size of the ICMP header + data
+  struct in6_addr snd_toaddr;          /* The peer to send the request to */
+  FAR const uint8_t *snd_buf;          /* ICMPv6 header + data payload */
+  uint16_t snd_buflen;                 /* Size of the ICMPv6 header + data
                                         * payload */
   int16_t snd_result;                  /* 0: success; <0:negated errno on
                                         * fail */
@@ -89,11 +88,11 @@ struct icmp_sendto_s
  * Name: sendto_request
  *
  * Description:
- *   Setup to send an ICMP request packet
+ *   Setup to send an ICMPv6 request packet
  *
  * Input Parameters:
  *   dev    - The device driver structure to use in the send operation
- *   pstate - Reference to an instance of the ICMP sendto state structure
+ *   pstate - Reference to an instance of the ICMPv6 sendto state structure
  *
  * Returned Value:
  *   None
@@ -104,66 +103,57 @@ struct icmp_sendto_s
  ****************************************************************************/
 
 static void sendto_request(FAR struct net_driver_s *dev,
-                           FAR struct icmp_sendto_s *pstate)
+                           FAR struct icmpv6_sendto_s *pstate)
 {
-  FAR struct ipv4_hdr_s *ipv4;
-  FAR struct icmp_hdr_s *icmp;
+  FAR struct ipv6_hdr_s *ipv6;
+  FAR struct icmpv6_echo_request_s *icmpv6;
 
-  IFF_SET_IPv4(dev->d_flags);
+  IFF_SET_IPv6(dev->d_flags);
 
   /* The total length to send is the size of the application data plus the
-   * IP and ICMP headers (and, eventually, the Ethernet header)
+   * IP and ICMPv6 headers (and, eventually, the Ethernet header)
    */
 
-  dev->d_len = IPv4_HDRLEN + pstate->snd_buflen;
+  dev->d_len = IPv6_HDRLEN + pstate->snd_buflen;
 
-  /* The total size of the data (including the size of the ICMP header) */
+  /* The total size of the data (including the size of the ICMPv6 header) */
 
   dev->d_sndlen += pstate->snd_buflen;
 
-  /* Initialize the IP header. */
+  /* Set up the IPv6 header (most is probably already in place) */
 
-  ipv4              = IPv4BUF;
-  ipv4->vhl         = 0x45;
-  ipv4->tos         = 0;
-  ipv4->len[0]      = (dev->d_len >> 8);
-  ipv4->len[1]      = (dev->d_len & 0xff);
-  ++g_ipid;
-  ipv4->ipid[0]     = g_ipid >> 8;
-  ipv4->ipid[1]     = g_ipid & 0xff;
-  ipv4->ipoffset[0] = IP_FLAG_DONTFRAG >> 8;
-  ipv4->ipoffset[1] = IP_FLAG_DONTFRAG & 0xff;
-  ipv4->ttl         = IP_TTL;
-  ipv4->proto       = IP_PROTO_ICMP;
+  ipv6           = IPv6BUF;
+  ipv6->vtc      = 0x60;                       /* Version/traffic class (MS) */
+  ipv6->tcf      = 0;                          /* Traffic class(LS)/Flow label(MS) */
+  ipv6->flow     = 0;                          /* Flow label (LS) */
+  ipv6->len[0]   = (pstate->snd_buflen >> 8);  /* Length excludes the IPv6 header */
+  ipv6->len[1]   = (pstate->snd_buflen & 0xff);
+  ipv6->proto    = IP_PROTO_ICMP6;             /* Next header */
+  ipv6->ttl      = 255;                        /* Hop limit */
 
-  net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
-  net_ipv4addr_hdrcopy(ipv4->destipaddr, &pstate->snd_toaddr);
+  net_ipv6addr_hdrcopy(ipv6->srcipaddr, dev->d_ipv6addr);
+  net_ipv6addr_hdrcopy(ipv6->destipaddr, pstate->snd_toaddr.s6_addr16);
 
-  /* Copy the ICMP header and payload into place after the IPv4 header */
+  /* Copy the ICMPv6 request and payload into place after the IPv6 header */
 
-  icmp              = ICMPBUF;
-  memcpy(icmp, pstate->snd_buf, pstate->snd_buflen);
+  icmpv6         = ICMPv6BUF;
+  memcpy(icmpv6, pstate->snd_buf, pstate->snd_buflen);
 
-  /* Calculate IP checksum. */
+  /* Calculate the ICMPv6 checksum over the ICMPv6 header and payload. */
 
-  ipv4->ipchksum    = 0;
-  ipv4->ipchksum    = ~(ipv4_chksum(dev));
-
-  /* Calculate the ICMP checksum. */
-
-  icmp->icmpchksum  = 0;
-  icmp->icmpchksum  = ~(icmp_chksum(dev, pstate->snd_buflen));
-  if (icmp->icmpchksum == 0)
+  icmpv6->chksum = 0;
+  icmpv6->chksum = ~icmpv6_chksum(dev, IPv6_HDRLEN);
+  if (icmpv6->chksum == 0)
     {
-      icmp->icmpchksum = 0xffff;
+      icmpv6->chksum = 0xffff;
     }
 
-  ninfo("Outgoing ICMP packet length: %d (%d)\n",
-        dev->d_len, (ipv4->len[0] << 8) | ipv4->len[1]);
+  ninfo("Outgoing ICMPv6 packet length: %d (%d)\n",
+        dev->d_len, (ipv6->len[0] << 8) | ipv6->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
-  g_netstats.icmp.sent++;
-  g_netstats.ipv4.sent++;
+  g_netstats.icmpv6.sent++;
+  g_netstats.ipv6.sent++;
 #endif
 }
 
@@ -177,9 +167,9 @@ static void sendto_request(FAR struct net_driver_s *dev,
  *
  * Input Parameters:
  *   dev        The structure of the network driver that generated the
- *              event.
- *   conn       The received packet, cast to (void *)
- *   pvpriv     An instance of struct icmp_sendto_s cast to (void *)
+ *              event
+ *   pvconn     The received packet, cast to (void *)
+ *   pvpriv     An instance of struct icmpv6_sendto_s cast to (void *)
  *   flags      Set of events describing why the callback was invoked
  *
  * Returned Value:
@@ -191,10 +181,10 @@ static void sendto_request(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
-                                  FAR void *conn,
-                                  FAR void *pvpriv, uint16_t flags)
+                                    FAR void *pvconn,
+                                    FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct icmp_sendto_s *pstate = (struct icmp_sendto_s *)pvpriv;
+  FAR struct icmpv6_sendto_s *pstate = (struct icmpv6_sendto_s *)pvpriv;
 
   ninfo("flags: %04x\n", flags);
 
@@ -223,11 +213,11 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
        */
 
       if (dev->d_sndlen <= 0 &&           /* Packet available */
-          (flags & ICMP_NEWDATA) == 0)    /* No incoming data */
+          (flags & ICMPv6_NEWDATA) == 0)  /* No incoming data */
         {
-          /* Send the ICMP echo request.  */
+          /* Send the ICMPv6 echo request.  */
 
-          ninfo("Send ICMP request\n");
+          ninfo("Send ICMPv6 ECHO request\n");
 
           sendto_request(dev, pstate);
           pstate->snd_result = OK;
@@ -259,57 +249,76 @@ end_wait:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: icmp_sendto
+ * Name: icmpv6_sendmsg
  *
  * Description:
- *   Implements the sendto() operation for the case of the IPPROTO_ICMP
+ *   Implements the sendmsg() operation for the case of the IPPROTO_ICMP6
  *   socket.  The 'buf' parameter points to a block of memory that includes
- *   an ICMP request header, followed by any payload that accompanies the
- *   request.  The 'len' parameter includes both the size of the ICMP header
- *   and the following payload.
+ *   an ICMPv6 request header, followed by any payload that accompanies the
+ *   request.  The 'len' parameter includes both the size of the ICMPv6
+ *   header and the following payload.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Data to send
- *   len      Length of data to send
+ *   msg      Message to send
  *   flags    Send flags
- *   to       Address of recipient
- *   tolen    The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send_to() for the list of appropriate error
+ *   On success, returns the number of characters sent.  On error, a negated
+ *   errno value is returned (see sendmsg() for the list of appropriate error
  *   values.
  *
  ****************************************************************************/
 
-ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf,
-                    size_t len, int flags, FAR const struct sockaddr *to,
-                    socklen_t tolen)
+ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                       int flags)
 {
-  FAR const struct sockaddr_in *inaddr;
+  FAR const void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR const struct sockaddr *to = msg->msg_name;
+  socklen_t tolen = msg->msg_namelen;
+  FAR const struct sockaddr_in6 *inaddr;
   FAR struct net_driver_s *dev;
-  FAR struct icmp_conn_s *conn;
-  FAR struct icmp_hdr_s *icmp;
-  struct icmp_sendto_s state;
-  int ret;
+  FAR struct icmpv6_conn_s *conn;
+  FAR struct icmpv6_echo_request_s *icmpv6;
+  struct icmpv6_sendto_s state;
+  ssize_t ret;
+
+  /* Validity check, only single iov supported */
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
+  if (to == NULL)
+    {
+      /* icmpv6_send() */
+
+      /* ICMPv6 sockets cannot be bound and, hence, cannot support any
+       * connection-oriented data transfer.
+       */
+
+      return -EDESTADDRREQ;
+    }
 
   /* Some sanity checks */
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL &&
               buf != NULL && to != NULL);
 
-  if (len < ICMP_HDRLEN || tolen < sizeof(struct sockaddr_in))
+  if (len < ICMPv6_HDRLEN || tolen < sizeof(struct sockaddr_in6))
     {
       return -EINVAL;
     }
 
   conn   = psock->s_conn;
-  inaddr = (FAR const struct sockaddr_in *)to;
+  inaddr = (FAR const struct sockaddr_in6 *)to;
 
-  /* Get the device that will be used to route this ICMP ECHO request */
+  /* Get the device that will be used to route this ICMPv6 ECHO request */
 
-  dev = netdev_findby_ripv4addr(INADDR_ANY, inaddr->sin_addr.s_addr);
+  dev = netdev_findby_ripv6addr(g_ipv6_unspecaddr,
+                               inaddr->sin6_addr.s6_addr16);
   if (dev == NULL)
     {
       nerr("ERROR: Not reachable\n");
@@ -319,7 +328,7 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Sanity check if the request len is greater than the net payload len */
 
-  if (len > NETDEV_PKTSIZE(dev) - (NET_LL_HDRLEN(dev) + IPv4_HDRLEN))
+  if (len > NETDEV_PKTSIZE(dev) - (NET_LL_HDRLEN(dev) + IPv6_HDRLEN))
     {
       nerr("ERROR: Invalid packet length\n");
       return -EINVAL;
@@ -332,28 +341,28 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf,
    * further pings?
    */
 
-  icmp = (FAR struct icmp_hdr_s *)buf;
-  if (icmp->type != ICMP_ECHO_REQUEST || icmp->id != conn->id ||
+  icmpv6 = (FAR struct icmpv6_echo_request_s *)buf;
+  if (icmpv6->type != ICMPv6_ECHO_REQUEST || icmpv6->id != conn->id ||
       dev != conn->dev)
     {
       conn->id    = 0;
       conn->nreqs = 0;
       conn->dev   = NULL;
 
-      iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
+      iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMPv6);
     }
 
-#ifdef CONFIG_NET_ARP_SEND
-  /* Make sure that the IP address mapping is in the ARP table */
+#ifdef CONFIG_NET_ICMPv6_NEIGHBOR
+  /* Make sure that the IP address mapping is in the Neighbor Table */
 
-  ret = arp_send(inaddr->sin_addr.s_addr);
+  ret = icmpv6_neighbor(inaddr->sin6_addr.s6_addr16);
   if (ret < 0)
     {
       nerr("ERROR: Not reachable\n");
       ret = -ENETUNREACH;
       goto errout;
     }
-#endif
+#endif /* CONFIG_NET_ICMPv6_NEIGHBOR */
 
   /* Initialize the state structure */
 
@@ -364,33 +373,33 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf,
   nxsem_init(&state.snd_sem, 0, 0);
   nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
 
-  state.snd_result = -ENOMEM;                 /* Assume allocation failure */
-  state.snd_toaddr = inaddr->sin_addr.s_addr; /* Address of the peer to send
-                                               * the request */
-  state.snd_buf    = buf;                     /* ICMP header + data payload */
-  state.snd_buflen = len;                     /* Size of the ICMP header +
-                                               * data payload */
+  state.snd_result = -ENOMEM;           /* Assume allocation failure */
+  state.snd_buf    = buf;               /* ICMPv6 header + data payload */
+  state.snd_buflen = len;               /* Size of the ICMPv6 header+data payload */
+
+  net_ipv6addr_copy(state.snd_toaddr.s6_addr16,
+                    inaddr->sin6_addr.s6_addr16);
 
   net_lock();
 
   /* Set up the callback */
 
-  state.snd_cb = icmp_callback_alloc(dev, conn);
-  if (state.snd_cb != NULL)
+  state.snd_cb = icmpv6_callback_alloc(dev, conn);
+  if (state.snd_cb)
     {
-      state.snd_cb->flags   = (ICMP_POLL | NETDEV_DOWN);
+      state.snd_cb->flags   = (ICMPv6_POLL | NETDEV_DOWN);
       state.snd_cb->priv    = (FAR void *)&state;
       state.snd_cb->event   = sendto_eventhandler;
 
-      /* Setup to receive ICMP ECHO replies */
+      /* Setup to receive ICMPv6 ECHO replies */
 
-      if (icmp->type == ICMP_ECHO_REQUEST)
+      if (icmpv6->type == ICMPv6_ECHO_REQUEST)
         {
-          conn->id    = icmp->id;
+          conn->id    = icmpv6->id;
           conn->nreqs = 1;
         }
 
-        conn->dev     = dev;
+      conn->dev       = dev;
 
       /* Notify the device driver of the availability of TX data */
 
@@ -409,8 +418,8 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf,
                * destination device.
                */
 
-              if (!net_ipv4addr_maskcmp(state.snd_toaddr, dev->d_ipaddr,
-                                        dev->d_netmask))
+              if (!net_ipv6addr_maskcmp(state.snd_toaddr.s6_addr16,
+                                        dev->d_ipv6addr, dev->d_ipv6netmask))
                 {
                   /* Destination address was not on the local network served
                    * by this device.  If a timeout occurs, then the most
@@ -425,7 +434,7 @@ ssize_t icmp_sendto(FAR struct socket *psock, FAR const void *buf,
           state.snd_result = ret;
         }
 
-      icmp_callback_free(dev, conn, state.snd_cb);
+      icmpv6_callback_free(dev, conn, state.snd_cb);
     }
 
   net_unlock();
@@ -448,8 +457,8 @@ errout:
   conn->nreqs = 0;
   conn->dev   = NULL;
 
-  iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
+  iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMPv6);
   return ret;
 }
 
-#endif /* CONFIG_NET_ICMP_SOCKET */
+#endif /* CONFIG_NET_ICMPv6_SOCKET */

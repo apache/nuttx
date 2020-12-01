@@ -60,15 +60,10 @@ static int        pkt_listen(FAR struct socket *psock, int backlog);
 static int        pkt_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
 static int        pkt_accept(FAR struct socket *psock,
-                   FAR struct sockaddr *addr, FAR socklen_t *addrlen,
-                   FAR struct socket *newsock);
+                    FAR struct sockaddr *addr, FAR socklen_t *addrlen,
+                    FAR struct socket *newsock);
 static int        pkt_poll_local(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-static ssize_t    pkt_send(FAR struct socket *psock, FAR const void *buf,
-                   size_t len, int flags);
-static ssize_t    pkt_sendto(FAR struct socket *psock, FAR const void *buf,
-                   size_t len, int flags, FAR const struct sockaddr *to,
-                   socklen_t tolen);
 static int        pkt_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -87,16 +82,8 @@ const struct sock_intf_s g_pkt_sockif =
   pkt_connect,     /* si_connect */
   pkt_accept,      /* si_accept */
   pkt_poll_local,  /* si_poll */
-  pkt_send,        /* si_send */
-  pkt_sendto,      /* si_sendto */
-#ifdef CONFIG_NET_SENDFILE
-  NULL,            /* si_sendfile */
-#endif
-  pkt_recvfrom,    /* si_recvfrom */
-#ifdef CONFIG_NET_CMSG
-  NULL,            /* si_recvmsg */
-  NULL,            /* si_sendmsg */
-#endif
+  pkt_sendmsg,     /* si_sendmsg */
+  pkt_recvmsg,     /* si_recvmsg */
   pkt_close        /* si_close */
 };
 
@@ -341,7 +328,7 @@ static int pkt_bind(FAR struct socket *psock,
 
   if (addr->sa_family != AF_PACKET || addrlen < sizeof(struct sockaddr_ll))
     {
-      nerr("ERROR: Invalid address length: %d < %d\n",
+      nerr("ERROR: Invalid address length: %d < %zu\n",
            addrlen, sizeof(struct sockaddr_ll));
       return -EBADF;
     }
@@ -506,79 +493,6 @@ static int pkt_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
                           bool setup)
 {
   return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: pkt_send
- *
- * Description:
- *   Socket send() method for the raw packet socket.
- *
- * Input Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send() for the list of appropriate error
- *   values.
- *
- ****************************************************************************/
-
-static ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf,
-                        size_t len, int flags)
-{
-  ssize_t ret;
-
-  /* Only SOCK_RAW is supported */
-
-  if (psock->s_type == SOCK_RAW)
-    {
-      /* Raw packet send */
-
-      ret = psock_pkt_send(psock, buf, len);
-    }
-  else
-    {
-      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
-       * no peer address is set.
-       */
-
-      ret = -EDESTADDRREQ;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: pkt_sendto
- *
- * Description:
- *   Implements the sendto() operation for the case of the raw packet socket.
- *
- * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *   to       Address of recipient
- *   tolen    The length of the address structure
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send_to() for the list of appropriate error
- *   values.
- *
- ****************************************************************************/
-
-static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
-                          size_t len, int flags,
-                          FAR const struct sockaddr *to, socklen_t tolen)
-{
-  nerr("ERROR: sendto() not supported for raw packet sockets\n");
-  return -EAFNOSUPPORT;
 }
 
 /****************************************************************************

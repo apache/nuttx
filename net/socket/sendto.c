@@ -107,46 +107,22 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
                      size_t len, int flags, FAR const struct sockaddr *to,
                      socklen_t tolen)
 {
-  ssize_t nsent;
+  struct iovec iov;
+  struct msghdr msg;
 
-  /* Verify that non-NULL pointers were passed */
+  iov.iov_base = (FAR void *)buf;
+  iov.iov_len = len;
+  msg.msg_name = (FAR struct sockaddr *)to;
+  msg.msg_namelen = tolen;
+  msg.msg_iov = &iov;
+  msg.msg_iovlen = 1;
+  msg.msg_control = NULL;
+  msg.msg_controllen = 0;
+  msg.msg_flags = 0;
 
-  if (buf == NULL)
-    {
-      return -EINVAL;
-    }
+  /* And let psock_sendmsg do all of the work */
 
-  /* If to is NULL or tolen is zero, then this function is same as send (for
-   * connected socket types)
-   */
-
-  if (to == NULL || tolen <= 0)
-    {
-      return psock_send(psock, buf, len, flags);
-    }
-
-  /* Verify that the psock corresponds to valid, allocated socket */
-
-  if (psock == NULL || psock->s_conn == NULL)
-    {
-      nerr("ERROR: Invalid socket\n");
-      return -EBADF;
-    }
-
-  /* Let the address family's sendto() method handle the operation */
-
-  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_sendto != NULL);
-  nsent = psock->s_sockif->si_sendto(psock, buf, len, flags, to, tolen);
-
-  /* Check if the domain-specific sendto() logic failed */
-
-  if (nsent < 0)
-    {
-      nerr("ERROR:  Family-specific send failed: %ld\n", (long)nsent);
-      return nsent;
-    }
-
-  return nsent;
+  return psock_sendmsg(psock, &msg, flags);
 }
 
 /****************************************************************************

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/local/loal.h
+ * net/local/local.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -362,59 +362,25 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 #endif
 
 /****************************************************************************
- * Name: psock_local_send
+ * Name: local_sendmsg
  *
  * Description:
- *   Send a local packet as a stream.
- *
- * Input Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags (ignored for now)
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately (see send() for the
- *   list of errno numbers).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_LOCAL_STREAM
-ssize_t psock_local_send(FAR struct socket *psock, FAR const void *buf,
-                         size_t len, int flags);
-#endif
-
-/****************************************************************************
- * Name: psock_local_sendto
- *
- * Description:
- *   This function implements the Unix domain-specific logic of the
- *   standard sendto() socket operation.
+ *   Implements the sendmsg() operation for the case of the local Unix socket
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Data to send
- *   len      Length of data to send
+ *   msg      msg to send
  *   flags    Send flags
- *   to       Address of recipient
- *   tolen    The length of the address structure
- *
- *   NOTE: All input parameters were verified by sendto() before this
- *   function was called.
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   a negated errno value is returned.  See the description in
- *   net/socket/sendto.c for the list of appropriate return value.
+ *   On success, returns the number of characters sent.  On  error, a negated
+ *   errno value is returned (see sendmsg() for the list of appropriate error
+ *   values.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_LOCAL_DGRAM
-ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
-                           size_t len, int flags,
-                           FAR const struct sockaddr *to, socklen_t tolen);
-#endif
+ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                      int flags);
 
 /****************************************************************************
  * Name: local_send_packet
@@ -433,14 +399,14 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-int local_send_packet(FAR struct file *filep, FAR const uint8_t *buf,
+int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
                       size_t len);
 
 /****************************************************************************
- * Name: local_recvfrom
+ * Name: local_recvmsg
  *
  * Description:
- *   recvfrom() receives messages from a local socket, and may be used to
+ *   recvmsg() receives messages from a local socket and may be used to
  *   receive data on a socket whether or not it is connection-oriented.
  *
  *   If from is not NULL, and the underlying protocol provides the source
@@ -450,23 +416,19 @@ int local_send_packet(FAR struct file *filep, FAR const uint8_t *buf,
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   msg      Buffer to receive the message
  *   flags    Receive flags (ignored for now)
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
+ *   On success, returns the number of characters received. If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, -1 is returned, and errno
- *   is set appropriately (see receivefrom for the complete list).
+ *   recvmsg() will return 0.  Otherwise, on errors, a negated errno value is
+ *   returned (see recvmsg() for the list of appropriate error values).
  *
  ****************************************************************************/
 
-ssize_t local_recvfrom(FAR struct socket *psock, FAR void *buf,
-                       size_t len, int flags, FAR struct sockaddr *from,
-                       FAR socklen_t *fromlen);
+ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                      int flags);
 
 /****************************************************************************
  * Name: local_fifo_read

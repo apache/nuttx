@@ -27,8 +27,8 @@ NET_CSRCS += icmpv6_input.c icmpv6_solicit.c icmpv6_advertise.c
 NET_CSRCS += icmpv6_linkipaddr.c
 
 ifeq ($(CONFIG_NET_ICMPv6_SOCKET),y)
-SOCK_CSRCS += icmpv6_sockif.c icmpv6_conn.c icmpv6_sendto.c
-SOCK_CSRCS += icmpv6_recvfrom.c icmpv6_netpoll.c
+SOCK_CSRCS += icmpv6_sockif.c icmpv6_conn.c icmpv6_sendmsg.c
+SOCK_CSRCS += icmpv6_recvmsg.c icmpv6_netpoll.c
 endif
 
 ifeq ($(CONFIG_NET_ICMPv6_NEIGHBOR),y)

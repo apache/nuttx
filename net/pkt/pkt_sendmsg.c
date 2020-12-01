@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/pkt/pkt_send.c
+ * net/pkt/pkt_sendmsg.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -78,7 +78,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 {
   FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
 
-  ninfo("flags: %04x sent: %d\n", flags, pstate->snd_sent);
+  ninfo("flags: %04x sent: %zd\n", flags, pstate->snd_sent);
 
   if (pstate)
     {
@@ -135,36 +135,64 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_pkt_send
+ * Name: pkt_sendmsg
  *
  * Description:
- *   The psock_pkt_send() call may be used only when the packet socket is in
+ *   The pkt_sendmsg() call may be used only when the packet socket is in
  *   a connected state (so that the intended recipient is known).
  *
  * Input Parameters:
  *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
+ *   msg      Message to send
+ *   flags    Send flags
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   a negated errno value is returned.  See send() for the complete list
- *   of return values.
+ *   On success, returns the number of characters sent. On error, a negated
+ *   errno value is returned (see sendmsg() for the complete list of return
+ *   values.
  *
  ****************************************************************************/
 
-ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
-                       size_t len)
+ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                    int flags)
 {
+  FAR const void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
   FAR struct net_driver_s *dev;
   struct send_s state;
   int ret = OK;
+
+  /* Validity check, only single iov supported */
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
+  if (msg->msg_name != NULL)
+    {
+      /* pkt_sendto */
+
+      nerr("ERROR: sendto() not supported for raw packet sockets\n");
+      return -EAFNOSUPPORT;
+    }
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (psock == NULL || psock->s_conn == NULL)
     {
       return -EBADF;
+    }
+
+  /* Only SOCK_RAW is supported */
+
+  if (psock->s_type == SOCK_RAW)
+    {
+      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
+       * no peer address is set.
+       */
+
+      return -EDESTADDRREQ;
     }
 
   /* Get the device driver that will service this transfer */

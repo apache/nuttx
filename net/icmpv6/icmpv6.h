@@ -604,10 +604,10 @@ FAR struct icmpv6_conn_s *icmpv6_findconn(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
- * Name: icmpv6_sendto
+ * Name: icmpv6_sendmsg
  *
  * Description:
- *   Implements the sendto() operation for the case of the IPPROTO_ICMP6
+ *   Implements the sendmsg() operation for the case of the IPPROTO_ICMP6
  *   socket.  The 'buf' parameter points to a block of memory that includes
  *   an ICMPv6 request header, followed by any payload that accompanies the
  *   request.  The 'len' parameter includes both the size of the ICMPv6
@@ -615,62 +615,51 @@ FAR struct icmpv6_conn_s *icmpv6_findconn(FAR struct net_driver_s *dev,
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Data to send
- *   len      Length of data to send
+ *   msg      Message to send
  *   flags    Send flags
- *   to       Address of recipient
- *   tolen    The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send_to() for the list of appropriate error
+ *   On success, returns the number of characters sent.  On error, a negated
+ *   errno value is returned (see sendmsg() for the list of appropriate error
  *   values.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
-ssize_t icmpv6_sendto(FAR struct socket *psock,
-                      FAR const void *buf,
-                      size_t len,
-                      int flags,
-                      FAR const struct sockaddr *to,
-                      socklen_t tolen);
+ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                       int flags);
 #endif
 
 /****************************************************************************
- * Name: icmpv6_recvfrom
+ * Name: icmpv6_recvmsg
  *
  * Description:
- *   Implements the socket recvfrom interface for the case of the AF_INET6
- *   data gram socket with the IPPROTO_ICMP6 protocol.  icmpv6_recvfrom()
+ *   Implements the socket recvfrom interface for the case of the AF_INET
+ *   data gram socket with the IPPROTO_ICMP6 protocol.  icmpv6_recvmsg()
  *   receives ICMPv6 ECHO replies for the a socket.
  *
- *   If 'from' is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in.  The argument 'fromlen' is
- *   initialized to the size of the buffer associated with from, and
+ *   If msg_name is not NULL, and the underlying protocol provides the source
+ *   address, this source address is filled in. The argument 'msg_namelen' is
+ *   initialized to the size of the buffer associated with msg_name, and
  *   modified on return to indicate the actual size of the address stored
  *   there.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   msg      Buffer to receive the message
  *   flags    Receive flags
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters received.  If no data is
+ *   On success, returns the number of characters received. If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, a negated errno value is
- *   returned (see recvfrom() for the list of appropriate error values).
+ *   recvmsg() will return 0.  Otherwise, on errors, a negated errno value is
+ *   returned (see recvmsg() for the list of appropriate error values).
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
-ssize_t icmpv6_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                        int flags, FAR struct sockaddr *from,
-                        FAR socklen_t *fromlen);
+ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                       int flags);
 #endif
 
 /****************************************************************************

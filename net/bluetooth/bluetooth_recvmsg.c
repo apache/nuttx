@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/bluetooth_recvfrom.c
+ * net/socket/bluetooth_recvmsg.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -272,43 +272,43 @@ static uint16_t bluetooth_recvfrom_eventhandler(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bluetooth_recvfrom
+ * Name: bluetooth_recvmsg
  *
  * Description:
  *   Implements the socket recvfrom interface for the case of the AF_INET
- *   and AF_INET6 address families.  bluetooth_recvfrom() receives messages
+ *   and AF_INET6 address families.  bluetooth_recvmsg() receives messages
  *   from a socket, and may be used to receive data on a socket whether or
  *   not it is connection-oriented.
  *
- *   If 'from' is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in.  The argument 'fromlen' is
- *   initialized to the size of the buffer associated with from, and
+ *   If msg_name is not NULL, and the underlying protocol provides the source
+ *   address, this source address is filled in. The argument 'msg_namelen' is
+ *   initialized to the size of the buffer associated with msg_name, and
  *   modified on return to indicate the actual size of the address stored
  *   there.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   msg      Buffer to receive data
  *   flags    Receive flags
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters received.  If no data is
+ *   On success, returns the number of characters received. If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, a negated errno value is
- *   returned (see recvfrom() for the list of appropriate error values).
+ *   recvmsg() will return 0. Otherwise, on errors, a negated errno value is
+ *   returned (see recvmsg() for the list of appropriate error values).
  *
  * Assumptions:
  *   The network is locked.
  *
  ****************************************************************************/
 
-ssize_t bluetooth_recvfrom(FAR struct socket *psock, FAR void *buf,
-                            size_t len, int flags, FAR struct sockaddr *from,
-                            FAR socklen_t *fromlen)
+ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                          int flags)
 {
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *from = msg->msg_name;
+  FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct bluetooth_conn_s *conn =
     (FAR struct bluetooth_conn_s *)psock->s_conn;
   FAR struct radio_driver_s *radio;
@@ -330,7 +330,7 @@ ssize_t bluetooth_recvfrom(FAR struct socket *psock, FAR void *buf,
       return -EPROTONOSUPPORT;
     }
 
-  /* Perform the packet recvfrom() operation */
+  /* Perform the packet recvmsg() operation */
 
   /* Initialize the state structure.  This is done with the network
    * locked because we don't want anything to happen until we are ready.

@@ -49,16 +49,16 @@
  *
  *   - It is not a cancellation point,
  *   - It does not modify the errno variable, and
- *   - I accepts the internal socket structure as an input rather than an
+ *   - It accepts the internal socket structure as an input rather than an
  *     task-specific socket descriptor.
  *
  * Input Parameters:
- *   psock   - A pointer to a NuttX-specific, internal socket structure
- *   buf     - Buffer to receive data
- *   len     - Length of buffer
- *   flags   - Receive flags
- *   from    - Address of source (may be NULL)
- *   fromlen - The length of the address structure
+ *   psock     A pointer to a NuttX-specific, internal socket structure
+ *   buf       Buffer to receive data
+ *   len       Length of buffer
+ *   flags     Receive flags
+ *   from      Address of source (may be NULL)
+ *   fromlen   The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  If no data is
@@ -73,33 +73,27 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                        int flags, FAR struct sockaddr *from,
                        FAR socklen_t *fromlen)
 {
-  /* Verify that non-NULL pointers were passed */
+  struct msghdr msg;
+  struct iovec iov;
+  ssize_t ret;
 
-  if (buf == NULL)
-    {
-      return -EINVAL;
-    }
+  iov.iov_base = buf;
+  iov.iov_len = len;
+  msg.msg_name = from;
+  msg.msg_namelen = fromlen ? *fromlen : 0;
+  msg.msg_iov = &iov;
+  msg.msg_iovlen = 1;
+  msg.msg_control = NULL;
+  msg.msg_controllen = 0;
+  msg.msg_flags = 0;
 
-  if (from != NULL && fromlen != NULL && *fromlen <= 0)
-    {
-      return -EINVAL;
-    }
+  /* And let psock_recvmsg do all of the work */
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
+  ret = psock_recvmsg(psock, &msg, flags);
+  if (ret >= 0 && fromlen != NULL)
+    *fromlen = msg.msg_namelen;
 
-  if (psock == NULL || psock->s_conn == NULL)
-    {
-      return -EBADF;
-    }
-
-  /* Let logic specific to this address family handle the recvfrom()
-   * operation.
-   */
-
-  DEBUGASSERT(psock->s_sockif != NULL &&
-             psock->s_sockif->si_recvfrom != NULL);
-
-  return psock->s_sockif->si_recvfrom(psock, buf, len, flags, from, fromlen);
+  return ret;
 }
 
 /****************************************************************************
@@ -115,12 +109,12 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *   - It does not modify the errno variable.
  *
  * Input Parameters:
- *   sockfd  - Socket descriptor of socket
- *   buf     - Buffer to receive data
- *   len     - Length of buffer
- *   flags   - Receive flags
- *   from    - Address of source (may be NULL)
- *   fromlen - The length of the address structure
+ *   sockfd    Socket descriptor of socket
+ *   buf       Buffer to receive data
+ *   len       Length of buffer
+ *   flags     Receive flags
+ *   from      Address of source (may be NULL)
+ *   fromlen   The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  If no data is
@@ -158,12 +152,12 @@ ssize_t nx_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
  *   on return to indicate the actual size of the address stored there.
  *
  * Input Parameters:
- *   sockfd  - Socket descriptor of socket
- *   buf     - Buffer to receive data
- *   len     - Length of buffer
- *   flags   - Receive flags
- *   from    - Address of source (may be NULL)
- *   fromlen - The length of the address structure
+ *   sockfd    Socket descriptor of socket
+ *   buf       Buffer to receive data
+ *   len       Length of buffer
+ *   flags     Receive flags
+ *   from      Address of source (may be NULL)
+ *   fromlen   The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  On  error,
@@ -199,23 +193,18 @@ ssize_t nx_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
 ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
                  FAR struct sockaddr *from, FAR socklen_t *fromlen)
 {
-  FAR struct socket *psock;
   ssize_t ret;
 
   /* recvfrom() is a cancellation point */
 
   enter_cancellation_point();
 
-  /* Get the underlying socket structure */
-
-  psock = sockfd_socket(sockfd);
-
   /* Let psock_recvfrom() do all of the work */
 
-  ret = psock_recvfrom(psock, buf, len, flags, from, fromlen);
+  ret = nx_recvfrom(sockfd, buf, len, flags, from, fromlen);
   if (ret < 0)
     {
-      _SO_SETERRNO(psock, -ret);
+      _SO_SETERRNO(sockfd_socket(sockfd), -ret);
       ret = ERROR;
     }
 
