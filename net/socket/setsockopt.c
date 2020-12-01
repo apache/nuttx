@@ -399,14 +399,14 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
         ret = psock_socketlevel_option(psock, option, value, value_len);
         break;
 
-      case IPPROTO_TCP:/* TCP protocol socket options (see include/netinet/tcp.h) */
 #ifdef CONFIG_NET_TCPPROTO_OPTIONS
+      case IPPROTO_TCP:/* TCP protocol socket options (see include/netinet/tcp.h) */
         ret = tcp_setsockopt(psock, option, value, value_len);
         break;
 #endif
 
-      case IPPROTO_UDP:/* UDP protocol socket options (see include/netinet/udp.h) */
 #ifdef CONFIG_NET_UDPPROTO_OPTIONS
+      case IPPROTO_UDP:/* UDP protocol socket options (see include/netinet/udp.h) */
         ret = udp_setsockopt(psock, option, value, value_len);
         break;
 #endif
@@ -430,7 +430,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
 #endif
 
       default:         /* The provided level is invalid */
-        ret = -EINVAL;
+        ret = -ENOPROTOOPT;
         break;
     }
 
