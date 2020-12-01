@@ -253,7 +253,7 @@ xtensa_context_save:
 	 * to avoid the window spill.
 	 */
 
-	l32i	r3, a2, (4 * REG_A3)			/* Recover original a3 */
+	l32i	a3, a2, (4 * REG_A3)			/* Recover original a3 */
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Recover the return address and return zero */
