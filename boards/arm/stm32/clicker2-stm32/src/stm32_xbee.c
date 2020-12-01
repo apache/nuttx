@@ -307,7 +307,7 @@ static int stm32_xbee_devsetup(FAR struct stm32_priv_s *priv)
   xbee = xbee_init(spi, &priv->dev);
   if (xbee == NULL)
     {
-      wlerr("ERROR: Failed to initialize XBee driver%d\n", priv->dev);
+      wlerr("ERROR: Failed to initialize XBee driver%d\n", priv->spidev);
       return -ENODEV;
     }
 
