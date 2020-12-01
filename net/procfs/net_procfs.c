@@ -431,7 +431,7 @@ static int netprocfs_opendir(FAR const char *relpath,
 
   level1->base.level = 1;
 
-  if (strcmp(relpath, "net") == 0)
+  if (strcmp(relpath, "net") == 0 || strcmp(relpath, "net/") == 0)
     {
       /* Count the number of network devices */
 
