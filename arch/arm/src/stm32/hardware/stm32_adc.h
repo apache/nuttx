@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_adc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ADC_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ADC_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -56,7 +56,8 @@
  *   which differs too much to keep it in the same file as ADC IPv1.
  */
 
-#if defined(CONFIG_STM32_HAVE_IP_ADC_V1) && defined(CONFIG_STM32_HAVE_IP_ADC_V2)
+#if defined(CONFIG_STM32_HAVE_IP_ADC_V1) && \
+    defined(CONFIG_STM32_HAVE_IP_ADC_V2)
 #  error Only one STM32 ADC IP version must be selected
 #endif
 
