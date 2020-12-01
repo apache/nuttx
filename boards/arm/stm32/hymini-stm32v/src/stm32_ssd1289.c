@@ -34,6 +34,10 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <sys/types.h>
@@ -60,7 +64,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration **********************************************************************/
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_STM32_FSMC
 #  error "CONFIG_STM32_FSMC is required to use the LCD"
@@ -83,7 +87,10 @@
 
 #define LCD_BL_TIMER_PERIOD 8999
 
-/* LCD is connected to the FSMC_Bank1_NOR/SRAM1 and NE1 is used as ship select signal */
+/* LCD is connected to the FSMC_Bank1_NOR/SRAM1 and NE1 is used as ship
+ * select signal
+ */
+
 /* RS <==> A16 */
 
 #define LCD_INDEX        0x60000000  /* RS = 0 */
@@ -228,7 +235,8 @@ static void stm32_write(FAR struct ssd1289_lcd_s *dev, uint16_t data)
  * Name: stm32_backlight
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER:
+ *   full on).
  *   Used here to set pwm duty on timer used for backlight.
  *
  ****************************************************************************/
@@ -248,7 +256,8 @@ static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power)
        * maximum power setting.
        */
 
-      duty = ((uint32_t)LCD_BL_TIMER_PERIOD * (uint32_t)power) / CONFIG_LCD_MAXPOWER;
+      duty = ((uint32_t)LCD_BL_TIMER_PERIOD * (uint32_t)power) /
+             CONFIG_LCD_MAXPOWER;
       if (duty >= LCD_BL_TIMER_PERIOD)
         {
           duty = LCD_BL_TIMER_PERIOD - 1;
@@ -314,7 +323,7 @@ static void init_lcd_backlight(void)
 
   ccer &= !ATIM_CCER_CC2P;
 
-  /* Enable channel 2*/
+  /* Enable channel 2 */
 
   ccer |= ATIM_CCER_CC2E;
 
@@ -327,7 +336,7 @@ static void init_lcd_backlight(void)
 
   modifyreg16(STM32_TIM3_CR1, 0, ATIM_CR1_ARPE);
 
-  /* Enable Backlight Timer !!!!*/
+  /* Enable Backlight Timer !!!! */
 
   modifyreg16(STM32_TIM3_CR1, 0, ATIM_CR1_CEN);
 
@@ -409,9 +418,9 @@ static void stm32_extmemgpios(const uint16_t *gpios, int ngpios)
   /* Configure GPIOs */
 
   for (i = 0; i < ngpios; i++)
-  {
-    stm32_configgpio(gpios[i]);
-  }
+    {
+      stm32_configgpio(gpios[i]);
+    }
 }
 
 /****************************************************************************
@@ -422,9 +431,9 @@ static void stm32_extmemgpios(const uint16_t *gpios, int ngpios)
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware.  The initial state of the LCD is
+ *   fully initialized, display memory cleared, and the LCD ready to use,
+ *   but with the power setting at 0 (full off).
  *
  ****************************************************************************/
 
@@ -463,8 +472,8 @@ int board_lcd_initialize(void)
  * Name:  board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows support
- *   for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.  This
+ *   allows support for multiple LCD devices.
  *
  ****************************************************************************/
 
