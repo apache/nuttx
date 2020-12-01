@@ -58,9 +58,9 @@
 #include <nuttx/spi/qspi.h>
 #include <nuttx/mtd/mtd.h>
 
-/******************************************************************************
+/************************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ************************************************************************************/
 
 /* MX25RXX Commands */
 
@@ -193,9 +193,9 @@ struct mx25rxx_dev_s
 #endif
 };
 
-/******************************************************************************
+/************************************************************************************
  * Private Function Prototypes
- ******************************************************************************/
+ ************************************************************************************/
 
 /* MTD driver methods */
 
@@ -207,7 +207,8 @@ static ssize_t mx25rxx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                               size_t nblocks, FAR const uint8_t *buf);
 static ssize_t mx25rxx_read(FAR struct mtd_dev_s *dev, off_t offset,
                             size_t nbytes, FAR uint8_t *buffer);
-static int mx25rxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+static int mx25rxx_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+                         unsigned long arg);
 
 /* Internal driver methods */
 
@@ -223,7 +224,8 @@ static int mx25rxx_command_address(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 
 static int mx25rxx_readid(struct mx25rxx_dev_s *dev);
 static int mx25rxx_read_byte(FAR struct mx25rxx_dev_s *dev,
-                             FAR uint8_t *buffer, off_t address, size_t buflen);
+                             FAR uint8_t *buffer, off_t address,
+                             size_t buflen);
 static int mx25rxx_read_status(FAR struct mx25rxx_dev_s *dev);
 static int mx25rxx_read_configuration(FAR struct mx25rxx_dev_s *dev);
 static void mx25rxx_write_status_config(FAR struct mx25rxx_dev_s *dev,
@@ -246,9 +248,9 @@ static int  mx25rxx_write_cache(FAR struct mx25rxx_dev_s *priv,
               FAR const uint8_t *buffer,  off_t sector, size_t nsectors);
 #endif
 
-/******************************************************************************
+/************************************************************************************
  * Private Functions
- ******************************************************************************/
+ ************************************************************************************/
 
 void mx25rxx_lock(FAR struct qspi_dev_s *qspi, bool read)
 {
@@ -589,8 +591,8 @@ int mx25rxx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
 #endif
 
 #if 0
-  /* FIXME: use mx25rxx_erase_block in case CONFIG_MX25RXX_SECTOR512 is not configured
-   * to speed up block erase.
+  /* FIXME: use mx25rxx_erase_block in case CONFIG_MX25RXX_SECTOR512 is
+   * not configured to speed up block erase.
    */
 
   unsigned int sectorsperblock = (64 * 1024) >> priv->sectorshift;
