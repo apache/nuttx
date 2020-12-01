@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <inttypes.h>
 #include <string.h>
 
 #include <arch/board/board.h>
@@ -1699,24 +1700,27 @@ static void adc_dumpregs(FAR struct stm32_dev_s *priv)
 {
   UNUSED(priv);
 
-  ainfo("ISR:  0x%08x IER:  0x%08x CR:   0x%08x CFGR1: 0x%08x\n",
+  ainfo("ISR:  0x%08" PRIx32 " IER:  0x%08" PRIx32
+        " CR:   0x%08" PRIx32 " CFGR1: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32L4_ADC_ISR_OFFSET),
         adc_getreg(priv, STM32L4_ADC_IER_OFFSET),
         adc_getreg(priv, STM32L4_ADC_CR_OFFSET),
         adc_getreg(priv, STM32L4_ADC_CFGR_OFFSET));
 
-  ainfo("SQR1: 0x%08x SQR2: 0x%08x SQR3: 0x%08x SQR4: 0x%08x\n",
+  ainfo("SQR1: 0x%08" PRIx32 " SQR2: 0x%08" PRIx32
+        " SQR3: 0x%08" PRIx32 " SQR4: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32L4_ADC_SQR1_OFFSET),
         adc_getreg(priv, STM32L4_ADC_SQR2_OFFSET),
         adc_getreg(priv, STM32L4_ADC_SQR3_OFFSET),
         adc_getreg(priv, STM32L4_ADC_SQR4_OFFSET));
 
-  ainfo("SMPR1: 0x%08x SMPR2: 0x%08x\n",
+  ainfo("SMPR1: 0x%08" PRIx32 " SMPR2: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32L4_ADC_SMPR1_OFFSET),
         adc_getreg(priv, STM32L4_ADC_SMPR2_OFFSET));
 
 #ifdef ADC_HAVE_INJECTED
-  ainfo("JSQR: 0x%08x\n", adc_getreg(priv, STM32L4_ADC_JSQR_OFFSET));
+  ainfo("JSQR: 0x%08" PRIx32 "\n",
+        adc_getreg(priv, STM32L4_ADC_JSQR_OFFSET));
 #endif
 }
 
@@ -2085,7 +2089,8 @@ static int adc_interrupt(FAR struct adc_dev_s *dev, uint32_t adcisr)
       value  = adc_getreg(priv, STM32L4_ADC_DR_OFFSET);
       value &= ADC_DR_MASK;
 
-      awarn("WARNING: Analog Watchdog, Value (0x%03x) out of range!\n",
+      awarn("WARNING: Analog Watchdog, "
+            "Value (0x%03" PRIx32 ") out of range!\n",
             value);
 
       /* Stop ADC conversions to avoid continuous interrupts */
