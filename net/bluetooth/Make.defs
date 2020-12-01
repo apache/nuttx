@@ -31,8 +31,8 @@ NET_CSRCS  += bluetooth_container.c
 # Socket layer
 
 SOCK_CSRCS += bluetooth_sockif.c
-SOCK_CSRCS += bluetooth_sendto.c
-SOCK_CSRCS += bluetooth_recvfrom.c
+SOCK_CSRCS += bluetooth_sendmsg.c
+SOCK_CSRCS += bluetooth_recvmsg.c
 
 # Device interface
 

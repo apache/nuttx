@@ -308,7 +308,7 @@ struct linger
 struct msghdr
 {
   FAR void *msg_name;           /* Socket name */
-  int msg_namelen;              /* Length of name */
+  socklen_t msg_namelen;        /* Length of name */
   FAR struct iovec *msg_iov;    /* Data blocks */
   unsigned long msg_iovlen;     /* Number of blocks */
   FAR void *msg_control;        /* Per protocol magic (eg BSD file descriptor passing) */

@@ -25,8 +25,8 @@ ifeq ($(CONFIG_NET_CAN),y)
 # Socket layer
 
 SOCK_CSRCS += can_sockif.c
-SOCK_CSRCS += can_send.c
-SOCK_CSRCS += can_recvfrom.c
+SOCK_CSRCS += can_sendmsg.c
+SOCK_CSRCS += can_recvmsg.c
 
 ifeq ($(CONFIG_NET_CAN_NOTIFIER),y)
 SOCK_CSRCS += can_notifier.c

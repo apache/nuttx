@@ -61,8 +61,6 @@ static int        icmp_accept(FAR struct socket *psock,
                     FAR struct socket *newsock);
 static int        icmp_netpoll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-static ssize_t    icmp_send(FAR struct socket *psock, FAR const void *buf,
-                    size_t len, int flags);
 static int        icmp_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -81,16 +79,8 @@ const struct sock_intf_s g_icmp_sockif =
   icmp_connect,     /* si_connect */
   icmp_accept,      /* si_accept */
   icmp_netpoll,     /* si_poll */
-  icmp_send,        /* si_send */
-  icmp_sendto,      /* si_sendto */
-#ifdef CONFIG_NET_SENDFILE
-  NULL,             /* si_sendfile */
-#endif
-  icmp_recvfrom,    /* si_recvfrom */
-#ifdef CONFIG_NET_CMSG
-  NULL,             /* si_recvmsg */
-  NULL,             /* si_sendmsg */
-#endif
+  icmp_sendmsg,     /* si_sendmsg */
+  icmp_recvmsg,     /* si_recvmsg */
   icmp_close        /* si_close */
 };
 
@@ -450,35 +440,6 @@ static int icmp_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
 
       return icmp_pollteardown(psock, fds);
     }
-}
-
-/****************************************************************************
- * Name: icmp_send
- *
- * Description:
- *   Socket send() method for the raw packet socket.
- *
- * Input Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send() for the list of appropriate error
- *   values.
- *
- ****************************************************************************/
-
-static ssize_t icmp_send(FAR struct socket *psock, FAR const void *buf,
-                        size_t len, int flags)
-{
-  /* ICMP sockets cannot be bound and, hence, cannot support any connection-
-   * oriented data transfer.
-   */
-
-  return -EDESTADDRREQ;
 }
 
 /****************************************************************************

@@ -31,8 +31,8 @@ NET_CSRCS  += ieee802154_container.c
 # Socket layer
 
 SOCK_CSRCS += ieee802154_sockif.c
-SOCK_CSRCS += ieee802154_sendto.c
-SOCK_CSRCS += ieee802154_recvfrom.c
+SOCK_CSRCS += ieee802154_sendmsg.c
+SOCK_CSRCS += ieee802154_recvmsg.c
 
 # Device interface
 

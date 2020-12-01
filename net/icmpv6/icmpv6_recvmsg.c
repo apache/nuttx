@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/icmp/icmp_recvfrom.c
+ * net/icmpv6/icmpv6_recvmsg.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,33 +31,36 @@
 
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/icmp.h>
+#include <nuttx/net/icmpv6.h>
 
 #include "devif/devif.h"
 #include "socket/socket.h"
-#include "icmp/icmp.h"
+#include "icmpv6/icmpv6.h"
 
-#ifdef CONFIG_NET_ICMP_SOCKET
+#ifdef CONFIG_NET_ICMPv6_SOCKET
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv4BUF  ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define ICMPBUF  ((struct icmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
-#define ICMPSIZE ((dev)->d_len - IPv4_HDRLEN)
+#define IPv6_BUF \
+  ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define ICMPv6_BUF \
+  ((struct icmpv6_echo_reply_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define ICMPv6_SIZE \
+  ((dev)->d_len - IPv6_HDRLEN)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct icmp_recvfrom_s
+struct icmpv6_recvfrom_s
 {
   FAR struct devif_callback_s *recv_cb; /* Reference to callback instance */
-  FAR struct socket *recv_sock;         /* IPPROTO_ICMP socket structure */
+  FAR struct socket *recv_sock;         /* IPPROTO_ICMP6 socket structure */
   sem_t recv_sem;                       /* Use to manage the wait for the
                                          * response */
-  in_addr_t recv_from;                  /* The peer we received the request
+  struct in6_addr recv_from;            /* The peer we received the request
                                          * from */
   FAR uint8_t *recv_buf;                /* Location to return the response */
   uint16_t recv_buflen;                 /* Size of the response */
@@ -79,9 +82,9 @@ struct icmp_recvfrom_s
  *
  * Input Parameters:
  *   dev        The structure of the network driver that generated the
- *              event.
+ *              event
  *   conn       The received packet, cast to (void *)
- *   pvpriv     An instance of struct icmp_recvfrom_s cast to void*
+ *   pvpriv     An instance of struct icmpv6_recvfrom_s cast to void*
  *   flags      Set of events describing why the callback was invoked
  *
  * Returned Value:
@@ -96,11 +99,11 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
                                   FAR void *pvconn,
                                   FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct icmp_recvfrom_s *pstate = (struct icmp_recvfrom_s *)pvpriv;
+  FAR struct icmpv6_recvfrom_s *pstate = (struct icmpv6_recvfrom_s *)pvpriv;
   FAR struct socket *psock;
-  FAR struct icmp_conn_s *conn;
-  FAR struct ipv4_hdr_s *ipv4;
-  FAR struct icmp_hdr_s *icmp;
+  FAR struct icmpv6_conn_s *conn;
+  FAR struct ipv6_hdr_s *ipv6;
+  FAR struct icmpv6_echo_reply_s *icmpv6;
 
   ninfo("flags: %04x\n", flags);
 
@@ -128,47 +131,51 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
           return flags;
         }
 
-      /* Check if we have just received a ICMP ECHO reply. */
+      /* Check if we have just received a ICMPv6 ECHO reply. */
 
-      if ((flags & ICMP_NEWDATA) != 0)    /* No incoming data */
+      if ((flags & ICMPv6_NEWDATA) != 0)    /* No incoming data */
         {
           unsigned int recvsize;
 
-          /* Check if it is for us */
+          /* Check if it is for us.
+           * REVISIT:  What if there are IPv6 extension headers present?
+           */
 
-          icmp = ICMPBUF;
-          if (conn->id != icmp->id)
+          icmpv6 = ICMPv6_BUF;
+          if (conn->id != icmpv6->id)
             {
-              ninfo("Wrong ID: %u vs %u\n", icmp->id, conn->id);
+              ninfo("Wrong ID: %u vs %u\n", icmpv6->id, conn->id);
               return flags;
             }
 
-          ninfo("Received ICMP reply\n");
+          ninfo("Received ICMPv6 reply\n");
 
           /* What should we do if the received reply is larger that the
            * buffer that the caller of sendto provided?  Truncate?  Error
            * out?
            */
 
-          recvsize = ICMPSIZE;
+          recvsize = ICMPv6_SIZE;
           if (recvsize > pstate->recv_buflen)
             {
               recvsize = pstate->recv_buflen;
             }
 
-          /* Copy the ICMP ECHO reply to the user provided buffer */
+          /* Copy the ICMPv6 ECHO reply to the user provided buffer
+           * REVISIT:  What if there are IPv6 extension headers present?
+           */
 
-          memcpy(pstate->recv_buf, ICMPBUF, recvsize);
+          memcpy(pstate->recv_buf, ICMPv6_BUF, recvsize);
 
           /* Return the size of the returned data */
 
           DEBUGASSERT(recvsize > INT16_MAX);
           pstate->recv_result = recvsize;
 
-          /* Return the IPv4 address of the sender from the IPv4 header */
+          /* Return the IPv6 address of the sender from the IPv6 header */
 
-          ipv4 = IPv4BUF;
-          net_ipv4addr_hdrcopy(&pstate->recv_from, ipv4->srcipaddr);
+          ipv6 = IPv6_BUF;
+          net_ipv6addr_hdrcopy(&pstate->recv_from, ipv6->srcipaddr);
 
           /* Decrement the count of outstanding requests.  I suppose this
            * could have already been decremented of there were multiple
@@ -181,7 +188,7 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
           /* Indicate that the data has been consumed */
 
-          flags &= ~ICMP_NEWDATA;
+          flags &= ~ICMPv6_NEWDATA;
           goto end_wait;
         }
 
@@ -206,13 +213,13 @@ end_wait:
 }
 
 /****************************************************************************
- * Name: icmp_readahead
+ * Name: icmpv6_readahead
  *
  * Description:
  *   Copy the buffered read-ahead data to the user buffer.
  *
  * Input Parameters:
- *   conn  - IPPROTO_ICMP socket connection structure containing the read-
+ *   conn  - IPPROTO_ICMP6 socket connection structure containing the read-
  *           ahead data.
  *   dev      The structure of the network driver that generated the event.
  *   pstate   recvfrom state structure
@@ -225,17 +232,17 @@ end_wait:
  *
  ****************************************************************************/
 
-static inline ssize_t icmp_readahead(FAR struct icmp_conn_s *conn,
+static inline ssize_t icmpv6_readahead(FAR struct icmpv6_conn_s *conn,
                                      FAR void *buf, size_t buflen,
-                                     FAR struct sockaddr_in *from,
+                                     FAR struct sockaddr_in6 *from,
                                      FAR socklen_t *fromlen)
 {
-  FAR struct sockaddr_in bitbucket;
+  FAR struct sockaddr_in6 bitbucket;
   FAR struct iob_s *iob;
   ssize_t ret = -ENODATA;
   int recvlen;
 
-  /* Check there is any ICMP replies already buffered in a read-ahead
+  /* Check there is any ICMPv6 replies already buffered in a read-ahead
    * buffer.
    */
 
@@ -262,7 +269,7 @@ static inline ssize_t icmp_readahead(FAR struct icmp_conn_s *conn,
 
       offset = sizeof(uint8_t);
 
-      if (addrsize > sizeof(struct sockaddr_in))
+      if (addrsize > sizeof(struct sockaddr_in6))
         {
           ret = -EINVAL;
           goto out;
@@ -306,7 +313,7 @@ out:
 
       /* And free the I/O buffer chain */
 
-      iob_free_chain(iob, IOBUSER_NET_SOCK_ICMP);
+      iob_free_chain(iob, IOBUSER_NET_SOCK_ICMPv6);
     }
 
   return ret;
@@ -317,50 +324,50 @@ out:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: icmp_recvfrom
+ * Name: icmpv6_recvmsg
  *
  * Description:
  *   Implements the socket recvfrom interface for the case of the AF_INET
- *   data gram socket with the IPPROTO_ICMP protocol.  icmp_recvfrom()
- *   receives ICMP ECHO replies for the a socket.
+ *   data gram socket with the IPPROTO_ICMP6 protocol.  icmpv6_recvmsg()
+ *   receives ICMPv6 ECHO replies for the a socket.
  *
- *   If 'from' is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in.  The argument 'fromlen' is
- *   initialized to the size of the buffer associated with from, and
+ *   If msg_name is not NULL, and the underlying protocol provides the source
+ *   address, this source address is filled in. The argument 'msg_namelen' is
+ *   initialized to the size of the buffer associated with msg_name, and
  *   modified on return to indicate the actual size of the address stored
  *   there.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   msg      Buffer to receive the message
  *   flags    Receive flags
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters received.  If no data is
+ *   On success, returns the number of characters received. If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, a negated errno value is
- *   returned (see recvfrom() for the list of appropriate error values).
+ *   recvmsg() will return 0.  Otherwise, on errors, a negated errno value is
+ *   returned (see recvmsg() for the list of appropriate error values).
  *
  ****************************************************************************/
 
-ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                      int flags, FAR struct sockaddr *from,
-                      FAR socklen_t *fromlen)
+ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                       int flags)
 {
-  FAR struct sockaddr_in *inaddr;
-  FAR struct icmp_conn_s *conn;
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *from = msg->msg_name;
+  FAR socklen_t *fromlen = &msg->msg_namelen;
+  FAR struct sockaddr_in6 *inaddr;
+  FAR struct icmpv6_conn_s *conn;
   FAR struct net_driver_s *dev;
-  struct icmp_recvfrom_s state;
+  struct icmpv6_recvfrom_s state;
   ssize_t ret;
 
   /* Some sanity checks */
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
 
-  if (len < ICMP_HDRLEN)
+  if (len < ICMPv6_HDRLEN)
     {
       return -EINVAL;
     }
@@ -371,7 +378,7 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   if (from != NULL)
     {
-      if (fromlen == NULL || *fromlen < sizeof(struct sockaddr_in))
+      if (fromlen == NULL && *fromlen < sizeof(struct sockaddr_in6))
         {
           return -EINVAL;
         }
@@ -394,13 +401,13 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   if (!IOB_QEMPTY(&conn->readahead))
     {
-      return icmp_readahead(conn, buf, len,
-                            (FAR struct sockaddr_in *)from, fromlen);
+      return icmpv6_readahead(conn, buf, len,
+                            (FAR struct sockaddr_in6 *)from, fromlen);
     }
 
   /* Initialize the state structure */
 
-  memset(&state, 0, sizeof(struct icmp_recvfrom_s));
+  memset(&state, 0, sizeof(struct icmpv6_recvfrom_s));
 
   /* This semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
@@ -409,12 +416,12 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   nxsem_init(&state.recv_sem, 0, 0);
   nxsem_set_protocol(&state.recv_sem, SEM_PRIO_NONE);
 
-  state.recv_sock   = psock;    /* The IPPROTO_ICMP socket instance */
+  state.recv_sock   = psock;    /* The IPPROTO_ICMP6 socket instance */
   state.recv_result = -ENOMEM;  /* Assume allocation failure */
   state.recv_buf    = buf;      /* Location to return the response */
   state.recv_buflen = len;      /* Size of the response */
 
-  /* Get the device that was used to send the ICMP request. */
+  /* Get the device that was used to send the ICMPv6 request. */
 
   dev = conn->dev;
   DEBUGASSERT(dev != NULL);
@@ -428,15 +435,18 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Set up the callback */
 
-  state.recv_cb = icmp_callback_alloc(dev, conn);
-  if (state.recv_cb != NULL)
+  state.recv_cb = icmpv6_callback_alloc(dev, conn);
+  if (state.recv_cb)
     {
-      state.recv_cb->flags = (ICMP_NEWDATA | NETDEV_DOWN);
+      state.recv_cb->flags = (ICMPv6_NEWDATA | NETDEV_DOWN);
       state.recv_cb->priv  = (FAR void *)&state;
       state.recv_cb->event = recvfrom_eventhandler;
 
       /* Wait for either the response to be received or for timeout to
-       * occur. net_timedwait will also terminate if a signal is received.
+       * occur. (1) net_timedwait will also terminate if a signal is
+       * received, (2) interrupts may be disabled!  They will be re-enabled
+       * while the task sleeps and automatically re-enabled when the task
+       * restarts.
        */
 
       ret = net_timedwait(&state.recv_sem, _SO_TIMEOUT(psock->s_rcvtimeo));
@@ -445,7 +455,7 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
           state.recv_result = ret;
         }
 
-      icmp_callback_free(dev, conn, state.recv_cb);
+      icmpv6_callback_free(dev, conn, state.recv_cb);
     }
 
   net_unlock();
@@ -463,11 +473,12 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   if (from != NULL)
     {
-      inaddr             = (FAR struct sockaddr_in *)from;
-      inaddr->sin_family = AF_INET;
-      inaddr->sin_port   = 0;
+      inaddr              = (FAR struct sockaddr_in6 *)from;
+      inaddr->sin6_family = AF_INET6;
+      inaddr->sin6_port   = 0;
 
-      net_ipv4addr_copy(inaddr->sin_addr.s_addr, state.recv_from);
+      net_ipv6addr_copy(inaddr->sin6_addr.s6_addr16,
+                        state.recv_from.s6_addr16);
     }
 
   ret = state.recv_result;
@@ -483,10 +494,10 @@ errout:
       conn->nreqs = 0;
       conn->dev   = NULL;
 
-      iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
+      iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMPv6);
     }
 
   return ret;
 }
 
-#endif /* CONFIG_NET_ICMP_SOCKET */
+#endif /* CONFIG_NET_ICMPv6_SOCKET */

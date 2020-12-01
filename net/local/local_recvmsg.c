@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/local/local_recvfrom.c
+ * net/local/local_recvmsg.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -378,11 +378,11 @@ errout_with_halfduplex:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: local_recvfrom
+ * Name: local_recvmsg
  *
  * Description:
- *   local_recvfrom() receives messages from a local socket and may be used
- *   to receive data on a socket whether or not it is connection-oriented.
+ *   recvmsg() receives messages from a local socket and may be used to
+ *   receive data on a socket whether or not it is connection-oriented.
  *
  *   If from is not NULL, and the underlying protocol provides the source
  *   address, this source address is filled in. The argument fromlen
@@ -391,25 +391,25 @@ errout_with_halfduplex:
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   flags    Receive flags
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
+ *   msg      Buffer to receive the message
+ *   flags    Receive flags (ignored for now)
  *
  * Returned Value:
- *   On success, returns the number of characters received.  If no data is
+ *   On success, returns the number of characters received. If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, a negated errno value is
- *   returned (see recv_from() for the complete list of appropriate error
- *   values).
+ *   recvmsg() will return 0.  Otherwise, on errors, a negated errno value is
+ *   returned (see recvmsg() for the list of appropriate error values).
  *
  ****************************************************************************/
 
-ssize_t local_recvfrom(FAR struct socket *psock, FAR void *buf,
-                       size_t len, int flags, FAR struct sockaddr *from,
-                       FAR socklen_t *fromlen)
+ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                      int flags)
 {
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *from = msg->msg_name;
+  FAR socklen_t *fromlen = &msg->msg_namelen;
+
   DEBUGASSERT(psock && psock->s_conn && buf);
 
   /* Check for a stream socket */

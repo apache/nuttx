@@ -516,21 +516,18 @@ int usrsock_poll(FAR struct socket *psock, FAR struct pollfd *fds,
                  bool setup);
 
 /****************************************************************************
- * Name: usrsock_sendto
+ * Name: usrsock_sendmsg
  *
  * Description:
- *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
- *   socket, the parameters to and 'tolen' are ignored (and the error EISCONN
- *   may be returned when they are not NULL and 0), and the error ENOTCONN is
- *   returned when the socket was not actually connected.
+ *   If sendmsg() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
+ *   socket, the parameters 'msg_name' and 'msg_namelen' are ignored (and the
+ *   error EISCONN may be returned when they are not NULL and 0), and the
+ *   error ENOTCONN is returned when the socket was not actually connected.
  *
  * Input Parameters:
  *   psock    A reference to the socket structure of the socket
- *   buf      Data to send
- *   len      Length of data to send
+ *   msg      Message to send
  *   flags    Send flags (ignored)
- *   to       Address of recipient
- *   tolen    The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On any failure, a
@@ -538,15 +535,14 @@ int usrsock_poll(FAR struct socket *psock, FAR struct pollfd *fds,
  *
  ****************************************************************************/
 
-ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
-                       size_t len, int flags, FAR const struct sockaddr *to,
-                       socklen_t tolen);
+ssize_t usrsock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                        int flags);
 
 /****************************************************************************
- * Name: usrsock_recvfrom
+ * Name: usrsock_recvmsg
  *
  * Description:
- *   recvfrom() receives messages from a socket, and may be used to receive
+ *   recvmsg() receives messages from a socket, and may be used to receive
  *   data on a socket whether or not it is connection-oriented.
  *
  *   If from is not NULL, and the underlying protocol provides the source
@@ -555,12 +551,9 @@ ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
  *   on return to indicate the actual size of the address stored there.
  *
  * Input Parameters:
- *   psock    A reference to the socket structure of the socket
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   msg      Buffer to receive the message
  *   flags    Receive flags (ignored)
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  If no data is
@@ -570,9 +563,8 @@ ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                         int flags, FAR struct sockaddr *from,
-                         FAR socklen_t *fromlen);
+ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                        int flags);
 
 /****************************************************************************
  * Name: usrsock_getsockopt

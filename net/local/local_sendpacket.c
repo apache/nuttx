@@ -125,9 +125,11 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
  *
  ****************************************************************************/
 
-int local_send_packet(FAR struct file *filep, FAR const uint8_t *buf,
+int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
                       size_t len)
 {
+  FAR const struct iovec *iov;
+  FAR const struct iovec *end;
   uint16_t len16;
   int ret;
 
@@ -138,14 +140,29 @@ int local_send_packet(FAR struct file *filep, FAR const uint8_t *buf,
     {
       /* Send the packet length */
 
-      len16 = len;
+      end = buf + len;
+      for (len16 = 0, iov = buf; iov != end; iov++)
+        {
+          len16 += iov->iov_len;
+        }
+
       ret = local_fifo_write(filep, (FAR const uint8_t *)&len16,
                              sizeof(uint16_t));
       if (ret == OK)
         {
           /* Send the packet data */
 
-          ret = local_fifo_write(filep, buf, len);
+          for (len16 = 0, iov = buf; iov != end; iov++)
+            {
+              ret = local_fifo_write(filep, iov->iov_base, iov->iov_len);
+              if (ret < 0)
+                break;
+              else
+                len16 += ret;
+            }
+
+          if (ret > 0)
+            ret = len16;
         }
     }
 

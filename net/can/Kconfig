@@ -51,7 +51,6 @@ config NET_CAN_RAW_TX_DEADLINE
 	bool "TX deadline sockopt"
 	default n
 	depends on NET_CAN_SOCK_OPTS && NET_CAN_HAVE_TX_DEADLINE
-	select NET_CMSG
 	---help---
 	    Note: Non-standard SocketCAN sockopt, but this options helps us in
 	    real-time use cases.

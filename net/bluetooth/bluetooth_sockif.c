@@ -65,11 +65,6 @@ static int        bluetooth_accept(FAR struct socket *psock,
                     FAR struct socket *newsock);
 static int        bluetooth_poll_local(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-static ssize_t    bluetooth_send(FAR struct socket *psock,
-                   FAR const void *buf, size_t len, int flags);
-static ssize_t    bluetooth_sendto(FAR struct socket *psock,
-                   FAR const void *buf, size_t len, int flags,
-                   FAR const struct sockaddr *to, socklen_t tolen);
 static int        bluetooth_close(FAR struct socket *psock);
 
 /* Protocol Specific Interfaces */
@@ -79,10 +74,6 @@ static int        bluetooth_l2cap_bind(FAR struct socket *psock,
 static int        bluetooth_hci_bind(FAR struct socket *psock,
                     FAR const struct sockaddr_hci *addr,
                     socklen_t addrlen);
-static ssize_t    bluetooth_l2cap_send(FAR struct socket *psock,
-                   FAR const void *buf, size_t len, int flags);
-static ssize_t    bluetooth_hci_send(FAR struct socket *psock,
-                   FAR const void *buf, size_t len, int flags);
 
 /****************************************************************************
  * Public Data
@@ -100,16 +91,8 @@ const struct sock_intf_s g_bluetooth_sockif =
   bluetooth_connect,     /* si_connect */
   bluetooth_accept,      /* si_accept */
   bluetooth_poll_local,  /* si_poll */
-  bluetooth_send,        /* si_send */
-  bluetooth_sendto,      /* si_sendto */
-#ifdef CONFIG_NET_SENDFILE
-  NULL,                  /* si_sendfile */
-#endif
-  bluetooth_recvfrom,    /* si_recvfrom */
-#ifdef CONFIG_NET_CMSG
-  NULL,                  /* si_recvmsg */
-  NULL,                  /* si_sendmsg */
-#endif
+  bluetooth_sendmsg,     /* si_sendmsg */
+  bluetooth_recvmsg,     /* si_recvmsg */
   bluetooth_close        /* si_close */
 };
 
@@ -745,189 +728,6 @@ static int bluetooth_poll_local(FAR struct socket *psock,
 
 #warning Missing logic
   return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: bluetooth_send
- *
- * Description:
- *   Socket send() method for the PF_BLUETOOTH socket.
- *
- * Input Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send() for the list of appropriate error
- *   values.
- *
- ****************************************************************************/
-
-static ssize_t bluetooth_send(FAR struct socket *psock, FAR const void *buf,
-                              size_t len, int flags)
-{
-  ssize_t ret;
-
-  DEBUGASSERT(psock != NULL || buf != NULL);
-
-  /* Only SOCK_RAW is supported */
-
-  if (psock->s_type == SOCK_RAW)
-    {
-      switch (psock->s_proto)
-        {
-          case BTPROTO_L2CAP:
-            {
-              ret = bluetooth_l2cap_send(psock, buf, len, flags);
-              break;
-            }
-
-          case BTPROTO_HCI:
-            {
-              ret = bluetooth_hci_send(psock, buf, len, flags);
-              break;
-            }
-
-          default:
-            ret = -EPFNOSUPPORT;
-        }
-    }
-  else
-    {
-      ret = -EINVAL;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: bluetooth_l2cap_send
- *
- * Description:
- *   Socket send() method for the PF_BLUETOOTH socket over BTPROTO_L2CAP.
- *
- * Input Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send() for the list of appropriate error
- *   values.
- *
- ****************************************************************************/
-
-static ssize_t bluetooth_l2cap_send(FAR struct socket *psock,
-                                    FAR const void *buf,
-                                    size_t len, int flags)
-{
-  struct sockaddr_l2 to;
-  FAR struct bluetooth_conn_s *conn;
-  ssize_t ret;
-
-  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
-  DEBUGASSERT(conn != NULL);
-
-  if (!_SS_ISCONNECTED(psock->s_flags))
-    {
-      ret = -ENOTCONN;
-    }
-  else
-    {
-      to.l2_family = AF_BLUETOOTH;
-      memcpy(&to.l2_bdaddr, &conn->bc_raddr, sizeof(bt_addr_t));
-      to.l2_cid = conn->bc_channel;
-
-      /* Then perform the send() as sendto() */
-
-      ret = psock_bluetooth_sendto(psock, buf, len, flags,
-                                   (FAR const struct sockaddr *)&to,
-                                   sizeof(struct sockaddr_l2));
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: bluetooth_hci_send
- *
- * Description:
- *   Socket send() method for the PF_BLUETOOTH socket over BTPROTO_HCI.
- *
- * Input Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send() for the list of appropriate error
- *   values.
- *
- ****************************************************************************/
-
-static ssize_t bluetooth_hci_send(FAR struct socket *psock,
-                                  FAR const void *buf,
-                                  size_t len, int flags)
-{
-  /* We only support sendto() for HCI sockets */
-
-  return -EPFNOSUPPORT;
-}
-
-/****************************************************************************
- * Name: bluetooth_sendto
- *
- * Description:
- *   Implements the sendto() operation for the case of the PF_BLUETOOTH
- *   socket.
- *
- * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *   to       Address of recipient
- *   tolen    The length of the address structure
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send_to() for the list of appropriate error
- *   values.
- *
- ****************************************************************************/
-
-static ssize_t bluetooth_sendto(FAR struct socket *psock,
-                                FAR const void *buf, size_t len, int flags,
-                                FAR const struct sockaddr *to,
-                                socklen_t tolen)
-{
-  ssize_t ret;
-
-  /* Only SOCK_RAW is supported */
-
-  if (psock->s_type == SOCK_RAW)
-    {
-      /* Raw packet send */
-
-      ret = psock_bluetooth_sendto(psock, buf, len, flags, to, tolen);
-    }
-  else
-    {
-      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
-       * no peer address is set.
-       */
-
-      ret = -EDESTADDRREQ;
-    }
-
-  return ret;
 }
 
 /****************************************************************************
