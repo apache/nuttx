@@ -108,6 +108,13 @@ config XTENSA_BTDEPTH
 	---help---
 		This is the depth of the backtrace.
 
+config XTENSA_INTBACKTRACE
+	bool "Full backtrace from interrupts"
+	default n
+	depends on XTENSA_DUMPBT_ON_ASSERT
+	---help---
+		Add necessary logic to be able to have a full backtrace from an interrupt context.
+
 config XTENSA_USE_SEPARATE_IMEM
 	bool "Use a separate heap for internal memory"
 	default n
