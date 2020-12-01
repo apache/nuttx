@@ -167,7 +167,7 @@ static const struct sam_pidmap_s g_xdmac_rxchan[] =
   { SAM_PID_TC0,    XDMACH_TC0_RX    }, /* TC0 Receive */
   { SAM_PID_TC1,    XDMACH_TC1_RX    }, /* TC1 Receive */
   { SAM_PID_TC2,    XDMACH_TC2_RX    }, /* TC2 Receive */
-  { SAM_PID_TC3,    XDMACH_TC3_RX    }  /* TC3 Receive */
+  { SAM_PID_TC3,    XDMACH_TC3_RX    }, /* TC3 Receive */
 };
 
 #define NXDMAC_RXCHANNELS (sizeof(g_xdmac_rxchan) / sizeof(struct sam_pidmap_s))
@@ -195,7 +195,7 @@ static const struct sam_pidmap_s g_xdmac_txchan[] =
   { SAM_PID_DACC,   XDMACH_DACC_TX   }, /* DACC Transmit */
   { SAM_PID_SSC0,   XDMACH_SSC_TX    }, /* SSC Transmit */
   { SAM_PID_AES,    XDMACH_AES_TX    }, /* AES Transmit */
-  { SAM_PID_PWM1,   XDMACH_PWM1_TX   }  /* PWM01Transmit */
+  { SAM_PID_PWM1,   XDMACH_PWM1_TX   }, /* PWM01Transmit */
 };
 
 #define NXDMAC_TXCHANNELS (sizeof(g_xdmac_txchan) / sizeof(struct sam_pidmap_s))
@@ -1958,7 +1958,9 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   if (xdmach->llhead)
     {
-      /* Save the callback info.  This will be invoked when the DMA completes */
+      /* Save the callback info.  This will be invoked when the DMA
+       * completes
+       */
 
       xdmach->callback = callback;
       xdmach->arg      = arg;
