@@ -2363,7 +2363,7 @@ static void sam_interrupt_work(FAR void *arg)
 
       if ((rsr & EMAC_RSR_RXOVR) != 0)
         {
-          nerr("ERROR: Receiver overrun RSR: %08x\n", rsr);
+          nerr("ERROR: Receiver overrun RSR: %08" PRIx32 "\n", rsr);
           clrbits |= EMAC_RSR_RXOVR;
         }
 
@@ -2422,7 +2422,7 @@ static void sam_interrupt_work(FAR void *arg)
           clrbits = EMAC_TSR_RLE | sam_txinuse(priv, qid);
           sam_txreset(priv, qid);
 
-          nerr("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
+          nerr("ERROR: Retry Limit Exceeded TSR: %08" PRIx32 "\n", tsr);
 
           regval  = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
           regval |= EMAC_NCR_TXEN;
