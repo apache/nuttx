@@ -134,7 +134,7 @@
 #  define XCPTCONTEXT_REGS  _REG_OVLY_START
 #endif
 
-#define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
+#define XCPTCONTEXT_SIZE    ((4 * XCPTCONTEXT_REGS) + 0x20)
 
 /****************************************************************************
  * Public Types
