@@ -134,6 +134,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
           return dev;
         }
     }
+
   return NULL;
 }
 
