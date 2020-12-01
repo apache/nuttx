@@ -42,6 +42,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -942,8 +943,8 @@ static int n25qxxx_write_page(struct n25qxxx_dev_s *priv, FAR const uint8_t *buf
 
       if (ret < 0)
         {
-          ferr("ERROR: QSPI_MEMORY failed writing address=%06x\n",
-               address);
+          ferr("ERROR: QSPI_MEMORY failed writing address=%06jx\n",
+               (intmax_t)address);
           return ret;
         }
 
@@ -1022,7 +1023,8 @@ static FAR uint8_t *n25qxxx_read_cache(struct n25qxxx_dev_s *priv, off_t sector)
 
   shift    = priv->sectorshift - N25QXXX_SECTOR512_SHIFT;
   esectno  = sector >> shift;
-  finfo("sector: %ld esectno: %d shift=%d\n", sector, esectno, shift);
+  finfo("sector: %jd esectno: %jd shift=%d\n",
+        (intmax_t)sector, (intmax_t)esectno, shift);
 
   /* Check if the requested erase block is already in the cache */
 
@@ -1090,7 +1092,8 @@ static void n25qxxx_erase_cache(struct n25qxxx_dev_s *priv, off_t sector)
   if (!IS_ERASED(priv))
     {
       off_t esectno  = sector >> (priv->sectorshift - N25QXXX_SECTOR512_SHIFT);
-      finfo("sector: %ld esectno: %d\n", sector, esectno);
+      finfo("sector: %jd esectno: %jd\n",
+            (intmax_t)sector, (intmax_t)esectno);
 
       DEBUGVERIFY(n25qxxx_erase_sector(priv, esectno));
       SET_ERASED(priv);
@@ -1134,7 +1137,8 @@ static int n25qxxx_write_cache(FAR struct n25qxxx_dev_s *priv,
       if (!IS_ERASED(priv))
         {
           off_t esectno  = sector >> (priv->sectorshift - N25QXXX_SECTOR512_SHIFT);
-          finfo("sector: %ld esectno: %d\n", sector, esectno);
+          finfo("sector: %jd esectno: %jd\n",
+                (intmax_t)sector, (intmax_t)esectno);
 
           ret = n25qxxx_erase_sector(priv, esectno);
           if (ret < 0)
@@ -1350,7 +1354,8 @@ static int n25qxxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #endif
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRId32 " erasesize: %" PRId32
+                    " neraseblocks: %" PRId32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
