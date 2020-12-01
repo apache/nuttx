@@ -72,10 +72,10 @@
  *   functionality.
  *
  * Input Parameters:
- *   psock - An instance of the internal socket structure.
- *   buf   - Data to send
- *   len   - Length of data to send
- *   flags - Send flags
+ *   psock    An instance of the internal socket structure.
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On any failure, a
@@ -87,34 +87,22 @@
 ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags)
 {
-  ssize_t ret;
+  struct msghdr msg;
+  struct iovec iov;
 
-  /* Verify that non-NULL pointers were passed */
+  iov.iov_base = buf;
+  iov.iov_len = len;
+  msg.msg_name = NULL;
+  msg.msg_namelen = 0;
+  msg.msg_iov = &iov;
+  msg.msg_iovlen = 1;
+  msg.msg_control = NULL;
+  msg.msg_controllen = 0;
+  msg.msg_flags = 0;
 
-  if (buf == NULL)
-    {
-      return -EINVAL;
-    }
+  /* And let psock_sendmsg do all of the work */
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (psock == NULL || psock->s_crefs <= 0)
-    {
-      return -EBADF;
-    }
-
-  /* Let the address family's send() method handle the operation */
-
-  DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_send != NULL);
-
-  ret = psock->s_sockif->si_send(psock, buf, len, flags);
-  if (ret < 0)
-    {
-      nerr("ERROR: socket si_send() (or usrsock_sendto()) failed: %zd\n",
-           ret);
-    }
-
-  return ret;
+  return psock_sendmsg(psock, &msg, flags);
 }
 
 /****************************************************************************
@@ -133,10 +121,10 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
  *   functionality.
  *
  * Input Parameters:
- *   sockfd - Socket descriptor of the socket
- *   buf    - Data to send
- *   len    - Length of data to send
- *   flags  - Send flags
+ *   sockfd   Socket descriptor of the socket
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On any failure, a
@@ -169,10 +157,10 @@ ssize_t nx_send(int sockfd, FAR const void *buf, size_t len, int flags)
  *   equivalent to sendto(sockfd,buf,len,flags,NULL,0).
  *
  * Input Parameters:
- *   sockfd - Socket descriptor of the socket
- *   buf    - Data to send
- *   len    - Length of data to send
- *   flags  - Send flags
+ *   sockfd   Socket descriptor of the socket
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -224,23 +212,18 @@ ssize_t nx_send(int sockfd, FAR const void *buf, size_t len, int flags)
 
 ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags)
 {
-  FAR struct socket *psock;
   ssize_t ret;
 
   /* send() is a cancellation point */
 
   enter_cancellation_point();
 
-  /* Get the underlying socket structure */
-
-  psock = sockfd_socket(sockfd);
-
   /* Let psock_send() do all of the work */
 
-  ret = psock_send(psock, buf, len, flags);
+  ret = nx_send(sockfd, buf, len, flags);
   if (ret < 0)
     {
-      _SO_SETERRNO(psock, -ret);
+      _SO_SETERRNO(sockfd_socket(sockfd), -ret);
       ret = ERROR;
     }
 

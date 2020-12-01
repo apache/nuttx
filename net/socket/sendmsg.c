@@ -48,7 +48,7 @@
 
 #include "socket/socket.h"
 
-#ifdef CONFIG_NET_CMSG
+#ifdef CONFIG_NET
 
 /****************************************************************************
  * Public Functions
@@ -65,21 +65,20 @@
  *
  *   - It is not a cancellation point,
  *   - It does not modify the errno variable, and
- *   - I accepts the internal socket structure as an input rather than an
+ *   - It accepts the internal socket structure as an input rather than an
  *     task-specific socket descriptor.
  *
  * Input Parameters:
- *   psock   - A pointer to a NuttX-specific, internal socket structure
- *   msg     - Buffer to of the msg
- *   len     - Length of buffer
- *   flags   - Receive flags
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   msg      Message to send
+ *   flags    Receive flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   send() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned (see comments with send() for a list of appropriate errno
- *   values).
+ *   sendmsg() will return 0. Otherwise, on any failure, a negated errno
+ *   value is returned (see comments with sendmsg() for a list of appropriate
+ *   errno values).
  *
  ****************************************************************************/
 
@@ -88,14 +87,9 @@ ssize_t psock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 {
   /* Verify that non-NULL pointers were passed */
 
-  if (msg == NULL)
+  if (msg == NULL || msg->msg_iov == NULL || msg->msg_iov->iov_base == NULL)
     {
       return -EINVAL;
-    }
-
-  if (msg->msg_iovlen != 1)
-    {
-      return -ENOTSUP;
     }
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -110,50 +104,34 @@ ssize_t psock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
    */
 
   DEBUGASSERT(psock->s_sockif != NULL &&
-              (psock->s_sockif->si_sendmsg != NULL ||
-               psock->s_sockif->si_sendto != NULL));
+              psock->s_sockif->si_sendmsg != NULL);
 
-  if (psock->s_sockif->si_sendmsg != NULL)
-    {
-      return psock->s_sockif->si_sendmsg(psock, msg, flags);
-    }
-  else
-    {
-      /* Socket doesn't implement si_sendmsg fallback to si_sendto */
-
-      FAR void *buf           = msg->msg_iov->iov_base;
-      FAR struct sockaddr *to = msg->msg_name;
-      socklen_t tolen         = msg->msg_namelen;
-      size_t len              = msg->msg_iov->iov_len;
-
-      return psock->s_sockif->si_sendto(psock, buf, len, flags, to, tolen);
-    }
+  return psock->s_sockif->si_sendmsg(psock, msg, flags);
 }
 
 /****************************************************************************
- * Name: nx_sendfrom
+ * Name: nx_sendmsg
  *
  * Description:
- *   nx_sendfrom() receives messages from a socket, and may be used to
+ *   nx_sendmsg() receives messages from a socket, and may be used to
  *   receive data on a socket whether or not it is connection-oriented.
  *   This is an internal OS interface.  It is functionally equivalent to
- *   sendfrom() except that:
+ *   sendmsg() except that:
  *
  *   - It is not a cancellation point, and
  *   - It does not modify the errno variable.
  *
  * Input Parameters:
- *   sockfd  - Socket descriptor of socket
- *   msg      Buffer to receive msg
- *   len     - Length of buffer
- *   flags   - Receive flags
+ *   sockfd   Socket descriptor of socket
+ *   msg      Buffer to receive the message
+ *   flags    Receive flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   send() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned (see comments with send() for a list of appropriate errno
- *   values).
+ *   sendmsg() will return 0. Otherwise, on any failure, a negated errno
+ *   value is returned (see comments with sendmsg() for a list of appropriate
+ *   errno values).
  *
  ****************************************************************************/
 
@@ -179,8 +157,7 @@ ssize_t nx_sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
  *
  * Parameters:
  *   sockfd   Socket descriptor of socket
- *   msg      Buffer to receive msg
- *   len      Length of buffer
+ *   msg      Buffer to receive the message
  *   flags    Receive flags
  *
  * Returned Value:
@@ -216,23 +193,18 @@ ssize_t nx_sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
 
 ssize_t sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
 {
-  FAR struct socket *psock;
   ssize_t ret;
 
-  /* sendfrom() is a cancellation point */
+  /* sendmsg() is a cancellation point */
 
   enter_cancellation_point();
 
-  /* Get the underlying socket structure */
+  /* Let psock_sendmsg() do all of the work */
 
-  psock = sockfd_socket(sockfd);
-
-  /* Let psock_sendfrom() do all of the work */
-
-  ret = psock_sendmsg(psock, msg, flags);
+  ret = nx_sendmsg(sockfd, msg, flags);
   if (ret < 0)
     {
-      _SO_SETERRNO(psock, -ret);
+      _SO_SETERRNO(sockfd_socket(sockfd), -ret);
       ret = ERROR;
     }
 
@@ -240,4 +212,4 @@ ssize_t sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
   return ret;
 }
 
-#endif /* CONFIG_NET_CMSG */
+#endif /* CONFIG_NET */

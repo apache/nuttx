@@ -289,7 +289,8 @@ FAR struct ieee802154_conn_s *
  * Name: ieee802154_callback
  *
  * Description:
- *   Inform the application holding the IEEE 802.15.4 socket of a change in state.
+ *   Inform the application holding the IEEE 802.15.4 socket of a change in
+ *   state.
  *
  * Returned Value:
  *   OK if IEEE 802.15.4 has been processed, otherwise ERROR.
@@ -304,39 +305,35 @@ uint16_t ieee802154_callback(FAR struct radio_driver_s *radio,
                              uint16_t flags);
 
 /****************************************************************************
- * Name: ieee802154_recvfrom
+ * Name: ieee802154_recvmsg
  *
  * Description:
  *   Implements the socket recvfrom interface for the case of the AF_INET
- *   and AF_INET6 address families.  ieee802154_recvfrom() receives messages from
- *   a socket, and may be used to receive data on a socket whether or not it
- *   is connection-oriented.
+ *   and AF_INET6 address families.  ieee802154_recvmsg() receives messages
+ *   from a socket, and may be used to receive data on a socket whether or
+ *   not it is connection-oriented.
  *
- *   If 'from' is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in.  The argument 'fromlen' is
- *   initialized to the size of the buffer associated with from, and
+ *   If msg_name is not NULL, and the underlying protocol provides the source
+ *   address, this source address is filled in. The argument 'msg_namelen' is
+ *   initialized to the size of the buffer associated with msg_name, and
  *   modified on return to indicate the actual size of the address stored
  *   there.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   msg      Buffer to receive the message
  *   flags    Receive flags
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters received.  If no data is
+ *   On success, returns the number of characters received. If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, a negated errno value is
- *   returned (see recvfrom() for the list of appropriate error values).
+ *   recvmsg() will return 0.  Otherwise, on errors, a negated errno value is
+ *   returned (see recvmsg() for the list of appropriate error values).
  *
  ****************************************************************************/
 
-ssize_t ieee802154_recvfrom(FAR struct socket *psock, FAR void *buf,
-                            size_t len, int flags, FAR struct sockaddr *from,
-                            FAR socklen_t *fromlen);
+ssize_t ieee802154_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                           int flags);
 
 /****************************************************************************
  * Name: ieee802154_find_device
@@ -381,33 +378,28 @@ void ieee802154_poll(FAR struct net_driver_s *dev,
                      FAR struct ieee802154_conn_s *conn);
 
 /****************************************************************************
- * Name: psock_ieee802154_sendto
+ * Name: ieee802154_sendmsg
  *
  * Description:
- *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
- *   socket, the parameters to and 'tolen' are ignored (and the error EISCONN
- *   may be returned when they are not NULL and 0), and the error ENOTCONN is
- *   returned when the socket was not actually connected.
+ *   If sendmsg() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
+ *   socket, the parameters 'msg_name' and 'msg_namelen' are ignored (and the
+ *   error EISCONN may be returned when they are not NULL and 0), and the
+ *   error ENOTCONN is returned when the socket was not actually connected.
  *
  * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Data to send
- *   len      Length of data to send
+ *   psock    An instance of the internal socket structure.
+ *   msg      Message to send
  *   flags    Send flags
- *   to       Address of recipient
- *   tolen    The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   a negated errno value is retruend.  See sendto() for the complete list
- *   of return values.
+ *   On success, returns the number of characters sent.  On error, a negated
+ *   errno value is returned (see sendmsg() for the complete list of return
+ *   values.
  *
  ****************************************************************************/
 
-ssize_t psock_ieee802154_sendto(FAR struct socket *psock,
-                                FAR const void *buf,
-                                size_t len, int flags,
-                                FAR const struct sockaddr *to, socklen_t tolen);
+ssize_t ieee802154_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                           int flags);
 
 /****************************************************************************
  * Name: ieee802154_container_initialize
@@ -445,8 +437,8 @@ void ieee802154_container_initialize(void);
  *   None
  *
  * Returned Value:
- *   A reference to the allocated container structure.  All user fields in this
- *   structure have been zeroed.  On a failure to allocate, NULL is
+ *   A reference to the allocated container structure. All user fields in
+ *   this structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
  *
  * Assumptions:

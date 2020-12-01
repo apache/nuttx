@@ -48,7 +48,7 @@
 
 #include "socket/socket.h"
 
-#ifdef CONFIG_NET_CMSG
+#ifdef CONFIG_NET
 
 /****************************************************************************
  * Public Functions
@@ -58,28 +58,27 @@
  * Name: psock_recvmsg
  *
  * Description:
- *   psock_recvfrom() receives messages from a socket, and may be used to
+ *   psock_recvmsg() receives messages from a socket, and may be used to
  *   receive data on a socket whether or not it is connection-oriented.
  *   This is an internal OS interface.  It is functionally equivalent to
- *   recvfrom() except that:
+ *   recvmsg() except that:
  *
  *   - It is not a cancellation point,
  *   - It does not modify the errno variable, and
- *   - I accepts the internal socket structure as an input rather than an
+ *   - It accepts the internal socket structure as an input rather than an
  *     task-specific socket descriptor.
  *
  * Input Parameters:
- *   psock   - A pointer to a NuttX-specific, internal socket structure
- *   msg      Buffer to receive msg
- *   len     - Length of buffer
- *   flags   - Receive flags
+ *   psock     A pointer to a NuttX-specific, internal socket structure
+ *   msg       Buffer to receive data
+ *   flags     Receive flags
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
+ *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned (see comments with send() for a list of appropriate errno
- *   values).
+ *   recvmsg() will return 0.  Otherwise, on any failure, a negated errno
+ *   value is returned (see comments with recvmsg() for a list of appropriate
+ *   errno values).
  *
  ****************************************************************************/
 
@@ -88,7 +87,12 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 {
   /* Verify that non-NULL pointers were passed */
 
-  if (msg == NULL)
+  if (msg == NULL || msg->msg_iov == NULL || msg->msg_iov->iov_base == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (msg->msg_name != NULL && msg->msg_namelen <= 0)
     {
       return -EINVAL;
     }
@@ -105,48 +109,31 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -EBADF;
     }
 
-  /* Let logic specific to this address family handle the recvfrom()
+  /* Let logic specific to this address family handle the recvmsg()
    * operation.
    */
 
   DEBUGASSERT(psock->s_sockif != NULL &&
-              (psock->s_sockif->si_recvmsg != NULL ||
-               psock->s_sockif->si_recvfrom != NULL));
+              psock->s_sockif->si_recvmsg != NULL);
 
-  if (psock->s_sockif->si_recvmsg != NULL)
-    {
-      return psock->s_sockif->si_recvmsg(psock, msg, flags);
-    }
-  else
-    {
-      /* Socket doesn't implement si_recvmsg fallback to si_recvfrom */
-
-      FAR void *buf             = msg->msg_iov->iov_base;
-      FAR struct sockaddr *from = msg->msg_name;
-      FAR socklen_t *fromlen    = (FAR socklen_t *)&msg->msg_namelen;
-      size_t len                = msg->msg_iov->iov_len;
-
-      return psock->s_sockif->si_recvfrom(psock, buf, len, flags, from,
-                                          fromlen);
-    }
+  return psock->s_sockif->si_recvmsg(psock, msg, flags);
 }
 
 /****************************************************************************
- * Name: nx_recvfrom
+ * Name: nx_recvmsg
  *
  * Description:
- *   nx_recvfrom() receives messages from a socket, and may be used to
+ *   nx_recvmsg() receives messages from a socket, and may be used to
  *   receive data on a socket whether or not it is connection-oriented.
  *   This is an internal OS interface.  It is functionally equivalent to
- *   recvfrom() except that:
+ *   recvmsg() except that:
  *
  *   - It is not a cancellation point, and
  *   - It does not modify the errno variable.
  *
  * Input Parameters:
  *   sockfd  - Socket descriptor of socket
- *   msg      Buffer to receive msg
- *   len     - Length of buffer
+ *   msg      Buffer to receive the message
  *   flags   - Receive flags
  *
  * Returned Value:
@@ -175,13 +162,12 @@ ssize_t nx_recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
  * Function: recvmsg
  *
  * Description:
- *   The recvmsg() call is identical to recvfrom() with a NULL from
- *   parameter.
+ *   recvmsg() receives messages from a socket, and may be used to
+ *   receive data on a socket whether or not it is connection-oriented.
  *
  * Parameters:
  *   sockfd   Socket descriptor of socket
- *   msg      Buffer to receive msg
- *   len      Length of buffer
+ *   msg      Buffer to receive the message
  *   flags    Receive flags
  *
  * Returned Value:
@@ -217,23 +203,18 @@ ssize_t nx_recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
 
 ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
 {
-  FAR struct socket *psock;
   ssize_t ret;
 
-  /* recvfrom() is a cancellation point */
+  /* recvmsg() is a cancellation point */
 
   enter_cancellation_point();
 
-  /* Get the underlying socket structure */
+  /* Let nx_recvmsg() do all of the work */
 
-  psock = sockfd_socket(sockfd);
-
-  /* Let psock_recvfrom() do all of the work */
-
-  ret = psock_recvmsg(psock, msg, flags);
+  ret = nx_recvmsg(sockfd, msg, flags);
   if (ret < 0)
     {
-      _SO_SETERRNO(psock, -ret);
+      _SO_SETERRNO(sockfd_socket(sockfd), -ret);
       ret = ERROR;
     }
 
@@ -241,4 +222,4 @@ ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
   return ret;
 }
 
-#endif /* CONFIG_NET_CMSG */
+#endif /* CONFIG_NET */

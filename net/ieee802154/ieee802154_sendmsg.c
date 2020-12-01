@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ieee802154/ieee802154_sendto.c
+ * net/ieee802154/ieee802154_sendmsg.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -391,11 +391,7 @@ errout:
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: psock_ieee802154_sendto
+ * Name: ieee802154_sendto
  *
  * Description:
  *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
@@ -418,10 +414,11 @@ errout:
  *
  ****************************************************************************/
 
-ssize_t psock_ieee802154_sendto(FAR struct socket *psock,
-                                FAR const void *buf, size_t len, int flags,
-                                FAR const struct sockaddr *to,
-                                socklen_t tolen)
+static ssize_t ieee802154_sendto(FAR struct socket *psock,
+                                 FAR const void *buf,
+                                 size_t len, int flags,
+                                 FAR const struct sockaddr *to,
+                                 socklen_t tolen)
 {
   FAR struct sockaddr_ieee802154_s *destaddr;
   FAR struct radio_driver_s *radio;
@@ -434,6 +431,17 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock,
   if (psock == NULL || psock->s_crefs <= 0)
     {
       return -EBADF;
+    }
+
+  /* Only SOCK_DGRAM is supported (because the MAC header is stripped) */
+
+  if (psock->s_type != SOCK_DGRAM)
+    {
+      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
+       * no peer address is set.
+       */
+
+      return -EDESTADDRREQ;
     }
 
   conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
@@ -537,6 +545,113 @@ ssize_t psock_ieee802154_sendto(FAR struct socket *psock,
   /* Return the number of bytes actually sent */
 
   return state.is_sent;
+}
+
+/****************************************************************************
+ * Name: ieee802154_send
+ *
+ * Description:
+ *   Socket send() method for the PF_IEEE802154 socket.
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error, a negated
+ *   errno value is returned (see send() for the list of appropriate error
+ *   values.
+ *
+ ****************************************************************************/
+
+static ssize_t ieee802154_send(FAR struct socket *psock, FAR const void *buf,
+                               size_t len, int flags)
+{
+  struct sockaddr_ieee802154_s to;
+  FAR struct ieee802154_conn_s *conn;
+  ssize_t ret;
+
+  DEBUGASSERT(psock != NULL || buf != NULL);
+  conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+  /* Only SOCK_DGRAM is supported (because the MAC header is stripped) */
+
+  if (psock->s_type == SOCK_DGRAM)
+    {
+      /* send() may be used only if the socket has been connected. */
+
+      if (!_SS_ISCONNECTED(psock->s_flags) ||
+          conn->raddr.s_mode == IEEE802154_ADDRMODE_NONE)
+        {
+          ret = -ENOTCONN;
+        }
+      else
+        {
+          to.sa_family = AF_IEEE802154;
+          memcpy(&to.sa_addr, &conn->raddr,
+                 sizeof(struct ieee802154_saddr_s));
+
+          /* Then perform the send() as sendto() */
+
+          ret = ieee802154_sendto(psock, buf, len, flags,
+                                  (FAR const struct sockaddr *)&to,
+                                  sizeof(struct sockaddr_ieee802154_s));
+        }
+    }
+  else
+    {
+      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
+       * no peer address is set.
+       */
+
+      ret = -EDESTADDRREQ;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ieee802154_sendmsg
+ *
+ * Description:
+ *   Socket sendmsg() method for the PF_IEEE802154 socket.
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   msg      Message to send
+ *   flags    Send flags
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On error, a negated
+ *   errno value is returned (see sendmsg() for the list of appropriate error
+ *   values.
+ *
+ ****************************************************************************/
+
+ssize_t ieee802154_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                           int flags)
+{
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *to = msg->msg_name;
+  socklen_t tolen = msg->msg_namelen;
+
+  /* Validity check, only single iov supported */
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
+  return to ? ieee802154_sendto(psock, buf, len, flags, to, tolen) :
+              ieee802154_send(psock, buf, len, flags);
 }
 
 #endif /* CONFIG_NET_IEEE802154 */

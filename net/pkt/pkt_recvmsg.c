@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/pkt/pkt_recvfrom.c
+ * net/pkt/pkt_recvmsg.c
  *
  *   Copyright (C) 2007-2009, 2011-2017, 2020 Gregory Nutt. All rights
  *     reserved.
@@ -328,40 +328,40 @@ static ssize_t pkt_recvfrom_result(int result,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pkt_recvfrom
+ * Name: pkt_recvmsg
  *
  * Description:
- *   Implements the socket recvfrom interface for the case of the AF_INET
- *   and AF_INET6 address families.  pkt_recvfrom() receives messages from
+ *   Implements the socket recvmsg interface for the case of the AF_INET
+ *   and AF_INET6 address families.  pkt_recvmsg() receives messages from
  *   a socket, and may be used to receive data on a socket whether or not it
  *   is connection-oriented.
  *
- *   If 'from' is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in.  The argument 'fromlen' is
- *   initialized to the size of the buffer associated with from, and
- *   modified on return to indicate the actual size of the address stored
- *   there.
+ *   If 'msg_name' is not NULL, and the underlying protocol provides the
+ *   source address, this source address is filled in.  The argument
+ *   'msg_namelen' is initialized to the size of the buffer associated with
+ *   msg_name, and modified on return to indicate the actual size of the
+ *   address stored there.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   msg      Buffer to receive the message
  *   flags    Receive flags
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters received.  If no data is
+ *   On success, returns the number of characters received. If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, a negated errno value is
- *   returned (see recvfrom() for the list of appropriate error values).
+ *   recvmsg() will return 0.  Otherwise, on errors, a negated errno value is
+ *   returned (see recvmsg() for the list of appropriate error values).
  *
  ****************************************************************************/
 
-ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                     int flags, FAR struct sockaddr *from,
-                     FAR socklen_t *fromlen)
+ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                    int flags)
 {
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *from = msg->msg_name;
+  FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
   FAR struct net_driver_s *dev;
   struct pkt_recvfrom_s state;

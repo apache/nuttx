@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/usrsock/usrsock_recvfrom.c
+ * net/usrsock/usrsock_sendmsg.c
  *
  *  Copyright (C) 2015, 2017 Haltian Ltd. All rights reserved.
  *  Author: Jussi Kivilinna <jussi.kivilinna@haltian.com>
@@ -58,116 +58,105 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t recvfrom_event(FAR struct net_driver_s *dev,
-                               FAR void *pvconn, FAR void *pvpriv,
-                               uint16_t flags)
+static uint16_t sendto_event(FAR struct net_driver_s *dev, FAR void *pvconn,
+                             FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct usrsock_data_reqstate_s *pstate = pvpriv;
+  FAR struct usrsock_reqstate_s *pstate = pvpriv;
   FAR struct usrsock_conn_s *conn = pvconn;
 
   if (flags & USRSOCK_EVENT_ABORT)
     {
       ninfo("socket aborted.\n");
 
-      pstate->reqstate.result = -ECONNABORTED;
-      pstate->valuelen = 0;
-      pstate->valuelen_nontrunc = 0;
+      pstate->result = -ECONNABORTED;
 
       /* Stop further callbacks */
 
-      pstate->reqstate.cb->flags   = 0;
-      pstate->reqstate.cb->priv    = NULL;
-      pstate->reqstate.cb->event   = NULL;
+      pstate->cb->flags   = 0;
+      pstate->cb->priv    = NULL;
+      pstate->cb->event   = NULL;
 
       /* Wake up the waiting thread */
 
-      nxsem_post(&pstate->reqstate.recvsem);
+      nxsem_post(&pstate->recvsem);
     }
   else if (flags & USRSOCK_EVENT_REQ_COMPLETE)
     {
       ninfo("request completed.\n");
 
-      pstate->reqstate.result = conn->resp.result;
-      if (pstate->reqstate.result < 0)
-        {
-          pstate->valuelen = 0;
-          pstate->valuelen_nontrunc = 0;
-        }
-      else
-        {
-          pstate->valuelen = conn->resp.valuelen;
-          pstate->valuelen_nontrunc = conn->resp.valuelen_nontrunc;
-        }
+      pstate->result = conn->resp.result;
 
-      if (pstate->reqstate.result >= 0 ||
-          pstate->reqstate.result == -EAGAIN)
+      if (pstate->result >= 0 || pstate->result == -EAGAIN)
         {
           /* After reception of data, mark input not ready. Daemon will
            * send event to restore this flag.
            */
 
-          conn->flags &= ~USRSOCK_EVENT_RECVFROM_AVAIL;
+          conn->flags &= ~USRSOCK_EVENT_SENDTO_READY;
         }
 
       /* Stop further callbacks */
 
-      pstate->reqstate.cb->flags   = 0;
-      pstate->reqstate.cb->priv    = NULL;
-      pstate->reqstate.cb->event   = NULL;
+      pstate->cb->flags   = 0;
+      pstate->cb->priv    = NULL;
+      pstate->cb->event   = NULL;
 
       /* Wake up the waiting thread */
 
-      nxsem_post(&pstate->reqstate.recvsem);
+      nxsem_post(&pstate->recvsem);
     }
   else if (flags & USRSOCK_EVENT_REMOTE_CLOSED)
     {
       ninfo("remote closed.\n");
 
-      pstate->reqstate.result = -EPIPE;
+      pstate->result = -EPIPE;
 
       /* Stop further callbacks */
 
-      pstate->reqstate.cb->flags   = 0;
-      pstate->reqstate.cb->priv    = NULL;
-      pstate->reqstate.cb->event   = NULL;
+      pstate->cb->flags   = 0;
+      pstate->cb->priv    = NULL;
+      pstate->cb->event   = NULL;
 
       /* Wake up the waiting thread */
 
-      nxsem_post(&pstate->reqstate.recvsem);
+      nxsem_post(&pstate->recvsem);
     }
-  else if (flags & USRSOCK_EVENT_RECVFROM_AVAIL)
+  else if (flags & USRSOCK_EVENT_SENDTO_READY)
     {
-      ninfo("recvfrom avail.\n");
+      ninfo("sendto ready.\n");
 
-      flags &= ~USRSOCK_EVENT_RECVFROM_AVAIL;
+      /* Do not let other waiters to claim new data. */
+
+      flags &= ~USRSOCK_EVENT_SENDTO_READY;
 
       /* Stop further callbacks */
 
-      pstate->reqstate.cb->flags   = 0;
-      pstate->reqstate.cb->priv    = NULL;
-      pstate->reqstate.cb->event   = NULL;
+      pstate->cb->flags   = 0;
+      pstate->cb->priv    = NULL;
+      pstate->cb->event   = NULL;
 
       /* Wake up the waiting thread */
 
-      nxsem_post(&pstate->reqstate.recvsem);
+      nxsem_post(&pstate->recvsem);
     }
 
   return flags;
 }
 
 /****************************************************************************
- * Name: do_recvfrom_request
+ * Name: do_sendto_request
  ****************************************************************************/
 
-static int do_recvfrom_request(FAR struct usrsock_conn_s *conn,
-                               size_t buflen, socklen_t addrlen,
-                               int32_t flags)
+static int do_sendto_request(FAR struct usrsock_conn_s *conn,
+                             FAR const void *buf, size_t buflen,
+                             FAR const struct sockaddr *addr,
+                             socklen_t addrlen, int32_t flags)
 {
-  struct usrsock_request_recvfrom_s req =
+  struct usrsock_request_sendto_s req =
   {
   };
 
-  struct iovec bufs[1];
+  struct iovec bufs[3];
 
   if (addrlen > UINT16_MAX)
     {
@@ -181,64 +170,64 @@ static int do_recvfrom_request(FAR struct usrsock_conn_s *conn,
 
   /* Prepare request for daemon to read. */
 
-  req.head.reqid = USRSOCK_REQUEST_RECVFROM;
+  req.head.reqid = USRSOCK_REQUEST_SENDTO;
   req.usockid = conn->usockid;
   req.flags = flags;
-  req.max_addrlen = addrlen;
-  req.max_buflen = buflen;
+  req.addrlen = addrlen;
+  req.buflen = buflen;
 
   bufs[0].iov_base = (FAR void *)&req;
   bufs[0].iov_len = sizeof(req);
+  bufs[1].iov_base = (FAR void *)addr;
+  bufs[1].iov_len = addrlen;
+  bufs[2].iov_base = (FAR void *)buf;
+  bufs[2].iov_len = buflen;
 
   return usrsockdev_do_request(conn, bufs, ARRAY_SIZE(bufs));
 }
 
 /****************************************************************************
- * Name: usrsock_recvfrom
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: usrsock_sendmsg
  *
  * Description:
- *   recvfrom() receives messages from a socket, and may be used to receive
- *   data on a socket whether or not it is connection-oriented.
- *
- *   If from is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in. The argument fromlen
- *   initialized to the size of the buffer associated with from, and modified
- *   on return to indicate the actual size of the address stored there.
+ *   If sendmsg() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
+ *   socket, the parameters 'msg_name' and 'msg_namelen' are ignored (and the
+ *   error EISCONN may be returned when they are not NULL and 0), and the
+ *   error ENOTCONN is returned when the socket was not actually connected.
  *
  * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   flags    Receive flags (ignored)
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
+ *   psock    A reference to the socket structure of the socket to be
+ *            connected
+ *   msg      Message to send
+ *   flags    Send flags (ignored)
  *
  ****************************************************************************/
 
-ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                         int flags, FAR struct sockaddr *from,
-                         FAR socklen_t *fromlen)
+ssize_t usrsock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                       int flags)
 {
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *to = msg->msg_name;
+  socklen_t tolen = msg->msg_namelen;
   FAR struct usrsock_conn_s *conn = psock->s_conn;
-  struct usrsock_data_reqstate_s state =
+  struct usrsock_reqstate_s state =
   {
   };
 
-  struct iovec inbufs[2];
-  socklen_t addrlen = 0;
-  socklen_t outaddrlen = 0;
   ssize_t ret;
 
   DEBUGASSERT(conn);
 
-  if (fromlen)
-    {
-      if (*fromlen > 0 && from == NULL)
-        {
-          return -EINVAL;
-        }
+  /* Validity check, only single iov supported */
 
-      addrlen = *fromlen;
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
     }
 
   net_lock();
@@ -248,7 +237,7 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     {
       /* Invalid state or closed by daemon. */
 
-      ninfo("usockid=%d; recvfrom() with uninitialized usrsock.\n",
+      ninfo("usockid=%d; sendto() with uninitialized usrsock.\n",
             conn->usockid);
 
       ret = (conn->state == USRSOCK_CONN_STATE_ABORTED) ? -EPIPE :
@@ -274,12 +263,17 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
             {
               /* Not connected. */
 
-              ninfo("usockid=%d; socket not connected.\n",
-                    conn->usockid);
-
               ret = -ENOTCONN;
               goto errout_unlock;
             }
+        }
+
+      if (to || tolen)
+        {
+          /* Address provided for connection-mode socket */
+
+          ret = -EISCONN;
+          goto errout_unlock;
         }
     }
 
@@ -287,8 +281,7 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     {
       /* Non-blocking connecting. */
 
-      ninfo("usockid=%d; socket still connecting.\n",
-            conn->usockid);
+      ninfo("usockid=%d; socket still connecting.\n", conn->usockid);
 
       ret = -EAGAIN;
       goto errout_unlock;
@@ -300,51 +293,51 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       if (conn->flags & USRSOCK_EVENT_REMOTE_CLOSED)
         {
-          ninfo("usockid=%d; remote closed (EOF).\n", conn->usockid);
+          ninfo("usockid=%d; remote closed.\n", conn->usockid);
 
-          ret = 0;
+          ret = -EPIPE;
           goto errout_unlock;
         }
 
-      /* Check if need to wait for receive data to become available. */
+      /* Check if need to wait for send to become ready. */
 
-      if (!(conn->flags & USRSOCK_EVENT_RECVFROM_AVAIL))
+      if (!(conn->flags & USRSOCK_EVENT_SENDTO_READY))
         {
           if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
             {
-              /* Nothing to receive from daemon side. */
+              /* Send busy at daemon side. */
 
               ret = -EAGAIN;
               goto errout_unlock;
             }
 
-          /* Wait recv to become avail. */
+          /* Wait send to become ready. */
 
-          ret = usrsock_setup_data_request_callback(
-              conn, &state, recvfrom_event,
-              USRSOCK_EVENT_ABORT | USRSOCK_EVENT_RECVFROM_AVAIL |
-              USRSOCK_EVENT_REMOTE_CLOSED);
+          ret = usrsock_setup_request_callback(conn, &state, sendto_event,
+                                               USRSOCK_EVENT_ABORT |
+                                               USRSOCK_EVENT_SENDTO_READY |
+                                               USRSOCK_EVENT_REMOTE_CLOSED);
           if (ret < 0)
             {
               nwarn("usrsock_setup_request_callback failed: %d\n", ret);
               goto errout_unlock;
             }
 
-          /* Wait for receive-avail (or abort, or timeout, or signal). */
+          /* Wait for send-ready (or abort, or timeout, or signal). */
 
-          ret = net_timedwait(&state.reqstate.recvsem,
-                              _SO_TIMEOUT(psock->s_rcvtimeo));
+          ret = net_timedwait(&state.recvsem,
+                              _SO_TIMEOUT(psock->s_sndtimeo));
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)
                 {
-                  ninfo("recvfrom timedout\n");
+                  ninfo("sendto timedout\n");
 
                   ret = -EAGAIN;
                 }
               else if (ret == -EINTR)
                 {
-                  ninfo("recvfrom interrupted\n");
+                  ninfo("sendto interrupted\n");
                 }
               else
                 {
@@ -353,7 +346,7 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                 }
             }
 
-          usrsock_teardown_data_request_callback(&state);
+          usrsock_teardown_request_callback(&state);
 
           /* Did wait timeout or got signal? */
 
@@ -374,81 +367,47 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
           if (conn->flags & USRSOCK_EVENT_REMOTE_CLOSED)
             {
-              ret = 0;
+              ret = -EPIPE;
               goto errout_unlock;
             }
 
-          DEBUGASSERT(conn->flags & USRSOCK_EVENT_RECVFROM_AVAIL);
+          DEBUGASSERT(conn->flags & USRSOCK_EVENT_SENDTO_READY);
         }
 
       /* Set up event callback for usrsock. */
 
-      ret = usrsock_setup_data_request_callback(
-          conn, &state, recvfrom_event,
-          USRSOCK_EVENT_ABORT | USRSOCK_EVENT_REQ_COMPLETE);
+      ret = usrsock_setup_request_callback(conn, &state, sendto_event,
+                                           USRSOCK_EVENT_ABORT |
+                                           USRSOCK_EVENT_REQ_COMPLETE);
       if (ret < 0)
         {
           nwarn("usrsock_setup_request_callback failed: %d\n", ret);
           goto errout_unlock;
         }
 
-      inbufs[0].iov_base = (FAR void *)from;
-      inbufs[0].iov_len = addrlen;
-      inbufs[1].iov_base = (FAR void *)buf;
-      inbufs[1].iov_len = len;
-
-      usrsock_setup_datain(conn, inbufs, ARRAY_SIZE(inbufs));
-
       /* MSG_DONTWAIT is only use in usrsock. */
 
-      flags &= ~MSG_DONTWAIT;
+       flags &= ~MSG_DONTWAIT;
 
       /* Request user-space daemon to close socket. */
 
-      ret = do_recvfrom_request(conn, len, addrlen, flags);
+      ret = do_sendto_request(conn, buf, len, to, tolen, flags);
       if (ret >= 0)
         {
           /* Wait for completion of request. */
 
-          net_lockedwait_uninterruptible(&state.reqstate.recvsem);
-          ret = state.reqstate.result;
+          net_lockedwait_uninterruptible(&state.recvsem);
+          ret = state.result;
 
           DEBUGASSERT(ret <= (ssize_t)len);
-          DEBUGASSERT(state.valuelen <= addrlen);
-          DEBUGASSERT(state.valuelen <= state.valuelen_nontrunc);
-
-          if (ret >= 0)
-            {
-              /* Store length of 'from' address that was available at
-               * daemon-side.
-               */
-
-              outaddrlen = state.valuelen_nontrunc;
-
-              /* If the MSG_PEEK flag is enabled, it will only peek
-               * from the buffer, so remark the input as ready.
-               */
-
-              if (flags & MSG_PEEK)
-                {
-                  conn->flags |= USRSOCK_EVENT_RECVFROM_AVAIL;
-                }
-            }
         }
 
-      usrsock_teardown_datain(conn);
-      usrsock_teardown_data_request_callback(&state);
+      usrsock_teardown_request_callback(&state);
     }
   while (ret == -EAGAIN);
 
 errout_unlock:
   net_unlock();
-
-  if (fromlen)
-    {
-      *fromlen = outaddrlen;
-    }
-
   return ret;
 }
 

@@ -203,26 +203,16 @@ struct sock_intf_s
                     FAR struct socket *newsock);
   CODE int        (*si_poll)(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-  CODE ssize_t    (*si_send)(FAR struct socket *psock, FAR const void *buf,
-                    size_t len, int flags);
-  CODE ssize_t    (*si_sendto)(FAR struct socket *psock, FAR const void *buf,
-                    size_t len, int flags, FAR const struct sockaddr *to,
-                    socklen_t tolen);
+  CODE ssize_t    (*si_sendmsg)(FAR struct socket *psock,
+                    FAR struct msghdr *msg, int flags);
+  CODE ssize_t    (*si_recvmsg)(FAR struct socket *psock,
+                    FAR struct msghdr *msg, int flags);
+  CODE int        (*si_close)(FAR struct socket *psock);
 #ifdef CONFIG_NET_SENDFILE
   CODE ssize_t    (*si_sendfile)(FAR struct socket *psock,
                     FAR struct file *infile, FAR off_t *offset,
                     size_t count);
 #endif
-  CODE ssize_t    (*si_recvfrom)(FAR struct socket *psock, FAR void *buf,
-                    size_t len, int flags, FAR struct sockaddr *from,
-                    FAR socklen_t *fromlen);
-#ifdef CONFIG_NET_CMSG
-  CODE ssize_t    (*si_recvmsg)(FAR struct socket *psock,
-    FAR struct msghdr *msg, int flags);
-  CODE ssize_t    (*si_sendmsg)(FAR struct socket *psock,
-    FAR struct msghdr *msg, int flags);
-#endif
-  CODE int        (*si_close)(FAR struct socket *psock);
 #ifdef CONFIG_NET_USRSOCK
   CODE int        (*si_ioctl)(FAR struct socket *psock, int cmd,
                     FAR void *arg, size_t arglen);
@@ -877,6 +867,66 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
                   socklen_t addrlen);
 
 /****************************************************************************
+ * Name: psock_sendmsg
+ *
+ * Description:
+ *   psock_sendmsg() sends messages to a socket, and may be used to
+ *   send data on a socket whether or not it is connection-oriented.
+ *   This is an internal OS interface. It is functionally equivalent to
+ *   sendmsg() except that:
+ *
+ *   - It is not a cancellation point,
+ *   - It does not modify the errno variable, and
+ *   - I accepts the internal socket structure as an input rather than an
+ *     task-specific socket descriptor.
+ *
+ * Input Parameters:
+ *   psock     A pointer to a NuttX-specific, internal socket structure
+ *   msg       Message to send
+ *   flags     Send flags
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent. Otherwise, on any
+ *   failure, a negated errno value is returned (see comments with sendmsg()
+ *   for a list of appropriate errno values).
+ *
+ ****************************************************************************/
+
+ssize_t psock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                      int flags);
+
+/****************************************************************************
+ * Name: psock_recvmsg
+ *
+ * Description:
+ *   psock_recvmsg() receives messages from a socket, and may be used to
+ *   receive data on a socket whether or not it is connection-oriented.
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   recvmsg() except that:
+ *
+ *   - It is not a cancellation point,
+ *   - It does not modify the errno variable, and
+ *   - It accepts the internal socket structure as an input rather than an
+ *     task-specific socket descriptor.
+ *
+ * Input Parameters:
+ *   psock     A pointer to a NuttX-specific, internal socket structure
+ *   msg       Buffer to receive data
+ *   flags     Receive flags
+ *
+ * Returned Value:
+ *   On success, returns the number of characters received.  If no data is
+ *   available to be received and the peer has performed an orderly shutdown,
+ *   recvmsg() will return 0.  Otherwise, on any failure, a negated errno
+ *   value is returned (see comments with recvmsg() for a list of appropriate
+ *   errno values).
+ *
+ ****************************************************************************/
+
+ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                      int flags);
+
+/****************************************************************************
  * Name: psock_send
  *
  * Description:
@@ -894,10 +944,10 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
  *   functionality.
  *
  * Input Parameters:
- *   psock - An instance of the internal socket structure.
- *   buf   - Data to send
- *   len   - Length of data to send
- *   flags - Send flags
+ *   psock   An instance of the internal socket structure.
+ *   buf     Data to send
+ *   len     Length of data to send
+ *   flags   Send flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On any failure, a
@@ -925,10 +975,10 @@ ssize_t psock_send(FAR struct socket *psock, const void *buf, size_t len,
  *   functionality.
  *
  * Input Parameters:
- *   sockfd - Socket descriptor of the socket
- *   buf    - Data to send
- *   len    - Length of data to send
- *   flags  - Send flags
+ *   sockfd   Socket descriptor of the socket
+ *   buf      Data to send
+ *   len      Length of data to send
+ *   flags    Send flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On any failure, a
@@ -1017,23 +1067,23 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
  *
  *   - It is not a cancellation point,
  *   - It does not modify the errno variable, and
- *   - I accepts the internal socket structure as an input rather than an
+ *   - It accepts the internal socket structure as an input rather than an
  *     task-specific socket descriptor.
  *
  * Input Parameters:
- *   psock   - A pointer to a NuttX-specific, internal socket structure
- *   buf     - Buffer to receive data
- *   len     - Length of buffer
- *   flags   - Receive flags
- *   from    - Address of source (may be NULL)
- *   fromlen - The length of the address structure
+ *   psock     A pointer to a NuttX-specific, internal socket structure
+ *   buf       Buffer to receive data
+ *   len       Length of buffer
+ *   flags     Receive flags
+ *   from      Address of source (may be NULL)
+ *   fromlen   The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
+ *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned (see comments with send() for a list of appropriate errno
- *   values).
+ *   recvfrom() will return 0.  Otherwise, on any failure, a negated errno
+ *   value is returned (see comments with recvfrom() for a list of
+ *   appropriate errno values).
  *
  ****************************************************************************/
 
@@ -1059,19 +1109,19 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *   - It does not modify the errno variable.
  *
  * Input Parameters:
- *   sockfd  - Socket descriptor of socket
- *   buf     - Buffer to receive data
- *   len     - Length of buffer
- *   flags   - Receive flags
- *   from    - Address of source (may be NULL)
- *   fromlen - The length of the address structure
+ *   sockfd    Socket descriptor of socket
+ *   buf       Buffer to receive data
+ *   len       Length of buffer
+ *   flags     Receive flags
+ *   from      Address of source (may be NULL)
+ *   fromlen   The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
+ *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned (see comments with send() for a list of appropriate errno
- *   values).
+ *   recvfrom() will return 0.  Otherwise, on any failure, a negated errno
+ *   value is returned (see comments with recvfrom() for a list of
+ *   appropriate errno values).
  *
  ****************************************************************************/
 

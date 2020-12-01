@@ -236,34 +236,6 @@ uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
                          uint16_t buflen);
 
 /****************************************************************************
- * Name: can_recvfrom
- *
- * Description:
- *   Implements the socket recvfrom interface pkt_recvfrom() receives
- *   messages from a socket, and may be used to receive data on a socket
- *   whether or not it is connection-oriented.
- *
- * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   flags    Receive flags
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
- *
- * Returned Value:
- *   On success, returns the number of characters received.  If no data is
- *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, a negated errno value is
- *   returned (see recvfrom() for the list of appropriate error values).
- *
- ****************************************************************************/
-
-ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                     int flags, FAR struct sockaddr *from,
-                     FAR socklen_t *fromlen);
-
-/****************************************************************************
  * Name: can_recvmsg
  *
  * Description:
@@ -271,20 +243,19 @@ ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *   data on a socket whether or not it is connection-oriented.
  *
  *   If from is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in. The argument 'fromlen'
+ *   address, this source address is filled in. The argument 'msg_namelen'
  *   initialized to the size of the buffer associated with from, and modified
  *   on return to indicate the actual size of the address stored there.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   msg      Buffer to receive msg
+ *   msg      Buffer to receive the message
  *   flags    Receive flags (ignored)
  *
  ****************************************************************************/
-#ifdef CONFIG_NET_CMSG
+
 ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                     int flags);
-#endif
 
 /****************************************************************************
  * Name: can_poll
@@ -307,49 +278,26 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 void can_poll(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn);
 
 /****************************************************************************
- * Name: psock_can_send
+ * Name: can_sendmsg
  *
  * Description:
- *   The psock_can_send() call may be used only when the packet socket is in
- *   a connected state (so that the intended recipient is known).
- *
- * Input Parameters:
- *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   a negated errno value is returned.  See send() for the complete list
- *   of return values.
- *
- ****************************************************************************/
-
-struct socket;
-ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
-                       size_t len);
-
-/****************************************************************************
- * Name: psock_can_sendmsg
- *
- * Description:
- *   The psock_can_sendmsg() call may be used only when the packet socket is
+ *   The can_sendmsg() call may be used only when the packet socket is
  *   in a connected state (so that the intended recipient is known).
  *
  * Input Parameters:
  *   psock    An instance of the internal socket structure.
- *   msg      msg to send
+ *   msg      CAN frame and optional CMSG
+ *   flags    Send flags (ignored)
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
- *   a negated errno value is returned.  See send() for the complete list
+ *   a negated errno value is retruend.  See sendmsg() for the complete list
  *   of return values.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_CMSG
-ssize_t psock_can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg);
-#endif
+ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                    int flags);
 
 /****************************************************************************
  * Name: can_readahead_signal

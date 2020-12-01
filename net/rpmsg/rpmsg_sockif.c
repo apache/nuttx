@@ -131,14 +131,10 @@ static int        rpmsg_socket_accept(FAR struct socket *psock,
                     FAR struct socket *newsock);
 static int        rpmsg_socket_poll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
-static ssize_t    rpmsg_socket_send(FAR struct socket *psock,
-                    FAR const void *buf, size_t len, int flags);
-static ssize_t    rpmsg_socket_sendto(FAR struct socket *psock,
-                    FAR const void *buf, size_t len, int flags,
-                    FAR const struct sockaddr *to, socklen_t tolen);
-static ssize_t    rpmsg_socket_recvfrom(FAR struct socket *psock,
-                    FAR void *buf, size_t len, int flags,
-                    FAR struct sockaddr *from, FAR socklen_t *fromlen);
+static ssize_t    rpmsg_socket_sendmsg(FAR struct socket *psock,
+                    FAR struct msghdr *msg, int flags);
+static ssize_t    rpmsg_socket_recvmsg(FAR struct socket *psock,
+                    FAR struct msghdr *msg, int flags);
 static int        rpmsg_socket_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -157,16 +153,8 @@ const struct sock_intf_s g_rpmsg_sockif =
   rpmsg_socket_connect,     /* si_connect */
   rpmsg_socket_accept,      /* si_accept */
   rpmsg_socket_poll,        /* si_poll */
-  rpmsg_socket_send,        /* si_send */
-  rpmsg_socket_sendto,      /* si_sendto */
-#ifdef CONFIG_NET_SENDFILE
-  NULL,                     /* si_sendfile */
-#endif
-  rpmsg_socket_recvfrom,    /* si_recvfrom */
-#ifdef CONFIG_NET_CMSG
-  NULL,                     /* si_recvmsg */
-  NULL,                     /* si_sendmsg */
-#endif
+  rpmsg_socket_sendmsg,     /* si_sendmsg */
+  rpmsg_socket_recvmsg,     /* si_recvmsg */
   rpmsg_socket_close        /* si_close */
 };
 
@@ -647,7 +635,7 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
   ret     = -ETIMEDOUT;
   timeout = _SO_TIMEOUT(psock->s_rcvtimeo);
 
-  for (tc = 0; tc < timeout * 1000;)
+  for (tc = 0; tc < timeout * 1000; )
     {
       ret = rpmsg_socket_sync(conn, timeout);
       if (ret != RPMSG_ERR_ADDR)
@@ -1036,28 +1024,29 @@ static ssize_t rpmsg_socket_send_internal(FAR struct socket *psock,
     }
 }
 
-static ssize_t rpmsg_socket_send(FAR struct socket *psock,
-                                 FAR const void *buf,
-                                 size_t len, int flags)
+static ssize_t rpmsg_socket_sendmsg(FAR struct socket *psock,
+                                    FAR struct msghdr *msg, int flags)
 {
-  if (!_SS_ISCONNECTED(psock->s_flags))
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *to = msg->msg_name;
+  socklen_t tolen = msg->msg_namelen;
+  ssize_t ret;
+
+  /* Validity check, only single iov supported */
+
+  if (msg->msg_iovlen != 1)
     {
-      return -ENOTCONN;
+      return -ENOTSUP;
     }
 
-  return rpmsg_socket_send_internal(psock, buf, len, flags);
-}
-
-static ssize_t rpmsg_socket_sendto(FAR struct socket *psock,
-                                   FAR const void *buf,
-                                   size_t len, int flags,
-                                   FAR const struct sockaddr *to,
-                                   socklen_t tolen)
-{
-  int ret;
-
   if (!_SS_ISCONNECTED(psock->s_flags))
     {
+      if (to == NULL)
+        {
+          return -ENOTCONN;
+        }
+
       ret = rpmsg_socket_connect(psock, to, tolen);
       if (ret < 0)
         {
@@ -1068,15 +1057,15 @@ static ssize_t rpmsg_socket_sendto(FAR struct socket *psock,
   return rpmsg_socket_send_internal(psock, buf, len, flags);
 }
 
-static ssize_t rpmsg_socket_recvfrom(FAR struct socket *psock,
-                                     FAR void *buf,
-                                     size_t len,
-                                     int flags,
-                                     FAR struct sockaddr *from,
-                                     FAR socklen_t *fromlen)
+static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
+                                    FAR struct msghdr *msg, int flags)
 {
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *from = msg->msg_name;
+  FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
-  int ret;
+  ssize_t ret;
 
   if (psock->s_type == SOCK_DGRAM && _SS_ISBOUND(psock->s_flags)
           && !_SS_ISCONNECTED(psock->s_flags))

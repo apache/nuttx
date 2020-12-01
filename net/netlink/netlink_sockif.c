@@ -79,14 +79,10 @@ static int  netlink_accept(FAR struct socket *psock,
               FAR struct socket *newsock);
 static int  netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
               bool setup);
-static ssize_t netlink_send(FAR struct socket *psock,
-              FAR const void *buf, size_t len, int flags);
-static ssize_t netlink_sendto(FAR struct socket *psock, FAR const void *buf,
-              size_t len, int flags, FAR const struct sockaddr *to,
-              socklen_t tolen);
-static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
-              size_t len, int flags, FAR struct sockaddr *from,
-              FAR socklen_t *fromlen);
+static ssize_t netlink_sendmsg(FAR struct socket *psock,
+                               FAR struct msghdr *msg, int flags);
+static ssize_t netlink_recvmsg(FAR struct socket *psock,
+                               FAR struct msghdr *msg, int flags);
 static int netlink_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -105,16 +101,8 @@ const struct sock_intf_s g_netlink_sockif =
   netlink_connect,      /* si_connect */
   netlink_accept,       /* si_accept */
   netlink_poll,         /* si_poll */
-  netlink_send,         /* si_send */
-  netlink_sendto,       /* si_sendto */
-#ifdef CONFIG_NET_SENDFILE
-  NULL,                 /* si_sendfile */
-#endif
-  netlink_recvfrom,     /* si_recvfrom */
-#ifdef CONFIG_NET_CMSG
-  NULL,                 /* si_recvmsg */
-  NULL,                 /* si_sendmsg */
-#endif
+  netlink_sendmsg,      /* si_sendmsg */
+  netlink_recvmsg,      /* si_recvmsg */
   netlink_close         /* si_close */
 };
 
@@ -674,87 +662,68 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
 }
 
 /****************************************************************************
- * Name: netlink_send
+ * Name: netlink_sendmsg
  *
  * Description:
- *   The netlink_send() call may be used only when the socket is in
- *   a connected state  (so that the intended recipient is known).
- *
- * Input Parameters:
- *   psock - An instance of the internal socket structure.
- *   buf   - Data to send
- *   len   - Length of data to send
- *   flags - Send flags (ignored)
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error, a negated
- *   errno value is returned (see send() for the list of appropriate error
- *   values.
- *
- ****************************************************************************/
-
-static ssize_t netlink_send(FAR struct socket *psock, FAR const void *buf,
-                            size_t len, int flags)
-{
-  FAR struct netlink_conn_s *conn;
-  struct sockaddr_nl nladdr;
-
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
-
-  /* Get the underlying connection structure */
-
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
-
-  /* Format the address */
-
-  nladdr.nl_family = AF_NETLINK;
-  nladdr.nl_pad    = 0;
-  nladdr.nl_pid    = conn->dst_pid;
-  nladdr.nl_groups = conn->dst_groups;
-
-  /* Then let sendto() perform the actual send operation */
-
-  return netlink_sendto(psock, buf, len, flags,
-                        (FAR const struct sockaddr *)&nladdr,
-                        sizeof(struct sockaddr_nl));
-}
-
-/****************************************************************************
- * Name: netlink_sendto
- *
- * Description:
- *   If sendto() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
- *   socket, the parameters to and 'tolen' are ignored (and the error EISCONN
- *   may be returned when they are not NULL and 0), and the error ENOTCONN is
- *   returned when the socket was not actually connected.
+ *   If sendmsg() is used on a connection-mode (SOCK_STREAM, SOCK_SEQPACKET)
+ *   socket, the parameters 'msg_name' and 'msg_namelen' are ignored (and the
+ *   error EISCONN may be returned when they are not NULL and 0), and the
+ *   error ENOTCONN is returned when the socket was not actually connected.
  *
  * Input Parameters:
  *   psock    A reference to the structure of the socket to be connected
- *   buf      Data to send
- *   len      Length of data to send
+ *   msg      msg to send
  *   flags    Send flags (ignored)
- *   to       Address of recipient
- *   tolen    The length of the address structure
  *
  * Returned Value:
- *   None
+ *   On success, returns the number of characters sent.  On  error, a negated
+ *   errno value is returned (see sendmsg() for the list of appropriate error
+ *   values.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-static ssize_t netlink_sendto(FAR struct socket *psock, FAR const void *buf,
-                              size_t len, int flags,
-                              FAR const struct sockaddr *to, socklen_t tolen)
+static ssize_t netlink_sendmsg(FAR struct socket *psock,
+                               FAR struct msghdr *msg, int flags)
 {
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *to = msg->msg_name;
+  socklen_t tolen = msg->msg_namelen;
   FAR struct netlink_conn_s *conn;
   FAR struct nlmsghdr *nlmsg;
+  struct sockaddr_nl nladdr;
   int ret;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL &&
-              to != NULL && tolen >= sizeof(struct sockaddr_nl));
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
+
+  /* Validity check, only single iov supported */
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
+  /* Get the underlying connection structure */
 
   conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  if (to == NULL)
+    {
+      /* netlink_send() */
+
+      /* Format the address */
+
+      nladdr.nl_family = AF_NETLINK;
+      nladdr.nl_pad    = 0;
+      nladdr.nl_pid    = conn->dst_pid;
+      nladdr.nl_groups = conn->dst_groups;
+
+      to = (FAR struct sockaddr *)&nladdr;
+      tolen = sizeof(struct sockaddr_nl);
+    }
+
+  DEBUGASSERT(tolen >= sizeof(struct sockaddr_nl));
 
   /* Get a reference to the netlink message */
 
@@ -780,32 +749,32 @@ static ssize_t netlink_sendto(FAR struct socket *psock, FAR const void *buf,
 }
 
 /****************************************************************************
- * Name: netlink_recvfrom
+ * Name: netlink_recvmsg
  *
  * Description:
- *   recvfrom() receives messages from a socket, and may be used to receive
+ *   recvmsg() receives messages from a socket, and may be used to receive
  *   data on a socket whether or not it is connection-oriented.
  *
- *   If from is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in. The argument 'fromlen'
- *   initialized to the size of the buffer associated with from, and modified
- *   on return to indicate the actual size of the address stored there.
+ *   If msg_name is not NULL, and the underlying protocol provides the source
+ *   address, this source address is filled in. The argument 'msg_namelen' is
+ *   initialized to the size of the buffer associated with msg_name, and
+ *   modified on return to indicate the actual size of the address stored
+ *   there.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
+ *   msg      Buffer to receive the message
  *   flags    Receive flags (ignored)
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
  *
  ****************************************************************************/
 
-static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
-                                size_t len, int flags,
-                                FAR struct sockaddr *from,
-                                FAR socklen_t *fromlen)
+static ssize_t netlink_recvmsg(FAR struct socket *psock,
+                               FAR struct msghdr *msg, int flags)
 {
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *from = msg->msg_name;
+  FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct netlink_response_s *entry;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);

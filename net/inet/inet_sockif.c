@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/net/net.h>
+#include <nuttx/kmalloc.h>
 
 #include "tcp/tcp.h"
 #include "udp/udp.h"
@@ -86,14 +87,15 @@ static ssize_t    inet_send(FAR struct socket *psock, FAR const void *buf,
 static ssize_t    inet_sendto(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags, FAR const struct sockaddr *to,
                     socklen_t tolen);
+static ssize_t    inet_sendmsg(FAR struct socket *psock,
+                    FAR struct msghdr *msg, int flags);
+static ssize_t    inet_recvmsg(FAR struct socket *psock,
+                    FAR struct msghdr *msg, int flags);
 #ifdef CONFIG_NET_SENDFILE
 static ssize_t    inet_sendfile(FAR struct socket *psock,
                     FAR struct file *infile, FAR off_t *offset,
                     size_t count);
 #endif
-static ssize_t    inet_recvfrom(FAR struct socket *psock, FAR void *buf,
-                    size_t len, int flags, FAR struct sockaddr *from,
-                    FAR socklen_t *fromlen);
 
 /****************************************************************************
  * Private Data
@@ -111,17 +113,13 @@ static const struct sock_intf_s g_inet_sockif =
   inet_connect,     /* si_connect */
   inet_accept,      /* si_accept */
   inet_poll,        /* si_poll */
-  inet_send,        /* si_send */
-  inet_sendto,      /* si_sendto */
-#ifdef CONFIG_NET_SENDFILE
-  inet_sendfile,    /* si_sendfile */
-#endif
-  inet_recvfrom,    /* si_recvfrom */
-#ifdef CONFIG_NET_CMSG
-  NULL,             /* si_recvmsg */
-  NULL,             /* si_sendmsg */
-#endif
+  inet_sendmsg,     /* si_sendmsg */
+  inet_recvmsg,     /* si_recvmsg */
   inet_close        /* si_close */
+#ifdef CONFIG_NET_SENDFILE
+  ,
+  inet_sendfile     /* si_sendfile */
+#endif
 };
 
 /****************************************************************************
@@ -1241,6 +1239,68 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
 }
 
 /****************************************************************************
+ * Name: inet_sendmsg
+ *
+ * Description:
+ *   The inet_send() call may be used only when the socket is in a connected
+ *   state  (so that the intended recipient is known).
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   msg      Message to send
+ *   flags    Send flags
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error, a negated
+ *   errno value is returned (see sendmsg() for the list of appropriate error
+ *   values.
+ *
+ ****************************************************************************/
+
+static ssize_t inet_sendmsg(FAR struct socket *psock,
+                            FAR struct msghdr *msg, int flags)
+{
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *to = msg->msg_name;
+  socklen_t tolen = msg->msg_namelen;
+  FAR struct iovec *iov;
+  FAR struct iovec *end;
+  int ret;
+
+  if (msg->msg_iovlen == 1)
+    {
+      return to ? inet_sendto(psock, buf, len, flags, to, tolen) :
+                  inet_send(psock, buf, len, flags);
+    }
+
+  end = &msg->msg_iov[msg->msg_iovlen];
+  for (len = 0, iov = msg->msg_iov; iov != end; iov++)
+    {
+      len += iov->iov_len;
+    }
+
+  buf = kmm_malloc(len);
+  if (buf == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  for (len = 0, iov = msg->msg_iov; iov != end; iov++)
+    {
+      memcpy(buf + len, iov->iov_base, iov->iov_len);
+      len += iov->iov_len;
+    }
+
+  ret = to ? inet_sendto(psock, buf, len, flags, to, tolen) :
+             inet_send(psock, buf, len, flags);
+
+  kmm_free(buf);
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: inet_sendfile
  *
  * Description:
@@ -1277,41 +1337,40 @@ static ssize_t inet_sendfile(FAR struct socket *psock,
 #endif
 
 /****************************************************************************
- * Name: inet_recvfrom
+ * Name: inet_recvmsg
  *
  * Description:
  *   Implements the socket recvfrom interface for the case of the AF_INET
- *   and AF_INET6 address families.  inet_recvfrom() receives messages from
+ *   and AF_INET6 address families.  inet_recvmsg() receives messages from
  *   a socket, and may be used to receive data on a socket whether or not it
  *   is connection-oriented.
  *
- *   If 'from' is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in.  The argument 'fromlen' is
- *   initialized to the size of the buffer associated with from, and
+ *   If msg_name is not NULL, and the underlying protocol provides the source
+ *   address, this source address is filled in. The argument 'msg_namelen' is
+ *   initialized to the size of the buffer associated with msg_name, and
  *   modified on return to indicate the actual size of the address stored
  *   there.
  *
  * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   flags    Receive flags
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
+ *   psock   - A pointer to a NuttX-specific, internal socket structure
+ *   msg     - Buffer to receive the message
+ *   flags   - Receive flags
  *
  * Returned Value:
  *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on errors, a negated errno value is
- *   returned (see recvfrom() for the list of appropriate error values).
+ *   recvmsg() will return 0.  Otherwise, on errors, a negated errno value is
+ *   returned (see recvmsg() for the list of appropriate error values).
  *
  ****************************************************************************/
 
-static ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf,
-                             size_t len, int flags,
-                             FAR struct sockaddr *from,
-                             FAR socklen_t *fromlen)
+static ssize_t inet_recvmsg(FAR struct socket *psock,
+                            FAR struct msghdr *msg, int flags)
 {
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *from = msg->msg_name;
+  FAR socklen_t *fromlen = &msg->msg_namelen;
   ssize_t ret;
 
   /* If a 'from' address has been provided, verify that it is large
