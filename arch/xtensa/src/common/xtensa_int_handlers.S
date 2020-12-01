@@ -187,6 +187,29 @@ g_intstackbase:
 	and		a6, a6, a3				/* a6 = Set of pending, enabled interrupts for this level */
 	beqz	a6, 1f						/* Nothing to do */
 
+  /* At this point, the exception frame should have been allocated and filled,
+   * and current sp points to the interrupt stack (if enabled). Copy the
+   * pre-exception's base save area below the current SP.
+   */
+
+#ifdef CONFIG_XTENSA_INTBACKTRACE
+  rsr  a0, EXCSAVE_1 + \level - 1  /* Get exception frame pointer stored in EXCSAVE_x */
+  l32i a3, a0, (4 * REG_A0)        /* Copy pre-exception a0 (return address) */
+  s32e a3, sp, -16
+  l32i a3, a0, (4 * REG_A1)        /* Copy pre-exception a1 (stack pointer) */
+  s32e a3, sp, -12
+
+  /* Backtracing only needs a0 and a1, no need to create full base save area.
+   * Also need to change current frame's return address to point to pre-exception's
+   * last run instruction.
+   */
+
+  rsr a0, EPC_1 + \level - 1  /* return address */
+  movi a4, 0xc0000000         /* constant with top 2 bits set (call size) */
+  or a0, a0, a4               /* set top 2 bits */
+  addx2 a0, a4, a0            /* clear top bit -- simulating call4 size   */
+#endif
+  
 	/* Call xtensa_int_decode passing the address of the register save area
 	 * as a parameter (A7).
 	 */
@@ -270,7 +293,7 @@ g_intstackbase:
 
 _xtensa_level1_handler:
 
-	mov		a0, sp							              /* sp == a1 */
+	mov		a0, sp							              /* Save SP in A0 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)   /* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			        /* Save pre-interrupt SP */
 	rsr		a0, PS						                /* Save interruptee's PS */
@@ -279,6 +302,10 @@ _xtensa_level1_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_1					            /* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+
+#ifdef CONFIG_XTENSA_INTBACKTRACE
+  wsr sp, EXCSAVE_1
+#endif
 
 	/* Save rest of interrupt context. */
 
@@ -369,7 +396,7 @@ _xtensa_level1_handler:
 
 _xtensa_level2_handler:
 
-	mov		a0, sp							/* sp == a1 */
+	mov		a0, sp							/* Save SP in A0 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, EPS_2						/* Save interruptee's PS */
@@ -378,6 +405,10 @@ _xtensa_level2_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_2					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+
+#ifdef CONFIG_XTENSA_INTBACKTRACE
+  wsr sp, EXCSAVE_2
+#endif
 
 	/* Save rest of interrupt context. */
 
@@ -430,7 +461,7 @@ _xtensa_level2_handler:
 
 _xtensa_level3_handler:
 
-	mov		a0, sp							/* sp == a1 */
+	mov		a0, sp							/* Save SP in A0 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, EPS_3						/* Save interruptee's PS */
@@ -439,6 +470,10 @@ _xtensa_level3_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_3					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+
+#ifdef CONFIG_XTENSA_INTBACKTRACE
+  wsr sp, EXCSAVE_3
+#endif
 
 	/* Save rest of interrupt context. */
 
@@ -491,7 +526,7 @@ _xtensa_level3_handler:
 
 _xtensa_level4_handler:
 
-	mov		a0, sp							/* sp == a1 */
+	mov		a0, sp							/* Save SP in A0 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, EPS_4						/* Save interruptee's PS */
@@ -500,6 +535,10 @@ _xtensa_level4_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_4					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+
+#ifdef CONFIG_XTENSA_INTBACKTRACE
+  wsr sp, EXCSAVE_4
+#endif
 
 	/* Save rest of interrupt context. */
 
@@ -552,7 +591,7 @@ _xtensa_level4_handler:
 
 _xtensa_level5_handler:
 
-	mov		a0, sp							/* sp == a1 */
+	mov		a0, sp							/* Save SP in A0 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, EPS_5						/* Save interruptee's PS */
@@ -561,6 +600,10 @@ _xtensa_level5_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_5					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+
+#ifdef CONFIG_XTENSA_INTBACKTRACE
+  wsr sp, EXCSAVE_5
+#endif
 
 	/* Save rest of interrupt context. */
 
@@ -613,7 +656,7 @@ _xtensa_level5_handler:
 
 _xtensa_level6_handler:
 
-	mov		a0, sp							/* sp == a1 */
+	mov		a0, sp							/* Save SP in A0 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, EPS_6						/* Save interruptee's PS */
@@ -622,6 +665,10 @@ _xtensa_level6_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_6					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+
+#ifdef CONFIG_XTENSA_INTBACKTRACE
+  wsr sp, EXCSAVE_6
+#endif
 
 	/* Save rest of interrupt context. */
 
@@ -713,7 +760,7 @@ _xtensa_level2_handler:
 #if 1
 	/* For now, just panic */
 
-	mov		a0, sp							/* sp == a1 */
+	mov		a0, sp							/* Save SP in A0 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, EPS_2						/* Save interruptee's PS */
@@ -747,7 +794,7 @@ _xtensa_level3_handler:
 #if 1
 	/* For now, just panic */
 
-	mov		a0, sp							/* sp == a1 */
+	mov		a0, sp							/* Save SP in A0 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, EPS_3						/* Save interruptee's PS */
@@ -783,7 +830,7 @@ _xtensa_level4_handler:
 #if 1
 	/* For now, just panic */
 
-	mov		a0, sp							/* sp == a1 */
+	mov		a0, sp							/* Save SP in A0 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, EPS_4						/* Save interruptee's PS */
@@ -819,7 +866,7 @@ _xtensa_level5_handler:
 #if 1
 	/* For now, just panic */
 
-	mov		a0, sp							/* sp == a1 */
+	mov		a0, sp							/* Save SP in A0 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, EPS_5						/* Save interruptee's PS */
@@ -855,7 +902,7 @@ _xtensa_level6_handler:
 #if 1
 	/* For now, just panic */
 
-	mov		a0, sp							/* sp == a1 */
+	mov		a0, sp							/* Save SP in A0 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, EPS_6						/* Save interruptee's PS */
