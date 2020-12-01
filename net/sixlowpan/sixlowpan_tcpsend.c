@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -332,7 +333,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
-  ninfo("flags: %04x acked: %u sent: %zu\n",
+  ninfo("flags: %04x acked: %" PRIu32 " sent: %zu\n",
         flags, sinfo->s_acked, sinfo->s_sent);
 
   /* If this packet contains an acknowledgement, then update the count of
@@ -350,7 +351,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
        */
 
       sinfo->s_acked = tcp_getsequence(tcp->ackno) - sinfo->s_isn;
-      ninfo("ACK: acked=%d sent=%zd buflen=%zd\n",
+      ninfo("ACK: acked=%" PRId32 " sent=%zd buflen=%zd\n",
             sinfo->s_acked, sinfo->s_sent, sinfo->s_buflen);
 
       /* Have all of the bytes in the buffer been sent and acknowledged? */
@@ -466,8 +467,8 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
            */
 
           seqno = sinfo->s_sent + sinfo->s_isn;
-          ninfo("Sending: sndseq %08lx->%08x\n",
-                (unsigned long)tcp_getsequence(conn->sndseq), seqno);
+          ninfo("Sending: sndseq %08" PRIx32 "->%08" PRIx32 "\n",
+                tcp_getsequence(conn->sndseq), seqno);
 
           tcp_setsequence(conn->sndseq, seqno);
 
@@ -518,9 +519,10 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
           g_netstats.tcp.sent++;
 #endif
 
-          ninfo("Sent: acked=%d sent=%zd buflen=%zd tx_unacked=%d\n",
+          ninfo("Sent: acked=%" PRId32 " sent=%zd "
+                "buflen=%zd tx_unacked=%" PRId32 "\n",
                 sinfo->s_acked, sinfo->s_sent, sinfo->s_buflen,
-                conn->tx_unacked);
+                (uint32_t)conn->tx_unacked);
         }
     }
 
