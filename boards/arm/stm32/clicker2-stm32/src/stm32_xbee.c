@@ -139,7 +139,8 @@ struct stm32_priv_s
 static void stm32_reset(FAR const struct xbee_lower_s *lower);
 static int  stm32_attach_attn(FAR const struct xbee_lower_s *lower,
                               xcpt_t handler, FAR void *arg);
-static void stm32_enable_attn(FAR const struct xbee_lower_s *lower, bool state);
+static void stm32_enable_attn(FAR const struct xbee_lower_s *lower,
+                              bool state);
 static bool stm32_poll_attn(FAR const struct xbee_lower_s *lower);
 static int  stm32_xbee_devsetup(FAR struct stm32_priv_s *priv);
 
@@ -310,12 +311,15 @@ static int stm32_xbee_devsetup(FAR struct stm32_priv_s *priv)
       return -ENODEV;
     }
 
-  /* Register the XBee netdev providing it the XBee MAC layer to interface with */
+  /* Register the XBee netdev providing it the XBee MAC layer to interface
+   * with
+   */
 
   ret = xbee_netdev_register(xbee);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to register the XBee MAC network driver wpan%d: %d\n",
+      wlerr("ERROR: Failed to register "
+            "the XBee MAC network driver wpan%d: %d\n",
             0, ret);
       return ret;
     }
