@@ -1640,7 +1640,7 @@ static int adc_extsel_set(FAR struct stm32_dev_s *priv, uint32_t extcfg)
       setbits = (extsel | exten);
       clrbits = (ADC_CFGR_EXTEN_MASK | ADC_CFGR_EXTSEL_MASK);
 
-      ainfo("Initializing extsel = 0x%08x\n", extsel);
+      ainfo("Initializing extsel = 0x%08" PRIx32 "\n", extsel);
 
       /* Write register */
 
