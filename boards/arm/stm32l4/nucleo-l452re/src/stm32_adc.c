@@ -41,6 +41,7 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <inttypes.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -229,7 +230,7 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat,
 
       for (i = 0; i < nsamples ; i++)
         {
-          ainfo("%d: channel: %d value: %d\n",
+          ainfo("%d: channel: %d value: %" PRId32 "\n",
                 i + 1, sample[i].am_channel, sample[i].am_data);
 
           /* Add the raw value to entropy pool. */
@@ -245,7 +246,8 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat,
 
                 *vrefint = STM32_VREFINT_MVOLTS * STM32_VREFINT_CAL /
                            sample[i].am_data;
-                ainfo("VREFINT: %d -> %u mV\n", sample[i].am_data, *vrefint);
+                ainfo("VREFINT: %" PRId32 " -> %" PRIu32 " mV\n",
+                      sample[i].am_data, *vrefint);
                 break;
 
               case ADC1_INTERNAL_TSENSE_CHANNEL:
@@ -256,18 +258,20 @@ int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat,
                 tsense = (110 - 30) *
                          (sample[i].am_data - STM32_TSENSE_TSCAL1)
                          / (STM32_TSENSE_TSCAL2 - STM32_TSENSE_TSCAL1) + 30;
-                ainfo("TSENSE: %d -> %d °C\n", sample[i].am_data, tsense);
+                ainfo("TSENSE: %" PRId32 " -> %" PRId32 " °C\n",
+                      sample[i].am_data, tsense);
                 UNUSED(tsense);
                 break;
 
               case ADC1_INTERNAL_VBATDIV3_CHANNEL:
                 *vbat = 3 * sample[i].am_data;
-                ainfo("VBAT/3: %d -> %u mV\n", sample[i].am_data, *vbat);
+                ainfo("VBAT/3: %" PRId32 " -> %" PRIu32 " mV\n",
+                      sample[i].am_data, *vbat);
                 break;
 
               case ADC1_MEASURE_CHANNEL:
                 *vext = sample[i].am_data;
-                ainfo("External channel: %d\n", *vext);
+                ainfo("External channel: %" PRId32 "\n", *vext);
                 break;
 
               default:
