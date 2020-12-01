@@ -98,32 +98,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       return -EINVAL;
     }
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      FAR struct usrsock_conn_s *conn = psock->s_conn;
-
-      DEBUGASSERT(conn);
-
-      /* Some of the socket options are handled from this function. */
-
-      switch (option)
-        {
-          case SO_RCVTIMEO: /* Rx timeouts can be handled at NuttX side, thus
-                             * simplify daemon implementation. */
-          case SO_SNDTIMEO: /* Rx timeouts can be handled at NuttX side, thus
-                             * simplify daemon implementation. */
-            break;
-
-          default:          /* Other options are passed to usrsock daemon. */
-            {
-              return usrsock_setsockopt(conn, SOL_SOCKET, option, value,
-                                        value_len);
-            }
-        }
-    }
-#endif
-
   /* Process the option */
 
   switch (option)
@@ -132,6 +106,51 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
        * We will blindly set the bit here although the implementation
        * is outside of the scope of setsockopt.
        */
+
+      case SO_RCVTIMEO:
+      case SO_SNDTIMEO:
+        {
+          FAR struct timeval *tv = (FAR struct timeval *)value;
+          socktimeo_t timeo;
+
+          /* Verify that option is the size of an 'struct timeval'. */
+
+          if (tv == NULL || value_len != sizeof(struct timeval))
+            {
+              return -EINVAL;
+            }
+
+          /* Get the timeout value.  Any microsecond remainder will be
+           * forced to the next larger, whole decisecond value.
+           */
+
+          timeo = (socktimeo_t)net_timeval2dsec(tv, TV2DS_CEIL);
+
+          /* Save the timeout value */
+
+          if (option == SO_RCVTIMEO)
+            {
+              psock->s_rcvtimeo = timeo;
+            }
+          else
+            {
+              psock->s_sndtimeo = timeo;
+            }
+
+          /* Set/clear the corresponding enable/disable bit */
+
+          if (timeo)
+            {
+              _SO_CLROPT(psock->s_options, option);
+            }
+          else
+            {
+              _SO_SETOPT(psock->s_options, option);
+            }
+        }
+        break;
+
+#ifndef CONFIG_NET_USRSOCK
 
       case SO_BROADCAST:  /* Permits sending of broadcast messages */
       case SO_DEBUG:      /* Enables recording of debugging information */
@@ -195,49 +214,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
                            * periodic transmission of probes */
         return tcp_setsockopt(psock, option, value, value_len);
 #endif
-
-      case SO_RCVTIMEO:
-      case SO_SNDTIMEO:
-        {
-          FAR struct timeval *tv = (FAR struct timeval *)value;
-          socktimeo_t timeo;
-
-          /* Verify that option is the size of an 'struct timeval'. */
-
-          if (tv == NULL || value_len != sizeof(struct timeval))
-            {
-              return -EINVAL;
-            }
-
-          /* Get the timeout value.  Any microsecond remainder will be
-           * forced to the next larger, whole decisecond value.
-           */
-
-          timeo = (socktimeo_t)net_timeval2dsec(tv, TV2DS_CEIL);
-
-          /* Save the timeout value */
-
-          if (option == SO_RCVTIMEO)
-            {
-              psock->s_rcvtimeo = timeo;
-            }
-          else
-            {
-              psock->s_sndtimeo = timeo;
-            }
-
-          /* Set/clear the corresponding enable/disable bit */
-
-          if (timeo)
-            {
-              _SO_CLROPT(psock->s_options, option);
-            }
-          else
-            {
-              _SO_SETOPT(psock->s_options, option);
-            }
-        }
-        break;
 
 #ifdef CONFIG_NET_SOLINGER
       case SO_LINGER:  /* Lingers on a close() if data is present */
@@ -316,6 +292,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       case SO_ERROR:      /* Reports and clears error status. */
       case SO_TYPE:       /* Reports the socket type */
 
+#endif
       default:
         return -ENOPROTOOPT;
     }
@@ -433,6 +410,16 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
         ret = -EINVAL;
         break;
     }
+
+#ifdef CONFIG_NET_USRSOCK
+  /* Try usrsock further if the protocol not available */
+
+  if (ret == -ENOPROTOOPT && psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      ret = usrsock_setsockopt(psock->s_conn, level,
+                               option, value, value_len);
+    }
+#endif
 
   return ret;
 }

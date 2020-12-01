@@ -103,37 +103,47 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       return -EINVAL;
     }
 
-#ifdef CONFIG_NET_USRSOCK
-  if (psock->s_type == SOCK_USRSOCK_TYPE)
-    {
-      FAR struct usrsock_conn_s *conn = psock->s_conn;
-
-      DEBUGASSERT(conn);
-
-      /* Some of the socket options are handled from this function. */
-
-      switch (option)
-        {
-          case SO_TYPE:     /* Type can be read from NuttX psock structure. */
-          case SO_RCVTIMEO: /* Rx timeouts can be handled at NuttX side, thus
-                             * simplify daemon implementation. */
-          case SO_SNDTIMEO: /* Rx timeouts can be handled at NuttX side, thus
-                             * simplify daemon implementation. */
-            break;
-
-          default:          /* Other options are passed to usrsock daemon. */
-            {
-              return usrsock_getsockopt(conn, SOL_SOCKET,
-                                        option, value, value_len);
-            }
-        }
-    }
-#endif
-
   /* Process the option */
 
   switch (option)
     {
+      /* The following are valid only if the OS CLOCK feature is enabled */
+
+      case SO_RCVTIMEO:
+      case SO_SNDTIMEO:
+        {
+          socktimeo_t timeo;
+
+          /* Verify that option is the size of an 'int'.  Should also check
+           * that 'value' is properly aligned for an 'int'
+           */
+
+          if (*value_len < sizeof(struct timeval))
+            {
+              return -EINVAL;
+            }
+
+          /* Get the timeout value.  This is a atomic operation and should
+         * require no special operation.
+         */
+
+          if (option == SO_RCVTIMEO)
+            {
+              timeo = psock->s_rcvtimeo;
+            }
+          else
+            {
+              timeo = psock->s_sndtimeo;
+            }
+
+          /* Then return the timeout value to the caller */
+
+          net_dsec2timeval(timeo, (struct timeval *)value);
+          *value_len   = sizeof(struct timeval);
+        }
+        break;
+
+#ifndef CONFIG_NET_USRSOCK
       case SO_ACCEPTCONN: /* Reports whether socket listening is enabled */
         if (*value_len < sizeof(int))
           {
@@ -231,42 +241,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
         }
         break;
 
-      /* The following are valid only if the OS CLOCK feature is enabled */
-
-      case SO_RCVTIMEO:
-      case SO_SNDTIMEO:
-        {
-          socktimeo_t timeo;
-
-          /* Verify that option is the size of an 'int'.  Should also check
-           * that 'value' is properly aligned for an 'int'
-           */
-
-          if (*value_len < sizeof(struct timeval))
-            {
-              return -EINVAL;
-            }
-
-          /* Get the timeout value.  This is a atomic operation and should
-         * require no special operation.
-         */
-
-          if (option == SO_RCVTIMEO)
-            {
-              timeo = psock->s_rcvtimeo;
-            }
-          else
-            {
-              timeo = psock->s_sndtimeo;
-            }
-
-          /* Then return the timeout value to the caller */
-
-          net_dsec2timeval(timeo, (struct timeval *)value);
-          *value_len   = sizeof(struct timeval);
-        }
-        break;
-
       case SO_ERROR:      /* Reports and clears error status. */
         {
           if (*value_len != sizeof(int))
@@ -301,6 +275,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */
       case SO_SNDBUF:     /* Sets send buffer size */
       case SO_SNDLOWAT:   /* Sets the minimum number of bytes to output */
+#endif
 
       default:
         return -ENOPROTOOPT;
@@ -360,7 +335,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 int psock_getsockopt(FAR struct socket *psock, int level, int option,
                      FAR void *value, FAR socklen_t *value_len)
 {
-  int ret = OK;
+  int ret;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -405,6 +380,16 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
         ret = -EINVAL;
        break;
     }
+
+#ifdef CONFIG_NET_USRSOCK
+  /* Try usrsock further if the protocol not available */
+
+  if (ret == -ENOPROTOOPT && psock->s_type == SOCK_USRSOCK_TYPE)
+    {
+      ret = usrsock_getsockopt(psock->s_conn, level,
+                               option, value, value_len);
+    }
+#endif
 
   return ret;
 }
