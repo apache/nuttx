@@ -154,7 +154,8 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
 
   /* Set timer period */
 
-  STM32_TIM_SETPERIOD(freerun->tch, (uint32_t)((1ull << freerun->width) - 1));
+  STM32_TIM_SETPERIOD(freerun->tch,
+                      (uint32_t)((1ull << freerun->width) - 1));
 
   /* Start the counter */
 
