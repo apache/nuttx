@@ -60,28 +60,14 @@ ifeq ($(CONFIG_ESP32_SPIFLASH),y)
 CSRCS += esp32_spiflash.c
 endif
 
-ifeq ($(CONFIG_TIMER),y)
-ifeq ($(CONFIG_ESP32_TIMER),y)
-CSRCS += esp32_timer.c
-endif
-endif
-
 ifeq ($(CONFIG_USERLED),y)
   CSRCS += esp32_userleds.c
-endif
-
-ifeq ($(CONFIG_WATCHDOG),y)
-ifeq ($(CONFIG_ESP32_WTD),y)
-CSRCS += esp32_wtd.c
-endif
 endif
 
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
 
 .PHONY = context distclean
-
-include $(TOPDIR)/boards/Board.mk
 
 $(SCRIPTOUT): $(SCRIPTIN) $(CONFIGFILE)
 	$(Q) $(CC) -isystem $(TOPDIR)/include -C -P -x c -E $(SCRIPTIN) -o $@
@@ -90,4 +76,8 @@ context:: $(SCRIPTOUT)
 
 distclean::
 	$(call DELFILE, $(SCRIPTOUT))
+
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
 

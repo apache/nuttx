@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-core/src/esp32_timer.c
+ * boards/xtensa/esp32/common/src/esp32_timer.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,30 +23,31 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/timers/timer.h>
+
 #include <debug.h>
-#include "esp32_tim_lowerhalf.h"
-#include "esp32-core.h"
 #include <sys/types.h>
+#include <nuttx/timers/timer.h>
+
+#include "esp32_tim_lowerhalf.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_TIMER0
-#define ESP32_TIMER0 (0)
+#  define ESP32_TIMER0 (0)
 #endif
 
 #ifdef CONFIG_ESP32_TIMER1
-#define ESP32_TIMER1 (1)
+#  define ESP32_TIMER1 (1)
 #endif
 
 #ifdef CONFIG_ESP32_TIMER2
-#define ESP32_TIMER2 (2)
+#  define ESP32_TIMER2 (2)
 #endif
 
 #ifdef CONFIG_ESP32_TIMER3
-#define ESP32_TIMER3 (3)
+#  define ESP32_TIMER3 (3)
 #endif
 
 /****************************************************************************
@@ -54,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_timer_driver_setup
+ * Name: board_timer_init
  *
  * Description:
  *   Configure the timer driver.
@@ -70,10 +71,11 @@
  *
  ****************************************************************************/
 
-int esp32_timer_driver_init(void)
+int board_timer_init(void)
 {
   int ret = OK;
-  #ifdef CONFIG_ESP32_TIMER0
+
+#ifdef CONFIG_ESP32_TIMER0
   ret = esp32_timer_initialize("/dev/timer0", ESP32_TIMER0);
   if (ret < 0)
     {
@@ -120,3 +122,4 @@ int esp32_timer_driver_init(void)
 errout:
   return ret;
 }
+
