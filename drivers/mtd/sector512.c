@@ -43,6 +43,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -253,8 +254,7 @@ static int s512_erase(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsector
   size_t eblockno;
   int ret;
 
-  finfo("sector512: %08lx nsectors: %lu\n",
-        (unsigned long)sector512, (unsigned int)nsectors);
+  finfo("sector512: %08jx nsectors: %zu\n", (intmax_t)sector512, nsectors);
 
   while (sectorsleft-- > 0)
     {
@@ -265,7 +265,7 @@ static int s512_erase(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsector
       dest = s512_cacheread(priv, sector512);
       if (!dest)
         {
-          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
+          ferr("ERROR: s512_cacheread(%lu) failed\n", (unsigned long)sector512);
           DEBUGPANIC();
           return -EIO;
         }
@@ -333,7 +333,7 @@ static ssize_t s512_bread(FAR struct mtd_dev_s *dev, off_t sector512,
       src = s512_cacheread(priv, sector512);
       if (!src)
         {
-          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector512);
+          ferr("ERROR: s512_cacheread(%lu) failed\n", (unsigned long)sector512);
           DEBUGPANIC();
 
           result = (ssize_t)nsectors - remaining;
@@ -467,7 +467,7 @@ static ssize_t s512_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
         {
           int result;
 
-          ferr("ERROR: s512_cacheread(%ul) failed\n", (unsigned long)sector);
+          ferr("ERROR: s512_cacheread(%lu) failed\n", (unsigned long)sector);
           DEBUGPANIC();
 
           result = (ssize_t)nbytes - remaining;
@@ -528,7 +528,8 @@ static int s512_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               geo->neraseblocks = priv->neblocks * priv->stdperblock;
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRId32 " erasesize: %" PRId32
+                    " neraseblocks: %" PRId32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -594,7 +595,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
   if (ret < 0 || geo.erasesize <= SECTOR_512 ||
      (geo.erasesize & ~MASK_512) != geo.erasesize)
     {
-      ferr("ERROR: MTDIOC_GEOMETRY ioctl returned %d, eraseize=%d\n",
+      ferr("ERROR: MTDIOC_GEOMETRY ioctl returned %d, eraseize=%" PRId32 "\n",
            ret, geo.erasesize);
       DEBUGPANIC();
       return NULL;
