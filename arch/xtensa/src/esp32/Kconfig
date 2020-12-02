@@ -223,6 +223,17 @@ config ESP32_MWDT1
 		Includes MWDT1. This watchdog timer is part of the Group 0
 		timer submodule.
 
+config ESP32_RWDT
+	bool "RTC Watchdog Timer"
+	default n
+	select ESP32_WTD
+	---help---
+		Includes RWDT. This watchdog timer is from the RTC module.
+		When it is selected, if the developer sets it to reset on expiration
+		it will reset Main System and the RTC module. If you don't want
+		to have the RTC module reset, please, use the Timers' Module WDTs.
+		They will only reset Main System.
+
 config ESP32_UART0
 	bool "UART 0"
 	default n

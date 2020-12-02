@@ -57,7 +57,7 @@
 #define CK_XTAL_32K_MASK            (BIT(30))
 #define CK8M_D256_OUT_MASK          (BIT(31))
 
-#define RTC_CNTL_OPTIONS0_REG          (DR_REG_RTCCNTL_BASE + 0x0)
+#define RTC_CNTL_OPTIONS0_REG       (DR_REG_RTCCNTL_BASE + 0x0)
 
 /* RTC_CNTL_SW_SYS_RST : WO ;bitpos:[31] ;default: 1'd0 ; */
 
