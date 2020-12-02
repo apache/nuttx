@@ -135,8 +135,10 @@ struct bmp180_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr);
-static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr);
+static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv,
+                              uint8_t regaddr);
+static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv,
+                                uint8_t regaddr);
 static void bmp180_putreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr,
                            uint8_t regval);
 static void bmp180_updatecaldata(FAR struct bmp180_dev_s *priv);
@@ -223,7 +225,8 @@ static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
  *
  ****************************************************************************/
 
-static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
+static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv,
+                                uint8_t regaddr)
 {
   struct i2c_config_s config;
   uint16_t msb;
@@ -472,7 +475,8 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
 
   /* Calculate true temperature */
 
-  x1   = ((priv->bmp180_utemp - priv->bmp180_cal_ac6) * priv->bmp180_cal_ac5) >> 15;
+  x1   = ((priv->bmp180_utemp - priv->bmp180_cal_ac6) *
+          priv->bmp180_cal_ac5) >> 15;
   x2   = (priv->bmp180_cal_mc << 11) / (x1 + priv->bmp180_cal_md);
   b5   = x1 + x2;
 
@@ -557,7 +561,8 @@ static ssize_t bmp180_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen != 4)
     {
-      snerr("ERROR: You can't read something other than 32 bits (4 bytes)\n");
+      snerr("ERROR: You can't read something "
+            "other than 32 bits (4 bytes)\n");
       return -1;
     }
 
