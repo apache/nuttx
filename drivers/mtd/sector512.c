@@ -59,6 +59,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration */
 
 #ifndef CONFIG_MTD_SECT512_ERASED_STATE
@@ -208,9 +209,9 @@ static void s512_cacheflush(struct s512_dev_s *priv)
   off_t sector;
   ssize_t result;
 
-  /* If the cached is dirty (meaning that it no longer matches the old FLASH contents)
-   * or was erased (with the cache containing the correct FLASH contents), then write
-   * the cached erase block to FLASH.
+  /* If the cached is dirty (meaning that it no longer matches the old FLASH
+   * contents) or was erased (with the cache containing the correct FLASH
+   * contents), then write the cached erase block to FLASH.
    */
 
   if (IS_DIRTY(priv) || IS_ERASED(priv))
@@ -218,7 +219,8 @@ static void s512_cacheflush(struct s512_dev_s *priv)
       /* Write entire erase block to FLASH */
 
       sector = priv->eblockno * priv->sectperblock;
-      result = priv->dev->bwrite(priv->dev, sector, priv->sectperblock, priv->eblock);
+      result = priv->dev->bwrite(priv->dev, sector, priv->sectperblock,
+                                 priv->eblock);
       if (result < 0)
         {
           ferr("ERROR: bwrite(%lu, %lu) returned %ld\n",
@@ -358,8 +360,9 @@ static ssize_t s512_bread(FAR struct mtd_dev_s *dev, off_t sector512,
  * Name: s512_bwrite
  ************************************************************************************/
 
-static ssize_t s512_bwrite(FAR struct mtd_dev_s *dev, off_t sector512, size_t nsectors,
-                            FAR const uint8_t *buffer)
+static ssize_t s512_bwrite(FAR struct mtd_dev_s *dev, off_t sector512,
+                           size_t nsectors,
+                           FAR const uint8_t *buffer)
 {
 #ifdef CONFIG_MTD_SECT512_READONLY
   return -EACCESS;
@@ -507,7 +510,8 @@ static int s512_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)
+                                           ((uintptr_t)arg);
           if (geo)
             {
               /* Populate the geometry structure with information need to know
@@ -628,7 +632,9 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
       priv->eblock = (FAR uint8_t *)kmm_malloc(priv->eblocksize);
       if (!priv->eblock)
         {
-          /* Allocation failed! Discard all of that work we just did and return NULL */
+          /* Allocation failed! Discard all of that work we just did and
+           * return NULL
+           */
 
           ferr("ERROR: Allocation failed\n");
           kmm_free(priv);
