@@ -465,7 +465,7 @@
 #define ADC_CFGR1_JQM                 (1 << 21)                    /* Bit 21: JSQR queue mode */
 #define ADC_CFGR1_AWD1SGL             (1 << 22)                    /* Bit 22: Enable watchdog on single/all channels */
 #define ADC_CFGR1_AWD1EN              (1 << 23)                    /* Bit 23: Analog watchdog enable 1 regular channels */
-#define ADC_CFGR1_JAWD1EN             (1 << 22)                    /* Bit 22: Analog watchdog enable 1 injected channels */
+#define ADC_CFGR1_JAWD1EN             (1 << 24)                    /* Bit 24: Analog watchdog enable 1 injected channels */
 #define ADC_CFGR1_JAUTO               (1 << 25)                    /* Bit 25: Automatic Injected Group conversion */
 #define ADC_CFGR1_AWD1CH_SHIFT        (26)                         /* Bits 26-30: Analog watchdog 1 channel select bits */
 #define ADC_CFGR1_AWD1CH_MASK         (31 << ADC_CFGR1_AWD1CH_SHIFT)
