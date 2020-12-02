@@ -43,6 +43,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <fixedmath.h>
 #include <errno.h>
@@ -426,8 +427,8 @@ static void bmp180_read_press_temp(FAR struct bmp180_dev_s *priv)
   priv->bmp180_upress |= bmp180_getreg8(priv, BMP180_ADC_OUT_XLSB);
   priv->bmp180_upress = priv->bmp180_upress >> (8 - (oss >> 6));
 
-  sninfo("Uncompensated temperature = %d\n", priv->bmp180_utemp);
-  sninfo("Uncompensated pressure = %d\n", priv->bmp180_upress);
+  sninfo("Uncompensated temperature = %" PRId32 "\n", priv->bmp180_utemp);
+  sninfo("Uncompensated pressure = %" PRId32 "\n", priv->bmp180_upress);
 }
 
 /****************************************************************************
@@ -481,7 +482,7 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
   b5   = x1 + x2;
 
   temp = (b5 + 8) >> 4;
-  sninfo("Compensated temperature = %d\n", temp);
+  sninfo("Compensated temperature = %" PRId32 "\n", temp);
   UNUSED(temp);
 
   /* Calculate true pressure */
@@ -512,7 +513,7 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
 
   press = press + ((x1 + x2 + 3791) >> 4);
 
-  sninfo("Compressed pressure = %d\n", press);
+  sninfo("Compressed pressure = %" PRId32 "\n", press);
   return press;
 }
 
