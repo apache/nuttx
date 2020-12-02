@@ -95,28 +95,6 @@ int esp32_mmcsd_initialize(int minor);
  ****************************************************************************/
 
 int esp32_spiflash_init(void);
-/****************************************************************************
- * Name: esp32_timer_driver_setup
- *
- * Description:
- *   Initialize TIMER driver.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_TIMER
-int esp32_timer_driver_init(void);
-#endif
-/****************************************************************************
- * Name: esp32_wdt_driver_init
- *
- * Description:
- *   Initialize WATCHDOG driver.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_WATCHDOG
-int esp32_wtd_driver_init(void);
-#endif
 
 /****************************************************************************
  * Name: esp32_spiflash_encrypt_test
@@ -133,9 +111,7 @@ int esp32_wtd_driver_init(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_SPIFLASH_ENCRYPTION_TEST
-
 void esp32_spiflash_encrypt_test(void);
-
 #endif
 
 #endif /* __ASSEMBLY__ */

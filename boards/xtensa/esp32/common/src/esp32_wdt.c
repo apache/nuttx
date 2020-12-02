@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-core/src/esp32_wtd.c
+ * boards/xtensa/esp32/common/src/esp32_wtd.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,25 +23,26 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <debug.h>
-#include "esp32_wtd_lowerhalf.h"
-#include "esp32-core.h"
+
 #include <sys/types.h>
+#include <debug.h>
+
+#include "esp32_wtd_lowerhalf.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_MWDT0
-#define ESP32_MWDT0 (0)
+#  define ESP32_MWDT0 (0)
 #endif
 
 #ifdef CONFIG_ESP32_MWDT1
-#define ESP32_MWDT1 (1)
+#  define ESP32_MWDT1 (1)
 #endif
 
 #ifdef CONFIG_ESP32_RWDT
-#define ESP32_RWDT  (2)
+#  define ESP32_RWDT  (2)
 #endif
 
 /****************************************************************************
@@ -49,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_wtd_driver_init
+ * Name: board_wdt_init
  *
  * Description:
  *   Configure the timer driver.
@@ -65,7 +66,7 @@
  *
  ****************************************************************************/
 
-int esp32_wtd_driver_init(void)
+int board_wdt_init(void)
 {
   int ret = OK;
 
@@ -78,7 +79,6 @@ int esp32_wtd_driver_init(void)
              ret);
       goto errout;
     }
-
 #endif
 
 #ifdef CONFIG_ESP32_MWDT1
@@ -90,7 +90,6 @@ int esp32_wtd_driver_init(void)
              ret);
       goto errout;
     }
-
 #endif
 
 #ifdef CONFIG_ESP32_RWDT
@@ -102,9 +101,9 @@ int esp32_wtd_driver_init(void)
              ret);
       goto errout;
     }
-
 #endif
 
 errout:
   return ret;
 }
+

@@ -47,7 +47,7 @@ config ESP32_TIMER
 	bool
 	default n
 
-config ESP32_WTD
+config ESP32_WDT
 	bool
 	default n
 
@@ -211,7 +211,7 @@ config ESP32_TIMER3
 config ESP32_MWDT0
 	bool "Main System Watchdog Timer (Group 0)"
 	default n
-	select ESP32_WTD
+	select ESP32_WDT
 	---help---
 		Includes MWDT0. This watchdog timer is part of the Group 0
 		timer submodule.
@@ -219,7 +219,7 @@ config ESP32_MWDT0
 config ESP32_MWDT1
 	bool "Main System Watchdog Timer (Group 1)"
 	default n
-	select ESP32_WTD
+	select ESP32_WDT
 	---help---
 		Includes MWDT1. This watchdog timer is part of the Group 0
 		timer submodule.

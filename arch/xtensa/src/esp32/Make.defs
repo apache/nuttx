@@ -164,7 +164,7 @@ endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
 CHIP_CSRCS += esp32_wtd_lowerhalf.c
-ifeq ($(CONFIG_ESP32_WTD),y)
+ifeq ($(CONFIG_ESP32_WDT),y)
 CHIP_CSRCS += esp32_wtd.c
 endif
 endif
