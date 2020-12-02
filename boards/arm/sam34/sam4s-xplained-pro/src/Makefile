@@ -37,8 +37,18 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = sam_boot.c
 
+ifeq ($(CONFIG_MMCSD_SPI),y)
+CSRCS += sam_spi.c
+endif
+
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += sam_appinit.c
+endif
+
+ifeq ($(CONFIG_SAM34_EXTNAND),y)
+ifeq ($(CONFIG_MTD_NAND),y)
+CSRCS += sam_nandflash.c
+endif
 endif
 
 ifeq ($(CONFIG_SAM34_HSMCI),y)

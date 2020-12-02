@@ -66,6 +66,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Success Values returned by the nand_checkblock function */
 
 #define GOODBLOCK            254
@@ -82,6 +83,7 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* NAND locking */
 
 static int      nand_lock(FAR struct nand_dev_s *nand);
@@ -94,7 +96,6 @@ static int     nand_checkblock(FAR struct nand_dev_s *nand, off_t block);
 static int     nand_devscan(FAR struct nand_dev_s *nand);
 #else
 #  define      nand_checkblock(n,b) (GOODBLOCK)
-#  define      nand_devscan(n) (0)
 #endif
 
 /* Misc. NAND helpers */
@@ -282,6 +283,7 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
               finfo("Good blocks: %u - %u\n", good, good + ngood);
               ngood = 0;
             }
+
 #endif
           if (ret == BADBLOCK)
             {
@@ -296,12 +298,12 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
 #if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_DEBUG_FS)
       else
         {
-           if (ngood == 0)
-             {
-               good = block;
-             }
+          if (ngood == 0)
+            {
+              good = block;
+            }
 
-           ngood++;
+          ngood++;
         }
 #endif
     }
@@ -381,6 +383,7 @@ static int nand_eraseblock(FAR struct nand_dev_s *nand, off_t block,
   int ret;
 
   /* finfo("Block %d\n", block); */
+
   DEBUGASSERT(nand && nand->raw);
 
 #ifdef CONFIG_MTD_NAND_BLOCKCHECK
@@ -455,7 +458,7 @@ static int nand_readpage(FAR struct nand_dev_s *nand, off_t block,
     {
       ferr("ERROR: Block is BAD\n");
       return -EAGAIN;
-   }
+    }
 #endif
 
 #ifdef CONFIG_MTD_NAND_SWECC
@@ -787,8 +790,8 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
           struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
           if (geo)
             {
-              /* Populate the geometry structure with information needed to know
-               * the capacity and how to access the device.  Returns:
+              /* Populate the geometry structure with information needed to
+               * know the capacity and how to access the device.  Returns:
                *
                *   blocksize    Size of one read/write block in bytes
                *   erasesize    Size of one erase block in bytes
@@ -880,7 +883,7 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
       chipid = nand_chipid(raw);
       if (nandmodel_find(g_nandmodels, NAND_NMODELS, chipid,
                          &raw->model))
-       {
+        {
           ferr("ERROR: Could not determine NAND model\n");
           return NULL;
         }
@@ -895,7 +898,8 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
       /* Construct the NAND model structure */
 
       model->devid     = onfi.manufacturer;
-      model->options   = onfi.buswidth ? NANDMODEL_DATAWIDTH16 : NANDMODEL_DATAWIDTH8;
+      model->options   = onfi.buswidth ? NANDMODEL_DATAWIDTH16 :
+                                         NANDMODEL_DATAWIDTH8;
       model->pagesize  = onfi.pagesize;
       model->sparesize = onfi.sparesize;
 
@@ -933,7 +937,8 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
 
       /* Disable any internal, embedded ECC function */
 
-      onfi_embeddedecc(&onfi, cmdaddr, addraddr, dataaddr, false);
+      onfi_embeddedecc(&onfi, raw->cmdaddr, raw->addraddr, raw->dataaddr,
+                                                           true);
     }
 
   /* Allocate an NAND MTD device structure */
@@ -955,9 +960,13 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
 
   nxsem_init(&nand->exclsem, 0, 1);
 
-  /* Scan the device for bad blocks */
+#if defined(CONFIG_MTD_NAND_BLOCKCHECK) && defined(CONFIG_DEBUG_INFO) && \
+    defined(CONFIG_DEBUG_FS)
+
+    /* Scan the device for bad blocks */
 
   nand_devscan(nand);
+#endif
 
   /* Return the implementation-specific state structure as the MTD device */
 

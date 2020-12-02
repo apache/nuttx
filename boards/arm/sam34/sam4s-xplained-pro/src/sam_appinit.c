@@ -114,6 +114,17 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef HAVE_NAND
+  ret = sam_nand_automount(SAM_SMC_CS0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize the NAND: %d (%d)\n",
+             ret, errno);
+      return ret;
+    }
+#endif
+
 #ifdef HAVE_HSMCI
   /* Initialize the HSMCI driver */
 
@@ -153,6 +164,18 @@ int board_app_initialize(uintptr_t arg)
       syslog(LOG_ERR,
              "ERROR: Failed to mount the FAT filesystem: %d (%d)\n",
              ret, errno);
+      return ret;
+    }
+#endif
+
+  /* SPI */
+
+#ifdef HAVE_MMCSD_SPI
+  ret = sam_sdinitialize(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot: %d\n",
+             ret);
       return ret;
     }
 #endif
