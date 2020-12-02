@@ -408,7 +408,7 @@ static int esp32_wtd_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 {
   FAR struct esp32_wtd_lowerhalf_s *priv =
     (FAR struct esp32_wtd_lowerhalf_s *)lower;
-  uint8_t rtc_cycles = 0;
+  uint16_t rtc_cycles = 0;
   uint32_t rtc_ms_max = 0;
 
   wdinfo("Entry: timeout=%d\n", timeout);
