@@ -818,16 +818,6 @@ int devif_timer(FAR struct net_driver_s *dev, int delay,
 #endif
   int bstop = false;
 
-#ifdef CONFIG_NET_IPv4_REASSEMBLY
-  /* Increment the timer used by the IP reassembly logic */
-
-  if (g_reassembly_timer != 0 &&
-      g_reassembly_timer < CONFIG_NET_IPv4_REASS_MAXAGE)
-    {
-      g_reassembly_timer += hsec;
-    }
-#endif
-
 #ifdef NET_TCP_HAVE_STACK
   /* Traverse all of the active TCP connections and perform the
    * timer action.
