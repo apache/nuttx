@@ -30,6 +30,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "hardware/esp32_soc.h"
 
 #ifndef __ASSEMBLY__
 
@@ -41,6 +42,24 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Number of cycles to wait from the 32k XTAL oscillator to
+ * consider it running. Larger values increase startup delay.
+ * Smaller values may cause false positive detection
+ * (i.e. oscillator runs for a few cycles and then stops).
+ */
+
+#define SLOW_CLK_CAL_CYCLES         1024
+
+/* Indicates that 32k oscillator gets input from external oscillator
+ * instead of a crystal.
+ */
+
+#define EXT_OSC_FLAG    BIT(3)
 
 /****************************************************************************
  * Public Types
@@ -58,9 +77,97 @@ enum esp32_rtc_xtal_freq_e
   RTC_XTAL_FREQ_24M = 24,     /* 24 MHz XTAL */
 };
 
+/* RTC SLOW_CLK frequency values */
+
+enum esp32_rtc_slow_freq_e
+{
+  RTC_SLOW_FREQ_RTC = 0,      /* Internal 150 kHz RC oscillator */
+  RTC_SLOW_FREQ_32K_XTAL = 1, /* External 32 kHz XTAL */
+  RTC_SLOW_FREQ_8MD256 = 2,   /* Internal 8 MHz RC oscillator, divided by 256 */
+};
+
+/* RTC FAST_CLK frequency values */
+
+enum esp32_rtc_fast_freq_e
+{
+  RTC_FAST_FREQ_XTALD4 = 0,   /* Main XTAL, divided by 4 */
+  RTC_FAST_FREQ_8M = 1,       /* Internal 8 MHz RC oscillator */
+};
+
+/* This is almost the same as esp32_rtc_slow_freq_e, except that we define
+ * an extra enum member for the external 32k oscillator. For convenience,
+ * lower 2 bits should correspond to esp32_rtc_slow_freq_e values.
+ */
+
+enum esp32_slow_clk_sel_e
+{
+  /* Internal 150 kHz RC oscillator */
+
+  SLOW_CLK_150K = RTC_SLOW_FREQ_RTC,
+
+  /* External 32 kHz XTAL */
+
+  SLOW_CLK_32K_XTAL = RTC_SLOW_FREQ_32K_XTAL,
+
+  /* Internal 8 MHz RC oscillator, divided by 256 */
+
+  SLOW_CLK_8MD256 = RTC_SLOW_FREQ_8MD256,
+
+  /* External 32k oscillator connected to 32K_XP pin */
+
+  SLOW_CLK_32K_EXT_OSC = RTC_SLOW_FREQ_32K_XTAL | EXT_OSC_FLAG
+};
+
+/* Clock source to be calibrated using rtc_clk_cal function */
+
+enum esp32_rtc_cal_sel_e
+{
+  RTC_CAL_RTC_MUX = 0,       /* Currently selected RTC SLOW_CLK */
+  RTC_CAL_8MD256 = 1,        /* Internal 8 MHz RC oscillator, divided by 256 */
+  RTC_CAL_32K_XTAL = 2       /* External 32 kHz XTAL */
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32_rtc_get_slow_clk_rtc
+ *
+ * Description:
+ *   Get slow_clk_rtc source.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The clock source:
+ *   -  SLOW_CK
+ *   -  CK_XTAL_32K
+ *   -  CK8M_D256_OUT
+ *
+ ****************************************************************************/
+
+enum esp32_rtc_slow_freq_e esp32_rtc_get_slow_clk(void);
+
+/****************************************************************************
+ * Name: esp32_rtc_clk_cal
+ *
+ * Description:
+ *   Measure RTC slow clock's period, based on main XTAL frequency
+ *
+ * Input Parameters:
+ *   cal_clk        - clock to be measured
+ *   slowclk_cycles - number of slow clock cycles to average
+ *
+ * Returned Value:
+ *   Average slow clock period in microseconds, Q13.19 fixed point format
+ *   or 0 if calibration has timed out
+ *
+ ****************************************************************************/
+
+uint32_t esp32_rtc_clk_cal(enum esp32_rtc_cal_sel_e cal_clk,
+                                                    uint32_t slowclk_cycles);
 
 /****************************************************************************
  * Name: esp32_rtc_clk_xtal_freq_get
