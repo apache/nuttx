@@ -217,17 +217,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       uintptr_t top_of_stack;
       size_t size_of_stack;
 
-#ifdef CONFIG_STACK_COLORATION
-      /* If stack debug is enabled, then fill the stack with a
-       * recognizable value that we can use later to test for high
-       * water marks.
-       */
-
-      up_stack_color((FAR void *)tcb->stack_alloc_ptr +
-                     sizeof(struct tls_info_s),
-                     stack_size - sizeof(struct tls_info_s));
-#endif
-
       /* XTENSA uses a push-down stack:  the stack grows toward lower
        * addresses in memory.  The stack pointer register points to the
        * lowest, valid working address (the "top" of the stack).  Items on
@@ -284,6 +273,17 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       return OK;
     }
 
+#ifdef CONFIG_STACK_COLORATION
+      /* If stack debug is enabled, then fill the stack with a
+       * recognizable value that we can use later to test for high
+       * water marks.
+       */
+
+      up_stack_color((FAR void *)tcb->stack_alloc_ptr +
+                     sizeof(struct tls_info_s),
+                     tcb->adj_stack_size - sizeof(struct tls_info_s));
+#endif
+
   return ERROR;
 }
 
@@ -300,8 +300,8 @@ void up_stack_color(FAR void *stackbase, size_t nbytes)
 {
   /* Take extra care that we do not write outsize the stack boundaries */
 
-  uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 3) & ~3);
-  uintptr_t stkend = (((uintptr_t)stackbase + nbytes) & ~3);
+  uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 15) & ~15);
+  uintptr_t stkend = (((uintptr_t)stackbase + nbytes) & ~15);
   size_t    nwords = (stkend - (uintptr_t)stackbase) >> 2;
 
   /* Set the entire stack to the coloration value */
