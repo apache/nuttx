@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
@@ -259,7 +260,7 @@ static int ina219_readpower(FAR struct ina219_dev_s *priv,
 
   buffer->current = (int32_t)tmp;
 
-  sninfo("Voltage: %u uV, Current: %d uA\n",
+  sninfo("Voltage: %" PRIu32 " uV, Current: %" PRId32 " uA\n",
          buffer->voltage, buffer->current);
 
   return OK;
