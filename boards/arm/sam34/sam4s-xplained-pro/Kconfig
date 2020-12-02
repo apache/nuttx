@@ -20,4 +20,43 @@ config SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH
 	default "/dev/tc0"
 	depends on TIMER && SCHED_CPULOAD && SCHED_CPULOAD_EXTCLK
 
+config SAM34_NAND_BLOCKMOUNT
+	bool "NAND FLASH auto-mount"
+	default n
+	depends on NSH_ARCHINIT && SAM34_EXTNAND
+	---help---
+		Automatically initialize the NAND FLASH driver when NSH starts.
+
+choice
+	prompt "NAND FLASH configuration"
+	default SAM34_NAND_NXFFS
+	depends on SAM34_NAND_BLOCKMOUNT
+
+config SAM34_NAND_FTL
+	bool "Create NAND FLASH block driver"
+	depends on MTD && MTD_NAND
+	---help---
+		Create the MTD driver for the NAND and "wrap" the NAND as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+		NOTE: This options is not currently recommended.  There is not now
+		NuttX file system that can handle the NAND back blocks or performs
+		wear-leveling other than NXFFS and NXFFS does not use a block driver
+		but, rather, operates directly upon the NAND MTD device.
+
+config SAM34_NAND_NXFFS
+	bool "Create NAND FLASH NXFFS file system"
+	depends on MTD && MTD_NAND && FS_NXFFS && NXFFS_NAND
+	---help---
+		Create the MTD driver for the NAND and mount the NAND device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+		NOTE: NXFFS is recommended because (1) it can handle the NAND back
+		blocks and (1) performs wear-leveling.
+
+endchoice # NAND FLASH configuration
+
 endif

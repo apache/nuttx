@@ -128,7 +128,7 @@
 
 /* MATRIX register addresses ************************************************************/
 
-#define SAM_MATRIX_MCFG(n))              (SAM_MATRIX_BASE+SAM_MATRIX_MCFG_OFFSET(n))
+#define SAM_MATRIX_MCFG(n)               (SAM_MATRIX_BASE+SAM_MATRIX_MCFG_OFFSET(n))
 #define SAM_MATRIX_MCFG0                 (SAM_MATRIX_BASE+SAM_MATRIX_MCFG0_OFFSET)
 #define SAM_MATRIX_MCFG1                 (SAM_MATRIX_BASE+SAM_MATRIX_MCFG1_OFFSET)
 #define SAM_MATRIX_MCFG2                 (SAM_MATRIX_BASE+SAM_MATRIX_MCFG2_OFFSET)
@@ -200,6 +200,7 @@
 #define SAM_MATRIX_WPSR                  (SAM_MATRIX_BASE+SAM_MATRIX_WPSR_OFFSET)
 
 /* MATRIX register bit definitions ******************************************************/
+
 /* Master Configuration Registers */
 
 #define MATRIX_MCFG_ULBT_SHIFT           (0)       /* Bits 0-2:  Undefined Length Burst Type */
@@ -309,6 +310,7 @@
 /* SMC Chip Select NAND Flash Assignment Register */
 
 #if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
+#define MATRIX_CCFG_SMCNFCS_SMC_NFCS(n)  (1<<(n))  /* Bit n:  SMC NAND Flash Chip Select n Assignment */
 #  define MATRIX_CCFG_SMCNFCS_SMC_NFCS0  (1 << 0)  /* Bit 0:  SMC NAND Flash Chip Select 0 Assignment */
 #  define MATRIX_CCFG_SMCNFCS_SMC_NFCS1  (1 << 1)  /* Bit 1:  SMC NAND Flash Chip Select 2 Assignment */
 #  define MATRIX_CCFG_SMCNFCS_SMC_NFCS2  (1 << 2)  /* Bit 2:  SMC NAND Flash Chip Select 2 Assignment */
@@ -362,10 +364,6 @@
 
 /****************************************************************************************
  * Public Data
- ****************************************************************************************/
-
-/****************************************************************************************
- * Public Functions
  ****************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_MATRIX_H */
