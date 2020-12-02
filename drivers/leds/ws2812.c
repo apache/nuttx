@@ -39,16 +39,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* These are the tuning parameters to meeting timeing requirements */
+/* These are the tuning parameters to meet timing requirements */
 
 #if CONFIG_WS2812_FREQUENCY == 4000000
-#  define WS2812_RST_CYCLES 30          /* 60us (>50us)*/
+#  define WS2812_RST_CYCLES 30          /* 60us (>50us) */
 #  define WS2812_ZERO_BYTE  0b01000000  /* 250 ns (200ns - 500ns) */
 #  define WS2812_ONE_BYTE   0b01110000  /* 750 ns (550ns - 850ns) */
 #elif CONFIG_WS2812_FREQUENCY == 8000000
-#  define WS2812_RST_CYCLES 60          /* 60us (>50us)*/
+#  define WS2812_RST_CYCLES 60          /* 60us (>50us) */
 #  define WS2812_ZERO_BYTE  0b01100000  /* 250 ns (200ns - 500ns) */
-#  define WS2812_ONE_BYTE   0b01111100  /* 750 ns (550ns - 850ns) */
+#  define WS2812_ONE_BYTE   0b01111100  /* 625 ns (550ns - 850ns) */
 #else
 #  error "Unsupported SPI Frequency"
 #endif
@@ -60,11 +60,11 @@
  * [<----reset bytes---->|<-RGBn->...<-RGB0->|<----reset bytes---->]
  *
  * It is important that this is shipped as close to one chunk as possible
- * in order to meet timeing requirements and to keep MOSI from going high
+ * in order to meet timing requirements and to keep MOSI from going high
  * between transactions.  Some chips will leave MOSI at the state of the
  * MSB of the last byte for this reason it is recommended to shift the
- * bytes that represents the zero and one so that the MSB is 1. The reset
- * clocks will pad the shortend low at the end.
+ * bits that represents the zero or one waveform so that the MSB is 0.
+ * The reset clocks will pad the shortened low at the end.
  */
 
 #define TXBUFF_SIZE(n) (WS2812_RST_CYCLES * 2 + n * WS2812_BYTES_PER_LED)
@@ -250,7 +250,7 @@ static ssize_t ws2812_write(FAR struct file *filep, FAR const char *buffer,
       return -1;
     }
 
-  /* We need at least one display, so 1 byte */
+  /* We need at least one LED, so 1 byte */
 
   if (buflen < 1)
     {
@@ -309,7 +309,7 @@ static ssize_t ws2812_write(FAR struct file *filep, FAR const char *buffer,
  * Description:
  *   This routine is called when seeking the WS2812 device. This can be used
  *   to address the starting LED to write.  This should be done on a full
- *   color boundary which is 32bits. e.g. LED0 - offset 0 LED 8.
+ *   color boundary which is 32bits. e.g. LED0 - offset 0, LED 8 - offset 32
  *
  ****************************************************************************/
 
