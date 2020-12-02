@@ -1878,6 +1878,16 @@ config ARCH_BOARD_TEENSY_3X
 		Teensy-3.0).  the primary difference is that the Teensy 3.0 has a
 		MK20DX128VLH5 with slightly less capability.
 
+config ARCH_BOARD_TEENSY_4X
+	bool "PJRC Teensy++ 4.x board"
+	depends on ARCH_CHIP_MIMXRT1062DVL6A
+	select ARCH_HAVE_LEDS
+	---help---
+		This is the port of NuttX to the PJRC Teensy++ 4.x board.  This board is
+		developed by http://pjrc.com/teensy/.  The Teensy++ 4.x is based
+		on an NXP MIMXRT1062DVL6A MCU. The port can support both Teensy 4.0 and
+		Teensy 4.1 boards.
+
 config ARCH_BOARD_TEENSY_LC
 	bool "Teensy LC"
 	depends on ARCH_CHIP_MKL25Z64
@@ -2331,6 +2341,7 @@ config ARCH_BOARD
 	default "sure-pic32mx"             if ARCH_BOARD_SUREPIC32MX
 	default "teensy-2.0"               if ARCH_BOARD_TEENSY_20
 	default "teensy-3.x"               if ARCH_BOARD_TEENSY_3X
+	default "teensy-4.x"               if ARCH_BOARD_TEENSY_4X
 	default "teensy-lc"                if ARCH_BOARD_TEENSY_LC
 	default "tm4c123g-launchpad"       if ARCH_BOARD_TM4C123G_LAUNCHPAD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
@@ -2442,6 +2453,9 @@ source "boards/arm/imxrt/imxrt1050-evk/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1060_EVK
 source "boards/arm/imxrt/imxrt1060-evk/Kconfig"
+endif
+if ARCH_BOARD_TEENSY_4X
+source "boards/arm/imxrt/teensy-4.x/Kconfig"
 endif
 if ARCH_BOARD_FREEDOM_K28F
 source "boards/arm/kinetis/freedom-k28f/Kconfig"
