@@ -224,7 +224,16 @@ static void generate_proxy(int nfixed, int nparms)
    * prototype
    */
 
-  fprintf(stream, "%s %s(", g_parm[RETTYPE_INDEX], g_parm[NAME_INDEX]);
+  if (strcmp(g_parm[RETTYPE_INDEX], "noreturn") == 0)
+    {
+      fprintf(stream, "void ");
+    }
+  else
+    {
+      fprintf(stream, "%s ", g_parm[RETTYPE_INDEX]);
+    }
+
+  fprintf(stream, "%s(", g_parm[NAME_INDEX]);
 
   /* Generate the formal parameter list */
 
@@ -301,7 +310,8 @@ static void generate_proxy(int nfixed, int nparms)
    * are special cases.
    */
 
-  if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0)
+  if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0 ||
+      strcmp(g_parm[RETTYPE_INDEX], "noreturn") == 0)
     {
       fprintf(stream, "  (void)sys_call%d(", nparms);
     }
@@ -339,7 +349,14 @@ static void generate_proxy(int nfixed, int nparms)
 
   /* Handle the tail end of the function. */
 
-  fprintf(stream, ");\n}\n");
+  fprintf(stream, ");\n");
+  if (strcmp(g_parm[RETTYPE_INDEX], "noreturn") == 0)
+    {
+        fprintf(stream, "  while(1);\n");
+    }
+
+  fprintf(stream, "}\n");
+
   if (g_parm[COND_INDEX][0] != '\0')
     {
       fprintf(stream, "\n#endif /* %s */\n", g_parm[COND_INDEX]);
@@ -448,7 +465,8 @@ static void generate_stub(int nfixed, int nparms)
    * a special case.
    */
 
-  if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0)
+  if (strcmp(g_parm[RETTYPE_INDEX], "void") == 0 ||
+      strcmp(g_parm[RETTYPE_INDEX], "noreturn") == 0)
     {
       fprintf(stream, "  %s(", g_parm[NAME_INDEX]);
     }
