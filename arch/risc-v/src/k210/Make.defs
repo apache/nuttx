@@ -39,6 +39,10 @@ CHIP_ASRCS = k210_head.S
 
 CMN_ASRCS  += riscv_testset.S
 
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+CMN_ASRCS  += riscv_setjmp.S
+endif
+
 # Specify C code within the common directory to be included
 CMN_CSRCS  += riscv_initialize.c riscv_swint.c
 CMN_CSRCS  += riscv_allocateheap.c riscv_createstack.c riscv_exit.c riscv_fault.c

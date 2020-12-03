@@ -39,6 +39,10 @@ HEAD_ASRC = gap8_head.S
 
 CHIP_ASRCS = riscv_syscall.S
 
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+CMN_ASRCS  += riscv_setjmp.S
+endif
+
 # Override the arch to enable hardware MUL during assembly.
 # This is to support our hardware mul test.  For that test,
 # we have to disable hardware mul for C code so the soft
