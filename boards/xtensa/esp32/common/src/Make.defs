@@ -19,11 +19,11 @@
 #############################################################################
 
 ifeq ($(CONFIG_TIMER),y)
-  CSRCS += esp32_timer.c
+  CSRCS += esp32_board_tim.c
 endif
 
-ifeq ($(CONFIG_WDT),y)
-  CSRCS += esp32_wdt.c
+ifeq ($(CONFIG_WATCHDOG),y)
+  CSRCS += esp32_board_wdt.c
 endif
 
 DEPPATH += --dep-path src

@@ -28,6 +28,7 @@
 #include <debug.h>
 
 #include "esp32_wtd_lowerhalf.h"
+#include "esp32_board_wdt.h"
 
 /****************************************************************************
  * Pre-processor Definitions

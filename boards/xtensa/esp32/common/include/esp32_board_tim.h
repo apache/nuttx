@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/include/esp32_timer.h
+ * boards/xtensa/esp32/common/include/esp32_board_tim.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_TIMER_H
-#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_TIMER_H
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIMER_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIMER_H
 
 /****************************************************************************
  * Included Files
@@ -75,4 +75,4 @@ int board_timer_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_TIMER_H */
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIMER_H */

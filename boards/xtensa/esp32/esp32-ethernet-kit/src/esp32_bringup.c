@@ -50,12 +50,12 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef CONFIG_ESP32_TIMER
-#  include "esp32_timer.h"
+#ifdef CONFIG_TIMER
+#  include "esp32_board_tim.h"
 #endif
 
-#ifdef CONFIG_ESP32_WDT
-#  include "esp32_wdt.h"
+#ifdef CONFIG_WATCHDOG
+#  include "esp32_board_wdt.h"
 #endif
 
 #include "esp32-ethernet-kit.h"
