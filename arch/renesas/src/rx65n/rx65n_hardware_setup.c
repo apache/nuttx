@@ -42,6 +42,7 @@
 
 void r_ether_port_configuration(void);
 void r_ether_pheriperal_enable(void);
+void r_usb_port_enable(void);
 
 /****************************************************************************
  * Name: r_system_init
@@ -71,6 +72,10 @@ void r_system_init(void)
 #ifdef CONFIG_RX65N_EMAC0
   r_ether_port_configuration();
   r_ether_pheriperal_enable();
+#endif
+
+#if defined(CONFIG_USBHOST)
+  r_usb_port_enable();
 #endif
 
   /* Disable writing to MPC pin function control registers */

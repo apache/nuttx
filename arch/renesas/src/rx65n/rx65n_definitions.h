@@ -847,17 +847,17 @@
  * generic
  */
 
-#define USB_PIPE1                                       (1)
-#define USB_PIPE2                                       (2)
-#define USB_PIPE3                                       (3)
-#define USB_PIPE4                                       (4)
-#define USB_PIPE5                                       (5)
-#define USB_PIPE6                                       (6)
-#define USB_PIPE7                                       (7)
-#define USB_PIPE8                                       (8)
-#define USB_PIPE9                                       (9)
-#define USB_MIN_PIPE_NO                                 (1u)
-#define USB_MAX_PIPE_NO                                 (9)
+#define USB_PIPE1         (1)
+#define USB_PIPE2         (2)
+#define USB_PIPE3         (3)
+#define USB_PIPE4         (4)
+#define USB_PIPE5         (5)
+#define USB_PIPE6         (6)
+#define USB_PIPE7         (7)
+#define USB_PIPE8         (8)
+#define USB_PIPE9         (9)
+#define USB_MIN_PIPE_NO   (1u)
+#define USB_MAX_PIPE_NO   (9)
 
 /* Details of pipe number for obtaining the pipe */
 
@@ -1171,6 +1171,7 @@
 #define USB_DEVICE_A                    (0xa000u) /* Device address A */
 #define USB_NODEVICE                    (0xf000u) /* No device */
 #define USB_DEVADDRBIT                  (12u)
+#define USB_DEFPACKET                   (0x0040)
 
 /* Device Address bit fields    */
 
@@ -1448,6 +1449,14 @@
 
 #define USB_INT_BRDY                                 (0x0001u)
 #define USB_BMREQUESTTYPERECIP                       (0x001Fu)   /* b4-0: Recipient */
+#define HUB_PORT1                                    (1)
+#define HUB_PORT2                                    (2)
+#define HUB_PORT3                                    (3)
+#define HUB_PORT4                                    (4)
+
+/* StandBy RAM Address */
+
+#define RX65N_SBRAM_BASE  0x000a4000
 
 /* Start of RSPI interface related definitions */
 
