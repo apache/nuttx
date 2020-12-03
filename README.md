@@ -1932,7 +1932,9 @@ Below is a guide to the available README files in the NuttX source tree:
      |   |   |- imxrt/
      |   |   |   |- imxrt1050-evk/
      |   |   |   |   `- README.txt
-     |   |   |   `- imxrt1060-evk/
+     |   |   |   |- imxrt1060-evk/
+     |   |   |   |   `- README.txt
+     |   |   |   `- teensy-4.x/
      |   |   |       `- README.txt
      |   |   |- kinetis/
      |   |   |   |- freedom-k28f/

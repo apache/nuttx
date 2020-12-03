@@ -2627,6 +2627,10 @@ NuttX-7.27.
    `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/imxrt/imxrt1020-evk/README.txt>`__
    file for further information.
 
+-  The basic Teensy-4.x port is complete. Refer to the NuttX board
+   `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/imxrt/teensy-4.x/README.txt>`__
+   file for further information.
+
 **i.MX RT Driver Status:**
 
 -  **NuttX-7.25**. The initial release in NuttX-7.25 includes UART,
