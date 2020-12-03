@@ -17,7 +17,8 @@ Contents
   - RSPI
   - RIIC
   - DTC
-  - Debugging
+  - USB Host
+  - USB Host Hub
   - Debugging
 
 Board Features
@@ -225,6 +226,20 @@ RSPI
 For GRROSE board only channel 1 can be tested since RSPI channel1 pinout is only brought out as
 Pin number 2 and 3 in CN4 is used for MOSIB and MISOB respectively.
 
+USB Host
+=============
+For the RX65N RSK2MB board, to be used as USB Device, the following Jumper settings need to be done
+
+J7     Short Pin 1 & Pin 2
+J16    Short Pin 2 & Pin 3
+
+USB Device
+=============
+For the RX65N RSK2MB board, to be used as USB Device, the following Jumper settings need to be done
+
+J7     Short Pin 2 & Pin 3
+J16    Short Pin 1 & Pin 2
+
 RTC
 ==========
 
@@ -298,6 +313,76 @@ DTC Testing
 ------------------------
 
 DTC has been tested using RSPI driver.
+
+USB Host Configurations
+--------------------------
+The following configurations need to be enabled for USB Host Mode driver to 
+support USB HID Keyboard class and MSC Class.
+
+CONFIG_USBHOST=y
+CONFIG_USBHOST_HIDKBD=y
+CONFIG_FS_FAT=y
+CONFIG_EXAMPLES_HIDKBD=y
+
+USB Host Driver Testing
+------------------------
+The Following Class Drivers were tested as mentioned below : 
+
+- USB HID Keyboard Class
+On the NuttX Console "hidkbd" application was executed 
+
+nsh> hidkbd
+The characters typed from the keyboard were executed correctly.
+
+- USB MSC Class
+
+The MSC device is enumerated as sda in /dev directory.
+
+The block device is mounted using the command as mentioned below : 
+
+mount -t vfat /dev/sda /mnt
+
+The MSC device is mounted in /dev directory 
+
+The copy command is executed to test the Read/Write functionality
+
+cp /mnt/<file.txt> /mnt/file_copy.txt
+
+USB Host Hub Configurations
+--------------------------
+The following configurations need to be enabled for USB Host Mode driver to 
+support USB HID Keyboard class and MSC Class.
+
+CONFIG_RX65N_USBHOST=y
+CONFIG_USBHOST_HUB=y
+CONFIG_USBHOST_ASYNCH=y
+CONFIG_USBHOST=y
+CONFIG_USBHOST_HIDKBD=y
+CONFIG_FS_FAT=y
+CONFIG_EXAMPLES_HIDKBD=y
+
+USB Host Hub Driver Testing
+------------------------
+The Following Class Drivers were tested as mentioned below : 
+
+- USB HID Keyboard Class
+On the NuttX Console "hidkbd" application was executed 
+
+nsh> hidkbd
+The characters typed from the keyboard were executed correctly.
+
+- USB MSC Class
+The MSC device is enumerated as sda in /dev directory.
+
+The block device is mounted using the command as mentioned below : 
+
+mount -t vfat /dev/sda /mnt
+
+The MSC device is mounted in /dev directory 
+
+The copy command is executed to test the Read/Write functionality
+
+cp /mnt/<file.txt> /mnt/file_copy.txt
 
 Debugging
 ==========
