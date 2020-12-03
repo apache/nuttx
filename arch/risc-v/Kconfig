@@ -55,15 +55,18 @@ endchoice
 config ARCH_RV32I
 	bool
 	default n
+	select ARCH_HAVE_SETJMP
 
 config ARCH_RV32IM
 	bool
 	default n
+	select ARCH_HAVE_SETJMP
 
 config ARCH_RV64GC
 	bool
 	default n
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
+	select ARCH_HAVE_SETJMP
 
 config ARCH_FAMILY
 	string
