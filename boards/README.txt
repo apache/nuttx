@@ -819,6 +819,15 @@ boards/arm/kinetis/teensy-3.x
   Teensy-3.0).  the primary difference is that the Teensy 3.0 has a
   MK30DX128VLH5 with slightly less capability.
 
+boards/arm/imxrt/teensy-4.x
+		This is the port of NuttX to the PJRC Teensy++ 4.x board.  This board is
+		developed by http://pjrc.com/teensy/.  The Teensy++ 4.x is based
+		on an NXP MIMXRT1062DVL6A MCU. The port can support both Teensy 4.0 and
+		Teensy 4.1 boards.
+
+    https://www.pjrc.com/store/teensy40.html
+    https://www.pjrc.com/store/teensy41.html
+
 boards/arm/kl/teensy-lc
   This is the port of nuttx for the Teensy LC board.  The Teensy LC
   is a DIP style breakout board for the MKL25Z64 and comes with a USB
