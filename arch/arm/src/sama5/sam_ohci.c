@@ -1353,11 +1353,15 @@ static inline int sam_reminted(struct sam_ed_s *ed)
   DEBUGASSERT(curr != NULL);
   if (curr != NULL)
     {
-      /* Clear all current entries in the interrupt table for this direction */
+      /* Clear all current entries in the interrupt table for this
+       * direction
+       */
 
       sam_setinttab(0, 2, offset);
 
-      /* Remove the ED from the list..  Is this ED the first on in the list? */
+      /* Remove the ED from the list..  Is this ED the first on in the
+       * list?
+       */
 
       if (prev == NULL)
         {
