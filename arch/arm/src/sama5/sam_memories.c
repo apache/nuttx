@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
@@ -766,7 +767,7 @@ uintptr_t sam_physregaddr(uintptr_t virtregaddr)
    * address
    */
 
-  serr("ERROR: Bad virtual address: %08lx\n", virtregaddr);
+  serr("ERROR: Bad virtual address: %08" PRIxPTR "\n", virtregaddr);
   DEBUGPANIC();
   return virtregaddr;
 }
@@ -926,7 +927,7 @@ uintptr_t sam_physramaddr(uintptr_t virtramaddr)
 
   if (virtramaddr != 0)
     {
-      serr("ERROR: Bad virtual address: %08lx\n", virtramaddr);
+      serr("ERROR: Bad virtual address: %08" PRIxPTR "\n", virtramaddr);
       DEBUGPANIC();
     }
 
@@ -1059,7 +1060,7 @@ uintptr_t sam_virtramaddr(uintptr_t physramaddr)
 
   if (physramaddr != 0)
     {
-      serr("ERROR: Bad physical address: %08lx\n|", physramaddr);
+      serr("ERROR: Bad physical address: %08" PRIxPTR "\n|", physramaddr);
       DEBUGPANIC();
     }
 
