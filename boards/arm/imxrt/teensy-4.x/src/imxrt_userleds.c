@@ -18,16 +18,16 @@
  *
  ****************************************************************************/
 
-/* There are two LED status indicators located on the EVK Board.  The
+/* There are two LED status indicators located on Teensy-4.x Board.  The
  * functions of these LEDs include:
  *
   *   - RED LED (loading status)
  *      - dim:    ready
  *      - bright: writing
  *      - blink:  no USB
- *   - USER LED (D8)
+ *   - USER LED (D3)
  *
- * Only a single LED, D8, is under software control.
+ * Only a single LED, D3, is under software control.
  */
 
 /****************************************************************************

@@ -36,6 +36,8 @@
 
 #ifdef CONFIG_IMXRT_LPI2C
 
+#define BMP280_LPI2C 3
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -70,7 +72,7 @@ static void imxrt_i2c_register(int bus)
     }
 
   #ifdef SENSORS_BMP280
-  if (CONFIG_BMP280_LPI2C == bus)
+  if (BMP280_LPI2C == bus)
     {
       /* Register the BMP280 driver */
 

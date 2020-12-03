@@ -19,7 +19,7 @@
  ****************************************************************************/
 
 #ifndef __BOARDS_ARM_IMXRT_TEENSY_4X_SRC_IMXRT_FLEXSPI_NOR_BOOT_H
-#  define __BOARDS_ARM_IMXRT_TEENSY_4X_SRC_IMXRT_FLEXSPI_NOR_BOOT_H
+#define __BOARDS_ARM_IMXRT_TEENSY_4X_SRC_IMXRT_FLEXSPI_NOR_BOOT_H
 
 /****************************************************************************
  * Included Files

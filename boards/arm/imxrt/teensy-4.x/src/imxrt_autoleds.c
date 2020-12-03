@@ -18,18 +18,17 @@
  *
  ****************************************************************************/
 
-/* There are four LED status indicators located on the EVK Board.  The
- * functions of these LEDs include:
+/* There are two LED status indicators located on the Teensy 4.x board.
+ * The functions of these LEDs include:
  *
- *   - Main Power Supply(D3)??
- *     Green: DC 5V main supply is normal.
- *     Red:   J2 input voltage is over 5.6V.
- *     Off:   The board is not powered.
- *   - Reset RED LED(D21)??
- *   - OpenSDA LED(D20)??
- *   - USER LED(D8)
+ *   - RED LED (loading status)
+ *      - dim:    ready
+ *      - bright: writing
+ *      - blink:  no USB
+ *   - USER LED (D3)
  *
- * Only a single LED, D8, is under software control.
+ * Only a single LED, D3, is under software control.
+ *
  *
  * This LED is not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in

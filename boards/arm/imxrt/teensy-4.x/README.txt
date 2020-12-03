@@ -41,9 +41,9 @@ LEDs and buttons
        - dim:    ready
        - bright: writing
        - blink:  no USB
-    - USER LED(D8)
+    - USER LED (D3)
 
-  Only a single LED, D8, is under software control.
+  Only a single LED, D3, is under software control.
 
   This LED is not used by the board port unless CONFIG_ARCH_LEDS is
   defined.  In that case, the usage by the board port is defined in
@@ -120,7 +120,6 @@ Configurations
 
 Configuration sub-directories
 -----------------------------
-
 
   nsh-4.0:
 

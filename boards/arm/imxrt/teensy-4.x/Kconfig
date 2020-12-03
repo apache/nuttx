@@ -24,13 +24,4 @@ config TEENSY_41
 
 endchoice # Board configuration
 
-menu "Sensors interfaces"
-
-config BMP280_LPI2C
-	int "LPI2C interface for BMP280 sensor"
-	depends on SENSORS_BMP280
-	default 4
-
-endmenu # Sensors interfaces
-
 endif

@@ -70,6 +70,7 @@ int imxrt_adc_initialize(void)
   int ret;
 
   /* Call imxrt_adcinitialize() to get an instance of the ADC interface */
+
   #ifdef CONFIG_IMXRT_ADC1
       adc = imxrt_adcinitialize(1, g_chanlist, ADC_NCHANNELS);
       if (adc == NULL)

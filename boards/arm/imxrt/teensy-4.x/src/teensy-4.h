@@ -51,9 +51,9 @@
  *      - dim:    ready
  *      - bright: writing
  *      - blink:  no USB
- *   - USER LED(D8)
+ *   - USER LED (D3)
  *
- * Only a single LED, D8, is under software control.
+ * Only a single LED, D3, is under software control.
  */
 
 #  define GPIO_LED        (GPIO_OUTPUT | IOMUX_LED_DEFAULT | \
