@@ -368,7 +368,7 @@ static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len)
   struct up_sample_s         sample;
   int                        ret;
 
-  iinfo("len=%d\n", len);
+  iinfo("len=%zd\n", len);
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
