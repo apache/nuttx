@@ -1658,7 +1658,7 @@ static inline int sam_single(struct sam_dmach_s *dmach)
 
   sam_putdmach(dmach, dmach->cfg, SAM_DMAC_CH_CFG_OFFSET);
 
-  /* Enable the channel by writing a ‘1’ to the CHER enable bit */
+  /* Enable the channel by writing a 1 to the CHER enable bit */
 
   sam_putdmac(dmac, DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER_OFFSET);
 
@@ -1718,7 +1718,7 @@ static inline int sam_multiple(struct sam_dmach_s *dmach)
 
   sam_putdmach(dmach, (uint32_t)llhead, SAM_DMAC_CH_DSCR_OFFSET);
 
-  /* Finally, enable the channel by writing a ‘1’ to the CHER enable */
+  /* Finally, enable the channel by writing a 1 to the CHER enable */
 
   sam_putdmac(dmac, DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER_OFFSET);
 
