@@ -365,7 +365,7 @@ static inline void tcp_sender(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Name: tcp_eventhandler
+ * Name: tcp_recvhandler
  *
  * Description:
  *   This function is called with the network locked to perform the actual
@@ -384,9 +384,9 @@ static inline void tcp_sender(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static uint16_t tcp_eventhandler(FAR struct net_driver_s *dev,
-                                 FAR void *pvconn, FAR void *pvpriv,
-                                 uint16_t flags)
+static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
+                                FAR void *pvconn, FAR void *pvpriv,
+                                uint16_t flags)
 {
   FAR struct tcp_recvfrom_s *pstate = (struct tcp_recvfrom_s *)pvpriv;
 
@@ -505,6 +505,53 @@ static uint16_t tcp_eventhandler(FAR struct net_driver_s *dev,
 
           nxsem_post(&pstate->ir_sem);
         }
+    }
+
+  return flags;
+}
+
+/****************************************************************************
+ * Name: tcp_ackhandler
+ *
+ * Description:
+ *   This function is called with the network locked to send the ACK in
+ *   response by the lower, device interfacing layer.
+ *
+ * Input Parameters:
+ *   dev      The structure of the network driver that generated the event.
+ *   pvconn   The connection structure associated with the socket
+ *   flags    Set of events describing why the callback was invoked
+ *
+ * Returned Value:
+ *   ACK should be send in the response.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static uint16_t tcp_ackhandler(FAR struct net_driver_s *dev,
+                               FAR void *pvconn, FAR void *pvpriv,
+                               uint16_t flags)
+{
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+
+  ninfo("flags: %04x\n", flags);
+
+  if (conn != NULL && (flags & TCP_POLL) != 0)
+    {
+      /* Indicate that the data has been consumed and that an ACK
+       * should be send.
+       */
+
+      if (tcp_get_recvwindow(dev, conn) != 0 &&
+          conn->rcv_wnd == 0)
+        {
+          flags |= TCP_SNDACK;
+        }
+
+      tcp_callback_free(conn, conn->rcv_ackcb);
+      conn->rcv_ackcb = NULL;
     }
 
   return flags;
@@ -636,14 +683,18 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
                            size_t len, int flags, FAR struct sockaddr *from,
                            FAR socklen_t *fromlen)
 {
-  struct tcp_recvfrom_s state;
-  int               ret;
+  struct tcp_recvfrom_s  state;
+  FAR struct tcp_conn_s *conn;
+  int                    ret;
+
+  net_lock();
+
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
   /* Initialize the state structure.  This is done with the network locked
    * because we don't want anything to happen until we are ready.
    */
 
-  net_lock();
   tcp_recvfrom_initialize(psock, buf, len, from, fromlen, &state);
 
   /* Handle any any TCP data already buffered in a read-ahead buffer.  NOTE
@@ -727,8 +778,6 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
 
   if (state.ir_recvlen == 0 && state.ir_buflen > 0)
     {
-      FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
-
       /* Set up the callback in the connection */
 
       state.ir_cb = tcp_callback_alloc(conn);
@@ -736,7 +785,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
         {
           state.ir_cb->flags   = (TCP_NEWDATA | TCP_DISCONN_EVENTS);
           state.ir_cb->priv    = (FAR void *)&state;
-          state.ir_cb->event   = tcp_eventhandler;
+          state.ir_cb->event   = tcp_recvhandler;
 
           /* Wait for either the receive to complete or for an error/timeout
            * to occur.  net_timedwait will also terminate if a signal isi
@@ -757,6 +806,20 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
       else
         {
           ret = -EBUSY;
+        }
+    }
+
+  /* Receive additional data from read-ahead buffer, send the ACK timely. */
+
+  else if (state.ir_recvlen > 0 && conn->rcv_wnd == 0 &&
+           conn->rcv_ackcb == NULL)
+    {
+      conn->rcv_ackcb = tcp_callback_alloc(conn);
+      if (conn->rcv_ackcb)
+        {
+          conn->rcv_ackcb->flags   = TCP_POLL;
+          conn->rcv_ackcb->event   = tcp_ackhandler;
+          netdev_txnotify_dev(conn->dev);
         }
     }
 
