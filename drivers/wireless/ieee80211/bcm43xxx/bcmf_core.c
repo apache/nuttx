@@ -181,7 +181,8 @@ int bcmf_upload_binary(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
       /* Transfer firmware data */
 
       ret = bcmf_transfer_bytes(sbus, true, 1,
-                                address & SBSDIO_SB_OFT_ADDR_MASK, buf, size);
+                                address & SBSDIO_SB_OFT_ADDR_MASK, buf,
+                                size);
       if (ret != OK)
         {
           wlerr("transfer failed %d %x %d\n", ret, address, size);
@@ -584,7 +585,8 @@ void bcmf_core_reset(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
 
   /* Run initialization sequence */
 
-  bcmf_write_sbregb(sbus, base + BCMA_IOCTL, BCMA_IOCTL_FGC | BCMA_IOCTL_CLK);
+  bcmf_write_sbregb(sbus, base + BCMA_IOCTL,
+                    BCMA_IOCTL_FGC | BCMA_IOCTL_CLK);
   bcmf_read_sbregw(sbus, base + BCMA_IOCTL, &value);
 
   bcmf_write_sbregb(sbus, base + BCMA_RESET_CTL, 0);
