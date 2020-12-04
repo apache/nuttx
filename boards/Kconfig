@@ -200,6 +200,27 @@ config ARCH_BOARD_ESP32CORE
 		of two CPUs is symmetric, meaning they use the same addresses to
 		access the same memory.
 
+config ARCH_BOARD_ESP32_ETHERNETKIT
+	bool "Espressif ESP32 Ethernet Kit"
+	depends on ARCH_CHIP_ESP32
+	select ARCH_HAVE_LEDS
+	---help---
+		The ESP32-Ethernet-Kit is an Ethernet-to-Wi-Fi development board that enables
+  		Ethernet devices to be interconnected over Wi-Fi. At the same time, to provide
+  		more flexible power supply options, the ESP32-Ethernet-Kit also supports power
+  		over Ethernet (PoE).
+
+config ARCH_BOARD_ESP32_WROVERKIT
+	bool "Espressif ESP-WROVER-KIT"
+	depends on ARCH_CHIP_ESP32
+	select ARCH_HAVE_LEDS
+	---help---
+		ESP-WROVER-KIT is an ESP32-based development board produced by Espressif.
+		ESP-WROVER-KIT features the following integrated components:
+  			ESP32-WROVER-B module
+  			LCD screen
+  			MicroSD card slot
+
 config ARCH_BOARD_EZ80F910200KITG
 	bool "ZiLOG ez80f910200kitg development kit"
 	depends on ARCH_CHIP_EZ80F91
@@ -2176,6 +2197,8 @@ config ARCH_BOARD
 	default "ekk-lm3s9b96"             if ARCH_BOARD_EKKLM3S9B96
 	default "quickfeather"             if ARCH_BOARD_QUICKFEATHER
 	default "esp32-core"               if ARCH_BOARD_ESP32CORE
+	default "esp32-ethernet-kit"       if ARCH_BOARD_ESP32_ETHERNETKIT
+	default "esp32-wrover-kit"         if ARCH_BOARD_ESP32_WROVERKIT
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
@@ -2996,6 +3019,12 @@ source "boards/renesas/rx65n/rx65n-grrose/Kconfig"
 endif
 if ARCH_BOARD_ESP32CORE
 source "boards/xtensa/esp32/esp32-core/Kconfig"
+endif
+if ARCH_BOARD_ESP32_ETHERNETKIT
+source "boards/xtensa/esp32/esp32-ethernet-kit/Kconfig"
+endif
+if ARCH_BOARD_ESP32_WROVERKIT
+source "boards/xtensa/esp32/esp32-wrover-kit/Kconfig"
 endif
 if ARCH_BOARD_Z16F2800100ZCOG
 source "boards/z16/z16f/z16f2800100zcog/Kconfig"
