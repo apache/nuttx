@@ -124,9 +124,9 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
               goto drop;
             }
 
-          /* Get the IPv6 + ICMPv6 combined header length.  NOTE:  This header
-           * size includes only the common 32-bit header at the beginning of
-           * each ICMPv6 message.
+          /* Get the IPv6 + ICMPv6 combined header length.  NOTE:  This
+           * header size includes only the common 32-bit header at the
+           * beginning of each ICMPv6 message.
            */
 
           hdrlen = IPv6_HDRLEN + ICMPv6_HDRLEN;
