@@ -997,7 +997,7 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
   ret = rpmsg_send_nocopy(&conn->ept, msg, total);
 out:
   rpmsg_socket_unlock(&conn->sendlock);
-  return ret;
+  return ret > 0 ? len : ret;
 }
 
 static ssize_t rpmsg_socket_send_internal(FAR struct socket *psock,
