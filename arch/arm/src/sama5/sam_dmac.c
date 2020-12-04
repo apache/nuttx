@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -1831,7 +1832,7 @@ static int sam_dmac_interrupt(int irq, void *context, FAR void *arg)
                 {
                   /* Yes... Terminate the transfer with an error? */
 
-                  dmaerr("ERROR: DMA failed: %08x\n", regval);
+                  dmaerr("ERROR: DMA failed: %08" PRIx32 "\n", regval);
                   sam_dmaterminate(dmach, -EIO);
                 }
 
