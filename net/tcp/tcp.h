@@ -273,6 +273,12 @@ struct tcp_conn_s
 
   FAR struct devif_callback_s *connevents;
 
+  /* Receiver callback to indicate that the data has been consumed and that
+   * an ACK should be send.
+   */
+
+  FAR struct devif_callback_s *rcv_ackcb;
+
   /* accept() is called when the TCP logic has created a connection
    *
    *   accept_private: This is private data that will be available to the
