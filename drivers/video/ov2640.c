@@ -860,12 +860,16 @@ static int ovr2640_chipid(FAR struct i2c_master_s *i2c)
 
   if (pidl != OVR2640_PRODUCT_IDL || pidh != OVR2640_PRODUCT_IDH)
     {
+#ifdef CONFIG_DEBUG_GRAPHICS
       gerr("ERROR: Unsupported PID=%02x$02x MID=%02x%02x\n",
             pidh, pidl, midh, midl);
+#endif
       return -ENOSYS;
     }
 
+#ifdef CONFIG_DEBUG_GRAPHICS
   ginfo("PID=%02x$02x MID=%02x%02x\n", pidh, pidl, midh, midl);
+#endif
   return OK;
 }
 
