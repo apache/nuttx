@@ -103,7 +103,7 @@ void sixlowpan_icmpv6_send(FAR struct net_driver_s *dev,
 
       if (ipv6icmpv6->ipv6.proto != IP_PROTO_ICMP6)
         {
-          nwarn("WARNING: Expected ICMPv6 prototype: %u vs %s\n",
+          nwarn("WARNING: Expected ICMPv6 prototype: %u vs %u\n",
                 ipv6icmpv6->ipv6.proto, IP_PROTO_ICMP6);
         }
       else
