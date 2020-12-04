@@ -1714,7 +1714,9 @@ static inline int sam_multiple(struct sam_dmach_s *dmach)
 
   sam_putdmach(dmach, dmach->cfg, SAM_DMAC_CH_CFG_OFFSET);
 
-  /* Program the DSCR register with the pointer to the firstlink list entry. */
+  /* Program the DSCR register with the pointer to the firstlink list
+   * entry.
+   */
 
   sam_putdmach(dmach, (uint32_t)llhead, SAM_DMAC_CH_DSCR_OFFSET);
 
@@ -2299,7 +2301,9 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   if (dmach->llhead)
     {
-      /* Save the callback info.  This will be invoked whent the DMA completes */
+      /* Save the callback info.  This will be invoked whent the DMA
+       * completes
+       */
 
       dmach->callback = callback;
       dmach->arg      = arg;
