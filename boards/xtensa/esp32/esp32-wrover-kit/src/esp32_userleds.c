@@ -27,9 +27,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
-#include <arch/board/board.h>
-#include "esp32_gpio.h"
 
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "esp32_gpio.h"
 #include "esp32-wrover-kit.h"
 
 /****************************************************************************
@@ -40,7 +42,7 @@
 
 static const uint32_t g_ledcfg[BOARD_NLEDS] =
 {
-  GPIO_LED1,
+  GPIO_LED1, GPIO_LED2, GPIO_LED3
 };
 
 /****************************************************************************
@@ -54,6 +56,8 @@ static const uint32_t g_ledcfg[BOARD_NLEDS] =
 uint32_t board_userled_initialize(void)
 {
   uint8_t i;
+
+  /* Configure the LEDs GPIOs as outputs */
 
   for (i = 0; i < BOARD_NLEDS; i++)
     {
@@ -82,8 +86,6 @@ void board_userled(int led, bool ledon)
 void board_userled_all(uint32_t ledset)
 {
   uint8_t i;
-
-  /* Configure LED1-8 GPIOs for output */
 
   for (i = 0; i < BOARD_NLEDS; i++)
     {

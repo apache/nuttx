@@ -26,6 +26,12 @@ CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
 
 CSRCS = esp32_boot.c esp32_bringup.c
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += esp32_autoleds.c
+else
+CSRCS += esp32_userleds.c
+endif
+
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += esp32_appinit.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
@@ -43,10 +49,6 @@ endif
 
 ifeq ($(CONFIG_ESP32_SPIFLASH),y)
 CSRCS += esp32_spiflash.c
-endif
-
-ifeq ($(CONFIG_USERLED),y)
-CSRCS += esp32_userleds.c
 endif
 
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template.ld

@@ -33,6 +33,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* ESP-WROVER-KIT GPIOs *****************************************************/
+
+/* LEDs */
+
+#define GPIO_LED1  0
+#define GPIO_LED2  2
+#define GPIO_LED3  4
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -68,6 +76,7 @@ int esp32_bringup(void);
  *
  * Description:
  *   Initialize SPI-based SD card and card detect thread.
+ *
  ****************************************************************************/
 
 int esp32_mmcsd_initialize(int minor);
