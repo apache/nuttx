@@ -52,6 +52,8 @@
  * Public Types
  ****************************************************************************/
 
+struct i2c_master_s; /* Forward reference */
+
 /* Number of temperature samples */
 
 typedef enum hts221_avrg_temp_e
