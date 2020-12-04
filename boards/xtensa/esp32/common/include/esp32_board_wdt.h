@@ -54,11 +54,6 @@ extern "C"
  * Description:
  *   Configure the timer driver.
  *
- * Input Parameters:
- *   devpath   - The full path to the timer device.  This should be of the
- *               form /dev/watchdogX
- *   wdt timer - The wdt timer's number.
- *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
  *   to indicate the nature of any failure.

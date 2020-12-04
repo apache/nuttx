@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/src/esp32_board_tim.c
+ * boards/xtensa/esp32/esp32-devkitc/src/esp32_boot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,97 +25,58 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
-#include <sys/types.h>
-#include <nuttx/timers/timer.h>
 
-#include "esp32_tim_lowerhalf.h"
-#include "esp32_board_tim.h"
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "esp32-devkitc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32_TIMER0
-#  define ESP32_TIMER0 (0)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER1
-#  define ESP32_TIMER1 (1)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER2
-#  define ESP32_TIMER2 (2)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER3
-#  define ESP32_TIMER3 (3)
-#endif
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_timer_init
+ * Name: esp32_board_initialize
  *
  * Description:
- *   Configure the timer driver.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
+ *   All ESP32 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
  ****************************************************************************/
 
-int board_timer_init(void)
+void esp32_board_initialize(void)
 {
-  int ret = OK;
-
-#ifdef CONFIG_ESP32_TIMER0
-  ret = esp32_timer_initialize("/dev/timer0", ESP32_TIMER0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-#ifdef CONFIG_ESP32_TIMER1
-  ret = esp32_timer_initialize("/dev/timer1", ESP32_TIMER1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-#ifdef CONFIG_ESP32_TIMER2
-  ret = esp32_timer_initialize("/dev/timer2", ESP32_TIMER2);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-#ifdef CONFIG_ESP32_TIMER3
-  ret = esp32_timer_initialize("/dev/timer3", ESP32_TIMER3);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-errout:
-  return ret;
 }
 
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_initialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phase may be used, for example, to initialize board-specific device
+ *   drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  /* Perform board-specific initialization */
+
+  esp32_bringup();
+}
+#endif

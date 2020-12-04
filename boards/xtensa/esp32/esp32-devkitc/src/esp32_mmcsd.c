@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/src/esp32_board_tim.c
+ * boards/xtensa/esp32/esp32-devkitc/src/esp32_mmcsd.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,100 +22,63 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <debug.h>
-#include <sys/types.h>
-#include <nuttx/timers/timer.h>
+#include <nuttx/config.h>
+#include <nuttx/mmcsd.h>
+#include <nuttx/spi/spi.h>
+#include <pthread.h>
+#include <sched.h>
+#include <time.h>
+#include <unistd.h>
 
-#include "esp32_tim_lowerhalf.h"
-#include "esp32_board_tim.h"
+#include "esp32_spi.h"
+#include "esp32-devkitc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32_TIMER0
-#  define ESP32_TIMER0 (0)
-#endif
+/****************************************************************************
+ * Private Definitions
+ ****************************************************************************/
 
-#ifdef CONFIG_ESP32_TIMER1
-#  define ESP32_TIMER1 (1)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER2
-#  define ESP32_TIMER2 (2)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER3
-#  define ESP32_TIMER3 (3)
-#endif
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_timer_init
+ * Name: esp32_mmcsd_initialize
  *
  * Description:
- *   Configure the timer driver.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
+ *   Initialize SPI-based SD card and card detect thread.
  ****************************************************************************/
 
-int board_timer_init(void)
+int esp32_mmcsd_initialize(int minor)
 {
-  int ret = OK;
+  struct spi_dev_s *spi;
+  int rv;
 
-#ifdef CONFIG_ESP32_TIMER0
-  ret = esp32_timer_initialize("/dev/timer0", ESP32_TIMER0);
-  if (ret < 0)
+  mcinfo("INFO: Initializing mmcsd card\n");
+
+  spi = esp32_spibus_initialize(2);
+  if (spi == NULL)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
+      mcerr("ERROR: Failed to initialize SPI port %d\n", 2);
+      return -ENODEV;
     }
-#endif
 
-#ifdef CONFIG_ESP32_TIMER1
-  ret = esp32_timer_initialize("/dev/timer1", ESP32_TIMER1);
-  if (ret < 0)
+  rv = mmcsd_spislotinitialize(minor, 0, spi);
+  if (rv < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
+      mcerr("ERROR: Failed to bind SPI port %d to SD slot %d\n",
+            2, 0);
+      return rv;
     }
-#endif
 
-#ifdef CONFIG_ESP32_TIMER2
-  ret = esp32_timer_initialize("/dev/timer2", ESP32_TIMER2);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-#ifdef CONFIG_ESP32_TIMER3
-  ret = esp32_timer_initialize("/dev/timer3", ESP32_TIMER3);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-errout:
-  return ret;
+  spiinfo("INFO: mmcsd card has been initialized successfully\n");
+  return OK;
 }
-

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/src/esp32_wdt.c
+ * boards/xtensa/esp32/esp32-devkitc/src/esp32_spi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,82 +24,33 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
-#include "esp32_wtd_lowerhalf.h"
-#include "esp32_board_wdt.h"
+#include <nuttx/spi/spi.h>
+#include <arch/board/board.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32_MWDT0
-#  define ESP32_MWDT0 (0)
-#endif
-
-#ifdef CONFIG_ESP32_MWDT1
-#  define ESP32_MWDT1 (1)
-#endif
-
-#ifdef CONFIG_ESP32_RWDT
-#  define ESP32_RWDT  (2)
-#endif
+#include "esp32-devkitc.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_wdt_init
- *
- * Description:
- *   Configure the timer driver.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
+ * Name:  esp32_spi2_status
  ****************************************************************************/
 
-int board_wdt_init(void)
+uint8_t esp32_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  int ret = OK;
+  uint8_t status = 0;
 
-#ifdef CONFIG_ESP32_MWDT0
-  ret = esp32_wtd_initialize("/dev/watchdog0", ESP32_MWDT0);
-  if (ret < 0)
+#ifdef CONFIG_MMCSD_SPI
+  if (devid == SPIDEV_MMCSD(0))
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize watchdog driver: %d\n",
-             ret);
-      goto errout;
+       status |= SPI_STATUS_PRESENT;
     }
 #endif
 
-#ifdef CONFIG_ESP32_MWDT1
-  ret = esp32_wtd_initialize("/dev/watchdog1", ESP32_MWDT1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize watchdog driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-#ifdef CONFIG_ESP32_RWDT
-  ret = esp32_wtd_initialize("/dev/watchdog2", ESP32_RWDT);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize watchdog driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-errout:
-  return ret;
+  return status;
 }
-
