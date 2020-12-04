@@ -656,7 +656,7 @@ static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
     {
       /* Wake up the thread with an Arbitration Lost error indication */
 
-      i2cerr("ERROR: TWIHS%d Arbitration Lost\n");
+      i2cerr("ERROR: TWIHS%d Arbitration Lost\n", priv->attr->twi);
       twi_wakeup(priv, -EUSERS);
     }
 #endif
