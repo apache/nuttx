@@ -49,6 +49,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -555,7 +556,7 @@ static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
   imr     = twi_getrel(priv, SAM_TWI_IMR_OFFSET);
   pending = sr & imr;
 
-  i2cinfo("TWI%d pending: %08x\n", priv->attr->twi, pending);
+  i2cinfo("TWI%d pending: %08" PRIx32 "\n", priv->attr->twi, pending);
 
   /* Byte received */
 
@@ -651,7 +652,8 @@ static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
     {
       /* Wake up the thread with an I/O error indication */
 
-      i2cerr("ERROR: TWI%d pending: %08x\n", priv->attr->twi, pending);
+      i2cerr("ERROR: TWI%d pending: %08" PRIx32 "\n",
+             priv->attr->twi, pending);
       twi_wakeup(priv, -EIO);
     }
 
