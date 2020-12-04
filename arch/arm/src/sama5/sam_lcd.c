@@ -48,6 +48,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
@@ -3082,8 +3083,8 @@ void sam_lcdclear(nxgl_mxpixel_t color)
   uint16_t *dest = (uint16_t *)LAYER_BASE.framebuffer;
   int i;
 
-  lcdinfo("Clearing display: BPP=16 color=%04x framebuffer=%08x size=%d\n",
-          color, LAYER_BASE.framebuffer, SAMA5_BASE_FBSIZE);
+  lcdinfo("Clearing display: BPP=16 color=%04jx framebuffer=%p size=%d\n",
+          (intmax_t)color, LAYER_BASE.framebuffer, SAMA5_BASE_FBSIZE);
 
   for (i = 0; i < SAMA5_BASE_FBSIZE; i += sizeof(uint16_t))
     {
