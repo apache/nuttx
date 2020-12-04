@@ -69,6 +69,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SAMA5_LCDC_DEFBACKLIGHT
@@ -502,6 +503,7 @@
 #define LCDC_FLAG_RIGHTLEFT (1 << 1)  /* Rend right-to-left */
 
 /* Preallocated LCDC DMA structures and framebuffers */
+
 /* Base layer */
 
 #define SAMA5_LCDC_BASE_DSCR    (CONFIG_SAMA5_LCDC_FB_VBASE+0)
@@ -523,8 +525,8 @@
 #define SAMA5_LCDC_DSCR_END     (CONFIG_SAMA5_LCDC_FB_VBASE+SAMA5_LCDC_DSCR_SIZE)
 
 /* Position the framebuffer memory in the center of the memory set aside.  We
- * will use any skirts before or after the framebuffer memory as a guard against
- * wild framebuffer writes.
+ * will use any skirts before or after the framebuffer memory as a guard
+ * against wild framebuffer writes.
  */
 
 #define SAMA5_LCDC_BUFFER_SIZE  (CONFIG_SAMA5_LCDC_FB_SIZE-SAMA5_LCDC_DSCR_SIZE)
@@ -589,6 +591,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This enumeration names each layer supported by the hardware */
 
 enum sam_layer_e
@@ -654,16 +657,17 @@ struct sam_lcdc_s
   /* Debug stuff */
 
 #ifdef CONFIG_SAMA5_LCDC_REGDEBUG
-   bool wrlast;                   /* True: Last access was a write */
-   uintptr_t addrlast;            /* Last address accessed */
-   uint32_t vallast;              /* Last value read or written */
-   int ntimes;                    /* Number of consecutive accesses */
+  bool wrlast;                   /* True: Last access was a write */
+  uintptr_t addrlast;            /* Last address accessed */
+  uint32_t vallast;              /* Last value read or written */
+  int ntimes;                    /* Number of consecutive accesses */
 #endif
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Register operations ******************************************************/
 
 #ifdef CONFIG_SAMA5_LCDC_REGDEBUG
@@ -677,6 +681,7 @@ static void sam_putreg(uintptr_t addr, uint32_t val);
 static void sam_wait_lcdstatus(uint32_t mask, uint32_t value);
 
 /* Frame buffer interface ***************************************************/
+
 /* Get information about the video controller configuration and the
  * configuration of each color plane.
  */
@@ -1210,6 +1215,7 @@ static int sam_hcr_setcursor(struct fb_vtable_s *vtable,
           g_lcdc.cpos = settings->pos;
           lcdinfo("pos: (h:%d, w:%d)\n", g_lcdc.cpos.x, g_lcdc.cpos.y);
         }
+
 #ifdef CONFIG_FB_HWCURSORSIZE
       if ((flags & FB_CUR_SETSIZE) != 0)
         {
@@ -1217,6 +1223,7 @@ static int sam_hcr_setcursor(struct fb_vtable_s *vtable,
           lcdinfo("size: (h:%d, w:%d)\n", g_lcdc.csize.h, g_lcdc.csize.w);
         }
 #endif
+
 #ifdef CONFIG_FB_HWCURSORIMAGE
       if ((flags & FB_CUR_SETIMAGE) != 0)
         {
@@ -1225,6 +1232,7 @@ static int sam_hcr_setcursor(struct fb_vtable_s *vtable,
                 settings->img.image);
         }
 #endif
+
       return OK;
     }
 
@@ -1891,8 +1899,8 @@ static void sam_lcd_disable(void)
 
   sam_wait_lcdstatus(LCDC_LCDSR_SIP | LCDC_LCDSR_DISP, 0);
 
-  /* 3. Disable the hsync and vsync signals by writing one to SYNCDIS field of
-   *    the LCDC_LCDDIS register.
+  /* 3. Disable the hsync and vsync signals by writing one to SYNCDIS field
+   *    of the LCDC_LCDDIS register.
    */
 
   sam_putreg(SAM_LCDC_LCDDIS, LCDC_LCDDIS_SYNC);
@@ -1909,8 +1917,8 @@ static void sam_lcd_disable(void)
 
   sam_putreg(SAM_LCDC_LCDDIS, LCDC_LCDDIS_CLK);
 
-  /* 6. Poll CLKSTS field of the LCDC_CLKSR register to check that Pixel Clock
-   *    is disabled.
+  /* 6. Poll CLKSTS field of the LCDC_CLKSR register to check that Pixel
+   *    Clock is disabled.
    */
 
   sam_wait_lcdstatus(LCDC_LCDSR_SIP | LCDC_LCDSR_CLK, 0);
@@ -2223,9 +2231,11 @@ static void sam_lcd_enable(void)
   /* 1. Configure LCD timing parameters, signal polarity and clock period. */
 
 #ifdef BOARD_LCDC_MCK_MUL2
-  div = (2*BOARD_MCK_FREQUENCY + (BOARD_LCDC_PIXELCLOCK-1)) / BOARD_LCDC_PIXELCLOCK;
+  div = (2*BOARD_MCK_FREQUENCY + (BOARD_LCDC_PIXELCLOCK - 1)) /
+        BOARD_LCDC_PIXELCLOCK;
 #else
-  div = (BOARD_MCK_FREQUENCY + (BOARD_LCDC_PIXELCLOCK-1)) / BOARD_LCDC_PIXELCLOCK;
+  div = (BOARD_MCK_FREQUENCY + (BOARD_LCDC_PIXELCLOCK - 1)) /
+        BOARD_LCDC_PIXELCLOCK;
 #endif
   DEBUGASSERT(div > 1);
 
@@ -2313,8 +2323,8 @@ static void sam_lcd_enable(void)
 
   sam_wait_lcdstatus(LCDC_LCDSR_SIP | LCDC_LCDSR_LCD, LCDC_LCDSR_LCD);
 
-  /* 6. Enable the display power signal writing one to the DISPEN field of the
-   *    LCDC_LCDEN register.
+  /* 6. Enable the display power signal writing one to the DISPEN field of
+   *    the LCDC_LCDEN register.
    */
 
   sam_putreg(SAM_LCDC_LCDEN, LCDC_LCDEN_DISP);
@@ -2398,7 +2408,8 @@ static uint32_t sam_scalefactor(uint32_t oldw, uint32_t neww)
  * Name: sam_show_layer
  *
  * Description:
- *   Show the give layer with the specified orientation and (perhaps) scaling.
+ *   Show the give layer with the specified orientation and (perhaps)
+ *   scaling.
  *
  ****************************************************************************/
 
@@ -2494,8 +2505,8 @@ static void sam_show_layer(struct sam_layer_s *layer,
 
   /* Normal direction: Left,Top -> Right,Down */
 
-  if ((!rightleft && !bottomup && layer->rotation == LCDC_ROT_0  ) ||
-      ( rightleft &&  bottomup && layer->rotation == LCDC_ROT_180))
+  if ((!rightleft && !bottomup && layer->rotation == LCDC_ROT_0) ||
+      (rightleft && bottomup && layer->rotation == LCDC_ROT_180))
     {
       /* No rotation optimization */
 
@@ -2523,7 +2534,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
 
   /* X mirror: Right,Top -> Left,Down */
 
-  else if (( rightleft && !bottomup && layer->rotation == LCDC_ROT_0  ) ||
+  else if ((rightleft && !bottomup && layer->rotation == LCDC_ROT_0) ||
            (!rightleft &&  bottomup && layer->rotation == LCDC_ROT_180))
     {
       /* No rotation optimization */
@@ -2555,8 +2566,8 @@ static void sam_show_layer(struct sam_layer_s *layer,
 
   /* Y mirror: Left,Down -> Right,Top */
 
-  else if ((!rightleft &&  bottomup && layer->rotation == LCDC_ROT_0  ) ||
-           ( rightleft && !bottomup && layer->rotation == LCDC_ROT_180))
+  else if ((!rightleft && bottomup && layer->rotation == LCDC_ROT_0) ||
+           (rightleft && !bottomup && layer->rotation == LCDC_ROT_180))
     {
       /* No rotation optimization */
 
@@ -2587,7 +2598,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
 
   /* X,Y mirror: Right,Top -> Left,Down */
 
-  else if (( rightleft &&  bottomup && layer->rotation == LCDC_ROT_0  ) ||
+  else if ((rightleft && bottomup && layer->rotation == LCDC_ROT_0) ||
            (!rightleft && !bottomup && layer->rotation == LCDC_ROT_180))
     {
       /* No rotation optimization */
@@ -2621,8 +2632,8 @@ static void sam_show_layer(struct sam_layer_s *layer,
 
   /* Rotate  90: Down,Left -> Top,Right (with w,h swap) */
 
-  else if ((!rightleft && !bottomup && layer->rotation == LCDC_ROT_90 ) ||
-           ( rightleft &&  bottomup && layer->rotation == LCDC_ROT_270))
+  else if ((!rightleft && !bottomup && layer->rotation == LCDC_ROT_90) ||
+           (rightleft && bottomup && layer->rotation == LCDC_ROT_270))
     {
       /* No rotation optimization */
 
@@ -2655,7 +2666,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
   /* Rotate 270: Top,Right -> Down,Left (with w,h swap) */
 
   else if ((!rightleft && !bottomup && layer->rotation == LCDC_ROT_270) ||
-           ( rightleft &&  bottomup && layer->rotation == LCDC_ROT_90 ))
+           (rightleft && bottomup && layer->rotation == LCDC_ROT_90))
     {
       /* No rotation optimization */
 
@@ -2676,7 +2687,8 @@ static void sam_show_layer(struct sam_layer_s *layer,
       /* X -- as rows */
 
       regaddr = g_layerstride[lid];
-      sam_putreg(regaddr, 0 - 2*bytespp - (bytesprow + padding) * (imgh - 1));
+      sam_putreg(regaddr,
+                 0 - 2 * bytespp - (bytesprow + padding) * (imgh - 1));
 
       /* Pointer to top right */
 
@@ -2686,8 +2698,8 @@ static void sam_show_layer(struct sam_layer_s *layer,
 
   /* Mirror X then Rotate 90: Down,Right -> Top,Left */
 
-  else if (( rightleft && !bottomup && layer->rotation == LCDC_ROT_90 ) ||
-           (!rightleft &&  bottomup && layer->rotation == LCDC_ROT_270))
+  else if ((rightleft && !bottomup && layer->rotation == LCDC_ROT_90) ||
+           (!rightleft && bottomup && layer->rotation == LCDC_ROT_270))
     {
       /* No rotation optimization */
 
@@ -2708,7 +2720,8 @@ static void sam_show_layer(struct sam_layer_s *layer,
       /* X -- as rows */
 
       regaddr = g_layerstride[lid];
-      sam_putreg(regaddr, 0 - 2 * bytespp + (bytesprow + padding) * (imgh - 1));
+      sam_putreg(regaddr,
+                 0 - 2 * bytespp + (bytesprow + padding) * (imgh - 1));
 
       /* Pointer to down right (x1,y1) */
 
@@ -2720,8 +2733,8 @@ static void sam_show_layer(struct sam_layer_s *layer,
 
   /* Mirror Y then Rotate 90: Top,Left -> Down,Right */
 
-  else if ((!rightleft &&  bottomup && layer->rotation ==  90) ||
-           ( rightleft && !bottomup && layer->rotation == LCDC_ROT_270))
+  else if ((!rightleft && bottomup && layer->rotation == 90) ||
+           (rightleft && !bottomup && layer->rotation == LCDC_ROT_270))
     {
       /* No rotation optimization */
 
@@ -2748,6 +2761,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
     }
 
   /* Configure DMA */
+
   /* DMA is running, just add new descriptor to queue */
 
   sam_dmasetup(lid, dscr, buffer);
@@ -2768,7 +2782,8 @@ static void sam_show_layer(struct sam_layer_s *layer,
   if (regaddr)
     {
       sam_putreg(regaddr,
-                 LCDC_HEOCFG3_XSIZE(dispw - 1) | LCDC_HEOCFG3_YSIZE(disph - 1);
+                 LCDC_HEOCFG3_XSIZE(dispw - 1) |
+                 LCDC_HEOCFG3_YSIZE(disph - 1);
     }
 #endif
 
@@ -2781,6 +2796,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
       uint32_t srch;
 
       /* Image size only used in scaling */
+
       /* Scaling target */
 
       if (layer->rotation == LCDC_ROT_90 || layer->rotation == LCDC_ROT_270)
@@ -2856,7 +2872,8 @@ static void sam_show_layer(struct sam_layer_s *layer,
 static void sam_show_base(void)
 {
   sam_show_layer(&LAYER_BASE, 0, 0,
-      BOARD_LCDC_WIDTH, BOARD_LCDC_HEIGHT, BOARD_LCDC_WIDTH, BOARD_LCDC_HEIGHT);
+                 BOARD_LCDC_WIDTH, BOARD_LCDC_HEIGHT,
+                 BOARD_LCDC_WIDTH, BOARD_LCDC_HEIGHT);
 }
 
 /****************************************************************************
@@ -2999,7 +3016,8 @@ int up_fbinitialize(int display)
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
- *   plane of the specified plane.  Many OSDs support multiple planes of video.
+ *   plane of the specified plane.  Many OSDs support multiple planes of
+ *   video.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
@@ -3047,16 +3065,16 @@ void up_fbuninitialize(int display)
   sam_lcd_disable();
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the SAMA5.  Clearing the display
- *   in the normal way by writing a sequences of runs that covers the entire display
- *   can be slow.  Here the display is cleared by simply setting all video memory to
- *   the specified color.
+ *   This is a non-standard LCD interface just for the SAMA5.  Clearing the
+ *   display in the normal way by writing a sequences of runs that covers
+ *   the entire display can be slow.  Here the display is cleared by simply
+ *   setting all video memory to the specified color.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_lcdclear(nxgl_mxpixel_t color)
 {
