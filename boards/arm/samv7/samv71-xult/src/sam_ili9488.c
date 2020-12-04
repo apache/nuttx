@@ -663,7 +663,11 @@ static int sam_setwindow(FAR struct sam_dev_s *priv, sam_color_t row,
   uint16_t buffer[4];
   int ret;
 
-  lcdinfo("row=%d col=%d width=%d height=%d\n", row, col, width, height);
+  lcdinfo("row=%jd col=%jd width=%jd height=%jd\n",
+          (intmax_t)row,
+          (intmax_t)col,
+          (intmax_t)width,
+          (intmax_t)height);
 
   /* Set Column Address Position */
 
