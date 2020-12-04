@@ -73,7 +73,7 @@ void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset)
         {
           /* Flush line */
 
-          wlinfo("%08x: %s%s\n",
+          wlinfo("%08lx: %s%s\n",
                  offset + i - char_count, hex_line, char_line);
           char_count = 0;
         }
@@ -90,7 +90,7 @@ void bcmf_hexdump(uint8_t *data, unsigned int len, unsigned long offset)
 
       memset(hex_line + 3 * char_count, ' ', 3 * (LINE_LEN - char_count));
       hex_line[3 * LINE_LEN] = 0;
-      wlinfo("%08x: %s%s\n", offset + i - char_count, hex_line, char_line);
+      wlinfo("%08lx: %s%s\n", offset + i - char_count, hex_line, char_line);
     }
 }
 
