@@ -280,6 +280,7 @@ struct ovr2640_reg_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -696,7 +697,7 @@ static int ov2640_putreg(FAR struct i2c_master_s *i2c, uint8_t regaddr,
   int ret;
 
 #ifdef CONFIG_OV2640_REGDEBUG
-   _err("%02x <- %02x\n", regaddr, regval);
+  _err("%02x <- %02x\n", regaddr, regval);
 #endif
 
   /* Set up for the transfer */
@@ -903,6 +904,7 @@ static int ov2640_reset(FAR struct i2c_master_s *i2c)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: ov2640_initialize
  *
@@ -945,7 +947,8 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
 #ifdef CONFIG_OV2640_JPEG
   /* Initialize for JPEG output */
 
-  ret = ov2640_putreglist(i2c, g_ov2640_jpeg_init, OV2640_JPEG_INIT_NENTRIES);
+  ret = ov2640_putreglist(i2c, g_ov2640_jpeg_init,
+                          OV2640_JPEG_INIT_NENTRIES);
   if (ret < 0)
     {
       gerr("ERROR: ov2640_putreglist failed: %d\n", ret);
@@ -1086,7 +1089,7 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c)
       goto errout;
     }
 
-/* Color format register settings */
+  /* Color format register settings */
 
   ret = ov2640_putreglist(i2c, g_ov2640_colorfmt_common,
                     OV2640_COLORFMT_COMMON_NENTRIES);
