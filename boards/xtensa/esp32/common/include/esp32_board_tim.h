@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIMER_H
-#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIMER_H
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIM_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIM_H
 
 /****************************************************************************
  * Included Files
@@ -54,11 +54,6 @@ extern "C"
  * Description:
  *   Configure the timer driver.
  *
- * Input Parameters:
- *   devpath - The full path to the timer device.  This should be of the
- *             form /dev/timerX
- *   timer   - The timer's number.
- *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
  *   to indicate the nature of any failure.
@@ -75,4 +70,4 @@ int board_timer_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIMER_H */
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_TIM_H */

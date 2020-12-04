@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/src/esp32_wdt.c
+ * boards/xtensa/esp32/esp32-devkitc/src/esp32_reset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,82 +24,40 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <debug.h>
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
 
-#include "esp32_wtd_lowerhalf.h"
-#include "esp32_board_wdt.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32_MWDT0
-#  define ESP32_MWDT0 (0)
-#endif
-
-#ifdef CONFIG_ESP32_MWDT1
-#  define ESP32_MWDT1 (1)
-#endif
-
-#ifdef CONFIG_ESP32_RWDT
-#  define ESP32_RWDT  (2)
-#endif
+#ifdef CONFIG_BOARDCTL_RESET
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_wdt_init
+ * Name: board_reset
  *
  * Description:
- *   Configure the timer driver.
+ *   Reset board.  Support for this function is required by board-level
+ *   logic if CONFIG_BOARDCTL_RESET is selected.
+ *
+ * Input Parameters:
+ *   status - Status information provided with the reset event.  This
+ *            meaning of this status information is board-specific.  If not
+ *            used by a board, the value zero may be provided in calls to
+ *            board_reset().
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.  The return value in this case is a
+ *   board-specific reason for the failure to shutdown.
  *
  ****************************************************************************/
 
-int board_wdt_init(void)
+int board_reset(int status)
 {
-  int ret = OK;
+  up_systemreset();
 
-#ifdef CONFIG_ESP32_MWDT0
-  ret = esp32_wtd_initialize("/dev/watchdog0", ESP32_MWDT0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize watchdog driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-#ifdef CONFIG_ESP32_MWDT1
-  ret = esp32_wtd_initialize("/dev/watchdog1", ESP32_MWDT1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize watchdog driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-#ifdef CONFIG_ESP32_RWDT
-  ret = esp32_wtd_initialize("/dev/watchdog2", ESP32_RWDT);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize watchdog driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-errout:
-  return ret;
+  return 0;
 }
 
+#endif /* CONFIG_BOARDCTL_RESET */

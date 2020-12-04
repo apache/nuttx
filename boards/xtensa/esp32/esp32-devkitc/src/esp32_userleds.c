@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/src/esp32_board_tim.c
+ * boards/xtensa/esp32/esp32-devkitc/src/esp32_userleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,98 +24,70 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
-#include <sys/types.h>
-#include <nuttx/timers/timer.h>
+#include <arch/board/board.h>
+#include "esp32_gpio.h"
 
-#include "esp32_tim_lowerhalf.h"
-#include "esp32_board_tim.h"
+#include "esp32-devkitc.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32_TIMER0
-#  define ESP32_TIMER0 (0)
-#endif
+/* This array maps an LED number to GPIO pin configuration */
 
-#ifdef CONFIG_ESP32_TIMER1
-#  define ESP32_TIMER1 (1)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER2
-#  define ESP32_TIMER2 (2)
-#endif
-
-#ifdef CONFIG_ESP32_TIMER3
-#  define ESP32_TIMER3 (3)
-#endif
+static const uint32_t g_ledcfg[BOARD_NLEDS] =
+{
+  GPIO_LED1,
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_timer_init
- *
- * Description:
- *   Configure the timer driver.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-int board_timer_init(void)
+uint32_t board_userled_initialize(void)
 {
-  int ret = OK;
+  uint8_t i;
 
-#ifdef CONFIG_ESP32_TIMER0
-  ret = esp32_timer_initialize("/dev/timer0", ESP32_TIMER0);
-  if (ret < 0)
+  for (i = 0; i < BOARD_NLEDS; i++)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
+      esp32_configgpio(g_ledcfg[i], OUTPUT);
     }
-#endif
 
-#ifdef CONFIG_ESP32_TIMER1
-  ret = esp32_timer_initialize("/dev/timer1", ESP32_TIMER1);
-  if (ret < 0)
+  return BOARD_NLEDS;
+}
+
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
+{
+  if ((unsigned)led < BOARD_NLEDS)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
+      esp32_gpiowrite(g_ledcfg[led], ledon);
     }
-#endif
+}
 
-#ifdef CONFIG_ESP32_TIMER2
-  ret = esp32_timer_initialize("/dev/timer2", ESP32_TIMER2);
-  if (ret < 0)
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint32_t ledset)
+{
+  uint8_t i;
+
+  /* Configure LED1-8 GPIOs for output */
+
+  for (i = 0; i < BOARD_NLEDS; i++)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
+      esp32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
     }
-#endif
-
-#ifdef CONFIG_ESP32_TIMER3
-  ret = esp32_timer_initialize("/dev/timer3", ESP32_TIMER3);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      goto errout;
-    }
-#endif
-
-errout:
-  return ret;
 }
 
