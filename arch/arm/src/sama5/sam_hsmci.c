@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -1540,7 +1541,7 @@ static int sam_hsmci_interrupt(int irq, void *context, void *arg)
             {
               /* Yes.. Was it some kind of timeout error? */
 
-              mcerr("ERROR: enabled: %08x pending: %08x\n",
+              mcerr("ERROR: enabled: %08" PRIx32 " pending: %08" PRIx32 "\n",
                     enabled, pending);
               if ((pending & HSMCI_DATA_TIMEOUT_ERRORS) != 0)
                 {
@@ -1618,7 +1619,7 @@ static int sam_hsmci_interrupt(int irq, void *context, void *arg)
                 {
                   /* Yes.. Was the error some kind of timeout? */
 
-                  mcerr("ERROR: events: %08x SR: %08x\n",
+                  mcerr("ERROR: events: %08" PRIx32 " SR: %08" PRIx32 "\n",
                         priv->cmdrmask, enabled);
 
                   if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
@@ -2088,7 +2089,8 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev,
 
   /* Write the fully decorated command to CMDR */
 
-  mcinfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
+  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32 "\n",
+         cmd, arg, regval);
   sam_putreg(priv, regval, SAM_HSMCI_CMDR_OFFSET);
   sam_cmdsample1(priv, SAMPLENDX_AFTER_CMDR);
   return OK;
@@ -2258,7 +2260,7 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev,
         {
           /* Some fatal error has occurred */
 
-          lcderr("ERROR: sr %08x\n", sr);
+          lcderr("ERROR: sr %08" PRIx32 "\n", sr);
           return -EIO;
         }
       else if ((sr & HSMCI_INT_TXRDY) != 0)
@@ -2397,8 +2399,9 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
             {
               /* Yes.. Was the error some kind of timeout? */
 
-              lcderr("ERROR: cmd: %08x events: %08x SR: %08x\n",
-                   cmd, priv->cmdrmask, sr);
+              lcderr("ERROR: cmd: %08" PRIx32
+                     " events: %08" PRIx32 " SR: %08" PRIx32 "\n",
+                     cmd, priv->cmdrmask, sr);
 
               if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
                 {
@@ -2429,7 +2432,8 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
        }
       else if (--timeout <= 0)
         {
-          lcderr("ERROR: Timeout cmd: %08x events: %08x SR: %08x\n",
+          lcderr("ERROR: Timeout cmd: %08" PRIx32
+                 " events: %08" PRIx32 " SR: %08" PRIx32 "\n",
                  cmd, priv->cmdrmask, sr);
 
           priv->wkupevent = SDIOWAIT_TIMEOUT;
@@ -3330,7 +3334,8 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       return NULL;
     }
 
-  mcinfo("priv: %p base: %08x hsmci: %d dmac: %d pid: %d\n",
+  mcinfo("priv: %p base: %08" PRIx32
+         " hsmci: %d dmac: %d pid: %" PRId32 "\n",
          priv, priv->base, priv->hsmci, dmac, pid);
 
   /* Initialize the HSMCI slot structure */
