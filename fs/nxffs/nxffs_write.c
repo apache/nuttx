@@ -882,8 +882,8 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
            * the block has uncorrectable bit errors.
            */
 
-          ferr("ERROR: Failed to read block %d: %d\n",
-               volume->ioblock, -ret);
+          ferr("ERROR: Failed to read block %jd: %d\n",
+               (intmax_t)volume->ioblock, -ret);
         }
 
       /* Search to the very end of this block if we have to */
