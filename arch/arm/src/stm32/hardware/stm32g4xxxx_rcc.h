@@ -1,6 +1,6 @@
 /****************************************************************************
- *  arch/arm/src/stm32/hardware/stm32g47xxx_rcc.h
- *  Register offsets, addresses, and bitfield defines for STM32G47xxx RCC
+ *  arch/arm/src/stm32/hardware/stm32g4xxxx_rcc.h
+ *  Register offsets, addresses, and bitfield defines for STM32G4Xxxx RCC
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -19,8 +19,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_RCC_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_RCC_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_RCC_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -674,4 +674,4 @@
 #define RCC_APB1ENR_UART4EN            RCC_APB1ENR1_UART4EN
 #define RCC_APB1ENR_UART5EN            RCC_APB1ENR1_UART5EN
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_RCC_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_RCC_H */

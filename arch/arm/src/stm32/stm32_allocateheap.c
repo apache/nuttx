@@ -524,16 +524,25 @@
  * In addition, external FSMC SRAM may be available.
  */
 
-#elif defined(CONFIG_STM32_STM32G47XX)
+#elif defined(CONFIG_STM32_STM32G4XXX)
 
 /* Set the end of system SRAM */
 
+#if defined(CONFIG_STM32_STM32G47XX)
 #  define SRAM1_END                    0x20020000
+#else
+#  error "Unsupported STM32G4 chip"
+#endif
 
 /* Set the range of CCM SRAM as well (although we may not use it) */
 
 #  define SRAM2_START                  0x10000000
-#  define SRAM2_END                    0x10008000
+
+#if defined(CONFIG_STM32_STM32G47XX)
+#    define SRAM2_END                  0x10008000
+#else
+#  error "Unsupported STM32G4 chip"
+#endif
 
 /* There are 4 possible SRAM configurations:
  *

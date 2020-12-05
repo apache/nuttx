@@ -55,8 +55,8 @@
 #  include "hardware/stm32f37xxx_syscfg.h"
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "hardware/stm32f40xxx_syscfg.h"
-#elif defined(CONFIG_STM32_STM32G47XX)
-#  include "hardware/stm32g47xxx_syscfg.h"
+#elif defined(CONFIG_STM32_STM32G4XXX)
+#  include "hardware/stm32g4xxxx_syscfg.h"
 #endif
 
 /****************************************************************************************************

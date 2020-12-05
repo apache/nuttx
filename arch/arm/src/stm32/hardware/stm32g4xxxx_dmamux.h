@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/stm32/hardware/stm32g47xxx_dmamux.h
+ * arch/arm/src/stm32/hardware/stm32g4xxxx_dmamux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_DMAMUX_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_DMAMUX_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_DMAMUX_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_DMAMUX_H
 
 /************************************************************************************
  * Included Files
@@ -33,8 +33,13 @@
 
 /* DMAMUX1 mapping ******************************************************************/
 
-/* NOTE: DMAMUX1 channels 0 to 7 are connected to DMA1 channels 0 to 7.
- *       DMAMUX1 channels 8 to 15 are connected to DMA2 channels 0 to 7.
+/* For category 3 and category 4 devies:
+ *       DMAMUX1 channels 0 to 7 are connected to DMA1 channels 1 to 8.
+ *       DMAMUX1 channels 8 to 15 are connected to DMA2 channels 1 to 8.
+ *
+ * For category 2:
+ *       DMAMUX1 channels 0 to 5 are connected to DMA1 channels 1 to 6.
+ *       DMAMUX1 channels 6 to 11 are connected to DMA2 channels 1 to 6.
  */
 
 #define DMAMUX1_REQ_MEM2MEM            (0)                   /* Memory to memory transfer */
@@ -154,4 +159,4 @@
 #define DMAMUX1_REQ_UCPD1_RX           (114)                 /* DMAMUX USBPD1 Rx request */
 #define DMAMUX1_REQ_UCPD1_TX           (115)                 /* DMAMUX USBPD1 Tx request */
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_DMAMUX_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_DMAMUX_H */

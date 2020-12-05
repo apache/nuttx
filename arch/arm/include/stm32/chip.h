@@ -80,10 +80,10 @@
 #else
 #  define __HAVE_F4  0
 #endif
-#ifdef CONFIG_STM32_STM32G47XX
-#  define __HAVE_G47 1
+#ifdef CONFIG_STM32_STM32G4XXX
+#  define __HAVE_G4 1
 #else
-#  define __HAVE_G47 0
+#  define __HAVE_G4 0
 #endif
 #ifdef CONFIG_STM32_STM32L15XX
 #  define __HAVE_L1  1
@@ -92,7 +92,7 @@
 #endif
 
 #if ((__HAVE_F1 + __HAVE_F2 + __HAVE_F30 + __HAVE_F33 + __HAVE_F37 + __HAVE_F4 + \
-      __HAVE_G47 + __HAVE_L1) != 1)
+      __HAVE_G4 + __HAVE_L1) != 1)
 #  error "Only one STM32 family must be selected !"
 #endif
 
@@ -2514,7 +2514,7 @@
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  define STM32_HAVE_IP_SPI_V2
 
-#elif defined(CONFIG_STM32_STM32G47XX)
+#elif defined(CONFIG_STM32_STM32G4XXX)
 #  define STM32_HAVE_IP_SPI_V4
 
 #elif defined(CONFIG_STM32_STM32L15XX)

@@ -57,8 +57,8 @@
 #  include "hardware/stm32f37xxx_memorymap.h"
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "hardware/stm32f40xxx_memorymap.h"
-#elif defined(CONFIG_STM32_STM32G47XX)
-#  include "hardware/stm32g47xxx_memorymap.h"
+#elif defined(CONFIG_STM32_STM32G4XXX)
+#  include "hardware/stm32g4xxxx_memorymap.h"
 #else
 #  error "Unsupported STM32 memory map"
 #endif

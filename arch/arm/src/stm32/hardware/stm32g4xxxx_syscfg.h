@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32/hardware/stm32g47xxx_syscfg.h
+ *  arch/arm/src/stm32/hardware/stm32g4xxxx_syscfg.h
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_SYSCFG_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_SYSCFG_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_SYSCFG_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_SYSCFG_H
 
 /****************************************************************************
  * Included Files
@@ -165,4 +165,4 @@
 #define SYSCFG_SKR_KEY_MASK              (0xff << SYSCFG_SKR_KEY_SHIFT)
 #  define SYSCFG_SKR_KEY(n)              (((n) << SYSCFG_SKR_KEY_SHIFT) & SYSCFG_SKR_KEY_MASK)
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_SYSCFG_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_SYSCFG_H */

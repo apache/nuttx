@@ -411,13 +411,13 @@ int stm32_configgpio(uint32_t cfgset)
 
 /****************************************************************************
  * Name: stm32_configgpio (for the STM32L15xxx, STM32F20xxx, STM32F40xxx,
- *       and STM32G47XX families).
+ *       and STM32G4XXX families).
  ****************************************************************************/
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
     defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
     defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
-    defined(CONFIG_STM32_STM32G47XX)
+    defined(CONFIG_STM32_STM32G4XXX)
 int stm32_configgpio(uint32_t cfgset)
 {
   uintptr_t base;
@@ -563,7 +563,7 @@ int stm32_configgpio(uint32_t cfgset)
           case GPIO_SPEED_40MHz:   /* 40 MHz High speed output */
             setting = GPIO_OSPEED_40MHz;
             break;
-#elif defined(CONFIG_STM32_STM32G47XX)
+#elif defined(CONFIG_STM32_STM32G4XXX)
           default:
           case GPIO_SPEED_5MHz:    /* 5 MHz Low speed output */
             setting = GPIO_OSPEED_5MHz;
@@ -698,7 +698,7 @@ int stm32_unconfiggpio(uint32_t cfgset)
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
       defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
-      defined(CONFIG_STM32_STM32G47XX)
+      defined(CONFIG_STM32_STM32G4XXX)
   cfgset |= GPIO_INPUT | GPIO_FLOAT;
 #else
 # error "Unsupported STM32 chip"
@@ -725,7 +725,7 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
       defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
-      defined(CONFIG_STM32_STM32G47XX)
+      defined(CONFIG_STM32_STM32G4XXX)
   uint32_t bit;
 #endif
   unsigned int port;
@@ -760,7 +760,7 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
       defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
-      defined(CONFIG_STM32_STM32G47XX)
+      defined(CONFIG_STM32_STM32G4XXX)
 
       if (value)
         {
