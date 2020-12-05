@@ -51,14 +51,14 @@
 
 /* Register Offsets *********************************************************************************/
 
-#define STM32_SYSCFG_MEMRMP_OFFSET     0x0000 /* SYSCFG memory remap register */
-#define STM32_SYSCFG_PMC_OFFSET        0x0004 /* SYSCFG peripheral mode configuration register */
+#define STM32_SYSCFG_MEMRMP_OFFSET     0x0000                    /* SYSCFG memory remap register */
+#define STM32_SYSCFG_PMC_OFFSET        0x0004                    /* SYSCFG peripheral mode configuration register */
 
 #define STM32_SYSCFG_EXTICR_OFFSET(p)  (0x0008 + ((p) & 0x000c)) /* Registers are displaced by 4! */
-#define STM32_SYSCFG_EXTICR1_OFFSET    0x0008 /* SYSCFG external interrupt configuration register 1 */
-#define STM32_SYSCFG_EXTICR2_OFFSET    0x000c /* SYSCFG external interrupt configuration register 2 */
-#define STM32_SYSCFG_EXTICR3_OFFSET    0x0010 /* SYSCFG external interrupt configuration register 3 */
-#define STM32_SYSCFG_EXTICR4_OFFSET    0x0014 /* SYSCFG external interrupt configuration register 4 */
+#define STM32_SYSCFG_EXTICR1_OFFSET    0x0008                    /* SYSCFG external interrupt configuration register 1 */
+#define STM32_SYSCFG_EXTICR2_OFFSET    0x000c                    /* SYSCFG external interrupt configuration register 2 */
+#define STM32_SYSCFG_EXTICR3_OFFSET    0x0010                    /* SYSCFG external interrupt configuration register 3 */
+#define STM32_SYSCFG_EXTICR4_OFFSET    0x0014                    /* SYSCFG external interrupt configuration register 4 */
 
 /* Register Addresses *******************************************************************************/
 
@@ -75,31 +75,31 @@
 
 /* SYSCFG memory remap register */
 
-#define SYSCFG_MEMRMP_MEMMODE_SHIFT     (0)       /* Bits 0-1: Memory mapping selection */
+#define SYSCFG_MEMRMP_MEMMODE_SHIFT     (0)                                 /* Bits 0-1: Memory mapping selection */
 #define SYSCFG_MEMRMP_MEMMODE_MASK      (3 << SYSCFG_MEMRMP_MEMMODE_SHIFT)
-#  define SYSCFG_MEMRMP_MEMMODE_FLASH   (0 << SYSCFG_MEMRMP_MEMMODE_SHIFT) /* 00: Main Flash memory mapped at 0x00000000 */
-#  define SYSCFG_MEMRMP_MEMMODE_SYSTEM  (1 << SYSCFG_MEMRMP_MEMMODE_SHIFT) /* 01: System Flash memory mapped at 0x00000000 */
-#  define SYSCFG_MEMRMP_MEMMODE_FSMC    (2 << SYSCFG_MEMRMP_MEMMODE_SHIFT) /* 10: FSMC */
-#  define SYSCFG_MEMRMP_MEMMODE_SRAM    (3 << SYSCFG_MEMRMP_MEMMODE_SHIFT) /* 11: SRAM mapped at 0x00000000 */
-                                                  /* Bits 2-7: Reserved */
-#define SYSCFG_MEMRMP_BOOTMODE_SHIFT    (0)       /* Bits 8-9: Boot mode selected by the boot pins */
+#  define SYSCFG_MEMRMP_MEMMODE_FLASH   (0 << SYSCFG_MEMRMP_MEMMODE_SHIFT)  /* 00: Main Flash memory mapped at 0x00000000 */
+#  define SYSCFG_MEMRMP_MEMMODE_SYSTEM  (1 << SYSCFG_MEMRMP_MEMMODE_SHIFT)  /* 01: System Flash memory mapped at 0x00000000 */
+#  define SYSCFG_MEMRMP_MEMMODE_FSMC    (2 << SYSCFG_MEMRMP_MEMMODE_SHIFT)  /* 10: FSMC */
+#  define SYSCFG_MEMRMP_MEMMODE_SRAM    (3 << SYSCFG_MEMRMP_MEMMODE_SHIFT)  /* 11: SRAM mapped at 0x00000000 */
+                                                                            /* Bits 2-7: Reserved */
+#define SYSCFG_MEMRMP_BOOTMODE_SHIFT    (0)                                 /* Bits 8-9: Boot mode selected by the boot pins */
 #define SYSCFG_MEMRMP_BOOTMODE_MASK     (3 << SYSCFG_MEMRMP_BOOTMODE_SHIFT)
 #  define SYSCFG_MEMRMP_BOOTMODE_FLASH  (0 << SYSCFG_MEMRMP_BOOTMODE_SHIFT) /* 00: Main Flash memory boot mode */
 #  define SYSCFG_MEMRMP_BOOTMODE_SYSTEM (1 << SYSCFG_MEMRMP_BOOTMODE_SHIFT) /* 01: System Flash memory boot mode */
 #  define SYSCFG_MEMRMP_BOOTMODE_SRAM   (3 << SYSCFG_MEMRMP_BOOTMODE_SHIFT) /* 11: Embedded SRAM boot mode */
-                                                  /* Bits 10-31: Reserved */
+                                                                            /* Bits 10-31: Reserved */
 
 /* SYSCFG peripheral mode configuration register */
 
-#define SYSCFG_PMC_USBPU                (1 << 0)  /* Bit 0: USB pull-up enable on DP line */
-#define SYSCFG_PMC_LCDCAPA_SHIFT        (1)       /* Bits 1-5: LCD  decoupling capacitance connection */
+#define SYSCFG_PMC_USBPU                (1 << 0)                           /* Bit 0: USB pull-up enable on DP line */
+#define SYSCFG_PMC_LCDCAPA_SHIFT        (1)                                /* Bits 1-5: LCD  decoupling capacitance connection */
 #define SYSCFG_PMC_LCDCAPA_MASK         (0x1f << SYSCFG_PMC_LCDCAPA_SHIFT)
 #  define SYSCFG_PMC_LCDCAPA_PB2        (0x01 << SYSCFG_PMC_LCDCAPA_SHIFT) /* Bit 1: Controls VLCDrail2 on PB2/LCD_VCAP2 */
 #  define SYSCFG_PMC_LCDCAPA_PB12       (0x02 << SYSCFG_PMC_LCDCAPA_SHIFT) /* Bit 2: Controls VLCDrail1 on PB12/LCD_VCAP1 */
 #  define SYSCFG_PMC_LCDCAPA_PB0        (0x04 << SYSCFG_PMC_LCDCAPA_SHIFT) /* Bit 3: Controls VLCDrail3 on PB0/LCD_VCAP3 */
 #  define SYSCFG_PMC_LCDCAPA_PE11       (0x08 << SYSCFG_PMC_LCDCAPA_SHIFT) /* Bit 4: Controls VLCDrail1 on PE11/LCD_VCAP1 */
 #  define SYSCFG_PMC_LCDCAPA_PE12       (0x10 << SYSCFG_PMC_LCDCAPA_SHIFT) /* Bit 5: Controls VLCDrail3 on PE12/LCD_VCAP3 */
-                                                  /* Bits 6-31: Reserved */
+                                                                           /* Bits 6-31: Reserved */
 
 /* SYSCFG external interrupt configuration register 1-4 */
 
