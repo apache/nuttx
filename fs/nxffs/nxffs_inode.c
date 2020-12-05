@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <crc32.h>
 #include <assert.h>
@@ -157,7 +158,8 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   crc = crc32part((FAR const uint8_t *)entry->name, namlen, crc);
   if (crc != ecrc)
     {
-      ferr("ERROR: CRC entry: %08x CRC calculated: %08x\n", ecrc, crc);
+      ferr("ERROR: CRC entry: %08" PRIx32
+           " CRC calculated: %08" PRIx32 "\n", ecrc, crc);
       ret = -EIO;
       goto errout_with_name;
     }
@@ -342,7 +344,8 @@ int nxffs_nextentry(FAR struct nxffs_volume_s *volume, off_t offset,
               ret = nxffs_rdentry(volume, offset, entry);
               if (ret == OK)
                 {
-                  finfo("Found a valid fileheader, offset: %d\n", offset);
+                  finfo("Found a valid fileheader, offset: %jd\n",
+                        (intmax_t)offset);
                   return OK;
                 }
 
