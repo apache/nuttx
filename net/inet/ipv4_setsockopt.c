@@ -192,26 +192,28 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
       case IP_MULTICAST_TTL:          /* Set/read the time-to-live value of
                                        * outgoing multicast packets */
         {
+          FAR struct udp_conn_s *conn;
+          int ttl;
+
           if (psock->s_type != SOCK_DGRAM ||
-              value_len != sizeof(int))
+              value == NULL || value_len == 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          ttl = (value_len >= sizeof(int)) ?
+            *(FAR int *)value : (int)*(FAR unsigned char *)value;
+
+          if (ttl <= 0 || ttl > 255)
             {
               ret = -EINVAL;
             }
           else
             {
-              FAR struct udp_conn_s *conn;
-              int ttl = *(FAR int *)value;
-
-              if (ttl <= 0 || ttl > 255)
-                {
-                  ret = -EINVAL;
-                }
-              else
-                {
-                  conn = (FAR struct udp_conn_s *)psock->s_conn;
-                  conn->ttl = ttl;
-                  ret = OK;
-                }
+              conn = (FAR struct udp_conn_s *)psock->s_conn;
+              conn->ttl = ttl;
+              ret = OK;
             }
         }
         break;
