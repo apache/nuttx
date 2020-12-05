@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <sched.h>
 #include <debug.h>
@@ -162,7 +163,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               up_savestate(tcb->xcp.regs);
 
-              sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
+              sinfo("PC/STATUS Saved: %08" PRIx32 "/%08" PRIx32
+                    " New: %08" PRIx32 "/%08" PRIx32 "\n",
                     tcb->xcp.saved_epc, tcb->xcp.saved_status,
                     CURRENT_REGS[REG_EPC], CURRENT_REGS[REG_STATUS]);
             }
@@ -195,7 +197,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           status                    |= CP0_STATUS_INT_SW0;
           tcb->xcp.regs[REG_STATUS]  = status;
 
-          sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
+          sinfo("PC/STATUS Saved: %08" PRIx32 "/%08" PRIx32
+                " New: %08" PRIx32 "/%08" PRIx32 "\n",
                 tcb->xcp.saved_epc, tcb->xcp.saved_status,
                 tcb->xcp.regs[REG_EPC], tcb->xcp.regs[REG_STATUS]);
         }
