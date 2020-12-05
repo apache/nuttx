@@ -180,7 +180,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       if (!tcb->stack_alloc_ptr)
         {
-          serr("ERROR: Failed to allocate stack, size %d\n", stack_size);
+          serr("ERROR: Failed to allocate stack, size %zd\n", stack_size);
         }
 #endif
     }
