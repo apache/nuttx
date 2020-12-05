@@ -1748,7 +1748,7 @@ static void pic32mx_interrupt_work(void *arg)
 
       /* RXOVFLW: Receive FIFO Over Flow Error.  RXOVFLW is set by the RXBM
        * Logic for an RX FIFO Overflow condition. It is cleared by either a
-       * Reset or CPU write of a ‘1’ to the CLR register.
+       * Reset or CPU write of a 1 to the CLR register.
        */
 
       if ((status & ETH_INT_RXOVFLW) != 0)
@@ -1759,7 +1759,7 @@ static void pic32mx_interrupt_work(void *arg)
 
       /* RXBUFNA: Receive Buffer Not Available Interrupt.  This bit is set by
        * a RX Buffer Descriptor Overrun condition. It is cleared by either a
-       * Reset or a CPU write of a ‘1’ to the CLR register.
+       * Reset or a CPU write of a 1 to the CLR register.
        */
 
       if ((status & ETH_INT_RXBUFNA) != 0)
@@ -1815,7 +1815,7 @@ static void pic32mx_interrupt_work(void *arg)
        * - Excessive defer abort
        * - Late collision abort
        * - Excessive collisions abort
-       * This bit is cleared by either a Reset or CPU write of a ‘1’ to the
+       * This bit is cleared by either a Reset or CPU write of a 1 to the
        * CLR register.
        */
 
@@ -1827,7 +1827,7 @@ static void pic32mx_interrupt_work(void *arg)
 
       /* TXBUSE: Transmit BVCI Bus Error Interrupt. This bit is set when the
        * TX DMA encounters a BVCI Bus error during a memory access. It is
-       * cleared by either a Reset or CPU write of a ‘1’ to the CLR register.
+       * cleared by either a Reset or CPU write of a 1 to the CLR register.
        */
 
       if ((status & ETH_INT_TXBUSE) != 0)
@@ -1839,7 +1839,7 @@ static void pic32mx_interrupt_work(void *arg)
       /* TXDONE: Transmit Done Interrupt.  This bit is set when the currently
        * transmitted TX packet completes transmission, and the Transmit
        * Status Vector is loaded into the first descriptor used for the
-       * packet. It is cleared by either a Reset or CPU write of a ‘1’ to
+       * packet. It is cleared by either a Reset or CPU write of a 1 to
        * the CLR register.
        */
 
@@ -1857,15 +1857,15 @@ static void pic32mx_interrupt_work(void *arg)
       /* EWMARK: Empty Watermark Interrupt.  This bit is set when the RX
        * Descriptor Buffer Count is less than or equal to the value in the
        * RXEWM bit (ETHRXWM:0-7) value. It is cleared by BUFCNT bit
-       * (ETHSTAT:16-23) being incremented by hardware. Writing a ‘0’ or
-       * a ‘1’ has no effect.
+       * (ETHSTAT:16-23) being incremented by hardware. Writing a 0 or
+       * a 1 has no effect.
        */
 
       /* FWMARK: Full Watermark Interrupt.  This bit is set when the RX
        * escriptor Buffer Count is greater than or equal to the value in the
        * RXFWM bit (ETHRXWM:16-23) field. It is cleared by writing the
        * BUFCDEC (ETHCON1:0) bit to decrement the BUFCNT counter. Writing a
-       * ‘0’ or a ‘1’ has no effect.
+       * 0 or a 1 has no effect.
        */
     }
 
