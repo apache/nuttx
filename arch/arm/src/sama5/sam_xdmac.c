@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -1850,7 +1851,7 @@ static int sam_xdmac_interrupt(int irq, void *context, FAR void *arg)
             {
               /* Yes... Terminate the transfer with an error? */
 
-              dmaerr("ERROR: DMA failed: %08x\n", chpending);
+              dmaerr("ERROR: DMA failed: %08" PRIx32 "\n", chpending);
               sam_dmaterminate(xdmach, -EIO);
             }
 
@@ -1867,7 +1868,8 @@ static int sam_xdmac_interrupt(int irq, void *context, FAR void *arg)
 
           else
             {
-              dmaerr("ERROR: Unexpected interrupt: %08x\n", chpending);
+              dmaerr("ERROR: Unexpected interrupt: %08" PRIx32 "\n",
+                     chpending);
               DEBUGPANIC();
             }
 
