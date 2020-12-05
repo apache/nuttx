@@ -43,6 +43,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <errno.h>
 #include <debug.h>
@@ -440,10 +441,10 @@ static int sam34_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   status->timeleft = (priv->timeout * elapsed) / (priv->reload + 1);
 
-  wdinfo("Status     : %08x\n", sam34_getreg(SAM_WDT_SR));
-  wdinfo("  flags    : %08x\n", status->flags);
-  wdinfo("  timeout  : %d\n", status->timeout);
-  wdinfo("  timeleft : %d\n", status->timeleft);
+  wdinfo("Status     : %08" PRIx32 "\n", sam34_getreg(SAM_WDT_SR));
+  wdinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  wdinfo("  timeout  : %" PRId32 "\n", status->timeout);
+  wdinfo("  timeleft : %" PRId32 "\n", status->timeleft);
   return OK;
 }
 
@@ -470,13 +471,13 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   uint32_t reload;
 
   DEBUGASSERT(priv);
-  wdinfo("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%" PRId32 "\n", timeout);
 
   /* Can this timeout be represented? */
 
   if (timeout < 1 || timeout > WDT_MAXTIMEOUT)
     {
-      wderr("ERROR: Cannot represent timeout=%d > %d\n",
+      wderr("ERROR: Cannot represent timeout=%" PRId32 " > %d\n",
             timeout, WDT_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -501,7 +502,7 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   priv->reload = reload;
 
-  wdinfo("fwdt=%d reload=%d timeout=%d\n",
+  wdinfo("fwdt=%d reload=%" PRId32 " timeout=%" PRId32 "\n",
          WDT_FCLK, reload, priv->timeout);
 
   /* Don't commit to MR register until started! */
