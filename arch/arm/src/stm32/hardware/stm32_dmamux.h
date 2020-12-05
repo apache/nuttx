@@ -168,8 +168,8 @@
 
 /* Import DMAMUX map */
 
-#if defined(CONFIG_STM32_STM32G47XX)
-#  include "hardware/stm32g47xxx_dmamux.h"
+#if defined(CONFIG_STM32_STM32G4XXX)
+#  include "hardware/stm32g4xxxx_dmamux.h"
 #else
 #  error "Unsupported STM32 sub family"
 #endif

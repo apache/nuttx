@@ -1,5 +1,5 @@
 /****************************************************************************************************
- *  arch/arm/include/stm32/stm32g47xxx_irq.h
+ *  arch/arm/include/stm32/stm32g4xxxx_irq.h
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -22,8 +22,8 @@
  * through nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_STM32_STM32G47XXX_IRQ_H
-#define __ARCH_ARM_INCLUDE_STM32_STM32G47XXX_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_STM32_STM32G4XXXX_IRQ_H
+#define __ARCH_ARM_INCLUDE_STM32_STM32G4XXXX_IRQ_H
 
 /****************************************************************************************************
  * Included Files
@@ -197,4 +197,4 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_STM32F30XXX_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_STM32_STM32G4XXXX_IRQ_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32/hardware/stm32g47xxx_uart.h
+ *  arch/arm/src/stm32/hardware/stm32g4xxxx_uart.h
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_UART_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_UART_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_UART_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_UART_H
 
 /****************************************************************************
  * Included Files
@@ -417,4 +417,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_UART_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_UART_H */

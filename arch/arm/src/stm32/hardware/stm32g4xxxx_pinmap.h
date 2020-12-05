@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32/hardware/stm32g47xxx_pinmap.h
+ *  arch/arm/src/stm32/hardware/stm32g4xxxx_pinmap.h
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_PINMAP_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_PINMAP_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_PINMAP_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_PINMAP_H
 
 /****************************************************************************
  * Included Files
@@ -29,18 +29,22 @@
 
 #include "stm32_gpio.h"
 
-#if defined(CONFIG_ARCH_CHIP_STM32G474C)
-#  include "stm32g474cxx_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32G474M)
-#  include "stm32g474mxx_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32G474Q)
-#  include "stm32g474qxx_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32G474R)
-#  include "stm32g474rxx_pinmap.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32G474V)
-#  include "stm32g474vxx_pinmap.h"
+#if defined(CONFIG_STM32_STM32G4XXK)
+#  include "stm32g4xxk_pinmap.h"
+#elif defined(CONFIG_STM32_STM32G4XXC)
+#  include "stm32g4xxc_pinmap.h"
+#elif defined(CONFIG_STM32_STM32G4XXR)
+#  include "stm32g4xxr_pinmap.h"
+#elif defined(CONFIG_STM32_STM32G4XXM)
+#  include "stm32g4xxm_pinmap.h"
+#elif defined(CONFIG_STM32_STM32G4XXV)
+#  include "stm32g4xxv_pinmap.h"
+#elif defined(CONFIG_STM32_STM32G4XXP)
+#  include "stm32g4xxp_pinmap.h"
+#elif defined(CONFIG_STM32_STM32G4XXQ)
+#  include "stm32g4xxq_pinmap.h"
 #else
-#  error "Unknown STM32G47xxx chip!"
+#  error "Unknown STM32G4xxxx chip!"
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_PINMAP_H */

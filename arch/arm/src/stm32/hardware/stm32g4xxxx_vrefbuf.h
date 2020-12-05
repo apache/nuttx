@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32/hardware/stm32g47xxx_vrefbuf.h
+ *  arch/arm/src/stm32/hardware/stm32g4xxxx_vrefbuf.h
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_VREFBUF_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_VREFBUF_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_VREFBUF_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_VREFBUF_H
 
 /****************************************************************************
  * Included Files
@@ -62,4 +62,4 @@
 #define VREFBUF_CCR_TRIM_SHIFT            (0)
 #define VREFBUF_CCR_TRIM_MASK             (0x3f)                         /* 6-bit unsigned trim code */
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_VREFBUF_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_VREFBUF_H */

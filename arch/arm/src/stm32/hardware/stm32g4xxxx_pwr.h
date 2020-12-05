@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32/hardware/stm32g47xxx_pwr.h
+ *  arch/arm/src/stm32/hardware/stm32g4xxxx_pwr.h
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_PWR_H
-#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_PWR_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_PWR_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_PWR_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -450,4 +450,4 @@
 #define PWR_CR5_R1MODE_SHIFT           (8)
 #define PWR_CR5_R1MODE                 (0x1 << PWR_CR5_R1MODE_SHIFT)      /* Main Regulator Range 1 Mode */
 
-#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_PWR_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_PWR_H */

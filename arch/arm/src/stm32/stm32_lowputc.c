@@ -235,7 +235,7 @@
 #  endif
 
 #  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G47XX)
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
 #    define USART_CR1_CLRBITS\
       (USART_CR1_UESM | USART_CR1_RE | USART_CR1_TE | USART_CR1_PS | \
        USART_CR1_PCE | USART_CR1_WAKE | USART_CR1_M | USART_CR1_MME | \
@@ -258,7 +258,7 @@
 #  endif
 
 #  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G47XX)
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
 #    define USART_CR2_CLRBITS \
       (USART_CR2_ADDM7 | USART_CR2_LBDL | USART_CR2_LBDIE | USART_CR2_LBCL | \
        USART_CR2_CPHA | USART_CR2_CPOL | USART_CR2_CLKEN | USART_CR2_STOP_MASK | \
@@ -275,7 +275,7 @@
 /* CR3 settings */
 
 #  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G47XX)
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
 
 #    define USART_CR3_CLRBITS \
       (USART_CR3_EIE | USART_CR3_IREN | USART_CR3_IRLP | USART_CR3_HDSEL | \
@@ -296,7 +296,7 @@
 /* Calculate USART BAUD rate divider */
 
 #  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G47XX)
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
 
 /* Baud rate for standard USART (SPI mode included):
  *
@@ -578,7 +578,7 @@ void stm32_lowsetup(void)
 #elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
       defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32F4XXX) || \
-      defined(CONFIG_STM32_STM32G47XX)
+      defined(CONFIG_STM32_STM32G4XXX)
 
 void stm32_lowsetup(void)
 {

@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32/stm32g47xxx_rcc.c
+ *  arch/arm/src/stm32/stm32g4xxxx_rcc.c
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
  ****************************************************************************/
 
 /* Unless otherwise specified, when comments in this file refer to the
- * reference manual, that is the STM32G474 Reference Manual (RM0440 Rev 2).
+ * reference manual, that is the STM32G4 Reference Manual (RM0440 Rev 2).
  *
  * This file requires a clocking configuration, which is set in board.h,
  * consisting of some or all of the following defines:
@@ -89,7 +89,7 @@
 
 #include <nuttx/config.h>
 
-#include "hardware/stm32g47xxx_pwr.h"
+#include "hardware/stm32g4xxxx_pwr.h"
 
 /****************************************************************************
  * Pre-processor Definitions

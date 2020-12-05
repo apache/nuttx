@@ -1,5 +1,5 @@
 /****************************************************************************************************
- *  arch/arm/src/stm32/hardware/stm32g47xxx_memorymap.h
+ *  arch/arm/src/stm32/hardware/stm32g4xxxx_memorymap.h
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -18,14 +18,14 @@
  *
  ****************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_MEMORYMAP_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_MEMORYMAP_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_MEMORYMAP_H
 
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
 
-/* STM32G47xxx Address Blocks ***********************************************************************/
+/* STM32G4xxxx Address Blocks ***********************************************************************/
 
 #define STM32_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb code block */
 #define STM32_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb sram block */
@@ -185,4 +185,4 @@
 
 #define STM32_DEBUGMCU_BASE  0xe0042000
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_MEMORYMAP_H */
