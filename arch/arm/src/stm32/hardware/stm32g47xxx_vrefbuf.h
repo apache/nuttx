@@ -28,8 +28,6 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#ifdef CONFIG_STM32_STM32G47XX
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -64,5 +62,4 @@
 #define VREFBUF_CCR_TRIM_SHIFT            (0)
 #define VREFBUF_CCR_TRIM_MASK             (0x3f)                         /* 6-bit unsigned trim code */
 
-#endif /* CONFIG_STM32_STM32G47XX */
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_VREFBUF_H */
