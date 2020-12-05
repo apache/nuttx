@@ -161,6 +161,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
   if (timerid == NULL || (clockid != CLOCK_REALTIME
 #ifdef CONFIG_CLOCK_MONOTONIC
       && clockid != CLOCK_MONOTONIC
+      && clockid != CLOCK_BOOTTIME
 #endif /* CONFIG_CLOCK_MONOTONIC */
       ))
     {
