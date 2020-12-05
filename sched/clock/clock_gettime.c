@@ -88,7 +88,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
    * is invoked with a clock_id argument of CLOCK_MONOTONIC."
    */
 
-  if (clock_id == CLOCK_MONOTONIC)
+  if (clock_id == CLOCK_MONOTONIC || clock_id == CLOCK_BOOTTIME)
     {
       /* The the time elapsed since the timer was initialized at power on
        * reset.
