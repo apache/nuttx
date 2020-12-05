@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -111,26 +112,29 @@ pid_t up_vfork(const struct vfork_s *context)
   void *argv;
   int ret;
 
-  sinfo("s0:%08x s1:%08x s2:%08x s3:%08x s4:%08x\n",
+  sinfo("s0:%08" PRIx32 " s1:%08" PRIx32 " s2:%08" PRIx32
+        " s3:%08" PRIx32 " s4:%08" PRIx32 "\n",
         context->s0, context->s1, context->s2, context->s3, context->s4);
 #ifdef CONFIG_MIPS32_FRAMEPOINTER
-  sinfo("s5:%08x s6:%08x s7:%08x\n",
+  sinfo("s5:%08" PRIx32 " s6:%08" PRIx32 " s7:%08" PRIx32 "\n",
         context->s5, context->s6, context->s7);
 #ifdef MIPS32_SAVE_GP
-  sinfo("fp:%08x sp:%08x ra:%08x gp:%08x\n",
+  sinfo("fp:%08" PRIx32 " sp:%08" PRIx32 " ra:%08" PRIx32
+        " gp:%08" PRIx32 "\n",
         context->fp, context->sp, context->ra, context->gp);
 #else
-  sinfo("fp:%08x sp:%08x ra:%08x\n",
+  sinfo("fp:%08" PRIx32 " sp:%08" PRIx32 " ra:%08" PRIx32 "\n",
         context->fp context->sp, context->ra);
 #endif
 #else
-  sinfo("s5:%08x s6:%08x s7:%08x s8:%08x\n",
+  sinfo("s5:%08" PRIx32 " s6:%08" PRIx32 " s7:%08" PRIx32
+        " s8:%08" PRIx32 "\n",
         context->s5, context->s6, context->s7, context->s8);
 #ifdef MIPS32_SAVE_GP
-  sinfo("sp:%08x ra:%08x gp:%08x\n",
+  sinfo("sp:%08" PRIx32 " ra:%08" PRIx32 " gp:%08" PRIx32 "\n",
         context->sp, context->ra, context->gp);
 #else
-  sinfo("sp:%08x ra:%08x\n",
+  sinfo("sp:%08" PRIx32 " ra:%08" PRIx32 "\n",
         context->sp, context->ra);
 #endif
 #endif
@@ -178,7 +182,7 @@ pid_t up_vfork(const struct vfork_s *context)
   DEBUGASSERT((uint32_t)parent->adj_stack_ptr > context->sp);
   stackutil = (uint32_t)parent->adj_stack_ptr - context->sp;
 
-  sinfo("stacksize:%d stackutil:%d\n", stacksize, stackutil);
+  sinfo("stacksize:%zd stackutil:%" PRId32 "\n", stacksize, stackutil);
 
   /* Make some feeble effort to perserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
@@ -204,14 +208,14 @@ pid_t up_vfork(const struct vfork_s *context)
       newfp = context->fp;
     }
 
-  sinfo("Old stack base:%08x SP:%08x FP:%08x\n",
+  sinfo("Old stack base:%p SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
         parent->adj_stack_ptr, context->sp, context->fp);
-  sinfo("New stack base:%08x SP:%08x FP:%08x\n",
+  sinfo("New stack base:%p SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
         child->cmn.adj_stack_ptr, newsp, newfp);
 #else
-  sinfo("Old stack base:%08x SP:%08x\n",
+  sinfo("Old stack base:%p SP:%08" PRIx32 "\n",
         parent->adj_stack_ptr, context->sp);
-  sinfo("New stack base:%08x SP:%08x\n",
+  sinfo("New stack base:%p SP:%08" PRIx32 "\n",
         child->cmn.adj_stack_ptr, newsp);
 #endif
 
