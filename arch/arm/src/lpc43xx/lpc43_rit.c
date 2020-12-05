@@ -79,14 +79,15 @@
  ****************************************************************************/
 
 static double sec_per_tick;
-static uint64_t g_internal_timer, g_alarm;
+static uint64_t g_internal_timer;
+static uint64_t g_alarm;
 struct timespec g_ts;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int lpc43_RIT_isr(int irq, FAR void *context, FAR void *arg)
+static int lpc43_rit_isr(int irq, FAR void *context, FAR void *arg)
 {
   irqstate_t flags;
 
@@ -108,27 +109,27 @@ static int lpc43_RIT_isr(int irq, FAR void *context, FAR void *arg)
   return OK;
 }
 
-static inline void lpc43_load_RIT_timer(uint32_t value)
+static inline void lpc43_load_rit_timer(uint32_t value)
 {
   putreg32(value, LPC43_RIT_COUNTER);
 }
 
-static inline void lpc43_load_RIT_compare(uint32_t value)
+static inline void lpc43_load_rit_compare(uint32_t value)
 {
   putreg32(value, LPC43_RIT_COMPVAL);
 }
 
-static inline void lpc43_set_RIT_timer_mask(uint32_t value)
+static inline void lpc43_set_rit_timer_mask(uint32_t value)
 {
   putreg32(value, LPC43_RIT_MASK);
 }
 
-static inline uint32_t lpc43_read_RIT_timer(void)
+static inline uint32_t lpc43_read_rit_timer(void)
 {
   return getreg32(LPC43_RIT_COUNTER);
 }
 
-static inline void lpc43_RIT_timer_start(void)
+static inline void lpc43_rit_timer_start(void)
 {
   uint32_t regval;
   regval = getreg32(LPC43_RIT_CTRL);
@@ -142,7 +143,7 @@ static inline void lpc43_RIT_timer_start(void)
   putreg32(regval, LPC43_RIT_CTRL);
 }
 
-static inline void lpc43_RIT_timer_stop(void)
+static inline void lpc43_rit_timer_stop(void)
 {
   uint32_t regval;
   regval = getreg32(LPC43_RIT_CTRL);
@@ -160,19 +161,19 @@ void up_timer_initialize(void)
   uint32_t mask_bits = 0;
   uint32_t mask_test = 0x80000000;
 
-  lpc43_RIT_timer_stop();
-  lpc43_load_RIT_timer(0);
+  lpc43_rit_timer_stop();
+  lpc43_load_rit_timer(0);
   g_internal_timer = 0;
 
   /* Set up the IRQ here */
 
-  irq_attach(LPC43M4_IRQ_RITIMER, lpc43_RIT_isr, NULL);
+  irq_attach(LPC43M4_IRQ_RITIMER, lpc43_rit_isr, NULL);
 
   /* Compute how many seconds per tick we have on the main clock.  If it is
    * 204MHz for example, then there should be about 4.90ns per tick
    */
 
-  sec_per_tick = (double)1.0/(double)LPC43_CCLK;
+  sec_per_tick = (double)1.0 / (double)LPC43_CCLK;
 
   /* Given an RIT_TIMER_RESOLUTION, compute how many ticks it will take to
    * reach that resolution.  For example, if we wanted a 1/4uS timer
@@ -182,7 +183,7 @@ void up_timer_initialize(void)
    * We round up by 1 tick.
    */
 
-  ticks_per_int = RIT_TIMER_RESOLUTION/(1000000000*sec_per_tick)+1;
+  ticks_per_int = RIT_TIMER_RESOLUTION / (1000000000 * sec_per_tick) + 1;
 
   /* Now we need to compute the mask that will let us set up to generate an
    * interrupt every 1/4uS.  This isn't "tickless" per-se, and probably
@@ -208,8 +209,8 @@ void up_timer_initialize(void)
    * RIT_TIMER_RESOLUTION cycles.
    */
 
-  lpc43_set_RIT_timer_mask((0xFFFFFFFF << (32 - mask_bits)));
-  lpc43_load_RIT_compare(ticks_per_int);
+  lpc43_set_rit_timer_mask((0xffffffff << (32 - mask_bits)));
+  lpc43_load_rit_compare(ticks_per_int);
 
   /* Turn on the IRQ */
 
@@ -217,7 +218,7 @@ void up_timer_initialize(void)
 
   /* Start the timer */
 
-  lpc43_RIT_timer_start();
+  lpc43_rit_timer_start();
 }
 
 int up_timer_gettime(FAR struct timespec *ts)
@@ -243,7 +244,8 @@ int up_alarm_start(FAR const struct timespec *ts)
    * coded.
    */
 
-  g_alarm = (uint64_t)ts->tv_sec * (uint64_t)1000000000 + (uint64_t)ts->tv_nsec;
+  g_alarm = (uint64_t)ts->tv_sec * (uint64_t)1000000000 +
+            (uint64_t)ts->tv_nsec;
   return OK;
 }
 
@@ -266,7 +268,8 @@ int up_timer_start(FAR const struct timespec *ts)
    */
 
   g_alarm = g_internal_timer;
-  g_alarm += (uint64_t)ts->tv_sec * (uint64_t)1000000000 + (uint64_t)ts->tv_nsec;
+  g_alarm += (uint64_t)ts->tv_sec * (uint64_t)1000000000 +
+             (uint64_t)ts->tv_nsec;
   return OK;
 }
 
