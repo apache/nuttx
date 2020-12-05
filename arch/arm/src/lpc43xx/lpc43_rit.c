@@ -79,7 +79,7 @@
  ****************************************************************************/
 
 static double sec_per_tick;
-static uint64_t internal_timer, alarm;
+static uint64_t g_internal_timer, g_alarm;
 struct timespec g_ts;
 
 /****************************************************************************
@@ -94,13 +94,13 @@ static int lpc43_RIT_isr(int irq, FAR void *context, FAR void *arg)
 
   putreg32(RIT_CTRL_INT, LPC43_RIT_CTRL);
 
-  internal_timer += (uint64_t)RIT_TIMER_RESOLUTION;
-  if (alarm > 0 && internal_timer >= alarm)
+  g_internal_timer += (uint64_t)RIT_TIMER_RESOLUTION;
+  if (g_alarm > 0 && g_internal_timer >= g_alarm)
     {
       /* handle expired alarm */
 
-      g_ts.tv_sec = (uint32_t)(internal_timer / 1000000000);
-      g_ts.tv_nsec = (uint32_t)(internal_timer % 1000000000);
+      g_ts.tv_sec = (uint32_t)(g_internal_timer / 1000000000);
+      g_ts.tv_nsec = (uint32_t)(g_internal_timer % 1000000000);
       nxsched_alarm_expiration(&g_ts);
     }
 
@@ -162,7 +162,7 @@ void up_timer_initialize(void)
 
   lpc43_RIT_timer_stop();
   lpc43_load_RIT_timer(0);
-  internal_timer = 0;
+  g_internal_timer = 0;
 
   /* Set up the IRQ here */
 
@@ -222,17 +222,17 @@ void up_timer_initialize(void)
 
 int up_timer_gettime(FAR struct timespec *ts)
 {
-  ts->tv_sec = (uint32_t)(internal_timer / 1000000000);
-  ts->tv_nsec = (uint32_t)(internal_timer % 1000000000);
+  ts->tv_sec = (uint32_t)(g_internal_timer / 1000000000);
+  ts->tv_nsec = (uint32_t)(g_internal_timer % 1000000000);
 
   return OK;
 }
 
 int up_alarm_cancel(FAR struct timespec *ts)
 {
-  ts->tv_sec = (uint32_t)(internal_timer / 1000000000);
-  ts->tv_nsec = (uint32_t)(internal_timer % 1000000000);
-  alarm = 0;
+  ts->tv_sec = (uint32_t)(g_internal_timer / 1000000000);
+  ts->tv_nsec = (uint32_t)(g_internal_timer % 1000000000);
+  g_alarm = 0;
   return OK;
 }
 
@@ -243,7 +243,7 @@ int up_alarm_start(FAR const struct timespec *ts)
    * coded.
    */
 
-  alarm = (uint64_t)ts->tv_sec * (uint64_t)1000000000 + (uint64_t)ts->tv_nsec;
+  g_alarm = (uint64_t)ts->tv_sec * (uint64_t)1000000000 + (uint64_t)ts->tv_nsec;
   return OK;
 }
 
@@ -265,8 +265,8 @@ int up_timer_start(FAR const struct timespec *ts)
    * potentially be implemented, so that's the way I did it.
    */
 
-  alarm = internal_timer;
-  alarm += (uint64_t)ts->tv_sec * (uint64_t)1000000000 + (uint64_t)ts->tv_nsec;
+  g_alarm = g_internal_timer;
+  g_alarm += (uint64_t)ts->tv_sec * (uint64_t)1000000000 + (uint64_t)ts->tv_nsec;
   return OK;
 }
 
