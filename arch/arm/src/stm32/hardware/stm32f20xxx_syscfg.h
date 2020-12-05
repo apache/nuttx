@@ -43,8 +43,6 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#ifdef CONFIG_STM32_STM32F20XX
-
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
@@ -147,5 +145,4 @@
 #define SYSCFG_CMPCR_CMPPD            (1 << 0)  /* Bit 0: Compensation cell power-down */
 #define SYSCFG_CMPCR_READY            (1 << 8)  /* Bit 8: Compensation cell ready flag */
 
-#endif /* CONFIG_STM32_STM32F20XX */
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F20XXX_SYSCFG_H */

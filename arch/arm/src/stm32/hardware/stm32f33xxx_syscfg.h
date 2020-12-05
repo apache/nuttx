@@ -44,8 +44,6 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#ifdef CONFIG_STM32_STM32F33XX
-
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
@@ -206,5 +204,4 @@
 #define SYSCFG_CFGR3_DAC1_TRIG3_RMP          (1 << 16)  /* Bit 16: HRTIM1_DAC1_TRIG1 remap */
 #define SYSCFG_CFGR3_DAC1_TRIG5_RMP          (1 << 17)  /* Bit 17: HRTIM1_DAC1_TRIG2 remap */
 
-#endif /* CONFIG_STM32_STM32F33XX */
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F33XXX_SYSCFG_H */

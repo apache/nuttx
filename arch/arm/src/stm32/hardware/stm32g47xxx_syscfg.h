@@ -28,8 +28,6 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#ifdef CONFIG_STM32_STM32G47XX
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -167,5 +165,4 @@
 #define SYSCFG_SKR_KEY_MASK              (0xff << SYSCFG_SKR_KEY_SHIFT)
 #  define SYSCFG_SKR_KEY(n)              (((n) << SYSCFG_SKR_KEY_SHIFT) & SYSCFG_SKR_KEY_MASK)
 
-#endif /* CONFIG_STM32_STM32G47XX */
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G47XXX_SYSCFG_H */

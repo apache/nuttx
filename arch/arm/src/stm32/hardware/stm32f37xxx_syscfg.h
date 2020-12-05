@@ -44,8 +44,6 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#ifdef CONFIG_STM32_STM32F37XX
-
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
@@ -162,5 +160,4 @@
 #define SYSCFG_CFGR2_PVDLOCK          (1 << 2)  /* Bit 2: PVD lock enable */
 #define SYSCFG_CFGR2_SRAM_PEF         (1 << 8)  /* Bit 8: SRAM parity error */
 
-#endif /* CONFIG_STM32_STM32F37XX */
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F37XXX_SYSCFG_H */

@@ -43,8 +43,6 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#ifdef CONFIG_STM32_STM32F30XX
-
 /****************************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************************/
@@ -173,5 +171,4 @@
 #define SYSCFG_CFGR2_BYPADDPAR        (1 << 4)  /* Bit 4: Bypass address bit 29 in parity calculation */
 #define SYSCFG_CFGR2_SRAM_PEF         (1 << 8)  /* Bit 8: SRAM parity error */
 
-#endif /* CONFIG_STM32_STM32F30XX */
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F30XXX_SYSCFG_H */
