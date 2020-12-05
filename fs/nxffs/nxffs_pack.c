@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -1434,7 +1435,8 @@ start_pack:
                       volume->pack);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to read erase block %d: %d\n", eblock, -ret);
+          ferr("ERROR: Failed to read erase block %jd: %d\n",
+               (intmax_t)eblock, -ret);
           goto errout_with_pack;
         }
 
@@ -1532,9 +1534,9 @@ start_pack:
                             {
                               /* Otherwise, something really bad happened */
 
-                              ferr("ERROR: Failed to pack into block %d: "
+                              ferr("ERROR: Failed to pack into block %jd: "
                                    "%d\n",
-                                   block, ret);
+                                   (intmax_t)block, ret);
                               goto errout_with_pack;
                             }
                         }
@@ -1567,9 +1569,9 @@ start_pack:
                             {
                               /* Otherwise, something really bad happened */
 
-                              ferr("ERROR: Failed to pack into block %d: "
+                              ferr("ERROR: Failed to pack into block %jd: "
                                    "%d\n",
-                                   block, ret);
+                                   (intmax_t)block, ret);
                               goto errout_with_pack;
                             }
                         }
@@ -1602,8 +1604,8 @@ start_pack:
       ret = MTD_ERASE(volume->mtd, eblock, 1);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to erase block %d [%d]: %d\n",
-               eblock, pack.block0, -ret);
+          ferr("ERROR: Failed to erase block %jd [%jd]: %d\n",
+               (intmax_t)eblock, (intmax_t)pack.block0, -ret);
           goto errout_with_pack;
         }
 
@@ -1613,8 +1615,8 @@ start_pack:
                        volume->pack);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to write erase block %d [%d]: %d\n",
-               eblock, pack.block0, -ret);
+          ferr("ERROR: Failed to write erase block %jd [%jd]: %d\n",
+               (intmax_t)eblock, (intmax_t)pack.block0, -ret);
           goto errout_with_pack;
         }
     }
