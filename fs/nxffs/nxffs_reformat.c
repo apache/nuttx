@@ -97,7 +97,7 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
       ret = MTD_ERASE(volume->mtd, eblock, 1);
       if (ret < 0)
         {
-          ferr("ERROR: Erase block %d failed: %d\n", eblock, ret);
+          ferr("ERROR: Erase block %jd failed: %d\n", (intmax_t)eblock, ret);
           return ret;
         }
 
