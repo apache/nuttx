@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -2008,7 +2009,9 @@ static bool wifi_env_is_chip(void)
 static void wifi_set_intr(int32_t cpu_no, uint32_t intr_source,
                           uint32_t intr_num, int32_t intr_prio)
 {
-  wlinfo("cpu_no=%d, intr_source=%u, intr_num=%u, intr_prio=%d");
+  wlinfo("cpu_no=%" PRId32 ", intr_source=%" PRIu32
+         ", intr_num=%" PRIu32 ", intr_prio=%" PRId32,
+         cpu_no, intr_source, intr_num, intr_prio);
 }
 
 /****************************************************************************
