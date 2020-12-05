@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -2195,7 +2196,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 #endif
 
   DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & priv->align) == 0);
-  i2sinfo("apb=%p nmaxbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nmaxbytes=%d arg=%p timeout=%" PRId32 "\n",
           apb, apb->nmaxbytes, arg, timeout);
 
   ssc_init_buffer(apb->samp, apb->nmaxbytes);
@@ -2416,7 +2417,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
    */
 
   DEBUGASSERT(priv && apb);
-  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%d\n",
+  i2sinfo("apb=%p nbytes=%d arg=%p timeout=%" PRId32 "\n",
           apb, apb->nbytes - apb->curbyte, arg, timeout);
 
   ssc_dump_buffer("Sending", &apb->samp[apb->curbyte],
@@ -2913,7 +2914,7 @@ static void ssc_clocking(struct sam_ssc_s *priv)
 
   sam_enableperiph1(priv->pid);
 
-  i2sinfo("PCSR1=%08x PCR=%08x CMR=%08x\n",
+  i2sinfo("PCSR1=%08" PRIx32 " PCR=%08" PRIx32 " CMR=%08" PRIx32 "\n",
           getreg32(SAM_PMC_PCSR1), regval,
           ssc_getreg(priv, SAM_SSC_CMR_OFFSET));
 }
