@@ -364,8 +364,8 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
                                    &blkentry->datlen);
               if (ret == OK)
                 {
-                  finfo("Found a valid data block, offset: %d datlen: %d\n",
-                        blkentry->hoffset, blkentry->datlen);
+                  finfo("Found a valid data block, offset: %jd datlen: %d\n",
+                        (intmax_t)blkentry->hoffset, blkentry->datlen);
                   return OK;
                 }
 
