@@ -93,6 +93,10 @@
 #include "stm32_apa102.h"
 #endif
 
+#ifdef CONFIG_WS2812
+#include "stm32_ws2812.h"
+#endif
+
 #ifdef CONFIG_SENSORS_MAX6675
 #include "stm32_max6675.h"
 #endif
@@ -320,6 +324,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_apa102_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_WS2812
+  /* Configure and initialize the WS2812 LEDs. */
+
+  ret = board_ws2812_initialize(0, WS2812_SPI, WS2812_NLEDS);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_ws2812_initialize() failed: %d\n", ret);
     }
 #endif
 

@@ -197,6 +197,11 @@
 
 #define GPIO_INT1         (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_PORTA|GPIO_PIN2)
 
+/* WS2812 LEDs */
+
+#define WS2812_NLEDS 2
+#define WS2812_SPI 1
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
