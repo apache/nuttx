@@ -4,9 +4,9 @@
 Configuring
 ===========
 
-Apache NuttX is a very configurable operating system. Nearly all features can be configured in or
-out of the system. This makes it possible to compile a build tailored for your hardware and
-application.
+Apache NuttX is a very configurable: nearly all features can be configured in or
+out of the system. This makes it possible to compile a build tailored for your
+hardware and application.
 
 The Apache NuttX configuration system uses Linux's
 `kconfig system <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`_ which
@@ -14,9 +14,9 @@ includes various frontends that allow you to modify configuration easily. Usuall
 frontend is used, which is a console based menu system (more info `here <https://en.wikipedia.org/wiki/Menuconfig>`_).
 
 As previously explained in :doc:`compiling`, the first step is to load a premade configuration for
-your board. Then, you can modify this configuration to your liking.
-
-In this example, we will show how you modify the default configuration of the ``sim`` build.
+your board. Then, you can modify this configuration to your liking. In this example, we will show
+how you modify the default configuration of the ``sim`` build, a build of NuttX which runs on your own
+computer.
 
 #. Initialize Board Configuration
 
@@ -103,7 +103,7 @@ If you know exactly which configuration symbol you want to change, you can use t
 
 This is also useful to script configuration changes that you perform often:
 
-.. code-block:: console
+.. code-block:: bash
 
    #!/bin/bash
 
@@ -121,7 +121,3 @@ This is also useful to script configuration changes that you perform often:
    kconfig-tweak --disable CONFIG_DEBUG_NOOPT
    kconfig-tweak --disable CONFIG_SYSLOG_TIMESTAMP
    make oldconfig
-
-----
-
-Next up is :ref:`debugging`.

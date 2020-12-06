@@ -66,8 +66,10 @@ To clean the build, you can do:
   .. code-block:: console
 
      $ make clean
+     
+.. tip::
 
-----
-
-Next up is :ref:`running`.
+  To increase build speed (or of any other target such as ``clean``), you can
+  pass the ``-jN`` flag to ``make``, where ``N`` is the number of parallel jobs
+  to start (usually, the number of processors on your machine).
 
