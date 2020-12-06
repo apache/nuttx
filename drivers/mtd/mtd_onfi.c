@@ -53,6 +53,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -357,15 +358,15 @@ int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
   onfi->model = *(FAR uint8_t *)(parmtab + 49);
 
   finfo("Returning:\n");
-  finfo("  manufacturer:  0x%02x\n", onfi->manufacturer);
-  finfo("  buswidth:      %d\n",     onfi->buswidth);
-  finfo("  luns:          %d\n",     onfi->luns);
-  finfo("  eccsize:       %d\n",     onfi->eccsize);
-  finfo("  model:         0x%02s\n", onfi->model);
-  finfo("  sparesize:     %d\n",     onfi->sparesize);
-  finfo("  pagesperblock: %d\n",     onfi->pagesperblock);
-  finfo("  blocksperlun:  %d\n",     onfi->blocksperlun);
-  finfo("  pagesize:      %d\n",     onfi->pagesize);
+  finfo("  manufacturer:  0x%02x\n",      onfi->manufacturer);
+  finfo("  buswidth:      %d\n",          onfi->buswidth);
+  finfo("  luns:          %d\n",          onfi->luns);
+  finfo("  eccsize:       %d\n",          onfi->eccsize);
+  finfo("  model:         0x%02x\n",      onfi->model);
+  finfo("  sparesize:     %d\n",          onfi->sparesize);
+  finfo("  pagesperblock: %d\n",          onfi->pagesperblock);
+  finfo("  blocksperlun:  %d\n",          onfi->blocksperlun);
+  finfo("  pagesize:      %" PRId32 "\n", onfi->pagesize);
   return OK;
 }
 
