@@ -26,6 +26,7 @@
 #include <nuttx/mtd/nand_config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
@@ -215,7 +216,7 @@ static inline int nand_tryeraseblock(struct sam_nandcs_s *priv, off_t block)
   ret = nand_wait_ready(priv);
   if (ret < 0)
     {
-      ferr("ERROR: Block %d Could not erase: %d\n", block, ret);
+      ferr("ERROR: Block %jd Could not erase: %d\n", (intmax_t)block, ret);
     }
 
   return ret;
@@ -373,8 +374,9 @@ static int nand_rawread(struct nand_raw_s *raw, off_t block,
 
   rowaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
   coladdr = data ? 0 : pagesize;
-  fwarn("block=%d page=%d rowaddr=%d coladdr %d data=%p spare=%p\n",
-        (int)block, page, rowaddr, coladdr , data, spare);
+  fwarn("block=%jd page=%d rowaddr=%jd coladdr %jd data=%p spare=%p\n",
+        (intmax_t)block, page, (intmax_t)rowaddr, (intmax_t)coladdr,
+        data, spare);
   coladdr = (coladdr >> 8) & 0x4 ? coladdr & 0x83f : coladdr;
   if (data)
     {
@@ -583,7 +585,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   mtd = nand_initialize(&priv->raw);
   if (!mtd)
     {
-      ferr("ERROR: CS%d nand_initialize failed %d\n", cs);
+      ferr("ERROR: CS%d nand_initialize failed\n", cs);
       return NULL;
     }
 
