@@ -97,7 +97,8 @@ int sam_at25_automount(int minor)
       mtd = at25_initialize(spi);
       if (!mtd)
         {
-          ferr("ERROR: Failed to bind SPI port %d to the AT25 FLASH driver\n");
+          ferr("ERROR: Failed to bind SPI port %d to "
+               "the AT25 FLASH driver\n");
           return -ENODEV;
         }
 
@@ -132,6 +133,7 @@ int sam_at25_automount(int minor)
           return ret;
         }
 #endif
+
       /* Now we are initialized */
 
       initialized = true;
