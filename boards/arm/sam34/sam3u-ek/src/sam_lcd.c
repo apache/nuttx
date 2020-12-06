@@ -113,6 +113,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -921,7 +922,7 @@ int board_lcd_initialize(void)
   /* Enable SMC peripheral clock */
 
   putreg32((1 << SAM_PID_SMC), SAM_PMC_PCER);
-  lcdinfo("PMC PCSR: %08x SMC: %08x\n",
+  lcdinfo("PMC PCSR: %08" PRIx32 " SMC: %08x\n",
           getreg32(SAM_PMC_PCSR), (1 << SAM_PID_SMC));
 
   /* Configure SMC CS2 */
@@ -949,10 +950,10 @@ int board_lcd_initialize(void)
             (SMCCS_MODE_DBW_16BITS);
   putreg32(regval, SAM_SMCCS_MODE(2));
 
-  lcdinfo("SMC SETUP[%08x]: %08x PULSE[%08x]: %08x\n",
+  lcdinfo("SMC SETUP[%08x]: %08" PRIx32 " PULSE[%08x]: %08" PRIx32 "\n",
           SAM_SMCCS_SETUP(2), getreg32(SAM_SMCCS_SETUP(2)),
           SAM_SMCCS_PULSE(2), getreg32(SAM_SMCCS_PULSE(2)));
-  lcdinfo("    CYCLE[%08x]: %08x MODE[%08x]:  %08x\n",
+  lcdinfo("    CYCLE[%08x]: %08" PRIx32 " MODE[%08x]:  %08" PRIx32 "\n",
           SAM_SMCCS_CYCLE(2), getreg32(SAM_SMCCS_CYCLE(2)),
           SAM_SMCCS_MODE(2),  getreg32(SAM_SMCCS_MODE(2)));
 
