@@ -64,6 +64,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -1211,7 +1212,8 @@ static uint32_t s32k1xx_lpspi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 
   regval = s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_SR_OFFSET);
 
-  spiinfo("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
+  spiinfo("Sent: %04" PRIx32 " Return: %04" PRIx32
+          " Status: %02" PRIx32 "\n", wd, ret, regval);
 
   UNUSED(regval);
   return ret;
