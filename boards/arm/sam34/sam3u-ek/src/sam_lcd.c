@@ -384,10 +384,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = sam_putrun,            /* Put a run into LCD memory */
-  .getrun = sam_getrun,            /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
-  .bpp    = SAM3UEK_BPP,           /* Bits-per-pixel */
+  .putrun = sam_putrun,             /* Put a run into LCD memory */
+  .getrun = sam_getrun,             /* Get a run from LCD memory */
+  .buffer = (uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp    = SAM3UEK_BPP,            /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
@@ -602,7 +602,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
                       FAR const uint8_t *buffer,
                       size_t npixels)
 {
-  uint16_t *run = (uint16_t*)buffer;
+  uint16_t *run = (uint16_t *)buffer;
   unsigned int i;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -651,6 +651,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
       sam_wrram(*run++);
     }
 #endif
+
   return OK;
 }
 
@@ -671,7 +672,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
 static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                       size_t npixels)
 {
-  uint16_t *run = (uint16_t*)buffer;
+  uint16_t *run = (uint16_t *)buffer;
   unsigned int i;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -715,6 +716,7 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       *run++ = sam_rdram();
     }
 #endif
+
   return OK;
 }
 
