@@ -165,7 +165,7 @@ static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_DEV_URANDOM_RANDOM_POOL
   if (len > 0)
     {
-      getrandom(buffer, len);
+      getrandom(buffer, len, 0);
     }
 
 #else

@@ -64,13 +64,15 @@
  * Input Parameters:
  *   bytes  - Buffer for returned random bytes
  *   nbytes - Number of bytes requested.
+ *   flags  - Bit mask that can contain zero or more of the ORed values
+ *            together.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void getrandom(FAR void *bytes, size_t nbytes);
+void getrandom(FAR void *bytes, size_t nbytes, unsigned int flags);
 
 #endif /* CONFIG_CRYPTO_RANDOM_POOL */
 

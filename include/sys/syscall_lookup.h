@@ -382,5 +382,5 @@ SYSCALL_LOOKUP(telldir,                    1)
  */
 
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
-  SYSCALL_LOOKUP(getrandom,                2)
+  SYSCALL_LOOKUP(getrandom,                3)
 #endif

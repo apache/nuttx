@@ -44,7 +44,7 @@
 void uuid_create(uuid_t *u, uint32_t *status)
 {
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
-  getrandom(u, sizeof(uuid_t));
+  getrandom(u, sizeof(uuid_t), 0);
 #else
   unsigned long *beg = (unsigned long *)u;
   unsigned long *end = (unsigned long *)(u + 1);
