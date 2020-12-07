@@ -39,6 +39,7 @@
 "getppid","unistd.h","defined(CONFIG_SCHED_HAVE_PARENT)","pid_t"
 "getsockname","sys/socket.h","defined(CONFIG_NET)","int","int","FAR struct sockaddr *","FAR socklen_t *"
 "getsockopt","sys/socket.h","defined(CONFIG_NET)","int","int","int","int","FAR void *","FAR socklen_t *"
+"gettid","unistd.h","","pid_t"
 "getuid","unistd.h","defined(CONFIG_SCHED_USER_IDENTITY)","uid_t"
 "if_indextoname","net/if.h","defined(CONFIG_NETDEV_IFINDEX)","FAR char *","unsigned int","FAR char *"
 "if_nametoindex","net/if.h","defined(CONFIG_NETDEV_IFINDEX)","unsigned int","FAR const char *"
