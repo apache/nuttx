@@ -263,6 +263,10 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
 
       ipv6tcp->tcp.wnd[0] = recvwndo >> 8;
       ipv6tcp->tcp.wnd[1] = recvwndo & 0xff;
+
+      /* Update the Receiver Window */
+
+      conn->rcv_wnd = recvwndo;
     }
 
   /* Calculate TCP checksum. */
