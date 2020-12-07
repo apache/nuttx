@@ -366,6 +366,10 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
       tcp->wnd[0] = recvwndo >> 8;
       tcp->wnd[1] = recvwndo & 0xff;
+
+      /* Update the Receiver Window */
+
+      conn->rcv_wnd = recvwndo;
     }
 
   /* Finish the IP portion of the message and calculate checksums */
