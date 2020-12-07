@@ -107,7 +107,6 @@ config ESP32_RMT
 config ESP32_RNG
 	bool "Random Number Generator (RNG)"
 	default n
-	depends on EXPERIMENTAL
 	select ARCH_HAVE_RNG
 	---help---
 		ESP32 supports a RNG that passed on Dieharder test suite.
@@ -248,14 +247,13 @@ config ESP32_UART2
 config ESP32_WIRELESS
 	bool "Wireless"
 	default n
-	depends on EXPERIMENTAL
 	select NET
 	select ARCH_PHY_INTERRUPT
 	select ESP32_RNG
 	select ESP32_RT_TIMER
 	select ESP32_TIMER0
 	---help---
-		No yet implemented
+		Enable Wireless support
 
 config ESP32_I2C0
 	bool "I2C 0"
