@@ -192,7 +192,8 @@ struct tcp_conn_s
   uint16_t rport;         /* The remoteTCP port, in network byte order */
   uint16_t mss;           /* Current maximum segment size for the
                            * connection */
-  uint16_t winsize;       /* Current window size of the connection */
+  uint16_t snd_wnd;       /* Sequence and acknowledgement numbers of last
+                           * window update */
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   uint32_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #else
