@@ -27,9 +27,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
-#include <arch/board/board.h>
-#include "esp32_gpio.h"
 
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "esp32_gpio.h"
 #include "esp32-devkitc.h"
 
 /****************************************************************************

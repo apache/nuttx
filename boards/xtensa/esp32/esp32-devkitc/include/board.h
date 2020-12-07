@@ -90,6 +90,5 @@
 /* Define how many LEDs this board has (needed by userleds) */
 
 #define BOARD_NLEDS       1
-#define GPIO_LED1         2
 
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_CORE_INCLUDE_BOARD_H */
