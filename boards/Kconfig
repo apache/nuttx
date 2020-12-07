@@ -203,7 +203,6 @@ config ARCH_BOARD_ESP32_DEVKITC
 config ARCH_BOARD_ESP32_ETHERNETKIT
 	bool "Espressif ESP32 Ethernet Kit"
 	depends on ARCH_CHIP_ESP32
-	select ARCH_HAVE_LEDS
 	---help---
 		The ESP32-Ethernet-Kit is an Ethernet-to-Wi-Fi development board that enables
   		Ethernet devices to be interconnected over Wi-Fi. At the same time, to provide
