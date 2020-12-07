@@ -852,6 +852,21 @@ endmenu # ESP32_EMAC
 menu "WiFi configuration"
 	depends on ESP32_WIRELESS
 
+choice
+	prompt "ESP32 WiFi mode"
+	default ESP32_WIFI_STATION
+
+config ESP32_WIFI_STATION
+	bool "Station mode"
+
+config ESP32_WIFI_SOFTAP
+	bool "SoftAP mode"
+
+config ESP32_WIFI_STATION_SOFTAP_COEXISTENCE
+	bool "Station + SoftAP coexistence"
+
+endchoice # ESP32 WiFi mode
+
 config ESP32_WIFI_STATIC_RXBUF_NUM
     int "WiFi static RX buffer number"
 	default 10
@@ -876,8 +891,8 @@ config ESP32_WIFI_RXBA_AMPDU_WZ
     int "WiFi RX BA AMPDU windown size"
 	default 6
 
-config ESP32_WLAN_RXBUF_NUM
-	int "WLAN netcard RX buffer number"
+config ESP32_WLAN_PKTBUF_NUM
+	int "WLAN netcard packet buffer number per netcard"
 	default 16
 
 config ESP32_WIFI_CONNECT_TIMEOUT

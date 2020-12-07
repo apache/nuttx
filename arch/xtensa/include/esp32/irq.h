@@ -383,6 +383,7 @@
 #define ESP32_CPUINT_NNMIPERIPHS    1
 #define EPS32_CPUINT_NMISET         0x00004000
 
+#define ESP32_CPUINT_MAC            0
 #define ESP32_CPUINT_TIMER0         6
 #define ESP32_CPUINT_SOFTWARE0      7
 #define ESP32_CPUINT_PROFILING      11

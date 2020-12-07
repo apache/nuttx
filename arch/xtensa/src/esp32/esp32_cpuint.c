@@ -150,6 +150,12 @@
 #define ESP32_MAX_PRIORITY     5
 #define ESP32_PRIO_INDEX(p)    ((p) - ESP32_MIN_PRIORITY)
 
+#ifdef CONFIG_ESP32_WIRELESS
+#  define ESP32_WIRELESS_RESERVE_INT  (1 << ESP32_CPUINT_MAC)
+#else
+#  define ESP32_WIRELESS_RESERVE_INT  0
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -179,9 +185,11 @@ static uint32_t g_intenable[1];
  * devices.
  */
 
-static uint32_t g_cpu0_freeints = EPS32_CPUINT_PERIPHSET;
+static uint32_t g_cpu0_freeints = EPS32_CPUINT_PERIPHSET &
+                                  (~ESP32_WIRELESS_RESERVE_INT);
 #ifdef CONFIG_SMP
-static uint32_t g_cpu1_freeints = EPS32_CPUINT_PERIPHSET;
+static uint32_t g_cpu1_freeints = EPS32_CPUINT_PERIPHSET &
+                                  (~ESP32_WIRELESS_RESERVE_INT);
 #endif
 
 /* Bitsets for each interrupt priority 1-5 */
@@ -374,6 +382,7 @@ int esp32_cpuint_initialize(void)
    *
    *   CPU interrupt bit           IRQ number
    *   --------------------------- ---------------------
+   *   ESP32_CPUINT_MAC         0  ESP32_IRQ_MAC      4
    *   ESP32_CPUINT_TIMER0      6  XTENSA_IRQ_TIMER0  0
    *   ESP32_CPUINT_SOFTWARE0   7  Not yet defined
    *   ESP32_CPUINT_PROFILING  11  Not yet defined
@@ -385,6 +394,13 @@ int esp32_cpuint_initialize(void)
   intmap[ESP32_CPUINT_TIMER0] = XTENSA_IRQ_TIMER0;
   intmap[ESP32_CPUINT_TIMER1] = XTENSA_IRQ_TIMER1;
   intmap[ESP32_CPUINT_TIMER2] = XTENSA_IRQ_TIMER2;
+
+  /* Reserve CPU interrupt for some special drivers */
+
+#ifdef CONFIG_ESP32_WIRELESS
+  intmap[ESP32_CPUINT_MAC]    = ESP32_IRQ_MAC;
+#endif
+
   return OK;
 }
 
