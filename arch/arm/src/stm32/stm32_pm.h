@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_pm.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_STM32_PM_H
 #define __ARCH_ARM_SRC_STM32_STM32_PM_H
@@ -122,8 +122,8 @@ int stm32_pmstandby(void);
  *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
  *                        executed, the MCU enters Sleep mode as soon as it
  *                        exits the lowest priority ISR.
- *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep mode
- *                        as soon as WFI or WFE instruction is executed.
+ *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep
+ *                        mode as soon as WFI or WFE instruction is executed.
  * Returned Value:
  *   None
  *

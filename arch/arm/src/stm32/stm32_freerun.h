@@ -55,9 +55,9 @@
  ****************************************************************************/
 
 /* The freerun client must allocate an instance of this structure and called
- * stm32_freerun_initialize() before using the freerun facilities.  The client
- * should not access the contents of this structure directly since the
- * contents are subject to change.
+ * stm32_freerun_initialize() before using the freerun facilities.  The
+ * client should not access the contents of this structure directly since
+ * the contents are subject to change.
  */
 
 struct stm32_freerun_s
