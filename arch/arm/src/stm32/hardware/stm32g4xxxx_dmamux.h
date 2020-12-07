@@ -33,7 +33,7 @@
 
 /* DMAMUX1 mapping ******************************************************************/
 
-/* For category 3 and category 4 devies:
+/* For category 3 and category 4 devices:
  *       DMAMUX1 channels 0 to 7 are connected to DMA1 channels 1 to 8.
  *       DMAMUX1 channels 8 to 15 are connected to DMA2 channels 1 to 8.
  *
