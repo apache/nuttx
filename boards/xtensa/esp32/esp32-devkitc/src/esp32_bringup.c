@@ -219,12 +219,23 @@ int esp32_bringup(void)
 #endif
 
 #ifdef CONFIG_NET
+#ifdef ESP32_WLAN_HAS_STA
   ret = esp32_wlan_sta_initialize();
   if (ret)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize WiFi\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize WiFi station\n");
       return ret;
     }
+#endif
+
+#ifdef ESP32_WLAN_HAS_SOFTAP
+  ret = esp32_wlan_softap_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize WiFi softAP\n");
+      return ret;
+    }
+#endif
 #endif
 
 #endif
