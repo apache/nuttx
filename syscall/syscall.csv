@@ -35,7 +35,7 @@
 "getitimer","sys/time.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","int","int","FAR struct itimerval *"
 "getpeername","sys/socket.h","defined(CONFIG_NET)","int","int","FAR struct sockaddr *","FAR socklen_t *"
 "getpid","unistd.h","","pid_t"
-"getrandom","sys/random.h","defined(CONFIG_CRYPTO_RANDOM_POOL)","void","FAR void *","size_t","unsigned int"
+"getrandom","sys/random.h","defined(CONFIG_CRYPTO_RANDOM_POOL)","ssize_t","void","FAR void *","size_t","unsigned int"
 "getsockname","sys/socket.h","defined(CONFIG_NET)","int","int","FAR struct sockaddr *","FAR socklen_t *"
 "getsockopt","sys/socket.h","defined(CONFIG_NET)","int","int","int","int","FAR void *","FAR socklen_t *"
 "getuid","unistd.h","defined(CONFIG_SCHED_USER_IDENTITY)","uid_t"

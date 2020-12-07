@@ -48,8 +48,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/*
- * Flags for getrandom(2)
+/* Flags for getrandom(2)
  *
  * GRND_NONBLOCK  Don't block and return EAGAIN instead
  * GRND_RANDOM    No effect
@@ -84,11 +83,17 @@
  *            together.
  *
  * Returned Value:
- *   None
+ *   On success, getrandom() returns the number of bytes that were copied
+ *   to the buffer buf.  This may be less than the number of bytes
+ *   requested via buflen if either GRND_RANDOM was specified in flags and
+ *   insufficient entropy was present in the random source or the system
+ *   call was interrupted by a signal.
+ *
+ *   On error, -1 is returned, and errno is set appropriately.
  *
  ****************************************************************************/
 
-void getrandom(FAR void *bytes, size_t nbytes, unsigned int flags);
+ssize_t getrandom(FAR void *bytes, size_t nbytes, unsigned int flags);
 
 #endif /* CONFIG_CRYPTO_RANDOM_POOL */
 
