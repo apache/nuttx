@@ -590,6 +590,7 @@ config ARCH_CORTEXM7
 config ARCH_ARMV7A
 	bool
 	default n
+	select ARM_HAVE_WFE_SEV
 
 config ARCH_CORTEXA5
 	bool
@@ -788,6 +789,12 @@ config ARM_THUMB
 	bool
 	default n
 	depends on ARCH_ARMV7A
+
+config ARM_HAVE_WFE_SEV
+	bool
+	default n
+	---help---
+		Use WFE and SEV instructions for spinlock to reduce power consumption
 
 config ARM_HAVE_MPU_UNIFIED
 	bool

@@ -80,6 +80,14 @@
 #  define SP_DSB()
 #endif
 
+#if !defined(SP_WFE)
+#  define SP_WFE()
+#endif
+
+#if !defined(SP_SEV)
+#  define SP_SEV()
+#endif
+
 #if defined(CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS) && !defined(__SP_UNLOCK_FUNCTION)
 #  define __SP_UNLOCK_FUNCTION 1
 #endif
