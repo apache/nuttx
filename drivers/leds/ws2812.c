@@ -39,21 +39,43 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* These are the tuning parameters to meet timing requirements */
+/* In order to meet the signaling timing requirements, the waveforms required
+ * to represent a 0/1 symbol are created by specific SPI bytes defined here.
+ * 
+ * Only two target frequencies: 4 MHz and 8 MHz. However, given the tolerance
+ * allowed in the WS2812 timing specs, two ranges around those target
+ * frequencies can be used for better flexibility. Extreme frequencies rounded
+ * to the nearest multiple of 100 kHz which meets the specs. Try to avoid
+ * using the extreme frequencies.
+ * 
+ * If using an LED different to the WS2812 (e.g. WS2812B) check its timing
+ * specs, which may vary slightly, to decide which frequency is safe to use.
+ * 
+ * WS2812 specs:
+ * T0H range: 200ns - 500ns
+ * T1H range: 550ns - 850ns
+ * Reset: low signal >50us
+ */
 
-#if CONFIG_WS2812_FREQUENCY == 4000000
-#  define WS2812_RST_CYCLES 30          /* 60us (>50us) */
-#  define WS2812_ZERO_BYTE  0b01000000  /* 250 ns (200ns - 500ns) */
-#  define WS2812_ONE_BYTE   0b01110000  /* 750 ns (550ns - 850ns) */
-#elif CONFIG_WS2812_FREQUENCY == 8000000
-#  define WS2812_RST_CYCLES 60          /* 60us (>50us) */
-#  define WS2812_ZERO_BYTE  0b01100000  /* 250 ns (200ns - 500ns) */
-#  define WS2812_ONE_BYTE   0b01111100  /* 625 ns (550ns - 850ns) */
+
+#if CONFIG_WS2812_FREQUENCY >= 3600000 && CONFIG_WS2812_FREQUENCY <= 5000000
+#  define WS2812_ZERO_BYTE  0b01000000 /* 200ns at 5 MHz, 278ns at 3.6 MHz */
+#  define WS2812_ONE_BYTE   0b01110000 /* 600ns at 5 MHz, 833ns at 3.6 MHz */
+#elif CONFIG_WS2812_FREQUENCY >= 5900000 && CONFIG_WS2812_FREQUENCY <= 9000000
+#  define WS2812_ZERO_BYTE  0b01100000 /* 222ns at 9 MHz, 339ns at 5.9 MHz */
+#  define WS2812_ONE_BYTE   0b01111100 /* 556ns at 9 MHz, 847ns at 5.9 MHz */
 #else
 #  error "Unsupported SPI Frequency"
 #endif
 
-#define WS2812_BYTES_PER_LED  8 * 3
+/* Reset bytes
+ * Number of empty bytes to create the reset low pulse
+ * Aiming for 60 us, safely above the 50us required.
+ */
+
+#define WS2812_RST_CYCLES (CONFIG_WS2812_FREQUENCY * 60 / 1000000 / 8) 
+
+#define WS2812_BYTES_PER_LED  (8 * 3)
 #define WS2812_RW_PIXEL_SIZE  4
 
 /* Transmit buffer looks like:
