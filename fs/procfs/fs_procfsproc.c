@@ -362,7 +362,7 @@ static FAR const struct proc_node_s * const g_groupinfo[] =
 
 /* Names of task/thread states */
 
-static FAR const char *g_statenames[] =
+static FAR const char * const g_statenames[] =
 {
   "Invalid",
   "Waiting,Unlock",
@@ -383,7 +383,7 @@ static FAR const char *g_statenames[] =
 #endif
 };
 
-static FAR const char *g_ttypenames[4] =
+static FAR const char * const g_ttypenames[4] =
 {
   "Task",
   "pthread",
