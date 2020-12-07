@@ -326,7 +326,7 @@ found:
 
   /* Update the connection's window size */
 
-  conn->winsize = ((uint16_t)tcp->wnd[0] << 8) + (uint16_t)tcp->wnd[1];
+  conn->snd_wnd = ((uint16_t)tcp->wnd[0] << 8) + (uint16_t)tcp->wnd[1];
 
   flags = 0;
 
