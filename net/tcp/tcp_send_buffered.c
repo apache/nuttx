@@ -734,7 +734,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
   if ((conn->tcpstateflags & TCP_ESTABLISHED) &&
       (flags & (TCP_POLL | TCP_REXMIT)) &&
       !(sq_empty(&conn->write_q)) &&
-      conn->winsize > 0)
+      conn->snd_wnd > 0)
     {
       FAR struct tcp_wrbuffer_s *wrb;
       uint32_t predicted_seqno;
@@ -760,15 +760,15 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           sndlen = conn->mss;
         }
 
-      if (sndlen > conn->winsize)
+      if (sndlen > conn->snd_wnd)
         {
-          sndlen = conn->winsize;
+          sndlen = conn->snd_wnd;
         }
 
       ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%zu mss=%u "
-            "winsize=%u\n",
+            "snd_wnd=%u\n",
             wrb, TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb), sndlen, conn->mss,
-            conn->winsize);
+            conn->snd_wnd);
 
       /* Set the sequence number for this segment.  If we are
        * retransmitting, then the sequence number will already

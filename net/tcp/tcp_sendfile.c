@@ -299,7 +299,7 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
       /* Check if we have "space" in the window */
 
-      if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->winsize)
+      if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->snd_wnd)
         {
           uint32_t seqno;
 

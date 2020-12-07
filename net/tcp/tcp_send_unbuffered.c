@@ -417,7 +417,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
       /* Check if we have "space" in the window */
 
-      if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->winsize)
+      if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->snd_wnd)
         {
           /* Set the sequence number for this packet.  NOTE:  The network
            * updates sndseq on receipt of ACK *before* this function is
