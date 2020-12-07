@@ -194,6 +194,7 @@ struct tcp_conn_s
                            * connection */
   uint16_t snd_wnd;       /* Sequence and acknowledgement numbers of last
                            * window update */
+  uint16_t rcv_wnd;       /* Receiver window available */
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   uint32_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #else
