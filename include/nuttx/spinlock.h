@@ -126,7 +126,8 @@ spinlock_t up_testset(volatile FAR spinlock_t *lock);
  * Name: spin_initialize
  *
  * Description:
- *   Initialize a non-reentrant spinlock object to its initial, unlocked state.
+ *   Initialize a non-reentrant spinlock object to its initial,
+ *   unlocked state.
  *
  * Input Parameters:
  *   lock  - A reference to the spinlock object to be initialized.
