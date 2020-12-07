@@ -41,22 +41,21 @@
 
 /* In order to meet the signaling timing requirements, the waveforms required
  * to represent a 0/1 symbol are created by specific SPI bytes defined here.
- * 
+ *
  * Only two target frequencies: 4 MHz and 8 MHz. However, given the tolerance
  * allowed in the WS2812 timing specs, two ranges around those target
- * frequencies can be used for better flexibility. Extreme frequencies rounded
- * to the nearest multiple of 100 kHz which meets the specs. Try to avoid
- * using the extreme frequencies.
- * 
+ * frequencies can be used for better flexibility. Extreme frequencies
+ * rounded to the nearest multiple of 100 kHz which meets the specs.
+ * Try to avoid using the extreme frequencies.
+ *
  * If using an LED different to the WS2812 (e.g. WS2812B) check its timing
  * specs, which may vary slightly, to decide which frequency is safe to use.
- * 
+ *
  * WS2812 specs:
  * T0H range: 200ns - 500ns
  * T1H range: 550ns - 850ns
  * Reset: low signal >50us
  */
-
 
 #if CONFIG_WS2812_FREQUENCY >= 3600000 && CONFIG_WS2812_FREQUENCY <= 5000000
 #  define WS2812_ZERO_BYTE  0b01000000 /* 200ns at 5 MHz, 278ns at 3.6 MHz */
