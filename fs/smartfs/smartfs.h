@@ -176,16 +176,6 @@
 
 #define SMART_MAGICSIZE           4
 
-/* Quasi-standard definitions */
-
-#ifndef MIN
-#  define MIN(a,b)                (a < b ? a : b)
-#endif
-
-#ifndef MAX
-#  define MAX(a,b)                (a > b ? a : b)
-#endif
-
 /* Underlying MTD Block driver access functions */
 
 #define FS_BOPS(f)        (f)->fs_blkdriver->u.i_bops
