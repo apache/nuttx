@@ -68,8 +68,14 @@ struct sim_audio_s
 
 static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
                              struct audio_caps_s *caps);
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int sim_audio_configure(struct audio_lowerhalf_s *dev,
+                               FAR void *session,
+                               const struct audio_caps_s *caps);
+#else
 static int sim_audio_configure(struct audio_lowerhalf_s *dev,
                                const struct audio_caps_s *caps);
+#endif
 static int sim_audio_shutdown(struct audio_lowerhalf_s *dev);
 static int sim_audio_start(struct audio_lowerhalf_s *dev);
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
@@ -353,8 +359,14 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
   return caps->ac_len;
 }
 
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int sim_audio_configure(struct audio_lowerhalf_s *dev,
+                               FAR void *session,
+                               const struct audio_caps_s *caps)
+#else
 static int sim_audio_configure(struct audio_lowerhalf_s *dev,
                                const struct audio_caps_s *caps)
+#endif
 {
   struct sim_audio_s *priv = (struct sim_audio_s *)dev;
   int ret = 0;
@@ -421,10 +433,18 @@ static int sim_audio_stop(struct audio_lowerhalf_s *dev)
       struct ap_buffer_s *apb;
 
       apb = (struct ap_buffer_s *)dq_remfirst(&priv->pendq);
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
+#else
       priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
+#endif
     }
 
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK, NULL);
+#else
   priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK);
+#endif
 
   return 0;
 }
@@ -576,7 +596,11 @@ static void sim_audio_process(struct sim_audio_s *priv)
           final = true;
         }
 
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
+#else
       priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
+#endif
 
       if (final)
         {
