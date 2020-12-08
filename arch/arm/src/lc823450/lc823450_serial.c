@@ -141,12 +141,8 @@ int g_console_disable;
 #  define HS_DMAACT_ACT2      3
 #endif
 
-#ifndef MAX
-#define MAX(a, b) ((a) > (b) ? a : b)
-#endif
-
 #ifndef MIN
-#define MIN(a, b) ((a) > (b) ? b : a)
+#  define MIN(a, b) ((a) > (b) ? (b) : (a))
 #endif
 
 /****************************************************************************

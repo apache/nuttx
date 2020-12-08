@@ -56,7 +56,7 @@
 #define DVFS_LINELEN  128
 
 #ifndef MIN
-#  define MIN(a,b) (a < b ? a : b)
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 #ifndef CONFIG_SMP_NCPUS
@@ -286,7 +286,8 @@ static ssize_t dvfs_write(FAR struct file *filep, FAR const char *buffer,
   strncpy(line, buffer, n);
   line[n] = '\0';
 
-  n = MIN(strcspn(line, " "), sizeof(cmd) - 1);
+  n = strcspn(line, " ");
+  n = MIN(n, sizeof(cmd) - 1);
   strncpy(cmd, line, n);
   cmd[n] = '\0';
 
