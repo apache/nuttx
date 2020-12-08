@@ -808,7 +808,7 @@ static inline void audio_message(FAR struct audio_upperhalf_s *upper,
   if (upper->usermq != NULL)
     {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-      msg.session = session;
+      msg->session = session;
 #endif
       nxmq_send(upper->usermq, (FAR const char *)msg, sizeof(*msg),
                 CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
