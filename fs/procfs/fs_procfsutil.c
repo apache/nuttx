@@ -51,11 +51,7 @@
  ****************************************************************************/
 
 #ifndef MIN
-#  define MIN(a,b) ((a < b) ? a : b)
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) ((a > b) ? a : b)
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 /****************************************************************************
@@ -78,9 +74,10 @@
  *
  *   procfs_memcpy() is a helper function.  Each read() method should
  *   provide data in a local data buffer ('src' and 'srclen').  This
- *   will transfer the data to the user receive buffer ('dest' and 'destlen'),
- *   respecting both (1) the size of the destination buffer so that it will
- *   write beyond the user receiver and (1) the file position, 'offset'.
+ *   will transfer the data to the user receive buffer ('dest' and
+ *   'destlen'), respecting both (1) the size of the destination buffer so
+ *   that it will write beyond the user receiver and (1) the file position,
+ *   'offset'.
  *
  *   This function will skip over data until the under of bytes specified
  *   by 'offset' have been skipped.  Then it will transfer data from the
