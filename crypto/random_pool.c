@@ -55,11 +55,11 @@
 #include <nuttx/crypto/blake2s.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef MIN
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 #define ROTL_32(x,n) ( ((x) << (n)) | ((x) >> (32-(n))) )
@@ -565,10 +565,19 @@ void getrandom(FAR void *bytes, size_t nbytes)
 {
   int ret;
 
-  ret = nxsem_wait_uninterruptible(&g_rng.rd_sem);
-  if (ret >= 0)
+  do
     {
-      rng_buf_internal(bytes, nbytes);
-      nxsem_post(&g_rng.rd_sem);
+      ret = nxsem_wait_uninterruptible(&g_rng.rd_sem);
+
+      /* The only possible error should be if we were awakened by
+       * thread cancellation. At this point, we must continue to acquire
+       * the semaphore anyway.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
+  while (ret < 0);
+
+  rng_buf_internal(bytes, nbytes);
+  nxsem_post(&g_rng.rd_sem);
 }
