@@ -133,6 +133,10 @@
 #include "board_qencoder.h"
 #endif
 
+#ifdef CONFIG_USBADB
+#include <nuttx/usb/adb.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -464,6 +468,10 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: board_nrf24l01_initialize failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_USBADB
+  usbdev_adb_initialize();
 #endif
 
   return ret;
