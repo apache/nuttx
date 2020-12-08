@@ -93,7 +93,7 @@
 /* Monotonic system-wide clock that includes time spent in suspension. */
 
 #ifdef CONFIG_CLOCK_MONOTONIC
-#  define CLOCK_BOOTTIME CLOCK_MONOTONIC
+#  define CLOCK_BOOTTIME   2
 #endif
 
 /* This is a flag that may be passed to the timer_settime() and
