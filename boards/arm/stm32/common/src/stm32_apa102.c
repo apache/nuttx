@@ -82,7 +82,7 @@
 int board_apa102_initialize(int devno, int spino)
 {
   FAR struct spi_dev_s *spi;
-  char devpath[12];
+  char devpath[13];
   int ret;
 
   spi = stm32_spibus_initialize(spino);
@@ -93,7 +93,7 @@ int board_apa102_initialize(int devno, int spino)
 
   /* Register the APA102 Driver at the specified location. */
 
-  snprintf(devpath, 12, "/dev/leddrv%d", devno);
+  snprintf(devpath, 13, "/dev/leddrv%d", devno);
   ret = apa102_register(devpath, spi);
   if (ret < 0)
     {
