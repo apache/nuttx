@@ -75,11 +75,7 @@
 
 #ifndef MIN
 #  define MIN(a, b) ((a) > (b) ? (b) : (a))
-#endif /* MIN */
-
-#ifndef MAX
-#  define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif /* MIN */
+#endif
 
 #if 0
 #  define DPRINTF(fmt, args...) uinfo(fmt, ##args)
