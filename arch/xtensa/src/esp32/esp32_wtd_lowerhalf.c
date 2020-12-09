@@ -679,10 +679,6 @@ int esp32_wtd_initialize(FAR const char *devpath, uint8_t wdt)
 
   ESP32_WTD_UNLOCK(lower->wtd);
 
-  /* Ensure stages are disabled and Flash boot protection was disabled */
-
-  ESP32_WTD_INITCONF(lower->wtd);
-
   /* If it is a Main System Watchdog Timer configure the Prescale to
    * have a 500us period.
    */

@@ -71,7 +71,6 @@ static int esp32_wtd_start(FAR struct esp32_wtd_dev_s *dev);
 static int esp32_wtd_stop(FAR struct esp32_wtd_dev_s *dev);
 static int esp32_wtd_enablewp(FAR struct esp32_wtd_dev_s *dev);
 static int esp32_wtd_disablewp(FAR struct esp32_wtd_dev_s *dev);
-static int esp32_wtd_initconf(FAR struct esp32_wtd_dev_s *dev);
 static int esp32_wtd_pre(FAR struct esp32_wtd_dev_s *dev, uint16_t value);
 static int esp32_wtd_settimeout(FAR struct esp32_wtd_dev_s *dev,
                                 uint32_t value, uint8_t stage);
@@ -95,7 +94,6 @@ struct esp32_wtd_ops_s esp32_mwtd_ops =
 {
   .start         = esp32_wtd_start,
   .stop          = esp32_wtd_stop,
-  .initconf      = esp32_wtd_initconf,
   .enablewp      = esp32_wtd_enablewp,
   .disablewp     = esp32_wtd_disablewp,
   .pre           = esp32_wtd_pre,
@@ -113,7 +111,6 @@ struct esp32_wtd_ops_s esp32_rwtd_ops =
 {
   .start         = esp32_wtd_start,
   .stop          = esp32_wtd_stop,
-  .initconf      = esp32_wtd_initconf,
   .enablewp      = esp32_wtd_enablewp,
   .disablewp     = esp32_wtd_disablewp,
   .pre           = NULL,
@@ -469,45 +466,6 @@ static int esp32_wtd_disablewp(FAR struct esp32_wtd_dev_s *dev)
   else
     {
       esp32_wtd_putreg(dev, MWDT_WP_REG, WRITE_PROTECTION_KEY);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: esp32_wtd_initconf
- *
- * Description:
- *   It turn off all the stages and ensure Flash Boot Protection is disabled.
- *   In case of RWDT, it also turns off the WDT, in case it was already
- *   turned on before. NOTE: The main system reset does not reset RTC, so
- *   all the registers values are kept.
- *
- ****************************************************************************/
-
-static int esp32_wtd_initconf(FAR struct esp32_wtd_dev_s *dev)
-{
-  uint32_t mask = 0;
-
-  DEBUGASSERT(dev);
-
-  /* If it is a RWDT */
-
-  if (((struct esp32_wtd_priv_s *)dev)->base == RTC_CNTL_WDTCONFIG0_REG)
-    {
-      mask = RTC_CNTL_WDT_INT_ENA_M | RTC_CNTL_WDT_STG0_M
-       | RTC_CNTL_WDT_STG1_M | RTC_CNTL_WDT_STG2_M | RTC_CNTL_WDT_STG3_M
-       | RTC_CNTL_WDT_FLASHBOOT_MOD_EN_M;
-      esp32_wtd_modifyreg32(dev, RWDT_CONFIG0_OFFSET, mask, 0);
-    }
-
-  /* If it is a MWDT */
-
-  else
-    {
-      mask = TIMG_WDT_STG0_M | TIMG_WDT_STG1_M | TIMG_WDT_STG2_M
-       | TIMG_WDT_STG3_M | TIMG_WDT_FLASHBOOT_MOD_EN_M;
-      esp32_wtd_modifyreg32(dev, MWDT_CONFIG0_OFFSET, mask, 0);
     }
 
   return OK;

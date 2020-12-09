@@ -41,7 +41,6 @@
 #define ESP32_WTD_STOP(d)                       ((d)->ops->stop(d))
 #define ESP32_WTD_LOCK(d)                       ((d)->ops->enablewp(d))
 #define ESP32_WTD_UNLOCK(d)                     ((d)->ops->disablewp(d))
-#define ESP32_WTD_INITCONF(d)                   ((d)->ops->initconf(d))
 #define ESP32_WTD_PRE(d, v)                     ((d)->ops->pre(d, v))
 #define ESP32_WTD_STO(d, v, s)                  ((d)->ops->settimeout(d, v, s))
 #define ESP32_WTD_FEED(d)                       ((d)->ops->feed(d))
