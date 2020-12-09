@@ -288,7 +288,7 @@ int stm32_bringup(void)
   ret = stm32_at24_automount(AT24_MINOR);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_at24_automount failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_at24_automount() failed: %d\n", ret);
       return ret;
     }
 #endif /* HAVE_AT24 */
@@ -309,7 +309,7 @@ int stm32_bringup(void)
   ret = board_tone_initialize(0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_tone_setup() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_tone_initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -319,7 +319,7 @@ int stm32_bringup(void)
   ret = board_apa102_initialize(0, 1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_apa102init() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_apa102_initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -329,7 +329,7 @@ int stm32_bringup(void)
   ret = board_lm75_initialize(0, 1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_lm75initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_lm75_initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -349,7 +349,7 @@ int stm32_bringup(void)
   ret = board_hcsr04_initialize(0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_hcsr04_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_hcsr04_initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -357,7 +357,7 @@ int stm32_bringup(void)
   ret = board_max6675_initialize(0, 1);
   if (ret < 0)
     {
-      serr("ERROR:  stm32_max6675initialize failed: %d\n", ret);
+      serr("ERROR:  board_max6675_initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -403,7 +403,8 @@ int stm32_bringup(void)
   ret = board_nunchuck_initialize(0, 1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: nunchuck_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_nunchuck_initialize() failed: %d\n",
+             ret);
     }
 #endif
 
@@ -436,7 +437,8 @@ int stm32_bringup(void)
   ret = board_apds9960_initialize(0, 1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_apds9960initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_apds9960_initialize() failed: %d\n",
+             ret);
     }
 #endif
 
@@ -446,7 +448,8 @@ int stm32_bringup(void)
   ret = board_veml6070_initialize(0, 1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_veml6070initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_veml6070_initialize() failed: %d\n",
+             ret);
     }
 #endif
 
@@ -456,7 +459,7 @@ int stm32_bringup(void)
   ret = stm32_adc_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup() failed: %d\n", ret);
     }
 #endif
 
@@ -466,7 +469,8 @@ int stm32_bringup(void)
   ret = board_nrf24l01_initialize(1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: board_nrf24l01_initialize failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_nrf24l01_initialize() failed: %d\n",
+             ret);
     }
 #endif
 
