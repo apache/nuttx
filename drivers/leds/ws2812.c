@@ -78,17 +78,17 @@
 #define WS2812_RW_PIXEL_SIZE  4
 
 /* Transmit buffer looks like:
- * [<----reset bytes---->|<-RGBn->...<-RGB0->|<----reset bytes---->]
+ * [<----N reset bytes---->|<-RGBn->...<-RGB0->|<----1 reset byte---->]
  *
  * It is important that this is shipped as close to one chunk as possible
  * in order to meet timing requirements and to keep MOSI from going high
  * between transactions.  Some chips will leave MOSI at the state of the
  * MSB of the last byte for this reason it is recommended to shift the
  * bits that represents the zero or one waveform so that the MSB is 0.
- * The reset clocks will pad the shortened low at the end.
+ * The reset byte after the RGB data will pad the shortened low at the end.
  */
 
-#define TXBUFF_SIZE(n) (WS2812_RST_CYCLES * 2 + n * WS2812_BYTES_PER_LED)
+#define TXBUFF_SIZE(n) (WS2812_RST_CYCLES + n * WS2812_BYTES_PER_LED + 1)
 
 /****************************************************************************
  * Private Types
