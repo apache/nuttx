@@ -246,6 +246,7 @@ MCU. Follow the links for the details:
          - :ref:`introduction/detailed_support:STMicro STM32 F446` (STM32 F4 family, ARM Cortex-M4)
          - :ref:`introduction/detailed_support:STMicro STM32 F46xx` (STM32 F4 family, ARM Cortex-M4)
          - :ref:`introduction/detailed_support:STMicro STM32 G474x` (STM32 G4 family, ARM Cortex-M4)
+         - :ref:`introduction/detailed_support:STMicro STM32 G431x` (STM32 G4 family, ARM Cortex-M4)
          - :ref:`introduction/detailed_support:STMicro STM32 L4x2` (STM32 L4 family, ARM Cortex-M4)
          - :ref:`introduction/detailed_support:STMicro STM32 L475` (STM32 L4 family, ARM Cortex-M4)
          - :ref:`introduction/detailed_support:STMicro STM32 L476` (STM32 L4 family, ARM Cortex-M4)
