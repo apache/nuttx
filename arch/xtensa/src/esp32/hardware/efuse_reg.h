@@ -21,6 +21,12 @@
 #ifndef __ARCH_XTENSA_INCLUDE_EFUSE_REG_H
 #define __ARCH_XTENSA_INCLUDE_EFUSE_REG_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include "esp32_soc.h"
+
 #define EFUSE_BLK0_RDATA0_REG          (DR_REG_EFUSE_BASE + 0x000)
 
 /* EFUSE_RD_FLASH_CRYPT_CNT : RO ;bitpos:[26:20] ;default: 7'b0 ;
