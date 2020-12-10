@@ -77,7 +77,6 @@ struct esp32_wtd_ops_s
 
   CODE int (*enablewp)(FAR struct esp32_wtd_dev_s *dev);
   CODE int (*disablewp)(FAR struct esp32_wtd_dev_s *dev);
-  CODE int (*initconf)(FAR struct esp32_wtd_dev_s *dev);
   CODE int (*pre)(FAR struct esp32_wtd_dev_s *dev, uint16_t value);
   CODE int (*settimeout)(FAR struct esp32_wtd_dev_s *dev,
                          uint32_t value, uint8_t stage);
