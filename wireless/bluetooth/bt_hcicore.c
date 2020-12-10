@@ -1166,6 +1166,8 @@ static void priority_rx_work(FAR void *arg)
             wlerr("Unknown event 0x%02x\n", hdr->evt);
             break;
         }
+
+      bt_buf_release(buf);
 #else
       UNUSED(hdr);
 

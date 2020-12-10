@@ -120,7 +120,9 @@ static int bthcisock_send(FAR const struct bt_driver_s *dev,
       return -1;
     }
 
+#ifndef CONFIG_WIRELESS_BLUETOOTH_HOST
   bt_buf_release(buf);
+#endif
 
   return buf->len;
 }
