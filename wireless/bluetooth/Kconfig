@@ -148,7 +148,7 @@ menu "Kernel Thread Configuration"
 
 config BLUETOOTH_TXCMD_STACKSIZE
 	int "Tx command thread stack size"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 
 config BLUETOOTH_TXCMD_PRIORITY
 	int "Tx command thread priority"
@@ -161,7 +161,7 @@ config BLUETOOTH_TXCMD_NMSGS
 
 config BLUETOOTH_TXCONN_STACKSIZE
 	int "Tx connection thread stack size"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 
 config BLUETOOTH_TXCONN_PRIORITY
 	int "Tx connection thread priority"
