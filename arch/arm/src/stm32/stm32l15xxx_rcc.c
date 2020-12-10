@@ -78,24 +78,26 @@ static inline void rcc_reset(void)
 
   /* Make sure that all devices are out of reset */
 
-  putreg32(0, STM32_RCC_AHBRSTR);           /* Disable AHB Peripheral Reset */
-  putreg32(0, STM32_RCC_APB2RSTR);          /* Disable APB2 Peripheral Reset */
-  putreg32(0, STM32_RCC_APB1RSTR);          /* Disable APB1 Peripheral Reset */
+  putreg32(0, STM32_RCC_AHBRSTR);      /* Disable AHB Peripheral Reset */
+  putreg32(0, STM32_RCC_APB2RSTR);     /* Disable APB2 Peripheral Reset */
+  putreg32(0, STM32_RCC_APB1RSTR);     /* Disable APB1 Peripheral Reset */
 
   /* Disable all clocking (other than to FLASH) */
 
   putreg32(RCC_AHBENR_FLITFEN, STM32_RCC_AHBENR); /* FLITF Clock ON */
-  putreg32(0, STM32_RCC_APB2ENR);           /* Disable APB2 Peripheral Clock */
-  putreg32(0, STM32_RCC_APB1ENR);           /* Disable APB1 Peripheral Clock */
+
+  putreg32(0, STM32_RCC_APB2ENR);      /* Disable APB2 Peripheral Clock */
+  putreg32(0, STM32_RCC_APB1ENR);      /* Disable APB1 Peripheral Clock */
 
   /* Set the Internal clock sources calibration register to its reset value.
-   * MSI to the default frequency (nominally 2.097MHz), MSITRIM=0, HSITRIM=0x10.
-   * Preserve the factory HSICAL and MSICAL settings.
+   * MSI to the default frequency (nominally 2.097MHz), MSITRIM=0,
+   * HSITRIM=0x10.  Preserve the factory HSICAL and MSICAL settings.
    */
 
   regval  = getreg32(STM32_RCC_ICSCR);
   regval &= (RCC_ICSCR_HSICAL_MASK | RCC_ICSCR_MSICAL_MASK);
-  regval |= (RCC_ICSR_RSTVAL & ~(RCC_ICSCR_HSICAL_MASK | RCC_ICSCR_MSICAL_MASK));
+  regval |= (RCC_ICSR_RSTVAL &
+             ~(RCC_ICSCR_HSICAL_MASK | RCC_ICSCR_MSICAL_MASK));
   putreg32(regval, STM32_RCC_ICSCR);
 
   /* Enable the internal MSI */
@@ -112,19 +114,24 @@ static inline void rcc_reset(void)
 
   regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~(RCC_CFGR_SW_MASK | RCC_CFGR_HPRE_MASK | RCC_CFGR_PPRE1_MASK |
-              RCC_CFGR_PPRE2_MASK | RCC_CFGR_MCOSEL_MASK | RCC_CFGR_MCOPRE_MASK);
+              RCC_CFGR_PPRE2_MASK | RCC_CFGR_MCOSEL_MASK |
+              RCC_CFGR_MCOPRE_MASK);
   putreg32(regval, STM32_RCC_CFGR);
 
-  /* Make sure that the selected MSI source is used as the system clock source */
+  /* Make sure that the selected MSI source is used as the system clock
+   * source
+   */
 
   while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_MSI);
 
-  /* Now we can disable the alternative clock sources: HSE, HSI, PLL, CSS and RTCPRE. Also,
-   * reset the HSE bypass.  This restores the RCC CR to its reset state.
+  /* Now we can disable the alternative clock sources: HSE, HSI, PLL, CSS and
+   * RTCPRE. Also, reset the HSE bypass.  This restores the RCC CR to its
+   * reset state.
    */
 
   regval  = getreg32(STM32_RCC_CR);         /* Disable the HSE and the PLL */
-  regval &= ~(RCC_CR_HSION | RCC_CR_HSEON | RCC_CR_PLLON | RCC_CR_CSSON | RCC_CR_RTCPRE_MASK);
+  regval &= ~(RCC_CR_HSION | RCC_CR_HSEON | RCC_CR_PLLON | RCC_CR_CSSON |
+              RCC_CR_RTCPRE_MASK);
   putreg32(regval, STM32_RCC_CR);
 
   regval  = getreg32(STM32_RCC_CR);         /* Reset HSEBYP bit */
@@ -155,7 +162,9 @@ static inline void rcc_reset(void)
   regval &= ~FLASH_ACR_LATENCY;             /* No wait states */
   putreg32(regval, STM32_FLASH_ACR);
 
-  /* Check that the new number of WS is taken into account by reading FLASH_ACR */
+  /* Check that the new number of WS is taken into account by reading
+   * FLASH_ACR
+   */
 
   /* Program the 32-bit access by clearing ACC64 in FLASH_ACR */
 
@@ -184,8 +193,9 @@ static inline void rcc_enableahb(void)
 
   /* Enable GPIOA-E, H, F-G (not all parts have all ports) */
 
-  regval |= (RCC_AHBENR_GPIOPAEN | RCC_AHBENR_GPIOPBEN | RCC_AHBENR_GPIOPCEN |
-             RCC_AHBENR_GPIOPDEN | RCC_AHBENR_GPIOPEEN | RCC_AHBENR_GPIOPHEN |
+  regval |= (RCC_AHBENR_GPIOPAEN | RCC_AHBENR_GPIOPBEN |
+             RCC_AHBENR_GPIOPCEN | RCC_AHBENR_GPIOPDEN |
+             RCC_AHBENR_GPIOPEEN | RCC_AHBENR_GPIOPHEN |
              RCC_AHBENR_GPIOPFEN | RCC_AHBENR_GPIOPGEN);
 
 #ifdef CONFIG_STM32_CRC
@@ -538,7 +548,8 @@ static void stm32_stdclockconfig(void)
   putreg32(regval, STM32_RCC_APB1ENR);
 
   /* Go to the high performance voltage range 1 if necessary.  In this mode,
-   * the PLL VCO frequency can be up to 96MHz.  USB and SDIO can be supported.
+   * the PLL VCO frequency can be up to 96MHz.  USB and SDIO can be
+   * supported.
    *
    * Range 1: PLLVCO up to 96MHz in range 1 (1.8V)
    * Range 2: PLLVCO up to 48MHz in range 2 (1.5V) (default)
@@ -654,25 +665,26 @@ static void stm32_stdclockconfig(void)
 
   /* Increasing the CPU frequency (in the same voltage range):
    *
-   * After reset, the used clock is the MSI (2 MHz) with 0 WS configured in the
-   * FLASH_ACR register. 32-bit access is enabled and prefetch is disabled.
-   * ST strongly recommends to use the following software sequences to tune the
-   * number of wait states needed to access the Flash memory with the CPU
-   * frequency.
+   * After reset, the used clock is the MSI (2 MHz) with 0 WS configured in
+   * the FLASH_ACR register. 32-bit access is enabled and prefetch is
+   * disabled. ST strongly recommends to use the following software
+   * sequences to tune the number of wait states needed to access the Flash
+   * memory with the CPU frequency.
    *
    *   - Program the 64-bit access by setting the ACC64 bit in Flash access
    *     control register (FLASH_ACR)
    *   - Check that 64-bit access is taken into account by reading FLASH_ACR
    *   - Program 1 WS to the LATENCY bit in FLASH_ACR
-   *   - Check that the new number of WS is taken into account by reading FLASH_ACR
+   *   - Check that the new number of WS is taken into account by reading
+   *     FLASH_ACR
    *   - Modify the CPU clock source by writing to the SW bits in the Clock
    *     configuration register (RCC_CFGR)
-   *   - If needed, modify the CPU clock prescaler by writing to the HPRE bits in
-   *     RCC_CFGR
-   *   - Check that the new CPU clock source or/and the new CPU clock prescaler
-   *     value is/are taken into account by reading the clock source status (SWS
-   *     bits) or/and the AHB prescaler value (HPRE bits), respectively, in the
-   *     RCC_CFGR register
+   *   - If needed, modify the CPU clock prescaler by writing to the HPRE
+   *     bits in RCC_CFGR
+   *   - Check that the new CPU clock source or/and the new CPU clock
+   *     prescaler value is/are taken into account by reading the clock
+   *     source status (SWS bits) or/and the AHB prescaler value (HPRE
+   *     bits), respectively, in the RCC_CFGR register
    */
 
   regval = getreg32(STM32_FLASH_ACR);
@@ -723,8 +735,8 @@ static void stm32_stdclockconfig(void)
 #if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
 
   /* Set the PLL divider and multiplier.  NOTE:  The PLL needs to be disabled
-   * to do these operation.  We know this is the case here because pll_reset()
-   * was previously called by stm32_clockconfig().
+   * to do these operation.  We know this is the case here because
+   * pll_reset() was previously called by stm32_clockconfig().
    */
 
   regval  = getreg32(STM32_RCC_CFGR);
