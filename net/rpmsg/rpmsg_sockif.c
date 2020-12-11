@@ -612,6 +612,8 @@ static int rpmsg_socket_listen(FAR struct socket *psock, int backlog)
 static int rpmsg_socket_connect_internal(FAR struct socket *psock)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
+  unsigned int timeout;
+  unsigned int tc;
   int ret;
 
   ret = circbuf_resize(&conn->recvbuf, CONFIG_NET_RPMSG_RXBUF_SIZE);
@@ -629,30 +631,31 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
       return ret;
     }
 
-  ret = rpmsg_socket_sync(conn);
+  ret     = -ETIMEDOUT;
+  timeout = _SO_TIMEOUT(psock->s_rcvtimeo);
+
+  for (tc = 0; tc < timeout * 1000;)
+    {
+      ret = rpmsg_socket_sync(conn);
+      if (ret != RPMSG_ERR_ADDR)
+        {
+          break;
+        }
+
+      if (timeout != UINT_MAX)
+        {
+          tc += RPMSG_TICK_COUNT;
+        }
+    }
+
   if (ret < 0)
     {
-      goto out;
+      rpmsg_unregister_callback(conn,
+                                rpmsg_socket_device_created,
+                                rpmsg_socket_device_destroy,
+                                NULL);
     }
 
-  ret = net_timedwait(&conn->sendsem, _SO_TIMEOUT(psock->s_rcvtimeo));
-  if (!conn->ept.rdev)
-    {
-      ret = -ECONNRESET;
-    }
-
-  if (ret < 0)
-    {
-      goto out;
-    }
-
-  return 0;
-
-out:
-  rpmsg_unregister_callback(conn,
-                            rpmsg_socket_device_created,
-                            rpmsg_socket_device_destroy,
-                            NULL);
   return ret;
 }
 
