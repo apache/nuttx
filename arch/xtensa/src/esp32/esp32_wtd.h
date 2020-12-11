@@ -100,5 +100,6 @@ struct esp32_wtd_ops_s
 
 FAR struct esp32_wtd_dev_s *esp32_wtd_init(uint8_t wdt_id);
 int esp32_wtd_deinit(FAR struct esp32_wtd_dev_s *dev);
+bool esp32_wtd_is_running(FAR struct esp32_wtd_dev_s *dev);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_WTD_H */
