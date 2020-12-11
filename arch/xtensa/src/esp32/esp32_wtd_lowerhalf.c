@@ -666,7 +666,6 @@ int esp32_wtd_initialize(FAR const char *devpath, uint8_t wdt)
 
   /* Initialize the elements of lower half state structure */
 
-  lower->started = false;
   lower->handler = NULL;
   lower->timeout = 0;
   lower->wtd     = esp32_wtd_init(wdt);
@@ -676,6 +675,8 @@ int esp32_wtd_initialize(FAR const char *devpath, uint8_t wdt)
       ret = -EINVAL;
       goto errout;
     }
+
+  lower->started = esp32_wtd_is_running(lower->wtd);
 
   ESP32_WTD_UNLOCK(lower->wtd);
 

@@ -68,6 +68,8 @@ static void esp32_wtd_modifyreg32(FAR struct esp32_wtd_dev_s *dev,
                                   uint32_t offset,
                                   uint32_t clearbits,
                                   uint32_t setbits);
+static uint32_t esp32_wtd_getreg(FAR struct esp32_wtd_dev_s *dev,
+                                 uint32_t offset);
 
 /* WTD operations ***********************************************************/
 
@@ -205,6 +207,22 @@ static void esp32_wtd_modifyreg32(FAR struct esp32_wtd_dev_s *dev,
 
   modifyreg32(((struct esp32_wtd_priv_s *)dev)->base + offset,
                 clearbits, setbits);
+}
+
+/****************************************************************************
+ * Name: esp32_wtd_getreg
+ *
+ * Description:
+ *   Get a 32-bit register value by offset
+ *
+ ****************************************************************************/
+
+static uint32_t esp32_wtd_getreg(FAR struct esp32_wtd_dev_s *dev,
+                                 uint32_t offset)
+{
+  DEBUGASSERT(dev);
+
+  return getreg32(((struct esp32_wtd_priv_s *)dev)->base + offset);
 }
 
 /****************************************************************************
@@ -956,4 +974,44 @@ int esp32_wtd_deinit(FAR struct esp32_wtd_dev_s *dev)
   wtd->inuse = false;
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: esp32_wtd_is_running
+ *
+ * Description:
+ *   Checks if the wdt was already turned on. For example, RTC may has been
+ *   enabled in bootloader.
+ *
+ ****************************************************************************/
+
+bool esp32_wtd_is_running(FAR struct esp32_wtd_dev_s *dev)
+{
+  uint32_t status = 0;
+  DEBUGASSERT(dev);
+
+  /* If it is a RWDT */
+
+  if (((struct esp32_wtd_priv_s *)dev)->base ==
+        RTC_CNTL_OPTIONS0_REG)
+    {
+      status = esp32_wtd_getreg(dev, RWDT_CONFIG0_OFFSET);
+      if (status & RTC_CNTL_WDT_EN)
+        {
+          return true;
+        }
+    }
+
+  /* If it is a MWDT */
+
+  else
+    {
+      status = esp32_wtd_getreg(dev, MWDT_CONFIG0_OFFSET);
+      if (status & TIMG_WDT_EN)
+        {
+          return true;
+        }
+    }
+
+  return false;
 }
