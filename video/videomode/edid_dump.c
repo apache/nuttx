@@ -122,7 +122,7 @@ void edid_dump(FAR const struct edid_info_s *edid)
 
       if ((edid->edid_video_input & EDID_DISPLAY_INPUT_SYNC) != 0)
         {
-          syslog(LOG_INFO, " %-16sSeperate syncs\n", "");
+          syslog(LOG_INFO, " %-16sSeparate syncs\n", "");
         }
 
       if ((edid->edid_video_input & EDID_DISPLAY_INPUT_COMPOSITE) != 0)

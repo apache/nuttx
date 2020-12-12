@@ -448,7 +448,7 @@ static struct wlan_rxbuf *wlan_recvframe(FAR struct wlan_priv_s *priv)
  *   ifidx  - The interface id that the tx callback has been triggered from.
  *   data   - Pointer to the data transmitted.
  *   len    - Length of the data transmitted.
- *   status - True if data was transmitted sucessfully or false if failed.
+ *   status - True if data was transmitted successfully or false if failed.
  *
  * Returned Value:
  *   None

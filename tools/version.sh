@@ -71,7 +71,7 @@ while [ ! -z "$1" ]; do
     echo "    show this help message and exit"
     echo "  -v <major.minor.patch>"
     echo "    The NuttX version number expressed as a major, minor and patch"
-    echo "    number seperated by a period"
+    echo "    number separated by a period"
     echo "   <outfile-path>"
     echo "    The full path to the version file to be created"
     exit 0
