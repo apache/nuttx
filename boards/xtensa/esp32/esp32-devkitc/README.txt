@@ -378,7 +378,7 @@ OpenOCD for the ESP32
   General OpenOCD build instructions
   ----------------------------------
   Installing OpenOCD.  The sources for the ESP32-enabled variant of
-  OpenOCD are available from Espressifs Github. To download the source,
+  OpenOCD are available from Espressifs GitHub. To download the source,
   use the following commands:
 
     git clone https://github.com/espressif/openocd-esp32.git

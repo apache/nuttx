@@ -249,7 +249,7 @@
 #define EMAC_MB_E             (BIT(26)) /* Mixed burst */
 #define EMAC_AAB_E            (BIT(25)) /* Address align burst */
 #define EMAC_PBLX8_E          (BIT(24)) /* PBL value x8 */
-#define EMAC_SPBL_E           (BIT(23)) /* Seperated PBL */
+#define EMAC_SPBL_E           (BIT(23)) /* Separated PBL */
 #define EMAC_RXDMA_PBL_S      (17)      /* RX DMA PBL value shift */
 #define EMAC_RXDMA_PBL_V      (0x3f)    /* RX DMA PBL value max value */
 #define EMAC_FB_E             (BIT(16)) /* Fixed burst */
