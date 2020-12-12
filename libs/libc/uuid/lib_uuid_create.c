@@ -22,7 +22,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/random.h>
 #include <stdlib.h>
 #include <uuid.h>
 
@@ -44,7 +43,7 @@
 void uuid_create(uuid_t *u, uint32_t *status)
 {
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
-  getrandom(u, sizeof(uuid_t));
+  arc4random_buf(u, sizeof(uuid_t));
 #else
   unsigned long *beg = (unsigned long *)u;
   unsigned long *end = (unsigned long *)(u + 1);
