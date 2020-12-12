@@ -121,6 +121,10 @@ int       rand(void);
 #define   srandom(s) srand(s)
 long      random(void);
 
+#ifdef CONFIG_CRYPTO_RANDOM_POOL
+void      arc4random_buf(FAR void *bytes, size_t nbytes);
+#endif
+
 /* Environment variable support */
 
 FAR char **get_environ_ptr(void);
