@@ -44,8 +44,6 @@
 #include <nuttx/config.h>
 #include <stddef.h>
 
-#include <sys/random.h> /* getrandom() */
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -98,7 +96,8 @@ enum rnd_source_t
 #ifdef CONFIG_BOARD_ENTROPY_POOL
 /* Entropy pool structure can be provided by board source. Use for this is,
  * for example, allocate entropy pool from special area of RAM which content
- * is kept over system reset. */
+ * is kept over system reset.
+ */
 
 extern struct entropy_pool_s board_entropy_pool;
 #endif
