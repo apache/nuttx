@@ -61,6 +61,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* IP Version Mask (bits 0-3 of first byte) */
 
 #define IP_VERSION_MASK  0x70
@@ -188,13 +189,13 @@ struct ipv4_stats_s
   net_stats_t recv;       /* Number of received packets at the IP layer */
   net_stats_t sent;       /* Number of sent packets at the IP layer */
   net_stats_t vhlerr;     /* Number of packets dropped due to wrong
-                             IP version or header length */
+                           * IP version or header length */
   net_stats_t fragerr;    /* Number of packets dropped since they
-                             were IP fragments */
+                           * were IP fragments */
   net_stats_t chkerr;     /* Number of packets dropped due to IP
-                             checksum errors */
+                           * checksum errors */
   net_stats_t protoerr;   /* Number of packets dropped since they
-                             were neither ICMP, UDP nor TCP */
+                           * were neither ICMP, UDP nor TCP */
 };
 #endif /* CONFIG_NET_IPv6 */
 
@@ -205,9 +206,9 @@ struct ipv6_stats_s
   net_stats_t recv;       /* Number of received packets at the IP layer */
   net_stats_t sent;       /* Number of sent packets at the IP layer */
   net_stats_t vhlerr;     /* Number of packets dropped due to wrong
-                             IP version or header length */
+                           * IP version or header length */
   net_stats_t protoerr;   /* Number of packets dropped since they
-                             were neither ICMP, UDP nor TCP */
+                           * were neither ICMP, UDP nor TCP */
 };
 #endif /* CONFIG_NET_IPv6 */
 #endif /* CONFIG_NET_STATISTICS */
@@ -279,14 +280,14 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_ENDIAN_BIG
-   /* Big-endian byte order: 11223344 */
+  /* Big-endian byte order: 11223344 */
 
 #  define ip4_addr1(ipaddr) (((ipaddr) >> 24) & 0xff)
 #  define ip4_addr2(ipaddr) (((ipaddr) >> 16) & 0xff)
 #  define ip4_addr3(ipaddr) (((ipaddr) >>  8) & 0xff)
 #  define ip4_addr4(ipaddr)  ((ipaddr)        & 0xff)
 #else
-   /* Little endian byte order: 44223311 */
+  /* Little endian byte order: 44223311 */
 
 #  define ip4_addr1(ipaddr)  ((ipaddr)        & 0xff)
 #  define ip4_addr2(ipaddr) (((ipaddr) >>  8) & 0xff)
@@ -576,7 +577,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  * Name: net_is_addr_unspecified
  *
  * Description:
- *   Is Ithe IPv6 address the unspecified address?  See RFC 4291 (replaces
+ *   Is the IPv6 address the unspecified address?  See RFC 4291 (replaces
  *   3513).
  *
  ****************************************************************************/

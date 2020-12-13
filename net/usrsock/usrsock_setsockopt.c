@@ -157,8 +157,7 @@ static int do_setsockopt_request(FAR struct usrsock_conn_s *conn,
  * Description:
  *   psock_setsockopt() sets the option specified by the 'option' argument,
  *   at the protocol level specified by the 'level' argument, to the value
- *   pointed to by the 'value' argument for the socket on the 'psock'
- *   argument.
+ *   pointed to by the 'value' argument for the usrsock connection.
  *
  *   The 'level' argument specifies the protocol level of the option. To set
  *   options at the socket level, specify the level argument as SOL_SOCKET.
@@ -212,7 +211,7 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn,
       goto errout_unlock;
     }
 
-  /* Request user-space daemon to close socket. */
+  /* Request user-space daemon to handle request. */
 
   ret = do_setsockopt_request(conn, level, option, value, value_len);
   if (ret >= 0)

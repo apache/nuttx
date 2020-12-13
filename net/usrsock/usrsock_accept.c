@@ -172,16 +172,16 @@ static int do_accept_request(FAR struct usrsock_conn_s *conn,
  * Name: usrsock_accept
  *
  * Description:
- *   The usrsock_sockif_accept function is used with connection-based socket
+ *   The usrsock_accept function is used with connection-based socket
  *   types (SOCK_STREAM, SOCK_SEQPACKET and SOCK_RDM). It extracts the first
  *   connection request on the queue of pending connections, creates a new
- *   connected socket with mostly the same properties as 'sockfd', and
+ *   connected socket with mostly the same properties as 'psock', and
  *   allocates a new socket descriptor for the socket, which is returned. The
  *   newly created socket is no longer in the listening state. The original
- *   socket 'sockfd' is unaffected by this call.  Per file descriptor flags
- *   are not inherited across an inet_accept.
+ *   socket 'psock' is unaffected by this call.  Per file descriptor flags
+ *   are not inherited across an usrsock_accept.
  *
- *   The 'sockfd' argument is a socket descriptor that has been created with
+ *   The 'psock' argument is a socket descriptor that has been created with
  *   socket(), bound to a local address with bind(), and is listening for
  *   connections after a call to listen().
  *
@@ -191,9 +191,9 @@ static int do_accept_request(FAR struct usrsock_conn_s *conn,
  *   actual length of the address returned.
  *
  *   If no pending connections are present on the queue, and the socket is
- *   not marked as non-blocking, inet_accept blocks the caller until a
+ *   not marked as non-blocking, usrsock_accept blocks the caller until a
  *   connection is present. If the socket is marked non-blocking and no
- *   pending connections are present on the queue, inet_accept returns
+ *   pending connections are present on the queue, usrsock_accept returns
  *   EAGAIN.
  *
  * Parameters:

@@ -77,11 +77,11 @@
  *   fromlen - The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
+ *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned (see comments with send() for a list of appropriate errno
- *   values).
+ *   psock_recvfrom() will return 0.  Otherwise, on any failure, a negated
+ *   errno value is returned (see comments with recvfrom() for a list of
+ *   appropriate errno values).
  *
  ****************************************************************************/
 
@@ -139,11 +139,11 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *   fromlen - The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
+ *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned (see comments with send() for a list of appropriate errno
- *   values).
+ *   nx_recvfrom() will return 0.  Otherwise, on any failure, a negated errno
+ *   value is returned (see comments with recvfrom() for a list of
+ *   appropriate errno values).
  *
  ****************************************************************************/
 
