@@ -134,6 +134,12 @@ int imxrt_bringup(void)
     }
 #endif
 
+#if !defined(CONFIG_BOARDCTL_USBDEVCTRL) && !defined(CONFIG_USBDEV_COMPOSITE)
+# ifdef CONFIG_CDCACM
+    cdcacm_initialize(0, NULL);
+# endif
+#endif
+
 #if defined(CONFIG_I2C_DRIVER)
   imxrt_i2c_setup();
 #endif
