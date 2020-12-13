@@ -140,9 +140,10 @@ static int do_ioctl_request(FAR struct usrsock_conn_s *conn, int cmd,
  *   This function performs network device specific operations.
  *
  * Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   psock    A reference to the socket structure of the socket
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
+ *   arglen   The length of 'arg'
  *
  ****************************************************************************/
 
@@ -187,7 +188,7 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, FAR void *arg,
   inbufs[0].iov_len = arglen;
   usrsock_setup_datain(conn, inbufs, ARRAY_SIZE(inbufs));
 
-  /* Request user-space daemon to close socket. */
+  /* Request user-space daemon to handle ioctl. */
 
   ret = do_ioctl_request(conn, cmd, arg, arglen);
   if (ret >= 0)

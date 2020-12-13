@@ -67,12 +67,12 @@
  *   the size of the option value is greater than 'value_len', the value
  *   stored in the object pointed to by the 'value' argument will be silently
  *   truncated. Otherwise, the length pointed to by the 'value_len' argument
- *   will be modified to indicate the actual length of the'value'.
+ *   will be modified to indicate the actual length of the 'value'.
  *
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
  *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
- *   argument is SOL_CP.
+ *   argument is SOL_TCP.
  *
  *   See <sys/socket.h> a complete list of values for the socket-level
  *   'option' argument.  Protocol-specific options are are protocol specific
@@ -302,7 +302,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
  *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
- *   argument is SOL_CP.
+ *   argument is SOL_TCP.
  *
  *   See <sys/socket.h> a complete list of values for the socket-level
  *   'option' argument.  Protocol-specific options are are protocol specific
@@ -405,7 +405,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
  *   SOL_SOCKET; to retrieve options at the TCP-protocol level, the level
- *   argument is SOL_CP.
+ *   argument is SOL_TCP.
  *
  *   See <sys/socket.h> a complete list of values for the socket-level
  *   'option' argument.  Protocol-specific options are are protocol specific

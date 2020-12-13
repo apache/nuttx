@@ -75,11 +75,11 @@
  *   flags   - Receive flags
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
+ *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned (see comments with send() for a list of appropriate errno
- *   values).
+ *   psock_recvmsg() will return 0.  Otherwise, on any failure, a negated
+ *   errno value is returned (see comments with recvmsg() for a list of
+ *   appropriate errno values).
  *
  ****************************************************************************/
 
@@ -150,11 +150,11 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *   flags   - Receive flags
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  If no data is
+ *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on any failure, a negated errno value
- *   is returned (see comments with send() for a list of appropriate errno
- *   values).
+ *   nx_recvmsg() will return 0.  Otherwise, on any failure, a negated errno
+ *   value is returned (see comments with recvmsg() for a list of appropriate
+ *   errno values).
  *
  ****************************************************************************/
 
