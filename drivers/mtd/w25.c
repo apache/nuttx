@@ -28,7 +28,7 @@
 
 #include <sys/types.h>
 
-#include <stdint.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -163,6 +163,7 @@
 #  define W25X64_SR_BP_LOWER8th    (12 << W25_SR_BP_SHIFT) /* Lower 8th */
 #  define W25X64_SR_BP_LOWERQTR    (13 << W25_SR_BP_SHIFT) /* Lower quarter */
 #  define W25X64_SR_BP_LOWERHALF   (14 << W25_SR_BP_SHIFT) /* Lower half */
+
                                              /* Bit 6: Reserved */
 #define W25_SR_SRP                 (1 << 7)  /* Bit 7: Status register write protect */
 
@@ -220,7 +221,7 @@ struct w25_dev_s
 
 #if defined(CONFIG_W25_SECTOR512) && !defined(CONFIG_W25_READONLY)
   uint8_t               flags;       /* Buffered sector flags */
-  uint16_t              esectno;     /* Erase sector number in the cache*/
+  uint16_t              esectno;     /* Erase sector number in the cache */
   FAR uint8_t          *sector;      /* Allocated sector data */
 #endif
 };
@@ -1261,7 +1262,8 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #endif
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRIu32 " erasesize: %" PRIu32
+                    " neraseblocks: %" PRIu32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -1350,7 +1352,9 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
         }
       else
         {
-          /* Make sure that the FLASH is unprotected so that we can write into it */
+          /* Make sure that the FLASH is unprotected so that we can write
+           * into it.
+           */
 
 #ifndef CONFIG_W25_READONLY
           w25_unprotect(priv);
@@ -1362,7 +1366,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
           priv->sector = (FAR uint8_t *)kmm_malloc(W25_SECTOR_SIZE);
           if (!priv->sector)
             {
-              /* Allocation failed! Discard all of that work we just did and return NULL */
+              /* Discard all of that work we just did and return NULL */
 
               ferr("ERROR: Allocation failed\n");
               kmm_free(priv);
