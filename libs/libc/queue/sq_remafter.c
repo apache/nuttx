@@ -47,8 +47,8 @@
  * Name: sq_remafter
  *
  * Description:
- *   sq_remafter removes the entry following 'node' from the'queue'  Returns
- *   a reference to the removed entry.
+ *   sq_remafter removes the entry following 'node' from the 'queue'.
+ *   Returns a reference to the removed entry.
  *
  ****************************************************************************/
 

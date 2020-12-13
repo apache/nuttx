@@ -129,7 +129,7 @@ typedef struct bigint_s bigint_t;
  * Private Data
  ****************************************************************************/
 
-/* REVISIT:  __dtoa is not thread safe due to thse two global variables.
+/* REVISIT:  __dtoa is not thread safe due to these two global variables.
  * Options:
  *
  * 1. Allocate on stack.  g_freelist is rather large, however.. around 275
