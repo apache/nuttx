@@ -174,6 +174,8 @@ extern "C"
 int open(FAR const char *path, int oflag, ...);
 int fcntl(int fd, int cmd, ...);
 
+int posix_fallocate(int fd, off_t offset, off_t len);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
