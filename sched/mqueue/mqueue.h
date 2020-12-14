@@ -53,12 +53,6 @@
 
 #define NUM_MSG_DESCRIPTORS  4
 
-/* This defines the number of messages to set aside for exclusive use by
- * interrupt handlers
- */
-
-#define NUM_INTERRUPT_MSGS   8
-
 /********************************************************************************
  * Public Type Definitions
  ********************************************************************************/

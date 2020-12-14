@@ -1536,6 +1536,12 @@ config PREALLOC_MQ_MSGS
 		The number of pre-allocated message structures.  The system manages
 		a pool of preallocated message structures to minimize dynamic allocations
 
+config PREALLOC_MQ_IRQ_MSGS
+	int "Number of pre-allocated irq messages"
+	default 8
+	---help---
+		The number of pre-allocated irq message structures.
+
 config MQ_MAXMSGSIZE
 	int "Maximum message size"
 	default 32
