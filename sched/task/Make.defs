@@ -39,6 +39,10 @@ CSRCS += task_getgroup.c task_getpid.c task_prctl.c task_recover.c
 CSRCS += task_restart.c task_spawnparms.c task_setcancelstate.c
 CSRCS += task_cancelpt.c task_terminate.c exit.c
 
+ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
+CSRCS += task_getppid.c
+endif
+
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
 ifeq ($(CONFIG_SCHED_WAITPID),y)
 CSRCS += task_vfork.c
