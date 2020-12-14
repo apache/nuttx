@@ -37,6 +37,7 @@
 #include "xtensa.h"
 #include "hardware/esp32_soc.h"
 #include "esp32_tim.h"
+#include "esp32_clockconfig.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -47,7 +48,7 @@
 /* Lowest divider, Highest Frequency Best Resolution */
 #define ESP32_TIMER_PRESCALER   2
 /* Number of cycles to complete 1 microsecond */
-#define ESP32_1USECOND          ((TB_CLK_FREQ/ESP32_TIMER_PRESCALER)/1000000)
+#define ESP32_1USECOND          ((esp_clk_apb_freq()/ESP32_TIMER_PRESCALER)/1000000)
 #define ESP32_INIT_CNTR_VALUE   0    /* Initial counter value */
 #define ESP32_TIMER_MAX_USECOND 0xffffffff
 #define ESP32_TIMER_MAX         (ESP32_1USECOND*ESP32_TIMER_MAX_USECOND)

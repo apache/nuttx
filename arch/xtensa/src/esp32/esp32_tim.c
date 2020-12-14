@@ -723,7 +723,7 @@ errout:
  * Name: esp32_tim_enableint
  *
  * Description:
- *   Enables an Edge Interrupt at the alarm if it is set.
+ *   Enables a level Interrupt at the alarm if it is set.
  *
  ****************************************************************************/
 
@@ -731,9 +731,25 @@ static int esp32_tim_enableint(FAR struct esp32_tim_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
-  /* Set the edge interrupt bit */
+  /* Set the level interrupt bit */
 
   esp32_tim_modifyreg32(dev, TIM_CONFIG_OFFSET, 0, TIMG_T0_LEVEL_INT_EN);
+
+  /* Timer 0 from group 0 or 1 */
+
+  if (((struct esp32_tim_priv_s *)dev)->base == TIMG_T0CONFIG_REG(0) ||
+    ((struct esp32_tim_priv_s *)dev)->base == TIMG_T0CONFIG_REG(1))
+    {
+      esp32_tim_modifyreg32(dev, TIM0_INT_ENA_OFFSET, 0,
+                                TIMG_T0_INT_ENA);
+    }
+  else
+    {
+      /* Timer 1 from group 0 or 1 */
+
+      esp32_tim_modifyreg32(dev, TIM1_INT_ENA_OFFSET, 0,
+                                TIMG_T1_INT_ENA);
+    }
 
   return OK;
 }
@@ -742,7 +758,7 @@ static int esp32_tim_enableint(FAR struct esp32_tim_dev_s *dev)
  * Name: esp32_tim_disableint
  *
  * Description:
- *   Disables an Edge Interrupt at the alarm if it is set.
+ *   Disables a level Interrupt at the alarm if it is set.
  *
  ****************************************************************************/
 
@@ -751,6 +767,22 @@ static int esp32_tim_disableint(FAR struct esp32_tim_dev_s *dev)
   DEBUGASSERT(dev);
 
   esp32_tim_modifyreg32(dev, TIM_CONFIG_OFFSET, TIMG_T0_LEVEL_INT_EN, 0);
+
+  /* Timer 0 from group 0 or 1 */
+
+  if (((struct esp32_tim_priv_s *)dev)->base == TIMG_T0CONFIG_REG(0) ||
+    ((struct esp32_tim_priv_s *)dev)->base == TIMG_T0CONFIG_REG(1))
+    {
+      esp32_tim_modifyreg32(dev, TIM0_INT_ENA_OFFSET, TIMG_T0_INT_ENA,
+                                0);
+    }
+  else
+    {
+      /* Timer 1 from group 0 or 1 */
+
+      esp32_tim_modifyreg32(dev, TIM1_INT_ENA_OFFSET, TIMG_T1_INT_ENA,
+                                0);
+    }
 
   return OK;
 }
@@ -835,7 +867,7 @@ static int esp32_tim_ackint(FAR struct esp32_tim_dev_s *dev)
  *
  * Description:
  *   Initialize TIMER device, if software real-time timer
- *   (CONFIG_ESP32_RT_TIMER) is enable, then timer0 can't
+ *   (CONFIG_ESP32_RT_TIMER) is enabled, then timer0 can't
  *   be initialized by this function directly.
  *
  ****************************************************************************/

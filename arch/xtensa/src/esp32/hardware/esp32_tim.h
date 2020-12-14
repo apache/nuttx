@@ -44,6 +44,8 @@
 #define TIM1_CLR_OFFSET			0x0080
 #define TIM0_INT_ST_OFFSET 		0x00A0
 #define TIM1_INT_ST_OFFSET 		0x007c
+#define TIM0_INT_ENA_OFFSET		0x0098
+#define TIM1_INT_ENA_OFFSET		0x0074
 #define LOW_32_MASK				0xffffffff
 
 /* WTD defines */
