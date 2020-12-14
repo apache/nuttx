@@ -1309,6 +1309,12 @@ endmenu # RTOS hooks
 
 menu "Signal Configuration"
 
+config SIG_PREALLOC_IRQ_ACTIONS
+	int "Number of pre-allocated irq actions"
+	default 8
+	---help---
+		The number of pre-allocated irq action structures.
+
 config SIG_EVTHREAD
 	bool "Support SIGEV_THHREAD"
 	default n
