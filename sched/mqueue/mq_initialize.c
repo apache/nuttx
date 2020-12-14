@@ -168,7 +168,7 @@ void nxmq_initialize(void)
    */
 
   g_msgfreeirqalloc =
-    mq_msgblockalloc(&g_msgfreeirq, NUM_INTERRUPT_MSGS,
+    mq_msgblockalloc(&g_msgfreeirq, CONFIG_PREALLOC_MQ_IRQ_MSGS,
                      MQ_ALLOC_IRQ);
 
   /* Allocate a block of message queue descriptors */
