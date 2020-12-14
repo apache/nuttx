@@ -28,6 +28,10 @@ SYSCALL_LOOKUP1(_exit,                     1)
 SYSCALL_LOOKUP(exit,                       1)
 SYSCALL_LOOKUP(getpid,                     0)
 
+#ifdef CONFIG_SCHED_HAVE_PARENT
+  SYSCALL_LOOKUP(getppid,                  0)
+#endif
+
 SYSCALL_LOOKUP(sched_getparam,             2)
 SYSCALL_LOOKUP(sched_getscheduler,         1)
 SYSCALL_LOOKUP(sched_lock,                 0)
