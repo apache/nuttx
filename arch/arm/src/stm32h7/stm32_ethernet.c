@@ -1451,7 +1451,7 @@ static void stm32_dopoll(struct stm32_ethmac_s *priv)
 
       if (dev->d_buf)
         {
-          devif_poll(dev, stm32_txpoll);
+          devif_timer(dev, 0, stm32_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.

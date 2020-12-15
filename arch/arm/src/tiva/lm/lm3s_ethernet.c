@@ -1556,7 +1556,7 @@ static void tiva_txavail_work(void *arg)
        * network for new Tx data
        */
 
-      devif_poll(&priv->ld_dev, tiva_txpoll);
+      devif_timer(&priv->ld_dev, 0, tiva_txpoll);
     }
 
   net_unlock();

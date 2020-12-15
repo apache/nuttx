@@ -1521,7 +1521,7 @@ static void s32k1xx_txavail_work(FAR void *arg)
            * new XMIT data.
            */
 
-          devif_poll(&priv->dev, s32k1xx_txpoll);
+          devif_timer(&priv->dev, 0, s32k1xx_txpoll);
         }
     }
 

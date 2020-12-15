@@ -1517,7 +1517,7 @@ static void imxrt_txavail_work(FAR void *arg)
            * new XMIT data.
            */
 
-          devif_poll(&priv->dev, imxrt_txpoll);
+          devif_timer(&priv->dev, 0, imxrt_txpoll);
         }
     }
 
