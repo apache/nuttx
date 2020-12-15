@@ -10,6 +10,12 @@ choice
 	prompt "RISC-V chip selection"
 	default ARCH_CHIP_NR5
 
+config ARCH_CHIP_BL60X
+	bool "Bouffalo Lab BL60x"
+	select ARCH_RV32IM
+	---help---
+		Bouffalo Lab BL602/4 Processor (RISC-V Core with BLE and WIFI).
+
 config ARCH_CHIP_FE310
 	bool "SiFive FE310"
 	select ARCH_RV32IM
