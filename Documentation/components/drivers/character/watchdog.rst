@@ -153,12 +153,12 @@ This command registers an user callback that will be triggered on timeout. It re
 
 .. c:macro:: WDIOC_KEEPALIVE
 
- This command resets the watchdog timer ("ping",  "pet the dog",  "feed the dog"). 
+ This command resets the watchdog timer AKA '**ping**", "**kick**", "**pet** the dog",  "**feed** the dog"). 
 
-Using the Auto-monitor feature to keep the chip alive
+Using the Auto-monitor feature to reset the watch dog,
 ------------------------------------------------------
 
-The auto-monitor provides an OS-internal mechanism to automatically start the watchdog timer and repeatedly reset the counting after the watchdog is registered.
+The auto-monitor provides an OS-internal mechanism to automatically start and repeatedly reset the watchdog.  
 
 To enable it, follow the next instructions:
 
@@ -196,8 +196,8 @@ To enable it, follow the next instructions:
 
  ``Idle callback``: This choice sets an Idle callback to feed the dog. It depends on the PM module, because this callback is triggered by the PM state change. To enable it do the following:
 
- Go into menu :menuselection:`Device Drivers --> Timer Driver Support` and press :kbd:`Enter`. Then enable:
+ Go into menu :menuselection:`Device Drivers` and enable:
 
- - [x] Power Management Support  
+ - [x] Power Management Support
  
 After selecting one of these choices, the chip will keep itself alive by one of these options. 
