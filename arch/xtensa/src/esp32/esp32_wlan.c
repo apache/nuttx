@@ -841,7 +841,7 @@ static void wlan_dopoll(FAR struct wlan_priv_s *priv)
 
   /* If so, then poll the network for new XMIT data */
 
-  devif_poll(dev, wlan_txpoll);
+  devif_timer(dev, 0, wlan_txpoll);
 
   dev->d_buf = NULL;
 }
