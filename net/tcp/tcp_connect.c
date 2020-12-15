@@ -41,6 +41,7 @@
 #include <nuttx/net/tcp.h>
 
 #include "devif/devif.h"
+#include "netdev/netdev.h"
 #include "socket/socket.h"
 #include "tcp/tcp.h"
 
@@ -322,6 +323,10 @@ int psock_tcp_connect(FAR struct socket *psock,
       ret = psock_setup_callbacks(psock, &state);
       if (ret >= 0)
         {
+          /* Notify the device driver that new connection is available. */
+
+          netdev_txnotify_dev(((FAR struct tcp_conn_s *)psock->s_conn)->dev);
+
           /* Wait for either the connect to complete or for an error/timeout
            * to occur. NOTES:  net_lockedwait will also terminate if a signal
            * is received.
