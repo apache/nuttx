@@ -569,7 +569,7 @@ config ESP32_SPIRAM_BOOT_INIT
 config ESP32_SPIRAM_IGNORE_NOTFOUND
 	bool "Ignore PSRAM when not found"
 	default "n"
-	depends on ESP_SPIRAM_BOOT_INIT && !BOOT_SDRAM_DATA
+	depends on ESP32_SPIRAM_BOOT_INIT && !BOOT_SDRAM_DATA
 	help
 	    Normally, if psram initialization is enabled during compile time
 	    but not found at runtime, it is seen as an error making the CPU
