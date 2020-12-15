@@ -115,7 +115,7 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
 {
   FAR struct streamlist *slist;
   FAR FILE              *stream;
-  int                    ret;
+  int                    ret = OK;
 
   /* Check input parameters */
 
@@ -164,7 +164,7 @@ int fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb,
    * more checks.
    */
 
-  else
+  else if (fd >= 3)
     {
       ret = fs_checkfd(tcb, fd, oflags);
     }
