@@ -15,8 +15,8 @@ github:
     - microcontroller
   enabled_merge_buttons:
     # disable squash button:
-    squash:  false
+    squash: false
     # disable merge button:
-    merge:   false
+    merge: false
     # enable rebase button:
-    rebase:  true
+    rebase: true
