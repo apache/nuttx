@@ -188,7 +188,7 @@ blacklist=`grep "^-" $testfile || true`
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
 function makefunc {
-  if ! ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" ${JOPTION} $@ 1>/dev/null; then
+  if ! ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" ${JOPTION} $@; then
     fail=1
   fi
 
