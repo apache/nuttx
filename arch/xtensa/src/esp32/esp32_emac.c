@@ -1693,7 +1693,7 @@ static void emac_dopoll(struct esp32_emac_s *priv)
 
       dev->d_len = EMAC_BUF_LEN;
 
-      devif_poll(dev, emac_txpoll);
+      devif_timer(dev, 0, emac_txpoll);
 
       if (dev->d_buf)
         {

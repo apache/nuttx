@@ -1252,7 +1252,7 @@ static void pic32mx_poll(struct pic32mx_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          devif_poll(&priv->pd_dev, pic32mx_txpoll);
+          devif_timer(&priv->pd_dev, 0, pic32mx_txpoll);
 
           /* Free any buffer left attached after the poll */
 

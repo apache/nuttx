@@ -1285,7 +1285,7 @@ static void lpc43_dopoll(FAR struct lpc43_ethmac_s *priv)
 
       if (dev->d_buf)
         {
-          devif_poll(dev, lpc43_txpoll);
+          devif_timer(dev, 0, lpc43_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.

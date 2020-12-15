@@ -957,7 +957,7 @@ static void misoc_net_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          devif_poll(&priv->misoc_net_dev, misoc_net_txpoll);
+          devif_timer(&priv->misoc_net_dev, 0, misoc_net_txpoll);
         }
     }
 

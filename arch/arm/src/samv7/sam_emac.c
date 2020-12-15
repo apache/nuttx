@@ -1618,7 +1618,7 @@ static void sam_dopoll(struct sam_emac_s *priv, int qid)
        * then poll the network for new XMIT data.
        */
 
-      devif_poll(dev, sam_txpoll);
+      devif_timer(dev, 0, sam_txpoll);
     }
 }
 

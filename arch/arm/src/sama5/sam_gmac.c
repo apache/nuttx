@@ -912,7 +912,7 @@ static void sam_dopoll(struct sam_gmac_s *priv)
        * then poll the network for new XMIT data.
        */
 
-      devif_poll(dev, sam_txpoll);
+      devif_timer(dev, 0, sam_txpoll);
     }
 }
 

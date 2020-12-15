@@ -1367,7 +1367,7 @@ static void kinetis_txavail_work(FAR void *arg)
            * new XMIT data.
            */
 
-          devif_poll(&priv->dev, kinetis_txpoll);
+          devif_timer(&priv->dev, 0, kinetis_txpoll);
         }
     }
 

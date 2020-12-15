@@ -1853,7 +1853,7 @@ static void lpc17_40_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network layer for new XMIT data */
 
-          devif_poll(&priv->lp_dev, lpc17_40_txpoll);
+          devif_timer(&priv->lp_dev, 0, lpc17_40_txpoll);
         }
     }
 
