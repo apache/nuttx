@@ -54,7 +54,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCPUFLAGS = -mcpu=cortex-a9 -mfpu=vfpv4-d16
-ARCHCFLAGS = -fno-builtin
+ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
@@ -85,6 +85,8 @@ ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
 else
   LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
 endif
+
+LDFLAGS += --gc-sections
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
