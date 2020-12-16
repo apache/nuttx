@@ -2803,12 +2803,12 @@ static int stm32_addmac(struct net_driver_s *dev, const uint8_t *mac)
 
   if (hashindex > 31)
     {
-      registeraddress = STM32_ETH_MACHT0R;
+      registeraddress = STM32_ETH_MACHT1R;
       hashindex -= 32;
     }
   else
     {
-      registeraddress = STM32_ETH_MACHT1R;
+      registeraddress = STM32_ETH_MACHT0R;
     }
 
   temp  = stm32_getreg(registeraddress);
