@@ -3946,11 +3946,13 @@ void IRAM_ATTR phy_exit_critical(uint32_t level)
 
 int phy_printf(const char *format, ...)
 {
+#ifdef CONFIG_DEBUG_WIRELESS_INFO
   va_list arg;
 
   va_start(arg, format);
-  wlinfo(format, arg);
+  vsyslog(LOG_INFO, format, arg);
   va_end(arg);
+#endif
 
   return 0;
 }
