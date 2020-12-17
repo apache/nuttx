@@ -86,12 +86,10 @@ done
 OUTFILE=$1
 
 if [ -z ${VERSION} ] ; then
-  VERSION=`git -C ${WD} tag --sort=taggerdate | tail -1 | cut -d'-' -f2`
+  VERSION=`git -C ${WD} describe 2>/dev/null | tail -1 | cut -d'-' -f2`
 
-  # Earlier tags used the format "major.minor", append a "0" for a patch.
-
-  if [[ ${VERSION} =~ ^([0-9]+[\.][0-9]+)$ ]] ; then
-    VERSION=${VERSION}.0
+  if [[ ! ${VERSION} =~ ([0-9]+).([0-9]+).([0-9]+) ]] ; then
+    VERSION=`git -C ${WD} tag --sort=v:refname | tail -1 | cut -d'-' -f2`
   fi
 fi
 
