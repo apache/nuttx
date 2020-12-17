@@ -102,6 +102,10 @@ Get help using NuttX or contribute to the project on our mailing lists:
     * View the archives at:
       <https://www.mail-archive.com/commits@nuttx.apache.org/>
 
+## Reporting Security Issues
+
+Found a vulnerability? See our security policy [here](.github/SECURITY.md).
+
 ## Issue Tracker
 
 ### Bug Reports:
