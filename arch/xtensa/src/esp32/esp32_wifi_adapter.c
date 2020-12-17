@@ -3114,13 +3114,14 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
   fd = open(dir, O_RDONLY, NVS_FILE_MODE);
   if (fd < 0)
     {
-      free(dir);
       if (errno == ENOENT)
         {
           wlinfo("INFO: No file %s\n", dir);
+          free(dir);
           return ESP_ERR_NVS_NOT_FOUND;
         }
       wlerr("ERROR: Failed to get open %s\n", dir);
+      free(dir);
       return -1;
     }
 
