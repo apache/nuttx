@@ -14,4 +14,4 @@ If you think you have found a possible vulnerability please reach out to the _pr
 private@nuttx.apache.org or the Apache Security list security@apache.org.
 
 Please **DO NOT** create a GitHub issue or email the project dev list as they are public.
-This project follows the Apache Vulnerability Handling Policy docuemnted [here](https://www.apache.org/security/committers.html#vulnerability-handling)
+This project follows the Apache Vulnerability Handling Policy documented [here](https://www.apache.org/security/committers.html#vulnerability-handling).
