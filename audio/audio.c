@@ -187,7 +187,6 @@ static int audio_open(FAR struct file *filep)
   /* Save the new open count on success */
 
   upper->crefs = tmp;
-  upper->usermq = NULL;
   ret = OK;
 
 errout_with_sem:
@@ -244,6 +243,7 @@ static int audio_close(FAR struct file *filep)
       audinfo("calling shutdown\n");
 
       lower->ops->shutdown(lower);
+      upper->usermq = NULL;
     }
 
   ret = OK;
