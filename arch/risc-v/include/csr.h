@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/include/rv32im/csr.h
+ * arch/risc-v/include/csr.h
  *
  *   Copyright (C) 2016 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
@@ -34,8 +34,8 @@
  * through nuttx/irq.h
  */
 
-#ifndef __ARCH_RISCV_INCLUDE_RV32IM_CSR_H
-#define __ARCH_RISCV_INCLUDE_RV32IM_CSR_H
+#ifndef __ARCH_RISCV_INCLUDE_CSR_H
+#define __ARCH_RISCV_INCLUDE_CSR_H
 
 /****************************************************************************
  * Included Files
@@ -345,4 +345,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_RISCV_INCLUDE_RV32IM_CSR_H */
+#endif /* __ARCH_RISCV_INCLUDE_CSR_H */
