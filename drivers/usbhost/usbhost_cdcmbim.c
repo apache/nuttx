@@ -2496,7 +2496,7 @@ static void cdcmbim_txavail_work(void *arg)
 
   if (priv->bifup)
     {
-      (void)devif_poll(&priv->netdev, cdcmbim_txpoll);
+      (void)devif_timer(&priv->netdev, 0, cdcmbim_txpoll);
     }
 
   net_unlock();

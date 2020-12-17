@@ -1177,7 +1177,7 @@ static void rndis_txavail_work(FAR void *arg)
 
   if (rndis_allocnetreq(priv))
     {
-      devif_poll(&priv->netdev, rndis_txpoll);
+      devif_timer(&priv->netdev, 0, rndis_txpoll);
       if (priv->net_req != NULL)
         {
           rndis_freenetreq(priv);

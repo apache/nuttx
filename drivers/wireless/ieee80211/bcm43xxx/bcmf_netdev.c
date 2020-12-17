@@ -797,7 +797,7 @@ static void bcmf_txavail_work(FAR void *arg)
 
       priv->bc_dev.d_buf = priv->cur_tx_frame->data;
       priv->bc_dev.d_len = 0;
-      devif_poll(&priv->bc_dev, bcmf_txpoll);
+      devif_timer(&priv->bc_dev, 0, bcmf_txpoll);
     }
 
 exit_unlock:

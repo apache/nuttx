@@ -967,7 +967,7 @@ static void tun_txavail_work(FAR void *arg)
       /* Poll the network for new XMIT data */
 
       priv->dev.d_buf = priv->read_buf;
-      devif_poll(&priv->dev, tun_txpoll);
+      devif_timer(&priv->dev, 0, tun_txpoll);
     }
 
   net_unlock();

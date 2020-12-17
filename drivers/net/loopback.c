@@ -385,7 +385,7 @@ static void lo_txavail_work(FAR void *arg)
           /* If so, then poll the network for new XMIT data */
 
           priv->lo_txdone = false;
-          devif_poll(&priv->lo_dev, lo_txpoll);
+          devif_timer(&priv->lo_dev, 0, lo_txpoll);
         }
       while (priv->lo_txdone);
     }

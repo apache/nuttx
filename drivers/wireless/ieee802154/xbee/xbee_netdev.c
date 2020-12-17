@@ -876,7 +876,7 @@ static void xbeenet_txavail_work(FAR void *arg)
 
       /* Then poll the network for new XMIT data */
 
-      devif_poll(&priv->xd_dev.r_dev, xbeenet_txpoll_callback);
+      devif_timer(&priv->xd_dev.r_dev, 0, xbeenet_txpoll_callback);
     }
 
   net_unlock();
