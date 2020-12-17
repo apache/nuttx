@@ -917,7 +917,7 @@ static void skel_txavail_work(FAR void *arg)
 
       /* If so, then poll the network for new XMIT data */
 
-      devif_poll(&priv->sk_dev, skel_txpoll);
+      devif_timer(&priv->sk_dev, 0, skel_txpoll);
     }
 
   net_unlock();

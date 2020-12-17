@@ -1812,7 +1812,7 @@ static void spirit_txpoll_work(FAR void *arg)
     {
       /* Perform a normal, asynchronous poll for new TX data */
 
-      devif_poll(&priv->radio.r_dev, spirit_txpoll_callback);
+      devif_timer(&priv->radio.r_dev, 0, spirit_txpoll_callback);
     }
 
   net_unlock();

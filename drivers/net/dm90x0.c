@@ -1658,7 +1658,7 @@ static void dm9x_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          devif_poll(&priv->dm_dev, dm9x_txpoll);
+          devif_timer(&priv->dm_dev, 0, dm9x_txpoll);
         }
     }
 

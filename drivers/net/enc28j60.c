@@ -2233,7 +2233,7 @@ static int enc_txavail(struct net_driver_s *dev)
            * poll the network for new XMIT data
            */
 
-          devif_poll(&priv->dev, enc_txpoll);
+          devif_timer(&priv->dev, 0, enc_txpoll);
         }
     }
 
