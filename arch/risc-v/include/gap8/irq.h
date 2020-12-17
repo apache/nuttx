@@ -347,10 +347,10 @@ static inline uint32_t _current_privilege(void)
  *
  ****************************************************************************/
 
-static inline uint32_t up_irq_save(void)
+static inline irqstate_t up_irq_save(void)
 {
-  uint32_t oldstat;
-  uint32_t newstat;
+  irqstate_t oldstat;
+  irqstate_t newstat;
 
   if (_current_privilege())
     {
@@ -404,10 +404,10 @@ static inline void up_irq_restore(uint32_t pri)
  *
  ****************************************************************************/
 
-static inline uint32_t up_irq_enable(void)
+static inline irqstate_t up_irq_enable(void)
 {
-  uint32_t oldstat;
-  uint32_t newstat;
+  irqstate_t oldstat;
+  irqstate_t newstat;
 
   if (_current_privilege())
     {
