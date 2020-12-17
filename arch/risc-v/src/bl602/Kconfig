@@ -1,0 +1,79 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "BL602 Configuration Options"
+
+menu "BL602 Peripheral Support"
+
+config BL602_HAVE_UART0
+	bool
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config BL602_UART0
+	bool "UART0"
+	default y
+	select ARCH_HAVE_UART0
+
+config BL602_UART0_TX_PIN
+	int "UART0 tx pin num"
+	default 16
+	depends on BL602_UART0
+
+config BL602_UART0_RX_PIN
+	int "UART0 rx pin num"
+	default 7
+	depends on BL602_UART0
+
+config BL602_UART0_RTS_PIN
+	int "UART0 rts pin num"
+	default -1
+	depends on BL602_UART0
+
+config BL602_UART0_CTS_PIN
+	int "UART0 cts pin num"
+	default -1 
+	depends on BL602_UART0
+
+config BL602_HAVE_UART1
+	bool
+	default y
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS 
+
+config BL602_UART1
+	bool "UART1"
+	default y
+	select ARCH_HAVE_UART1
+	
+config BL602_UART1_TX_PIN
+    int "UART1 tx pin num"
+    default 4
+    depends on BL602_UART1
+
+config BL602_UART1_RX_PIN
+    int "UART1 rx pin num"
+    default 3
+    depends on BL602_UART1
+
+config BL602_UART1_RTS_PIN
+    int "UART1 rts pin num"
+    default -1
+    depends on BL602_UART1
+
+config BL602_UART1_CTS_PIN
+    int "UART1 cts pin num"
+    default -1 
+    depends on BL602_UART1
+
+config BL602_TIMER0
+	bool "TIMER0"
+	default y
+
+config BL602_TIMER1
+	bool "TIMER1"
+	default y
+endmenu

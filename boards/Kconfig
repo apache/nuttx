@@ -74,6 +74,13 @@ config ARCH_BOARD_AXOLOTI
 		Axoloti synthesizer board based on the STMicro STM32F427IGH6 MCU.
 		See: http://www.axoloti.com/
 
+config ARCH_BOARD_BL602EVB
+	bool "BouffaloLab BL602EVB Board"
+	depends on ARCH_CHIP_BL602
+	---help---
+		This is the board configuration for the port of NuttX to the BouffaloLab BL602EVB
+		board.  This board features the RISC-V rv32imfc core
+
 config ARCH_BOARD_C5471EVM
 	bool "Spectrum Digital C5471 evaluation board"
 	depends on ARCH_CHIP_C5471
@@ -2192,6 +2199,7 @@ config ARCH_BOARD
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
 	default "axoloti"                  if ARCH_BOARD_AXOLOTI
 	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
+	default "bl602evb"                 if ARCH_BOARD_BL602EVB
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
 	default "clicker2-stm32"           if ARCH_BOARD_CLICKER2_STM32
 	default "cloudctrl"                if ARCH_BOARD_CLOUDCTRL
@@ -3064,6 +3072,9 @@ source "boards/z80/ez80/z20x/Kconfig"
 endif
 if ARCH_BOARD_Z80SIM
 source "boards/z80/z80/z80sim/Kconfig"
+endif
+if ARCH_BOARD_BL602EVB
+source "boards/risc-v/bl602/bl602evb/Kconfig"
 endif
 
 config BOARD_CRASHDUMP

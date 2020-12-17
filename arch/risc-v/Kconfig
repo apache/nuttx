@@ -44,6 +44,12 @@ config ARCH_CHIP_GAP8
 		GreenwavesTechnologies GAP8 features a 1+8-core RI5CY DSP-like
 		processor, which originally comes from the ETH PULP platform.
 
+config ARCH_CHIP_BL602
+	bool "BouffaloLab BL602"
+	select ARCH_RV32IM
+	---help---
+		BouffaloLab BL602(rv32imfc)
+
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
 	select ARCH_CHIP_CUSTOM
@@ -80,6 +86,7 @@ config ARCH_CHIP
 	default "litex"		if ARCH_CHIP_LITEX
 	default "nr5m100"	if ARCH_CHIP_NR5
 	default "gap8"		if ARCH_CHIP_GAP8
+	default "bl602"		if ARCH_CHIP_BL602
 
 config NR5_MPU
 	bool "MPU support"
@@ -112,5 +119,7 @@ endif
 if ARCH_CHIP_GAP8
 source arch/risc-v/src/gap8/Kconfig
 endif
-
+if ARCH_CHIP_BL602
+source arch/risc-v/src/bl602/Kconfig
+endif
 endif
