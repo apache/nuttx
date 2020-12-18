@@ -40,22 +40,26 @@
 
 #include "chip.h"
 
-void bl_irq_enable(unsigned int source)
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static inline void bl_irq_enable(unsigned int source)
 {
   *(volatile uint8_t *)(CLIC_HART0_ADDR + CLIC_INTIE + source) = 1;
 }
 
-void bl_irq_disable(unsigned int source)
+static inline void bl_irq_disable(unsigned int source)
 {
   *(volatile uint8_t *)(CLIC_HART0_ADDR + CLIC_INTIE + source) = 0;
 }
 
-void bl_irq_pending_set(unsigned int source)
+static inline void bl_irq_pending_set(unsigned int source)
 {
   *(volatile uint8_t *)(CLIC_HART0_ADDR + CLIC_INTIP + source) = 1;
 }
 
-void bl_irq_pending_clear(unsigned int source)
+static inline void bl_irq_pending_clear(unsigned int source)
 {
   *(volatile uint8_t *)(CLIC_HART0_ADDR + CLIC_INTIP + source) = 0;
 }
@@ -251,3 +255,4 @@ irqstate_t up_irq_enable(void)
   asm volatile("csrrs %0, mstatus, %1" : "=r"(oldstat) : "r"(MSTATUS_MIE));
   return oldstat;
 }
+

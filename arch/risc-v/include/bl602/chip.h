@@ -31,6 +31,5 @@
 #include <stdbool.h>
 
 #include <arch/irq.h>
-#include "riscv_internal.h"
 
 #endif /* __ARCH_RISCV_INCLUDE_BL602_CHIP_H */

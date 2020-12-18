@@ -29,4 +29,5 @@
 
 int bl602_bringup(void);
 
-#endif /* __BOARDS_RISCV_BL602_EVB_SRC_ARTY_A7_H */
+#endif /* __BOARDS_RISCV_BL602_BL602EVB_SRC_BL602EVB_H */
+

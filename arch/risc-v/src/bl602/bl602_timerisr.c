@@ -154,3 +154,4 @@ void up_timer_initialize(void)
 
   up_enable_irq(BL602_IRQ_MTIMER);
 }
+

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/bl602/evb/src/litex_appinit.c
+ * boards/risc-v/bl602/evb/src/bl602_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

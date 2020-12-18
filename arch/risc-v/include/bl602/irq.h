@@ -35,10 +35,6 @@
 
 #define CLIC_TIMER_ENABLE_ADDRESS (0x02800407)
 
-/* In mstatus register */
-
-#define MIE_MSIE (0x1 << 3) /* Machine Software Interrupt Enable */
-
 /* Map RISC-V exception code to NuttX IRQ */
 
 /* IRQ 0-15 : (exception:interrupt=0) */
@@ -54,8 +50,8 @@
 #define BL602_IRQ_ECALLU       (8) /* Environment Call from U-mode */
                                    /* 9-10: Reserved */
 
-#define BL602_IRQ_ECALLM (11) /* Environment Call from M-mode */
-                              /* 12-15: Reserved */
+#define BL602_IRQ_ECALLM       (11) /* Environment Call from M-mode */
+                                    /* 12-15: Reserved */
 
 /* IRQ 16- : (async event:interrupt=1) */
 
@@ -231,8 +227,6 @@ extern "C"
 EXTERN irqstate_t up_irq_save(void);
 EXTERN void       up_irq_restore(irqstate_t);
 EXTERN irqstate_t up_irq_enable(void);
-EXTERN void       up_disable_irq(int irq);
-EXTERN void       up_enable_irq(int irq);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -240,3 +234,4 @@ EXTERN void       up_enable_irq(int irq);
 #endif
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_INCLUDE_BL602_IRQ_H */
+
