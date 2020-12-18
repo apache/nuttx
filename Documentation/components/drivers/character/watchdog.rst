@@ -153,7 +153,7 @@ This command registers an user callback that will be triggered on timeout. It re
 
 .. c:macro:: WDIOC_KEEPALIVE
 
- This command resets the watchdog timer AKA '**ping**", "**kick**", "**pet** the dog",  "**feed** the dog"). 
+ This command resets the watchdog timer AKA '**ping**", "**kick**", "**pet**",  "**feed**" the dog". 
 
 Using the Auto-monitor feature to reset the watch dog,
 ------------------------------------------------------
