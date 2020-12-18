@@ -395,12 +395,16 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int      chan,
   timstr.pl_trig_src =
     TIMER_PRELOAD_TRIG_COMP0; /* Timer count register preload trigger source
                                * slelect */
+
   timstr.count_mode = TIMER_COUNT_PRELOAD; /* Timer count mode */
+
   timstr.clock_division =
     (TIMER_CLK_DIV * resolution) - 1;  /* Timer clock divison value */
+
   timstr.match_val0  = TIMER_MAX_VALUE; /* Timer match 0 value 0 */
   timstr.match_val1  = TIMER_MAX_VALUE; /* Timer match 1 value 0 */
   timstr.match_val2  = TIMER_MAX_VALUE; /* Timer match 2 value 0 */
+
   timstr.pre_load_val = TIMER_MAX_VALUE; /* Timer preload value */
 
   timer_intmask(chan, TIMER_INT_ALL, 1);

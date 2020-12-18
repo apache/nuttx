@@ -693,8 +693,13 @@ enum uart_bytebits_inverse_e
 
 enum uart_auto_baudrate_detection_e
 {
-  UART_AUTOBAUD_0X55, /* UART auto baudrate detection using codeword 0x55 */
-  UART_AUTOBAUD_STARTBIT /* UART auto baudrate detection using start bit */
+  /* UART auto baudrate detection using codeword 0x55 */
+
+  UART_AUTOBAUD_0X55,
+
+  /* UART auto baudrate detection using start bit */
+
+  UART_AUTOBAUD_STARTBIT
 };
 
 /* UART interrupt type definition */

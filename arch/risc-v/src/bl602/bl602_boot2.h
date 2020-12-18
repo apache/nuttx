@@ -45,6 +45,7 @@ enum pt_table_error_e
   PT_ERROR_ENTRY_NOT_FOUND,   /* Partition table error type:entry not found */
   PT_ERROR_ENTRY_UPDATE_FAIL, /* Partition table error type:entry update fail
                                */
+
   PT_ERROR_CRC32,       /* Partition table error type:crc32 error */
   PT_ERROR_PARAMETER,   /* Partition table error type:input parameter error */
   PT_ERROR_FALSH_READ,  /* Partition table error type:flash read error */

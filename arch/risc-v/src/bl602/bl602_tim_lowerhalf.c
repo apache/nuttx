@@ -52,6 +52,7 @@
 struct bl602_lowerhalf_s
 {
   FAR const struct timer_ops_s *ops; /* Lower half operations */
+
   tccb_t    callback; /* Current upper half interrupt callback */
   FAR void *arg;      /* Argument passed to upper half callback */
   bool      started;  /* True: Timer has been started */
@@ -403,6 +404,7 @@ int bl602_timer_initialize(FAR const char *devpath, int timer)
   timstr.pl_trig_src =
     TIMER_PRELOAD_TRIG_COMP0; /* Timer count register preload trigger source
                                  slelect */
+
   timstr.count_mode     = TIMER_COUNT_PRELOAD; /* Timer count mode */
   timstr.clock_division = TIMER_CLK_DIV;       /* Timer clock divison value */
   timstr.match_val0     = TIMER_MAX_VALUE;     /* Timer match 0 value 0 */
