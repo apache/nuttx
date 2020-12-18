@@ -237,7 +237,7 @@ static void spiffs_unlock_reentrant(FAR struct spiffs_sem_s *rsem)
 }
 
 /****************************************************************************
- * Name: spiffs_readdir_callback
+ * Name: spiffs_consistency_check
  ****************************************************************************/
 
 static int spiffs_consistency_check(FAR struct spiffs_s *fs)
