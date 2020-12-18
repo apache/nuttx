@@ -155,8 +155,8 @@ This command registers an user callback that will be triggered on timeout. It re
 
  This command resets the watchdog timer AKA '**ping**", "**kick**", "**pet**",  "**feed**" the dog". 
 
-Using the Auto-monitor feature to reset the watch dog,
-------------------------------------------------------
+Enable Built in System Monitoring to reset the watchdog
+-------------------------------------------------------
 
 The auto-monitor provides an OS-internal mechanism to automatically start and repeatedly reset the watchdog.  
 
@@ -188,7 +188,8 @@ To enable it, follow the next instructions:
 
  ``Timer callback``: This choice also uses a timer callback to reset the watchdog, but it will reset the watchdog every "keep a live interval".
 
- ``Worker callback``: This choice uses the Low Priority Work Queue to reset the watchog every "keep a live interval". This choice depends on having the Low Priority Work Queue enabled. 
+ ``Worker callback``:  This choice uses a Work Queue to reset the watchdog every "keep a live interval". This choice depends on having the Low or High Priority Work Queue enabled.
+ If only the High Priority Work Queue is enabled, this one will be used, otherwise Low Priority Work Queue is used. 
  
  So, before enabling it, go into menu :menuselection:`RTOS Features --> Work queue support` and press :kbd:`Enter`.
 
