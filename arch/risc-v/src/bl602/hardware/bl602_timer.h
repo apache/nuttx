@@ -599,8 +599,11 @@ struct timer_cfg_s
 {
   timer_chan_t   timer_ch; /* Timer channel */
   timer_clksrc_t clk_src;  /* Timer clock source */
-  timer_preload_trig_t
-                    pl_trig_src; /* Timer count register preload trigger source slelect */
+
+  /* Timer count register preload trigger source slelect */
+
+  timer_preload_trig_t pl_trig_src;
+
   timer_countmode_t count_mode;     /* Timer count mode */
   uint8_t           clock_division; /* Timer clock divison value */
   uint32_t          match_val0;     /* Timer match 0 value 0 */
