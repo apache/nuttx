@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/litex/arty_a7/include/board.h
+ * boards/risc-v/bl602/bl602evb/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -58,11 +58,11 @@ extern "C"
  * Name: litex_boardinitialize
  ****************************************************************************/
 
-void litex_boardinitialize(void);
+void bl602_boardinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISC-V_BL602_EVB_INCLUDE_BOARD_H */
+#endif /* __BOARDS_RISC_V_BL602_BL602EVB_INCLUDE_BOARD_H */

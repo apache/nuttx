@@ -25,11 +25,15 @@
 #include <stdint.h>
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
 #include <arch/board/board.h>
 
-#include "bl602_boot2.h"
+#include "riscv_internal.h"
 #include "chip.h"
+
+#include "bl602_boot2.h"
+#include "hardware/bl602_hbn.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -115,6 +119,8 @@ uint32_t boot2_get_flash_addr(void)
 
 void bfl_main(void)
 {
+  uint32_t tmp_val;
+
   /* set interrupt vector */
 
   asm volatile("csrw mtvec, %0" ::"r"((uintptr_t)exception_common + 2));
@@ -122,6 +128,12 @@ void bfl_main(void)
   /* Configure the UART so we can get debug output */
 
   bl602_lowsetup();
+
+  /* HBN Config AON pad input and SMT */
+
+  tmp_val = BL_RD_REG(HBN_BASE, HBN_IRQ_MODE);
+  tmp_val = BL_SET_REG_BITS_VAL(tmp_val, HBN_REG_AON_PAD_IE_SMT, 1);
+  BL_WR_REG(HBN_BASE, HBN_IRQ_MODE, tmp_val);
 
 #ifdef USE_EARLYSERIALINIT
   up_earlyserialinit();
@@ -140,3 +152,4 @@ void bfl_main(void)
   while (1)
     ;
 }
+

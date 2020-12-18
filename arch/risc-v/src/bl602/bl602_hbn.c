@@ -26,49 +26,6 @@
 #include "hardware/bl602_hbn.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: <Static function name>
- *
- * Description:
- *   Description of the operation of the static function.
- *
- * Input Parameters:
- *   A list of input parameters, one-per-line, appears here along with a
- *   description of each input parameter.
- *
- * Returned Value:
- *   Description of the value returned by this function (if any),
- *   including an enumeration of all possible error values.
- *
- * Assumptions/Limitations:
- *   Anything else that one might need to know to use this function.
- *
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -98,3 +55,4 @@ void hbn_set_uart_clk_sel(enum hbn_uart_clk_type_e clk_sel)
   tmp_val = BL_SET_REG_BITS_VAL(tmp_val, HBN_UART_CLK_SEL, clk_sel);
   BL_WR_REG(HBN_BASE, HBN_GLB, tmp_val);
 }
+

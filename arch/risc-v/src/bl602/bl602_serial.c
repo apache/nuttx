@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -982,3 +983,4 @@ int up_putc(int ch)
 }
 
 #endif /* USE_SERIALDRIVER */
+

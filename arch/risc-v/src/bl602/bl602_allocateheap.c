@@ -24,9 +24,14 @@
 
 #include <nuttx/config.h>
 
-#include <arch/board/board.h>
-
 #include "chip.h"
+
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
+
+extern uint8_t _heap_start;
+extern uint8_t _heap_size;
 
 /****************************************************************************
  * Public Functions
@@ -54,9 +59,6 @@ void up_addregion(void)
  *   allocated (and protected) by an analogous up_allocate_kheap().
  *
  ****************************************************************************/
-
-extern uint8_t _heap_start;
-extern uint8_t _heap_size;
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {

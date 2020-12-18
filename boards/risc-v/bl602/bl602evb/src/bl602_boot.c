@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/bl602/evb/src/litex_boot.c
+ * boards/risc-v/bl602/evb/src/bl602_boot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -29,8 +29,6 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "hardware/bl602_hbn.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -47,7 +45,7 @@
  * Name: bl602_boardinitialize
  *
  * Description:
- *   All LITEX architectures must provide the following entry point.
+ *   All bl602 architectures must provide the following entry point.
  *   This entry point is called early in the initialization -- after all
  *   memory has been configured and mapped but before any devices have been
  *   initialized.
@@ -56,9 +54,5 @@
 
 void bl602_boardinitialize(void)
 {
-  uint32_t tmp_val;
-
-  tmp_val = BL_RD_REG(HBN_BASE, HBN_IRQ_MODE);
-  tmp_val = BL_SET_REG_BITS_VAL(tmp_val, HBN_REG_AON_PAD_IE_SMT, 1);
-  BL_WR_REG(HBN_BASE, HBN_IRQ_MODE, tmp_val);
 }
+

@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
 #include <sys/types.h>
 
@@ -447,3 +448,4 @@ int bl602_timer_initialize(FAR const char *devpath, int timer)
 
   return OK;
 }
+

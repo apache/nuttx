@@ -9,13 +9,11 @@ menu "BL602 Peripheral Support"
 
 config BL602_HAVE_UART0
 	bool
-	default y
 	select UART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config BL602_UART0
 	bool "UART0"
-	default y
 	select ARCH_HAVE_UART0
 
 config BL602_UART0_TX_PIN
@@ -40,13 +38,11 @@ config BL602_UART0_CTS_PIN
 
 config BL602_HAVE_UART1
 	bool
-	default y
 	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS 
 
 config BL602_UART1
 	bool "UART1"
-	default y
 	select ARCH_HAVE_UART1
 	
 config BL602_UART1_TX_PIN
@@ -71,9 +67,7 @@ config BL602_UART1_CTS_PIN
 
 config BL602_TIMER0
 	bool "TIMER0"
-	default y
 
 config BL602_TIMER1
 	bool "TIMER1"
-	default y
 endmenu
