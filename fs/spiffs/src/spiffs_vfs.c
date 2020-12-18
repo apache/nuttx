@@ -1506,7 +1506,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
         (unsigned int)SPIFFS_GEO_PAGE_SIZE(fs));
   finfo("object lookup pages:         %u\n",
         (unsigned int)SPIFFS_OBJ_LOOKUP_PAGES(fs));
-  finfo("page pages per block:        %u\n",
+  finfo("pages per block:             %u\n",
         (unsigned int)SPIFFS_GEO_PAGES_PER_BLOCK(fs));
   finfo("page header length:          %u\n",
         (unsigned int)sizeof(struct spiffs_page_header_s));
