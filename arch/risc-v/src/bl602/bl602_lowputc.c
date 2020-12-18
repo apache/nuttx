@@ -426,9 +426,6 @@ void bl602_lowsetup(void)
 
   bl602_uart_configure(BL602_CONSOLE_BASE, &g_bl602_console_config);
 
-  up_lowputc('A');
-  up_lowputc('\r');
-  up_lowputc('\n');
 #endif /* HAVE_SERIAL_CONSOLE */
 }
 
