@@ -22,7 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/rv32im/irq.h>
+#include <arch/csr.h>
 
 	.section .init
 	.globl bl602_start
