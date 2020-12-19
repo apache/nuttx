@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/k210_schedulesigaction.c
+ * arch/risc-v/src/rv64gc/riscv_schedulesigaction.c
  *
  *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
@@ -48,13 +48,10 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <arch/k210/irq.h>
 
 #include "sched/sched.h"
 #include "riscv_internal.h"
 #include "riscv_arch.h"
-
-#include "irq/irq.h"
 
 /****************************************************************************
  * Public Functions
