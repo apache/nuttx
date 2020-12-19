@@ -309,6 +309,22 @@
 #define CSR_DPC             0x7B1
 #define CSR_DSCRATCH        0x7B2
 
+/* In mstatus register */
+
+#define MSTATUS_MIE   (0x1 << 3)  /* Machine Interrupt Enable */
+#define MSTATUS_MPIE  (0x1 << 7)  /* Machine Previous Interrupt Enable */
+#define MSTATUS_MPPM  (0x3 << 11) /* Machine Previous Privilege (m-mode) */
+
+/* In mie (machine interrupt enable) register */
+
+#define MIE_MSIE      (0x1 << 3)  /* Machine Software Interrupt Enable */
+#define MIE_MTIE      (0x1 << 7)  /* Machine Timer Interrupt Enable */
+#define MIE_MEIE      (0x1 << 11) /* Machine External Interrupt Enable */
+
+/* In mip (machine interrupt pending) register */
+
+#define MIP_MTIP      (0x1 << 7)
+
 #define CSR_STR(csr) #csr
 
 #define READ_CSR(reg) \
