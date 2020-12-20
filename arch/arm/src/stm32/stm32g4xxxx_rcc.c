@@ -19,7 +19,7 @@
  ****************************************************************************/
 
 /* Unless otherwise specified, when comments in this file refer to the
- * reference manual, that is the STM32G4 Reference Manual (RM0440 Rev 2).
+ * reference manual, that is the STM32G4 Reference Manual (RM0440 Rev 5).
  *
  * This file requires a clocking configuration, which is set in board.h,
  * consisting of some or all of the following defines:
@@ -126,7 +126,7 @@
 /* Per the reference manual:
  *
  * Choose PWR VOS range setting and R1MODE based on SYSCLK frequency (see
- * section 5.1.5, Dynamic voltage scaling management).
+ * section 6.1.5, Dynamic voltage scaling management).
  *
  * Choose number of FLASH wait states according to CPU clock (HCLK)
  * frequency (see section 3.3.3, Read access latency, and Table 9 in that
@@ -138,43 +138,48 @@
 
 #if (STM32_SYSCLK_FREQUENCY > 26000000)
 #  define PWR_CR1_VOS_RANGE_SETTING    PWR_CR1_VOS_RANGE_1
-#  if (STM32_SYSCLK_FREQUENCY > 150000000)
+#  if (STM32_SYSCLK_FREQUENCY > 150000000) /* Table 9, left column, "Vcore Range 1 boost mode" */
 #    define PWR_CR5_R1MODE_SETTING     0
-#  else
+#    if (STM32_HCLK_FREQUENCY <= 34000000)
+#      define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_0
+#    elif (STM32_HCLK_FREQUENCY <= 68000000)
+#      define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_1
+#    elif (STM32_HCLK_FREQUENCY <= 102000000)
+#      define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_2
+#    elif (STM32_HCLK_FREQUENCY <= 136000000)
+#      define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_3
+#    elif (STM32_HCLK_FREQUENCY <= 170000000)
+#      define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_4
+#    else
+#      error "Incorrect STM32_HCLK_FREQUENCY (Vcore range 1 boost mode)!"
+#    endif
+#  else                                    /* Table 9, middle column, "Vcore Range 1 normal mode" */
 #    define PWR_CR5_R1MODE_SETTING     PWR_CR5_R1MODE
+#    if (STM32_HCLK_FREQUENCY <= 30000000)
+#      define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_0
+#    elif (STM32_HCLK_FREQUENCY <= 60000000)
+#      define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_1
+#    elif (STM32_HCLK_FREQUENCY <= 90000000)
+#      define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_2
+#    elif (STM32_HCLK_FREQUENCY <= 120000000)
+#      define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_3
+#    elif (STM32_HCLK_FREQUENCY <= 150000000)
+#      define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_4
+#    else
+#      error "Incorrect STM32_HCLK_FREQUENCY (Vcore range 1 normal mode)!"
+#    endif
 #  endif
-#  if (STM32_HCLK_FREQUENCY <= 20000000)
-#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_0
-#  elif (STM32_HCLK_FREQUENCY <= 40000000)
-#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_1
-#  elif (STM32_HCLK_FREQUENCY <= 60000000)
-#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_2
-#  elif (STM32_HCLK_FREQUENCY <= 80000000)
-#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_3
-#  elif (STM32_HCLK_FREQUENCY <= 100000000)
-#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_4
-#  elif (STM32_HCLK_FREQUENCY <= 120000000)
-#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_5
-#  elif (STM32_HCLK_FREQUENCY <= 140000000)
-#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_6
-#  elif (STM32_HCLK_FREQUENCY <= 160000000)
-#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_7
-#  elif (STM32_HCLK_FREQUENCY <= 170000000)
-#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_8
-#  else
-#    error "Incorrect STM32_HCLK_FREQUENCY (VOS range 1)!"
-#  endif
-#else
+#else                                      /* Table 9, right column, "Vcore Range 2" */
 #  define PWR_CR1_VOS_RANGE_SETTING    PWR_CR1_VOS_RANGE_2;
 #  define PWR_CR5_R1MODE_SETTING       0
-#  if (STM32_HCLK_FREQUENCY <= 8000000)
+#  if (STM32_HCLK_FREQUENCY <= 12000000)
 #    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_0
-#  elif (STM32_HCLK_FREQUENCY <= 16000000)
+#  elif (STM32_HCLK_FREQUENCY <= 24000000)
 #    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_1
 #  elif (STM32_HCLK_FREQUENCY <= 26000000)
 #    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_2
 #  else
-#    error "Incorrect STM32_HCLK_FREQUENCY! (VOS range 2)"
+#    error "Incorrect STM32_HCLK_FREQUENCY! (Vcore range 2)"
 #  endif
 #endif
 
@@ -901,7 +906,7 @@ static void stm32_stdclockconfig(void)
   /* If SYSCLK > 150MHz, temporarily set the HCLK prescaler (RCC_CFGR_HPRE)
    * to divide by 2 (RCC_CFGR_HPRE_SYSCLKd2) before changing SYSCLK source
    * to PLL. Afterwards, (after waiting at least 1us) change back to no
-   * division (RCC_CFGR_HPRE_SYSCLK). See reference manual, section 5.1.5.
+   * division (RCC_CFGR_HPRE_SYSCLK). See reference manual, section 6.1.5.
    */
 
   regval = getreg32(STM32_RCC_CFGR);
