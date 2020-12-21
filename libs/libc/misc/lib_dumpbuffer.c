@@ -47,8 +47,11 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-#define _NITEMS   16                 /* 32 bytes displayed per line */
-#define _LINESIZE (3 * _NITEMS + _NITEMS + 4)  /* 2 hex chars, ASCII char, 3 spaces, NUL */
+/* 32 bytes displayed per line */
+#define _NITEMS   16
+
+/* 2 hex chars, ASCII char, 3 spaces, NUL */
+#define _LINESIZE (3 * _NITEMS + _NITEMS + 4)
 
 /****************************************************************************
  * Private Functions
@@ -149,5 +152,5 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
 
       *ptr = '\0';  /* Plus 1 byte */
       syslog(LOG_INFO, "%04x  %s\n", i, buf);
-   }
+    }
 }
