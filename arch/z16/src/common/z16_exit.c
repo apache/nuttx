@@ -150,6 +150,10 @@ void up_exit(int status)
   tcb = this_task();
   sinfo("New Active Task TCB=%p\n", tcb);
 
+  /* Adjusts time slice for SCHED_RR & SCHED_SPORADIC cases */
+
+  nxsched_resume_scheduler(tcb);
+
   /* Then switch contexts */
 
   RESTORE_USERCONTEXT(tcb);

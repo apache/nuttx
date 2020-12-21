@@ -86,6 +86,12 @@ void up_exit(int status)
   tcb = this_task();
   sinfo("New Active Task TCB=%p\n", tcb);
 
+  /* Adjusts time slice for SCHED_RR & SCHED_SPORADIC cases
+   * NOTE: the API also adjusts the global IRQ control for SMP
+   */
+
+  nxsched_resume_scheduler(tcb);
+
   /* The way that we handle signals in the simulation is kind of
    * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
    * driven environment.
