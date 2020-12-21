@@ -400,6 +400,10 @@ begin_packed_struct struct spiffs_page_header_s
 begin_packed_struct struct spiffs_pgobj_ndxheader_s
 {
   struct spiffs_page_header_s phdr;     /* common page header */
+#ifndef CONFIG_SPIFFS_COMPAT_OLD_NUTTX
+  uint8_t _align[4 - ((sizeof(struct spiffs_page_header_s) & 3) ==
+                 0 ? 4 : (sizeof(struct spiffs_page_header_s) & 3))];
+#endif
   uint32_t size;                        /* size of object */
   uint8_t type;                         /* type of object */
   uint8_t name[CONFIG_SPIFFS_NAME_MAX]; /* name of object */
