@@ -47,8 +47,8 @@
  * Pre-processor definitions
  ****************************************************************************/
 
-#define _NITEMS   32                 /* 32 bytes displayed per line */
-#define _LINESIZE (3 * _NITEMS + 4)  /* 2 hex chars, ASCII char, 3 spaces, NUL */
+#define _NITEMS   16                 /* 32 bytes displayed per line */
+#define _LINESIZE (3 * _NITEMS + _NITEMS + 4)  /* 2 hex chars, ASCII char, 3 spaces, NUL */
 
 /****************************************************************************
  * Private Functions
@@ -97,7 +97,11 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
   unsigned int j;
   unsigned int k;
 
-  syslog(LOG_INFO, "%s (%p):\n", msg, buffer);
+  if (msg)
+    {
+      syslog(LOG_INFO, "%s (%p):\n", msg, buffer);
+    }
+
   for (i = 0; i < buflen; i += _NITEMS)
     {
       FAR char *ptr = buf;
@@ -107,11 +111,6 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
       for (j = 0; j < _NITEMS; j++)
         {
           k = i + j;
-
-          if (j == (_NITEMS / 2))
-            {
-              *ptr++ = ' ';
-            }
 
           if (k < buflen)
             {
@@ -123,6 +122,8 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
               *ptr++ = ' ';
               *ptr++ = ' ';
             }
+
+          *ptr++ = ' ';
         }
 
       *ptr++ = ' ';  /* Plus 1 byte */
@@ -132,11 +133,6 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
       for (j = 0; j < _NITEMS; j++)
         {
          k = i + j;
-
-          if (j == (_NITEMS / 2))
-            {
-              *ptr++ = ' ';
-            }
 
           if (k < buflen)
             {
@@ -152,6 +148,6 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
         }
 
       *ptr = '\0';  /* Plus 1 byte */
-      syslog(LOG_INFO, "%04x: %s\n", i, buf);
+      syslog(LOG_INFO, "%04x  %s\n", i, buf);
    }
 }
