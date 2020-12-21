@@ -48,10 +48,13 @@
  ****************************************************************************/
 
 /* 32 bytes displayed per line */
-#define _NITEMS   16
+#define _NITEMS           (16)
 
-/* 2 hex chars, ASCII char, 3 spaces, NUL */
-#define _LINESIZE (3 * _NITEMS + _NITEMS + 4)
+/* 16 * (2 hex chars + 1 blank) + 1 space */
+#define _ASCIICHAR_OFFSET (_NITEMS * 3 + 1)
+
+/* _ASCIICHAR_OFFSET + 16 ASCII char, 1 NULL */
+#define _LINESIZE         (_ASCIICHAR_OFFSET + _NITEMS + 1)
 
 /****************************************************************************
  * Private Functions
@@ -119,38 +122,30 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
             {
               *ptr++ = lib_nibble((buffer[k] >> 4) & 0xf);
               *ptr++ = lib_nibble(buffer[k] & 0xf);
+
+              /* Generate printable characters */
+
+              if (buffer[k] >= 0x20 && buffer[k] < 0x7f)
+                {
+                  buf[_ASCIICHAR_OFFSET + j] = buffer[k];
+                }
+              else
+                {
+                  buf[_ASCIICHAR_OFFSET + j] = '.';
+                }
             }
           else
             {
               *ptr++ = ' ';
               *ptr++ = ' ';
+              buf[_ASCIICHAR_OFFSET + j] = '\0';
             }
 
           *ptr++ = ' ';
         }
 
-      *ptr++ = ' ';  /* Plus 1 byte */
-
-      /* Generate printable characters:  Plus 1 * _NITEMS + 1 bytes */
-
-      for (j = 0; j < _NITEMS; j++)
-        {
-         k = i + j;
-
-          if (k < buflen)
-            {
-              if (buffer[k] >= 0x20 && buffer[k] < 0x7f)
-                {
-                  *ptr++ = buffer[k];
-                }
-              else
-                {
-                  *ptr++ = '.';
-                }
-            }
-        }
-
-      *ptr = '\0';  /* Plus 1 byte */
+      buf[_ASCIICHAR_OFFSET - 1] = ' '; /* Plus 1 byte */
+      buf[_ASCIICHAR_OFFSET + _NITEMS] = '\0';
       syslog(LOG_INFO, "%04x  %s\n", i, buf);
     }
 }
