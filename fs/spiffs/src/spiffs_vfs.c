@@ -330,7 +330,18 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
       DEBUGASSERT(dir != NULL);
       entryp = &dir->fd_dir;
 
-      strncpy(entryp->d_name, (FAR char *)objhdr.name, NAME_MAX + 1);
+#ifdef CONFIG_SPIFFS_LEADING_SLASH
+      /* Skip the leading '/'. */
+
+      if (objhdr.name[0] != '/')
+        {
+          return -EINVAL; /* The filesystem is corrupted */
+        }
+#endif
+
+      strncpy(entryp->d_name,
+              (FAR char *)objhdr.name + SPIFFS_LEADING_SLASH_SIZE,
+              NAME_MAX + 1);
       entryp->d_type = objhdr.type;
       return OK;
     }

@@ -318,7 +318,12 @@ static int spiffs_find_objhdr_pgndx_callback(FAR struct spiffs_s *fs,
                             SPIFFS_PH_FLAG_NDXDELE)) ==
       (SPIFFS_PH_FLAG_DELET | SPIFFS_PH_FLAG_NDXDELE))
     {
-      if (strcmp((FAR const char *)user_const, (FAR char *)objhdr.name) == 0)
+      if (
+#ifdef CONFIG_SPIFFS_LEADING_SLASH
+          ((FAR char *)objhdr.name)[0] == '/' &&
+#endif
+          strcmp((FAR const char *)user_const,
+                 (FAR char *)objhdr.name + SPIFFS_LEADING_SLASH_SIZE) == 0)
         {
           return OK;
         }
@@ -1384,7 +1389,11 @@ int spiffs_fobj_create(FAR struct spiffs_s *fs,
   objndx_hdr.type       = type;
   objndx_hdr.size       = SPIFFS_UNDEFINED_LEN;
 
-  strncpy((char *)objndx_hdr.name, (const char *)name,
+#ifdef CONFIG_SPIFFS_LEADING_SLASH
+  objndx_hdr.name[0] = '/';
+#endif
+  strncpy((char *)objndx_hdr.name + SPIFFS_LEADING_SLASH_SIZE,
+          (const char *)name,
           CONFIG_SPIFFS_NAME_MAX);
 
   /* Update page */
@@ -1472,7 +1481,8 @@ int spiffs_fobj_update_ndxhdr(FAR struct spiffs_s *fs,
 
   if (name != NULL)
     {
-      strncpy((FAR char *)objhdr->name, (FAR const char *)name,
+      strncpy((FAR char *)objhdr->name + SPIFFS_LEADING_SLASH_SIZE,
+              (FAR const char *)name,
               CONFIG_SPIFFS_NAME_MAX);
     }
 
