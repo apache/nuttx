@@ -397,6 +397,12 @@ begin_packed_struct struct spiffs_page_header_s
 
 /* Object index header page header */
 
+#ifdef CONFIG_SPIFFS_LEADING_SLASH
+#define	SPIFFS_LEADING_SLASH_SIZE	1
+#else
+#define	SPIFFS_LEADING_SLASH_SIZE	0
+#endif
+
 begin_packed_struct struct spiffs_pgobj_ndxheader_s
 {
   struct spiffs_page_header_s phdr;     /* common page header */
@@ -406,7 +412,8 @@ begin_packed_struct struct spiffs_pgobj_ndxheader_s
 #endif
   uint32_t size;                        /* size of object */
   uint8_t type;                         /* type of object */
-  uint8_t name[CONFIG_SPIFFS_NAME_MAX]; /* name of object */
+  uint8_t name[SPIFFS_LEADING_SLASH_SIZE +
+               CONFIG_SPIFFS_NAME_MAX]; /* name of object */
 } end_packed_struct;
 
 /* Object index page header */
