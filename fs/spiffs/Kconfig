@@ -176,4 +176,13 @@ config SPIFFS_COPYBUF_STACK
 		value generates more read/writes.  No meaning having it bigger
 		than logical page size.
 
+config SPIFFS_COMPAT_OLD_NUTTX
+	bool "Compatibility with older NuttX SPIFFS"
+	default n
+	---help---
+		Enable the compatiblilty with older NuttX versions.
+		(Older than NuttX 11.0.0, where this option was introduced.)
+
+		Note: This config affects the on-flash structure.
+
 endif # FS_SPIFFS
