@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define TICK_COUNT         (160 * 1000 * 1000 / TICK_PER_SEC)
+#define TICK_COUNT         (10 * 1000 * 1000 / TICK_PER_SEC)
 #define CLINT_BASE_ADDRESS 0x02000000
 
 #define getreg64(a)    (*(volatile uint64_t *)(a))
