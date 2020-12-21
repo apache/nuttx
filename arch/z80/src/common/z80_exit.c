@@ -152,6 +152,10 @@ void up_exit(int status)
   tcb = this_task();
   sinfo("New Active Task TCB=%p\n", tcb);
 
+  /* Adjusts time slice for SCHED_RR & SCHED_SPORADIC cases */
+
+  nxsched_resume_scheduler(tcb);
+
 #ifdef CONFIG_ARCH_ADDRENV
   /* Make sure that the address environment for the previously running
    * task is closed down gracefully (data caches dump, MMU flushed) and
