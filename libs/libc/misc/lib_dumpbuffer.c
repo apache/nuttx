@@ -54,3 +54,26 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
 
   lib_dumpvbuffer(msg, &buf, 1);
 }
+
+/****************************************************************************
+ * Name: lib_writebuffer
+ *
+ * Description:
+ *  Do a pretty buffer dump to a specified file descriptor.
+ *
+ *  A fairly large on-stack buffer is used for the case where timestamps are
+ *  applied to each line.
+ *
+ ****************************************************************************/
+
+void lib_writebuffer(int fd, FAR const char *msg,
+                     FAR const uint8_t *buffer, unsigned int buflen)
+{
+  struct iovec buf =
+    {
+      .iov_base = (FAR char *)buffer,
+      .iov_len = buflen,
+    };
+
+  lib_writevbuffer(fd, msg, &buf, 1);
+}
