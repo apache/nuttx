@@ -21,7 +21,7 @@
 VERSION=0.2.5
 
 $(TOPDIR)/include/uClibc++:
-	$(Q) wget https://git.busybox.net/uClibc++/snapshot/uClibc++-$(VERSION).tar.gz
+	$(Q) curl -O -L https://git.busybox.net/uClibc++/snapshot/uClibc++-$(VERSION).tar.gz
 	$(Q) tar -xzf uClibc++-$(VERSION).tar.gz
 	$(Q) $(DELFILE) uClibc++-$(VERSION).tar.gz
 	$(Q) mv uClibc++-$(VERSION) uClibc++

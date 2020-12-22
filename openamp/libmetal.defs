@@ -60,7 +60,7 @@ LIBMETAL_HDRS_SEDEXP := \
 	 s/cmakedefine/undef/g"
 
 libmetal.zip:
-	$(Q) wget https://github.com/OpenAMP/libmetal/archive/v$(VERSION).zip -O libmetal.zip
+	$(Q) curl -L https://github.com/OpenAMP/libmetal/archive/v$(VERSION).zip -o libmetal.zip
 	$(Q) unzip -o libmetal.zip
 	$(Q) mv libmetal-$(VERSION) libmetal
 	$(Q) patch -p0 < 0001-system-nuttx-change-clock_systimespec-to-clock_systi.patch
