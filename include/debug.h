@@ -51,6 +51,7 @@
 #endif
 
 #include <syslog.h>
+#include <sys/uio.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1021,6 +1022,11 @@ extern "C"
 
 void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
                     unsigned int buflen);
+
+/* Do a pretty buffer dump from multiple buffers. */
+
+void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
+                     int iovcnt);
 
 /* The system logging interfaces are normally accessed via the macros
  * provided above.  If the cross-compiler's C pre-processor supports a
