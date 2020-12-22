@@ -33,7 +33,6 @@
 #include <signal.h>
 #include <semaphore.h>
 #include <pthread.h>
-#include <mqueue.h>
 #include <time.h>
 
 #include <nuttx/clock.h>
@@ -599,12 +598,6 @@ struct task_group_s
   /* Sockets ********************************************************************/
 
   struct socketlist tg_socketlist;  /* Maps socket descriptor to socket         */
-#endif
-
-#ifndef CONFIG_DISABLE_MQUEUE
-  /* POSIX Named Message Queue Fields *******************************************/
-
-  sq_queue_t tg_msgdesq;            /* List of opened message queues           */
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

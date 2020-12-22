@@ -42,7 +42,6 @@
 
 #include <sys/types.h>
 #include <signal.h>
-#include "queue.h"
 
 /********************************************************************************
  * Pre-processor Definitions
@@ -66,7 +65,7 @@ struct mq_attr
 
 /* Message queue descriptor */
 
-typedef FAR struct mq_des *mqd_t;
+typedef int mqd_t;
 
 /********************************************************************************
  * Public Data

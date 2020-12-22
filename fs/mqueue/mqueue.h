@@ -45,6 +45,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_FS_MQUEUE_MPATH
@@ -54,42 +55,5 @@
 /* Sizes of things */
 
 #define MAX_MQUEUE_PATH 64
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mq_inode_release
- *
- * Description:
- *   Release a reference count on a message queue inode.
- *
- * Input Parameters:
- *   inode - The message queue inode
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void mq_inode_release(FAR struct inode *inode);
-
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* __FS_MQUEUE_MQUEUE_H */
