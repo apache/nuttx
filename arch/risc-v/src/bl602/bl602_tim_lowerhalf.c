@@ -1,5 +1,8 @@
 /****************************************************************************
- * boards/risc-v/bl602/evb/src/bl602_lowerhalf.c
+ * arch/risc-v/src/bl602/bl602_tim_lowerhalf.c
+ *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,6 +38,7 @@
 #include <nuttx/timers/timer.h>
 
 #include <arch/board/board.h>
+#include "riscv_arch.h"
 
 #include <hardware/bl602_glb.h>
 #include <hardware/bl602_timer.h>
@@ -50,7 +54,7 @@
  * Private Types
  ****************************************************************************/
 
-struct bl602_lowerhalf_s
+struct bl602_tim_lowerhalf_s
 {
   FAR const struct timer_ops_s *ops; /* Lower half operations */
 
@@ -69,15 +73,15 @@ static int bl602_timer_handler(int irq, void *context, void *arg);
 
 /* "Lower half" driver methods */
 
-static int  bl602_start(FAR struct timer_lowerhalf_s *lower);
-static int  bl602_stop(FAR struct timer_lowerhalf_s *lower);
-static int  bl602_getstatus(FAR struct timer_lowerhalf_s *lower,
-                            FAR struct timer_status_s *   status);
-static int  bl602_settimeout(FAR struct timer_lowerhalf_s *lower,
-                             uint32_t                      timeout);
-static void bl602_setcallback(FAR struct timer_lowerhalf_s *lower,
-                              tccb_t                        callback,
-                              FAR void *                    arg);
+static int  bl602_tim_start(FAR struct timer_lowerhalf_s *lower);
+static int  bl602_tim_stop(FAR struct timer_lowerhalf_s *lower);
+static int  bl602_tim_getstatus(FAR struct timer_lowerhalf_s *lower,
+                                FAR struct timer_status_s *   status);
+static int  bl602_tim_settimeout(FAR struct timer_lowerhalf_s *lower,
+                                 uint32_t                      timeout);
+static void bl602_tim_setcallback(FAR struct timer_lowerhalf_s *lower,
+                                  tccb_t                        callback,
+                                  FAR void *                    arg);
 
 /****************************************************************************
  * Private Data
@@ -87,16 +91,16 @@ static void bl602_setcallback(FAR struct timer_lowerhalf_s *lower,
 
 static const struct timer_ops_s g_timer_ops =
 {
-  .start       = bl602_start,
-  .stop        = bl602_stop,
-  .getstatus   = bl602_getstatus,
-  .settimeout  = bl602_settimeout,
-  .setcallback = bl602_setcallback,
+  .start       = bl602_tim_start,
+  .stop        = bl602_tim_stop,
+  .getstatus   = bl602_tim_getstatus,
+  .settimeout  = bl602_tim_settimeout,
+  .setcallback = bl602_tim_setcallback,
   .ioctl       = NULL,
 };
 
 #ifdef CONFIG_BL602_TIMER0
-static struct bl602_lowerhalf_s g_tim1_lowerhalf =
+static struct bl602_tim_lowerhalf_s g_tim1_lowerhalf =
 {
   .ops = &g_timer_ops,
   .irq = BL602_IRQ_TIMER_CH0,
@@ -105,7 +109,7 @@ static struct bl602_lowerhalf_s g_tim1_lowerhalf =
 #endif
 
 #ifdef CONFIG_BL602_TIMER1
-static struct bl602_lowerhalf_s g_tim2_lowerhalf =
+static struct bl602_tim_lowerhalf_s g_tim2_lowerhalf =
 {
   .ops = &g_timer_ops,
   .irq = BL602_IRQ_TIMER_CH1,
@@ -131,8 +135,9 @@ static struct bl602_lowerhalf_s g_tim2_lowerhalf =
 
 static int bl602_timer_handler(int irq, void *context, void *arg)
 {
-  FAR struct bl602_lowerhalf_s *priv = (FAR struct bl602_lowerhalf_s *)arg;
-  uint32_t                      next_interval_us = 0;
+  FAR struct bl602_tim_lowerhalf_s *priv =
+    (FAR struct bl602_tim_lowerhalf_s *)arg;
+  uint32_t next_interval_us = 0;
 
   /* Clear Interrupt Bits */
 
@@ -140,54 +145,54 @@ static int bl602_timer_handler(int irq, void *context, void *arg)
   uint32_t tmp_val;
   uint32_t tmp_addr;
 
-  int_id   = BL_RD_WORD(TIMER_BASE + TIMER_TMSR2_OFFSET + 4 * priv->tim);
+  int_id   = getreg32(TIMER_BASE + TIMER_TMSR2_OFFSET + 4 * priv->tim);
   tmp_addr = TIMER_BASE + TIMER_TICR2_OFFSET + 4 * priv->tim;
-  tmp_val  = BL_RD_WORD(tmp_addr);
+  tmp_val  = getreg32(tmp_addr);
 
   /* Comparator 0 match interrupt */
 
-  if (BL_IS_REG_BIT_SET(int_id, TIMER_TMSR_0))
+  if (((int_id) & (1 << (TIMER_TMSR_0_POS))) != 0)
     {
-      BL_WR_WORD(tmp_addr, BL_SET_REG_BIT(tmp_val, TIMER_TCLR_0));
+      putreg32(tmp_val | (1 << TIMER_TCLR_0_POS), tmp_addr);
       if (priv->callback(&next_interval_us, priv->arg))
         {
           if (next_interval_us > 0)
             {
               /* Set a value to the alarm */
 
-              timer_disable(priv->tim);
-              timer_setcompvalue(
+              bl602_timer_disable(priv->tim);
+              bl602_timer_setcompvalue(
                 priv->tim, TIMER_COMP_ID_0, next_interval_us);
-              timer_setpreloadvalue(priv->tim, 0);
-              timer_enable(priv->tim);
+              bl602_timer_setpreloadvalue(priv->tim, 0);
+              bl602_timer_enable(priv->tim);
             }
         }
       else
         {
-          timer_disable(priv->tim);
-          timer_setpreloadvalue(priv->tim, 0);
+          bl602_timer_disable(priv->tim);
+          bl602_timer_setpreloadvalue(priv->tim, 0);
         }
     }
 
   /* Comparator 1 match interrupt */
 
-  if (BL_IS_REG_BIT_SET(int_id, TIMER_TMSR_1))
+  if (((int_id) & (1 << (TIMER_TMSR_1_POS))) != 0)
     {
-      BL_WR_WORD(tmp_addr, BL_SET_REG_BIT(tmp_val, TIMER_TCLR_1));
+      putreg32(tmp_val | (1 << TIMER_TCLR_1_POS), tmp_addr);
     }
 
   /* Comparator 2 match interrupt */
 
-  if (BL_IS_REG_BIT_SET(int_id, TIMER_TMSR_2))
+  if (((int_id) & (1 << (TIMER_TMSR_2_POS))) != 0)
     {
-      BL_WR_WORD(tmp_addr, BL_SET_REG_BIT(tmp_val, TIMER_TCLR_2));
+      putreg32(tmp_val | (1 << TIMER_TCLR_2_POS), tmp_addr);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: bl602_start
+ * Name: bl602_tim_start
  *
  * Description:
  *   Start the timer, resetting the time to the current timeout,
@@ -201,9 +206,10 @@ static int bl602_timer_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static int bl602_start(FAR struct timer_lowerhalf_s *lower)
+static int bl602_tim_start(FAR struct timer_lowerhalf_s *lower)
 {
-  FAR struct bl602_lowerhalf_s *priv = (FAR struct bl602_lowerhalf_s *)lower;
+  FAR struct bl602_tim_lowerhalf_s *priv =
+    (FAR struct bl602_tim_lowerhalf_s *)lower;
 
   if (!priv->started)
     {
@@ -212,11 +218,11 @@ static int bl602_start(FAR struct timer_lowerhalf_s *lower)
           return -EPERM;
         }
 
-      timer_setpreloadvalue(priv->tim, 0);
+      bl602_timer_setpreloadvalue(priv->tim, 0);
       irq_attach(priv->irq, bl602_timer_handler, (void *)priv);
       up_enable_irq(priv->irq);
-      timer_intmask(priv->tim, TIMER_INT_COMP_0, 0);
-      timer_enable(priv->tim);
+      bl602_timer_intmask(priv->tim, TIMER_INT_COMP_0, 0);
+      bl602_timer_enable(priv->tim);
       priv->started = true;
       return OK;
     }
@@ -227,7 +233,7 @@ static int bl602_start(FAR struct timer_lowerhalf_s *lower)
 }
 
 /****************************************************************************
- * Name: bl602_stop
+ * Name: bl602_tim_stop
  *
  * Description:
  *   Stop the timer
@@ -241,18 +247,19 @@ static int bl602_start(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int bl602_stop(FAR struct timer_lowerhalf_s *lower)
+static int bl602_tim_stop(FAR struct timer_lowerhalf_s *lower)
 {
-  FAR struct bl602_lowerhalf_s *priv = (FAR struct bl602_lowerhalf_s *)lower;
+  FAR struct bl602_tim_lowerhalf_s *priv =
+    (FAR struct bl602_tim_lowerhalf_s *)lower;
 
   /* timer disable */
 
   if (priv->started)
     {
-      timer_disable(priv->tim);
+      bl602_timer_disable(priv->tim);
       priv->started = false;
       up_disable_irq(priv->irq);
-      timer_intmask(priv->tim, TIMER_INT_COMP_0, 1);
+      bl602_timer_intmask(priv->tim, TIMER_INT_COMP_0, 1);
       return OK;
     }
 
@@ -262,7 +269,7 @@ static int bl602_stop(FAR struct timer_lowerhalf_s *lower)
 }
 
 /****************************************************************************
- * Name: bl602_getstatus
+ * Name: bl602_tim_getstatus
  *
  * Description:
  *   get timer status
@@ -277,14 +284,15 @@ static int bl602_stop(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int bl602_getstatus(FAR struct timer_lowerhalf_s *lower,
-                           FAR struct timer_status_s *   status)
+static int bl602_tim_getstatus(FAR struct timer_lowerhalf_s *lower,
+                               FAR struct timer_status_s *   status)
 {
-  FAR struct bl602_lowerhalf_s *priv = (FAR struct bl602_lowerhalf_s *)lower;
-  uint32_t                      current_count;
+  FAR struct bl602_tim_lowerhalf_s *priv =
+    (FAR struct bl602_tim_lowerhalf_s *)lower;
+  uint32_t current_count;
 
   status->timeout = timer_getcompvalue(priv->tim, TIMER_COMP_ID_0);
-  current_count   = timer_getcountervalue(priv->tim);
+  current_count   = bl602_timer_getcountervalue(priv->tim);
   if (current_count < status->timeout)
     {
       status->timeleft = status->timeout - current_count;
@@ -298,7 +306,7 @@ static int bl602_getstatus(FAR struct timer_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: bl602_settimeout
+ * Name: bl602_tim_settimeout
  *
  * Description:
  *   Set a new timeout value (and reset the timer)
@@ -313,18 +321,19 @@ static int bl602_getstatus(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int bl602_settimeout(FAR struct timer_lowerhalf_s *lower,
-                            uint32_t                      timeout)
+static int bl602_tim_settimeout(FAR struct timer_lowerhalf_s *lower,
+                                uint32_t                      timeout)
 {
-  FAR struct bl602_lowerhalf_s *priv = (FAR struct bl602_lowerhalf_s *)lower;
+  FAR struct bl602_tim_lowerhalf_s *priv =
+    (FAR struct bl602_tim_lowerhalf_s *)lower;
 
-  timer_setcompvalue(priv->tim, TIMER_COMP_ID_0, timeout);
+  bl602_timer_setcompvalue(priv->tim, TIMER_COMP_ID_0, timeout);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: bl602_setcallback
+ * Name: bl602_tim_setcallback
  *
  * Description:
  *   Call this user provided timeout handler.
@@ -342,12 +351,13 @@ static int bl602_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void bl602_setcallback(FAR struct timer_lowerhalf_s *lower,
-                              tccb_t                        callback,
-                              FAR void *                    arg)
+static void bl602_tim_setcallback(FAR struct timer_lowerhalf_s *lower,
+                                  tccb_t                        callback,
+                                  FAR void *                    arg)
 {
-  struct bl602_lowerhalf_s *priv  = (FAR struct bl602_lowerhalf_s *)lower;
-  irqstate_t                    flags = enter_critical_section();
+  struct bl602_tim_lowerhalf_s *priv =
+    (FAR struct bl602_tim_lowerhalf_s *)lower;
+  irqstate_t flags = enter_critical_section();
 
   /* Save the new callback */
 
@@ -381,8 +391,8 @@ static void bl602_setcallback(FAR struct timer_lowerhalf_s *lower,
 
 int bl602_timer_initialize(FAR const char *devpath, int timer)
 {
-  FAR struct bl602_lowerhalf_s *lower;
-  timer_cfg_t                   timstr;
+  FAR struct bl602_tim_lowerhalf_s *lower;
+  timer_cfg_t                       timstr;
 
   switch (timer)
     {
@@ -413,15 +423,15 @@ int bl602_timer_initialize(FAR const char *devpath, int timer)
   timstr.match_val2     = TIMER_MAX_VALUE;     /* Timer match 2 value 0 */
   timstr.pre_load_val   = TIMER_MAX_VALUE;     /* Timer preload value */
 
-  glb_ahb_slave1_reset(BL_AHB_SLAVE1_TMR);
+  bl602_glb_ahb_slave1_reset(BL_AHB_SLAVE1_TMR);
 
-  timer_intmask(lower->tim, TIMER_INT_ALL, 1);
+  bl602_timer_intmask(lower->tim, TIMER_INT_ALL, 1);
 
   /* timer disable */
 
-  timer_disable(lower->tim);
+  bl602_timer_disable(lower->tim);
 
-  timer_init(&timstr);
+  bl602_timer_init(&timstr);
 
   /* Initialize the elements of lower half state structure */
 
@@ -448,4 +458,3 @@ int bl602_timer_initialize(FAR const char *devpath, int timer)
 
   return OK;
 }
-

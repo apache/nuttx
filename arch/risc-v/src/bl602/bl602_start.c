@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_init.c
  *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +32,7 @@
 
 #include <arch/board/board.h>
 
+#include "riscv_arch.h"
 #include "riscv_internal.h"
 #include "chip.h"
 
@@ -44,18 +48,6 @@
 #else
 #define showprogress(c)
 #endif
-
-#define PARTITION_BOOT2_RAM_ADDR_ACTIVE (0x42049C00)
-#define PARTITION_HEADER_BOOT2_RAM_ADDR (0x42049C04)
-#define PARTITION_BOOT2_FLASH_HEADER    (0x42049d14)
-#define PARTITION_BOOT2_FLASH_CONFIG    (0x42049d18)
-#define PARTITION_MAGIC                 (0x54504642)
-#define PARTITION_FW_PART_NAME          "FW"
-#define PARTITION_FW_PART_HEADER_SIZE   (0x1000)
-
-/* TODO use header file from project */
-
-#define FW_XIP_ADDRESS (0x23000000)
 
 #define BL602_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE & ~3)
 
@@ -73,7 +65,7 @@
  * address.
  */
 
-static uint8_t idle_stack[BL602_IDLESTACK_SIZE];
+static uint8_t g_idle_stack[BL602_IDLESTACK_SIZE];
 
 /* Dont change the name of varaible, since we refer this
  * boot2_partition_table in linker script
@@ -90,7 +82,7 @@ static struct
  * Public Data
  ****************************************************************************/
 
-uint32_t g_idle_topstack = (uintptr_t)idle_stack + BL602_IDLESTACK_SIZE;
+uint32_t g_idle_topstack = (uintptr_t)g_idle_stack + BL602_IDLESTACK_SIZE;
 
 /****************************************************************************
  * Public Functions
@@ -131,9 +123,10 @@ void bfl_main(void)
 
   /* HBN Config AON pad input and SMT */
 
-  tmp_val = BL_RD_REG(HBN_BASE, HBN_IRQ_MODE);
-  tmp_val = BL_SET_REG_BITS_VAL(tmp_val, HBN_REG_AON_PAD_IE_SMT, 1);
-  BL_WR_REG(HBN_BASE, HBN_IRQ_MODE, tmp_val);
+  tmp_val = getreg32(HBN_BASE + HBN_IRQ_MODE_OFFSET);
+  tmp_val = (tmp_val & HBN_REG_AON_PAD_IE_SMT_UMSK) |
+            (1 << HBN_REG_AON_PAD_IE_SMT_POS);
+  putreg32(tmp_val, HBN_BASE + HBN_IRQ_MODE_OFFSET);
 
 #ifdef USE_EARLYSERIALINIT
   up_earlyserialinit();
@@ -152,4 +145,3 @@ void bfl_main(void)
   while (1)
     ;
 }
-

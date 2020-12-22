@@ -1,6 +1,9 @@
 ############################################################################
 # arch/risc-v/src/bl602/Make.defs
 #
+#   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -46,11 +49,14 @@ endif
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = bl602_allocateheap.c
 CHIP_CSRCS += bl602_idle.c bl602_irq.c bl602_irq_dispatch.c
-CHIP_CSRCS += bl602_serial.c bl602_lowputc.c
+CHIP_CSRCS += bl602_serial.c bl602_lowputc.c bl602_tim.c
 CHIP_CSRCS += bl602_start.c bl602_timerisr.c
 
 ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS  += bl602_tim.c bl602_tim_lowerhalf.c bl602_oneshot_lowerhalf.c
+CHIP_CSRCS  += bl602_tim_lowerhalf.c
+endif
+ifeq ($(CONFIG_ONESHOT),y)
+CHIP_CSRCS  += bl602_oneshot_lowerhalf.c
 endif
 
 CHIP_CSRCS += bl602_glb.c bl602_gpio.c bl602_hbn.c

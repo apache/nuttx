@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/bl602/evb/src/bl602_appinit.c
+ * arch/risc-v/src/bl602/hardware/bl602_clint.h
  *
  * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
  * Author: Gregory Nutt <gnutt@nuttx.org>
@@ -21,52 +21,23 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_CLINT_H
+#define __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_CLINT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdbool.h>
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
-
-#include <nuttx/board.h>
-
-#include "chip.h"
-#include "bl602evb.h"
+#include <stdint.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_app_initialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value could be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
- *
- ****************************************************************************/
+#define BL602_CLINT_BASE (0x02000000)
 
-int board_app_initialize(uintptr_t arg)
-{
-  bl602_bringup();
+#define BL602_MTIMER_HIGH ((uint32_t *)(BL602_CLINT_BASE + 0xBFFC))
+#define BL602_MTIMER_LOW  ((uint32_t *)(BL602_CLINT_BASE + 0xBFF8))
+#define BL602_MTIMER_CMP  ((uint64_t *)(BL602_CLINT_BASE + 0x4000))
 
-  return 0;
-}
+#endif /* __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_CLINT_H */

@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_irq.c
  *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,22 +49,22 @@
 
 static inline void bl_irq_enable(unsigned int source)
 {
-  *(volatile uint8_t *)(CLIC_HART0_ADDR + CLIC_INTIE + source) = 1;
+  putreg8(1, CLIC_HART0_ADDR + CLIC_INTIE + source);
 }
 
 static inline void bl_irq_disable(unsigned int source)
 {
-  *(volatile uint8_t *)(CLIC_HART0_ADDR + CLIC_INTIE + source) = 0;
+  putreg8(0, CLIC_HART0_ADDR + CLIC_INTIE + source);
 }
 
 static inline void bl_irq_pending_set(unsigned int source)
 {
-  *(volatile uint8_t *)(CLIC_HART0_ADDR + CLIC_INTIP + source) = 1;
+  putreg8(1, CLIC_HART0_ADDR + CLIC_INTIP + source);
 }
 
 static inline void bl_irq_pending_clear(unsigned int source)
 {
-  *(volatile uint8_t *)(CLIC_HART0_ADDR + CLIC_INTIP + source) = 0;
+  putreg8(0, CLIC_HART0_ADDR + CLIC_INTIP + source);
 }
 
 /****************************************************************************
@@ -122,7 +125,7 @@ void up_disable_irq(int irq)
     }
   else if (irq == BL602_IRQ_MTIMER)
     {
-      *(volatile uint8_t *)CLIC_TIMER_ENABLE_ADDRESS = 0;
+      putreg8(0, CLIC_TIMER_ENABLE_ADDRESS);
 
       /* Read mstatus & clear machine timer interrupt enable in mie */
 
@@ -155,7 +158,7 @@ void up_enable_irq(int irq)
     }
   else if (irq == BL602_IRQ_MTIMER)
     {
-      *(volatile uint8_t *)CLIC_TIMER_ENABLE_ADDRESS = 1;
+      putreg8(1, CLIC_TIMER_ENABLE_ADDRESS);
 
       /* Read mstatus & set machine timer interrupt enable in mie */
 
@@ -255,4 +258,3 @@ irqstate_t up_irq_enable(void)
   asm volatile("csrrs %0, mstatus, %1" : "=r"(oldstat) : "r"(MSTATUS_MIE));
   return oldstat;
 }
-

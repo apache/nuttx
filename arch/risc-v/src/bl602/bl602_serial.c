@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_serial.c
  *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -312,15 +315,15 @@ static int __uart_interrupt(int irq, FAR void *context, FAR void *arg)
   uint32_t         tmp_val   = 0;
   uint32_t         mask_val  = 0;
 
-  tmp_val  = BL_RD_REG(uart_priv->uartbase, UART_INT_STS);
-  mask_val = BL_RD_REG(uart_priv->uartbase, UART_INT_MASK);
+  tmp_val  = bl602_up_serialin(uart_priv->uartbase, UART_INT_STS_OFFSET);
+  mask_val = bl602_up_serialin(uart_priv->uartbase, UART_INT_MASK_OFFSET);
 
   /* Length of uart rx data transfer arrived interrupt */
 
-  if (BL_IS_REG_BIT_SET(tmp_val, UART_URX_END_INT) &&
-      !BL_IS_REG_BIT_SET(mask_val, UART_CR_URX_END_MASK))
+  if ((tmp_val & (1 << UART_URX_END_INT_POS)) &&
+      !(mask_val & (1 << UART_CR_URX_END_MASK_POS)))
     {
-      BL_WR_REG(uart_priv->uartbase, UART_INT_CLEAR, 0x2);
+      bl602_up_serialout(uart_priv->uartbase, UART_INT_CLEAR_OFFSET, 0x2);
 
       /* Receive Data ready */
 
@@ -329,8 +332,8 @@ static int __uart_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Tx fifo ready interrupt,auto-cleared when data is pushed */
 
-  if (BL_IS_REG_BIT_SET(tmp_val, UART_UTX_FIFO_INT) &&
-      !BL_IS_REG_BIT_SET(mask_val, UART_CR_UTX_FIFO_MASK))
+  if ((tmp_val & (1 << UART_UTX_FIFO_INT_POS)) &&
+      !(mask_val & (1 << UART_CR_UTX_FIFO_MASK_POS)))
     {
       /* Transmit data request interrupt */
 
@@ -339,8 +342,8 @@ static int __uart_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Rx fifo ready interrupt,auto-cleared when data is popped */
 
-  if (BL_IS_REG_BIT_SET(tmp_val, UART_URX_FIFO_INT) &&
-      !BL_IS_REG_BIT_SET(mask_val, UART_CR_URX_FIFO_MASK))
+  if ((tmp_val & (1 << UART_URX_FIFO_INT_POS)) &&
+      !(mask_val & (1 << UART_CR_URX_FIFO_MASK_POS)))
     {
       /* Receive Data ready */
 
@@ -378,20 +381,12 @@ static int up_setup(struct uart_dev_s *dev)
 
 static void up_shutdown(struct uart_dev_s *dev)
 {
-  uint32_t         tmp_val;
   struct up_dev_s *uart_priv = (struct up_dev_s *)dev->priv;
 
   /* Disable uart before config */
 
-  tmp_val = BL_RD_REG(uart_priv->uartbase, UART_UTX_CONFIG);
-  BL_WR_REG(uart_priv->uartbase,
-            UART_UTX_CONFIG,
-            BL_CLR_REG_BIT(tmp_val, UART_CR_UTX_EN));
-
-  tmp_val = BL_RD_REG(uart_priv->uartbase, UART_URX_CONFIG);
-  BL_WR_REG(uart_priv->uartbase,
-            UART_URX_CONFIG,
-            BL_CLR_REG_BIT(tmp_val, UART_CR_URX_EN));
+  bl602_up_serialmodify(uart_priv->uartbase, UART_UTX_CONFIG_OFFSET, 1, 0);
+  bl602_up_serialmodify(uart_priv->uartbase, UART_URX_CONFIG_OFFSET, 1, 0);
 }
 
 /****************************************************************************
@@ -444,6 +439,16 @@ static void up_detach(struct uart_dev_s *dev)
   /* Detach from the interrupt */
 
   irq_detach(priv->irq);
+}
+
+/****************************************************************************
+ * Name: bl602_data_getbits
+ ****************************************************************************/
+
+static uint32_t
+bl602_data_getbits(uint32_t data, uint32_t start, uint32_t len)
+{
+  return (((data) >> (start)) & (~((~0) << (len))));
 }
 
 /****************************************************************************
@@ -613,9 +618,11 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
                * implement TCSADRAIN / TCSAFLUSH
                */
 
-              tmp_val = BL_RD_REG(priv->uartbase, UART_INT_MASK);
+              tmp_val =
+                bl602_up_serialin(priv->uartbase, UART_INT_MASK_OFFSET);
               bl602_uart_configure(priv->uartbase, &config);
-              BL_WR_REG(priv->uartbase, UART_INT_MASK, tmp_val);
+              bl602_up_serialout(
+                priv->uartbase, UART_INT_MASK_OFFSET, tmp_val);
             }
         }
       while (0);
@@ -654,10 +661,12 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 
   /* if uart fifo cnts > 0 */
 
-  if (BL_GET_REG_BITS_VAL(BL_RD_REG(priv->uartbase, UART_FIFO_CONFIG_1),
-                          UART_RX_FIFO_CNT) > 0)
+  if (bl602_data_getbits(
+        bl602_up_serialin(priv->uartbase, UART_FIFO_CONFIG_1_OFFSET),
+        UART_RX_FIFO_CNT_POS,
+        6) > 0)
     {
-      rxdata = BL_RD_BYTE(priv->uartbase + UART_FIFO_RDATA_OFFSET);
+      rxdata = bl602_up_serialin(priv->uartbase, UART_FIFO_RDATA_OFFSET);
     }
   else
     {
@@ -683,18 +692,18 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      tmp_val = BL_RD_REG(priv->uartbase, UART_INT_MASK);
+      tmp_val = bl602_up_serialin(priv->uartbase, UART_INT_MASK_OFFSET);
       tmp_val &= ~(1 << UART_INT_RX_FIFO_REQ);
       tmp_val &= ~(1 << UART_INT_RX_END);
-      BL_WR_REG(priv->uartbase, UART_INT_MASK, tmp_val);
+      bl602_up_serialout(priv->uartbase, UART_INT_MASK_OFFSET, tmp_val);
 #endif
     }
   else
     {
-      tmp_val = BL_RD_REG(priv->uartbase, UART_INT_MASK);
+      tmp_val = bl602_up_serialin(priv->uartbase, UART_INT_MASK_OFFSET);
       tmp_val |= (1 << UART_INT_RX_FIFO_REQ);
       tmp_val |= (1 << UART_INT_RX_END);
-      BL_WR_REG(priv->uartbase, UART_INT_MASK, tmp_val);
+      bl602_up_serialout(priv->uartbase, UART_INT_MASK_OFFSET, tmp_val);
     }
 
   leave_critical_section(flags);
@@ -714,8 +723,10 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 
   /* Return true is data is available in the receive data buffer */
 
-  uint32_t rxcnt = BL_GET_REG_BITS_VAL(
-    BL_RD_REG(priv->uartbase, UART_FIFO_CONFIG_1), UART_RX_FIFO_CNT);
+  uint32_t rxcnt = bl602_data_getbits(
+    bl602_up_serialin(priv->uartbase, UART_FIFO_CONFIG_1_OFFSET),
+    UART_RX_FIFO_CNT_POS,
+    6);
 
   return rxcnt != 0;
 }
@@ -734,11 +745,13 @@ static void up_send(struct uart_dev_s *dev, int ch)
 
   /* Wait for FIFO */
 
-  while (BL_GET_REG_BITS_VAL(BL_RD_REG(priv->uartbase, UART_FIFO_CONFIG_1),
-                             UART_TX_FIFO_CNT) == 0)
+  while (bl602_data_getbits(
+           bl602_up_serialin(priv->uartbase, UART_FIFO_CONFIG_1_OFFSET),
+           UART_TX_FIFO_CNT_POS,
+           6) == 0)
     ;
 
-  BL_WR_BYTE(priv->uartbase + UART_FIFO_WDATA_OFFSET, ch);
+  bl602_up_serialout(priv->uartbase, UART_FIFO_WDATA_OFFSET, ch);
 }
 
 /****************************************************************************
@@ -762,9 +775,9 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       /* Enable the TX interrupt */
 
-      tmp_val = BL_RD_REG(priv->uartbase, UART_INT_MASK);
+      tmp_val = bl602_up_serialin(priv->uartbase, UART_INT_MASK_OFFSET);
       tmp_val &= ~(1 << UART_INT_TX_FIFO_REQ);
-      BL_WR_REG(priv->uartbase, UART_INT_MASK, tmp_val);
+      bl602_up_serialout(priv->uartbase, UART_INT_MASK_OFFSET, tmp_val);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -777,9 +790,9 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-      tmp_val = BL_RD_REG(priv->uartbase, UART_INT_MASK);
+      tmp_val = bl602_up_serialin(priv->uartbase, UART_INT_MASK_OFFSET);
       tmp_val |= (1 << UART_INT_TX_FIFO_REQ);
-      BL_WR_REG(priv->uartbase, UART_INT_MASK, tmp_val);
+      bl602_up_serialout(priv->uartbase, UART_INT_MASK_OFFSET, tmp_val);
     }
 
   leave_critical_section(flags);
@@ -799,8 +812,9 @@ static bool up_txready(struct uart_dev_s *dev)
 
   /* Return TRUE if the TX FIFO is not full */
 
-  uint32_t txcnt = BL_GET_REG_BITS_VAL(
-    BL_RD_REG(priv->uartbase, UART_FIFO_CONFIG_1), UART_TX_FIFO_CNT);
+  uint32_t txcnt =
+    bl602_up_serialin(priv->uartbase, UART_FIFO_CONFIG_1_OFFSET);
+  txcnt = (txcnt & UART_TX_FIFO_CNT_MSK) >> UART_TX_FIFO_CNT_POS;
 
   return (txcnt != 0);
 }
@@ -819,8 +833,10 @@ static bool up_txempty(struct uart_dev_s *dev)
 
   /* Return TRUE if the TX is pending */
 
-  uint32_t txcnt = BL_GET_REG_BITS_VAL(
-    BL_RD_REG(priv->uartbase, UART_FIFO_CONFIG_1), UART_TX_FIFO_CNT);
+  uint32_t txcnt = bl602_data_getbits(
+    bl602_up_serialin(priv->uartbase, UART_FIFO_CONFIG_1_OFFSET),
+    UART_TX_FIFO_CNT_POS,
+    6);
 
   return (txcnt == 0);
 }
@@ -983,4 +999,3 @@ int up_putc(int ch)
 }
 
 #endif /* USE_SERIALDRIVER */
-

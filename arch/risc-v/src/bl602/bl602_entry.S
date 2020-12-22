@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_entry.S
  *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,121 +27,128 @@
 
 #include <arch/csr.h>
 
-	.section .init
-	.globl bl602_start
-	.globl __start
-	.type bl602_start,@function
+    .section .init
+    .globl bl602_start
+    .globl __start
+    .type bl602_start,@function
 
 __start:
 bl602_start:
-	.cfi_startproc
-	.cfi_undefined ra
-  .option push
-  .option norelax
+    .cfi_startproc
+    .cfi_undefined ra
+    .option push
+    .option norelax
 
   /*disable IRQ*/
 
-	li t0, MSTATUS_MIE
-	csrc mstatus, t0
+    li t0, MSTATUS_MIE
+    csrc mstatus, t0
 
-	la gp, __global_pointer$
+    la gp, __global_pointer$
 .option pop
-	la sp, _sp_main
+    la sp, _sp_main
 
 #ifndef RUN_IN_RAM
-	/* Load boot2 partition address */
 
-	la a0, __boot2_pt_addr_src
-	la a1, __boot2_pt_addr_start
-	la a2, __boot2_pt_addr_end
-	bgeu a1, a2, 2f
+    /* Load boot2 partition address */
 
-1:
-	lw t0, (a0)
-	sw t0, (a1)
-	addi a0, a0, 4
-	addi a1, a1, 4
-	bltu a1, a2, 1b
+    la a0, __boot2_pt_addr_src
+    la a1, __boot2_pt_addr_start
+    la a2, __boot2_pt_addr_end
+    bgeu a1, a2, bl602_entry_load_boot2_partiton_address_end
 
-2:
-	/* Load boot2 flashCfg address */
+bl602_entry_load_boot2_partiton_address_loop:
+    lw t0, (a0)
+    sw t0, (a1)
+    addi a0, a0, 4
+    addi a1, a1, 4
+    bltu a1, a2, bl602_entry_load_boot2_partiton_address_loop
 
-	jal boot2_get_flash_addr
-	la a1, __boot2_flash_cfg_start
-	la a2, __boot2_flash_cfg_end
-	bgeu a1, a2, 2f
+bl602_entry_load_boot2_partiton_address_end:
 
-1:
-	lw t0, (a0)
-	sw t0, (a1)
-	addi a0, a0, 4
-	addi a1, a1, 4
-	bltu a1, a2, 1b
+    /* Load boot2 flashCfg address */
 
-2:
+    jal boot2_get_flash_addr
+    la a1, __boot2_flash_cfg_start
+    la a2, __boot2_flash_cfg_end
+    bgeu a1, a2, bl602_entry_load_boot2_flashcfg_address_end
+
+bl602_entry_load_boot2_flashcfg_address_loop:
+    lw t0, (a0)
+    sw t0, (a1)
+    addi a0, a0, 4
+    addi a1, a1, 4
+    bltu a1, a2, bl602_entry_load_boot2_flashcfg_address_loop
+
+bl602_entry_load_boot2_flashcfg_address_end:
 #endif
-	/* Load data section */
 
-	la a0, _data_load
-	la a1, _data_run
-	la a2, _data_run_end
-	bgeu a1, a2, 2f
+    /* Load data section */
 
-1:
-	lw t0, (a0)
-	sw t0, (a1)
-	addi a0, a0, 4
-	addi a1, a1, 4
-	bltu a1, a2, 1b
+    la a0, _data_load
+    la a1, _data_run
+    la a2, _data_run_end
+    bgeu a1, a2, bl602_entry_load_data_section_end
 
-2:
-	/* Clear bss section */
+bl602_entry_load_data_section_loop:
+    lw t0, (a0)
+    sw t0, (a1)
+    addi a0, a0, 4
+    addi a1, a1, 4
+    bltu a1, a2, bl602_entry_load_data_section_loop
 
-	la a0, __bss_start
-	la a1, __bss_end
-	bgeu a0, a1, 3f
+bl602_entry_load_data_section_end:
 
-1:
-	sw zero, (a0)
-	addi a0, a0, 4
-	bltu a0, a1, 1b
+    /* Clear bss section */
 
-	/* Clear bss section */
+    la a0, __bss_start
+    la a1, __bss_end
+    bgeu a0, a1, bl602_entry_zero_bss_end
 
-	la a0, __wifi_bss_start
-	la a1, __wifi_bss_end
-	bgeu a0, a1, 3f
+bl602_entry_zero_bss_loop:
+    sw zero, (a0)
+    addi a0, a0, 4
+    bltu a0, a1, bl602_entry_zero_bss_loop
+bl602_entry_zero_bss_end:
 
-1:
-	sw zero, (a0)
-	addi a0, a0, 4
-	bltu a0, a1, 1b
+    /* Clear bss section */
 
-3:
+    la a0, __wifi_bss_start
+    la a1, __wifi_bss_end
+    bgeu a0, a1, bl602_entry_zero_wifi_bss_end
+
+bl602_entry_zero_wifi_bss_loop:
+    sw zero, (a0)
+    addi a0, a0, 4
+    bltu a0, a1, bl602_entry_zero_wifi_bss_loop
+bl602_entry_zero_wifi_bss_end:
+
 #ifndef __riscv_float_abi_soft
-	/* Enable FPU */
-	li t0, MSTATUS_FS
-	csrs mstatus, t0
-	csrr t1, mstatus
-	and t1, t1, t0
-	beqz t1, 1f
-	fssr x0
 
-1:
+    /* Enable FPU */
+
+    li t0, MSTATUS_FS
+    csrs mstatus, t0
+    csrr t1, mstatus
+    and t1, t1, t0
+    beqz t1, bl602_entry_enable_fpu_end
+    fssr x0
+
+bl602_entry_enable_fpu_end:
 #endif
 
-	auipc ra, 0
-	addi sp, sp, -16
-	sw ra, 8(sp)
+    auipc ra, 0
+    addi sp, sp, -16
+    sw ra, 8(sp)
 
-	/* argc = argv = 0 */
+    /* argc = argv = 0 */
 
-	li a0, 0
-	li a1, 0
-	call bfl_main
+    li a0, 0
+    li a1, 0
+    call bfl_main
 
-1:
-	j 1b
+bl602_entry_deadloop:
+    j bl602_entry_deadloop
 
-	.cfi_endproc
+    .cfi_endproc
 

@@ -37,47 +37,13 @@ SECTIONS
     *(.rodata .rodata.*)
     *(.sdata2.*)
 
-    /* static cli cmds */
-    . = ALIGN(4);
-    _bl_static_cli_cmds_start = .;
-    KEEP(*(.static_cli_cmds))
-    *(.static_cli_cmds)
-    _bl_static_cli_cmds_end = .;
-
     /* static fw attribute entry */
     . = ALIGN(4);
     _bl_static_fw_cfg_entry_start = .;
     KEEP(*(.wifi.cfg.entry))
     _bl_static_fw_cfg_entry_end = .;
 
-    /* static blog code1 */
-    . = ALIGN(4);
-    _bl_static_blogcomponent_code_start = .;
-    KEEP(SORT(*)(.static_blogcomponent_code*))
-    *(.static_blogcomponent_code*)
-    _bl_static_blogcomponent_code_end = .;
-
-    /* static blog code2 */
-    . = ALIGN(4);
-    _bl_static_blogfile_code_start = .;
-    KEEP(SORT(*)(.static_blogfile_code*))
-    *(.static_blogfile_code*)
-    _bl_static_blogfile_code_end = .;
-
-    /* static blog code3 */
-    . = ALIGN(4);
-    _bl_static_blogpri_code_start = .;
-    KEEP(SORT(*)(.static_blogpri_code*))
-    *(.static_blogpri_code*)
-    _bl_static_blogpri_code_end = .;
-
     *(.gnu.linkonce.r.*)
-    
-    /*Framework table section, use ALIGN here to avoid fill section*/
-    . = ALIGN(4);
-    _rom_framework_audio_device_start = .;
-    KEEP(*(.framework.audio_device))
-    _rom_framework_audio_device_end = .;
   } > flash
 
   /*put wifibss in the first place*/
@@ -108,8 +74,6 @@ SECTIONS
 
   .romdata       :
   {
-    /*always put freetos under global_pointer with the following order. No change!*/
-    PROVIDE( __global_pointer_head$ =  . );
     PROVIDE( __global_pointer$ = . + 0x7F0 );
     . = . + 0x498;
   } > ram_tcm AT > flash
@@ -181,29 +145,17 @@ SECTIONS
   PROVIDE( _heap_start = . );
   PROVIDE( _heap_size = ADDR(.stack) - _heap_start );
 
-
   .stack ORIGIN(ram_tcm) + LENGTH(ram_tcm) - __stack_size (NOLOAD) :
   {
     . = . + __stack_size;
     PROVIDE( _sp_main = . );
-    __freertos_irq_stack_top = .;
   } >ram_tcm
 
   /*CFG FW used in code*/
   PROVIDE( _ld_bl_static_cfg_entry_start = _bl_static_fw_cfg_entry_start );
   PROVIDE( _ld_bl_static_cfg_entry_end   = _bl_static_fw_cfg_entry_end );
   
-  PROVIDE( _ld_ram_size0 = LENGTH(flash) );
-  PROVIDE( _ld_ram_addr0 = ORIGIN(flash) );
-  PROVIDE( _ld_ram_size1 = LENGTH(ram_tcm) );
-  PROVIDE( _ld_ram_addr1 = ORIGIN(ram_tcm) );
-  PROVIDE( _ld_ram_size2 = LENGTH(ram_wifi) );
-  PROVIDE( _ld_ram_addr2 = ORIGIN(ram_wifi) );
-
-
   /*BOOT2 sections*/
   PROVIDE ( __boot2_pt_addr_src = BOOT2_PT_ADDR );
   PROVIDE ( __boot2_flash_cfg_src = BOOT2_FLASHCFG_ADDR ); 
-
-  PROVIDE (__LD_CONFIG_EM_SEL = __EM_SIZE);
 }
