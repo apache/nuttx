@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/esp32/esp32_wtd_lowerhalf.c
+ * arch/arm/src/esp32/esp32_wdt_lowerhalf.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,8 +35,8 @@
 
 #include "xtensa.h"
 #include "hardware/esp32_soc.h"
-#include "esp32_wtd.h"
-#include "esp32_wtd_lowerhalf.h"
+#include "esp32_wdt.h"
+#include "esp32_wdt_lowerhalf.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,10 +69,10 @@
  * well-known watchdog_lowerhalf_s structure.
  */
 
-struct esp32_wtd_lowerhalf_s
+struct esp32_wdt_lowerhalf_s
 {
   FAR const struct watchdog_ops_s *ops;        /* Lower half operations */
-  FAR struct esp32_wtd_dev_s   *wtd;           /* esp32 watchdog driver */
+  FAR struct esp32_wdt_dev_s   *wdt;           /* esp32 watchdog driver */
   uint32_t timeout;                            /* The current timeout */
   enum wdt_peripherals peripheral;             /* Indicates if it is from RTC or Timer Module */
   uint32_t lastreset;                          /* The last reset time */
@@ -91,14 +91,14 @@ static int      esp32_wdt_handler(int irq, FAR void *context, FAR void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
-static int      esp32_wtd_start(FAR struct watchdog_lowerhalf_s *lower);
-static int      esp32_wtd_stop(FAR struct watchdog_lowerhalf_s *lower);
-static int      esp32_wtd_keepalive(FAR struct watchdog_lowerhalf_s *lower);
-static int      esp32_wtd_getstatus(FAR struct watchdog_lowerhalf_s *lower,
+static int      esp32_wdt_start(FAR struct watchdog_lowerhalf_s *lower);
+static int      esp32_wdt_stop(FAR struct watchdog_lowerhalf_s *lower);
+static int      esp32_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower);
+static int      esp32_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
                                     FAR struct watchdog_status_s *status);
-static int      esp32_wtd_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int      esp32_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
                                      uint32_t timeout);
-static xcpt_t   esp32_wtd_capture(FAR struct watchdog_lowerhalf_s *lower,
+static xcpt_t   esp32_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
                                   xcpt_t handler);
 
 /****************************************************************************
@@ -109,19 +109,19 @@ static xcpt_t   esp32_wtd_capture(FAR struct watchdog_lowerhalf_s *lower,
 
 static const struct watchdog_ops_s g_esp32_wdg_ops =
 {
-  .start      = esp32_wtd_start,
-  .stop       = esp32_wtd_stop,
-  .keepalive  = esp32_wtd_keepalive,
-  .getstatus  = esp32_wtd_getstatus,
-  .settimeout = esp32_wtd_settimeout,
-  .capture    = esp32_wtd_capture,
+  .start      = esp32_wdt_start,
+  .stop       = esp32_wdt_stop,
+  .keepalive  = esp32_wdt_keepalive,
+  .getstatus  = esp32_wdt_getstatus,
+  .settimeout = esp32_wdt_settimeout,
+  .capture    = esp32_wdt_capture,
   .ioctl      = NULL,
 };
 
 #ifdef CONFIG_ESP32_MWDT0
 /* MWDT0 lower-half */
 
-static struct esp32_wtd_lowerhalf_s g_esp32_mwdt0_lowerhalf =
+static struct esp32_wdt_lowerhalf_s g_esp32_mwdt0_lowerhalf =
 {
   .ops = &g_esp32_wdg_ops,
 };
@@ -130,7 +130,7 @@ static struct esp32_wtd_lowerhalf_s g_esp32_mwdt0_lowerhalf =
 #ifdef CONFIG_ESP32_MWDT1
 /* MWDT1 lower-half */
 
-static struct esp32_wtd_lowerhalf_s g_esp32_mwdt1_lowerhalf =
+static struct esp32_wdt_lowerhalf_s g_esp32_mwdt1_lowerhalf =
 {
   .ops = &g_esp32_wdg_ops,
 };
@@ -139,14 +139,14 @@ static struct esp32_wtd_lowerhalf_s g_esp32_mwdt1_lowerhalf =
 #ifdef CONFIG_ESP32_RWDT
 /* RWDT lower-half */
 
-static struct esp32_wtd_lowerhalf_s g_esp32_rwdt_lowerhalf =
+static struct esp32_wdt_lowerhalf_s g_esp32_rwdt_lowerhalf =
 {
   .ops = &g_esp32_wdg_ops,
 };
 #endif
 
 /****************************************************************************
- * Name: esp32_wtd_start
+ * Name: esp32_wdt_start
  *
  * Description:
  *   Start the watchdog timer, register a callback if there is one and
@@ -162,10 +162,10 @@ static struct esp32_wtd_lowerhalf_s g_esp32_rwdt_lowerhalf =
  *
  ****************************************************************************/
 
-static int esp32_wtd_start(FAR struct watchdog_lowerhalf_s *lower)
+static int esp32_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct esp32_wtd_lowerhalf_s *priv =
-    (FAR struct esp32_wtd_lowerhalf_s *)lower;
+  FAR struct esp32_wdt_lowerhalf_s *priv =
+    (FAR struct esp32_wdt_lowerhalf_s *)lower;
   int ret = OK;
   irqstate_t flags;
 
@@ -188,7 +188,7 @@ static int esp32_wtd_start(FAR struct watchdog_lowerhalf_s *lower)
 
       /* Unlock WDT */
 
-      ESP32_WTD_UNLOCK(priv->wtd);
+      ESP32_WDT_UNLOCK(priv->wdt);
 
       /* No User Handler */
 
@@ -198,11 +198,11 @@ static int esp32_wtd_start(FAR struct watchdog_lowerhalf_s *lower)
 
             if (priv->peripheral == TIMER)
               {
-                 ESP32_WTD_STG_CONF(priv->wtd, STAGE_0, RESET_SYSTEM_TIMER);
+                 ESP32_WDT_STG_CONF(priv->wdt, STAGE_0, RESET_SYSTEM_TIMER);
               }
             else
               {
-                ESP32_WTD_STG_CONF(priv->wtd, STAGE_0, RESET_SYSTEM_RTC);
+                ESP32_WDT_STG_CONF(priv->wdt, STAGE_0, RESET_SYSTEM_RTC);
               }
         }
 
@@ -212,30 +212,30 @@ static int esp32_wtd_start(FAR struct watchdog_lowerhalf_s *lower)
         {
           /* Then configure it to call the user handler on wdt expiration */
 
-          ESP32_WTD_STG_CONF(priv->wtd, STAGE_0, INTERRUPT_ON_TIMEOUT);
+          ESP32_WDT_STG_CONF(priv->wdt, STAGE_0, INTERRUPT_ON_TIMEOUT);
 
           /* Set the lower half handler and enable interrupt */
 
           flags = enter_critical_section();
-          ESP32_WTD_SETISR(priv->wtd, esp32_wdt_handler, priv);
+          ESP32_WDT_SETISR(priv->wdt, esp32_wdt_handler, priv);
           leave_critical_section(flags);
-          ESP32_WTD_ENABLEINT(priv->wtd);
+          ESP32_WDT_ENABLEINT(priv->wdt);
         }
       flags = enter_critical_section();
       priv->lastreset = clock_systime_ticks();
-      ESP32_WTD_START(priv->wtd);
+      ESP32_WDT_START(priv->wdt);
       leave_critical_section(flags);
 
       /* Lock it again */
 
-      ESP32_WTD_LOCK(priv->wtd);
+      ESP32_WDT_LOCK(priv->wdt);
     }
   errout:
     return ret;
 }
 
 /****************************************************************************
- * Name: esp32_wtd_stop
+ * Name: esp32_wdt_stop
  *
  * Description:
  *   Stop the watchdog timer. In case a callback was previously configured,
@@ -247,33 +247,33 @@ static int esp32_wtd_start(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int esp32_wtd_stop(FAR struct watchdog_lowerhalf_s *lower)
+static int esp32_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct esp32_wtd_lowerhalf_s *priv =
-  (FAR struct esp32_wtd_lowerhalf_s *)lower;
+  FAR struct esp32_wdt_lowerhalf_s *priv =
+  (FAR struct esp32_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
 
   /* Unlock WDT */
 
-  ESP32_WTD_UNLOCK(priv->wtd);
+  ESP32_WDT_UNLOCK(priv->wdt);
 
   /* Disable the WDT */
 
-  ESP32_WTD_STOP(priv->wtd);
+  ESP32_WDT_STOP(priv->wdt);
 
   /* In case there is some callback registered, disable and deallocate */
 
   if (priv->handler != NULL)
     {
-      ESP32_WTD_DISABLEINT(priv->wtd);
+      ESP32_WDT_DISABLEINT(priv->wdt);
       flags = enter_critical_section();
-      ESP32_WTD_SETISR(priv->wtd, NULL, NULL);
+      ESP32_WDT_SETISR(priv->wdt, NULL, NULL);
       leave_critical_section(flags);
     }
 
   /* Lock it again */
 
-  ESP32_WTD_LOCK(priv->wtd);
+  ESP32_WDT_LOCK(priv->wdt);
 
   priv->started = false;
 
@@ -281,7 +281,7 @@ static int esp32_wtd_stop(FAR struct watchdog_lowerhalf_s *lower)
 }
 
 /****************************************************************************
- * Name: esp32_wtd_keepalive
+ * Name: esp32_wdt_keepalive
  *
  * Description:
  *   Reset the watchdog timer, prevent any
@@ -295,34 +295,34 @@ static int esp32_wtd_stop(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int esp32_wtd_keepalive(FAR struct watchdog_lowerhalf_s *lower)
+static int esp32_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct esp32_wtd_lowerhalf_s *priv =
-    (FAR struct esp32_wtd_lowerhalf_s *)lower;
+  FAR struct esp32_wdt_lowerhalf_s *priv =
+    (FAR struct esp32_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
 
   wdinfo("Entry\n");
 
   /* Unlock */
 
-  ESP32_WTD_UNLOCK(priv->wtd);
+  ESP32_WDT_UNLOCK(priv->wdt);
 
   /* Feed the dog and updates the lastreset variable */
 
   flags = enter_critical_section();
   priv->lastreset = clock_systime_ticks();
-  ESP32_WTD_FEED(priv->wtd);
+  ESP32_WDT_FEED(priv->wdt);
   leave_critical_section(flags);
 
   /* Lock */
 
-  ESP32_WTD_LOCK(priv->wtd);
+  ESP32_WDT_LOCK(priv->wdt);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: esp32_wtd_getstatus
+ * Name: esp32_wdt_getstatus
  *
  * Description:
  *   Get the current watchdog timer status
@@ -334,11 +334,11 @@ static int esp32_wtd_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int esp32_wtd_getstatus(FAR struct watchdog_lowerhalf_s *lower,
+static int esp32_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
                            FAR struct watchdog_status_s *status)
 {
-  FAR struct esp32_wtd_lowerhalf_s *priv =
-    (FAR struct esp32_wtd_lowerhalf_s *)lower;
+  FAR struct esp32_wdt_lowerhalf_s *priv =
+    (FAR struct esp32_wdt_lowerhalf_s *)lower;
   uint32_t ticks;
   uint32_t elapsed;
 
@@ -388,7 +388,7 @@ static int esp32_wtd_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: esp32_wtd_settimeout
+ * Name: esp32_wdt_settimeout
  *
  * Description:
  *   Set a new timeout value (and reset the watchdog timer)
@@ -403,11 +403,11 @@ static int esp32_wtd_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int esp32_wtd_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int esp32_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
                             uint32_t timeout)
 {
-  FAR struct esp32_wtd_lowerhalf_s *priv =
-    (FAR struct esp32_wtd_lowerhalf_s *)lower;
+  FAR struct esp32_wdt_lowerhalf_s *priv =
+    (FAR struct esp32_wdt_lowerhalf_s *)lower;
   uint16_t rtc_cycles = 0;
   uint32_t rtc_ms_max = 0;
 
@@ -416,7 +416,7 @@ static int esp32_wtd_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Unlock WDT */
 
-  ESP32_WTD_UNLOCK(priv->wtd);
+  ESP32_WDT_UNLOCK(priv->wdt);
 
   /* Write the timeout value */
 
@@ -437,7 +437,7 @@ static int esp32_wtd_settimeout(FAR struct watchdog_lowerhalf_s *lower,
       else
         {
           timeout = timeout*MS_CYCLES_TIMER;
-          ESP32_WTD_STO(priv->wtd, timeout, STAGE_0);
+          ESP32_WDT_STO(priv->wdt, timeout, STAGE_0);
         }
     }
 
@@ -445,7 +445,7 @@ static int esp32_wtd_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   else
     {
-      rtc_cycles = ESP32_RWDT_CLK(priv->wtd);
+      rtc_cycles = ESP32_RWDT_CLK(priv->wdt);
       rtc_ms_max = (uint32_t)(FULL_STAGE / rtc_cycles);
 
       /* Is this timeout a valid value for RTC WDT? */
@@ -459,23 +459,23 @@ static int esp32_wtd_settimeout(FAR struct watchdog_lowerhalf_s *lower,
       else
         {
           timeout = timeout*rtc_cycles;
-          ESP32_WTD_STO(priv->wtd, timeout, STAGE_0);
+          ESP32_WDT_STO(priv->wdt, timeout, STAGE_0);
         }
     }
 
   /* Reset the wdt */
 
-  ESP32_WTD_FEED(priv->wtd);
+  ESP32_WDT_FEED(priv->wdt);
 
   /* Lock it again */
 
-  ESP32_WTD_LOCK(priv->wtd);
+  ESP32_WDT_LOCK(priv->wdt);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: esp32_wtd_capture
+ * Name: esp32_wdt_capture
  *
  * Description:
  *   Don't reset on watchdog timer timeout; instead, call this user provider
@@ -496,11 +496,11 @@ static int esp32_wtd_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static xcpt_t esp32_wtd_capture(FAR struct watchdog_lowerhalf_s *lower,
+static xcpt_t esp32_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
                             xcpt_t handler)
 {
-  FAR struct esp32_wtd_lowerhalf_s *priv =
-  (FAR struct esp32_wtd_lowerhalf_s *)lower;
+  FAR struct esp32_wdt_lowerhalf_s *priv =
+  (FAR struct esp32_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
   xcpt_t oldhandler;
 
@@ -511,7 +511,7 @@ static xcpt_t esp32_wtd_capture(FAR struct watchdog_lowerhalf_s *lower,
 
   oldhandler = priv->handler;
 
-  ESP32_WTD_UNLOCK(priv->wtd);
+  ESP32_WDT_UNLOCK(priv->wdt);
 
   flags = enter_critical_section();
 
@@ -532,7 +532,7 @@ static xcpt_t esp32_wtd_capture(FAR struct watchdog_lowerhalf_s *lower,
 
       if (oldhandler != NULL)
         {
-          ESP32_WTD_SETISR(priv->wtd, NULL, NULL);
+          ESP32_WDT_SETISR(priv->wdt, NULL, NULL);
         }
       else
         {
@@ -540,36 +540,36 @@ static xcpt_t esp32_wtd_capture(FAR struct watchdog_lowerhalf_s *lower,
            * then change to interrupt.
            */
 
-          ESP32_WTD_STG_CONF(priv->wtd, STAGE_0, INTERRUPT_ON_TIMEOUT);
+          ESP32_WDT_STG_CONF(priv->wdt, STAGE_0, INTERRUPT_ON_TIMEOUT);
         }
 
       /* Set the lower half handler and enable interrupt */
 
-      ESP32_WTD_SETISR(priv->wtd, esp32_wdt_handler, priv);
-      ESP32_WTD_ENABLEINT(priv->wtd);
+      ESP32_WDT_SETISR(priv->wdt, esp32_wdt_handler, priv);
+      ESP32_WDT_ENABLEINT(priv->wdt);
     }
 
   /* In case the user wants to disable the callback */
 
   else
     {
-      ESP32_WTD_DISABLEINT(priv->wtd);
-      ESP32_WTD_SETISR(priv->wtd, NULL, NULL);
+      ESP32_WDT_DISABLEINT(priv->wdt);
+      ESP32_WDT_SETISR(priv->wdt, NULL, NULL);
 
       /* Then configure it to reset on wdt expiration */
 
       if (priv->peripheral == TIMER)
         {
-          ESP32_WTD_STG_CONF(priv->wtd, STAGE_0, RESET_SYSTEM_TIMER);
+          ESP32_WDT_STG_CONF(priv->wdt, STAGE_0, RESET_SYSTEM_TIMER);
         }
       else
         {
-          ESP32_WTD_STG_CONF(priv->wtd, STAGE_0, RESET_SYSTEM_RTC);
+          ESP32_WDT_STG_CONF(priv->wdt, STAGE_0, RESET_SYSTEM_RTC);
         }
     }
 
   leave_critical_section(flags);
-  ESP32_WTD_LOCK(priv->wtd);
+  ESP32_WDT_LOCK(priv->wdt);
   return oldhandler;
 }
 
@@ -577,9 +577,9 @@ static xcpt_t esp32_wtd_capture(FAR struct watchdog_lowerhalf_s *lower,
 
 static int    esp32_wdt_handler(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct esp32_wtd_lowerhalf_s *priv = arg;
+  FAR struct esp32_wdt_lowerhalf_s *priv = arg;
 
-  ESP32_WTD_UNLOCK(priv->wtd);
+  ESP32_WDT_UNLOCK(priv->wdt);
 
   /* Updates last reset var and feed the dog to reload the counter and
    * to allow the application to continue executing.
@@ -587,14 +587,14 @@ static int    esp32_wdt_handler(int irq, FAR void *context, FAR void *arg)
 #ifdef CONFIG_DEBUG_WATCHDOG
   priv->lastreset = clock_systime_ticks();
 #endif
-  ESP32_WTD_FEED(priv->wtd);
+  ESP32_WDT_FEED(priv->wdt);
 
   /* Run the user callback */
 
   priv->handler(irq, context, priv->upper);
 
-  ESP32_WTD_ACKINT(priv->wtd);        /* Clear the Interrupt */
-  ESP32_WTD_LOCK(priv->wtd);
+  ESP32_WDT_ACKINT(priv->wdt);        /* Clear the Interrupt */
+  ESP32_WDT_LOCK(priv->wdt);
 
   return OK;
 }
@@ -604,7 +604,7 @@ static int    esp32_wdt_handler(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_wtd_initialize
+ * Name: esp32_wdt_initialize
  *
  * Description:
  *   Initialize the WDT watchdog timer.  The watchdog timer is initialized
@@ -621,9 +621,9 @@ static int    esp32_wdt_handler(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-int esp32_wtd_initialize(FAR const char *devpath, uint8_t wdt)
+int esp32_wdt_initialize(FAR const char *devpath, uint8_t wdt)
 {
-  struct esp32_wtd_lowerhalf_s *lower = NULL;
+  struct esp32_wdt_lowerhalf_s *lower = NULL;
   int                             ret = OK;
 
   DEBUGASSERT(devpath);
@@ -668,17 +668,17 @@ int esp32_wtd_initialize(FAR const char *devpath, uint8_t wdt)
 
   lower->handler = NULL;
   lower->timeout = 0;
-  lower->wtd     = esp32_wtd_init(wdt);
+  lower->wdt     = esp32_wdt_init(wdt);
 
-  if (lower->wtd == NULL)
+  if (lower->wdt == NULL)
     {
       ret = -EINVAL;
       goto errout;
     }
 
-  lower->started = esp32_wtd_is_running(lower->wtd);
+  lower->started = esp32_wdt_is_running(lower->wdt);
 
-  ESP32_WTD_UNLOCK(lower->wtd);
+  ESP32_WDT_UNLOCK(lower->wdt);
 
   /* If it is a Main System Watchdog Timer configure the Prescale to
    * have a 500us period.
@@ -686,10 +686,10 @@ int esp32_wtd_initialize(FAR const char *devpath, uint8_t wdt)
 
   if (lower->peripheral == TIMER)
     {
-      ESP32_WTD_PRE(lower->wtd, PRE_VALUE);
+      ESP32_WDT_PRE(lower->wdt, PRE_VALUE);
     }
 
-  ESP32_WTD_LOCK(lower->wtd);
+  ESP32_WDT_LOCK(lower->wdt);
 
   /* Register the watchdog driver as /dev/watchdogX. If the registration goes
    * right the returned value from watchdog_register is a pointer to

@@ -226,7 +226,7 @@ config ESP32_MWDT1
 config ESP32_RWDT
 	bool "RTC Watchdog Timer"
 	default n
-	select ESP32_WTD
+	select ESP32_WDT
 	---help---
 		Includes RWDT. This watchdog timer is from the RTC module.
 		When it is selected, if the developer sets it to reset on expiration

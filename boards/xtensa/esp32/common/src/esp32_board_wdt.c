@@ -27,7 +27,7 @@
 #include <sys/types.h>
 #include <debug.h>
 
-#include "esp32_wtd_lowerhalf.h"
+#include "esp32_wdt_lowerhalf.h"
 #include "esp32_board_wdt.h"
 
 /****************************************************************************
@@ -67,7 +67,7 @@ int board_wdt_init(void)
   int ret = OK;
 
 #ifdef CONFIG_ESP32_MWDT0
-  ret = esp32_wtd_initialize("/dev/watchdog0", ESP32_MWDT0);
+  ret = esp32_wdt_initialize("/dev/watchdog0", ESP32_MWDT0);
   if (ret < 0)
     {
       syslog(LOG_ERR,
@@ -78,7 +78,7 @@ int board_wdt_init(void)
 #endif
 
 #ifdef CONFIG_ESP32_MWDT1
-  ret = esp32_wtd_initialize("/dev/watchdog1", ESP32_MWDT1);
+  ret = esp32_wdt_initialize("/dev/watchdog1", ESP32_MWDT1);
   if (ret < 0)
     {
       syslog(LOG_ERR,
@@ -89,7 +89,7 @@ int board_wdt_init(void)
 #endif
 
 #ifdef CONFIG_ESP32_RWDT
-  ret = esp32_wtd_initialize("/dev/watchdog2", ESP32_RWDT);
+  ret = esp32_wdt_initialize("/dev/watchdog2", ESP32_RWDT);
   if (ret < 0)
     {
       syslog(LOG_ERR,

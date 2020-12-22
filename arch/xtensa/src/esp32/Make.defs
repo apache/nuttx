@@ -163,9 +163,9 @@ CHIP_CSRCS += esp32_partition.c
 endif
 
 ifeq ($(CONFIG_ESP32_WDT),y)
-CHIP_CSRCS += esp32_wtd.c
+CHIP_CSRCS += esp32_wdt.c
 ifeq ($(CONFIG_WATCHDOG),y)
-CHIP_CSRCS += esp32_wtd_lowerhalf.c
+CHIP_CSRCS += esp32_wdt_lowerhalf.c
 endif
 endif
 
