@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_wtd_lowerhalf.h
+ * arch/xtensa/src/esp32/esp32_wdt_lowerhalf.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_WTD_LOWERHALF_H
-#define __ARCH_XTENSA_SRC_ESP32_ESP32_WTD_LOWERHALF_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_WDT_LOWERHALF_H
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_WDT_LOWERHALF_H
 
 /****************************************************************************
  * Included Files
@@ -47,6 +47,6 @@ enum wdt_peripherals
  * Name: esp32_timer_initialize
  ****************************************************************************/
 
-int esp32_wtd_initialize(FAR const char *devpath, uint8_t timer);
+int esp32_wdt_initialize(FAR const char *devpath, uint8_t timer);
 
-#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_WTD_LOWERHALF_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_WDT_LOWERHALF_H */

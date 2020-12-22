@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_wtd.c
+ * arch/xtensa/src/esp32/esp32_wdt.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,7 +28,7 @@
 #include "xtensa.h"
 #include "hardware/esp32_tim.h"
 #include "hardware/esp32_rtccntl.h"
-#include "esp32_wtd.h"
+#include "esp32_wdt.h"
 #include "esp32_cpuint.h"
 #include "esp32_rtc.h"
 
@@ -45,126 +45,126 @@
  * Private Types
  ****************************************************************************/
 
-struct esp32_wtd_priv_s
+struct esp32_wdt_priv_s
   {
-    FAR struct esp32_wtd_ops_s *ops;
-    uint32_t                    base;    /* WTD register base address */
+    FAR struct esp32_wdt_ops_s *ops;
+    uint32_t                    base;    /* WDT register base address */
     uint8_t                     periph;  /* Peripheral ID */
     uint8_t                     irq;     /* Interrupt ID */
-    int                         cpuint;  /* CPU interrupt assigned to this wtd */
-    bool                        inuse;   /* Flag indicating if this wtd is in use */
+    int                         cpuint;  /* CPU interrupt assigned to this wdt */
+    bool                        inuse;   /* Flag indicating if this wdt is in use */
   };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-/* WTD registers access *****************************************************/
+/* WDT registers access *****************************************************/
 
-static void esp32_wtd_putreg(FAR struct esp32_wtd_dev_s *dev,
+static void esp32_wdt_putreg(FAR struct esp32_wdt_dev_s *dev,
                              uint32_t offset,
                              uint32_t value);
-static void esp32_wtd_modifyreg32(FAR struct esp32_wtd_dev_s *dev,
+static void esp32_wdt_modifyreg32(FAR struct esp32_wdt_dev_s *dev,
                                   uint32_t offset,
                                   uint32_t clearbits,
                                   uint32_t setbits);
-static uint32_t esp32_wtd_getreg(FAR struct esp32_wtd_dev_s *dev,
+static uint32_t esp32_wdt_getreg(FAR struct esp32_wdt_dev_s *dev,
                                  uint32_t offset);
 
-/* WTD operations ***********************************************************/
+/* WDT operations ***********************************************************/
 
-static int esp32_wtd_start(FAR struct esp32_wtd_dev_s *dev);
-static int esp32_wtd_stop(FAR struct esp32_wtd_dev_s *dev);
-static int esp32_wtd_enablewp(FAR struct esp32_wtd_dev_s *dev);
-static int esp32_wtd_disablewp(FAR struct esp32_wtd_dev_s *dev);
-static int esp32_wtd_pre(FAR struct esp32_wtd_dev_s *dev, uint16_t value);
-static int esp32_wtd_settimeout(FAR struct esp32_wtd_dev_s *dev,
+static int esp32_wdt_start(FAR struct esp32_wdt_dev_s *dev);
+static int esp32_wdt_stop(FAR struct esp32_wdt_dev_s *dev);
+static int esp32_wdt_enablewp(FAR struct esp32_wdt_dev_s *dev);
+static int esp32_wdt_disablewp(FAR struct esp32_wdt_dev_s *dev);
+static int esp32_wdt_pre(FAR struct esp32_wdt_dev_s *dev, uint16_t value);
+static int esp32_wdt_settimeout(FAR struct esp32_wdt_dev_s *dev,
                                 uint32_t value, uint8_t stage);
-static int esp32_wtd_feed_dog(FAR struct esp32_wtd_dev_s *dev);
-static int esp32_wtd_set_stg_conf(FAR struct esp32_wtd_dev_s *dev,
+static int esp32_wdt_feed_dog(FAR struct esp32_wdt_dev_s *dev);
+static int esp32_wdt_set_stg_conf(FAR struct esp32_wdt_dev_s *dev,
                                    uint8_t stage, uint8_t conf);
-static uint16_t esp32_rtc_clk(FAR struct esp32_wtd_dev_s *dev);
-static int esp32_wtd_setisr(FAR struct esp32_wtd_dev_s *dev, xcpt_t handler,
+static uint16_t esp32_rtc_clk(FAR struct esp32_wdt_dev_s *dev);
+static int esp32_wdt_setisr(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
                             FAR void * arg);
-static int esp32_wtd_enableint(FAR struct esp32_wtd_dev_s *dev);
-static int esp32_wtd_disableint(FAR struct esp32_wtd_dev_s *dev);
-static int esp32_wtd_ackint(FAR struct esp32_wtd_dev_s *dev);
+static int esp32_wdt_enableint(FAR struct esp32_wdt_dev_s *dev);
+static int esp32_wdt_disableint(FAR struct esp32_wdt_dev_s *dev);
+static int esp32_wdt_ackint(FAR struct esp32_wdt_dev_s *dev);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* ESP32 WTD ops */
+/* ESP32 WDT ops */
 
-struct esp32_wtd_ops_s esp32_mwtd_ops =
+struct esp32_wdt_ops_s esp32_mwdt_ops =
 {
-  .start         = esp32_wtd_start,
-  .stop          = esp32_wtd_stop,
-  .enablewp      = esp32_wtd_enablewp,
-  .disablewp     = esp32_wtd_disablewp,
-  .pre           = esp32_wtd_pre,
-  .settimeout    = esp32_wtd_settimeout,
-  .feed          = esp32_wtd_feed_dog,
-  .stg_conf      = esp32_wtd_set_stg_conf,
+  .start         = esp32_wdt_start,
+  .stop          = esp32_wdt_stop,
+  .enablewp      = esp32_wdt_enablewp,
+  .disablewp     = esp32_wdt_disablewp,
+  .pre           = esp32_wdt_pre,
+  .settimeout    = esp32_wdt_settimeout,
+  .feed          = esp32_wdt_feed_dog,
+  .stg_conf      = esp32_wdt_set_stg_conf,
   .rtc_clk       = NULL,
-  .setisr        = esp32_wtd_setisr,
-  .enableint     = esp32_wtd_enableint,
-  .disableint    = esp32_wtd_disableint,
-  .ackint        = esp32_wtd_ackint,
+  .setisr        = esp32_wdt_setisr,
+  .enableint     = esp32_wdt_enableint,
+  .disableint    = esp32_wdt_disableint,
+  .ackint        = esp32_wdt_ackint,
 };
 
-struct esp32_wtd_ops_s esp32_rwtd_ops =
+struct esp32_wdt_ops_s esp32_rwdt_ops =
 {
-  .start         = esp32_wtd_start,
-  .stop          = esp32_wtd_stop,
-  .enablewp      = esp32_wtd_enablewp,
-  .disablewp     = esp32_wtd_disablewp,
+  .start         = esp32_wdt_start,
+  .stop          = esp32_wdt_stop,
+  .enablewp      = esp32_wdt_enablewp,
+  .disablewp     = esp32_wdt_disablewp,
   .pre           = NULL,
-  .settimeout    = esp32_wtd_settimeout,
-  .feed          = esp32_wtd_feed_dog,
-  .stg_conf      = esp32_wtd_set_stg_conf,
+  .settimeout    = esp32_wdt_settimeout,
+  .feed          = esp32_wdt_feed_dog,
+  .stg_conf      = esp32_wdt_set_stg_conf,
   .rtc_clk       = esp32_rtc_clk,
-  .setisr        = esp32_wtd_setisr,
-  .enableint     = esp32_wtd_enableint,
-  .disableint    = esp32_wtd_disableint,
-  .ackint        = esp32_wtd_ackint,
+  .setisr        = esp32_wdt_setisr,
+  .enableint     = esp32_wdt_enableint,
+  .disableint    = esp32_wdt_disableint,
+  .ackint        = esp32_wdt_ackint,
 };
 
 #ifdef CONFIG_ESP32_MWDT0
 
-struct esp32_wtd_priv_s g_esp32_mwtd0_priv =
+struct esp32_wdt_priv_s g_esp32_mwdt0_priv =
 {
-  .ops    = &esp32_mwtd_ops,
+  .ops    = &esp32_mwdt_ops,
   .base   = TIMG_WDTCONFIG0_REG(0),
   .periph = ESP32_PERIPH_TG_WDT_LEVEL, /* Peripheral ID */
   .irq    = ESP32_IRQ_TG_WDT_LEVEL,    /* Interrupt ID */
-  .cpuint = -ENOMEM,                   /* CPU interrupt assigned to this wtd */
+  .cpuint = -ENOMEM,                   /* CPU interrupt assigned to this wdt */
   .inuse = false,
 };
 #endif
 
 #ifdef CONFIG_ESP32_MWDT1
 
-struct esp32_wtd_priv_s g_esp32_mwtd1_priv =
+struct esp32_wdt_priv_s g_esp32_mwdt1_priv =
 {
-  .ops   = &esp32_mwtd_ops,
+  .ops   = &esp32_mwdt_ops,
   .base  = TIMG_WDTCONFIG0_REG(1),
   .periph = ESP32_PERIPH_TG1_WDT_LEVEL, /* Peripheral ID */
   .irq    = ESP32_IRQ_TG1_WDT_LEVEL,    /* Interrupt ID */
-  .cpuint = -ENOMEM,                    /* CPU interrupt assigned to this wtd */
+  .cpuint = -ENOMEM,                    /* CPU interrupt assigned to this wdt */
   .inuse = false,
 };
 #endif
 
 #ifdef CONFIG_ESP32_RWDT
 
-struct esp32_wtd_priv_s g_esp32_rwtd_priv =
+struct esp32_wdt_priv_s g_esp32_rwdt_priv =
 {
-  .ops   = &esp32_rwtd_ops,
+  .ops   = &esp32_rwdt_ops,
   .base  = RTC_CNTL_OPTIONS0_REG,
   .periph = ESP32_PERIPH_RTC_CORE,  /* Peripheral ID */
   .irq    = ESP32_IRQ_RTC_CORE,     /* Interrupt ID */
-  .cpuint = -ENOMEM,                /* CPU interrupt assigned to this wtd */
+  .cpuint = -ENOMEM,                /* CPU interrupt assigned to this wdt */
   .inuse = false,
 };
 #endif
@@ -174,89 +174,89 @@ struct esp32_wtd_priv_s g_esp32_rwtd_priv =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_wtd_putreg
+ * Name: esp32_wdt_putreg
  *
  * Description:
  *   Put a 32-bit register value by offset
  *
  ****************************************************************************/
 
-static void esp32_wtd_putreg(FAR struct esp32_wtd_dev_s *dev,
+static void esp32_wdt_putreg(FAR struct esp32_wdt_dev_s *dev,
                              uint32_t offset,
                              uint32_t value)
 {
   DEBUGASSERT(dev);
 
-  putreg32(value, ((struct esp32_wtd_priv_s *)dev)->base + offset);
+  putreg32(value, ((struct esp32_wdt_priv_s *)dev)->base + offset);
 }
 
 /****************************************************************************
- * Name: esp32_wtd_modifyreg32
+ * Name: esp32_wdt_modifyreg32
  *
  * Description:
  *   Modify a reg of 32 bits
  *
  ****************************************************************************/
 
-static void esp32_wtd_modifyreg32(FAR struct esp32_wtd_dev_s *dev,
+static void esp32_wdt_modifyreg32(FAR struct esp32_wdt_dev_s *dev,
                                   uint32_t offset,
                                   uint32_t clearbits,
                                   uint32_t setbits)
 {
   DEBUGASSERT(dev);
 
-  modifyreg32(((struct esp32_wtd_priv_s *)dev)->base + offset,
+  modifyreg32(((struct esp32_wdt_priv_s *)dev)->base + offset,
                 clearbits, setbits);
 }
 
 /****************************************************************************
- * Name: esp32_wtd_getreg
+ * Name: esp32_wdt_getreg
  *
  * Description:
  *   Get a 32-bit register value by offset
  *
  ****************************************************************************/
 
-static uint32_t esp32_wtd_getreg(FAR struct esp32_wtd_dev_s *dev,
+static uint32_t esp32_wdt_getreg(FAR struct esp32_wdt_dev_s *dev,
                                  uint32_t offset)
 {
   DEBUGASSERT(dev);
 
-  return getreg32(((struct esp32_wtd_priv_s *)dev)->base + offset);
+  return getreg32(((struct esp32_wdt_priv_s *)dev)->base + offset);
 }
 
 /****************************************************************************
- * Name: esp32_wtd_start
+ * Name: esp32_wdt_start
  *
  * Description:
  *   Releases the counter
  *
  ****************************************************************************/
 
-static int esp32_wtd_start(FAR struct esp32_wtd_dev_s *dev)
+static int esp32_wdt_start(FAR struct esp32_wdt_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
   /* If it is a RWDT */
 
-  if (((struct esp32_wtd_priv_s *)dev)->base ==
+  if (((struct esp32_wdt_priv_s *)dev)->base ==
         RTC_CNTL_OPTIONS0_REG)
     {
-      esp32_wtd_modifyreg32(dev, RWDT_CONFIG0_OFFSET, 0, RTC_CNTL_WDT_EN);
+      esp32_wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET, 0, RTC_CNTL_WDT_EN);
     }
 
   /* If it is a MWDT */
 
   else
     {
-      esp32_wtd_modifyreg32(dev, MWDT_CONFIG0_OFFSET, 0, TIMG_WDT_EN);
+      esp32_wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET, 0, TIMG_WDT_EN);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: esp32_wtd_set_stg_conf
+ * Name: esp32_wdt_set_stg_conf
  *
  * Description:
  *   It configures the action to be triggered by a stage on expiration.
@@ -269,7 +269,7 @@ static int esp32_wtd_start(FAR struct esp32_wtd_dev_s *dev)
  *
  ****************************************************************************/
 
-static int esp32_wtd_set_stg_conf(FAR struct esp32_wtd_dev_s *dev,
+static int esp32_wdt_set_stg_conf(FAR struct esp32_wdt_dev_s *dev,
                                    uint8_t stage, uint8_t conf)
 {
   int ret = OK;
@@ -282,11 +282,11 @@ static int esp32_wtd_set_stg_conf(FAR struct esp32_wtd_dev_s *dev,
         {
           /* If it is a RWDT */
 
-          if (((struct esp32_wtd_priv_s *)dev)->base ==
+          if (((struct esp32_wdt_priv_s *)dev)->base ==
                 RTC_CNTL_OPTIONS0_REG)
             {
               mask = (uint32_t)conf << RTC_CNTL_WDT_STG0_S;
-              esp32_wtd_modifyreg32(dev, RWDT_CONFIG0_OFFSET,
+              esp32_wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET,
                                     RTC_CNTL_WDT_STG0_M, mask);
             }
 
@@ -295,7 +295,7 @@ static int esp32_wtd_set_stg_conf(FAR struct esp32_wtd_dev_s *dev,
           else
             {
               mask = (uint32_t)conf << TIMG_WDT_STG0_S;
-              esp32_wtd_modifyreg32(dev, MWDT_CONFIG0_OFFSET,
+              esp32_wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET,
                                     TIMG_WDT_STG0_M, mask);
             }
           break;
@@ -305,11 +305,11 @@ static int esp32_wtd_set_stg_conf(FAR struct esp32_wtd_dev_s *dev,
         {
           /* If it is a RWDT */
 
-          if (((struct esp32_wtd_priv_s *)dev)->base ==
+          if (((struct esp32_wdt_priv_s *)dev)->base ==
                 RTC_CNTL_OPTIONS0_REG)
             {
               mask = (uint32_t)conf << RTC_CNTL_WDT_STG1_S;
-              esp32_wtd_modifyreg32(dev, RWDT_CONFIG0_OFFSET,
+              esp32_wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET,
                                     RTC_CNTL_WDT_STG1_M, mask);
             }
 
@@ -318,7 +318,7 @@ static int esp32_wtd_set_stg_conf(FAR struct esp32_wtd_dev_s *dev,
           else
             {
               mask = (uint32_t)conf << TIMG_WDT_STG1_S;
-              esp32_wtd_modifyreg32(dev, MWDT_CONFIG0_OFFSET,
+              esp32_wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET,
                                     TIMG_WDT_STG1_M, mask);
             }
           break;
@@ -328,11 +328,11 @@ static int esp32_wtd_set_stg_conf(FAR struct esp32_wtd_dev_s *dev,
         {
           /* If it is a RWDT */
 
-          if (((struct esp32_wtd_priv_s *)dev)->base ==
+          if (((struct esp32_wdt_priv_s *)dev)->base ==
                RTC_CNTL_OPTIONS0_REG)
             {
               mask = (uint32_t)conf << RTC_CNTL_WDT_STG2_S;
-              esp32_wtd_modifyreg32(dev, RWDT_CONFIG0_OFFSET,
+              esp32_wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET,
                                     RTC_CNTL_WDT_STG2_M, mask);
             }
 
@@ -341,7 +341,7 @@ static int esp32_wtd_set_stg_conf(FAR struct esp32_wtd_dev_s *dev,
           else
             {
               mask = (uint32_t)conf << TIMG_WDT_STG2_S;
-              esp32_wtd_modifyreg32(dev, MWDT_CONFIG0_OFFSET,
+              esp32_wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET,
                                     TIMG_WDT_STG2_M, mask);
             }
           break;
@@ -351,11 +351,11 @@ static int esp32_wtd_set_stg_conf(FAR struct esp32_wtd_dev_s *dev,
         {
           /* If it is a RWDT */
 
-          if (((struct esp32_wtd_priv_s *)dev)->base ==
+          if (((struct esp32_wdt_priv_s *)dev)->base ==
                RTC_CNTL_OPTIONS0_REG)
             {
               mask = (uint32_t)conf << RTC_CNTL_WDT_STG3_S;
-              esp32_wtd_modifyreg32(dev, RWDT_CONFIG0_OFFSET,
+              esp32_wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET,
                                     RTC_CNTL_WDT_STG3_M, mask);
             }
 
@@ -364,7 +364,7 @@ static int esp32_wtd_set_stg_conf(FAR struct esp32_wtd_dev_s *dev,
           else
             {
               mask = (uint32_t)conf << TIMG_WDT_STG3_S;
-              esp32_wtd_modifyreg32(dev, MWDT_CONFIG0_OFFSET,
+              esp32_wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET,
                                     TIMG_WDT_STG3_M, mask);
             }
           break;
@@ -383,36 +383,36 @@ static int esp32_wtd_set_stg_conf(FAR struct esp32_wtd_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: esp32_wtd_stop
+ * Name: esp32_wdt_stop
  *
  * Description:
  *   Disables the watchdog
  *
  ****************************************************************************/
 
-static int esp32_wtd_stop(FAR struct esp32_wtd_dev_s *dev)
+static int esp32_wdt_stop(FAR struct esp32_wdt_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
   /* If it is a RWDT */
 
-  if (((struct esp32_wtd_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
+  if (((struct esp32_wdt_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
     {
-      esp32_wtd_modifyreg32(dev, RWDT_CONFIG0_OFFSET, RTC_CNTL_WDT_EN, 0);
+      esp32_wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET, RTC_CNTL_WDT_EN, 0);
     }
 
   /* If it is a MWDT */
 
   else
     {
-      esp32_wtd_modifyreg32(dev, MWDT_CONFIG0_OFFSET, TIMG_WDT_EN, 0);
+      esp32_wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET, TIMG_WDT_EN, 0);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: esp32_wtd_enablewp
+ * Name: esp32_wdt_enablewp
  *
  * Description:
  *   Enables write protection (WP) on registers against accidental writing.
@@ -423,29 +423,29 @@ static int esp32_wtd_stop(FAR struct esp32_wtd_dev_s *dev)
  *
  ****************************************************************************/
 
-static int esp32_wtd_enablewp(FAR struct esp32_wtd_dev_s *dev)
+static int esp32_wdt_enablewp(FAR struct esp32_wdt_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
   /* If it is a RWDT */
 
-  if (((struct esp32_wtd_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
+  if (((struct esp32_wdt_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
     {
-      esp32_wtd_putreg(dev, RWDT_WP_REG, 0);
+      esp32_wdt_putreg(dev, RWDT_WP_REG, 0);
     }
 
   /* If it is a MWDT */
 
   else
     {
-      esp32_wtd_putreg(dev, MWDT_WP_REG, 0);
+      esp32_wdt_putreg(dev, MWDT_WP_REG, 0);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: esp32_wtd_disablewp
+ * Name: esp32_wdt_disablewp
  *
  * Description:
  *   Disables write protection (WP) on registers against accidental writing.
@@ -456,29 +456,29 @@ static int esp32_wtd_enablewp(FAR struct esp32_wtd_dev_s *dev)
  *
  ****************************************************************************/
 
-static int esp32_wtd_disablewp(FAR struct esp32_wtd_dev_s *dev)
+static int esp32_wdt_disablewp(FAR struct esp32_wdt_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
   /* If it is a RWDT */
 
-  if (((struct esp32_wtd_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
+  if (((struct esp32_wdt_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
     {
-      esp32_wtd_putreg(dev, RWDT_WP_REG, WRITE_PROTECTION_KEY);
+      esp32_wdt_putreg(dev, RWDT_WP_REG, WRITE_PROTECTION_KEY);
     }
 
   /* If it is a MWDT */
 
   else
     {
-      esp32_wtd_putreg(dev, MWDT_WP_REG, WRITE_PROTECTION_KEY);
+      esp32_wdt_putreg(dev, MWDT_WP_REG, WRITE_PROTECTION_KEY);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: esp32_wtd_pre
+ * Name: esp32_wdt_pre
  *
  * Description:
  *   Sets  a prescale value. The MWDT clock period is 12.5 ns * value (pre).
@@ -487,13 +487,13 @@ static int esp32_wtd_disablewp(FAR struct esp32_wtd_dev_s *dev)
  *
  ****************************************************************************/
 
-static int esp32_wtd_pre(FAR struct esp32_wtd_dev_s *dev, uint16_t pre)
+static int esp32_wdt_pre(FAR struct esp32_wdt_dev_s *dev, uint16_t pre)
 {
   uint32_t mask = (uint32_t)pre << TIMG_WDT_CLK_PRESCALE_S;
 
   DEBUGASSERT(dev);
 
-  esp32_wtd_modifyreg32(dev, MWDT_CLK_PRESCALE_OFFSET,
+  esp32_wdt_modifyreg32(dev, MWDT_CLK_PRESCALE_OFFSET,
                         TIMG_WDT_CLK_PRESCALE_M, mask);
 
   return OK;
@@ -508,7 +508,7 @@ static int esp32_wtd_pre(FAR struct esp32_wtd_dev_s *dev, uint16_t pre)
  *
  ****************************************************************************/
 
-static uint16_t esp32_rtc_clk(FAR struct esp32_wtd_dev_s *dev)
+static uint16_t esp32_rtc_clk(FAR struct esp32_wdt_dev_s *dev)
 {
   enum esp32_rtc_slow_freq_e slow_clk_rtc;
   uint32_t period_13q19;
@@ -542,14 +542,14 @@ static uint16_t esp32_rtc_clk(FAR struct esp32_wtd_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: esp32_wtd_settimeout
+ * Name: esp32_wdt_settimeout
  *
  * Description:
  *   Sets the wdt timeout.
  *
  ****************************************************************************/
 
-static int esp32_wtd_settimeout(FAR struct esp32_wtd_dev_s *dev,
+static int esp32_wdt_settimeout(FAR struct esp32_wdt_dev_s *dev,
                                 uint32_t value, uint8_t stage)
 {
   int ret = OK;
@@ -561,17 +561,17 @@ static int esp32_wtd_settimeout(FAR struct esp32_wtd_dev_s *dev,
         {
           /* If it is a RWDT */
 
-          if (((struct esp32_wtd_priv_s *)dev)->base ==
+          if (((struct esp32_wdt_priv_s *)dev)->base ==
                 RTC_CNTL_OPTIONS0_REG)
             {
-              esp32_wtd_putreg(dev, RWDT_STAGE0_TIMEOUT_OFFSET, value);
+              esp32_wdt_putreg(dev, RWDT_STAGE0_TIMEOUT_OFFSET, value);
             }
 
           /* If it is a MWDT */
 
           else
             {
-              esp32_wtd_putreg(dev, MWDT_STAGE0_TIMEOUT_OFFSET, value);
+              esp32_wdt_putreg(dev, MWDT_STAGE0_TIMEOUT_OFFSET, value);
             }
           break;
         }
@@ -580,17 +580,17 @@ static int esp32_wtd_settimeout(FAR struct esp32_wtd_dev_s *dev,
         {
           /* If it is a RWDT */
 
-          if (((struct esp32_wtd_priv_s *)dev)->base ==
+          if (((struct esp32_wdt_priv_s *)dev)->base ==
                 RTC_CNTL_OPTIONS0_REG)
             {
-              esp32_wtd_putreg(dev, RWDT_STAGE1_TIMEOUT_OFFSET, value);
+              esp32_wdt_putreg(dev, RWDT_STAGE1_TIMEOUT_OFFSET, value);
             }
 
           /* If it is a MWDT */
 
           else
             {
-              esp32_wtd_putreg(dev, MWDT_STAGE1_TIMEOUT_OFFSET, value);
+              esp32_wdt_putreg(dev, MWDT_STAGE1_TIMEOUT_OFFSET, value);
             }
           break;
         }
@@ -599,17 +599,17 @@ static int esp32_wtd_settimeout(FAR struct esp32_wtd_dev_s *dev,
         {
           /* If it is a RWDT */
 
-          if (((struct esp32_wtd_priv_s *)dev)->base ==
+          if (((struct esp32_wdt_priv_s *)dev)->base ==
                 RTC_CNTL_OPTIONS0_REG)
             {
-              esp32_wtd_putreg(dev, RWDT_STAGE2_TIMEOUT_OFFSET, value);
+              esp32_wdt_putreg(dev, RWDT_STAGE2_TIMEOUT_OFFSET, value);
             }
 
           /* If it is a MWDT */
 
           else
             {
-              esp32_wtd_putreg(dev, MWDT_STAGE2_TIMEOUT_OFFSET, value);
+              esp32_wdt_putreg(dev, MWDT_STAGE2_TIMEOUT_OFFSET, value);
             }
           break;
         }
@@ -618,17 +618,17 @@ static int esp32_wtd_settimeout(FAR struct esp32_wtd_dev_s *dev,
         {
           /* If it is a RWDT */
 
-          if (((struct esp32_wtd_priv_s *)dev)->base ==
+          if (((struct esp32_wdt_priv_s *)dev)->base ==
                 RTC_CNTL_OPTIONS0_REG)
             {
-              esp32_wtd_putreg(dev, RWDT_STAGE3_TIMEOUT_OFFSET, value);
+              esp32_wdt_putreg(dev, RWDT_STAGE3_TIMEOUT_OFFSET, value);
             }
 
           /* If it is a MWDT */
 
           else
             {
-              esp32_wtd_putreg(dev, MWDT_STAGE3_TIMEOUT_OFFSET, value);
+              esp32_wdt_putreg(dev, MWDT_STAGE3_TIMEOUT_OFFSET, value);
             }
           break;
         }
@@ -646,7 +646,7 @@ static int esp32_wtd_settimeout(FAR struct esp32_wtd_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: esp32_wtd_feed_dog
+ * Name: esp32_wdt_feed_dog
  *
  * Description:
  *   Feeds the dog.  When software feeds the watchdog timer, it returns to
@@ -654,29 +654,29 @@ static int esp32_wtd_settimeout(FAR struct esp32_wtd_dev_s *dev,
  *
  ****************************************************************************/
 
-static int esp32_wtd_feed_dog(FAR struct esp32_wtd_dev_s *dev)
+static int esp32_wdt_feed_dog(FAR struct esp32_wdt_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
   /* If it is a RWDT */
 
-  if (((struct esp32_wtd_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
+  if (((struct esp32_wdt_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
     {
-      esp32_wtd_putreg(dev, RWDT_FEED_OFFSET , FEED_DOG);
+      esp32_wdt_putreg(dev, RWDT_FEED_OFFSET , FEED_DOG);
     }
 
   /* If it is a MWDT */
 
   else
     {
-      esp32_wtd_putreg(dev, MWDT_FEED_OFFSET , FEED_DOG);
+      esp32_wdt_putreg(dev, MWDT_FEED_OFFSET , FEED_DOG);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: esp32_wtd_setisr
+ * Name: esp32_wdt_setisr
  *
  * Description:
  *   Allocates a Level CPU Interrupt, connects the peripheral source to this
@@ -685,16 +685,16 @@ static int esp32_wtd_feed_dog(FAR struct esp32_wtd_dev_s *dev)
  *
  ****************************************************************************/
 
-static int esp32_wtd_setisr(FAR struct esp32_wtd_dev_s *dev, xcpt_t handler,
+static int esp32_wdt_setisr(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
                             FAR void *arg)
 {
-  FAR struct esp32_wtd_priv_s *wtd = NULL;
+  FAR struct esp32_wdt_priv_s *wdt = NULL;
   int ret = OK;
   uint8_t cpu;
 
   DEBUGASSERT(dev);
 
-  wtd = (FAR struct esp32_wtd_priv_s *)dev;
+  wdt = (FAR struct esp32_wdt_priv_s *)dev;
 
   /* Disable interrupt when callback is removed */
 
@@ -702,17 +702,17 @@ static int esp32_wtd_setisr(FAR struct esp32_wtd_dev_s *dev, xcpt_t handler,
     {
       /* If a CPU Interrupt was previously allocated, then deallocate it */
 
-      if (wtd->cpuint >= 0)
+      if (wdt->cpuint >= 0)
         {
           /* Disable CPU Interrupt, free a previously allocated
            * CPU Interrupt
            */
 
-          up_disable_irq(wtd->cpuint);
+          up_disable_irq(wdt->cpuint);
           cpu = up_cpu_index();
-          esp32_detach_peripheral(cpu, wtd->periph, wtd->cpuint);
-          esp32_free_cpuint(wtd->cpuint);
-          irq_detach(wtd->irq);
+          esp32_detach_peripheral(cpu, wdt->periph, wdt->cpuint);
+          esp32_free_cpuint(wdt->cpuint);
+          irq_detach(wdt->irq);
         }
 
       ret = OK;
@@ -725,40 +725,40 @@ static int esp32_wtd_setisr(FAR struct esp32_wtd_dev_s *dev, xcpt_t handler,
     {
       /* Verify the available CPU Interrupt */
 
-      wtd->cpuint = esp32_alloc_levelint(1);
-      if (wtd->cpuint < 0)
+      wdt->cpuint = esp32_alloc_levelint(1);
+      if (wdt->cpuint < 0)
         {
           tmrerr("ERROR: No CPU Interrupt available");
-          ret = wtd->cpuint;
+          ret = wdt->cpuint;
           goto errout;
         }
 
       /* Disable the provided CPU Interrupt to configure it */
 
-      up_disable_irq(wtd->cpuint);
+      up_disable_irq(wdt->cpuint);
 
       /* Attach a peripheral interrupt to the available CPU interrupt in
        * the current core
        */
 
       cpu = up_cpu_index();
-      esp32_attach_peripheral(cpu, wtd->periph, wtd->cpuint);
+      esp32_attach_peripheral(cpu, wdt->periph, wdt->cpuint);
 
       /* Associate an IRQ Number (from the WDT) to an ISR */
 
-      ret = irq_attach(wtd->irq, handler, arg);
+      ret = irq_attach(wdt->irq, handler, arg);
 
       if (ret != OK)
         {
-          esp32_detach_peripheral(cpu, wtd->periph, wtd->cpuint);
-          esp32_free_cpuint(wtd->cpuint);
+          esp32_detach_peripheral(cpu, wdt->periph, wdt->cpuint);
+          esp32_free_cpuint(wdt->cpuint);
           tmrerr("ERROR: Failed to associate an IRQ Number");
           goto errout;
         }
 
       /* Enable the CPU Interrupt that is linked to the wdt */
 
-      up_enable_irq(wtd->cpuint);
+      up_enable_irq(wdt->cpuint);
     }
 
 errout:
@@ -766,14 +766,14 @@ errout:
 }
 
 /****************************************************************************
- * Name: esp32_wtd_enableint
+ * Name: esp32_wdt_enableint
  *
  * Description:
  *   Enables a Level Interrupt at timeout.
  *
  ****************************************************************************/
 
-static int esp32_wtd_enableint(FAR struct esp32_wtd_dev_s *dev)
+static int esp32_wdt_enableint(FAR struct esp32_wdt_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -781,16 +781,16 @@ static int esp32_wtd_enableint(FAR struct esp32_wtd_dev_s *dev)
 
   /* If it is a RWDT */
 
-  if (((struct esp32_wtd_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
+  if (((struct esp32_wdt_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
     {
       /* Level Interrupt */
 
-      esp32_wtd_modifyreg32(dev, RWDT_CONFIG0_OFFSET, 0,
+      esp32_wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET, 0,
                             RTC_CNTL_WDT_LEVEL_INT_EN);
 
       /* Enable Interrupt */
 
-      esp32_wtd_modifyreg32(dev, RWDT_INT_ENA_REG_OFFSET, 0,
+      esp32_wdt_modifyreg32(dev, RWDT_INT_ENA_REG_OFFSET, 0,
                             RTC_CNTL_WDT_INT_ENA);
     }
 
@@ -800,12 +800,12 @@ static int esp32_wtd_enableint(FAR struct esp32_wtd_dev_s *dev)
     {
       /* Level Interrupt */
 
-      esp32_wtd_modifyreg32(dev, MWDT_CONFIG0_OFFSET, 0,
+      esp32_wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET, 0,
                             TIMG_WDT_LEVEL_INT_EN);
 
       /* Enable Interrupt */
 
-      esp32_wtd_modifyreg32(dev, MWDT_INT_ENA_REG_OFFSET, 0,
+      esp32_wdt_modifyreg32(dev, MWDT_INT_ENA_REG_OFFSET, 0,
                             TIMG_WDT_INT_ENA);
     }
 
@@ -813,29 +813,29 @@ static int esp32_wtd_enableint(FAR struct esp32_wtd_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: esp32_wtd_disableint
+ * Name: esp32_wdt_disableint
  *
  * Description:
  *   Disables a Level Interrupt at timeout.
  *
  ****************************************************************************/
 
-static int esp32_wtd_disableint(FAR struct esp32_wtd_dev_s *dev)
+static int esp32_wdt_disableint(FAR struct esp32_wdt_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
   /* If it is a RWDT */
 
-  if (((struct esp32_wtd_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
+  if (((struct esp32_wdt_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
     {
       /* Level Interrupt */
 
-      esp32_wtd_modifyreg32(dev, RWDT_CONFIG0_OFFSET,
+      esp32_wdt_modifyreg32(dev, RWDT_CONFIG0_OFFSET,
                             RTC_CNTL_WDT_LEVEL_INT_EN, 0);
 
       /* Enable Interrupt */
 
-      esp32_wtd_modifyreg32(dev, RWDT_INT_ENA_REG_OFFSET,
+      esp32_wdt_modifyreg32(dev, RWDT_INT_ENA_REG_OFFSET,
                             RTC_CNTL_WDT_INT_ENA, 0);
     }
 
@@ -845,12 +845,12 @@ static int esp32_wtd_disableint(FAR struct esp32_wtd_dev_s *dev)
     {
       /* Level Interrupt */
 
-      esp32_wtd_modifyreg32(dev, MWDT_CONFIG0_OFFSET,
+      esp32_wdt_modifyreg32(dev, MWDT_CONFIG0_OFFSET,
                             TIMG_WDT_LEVEL_INT_EN, 0);
 
       /* Enable Interrupt */
 
-      esp32_wtd_modifyreg32(dev, MWDT_INT_ENA_REG_OFFSET,
+      esp32_wdt_modifyreg32(dev, MWDT_INT_ENA_REG_OFFSET,
                             TIMG_WDT_INT_ENA, 0);
     }
 
@@ -858,29 +858,29 @@ static int esp32_wtd_disableint(FAR struct esp32_wtd_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: esp32_wtd_ackint
+ * Name: esp32_wdt_ackint
  *
  *   Description:
  *   Acknowledges an interrupt
  *
  ****************************************************************************/
 
-static int esp32_wtd_ackint(FAR struct esp32_wtd_dev_s *dev)
+static int esp32_wdt_ackint(FAR struct esp32_wdt_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
   /* If it is a RWDT */
 
-  if (((struct esp32_wtd_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
+  if (((struct esp32_wdt_priv_s *)dev)->base == RTC_CNTL_OPTIONS0_REG)
     {
-      esp32_wtd_putreg(dev, RWDT_INT_CLR_REG_OFFSET, RTC_CNTL_WDT_INT_CLR);
+      esp32_wdt_putreg(dev, RWDT_INT_CLR_REG_OFFSET, RTC_CNTL_WDT_INT_CLR);
     }
 
   /* If it is a MWDT */
 
   else
     {
-      esp32_wtd_putreg(dev, MWDT_INT_CLR_REG_OFFSET, TIMG_WDT_INT_CLR);
+      esp32_wdt_putreg(dev, MWDT_INT_CLR_REG_OFFSET, TIMG_WDT_INT_CLR);
     }
 
   return OK;
@@ -891,16 +891,16 @@ static int esp32_wtd_ackint(FAR struct esp32_wtd_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_wtd_init
+ * Name: esp32_wdt_init
  *
  * Description:
  *   Initialize WDT device
  *
  ****************************************************************************/
 
-FAR struct esp32_wtd_dev_s *esp32_wtd_init(uint8_t wdt_id)
+FAR struct esp32_wdt_dev_s *esp32_wdt_init(uint8_t wdt_id)
 {
-  FAR struct esp32_wtd_priv_s *wtd = NULL;
+  FAR struct esp32_wdt_priv_s *wdt = NULL;
 
   /* Get wdt instance */
 
@@ -909,7 +909,7 @@ FAR struct esp32_wtd_dev_s *esp32_wtd_init(uint8_t wdt_id)
 #ifdef CONFIG_ESP32_MWDT0
       case 0:
         {
-          wtd = &g_esp32_mwtd0_priv;
+          wdt = &g_esp32_mwdt0_priv;
           break;
         }
 
@@ -917,7 +917,7 @@ FAR struct esp32_wtd_dev_s *esp32_wtd_init(uint8_t wdt_id)
 #ifdef CONFIG_ESP32_MWDT1
       case 1:
         {
-          wtd = &g_esp32_mwtd1_priv;
+          wdt = &g_esp32_mwdt1_priv;
           break;
         }
 
@@ -925,7 +925,7 @@ FAR struct esp32_wtd_dev_s *esp32_wtd_init(uint8_t wdt_id)
 #ifdef CONFIG_ESP32_RWDT
       case 2:
         {
-          wtd = &g_esp32_rwtd_priv;
+          wdt = &g_esp32_rwdt_priv;
           break;
         }
 
@@ -941,43 +941,43 @@ FAR struct esp32_wtd_dev_s *esp32_wtd_init(uint8_t wdt_id)
    * Otherwise, inform it has been used.
    */
 
-  if (wtd->inuse == true)
+  if (wdt->inuse == true)
     {
       tmrerr("ERROR: WDT %d is already in use\n", wdt_id);
-      wtd = NULL;
+      wdt = NULL;
     }
   else
     {
-      wtd->inuse = true;
+      wdt->inuse = true;
     }
 
   errout:
-    return (FAR struct esp32_wtd_dev_s *)wtd;
+    return (FAR struct esp32_wdt_dev_s *)wdt;
 }
 
 /****************************************************************************
- * Name: esp32_wtd_deinit
+ * Name: esp32_wdt_deinit
  *
  * Description:
  *   Deinit WDT device
  *
  ****************************************************************************/
 
-int esp32_wtd_deinit(FAR struct esp32_wtd_dev_s *dev)
+int esp32_wdt_deinit(FAR struct esp32_wdt_dev_s *dev)
 {
-  FAR struct esp32_wtd_priv_s *wtd = NULL;
+  FAR struct esp32_wdt_priv_s *wdt = NULL;
 
   DEBUGASSERT(dev);
 
-  wtd = (FAR struct esp32_wtd_priv_s *)dev;
+  wdt = (FAR struct esp32_wdt_priv_s *)dev;
 
-  wtd->inuse = false;
+  wdt->inuse = false;
 
   return OK;
 }
 
 /****************************************************************************
- * Name: esp32_wtd_is_running
+ * Name: esp32_wdt_is_running
  *
  * Description:
  *   Checks if the wdt was already turned on. For example, RTC may has been
@@ -985,17 +985,17 @@ int esp32_wtd_deinit(FAR struct esp32_wtd_dev_s *dev)
  *
  ****************************************************************************/
 
-bool esp32_wtd_is_running(FAR struct esp32_wtd_dev_s *dev)
+bool esp32_wdt_is_running(FAR struct esp32_wdt_dev_s *dev)
 {
   uint32_t status = 0;
   DEBUGASSERT(dev);
 
   /* If it is a RWDT */
 
-  if (((struct esp32_wtd_priv_s *)dev)->base ==
+  if (((struct esp32_wdt_priv_s *)dev)->base ==
         RTC_CNTL_OPTIONS0_REG)
     {
-      status = esp32_wtd_getreg(dev, RWDT_CONFIG0_OFFSET);
+      status = esp32_wdt_getreg(dev, RWDT_CONFIG0_OFFSET);
       if (status & RTC_CNTL_WDT_EN)
         {
           return true;
@@ -1006,7 +1006,7 @@ bool esp32_wtd_is_running(FAR struct esp32_wtd_dev_s *dev)
 
   else
     {
-      status = esp32_wtd_getreg(dev, MWDT_CONFIG0_OFFSET);
+      status = esp32_wdt_getreg(dev, MWDT_CONFIG0_OFFSET);
       if (status & TIMG_WDT_EN)
         {
           return true;

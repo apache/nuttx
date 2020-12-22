@@ -37,7 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* WTD defines */
+/* WDT defines */
 
 /* Offset relative to each wathdog timer instance memory base */
 

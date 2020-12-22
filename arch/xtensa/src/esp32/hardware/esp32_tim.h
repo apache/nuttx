@@ -48,7 +48,7 @@
 #define TIM1_INT_ENA_OFFSET		0x0074
 #define LOW_32_MASK				0xffffffff
 
-/* WTD defines */
+/* WDT defines */
 
 #define WRITE_PROTECTION_KEY    0x050d83aa1
 
