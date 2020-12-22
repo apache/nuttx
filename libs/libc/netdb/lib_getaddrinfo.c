@@ -124,7 +124,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
   int flags = 0;
   int proto = 0;
   int socktype = 0;
-  char hostbuffer[CONFIG_NETDB_BUFSIZE];
+  FAR char *hostbuffer;
   FAR struct hostent_s host;
   FAR struct ai_s *ai;
   FAR struct ai_s *prev_ai = NULL;
@@ -280,12 +280,19 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 #endif /* CONFIG_NET_LOOPBACK */
     }
 
+  hostbuffer = lib_malloc(CONFIG_NETDB_BUFSIZE);
+  if (hostbuffer == NULL)
+    {
+      return EAI_MEMORY;
+    }
+
   /* REVISIT: no check for AI_NUMERICHOST flag. */
 
   gethostentbyname_r(hostname, &host,
-                     hostbuffer, sizeof(hostbuffer), &ret);
+                     hostbuffer, CONFIG_NETDB_BUFSIZE, &ret);
   if (ret != OK)
     {
+      lib_free(hostbuffer);
       return ret;
     }
 
@@ -309,6 +316,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
               freeaddrinfo(*res);
             }
 
+          lib_free(hostbuffer);
           return EAI_MEMORY;
         }
 
@@ -337,5 +345,6 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       prev_ai = ai;
     }
 
+  lib_free(hostbuffer);
   return (*res != NULL) ? OK : EAI_FAMILY;
 }
