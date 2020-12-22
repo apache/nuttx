@@ -24,7 +24,7 @@ PACKAGE=libsamplerate
 VERSION=0.1.9
 
 libsamplerate:
-	$(Q) wget https://codeload.github.com/libsndfile/libsamplerate/zip/master -O libsamplerate.zip
+	$(Q) curl -L https://codeload.github.com/libsndfile/libsamplerate/zip/master -o libsamplerate.zip
 	$(Q) unzip -o libsamplerate.zip
 	$(Q) mv libsamplerate-master libsamplerate
 	$(Q) cp -rf libsamplerate/src/samplerate.h $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)audio$(DELIM)

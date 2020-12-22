@@ -288,7 +288,7 @@ Cygwin configuration:
           gcc-core         byacc        libmpfr-dev
           gcc-g++          gperf        libmpc-dev
           flex             gdb          automake-1.15
-          libncurses-dev   libgmp-dev
+          libncurses-dev   libgmp-dev   curl
 
 After installing Cygwin, you will get lots of links for installed
 tools and shells.  I use the RXVT native shell.  It is fast and reliable
@@ -319,6 +319,7 @@ README.txt file in the tools repository.  This requires the following
 additional tools:
 
     pacman -S bison
+    pacman -S curl
     pacman -S gperf
     pacman -S ncurses-devel
     pacman -S automake-wrapper
