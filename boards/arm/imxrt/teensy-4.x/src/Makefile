@@ -54,4 +54,8 @@ ifeq ($(CONFIG_IMXRT_ADC),y)
 CSRCS += imxrt_adc.c
 endif
 
+ifeq ($(CONFIG_LCD_ST7789),y)
+CSRCS += imxrt_st7789.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

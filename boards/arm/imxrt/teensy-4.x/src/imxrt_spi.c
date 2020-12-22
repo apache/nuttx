@@ -34,7 +34,6 @@
 
 #include "arm_arch.h"
 
-#include "imxrt_config.h"
 #include "imxrt_lpspi.h"
 #include "imxrt_gpio.h"
 #include "teensy-4.h"
@@ -62,6 +61,7 @@ void weak_function imxrt_spidev_initialize(void)
 #endif
 #ifdef CONFIG_IMXRT_LPSPI4
   imxrt_config_gpio(GPIO_LPSPI4_CS); /* LPSPI4 chip select */
+  imxrt_config_gpio(GPIO_LCD_CD);
 #endif
 }
 
@@ -144,10 +144,12 @@ uint8_t imxrt_lpspi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 void imxrt_lpspi4select(FAR struct spi_dev_s *dev, uint32_t devid,
                         bool selected)
 {
-    spiinfo("devid: %d CS: %s\n", (int)devid,
-            selected ? "assert" : "de-assert");
-
-    imxrt_gpio_write(GPIO_LPSPI4_CS, !selected);
+  spiinfo("devid: %d CS: %s\n", (int)devid,
+          selected ? "assert" : "de-assert");
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      imxrt_gpio_write(GPIO_LPSPI4_CS, !selected);
+    }
 }
 
 uint8_t imxrt_lpspi4status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -204,7 +206,15 @@ int imxrt_lpspi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #ifdef CONFIG_IMXRT_LPSPI4
 int imxrt_lpspi4cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-  return -ENODEV;
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      imxrt_gpio_write(GPIO_LCD_CD, !cmd);
+      return OK;
+    }
+  else
+    {
+      return -ENODEV;
+    }
 }
 #endif
 #endif /* CONFIG_SPI_CMDDATA */
