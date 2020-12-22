@@ -3111,7 +3111,7 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
       return -1;
     }
 
-  fd = open(dir, O_RDONLY, NVS_FILE_MODE);
+  fd = open(dir, O_RDONLY);
   if (fd < 0)
     {
       if (errno == ENOENT)
