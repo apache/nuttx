@@ -1021,22 +1021,10 @@ extern "C"
 void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
                     unsigned int buflen);
 
-/* Dump a buffer of data to a specified file descriptor. */
-
-void lib_writebuffer(int fd, FAR const char *msg,
-                     FAR const uint8_t *buffer, unsigned int buflen);
-
 /* Do a pretty buffer dump from multiple buffers. */
 
 void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
                      int iovcnt);
-
-/* Do a pretty buffer dump from multiple buffers
- * to a specified file descriptor.
- */
-
-void lib_writevbuffer(int fd, FAR const char *msg,
-                      FAR const struct iovec *iov, int iovcnt);
 
 /* The system logging interfaces are normally accessed via the macros
  * provided above.  If the cross-compiler's C pre-processor supports a

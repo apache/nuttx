@@ -26,7 +26,6 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
-#include <stdio.h>
 #include <debug.h>
 
 /****************************************************************************
@@ -71,19 +70,18 @@ static char lib_nibble(unsigned char nibble)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_writevbuffer
+ * Name: lib_dumpvbuffer
  *
  * Description:
- *  Do a pretty buffer dump from multiple buffers to a specified file
- *  descriptor.
+ *  Do a pretty buffer dump from multiple buffers.
  *
  *  A fairly large on-stack buffer is used for the case where timestamps are
  *  applied to each line.
  *
  ****************************************************************************/
 
-void lib_writevbuffer(int fd, FAR const char *msg,
-                      FAR const struct iovec *iov, int iovcnt)
+void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
+                     int iovcnt)
 {
   FAR const struct iovec *piov = iov;
   FAR const uint8_t *iov_buf;
@@ -98,14 +96,7 @@ void lib_writevbuffer(int fd, FAR const char *msg,
 
   if (msg)
     {
-      if (fd > 0)
-        {
-          dprintf(fd, "%s (%p):\n", msg, iov->iov_base);
-        }
-      else
-        {
-          syslog(LOG_INFO, "%s (%p):\n", msg, iov->iov_base);
-        }
+      syslog(LOG_INFO, "%s (%p):\n", msg, iov->iov_base);
     }
 
   for (i = 0; i < iovcnt; i++)
@@ -179,30 +170,6 @@ void lib_writevbuffer(int fd, FAR const char *msg,
           *ptr++ = ' ';  /* Plus 1 byte */
         }
 
-      if (fd > 0)
-        {
-          dprintf(fd, "%04x  %s\n", i, line);
-        }
-      else
-        {
-          syslog(LOG_INFO, "%04x  %s\n", i, line);
-        }
+      syslog(LOG_INFO, "%04x  %s\n", i, line);
     }
-}
-
-/****************************************************************************
- * Name: lib_dumpvbuffer
- *
- * Description:
- *  Do a pretty buffer dump from multiple buffers.
- *
- *  A fairly large on-stack buffer is used for the case where timestamps are
- *  applied to each line.
- *
- ****************************************************************************/
-
-void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
-                     int iovcnt)
-{
-  lib_writevbuffer(-1, msg, iov, iovcnt);
 }
