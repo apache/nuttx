@@ -140,6 +140,7 @@ static struct work_s g_hp_work;
  *
  ****************************************************************************/
 
+#ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
 static int bt_send(FAR const struct bt_driver_s *btdev,
                    FAR struct bt_buf_s *buf)
 {
@@ -147,6 +148,7 @@ static int bt_send(FAR const struct bt_driver_s *btdev,
 
   return btdev->send(btdev, buf);
 }
+#endif
 
 /****************************************************************************
  * Name: bt_enqueue_bufwork
