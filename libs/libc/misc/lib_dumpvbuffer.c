@@ -85,13 +85,10 @@ void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
 {
   FAR const struct iovec *piov = iov;
   FAR const uint8_t *iov_buf;
+  unsigned int len = 0;
   char line[_LINESIZE];
-  size_t niovpos = 0;
-  size_t ntotal = 0;
-  size_t nbufpos;
-  unsigned int i;
-  unsigned int j;
-  unsigned int k;
+  unsigned int nitems;
+  unsigned int i = 0;
   FAR char *ptr;
 
   if (msg)
@@ -99,77 +96,45 @@ void lib_dumpvbuffer(FAR const char *msg, FAR const struct iovec *iov,
       syslog(LOG_INFO, "%s (%p):\n", msg, iov->iov_base);
     }
 
-  for (i = 0; i < iovcnt; i++)
-    {
-      /* Ignore zero-length writes */
-
-      if (iov[i].iov_len <= 0)
-        {
-          break;
-        }
-
-      ntotal += iov[i].iov_len;
-    }
-
-  if (ntotal == 0)
-    {
-      return;
-    }
-
   /* Initialize the separator and terminator */
 
   line[_ASCIICHAR_OFFSET - 1] = ' ';
   line[_LINESIZE - 1] = '\0';
 
-  iov_buf = piov->iov_base;
-
-  for (i = 0; i < ntotal; i += _NITEMS)
+  while (piov != &iov[iovcnt] && piov->iov_len)
     {
+      iov_buf = piov->iov_base;
       ptr = line;
 
-      for (j = 0; j < _NITEMS; j++)
+      for (nitems = 0; nitems < _NITEMS; nitems++)
         {
-          k = i + j;
+          *ptr++ = lib_nibble((iov_buf[len] >> 4) & 0xf);
+          *ptr++ = lib_nibble(iov_buf[len] & 0xf);
+          *ptr++ = ' ';
 
-          if (k < ntotal)
+          /* Generate printable characters */
+
+          if (iov_buf[len] >= 0x20 && iov_buf[len] < 0x7f)
             {
-              /* Redirect the IO Vector */
-
-              if (k == niovpos + piov->iov_len)
-                {
-                  niovpos += piov->iov_len;
-                  piov++;
-                  iov_buf = piov->iov_base;
-                }
-
-              /* Generate hex values */
-
-              nbufpos = k - niovpos;
-
-              *ptr++ = lib_nibble((iov_buf[nbufpos] >> 4) & 0xf);
-              *ptr++ = lib_nibble(iov_buf[nbufpos] & 0xf);
-
-              /* Generate printable characters */
-
-              if (iov_buf[nbufpos] >= 0x20 && iov_buf[nbufpos] < 0x7f)
-                {
-                  line[_ASCIICHAR_OFFSET + j] = iov_buf[nbufpos];
-                }
-              else
-                {
-                  line[_ASCIICHAR_OFFSET + j] = '.';
-                }
+              line[_ASCIICHAR_OFFSET + nitems] = iov_buf[len];
             }
           else
             {
-              *ptr++ = ' ';
-              *ptr++ = ' ';
-              line[_ASCIICHAR_OFFSET + j] = '\0';
+              line[_ASCIICHAR_OFFSET + nitems] = '.';
             }
 
-          *ptr++ = ' ';  /* Plus 1 byte */
+          if (++len == piov->iov_len)
+            {
+              len = 0;
+              if (++piov == &iov[iovcnt])
+                {
+                  memset(ptr, ' ', (_NITEMS - nitems) * 3);
+                  memset(&line[_ASCIICHAR_OFFSET + nitems], ' ', _NITEMS - nitems);
+                  break;
+              }
+            }
         }
 
-      syslog(LOG_INFO, "%04x  %s\n", i, line);
+      syslog(LOG_INFO, "%04x  %s\n", i++ * _NITEMS, line);
     }
 }
