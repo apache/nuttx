@@ -27,6 +27,7 @@
 #include <fcntl.h>          /* O_NONBLOCK */
 #include <mqueue.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/mqueue.h>
 
 /****************************************************************************
@@ -61,23 +62,33 @@
 int mq_setattr(mqd_t mqdes, const struct mq_attr *mq_stat,
                struct mq_attr *oldstat)
 {
-  int ret = ERROR;
+  FAR struct file *filep;
+  int ret;
 
-  if (mqdes && mq_stat)
+  if (!mq_stat)
     {
-      /* Return the attributes if so requested */
-
-      if (oldstat)
-        {
-          mq_getattr(mqdes, oldstat);
-        }
-
-      /* Set the new value of the O_NONBLOCK flag. */
-
-      mqdes->oflags = ((mq_stat->mq_flags & O_NONBLOCK) |
-                       (mqdes->oflags & (~O_NONBLOCK)));
-      ret = OK;
+      set_errno(EINVAL);
+      return ERROR;
     }
 
-  return ret;
+  ret = fs_getfilep(mqdes, &filep);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  /* Return the attributes if so requested */
+
+  if (oldstat)
+    {
+      mq_getattr(mqdes, oldstat);
+    }
+
+  /* Set the new value of the O_NONBLOCK flag. */
+
+  filep->f_oflags = ((mq_stat->mq_flags & O_NONBLOCK) |
+                    (filep->f_oflags & (~O_NONBLOCK)));
+
+  return OK;
 }

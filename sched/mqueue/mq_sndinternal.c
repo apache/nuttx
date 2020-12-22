@@ -55,38 +55,39 @@
  *   common to both functions.
  *
  * Input Parameters:
- *   mqdes - Message queue descriptor
- *   msg - Message to send
+ *   msgq   - Message queue descriptor
+ *   oflags - flags from user set
+ *   msg    - Message to send
  *   msglen - The length of the message in bytes
- *   prio - The priority of the message
+ *   prio   - The priority of the message
  *
  * Returned Value:
  *   One success, 0 (OK) is returned. On failure, a negated errno value is
  *   returned.
  *
- *     EINVAL   Either msg or mqdes is NULL or the value of prio is invalid.
+ *     EINVAL   Either msg or msgq is NULL or the value of prio is invalid.
  *     EPERM    Message queue opened not opened for writing.
  *     EMSGSIZE 'msglen' was greater than the maxmsgsize attribute of the
  *               message queue.
  *
  ****************************************************************************/
 
-int nxmq_verify_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
-                     unsigned int prio)
+int nxmq_verify_send(FAR struct mqueue_inode_s *msgq, int oflags,
+                     FAR const char *msg, size_t msglen, unsigned int prio)
 {
   /* Verify the input parameters */
 
-  if (msg == NULL || mqdes == NULL || prio > MQ_PRIO_MAX)
+  if (msg == NULL || msgq == NULL || prio > MQ_PRIO_MAX)
     {
       return -EINVAL;
     }
 
-  if ((mqdes->oflags & O_WROK) == 0)
+  if ((oflags & O_WROK) == 0)
     {
       return -EPERM;
     }
 
-  if (msglen > (size_t)mqdes->msgq->maxmsgsize)
+  if (msglen > (size_t)msgq->maxmsgsize)
     {
       return -EMSGSIZE;
     }
@@ -190,14 +191,15 @@ FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
  *   full.
  *
  * Input Parameters:
- *   mqdes - Message queue descriptor
+ *   msgq   - Message queue descriptor
+ *   oflags - flags from user set
  *
  * Returned Value:
  *   On success, nxmq_wait_send() returns 0 (OK); a negated errno value is
  *   returned on any failure:
  *
  *   EAGAIN   The queue was full and the O_NONBLOCK flag was set for the
- *            message queue description referred to by mqdes.
+ *            message queue description referred to by msgq.
  *   EINTR    The call was interrupted by a signal handler.
  *   ETIMEOUT A timeout expired before the message queue became non-full
  *            (mq_timedsend only).
@@ -208,10 +210,9 @@ FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
  *
  ****************************************************************************/
 
-int nxmq_wait_send(mqd_t mqdes)
+int nxmq_wait_send(FAR struct mqueue_inode_s *msgq, int oflags)
 {
   FAR struct tcb_s *rtcb;
-  FAR struct mqueue_inode_s *msgq;
   int ret;
 
 #ifdef CONFIG_CANCELLATION_POINTS
@@ -229,10 +230,6 @@ int nxmq_wait_send(mqd_t mqdes)
     }
 #endif
 
-  /* Get a pointer to the message queue */
-
-  msgq = mqdes->msgq;
-
   /* Verify that the queue is indeed full as the caller thinks */
 
   if (msgq->nmsgs >= msgq->maxmsgs)
@@ -241,7 +238,7 @@ int nxmq_wait_send(mqd_t mqdes)
        * message queue?
        */
 
-      if ((mqdes->oflags & O_NONBLOCK) != 0)
+      if ((oflags & O_NONBLOCK) != 0)
         {
           /* No... We will return an error to the caller. */
 
@@ -305,12 +302,12 @@ int nxmq_wait_send(mqd_t mqdes)
  * Description:
  *   This is internal, common logic shared by both [nx]mq_send and
  *   [nx]mq_timesend.  This function adds the specified message (msg) to the
- *   message queue (mqdes).  Then it notifies any tasks that were waiting
+ *   message queue (msgq).  Then it notifies any tasks that were waiting
  *   for message queue notifications setup by mq_notify.  And, finally, it
  *   awakens any tasks that were waiting for the message not empty event.
  *
  * Input Parameters:
- *   mqdes  - Message queue descriptor
+ *   msgq   - Message queue descriptor
  *   msg    - Message to send
  *   msglen - The length of the message in bytes
  *   prio   - The priority of the message
@@ -320,11 +317,11 @@ int nxmq_wait_send(mqd_t mqdes)
  *
  ****************************************************************************/
 
-int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
+int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
+                 FAR struct mqueue_msg_s *mqmsg,
                  FAR const char *msg, size_t msglen, unsigned int prio)
 {
   FAR struct tcb_s *btcb;
-  FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *next;
   FAR struct mqueue_msg_s *prev;
   irqstate_t flags;
@@ -332,7 +329,6 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
   /* Get a pointer to the message queue */
 
   sched_lock();
-  msgq = mqdes->msgq;
 
   /* Construct the message header info */
 
@@ -376,7 +372,7 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
    * message queue
    */
 
-  if (msgq->ntmqdes)
+  if (msgq->ntpid != INVALID_PROCESS_ID)
     {
       struct sigevent event;
       pid_t pid;
@@ -389,8 +385,7 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
       /* Detach the notification */
 
       memset(&msgq->ntevent, 0, sizeof(struct sigevent));
-      msgq->ntpid   = INVALID_PROCESS_ID;
-      msgq->ntmqdes = NULL;
+      msgq->ntpid = INVALID_PROCESS_ID;
 
       /* Notification the client */
 

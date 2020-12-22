@@ -53,8 +53,9 @@
  *   are common to both functions.
  *
  * Input Parameters:
- *   mqdes - Message Queue Descriptor
- *   msg - Buffer to receive the message
+ *   msgq   - Message queue descriptor
+ *   oflags - flags from user set
+ *   msg    - Buffer to receive the message
  *   msglen - Size of the buffer in bytes
  *
  * Returned Value:
@@ -64,25 +65,26 @@
  *   EPERM    Message queue opened not opened for reading.
  *   EMSGSIZE 'msglen' was less than the maxmsgsize attribute of the message
  *            queue.
- *   EINVAL   Invalid 'msg' or 'mqdes'
+ *   EINVAL   Invalid 'msg' or 'msgq'
  *
  ****************************************************************************/
 
-int nxmq_verify_receive(mqd_t mqdes, FAR char *msg, size_t msglen)
+int nxmq_verify_receive(FAR struct mqueue_inode_s *msgq,
+                        int oflags, FAR char *msg, size_t msglen)
 {
   /* Verify the input parameters */
 
-  if (!msg || !mqdes)
+  if (!msg || !msgq)
     {
       return -EINVAL;
     }
 
-  if ((mqdes->oflags & O_RDOK) == 0)
+  if ((oflags & O_RDOK) == 0)
     {
       return -EPERM;
     }
 
-  if (msglen < (size_t)mqdes->msgq->maxmsgsize)
+  if (msglen < (size_t)msgq->maxmsgsize)
     {
       return -EMSGSIZE;
     }
@@ -100,7 +102,8 @@ int nxmq_verify_receive(mqd_t mqdes, FAR char *msg, size_t msglen)
  *   returns it.
  *
  * Input Parameters:
- *   mqdes  - Message queue descriptor
+ *   msgq   - Message queue descriptor
+ *   oflags - flags from user set
  *   rcvmsg - The caller-provided location in which to return the newly
  *            received message.
  *
@@ -117,10 +120,10 @@ int nxmq_verify_receive(mqd_t mqdes, FAR char *msg, size_t msglen)
  *
  ****************************************************************************/
 
-int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
+int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
+                      int oflags, FAR struct mqueue_msg_s **rcvmsg)
 {
   FAR struct tcb_s *rtcb;
-  FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *newmsg;
   int ret;
 
@@ -142,10 +145,6 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
     }
 #endif
 
-  /* Get a pointer to the message queue */
-
-  msgq = mqdes->msgq;
-
   /* Get the message from the head of the queue */
 
   while ((newmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&msgq->msglist))
@@ -155,7 +154,7 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
        * has been satisfied?
        */
 
-      if ((mqdes->oflags & O_NONBLOCK) == 0)
+      if ((oflags & O_NONBLOCK) == 0)
         {
           /* Yes.. Block and try again */
 
@@ -191,7 +190,7 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
       else
         {
           /* The queue was empty, and the O_NONBLOCK flag was set for the
-           * message queue description referred to by 'mqdes'.
+           * message queue description.
            */
 
           return -EAGAIN;
@@ -222,7 +221,7 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
  *   and disposes of the message structure
  *
  * Input Parameters:
- *   mqdes - Message queue descriptor
+ *   msgq    - Message queue descriptor
  *   mqmsg   - The message obtained by mq_waitmsg()
  *   ubuffer - The address of the user provided buffer to receive the message
  *   prio    - The user-provided location to return the message priority.
@@ -240,12 +239,12 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
  *
  ****************************************************************************/
 
-ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
+ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
+                        FAR struct mqueue_msg_s *mqmsg,
                         FAR char *ubuffer, unsigned int *prio)
 {
   FAR struct tcb_s *btcb;
   irqstate_t flags;
-  FAR struct mqueue_inode_s *msgq;
   ssize_t rcvmsglen;
 
   /* Get the length of the message (also the return value) */
@@ -269,7 +268,6 @@ ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
 
   /* Check if any tasks are waiting for the MQ not full event. */
 
-  msgq = mqdes->msgq;
   if (msgq->nwaitnotfull > 0)
     {
       /* Find the highest priority task that is waiting for

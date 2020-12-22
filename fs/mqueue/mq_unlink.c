@@ -36,6 +36,38 @@
 #include "mqueue/mqueue.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mq_inode_release
+ *
+ * Description:
+ *   Release a reference count on a message queue inode.
+ *
+ * Input Parameters:
+ *   inode - The message queue inode
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void mq_inode_release(FAR struct inode *inode)
+{
+  if (inode->i_crefs <= 1)
+    {
+      FAR struct mqueue_inode_s *msgq = inode->i_private;
+
+      if (msgq)
+        {
+          nxmq_free_msgq(msgq);
+          inode->i_private = NULL;
+        }
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -182,8 +214,8 @@ int mq_unlink(FAR const char *mq_name)
   if (ret < 0)
     {
       set_errno(-ret);
-      ret = ERROR;
+      return ERROR;
     }
 
-  return ret;
+  return OK;
 }
