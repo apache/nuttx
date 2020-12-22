@@ -1,6 +1,8 @@
 /****************************************************************************
- * <Relative path to the file>
- * <Optional one line file description>
+ * arch/risc-v/src/bl602/bl602_hbn.c
+ *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,13 +26,14 @@
  ****************************************************************************/
 
 #include "hardware/bl602_hbn.h"
+#include "riscv_arch.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: hbn_set_uart_clk_sel
+ * Name: bl602_hbn_set_uart_clk_sel
  *
  * Description:
  *   Select uart clock source.
@@ -47,12 +50,12 @@
  *
  ****************************************************************************/
 
-void hbn_set_uart_clk_sel(enum hbn_uart_clk_type_e clk_sel)
+void bl602_hbn_set_uart_clk_sel(int clk_sel)
 {
   uint32_t tmp_val;
 
-  tmp_val = BL_RD_REG(HBN_BASE, HBN_GLB);
-  tmp_val = BL_SET_REG_BITS_VAL(tmp_val, HBN_UART_CLK_SEL, clk_sel);
-  BL_WR_REG(HBN_BASE, HBN_GLB, tmp_val);
+  tmp_val = getreg32(HBN_BASE + HBN_GLB_OFFSET);
+  tmp_val &= ~(1 << 2);
+  tmp_val |= (clk_sel << 2);
+  putreg32(tmp_val, HBN_BASE + HBN_GLB_OFFSET);
 }
-

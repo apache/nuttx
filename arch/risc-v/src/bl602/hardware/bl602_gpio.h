@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/hardware/bl602_gpio.h
  *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,27 +36,27 @@
 
 /* Input Floating Mode */
 
-#define GPIO_MODE_INPUT ((uint32_t)0x00000000U)
+#define GPIO_MODE_INPUT (0x00000000)
 
 /* Output Push Pull Mode */
 
-#define GPIO_MODE_OUTPUT ((uint32_t)0x00000001U)
+#define GPIO_MODE_OUTPUT (0x00000001)
 
 /* Alternate function */
 
-#define GPIO_MODE_AF ((uint32_t)0x00000002U)
+#define GPIO_MODE_AF (0x00000002)
 
 /* GPIO pull up */
 
-#define GPIO_PULL_UP ((uint32_t)0x00000000U)
+#define GPIO_PULL_UP (0x00000000)
 
 /* GPIO pull down */
 
-#define GPIO_PULL_DOWN ((uint32_t)0x00000001U)
+#define GPIO_PULL_DOWN (0x00000001)
 
 /* GPIO no pull up or down */
 
-#define GPIO_PULL_NONE ((uint32_t)0x00000002U)
+#define GPIO_PULL_NONE (0x00000002)
 
 /* GPIO0 function definition */
 
@@ -406,56 +409,50 @@
 
 #ifndef __ASSEMBLY__
 
-enum gpio_pins_e
-{
-  GLB_GPIO_PIN_0 = 0,
-  GLB_GPIO_PIN_1,
-  GLB_GPIO_PIN_2,
-  GLB_GPIO_PIN_3,
-  GLB_GPIO_PIN_4,
-  GLB_GPIO_PIN_5,
-  GLB_GPIO_PIN_6,
-  GLB_GPIO_PIN_7,
-  GLB_GPIO_PIN_8,
-  GLB_GPIO_PIN_9,
-  GLB_GPIO_PIN_10,
-  GLB_GPIO_PIN_11,
-  GLB_GPIO_PIN_12,
-  GLB_GPIO_PIN_13,
-  GLB_GPIO_PIN_14,
-  GLB_GPIO_PIN_15,
-  GLB_GPIO_PIN_16,
-  GLB_GPIO_PIN_17,
-  GLB_GPIO_PIN_18,
-  GLB_GPIO_PIN_19,
-  GLB_GPIO_PIN_20,
-  GLB_GPIO_PIN_21,
-  GLB_GPIO_PIN_22,
-  GLB_GPIO_PIN_MAX
-};
+#define GLB_GPIO_PIN_0  0
+#define GLB_GPIO_PIN_1  1
+#define GLB_GPIO_PIN_2  2
+#define GLB_GPIO_PIN_3  3
+#define GLB_GPIO_PIN_4  4
+#define GLB_GPIO_PIN_5  5
+#define GLB_GPIO_PIN_6  6
+#define GLB_GPIO_PIN_7  7
+#define GLB_GPIO_PIN_8  8
+#define GLB_GPIO_PIN_9  9
+#define GLB_GPIO_PIN_10 10
+#define GLB_GPIO_PIN_11 11
+#define GLB_GPIO_PIN_12 12
+#define GLB_GPIO_PIN_13 13
+#define GLB_GPIO_PIN_14 14
+#define GLB_GPIO_PIN_15 15
+#define GLB_GPIO_PIN_16 16
+#define GLB_GPIO_PIN_17 17
+#define GLB_GPIO_PIN_18 18
+#define GLB_GPIO_PIN_19 19
+#define GLB_GPIO_PIN_20 20
+#define GLB_GPIO_PIN_21 21
+#define GLB_GPIO_PIN_22 22
+#define GLB_GPIO_PIN_MA 23
 
-enum gpio_fun_e
-{
-  GPIO_FUN_SDIO   = 1,
-  GPIO_FUN_FLASH  = 2,
-  GPIO_FUN_SPI    = 4,
-  GPIO_FUN_I2C    = 6,
-  GPIO_FUN_UART   = 7,
-  GPIO_FUN_PWM    = 8,
-  GPIO_FUN_EXT_PA = 8,
-  GPIO_FUN_ANALOG = 10,
-  GPIO_FUN_SWGPIO = 11,
-  GPIO_FUN_JTAG   = 14
-};
+#define GPIO_FUN_SDIO   1
+#define GPIO_FUN_FLASH  2
+#define GPIO_FUN_SPI    4
+#define GPIO_FUN_I2C    6
+#define GPIO_FUN_UART   7
+#define GPIO_FUN_PWM    8
+#define GPIO_FUN_EXT_PA 8
+#define GPIO_FUN_ANALOG 10
+#define GPIO_FUN_SWGPIO 11
+#define GPIO_FUN_JTAG   14
 
 struct gpio_cfg_s
 {
-  enum gpio_pins_e gpio_pin;
-  enum gpio_fun_e  gpio_fun;
-  int              gpio_mode;
-  int              pull_type;
-  int              drive;
-  int              smt_ctrl;
+  int gpio_pin;
+  int gpio_fun;
+  int gpio_mode;
+  int pull_type;
+  int drive;
+  int smt_ctrl;
 };
 
 /****************************************************************************
@@ -479,7 +476,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gpio_init
+ * Name: bl602_gpio_init
  *
  * Description:
  *   Init a gpio pin.
@@ -496,7 +493,7 @@ extern "C"
  *
  ****************************************************************************/
 
-EXTERN void gpio_init(struct gpio_cfg_s *cfg);
+EXTERN void bl602_gpio_init(struct gpio_cfg_s *cfg);
 
 #undef EXTERN
 #ifdef __cplusplus

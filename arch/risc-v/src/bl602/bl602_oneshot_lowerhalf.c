@@ -1,8 +1,8 @@
 /****************************************************************************
- *  arch/arm/src/bl602/bl602_oneshot_lowerhalf.c
+ * arch/arm/src/bl602/bl602_oneshot_lowerhalf.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ * Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ * Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,9 +48,17 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/timers/oneshot.h>
 
+#include "riscv_arch.h"
+#include "riscv_internal.h"
+
 #include <hardware/bl602_timer.h>
 #include "bl602_oneshot_lowerhalf.h"
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Private definetions */
 #define TIMER_MAX_VALUE (0xFFFFFFFF)
 #define TIMER_CLK_DIV   (160)
 #define TIMER_CLK_FREQ  (160000000UL / (TIMER_CLK_DIV))
@@ -142,15 +150,15 @@ static int bl602_oneshot_handler(int irq, FAR void *context, FAR void *arg)
   uint32_t tmp_val;
   uint32_t tmp_addr;
 
-  int_id   = BL_RD_WORD(TIMER_BASE + TIMER_TMSR2_OFFSET + 4 * priv->tim);
+  int_id   = getreg32(TIMER_BASE + TIMER_TMSR2_OFFSET + 4 * priv->tim);
   tmp_addr = TIMER_BASE + TIMER_TICR2_OFFSET + 4 * priv->tim;
-  tmp_val  = BL_RD_WORD(tmp_addr);
+  tmp_val  = getreg32(tmp_addr);
 
   /* Comparator 0 match interrupt */
 
-  if (BL_IS_REG_BIT_SET(int_id, TIMER_TMSR_0))
+  if (((int_id) & (1 << (TIMER_TMSR_0_POS))) != 0)
     {
-      BL_WR_WORD(tmp_addr, BL_SET_REG_BIT(tmp_val, TIMER_TCLR_0));
+      putreg32(tmp_val | (1 << TIMER_TCLR_0_POS), tmp_addr);
       callback = priv->callback;
       cbarg    = priv->arg;
 
@@ -162,16 +170,16 @@ static int bl602_oneshot_handler(int irq, FAR void *context, FAR void *arg)
 
   /* Comparator 1 match interrupt */
 
-  if (BL_IS_REG_BIT_SET(int_id, TIMER_TMSR_1))
+  if (((int_id) & (1 << (TIMER_TMSR_1_POS))) != 0)
     {
-      BL_WR_WORD(tmp_addr, BL_SET_REG_BIT(tmp_val, TIMER_TCLR_1));
+      putreg32(tmp_val | (1 << TIMER_TCLR_1_POS), tmp_addr);
     }
 
   /* Comparator 2 match interrupt */
 
-  if (BL_IS_REG_BIT_SET(int_id, TIMER_TMSR_2))
+  if (((int_id) & (1 << (TIMER_TMSR_2_POS))) != 0)
     {
-      BL_WR_WORD(tmp_addr, BL_SET_REG_BIT(tmp_val, TIMER_TCLR_2));
+      putreg32(tmp_val | (1 << TIMER_TCLR_2_POS), tmp_addr);
     }
 
   return 0;
@@ -265,14 +273,14 @@ static int bl602_start(FAR struct oneshot_lowerhalf_s *lower,
   usec = (uint64_t)ts->tv_sec * USEC_PER_SEC +
          (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
 
-  timer_setcompvalue(
+  bl602_timer_setcompvalue(
     priv->tim, TIMER_COMP_ID_0, usec / (TIMER_CLK_FREQ / priv->freq));
 
-  timer_setpreloadvalue(priv->tim, 0);
+  bl602_timer_setpreloadvalue(priv->tim, 0);
   irq_attach(priv->irq, bl602_oneshot_handler, (void *)priv);
   up_enable_irq(priv->irq);
-  timer_intmask(priv->tim, TIMER_INT_COMP_0, 0);
-  timer_enable(priv->tim);
+  bl602_timer_intmask(priv->tim, TIMER_INT_COMP_0, 0);
+  bl602_timer_enable(priv->tim);
   priv->started = true;
 
   leave_critical_section(flags);
@@ -319,10 +327,10 @@ static int bl602_cancel(FAR struct oneshot_lowerhalf_s *lower,
     {
       flags = enter_critical_section();
 
-      timer_disable(priv->tim);
+      bl602_timer_disable(priv->tim);
       priv->started = false;
       up_disable_irq(priv->irq);
-      timer_intmask(priv->tim, TIMER_INT_COMP_0, 1);
+      bl602_timer_intmask(priv->tim, TIMER_INT_COMP_0, 1);
       priv->callback = NULL;
       priv->arg      = NULL;
 
@@ -399,22 +407,21 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int      chan,
   timstr.count_mode = TIMER_COUNT_PRELOAD; /* Timer count mode */
 
   timstr.clock_division =
-    (TIMER_CLK_DIV * resolution) - 1;  /* Timer clock divison value */
+    (TIMER_CLK_DIV * resolution) - 1; /* Timer clock divison value */
 
-  timstr.match_val0  = TIMER_MAX_VALUE; /* Timer match 0 value 0 */
-  timstr.match_val1  = TIMER_MAX_VALUE; /* Timer match 1 value 0 */
-  timstr.match_val2  = TIMER_MAX_VALUE; /* Timer match 2 value 0 */
+  timstr.match_val0 = TIMER_MAX_VALUE; /* Timer match 0 value 0 */
+  timstr.match_val1 = TIMER_MAX_VALUE; /* Timer match 1 value 0 */
+  timstr.match_val2 = TIMER_MAX_VALUE; /* Timer match 2 value 0 */
 
   timstr.pre_load_val = TIMER_MAX_VALUE; /* Timer preload value */
 
-  timer_intmask(chan, TIMER_INT_ALL, 1);
+  bl602_timer_intmask(chan, TIMER_INT_ALL, 1);
 
   /* timer disable */
 
-  timer_disable(chan);
+  bl602_timer_disable(chan);
 
-  timer_init(&timstr);
+  bl602_timer_init(&timstr);
 
   return &priv->lh;
 }
-

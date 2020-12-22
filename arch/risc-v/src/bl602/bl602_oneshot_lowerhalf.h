@@ -1,8 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_oneshot.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -71,6 +71,7 @@
  * Public Types
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
 /* This describes the callback function that will be invoked when the oneshot
  * timer expires.  The oneshot fires, the client will receive:
  *
@@ -208,5 +209,6 @@ int bl602_oneshot_cancel(struct bl602_oneshot_s *oneshot,
 }
 #endif
 
+#endif /* __ASSEMBLY__ */
 #endif /* CONFIG_BL602_ONESHOT */
 #endif /* __ARCH_ARM_SRC_BL602_ONESHOT_H */

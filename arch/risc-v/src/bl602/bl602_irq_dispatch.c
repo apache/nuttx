@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_irq_dispatch.c
  *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -103,4 +106,3 @@ void *bl602_dispatch_irq(uint32_t vector, uint32_t *regs)
 
   return regs;
 }
-

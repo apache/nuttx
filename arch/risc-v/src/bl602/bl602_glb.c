@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_glb.c
  *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,13 +26,14 @@
  ****************************************************************************/
 
 #include "hardware/bl602_glb.h"
+#include "riscv_arch.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: glb_uart_fun_sel
+ * Name: bl602_glb_uart_fun_sel
  *
  * Description:
  *   Select UART signal function.
@@ -43,12 +47,13 @@
  *
  ****************************************************************************/
 
-void glb_uart_fun_sel(enum glb_uart_sig_e sig, enum glb_uart_sig_fun_e fun)
+void bl602_glb_uart_fun_sel(int sig, int fun)
 {
   uint32_t sig_pos = 0;
   uint32_t tmp_val = 0;
 
-  tmp_val = BL_RD_REG(GLB_BASE, GLB_UART_SIG_SEL_0);
+  tmp_val = getreg32(GLB_BASE + GLB_UART_SIG_SEL_0_OFFSET);
+
   sig_pos = (sig * 4);
 
   /* Clear original val */
@@ -58,11 +63,11 @@ void glb_uart_fun_sel(enum glb_uart_sig_e sig, enum glb_uart_sig_fun_e fun)
   /* Set new value */
 
   tmp_val = tmp_val | (fun << sig_pos);
-  BL_WR_REG(GLB_BASE, GLB_UART_SIG_SEL_0, tmp_val);
+  putreg32(tmp_val, GLB_BASE + GLB_UART_SIG_SEL_0_OFFSET);
 }
 
 /****************************************************************************
- * Name: glb_ahb_slave1_reset
+ * Name: bl602_glb_ahb_slave1_reset
  *
  * Description:
  *   Select UART signal function.
@@ -76,20 +81,31 @@ void glb_uart_fun_sel(enum glb_uart_sig_e sig, enum glb_uart_sig_fun_e fun)
  *
  ****************************************************************************/
 
-void glb_ahb_slave1_reset(enum bl_ahb_slave1_e slave1)
+void bl602_glb_ahb_slave1_reset(uint32_t slave1)
 {
   uint32_t tmp_val = 0;
 
-  tmp_val = BL_RD_REG(GLB_BASE, GLB_SWRST_CFG1);
+  tmp_val = getreg32(GLB_BASE + GLB_SWRST_CFG1_OFFSET);
   tmp_val &= (~(1 << slave1));
-  BL_WR_REG(GLB_BASE, GLB_SWRST_CFG1, tmp_val);
-  BL_DRV_DUMMY;
-  tmp_val = BL_RD_REG(GLB_BASE, GLB_SWRST_CFG1);
-  tmp_val |= (1 << slave1);
-  BL_WR_REG(GLB_BASE, GLB_SWRST_CFG1, tmp_val);
-  BL_DRV_DUMMY;
-  tmp_val = BL_RD_REG(GLB_BASE, GLB_SWRST_CFG1);
-  tmp_val &= (~(1 << slave1));
-  BL_WR_REG(GLB_BASE, GLB_SWRST_CFG1, tmp_val);
-}
+  putreg32(tmp_val, GLB_BASE + GLB_SWRST_CFG1_OFFSET);
 
+  /* It is to prevent glitch, which cannot be accessed via bus immediately
+   * after certain register operations, so some nop is added
+   */
+
+  BL_DRV_DUMMY();
+
+  tmp_val = getreg32(GLB_BASE + GLB_SWRST_CFG1_OFFSET);
+  tmp_val |= (1 << slave1);
+  putreg32(tmp_val, GLB_BASE + GLB_SWRST_CFG1_OFFSET);
+
+  /* It is to prevent glitch, which cannot be accessed via bus immediately
+   * after certain register operations, so some nop is added
+   */
+
+  BL_DRV_DUMMY();
+
+  tmp_val = getreg32(GLB_BASE + GLB_SWRST_CFG1_OFFSET);
+  tmp_val &= (~(1 << slave1));
+  putreg32(tmp_val, GLB_BASE + GLB_SWRST_CFG1_OFFSET);
+}

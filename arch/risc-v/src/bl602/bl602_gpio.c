@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_gpio.c
  *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,13 +28,14 @@
 #include <stdint.h>
 #include "hardware/bl602_gpio.h"
 #include "hardware/bl602_glb.h"
+#include "riscv_arch.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gpio_init
+ * Name: bl602_gpio_init
  *
  * Description:
  *   Init a gpio pin.
@@ -48,7 +52,7 @@
  *
  ****************************************************************************/
 
-void gpio_init(struct gpio_cfg_s *cfg)
+void bl602_gpio_init(struct gpio_cfg_s *cfg)
 {
   uint8_t   gpio_pin = cfg->gpio_pin;
   uint32_t *p_out;
@@ -66,7 +70,7 @@ void gpio_init(struct gpio_cfg_s *cfg)
   tmp_out &= (~(1 << pos));
   *p_out = tmp_out;
 
-  tmp_val = BL_RD_WORD(GLB_BASE + GLB_GPIO_OFFSET + gpio_pin / 2 * 4);
+  tmp_val = getreg32(GLB_BASE + GLB_GPIO_OFFSET + gpio_pin / 2 * 4);
 
   if (gpio_pin % 2 == 0)
     {
@@ -74,32 +78,33 @@ void gpio_init(struct gpio_cfg_s *cfg)
 
       if (cfg->gpio_mode == GPIO_MODE_OUTPUT)
         {
-          tmp_val = BL_CLR_REG_BIT(tmp_val, GLB_REG_GPIO_0_IE);
+          tmp_val = tmp_val & GLB_REG_GPIO_0_IE_UMSK;
           tmp_out |= (1 << pos);
         }
       else
         {
-          tmp_val = BL_SET_REG_BIT(tmp_val, GLB_REG_GPIO_0_IE);
+          tmp_val = tmp_val | (1 << GLB_REG_GPIO_0_IE_POS);
         }
 
       /* Set pull up or down */
 
-      tmp_val = BL_CLR_REG_BIT(tmp_val, GLB_REG_GPIO_0_PU);
-      tmp_val = BL_CLR_REG_BIT(tmp_val, GLB_REG_GPIO_0_PD);
+      tmp_val &= GLB_REG_GPIO_0_PU_UMSK;
+      tmp_val &= GLB_REG_GPIO_0_PD_UMSK;
       if (cfg->pull_type == GPIO_PULL_UP)
         {
-          tmp_val = BL_SET_REG_BIT(tmp_val, GLB_REG_GPIO_0_PU);
+          tmp_val = tmp_val | (1 << GLB_REG_GPIO_0_PU_POS);
         }
       else if (cfg->pull_type == GPIO_PULL_DOWN)
         {
-          tmp_val = BL_SET_REG_BIT(tmp_val, GLB_REG_GPIO_0_PD);
+          tmp_val = tmp_val | (1 << GLB_REG_GPIO_0_PD_POS);
         }
 
-      tmp_val = BL_SET_REG_BITS_VAL(tmp_val, GLB_REG_GPIO_0_DRV, cfg->drive);
-      tmp_val =
-        BL_SET_REG_BITS_VAL(tmp_val, GLB_REG_GPIO_0_SMT, cfg->smt_ctrl);
-      tmp_val =
-        BL_SET_REG_BITS_VAL(tmp_val, GLB_REG_GPIO_0_FUNC_SEL, cfg->gpio_fun);
+      tmp_val = (tmp_val & GLB_REG_GPIO_0_DRV_UMSK) |
+                (cfg->drive << GLB_REG_GPIO_0_DRV_POS);
+      tmp_val = (tmp_val & GLB_REG_GPIO_0_SMT_UMSK) |
+                (cfg->smt_ctrl << GLB_REG_GPIO_0_SMT_POS);
+      tmp_val = (tmp_val & GLB_REG_GPIO_0_FUNC_SEL_UMSK) |
+                (cfg->gpio_fun << GLB_REG_GPIO_0_FUNC_SEL_POS);
     }
   else
     {
@@ -107,36 +112,36 @@ void gpio_init(struct gpio_cfg_s *cfg)
 
       if (cfg->gpio_mode == GPIO_MODE_OUTPUT)
         {
-          tmp_val = BL_CLR_REG_BIT(tmp_val, GLB_REG_GPIO_1_IE);
+          tmp_val &= GLB_REG_GPIO_1_IE_UMSK;
           tmp_out |= (1 << pos);
         }
       else
         {
-          tmp_val = BL_SET_REG_BIT(tmp_val, GLB_REG_GPIO_1_IE);
+          tmp_val = tmp_val | (1 << GLB_REG_GPIO_1_IE_POS);
         }
 
       /* Set pull up or down */
 
-      tmp_val = BL_CLR_REG_BIT(tmp_val, GLB_REG_GPIO_1_PU);
-      tmp_val = BL_CLR_REG_BIT(tmp_val, GLB_REG_GPIO_1_PD);
+      tmp_val &= GLB_REG_GPIO_1_PU_UMSK;
+      tmp_val &= GLB_REG_GPIO_1_PD_UMSK;
       if (cfg->pull_type == GPIO_PULL_UP)
         {
-          tmp_val = BL_SET_REG_BIT(tmp_val, GLB_REG_GPIO_1_PU);
+          tmp_val = tmp_val | (1 << GLB_REG_GPIO_1_PU_POS);
         }
       else if (cfg->pull_type == GPIO_PULL_DOWN)
         {
-          tmp_val = BL_SET_REG_BIT(tmp_val, GLB_REG_GPIO_1_PD);
+          tmp_val = tmp_val | (1 << GLB_REG_GPIO_1_PD_POS);
         }
 
-      tmp_val = BL_SET_REG_BITS_VAL(tmp_val, GLB_REG_GPIO_1_DRV, cfg->drive);
-      tmp_val =
-        BL_SET_REG_BITS_VAL(tmp_val, GLB_REG_GPIO_1_SMT, cfg->smt_ctrl);
-      tmp_val =
-        BL_SET_REG_BITS_VAL(tmp_val, GLB_REG_GPIO_1_FUNC_SEL, cfg->gpio_fun);
+      tmp_val = (tmp_val & GLB_REG_GPIO_1_DRV_UMSK) |
+                (cfg->drive << GLB_REG_GPIO_1_DRV_POS);
+      tmp_val = (tmp_val & GLB_REG_GPIO_1_SMT_UMSK) |
+                (cfg->smt_ctrl << GLB_REG_GPIO_1_SMT_POS);
+      tmp_val = (tmp_val & GLB_REG_GPIO_1_FUNC_SEL_UMSK) |
+                (cfg->gpio_fun << GLB_REG_GPIO_1_FUNC_SEL_POS);
     }
 
-  BL_WR_WORD(GLB_BASE + GLB_GPIO_OFFSET + gpio_pin / 2 * 4, tmp_val);
+  putreg32(tmp_val, GLB_BASE + GLB_GPIO_OFFSET + gpio_pin / 2 * 4);
 
   *p_out = tmp_out;
 }
-

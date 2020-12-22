@@ -4,7 +4,7 @@
 
 2. Download Bouffalo lab flash tools
 
-  $ git clone https://github.com/bouffalo/flash_tools.git
+  $ git clone https://github.com/bouffalolab/flash_tools.git
 
 3. Configure and build NuttX
 

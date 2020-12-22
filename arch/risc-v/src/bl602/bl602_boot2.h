@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_boot2.h
  *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,45 +34,42 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Partition table error type definition */
+
+#define PT_ERROR_SUCCESS 0 /* Partition table error type:success */
+#define PT_ERROR_TABLE_NOT_VALID \
+  1 /* Partition table error type:entry not found */
+#define PT_ERROR_ENTRY_NOT_FOUND \
+  2 /* Partition table error type:entry not found */
+#define PT_ERROR_ENTRY_UPDATE_FAIL \
+  3                      /* Partition table error type:entry update fail */
+#define PT_ERROR_CRC32 4 /* Partition table error type:crc32 error */
+#define PT_ERROR_PARAMETER \
+  5 /* Partition table error type:input parameter error */
+#define PT_ERROR_FALSH_READ \
+  6 /* Partition table error type:flash read error */
+#define PT_ERROR_FALSH_WRITE \
+  7 /* Partition table error type:flash write error */
+#define PT_ERROR_FALSH_ERASE \
+  8 /* Partition table error type:flash erase error */
+
+/* Partition id type definition */
+
+#define PT_TABLE_ID_0       0 /* Partition table ID 0 */
+#define PT_TABLE_ID_1       1 /* Partition table ID 1 */
+#define PT_TABLE_ID_INVALID 2 /* Partition table ID invalid */
+
+/* Partition id type definition */
+
+#define PT_ENTRY_FW_CPU0 0  /* Partition entry type:CPU0 firmware */
+#define PT_ENTRY_FW_CPU1 1  /* Partition entry type:CPU1 firmware */
+#define PT_ENTRY_MAX     16 /* Partition entry type:Max */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-/* Partition table error type definition */
-
-enum pt_table_error_e
-{
-  PT_ERROR_SUCCESS,           /* Partition table error type:success */
-  PT_ERROR_TABLE_NOT_VALID,   /* Partition table error type:entry not found */
-  PT_ERROR_ENTRY_NOT_FOUND,   /* Partition table error type:entry not found */
-  PT_ERROR_ENTRY_UPDATE_FAIL, /* Partition table error type:entry update fail
-                               */
-
-  PT_ERROR_CRC32,       /* Partition table error type:crc32 error */
-  PT_ERROR_PARAMETER,   /* Partition table error type:input parameter error */
-  PT_ERROR_FALSH_READ,  /* Partition table error type:flash read error */
-  PT_ERROR_FALSH_WRITE, /* Partition table error type:flash write error */
-  PT_ERROR_FALSH_ERASE  /* Partition table error type:flash erase error */
-};
-
-/* Partition id type definition */
-
-enum pt_table_id_e
-{
-  PT_TABLE_ID_0,       /* Partition table ID 0 */
-  PT_TABLE_ID_1,       /* Partition table ID 1 */
-  PT_TABLE_ID_INVALID, /* Partition table ID invalid */
-};
-
-/* Partition id type definition */
-
-enum pt_table_entry_type_e
-{
-  PT_ENTRY_FW_CPU0,  /* Partition entry type:CPU0 firmware */
-  PT_ENTRY_FW_CPU1,  /* Partition entry type:CPU1 firmware */
-  PT_ENTRY_MAX = 16, /* Partition entry type:Max */
-};
 
 /* Partition table config definition */
 

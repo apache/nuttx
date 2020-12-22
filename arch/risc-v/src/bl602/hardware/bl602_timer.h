@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/hardware/bl602_timer.h
  *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -500,116 +503,85 @@
 #define TIMER_WCDR_MSK    (((1U << TIMER_WCDR_LEN) - 1) << TIMER_WCDR_POS)
 #define TIMER_WCDR_UMSK   (~(((1U << TIMER_WCDR_LEN) - 1) << TIMER_WCDR_POS))
 
-#define WDT_ENABLE_ACCESS() \
-  { \
-    BL_WR_REG(TIMER_BASE, \
-              TIMER_WFAR, \
-              BL_SET_REG_BITS_VAL( \
-                BL_RD_REG(TIMER_BASE, TIMER_WFAR), TIMER_WFAR, 0xBABA)); \
-    BL_WR_REG(TIMER_BASE, \
-              TIMER_WSAR, \
-              BL_SET_REG_BITS_VAL( \
-                BL_RD_REG(TIMER_BASE, TIMER_WSAR), TIMER_WSAR, 0xEB10)); \
-  }
+/* TIMER channel type definition */
+
+#define TIMER_CH0    0 /* TIMER channel 0 port define */
+#define TIMER_CH1    1 /* TIMER channel 1 port define */
+#define TIMER_CH_MAX 2
+
+/* TIMER clock source type definition */
+
+#define TIMER_CLKSRC_FCLK 0 /* TIMER clock source :System CLK */
+#define TIMER_CLKSRC_32K  1 /* TIMER clock source :32K CLK */
+#define TIMER_CLKSRC_1K   2 /* TIMER clock source :1K CLK,Only for
+                             * Timer not for  Watchdog */
+
+#define TIMER_CLKSRC_XTAL 3  /* TIMER clock source :XTAL CLK */
+
+/* TIMER match compare ID type definition */
+
+#define TIMER_COMP_ID_0 0 /* TIMER match compare ID 0 define */
+#define TIMER_COMP_ID_1 1 /* TIMER match compare ID 1 define */
+#define TIMER_COMP_ID_2 2 /* TIMER match compare ID 2 define */
+
+/* TIMER preload source type definition */
+
+#define TIMER_PRELOAD_TRIG_NONE 0 /* TIMER no preload source, just free run \
+                                   */
+#define TIMER_PRELOAD_TRIG_COMP0 \
+  1 /* TIMER count register preload triggered by \
+     * comparator 0 */
+
+#define TIMER_PRELOAD_TRIG_COMP1 \
+  2 /* TIMER count register preload triggered by \
+     * comparator 1 */
+
+#define TIMER_PRELOAD_TRIG_COMP2 \
+  3 /* TIMER count register preload triggered by \
+     * comparator 2 */
+
+/* TIMER count register run mode type definition */
+
+#define TIMER_COUNT_PRELOAD \
+  0 /* TIMER count register preload from comparator \
+     * register */
+
+#define TIMER_COUNT_FREERUN 1 /* TIMER count register free run */
+
+/* TIMER interrupt type definition */
+
+#define TIMER_INT_COMP_0 0 /* Comparator 0 match cause interrupt */
+#define TIMER_INT_COMP_1 1 /* Comparator 1 match cause interrupt */
+#define TIMER_INT_COMP_2 2 /* Comparator 2 match cause interrupt */
+#define TIMER_INT_ALL    3
+
+/* Watchdog timer interrupt type definition */
+
+#define WDT_INT     0 /* Comparator 0 match cause interrupt */
+#define WDT_INT_ALL 1
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-/* TIMER channel type definition */
-
-enum timer_chan_e
-{
-  TIMER_CH0, /* TIMER channel 0 port define */
-  TIMER_CH1, /* TIMER channel 1 port define */
-  TIMER_CH_MAX
-};
-typedef enum timer_chan_e timer_chan_t;
-
-/* TIMER clock source type definition */
-
-enum timer_clksrc_e
-{
-  TIMER_CLKSRC_FCLK, /* TIMER clock source :System CLK */
-  TIMER_CLKSRC_32K,  /* TIMER clock source :32K CLK */
-  TIMER_CLKSRC_1K,   /* TIMER clock source :1K CLK,Only for Timer not for
-                      * Watchdog */
-  TIMER_CLKSRC_XTAL  /* TIMER clock source :XTAL CLK */
-};
-typedef enum timer_clksrc_e timer_clksrc_t;
-
-/* TIMER match compare ID type definition */
-
-enum timer_comp_id_e
-{
-  TIMER_COMP_ID_0, /* TIMER match compare ID 0 define */
-  TIMER_COMP_ID_1, /* TIMER match compare ID 1 define */
-  TIMER_COMP_ID_2  /* TIMER match compare ID 2 define */
-};
-typedef enum timer_comp_id_e timer_comp_id_t;
-
-/* TIMER preload source type definition */
-
-enum timer_preload_trig_e
-{
-  TIMER_PRELOAD_TRIG_NONE,  /* TIMER no preload source, just free run */
-  TIMER_PRELOAD_TRIG_COMP0, /* TIMER count register preload triggered by
-                             * comparator 0 */
-  TIMER_PRELOAD_TRIG_COMP1, /* TIMER count register preload triggered by
-                             * comparator 1 */
-  TIMER_PRELOAD_TRIG_COMP2  /* TIMER count register preload triggered by
-                             * comparator 2 */
-};
-typedef enum timer_preload_trig_e timer_preload_trig_t;
-
-/* TIMER count register run mode type definition */
-
-enum timer_countmode_e
-{
-  TIMER_COUNT_PRELOAD, /* TIMER count register preload from comparator
-                        * register */
-  TIMER_COUNT_FREERUN  /* TIMER count register free run */
-};
-typedef enum timer_countmode_e timer_countmode_t;
-
-/* TIMER interrupt type definition */
-
-enum timer_int_e
-{
-  TIMER_INT_COMP_0, /* Comparator 0 match cause interrupt */
-  TIMER_INT_COMP_1, /* Comparator 1 match cause interrupt */
-  TIMER_INT_COMP_2, /* Comparator 2 match cause interrupt */
-  TIMER_INT_ALL
-};
-typedef enum timer_int_e timer_int_t;
-
-/* Watchdog timer interrupt type definition */
-
-enum wdt_int_e
-{
-  WDT_INT, /* Comparator 0 match cause interrupt */
-  WDT_INT_ALL
-};
-typedef enum wdt_int_e wdt_int_t;
-
 /* TIMER configuration structure type definition */
 
 struct timer_cfg_s
 {
-  timer_chan_t   timer_ch; /* Timer channel */
-  timer_clksrc_t clk_src;  /* Timer clock source */
+  uint32_t timer_ch; /* Timer channel */
+  uint32_t clk_src;  /* Timer clock source */
 
   /* Timer count register preload trigger source slelect */
 
-  timer_preload_trig_t pl_trig_src;
+  uint32_t pl_trig_src;
 
-  timer_countmode_t count_mode;     /* Timer count mode */
-  uint8_t           clock_division; /* Timer clock divison value */
-  uint32_t          match_val0;     /* Timer match 0 value 0 */
-  uint32_t          match_val1;     /* Timer match 1 value 0 */
-  uint32_t          match_val2;     /* Timer match 2 value 0 */
-  uint32_t          pre_load_val;   /* Timer preload value */
+  uint32_t count_mode;     /* Timer count mode */
+  uint8_t  clock_division; /* Timer clock divison value */
+  uint32_t match_val0;     /* Timer match 0 value 0 */
+  uint32_t match_val1;     /* Timer match 1 value 0 */
+  uint32_t match_val2;     /* Timer match 2 value 0 */
+  uint32_t pre_load_val;   /* Timer preload value */
 };
 typedef struct timer_cfg_s timer_cfg_t;
 
@@ -626,37 +598,33 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN uint32_t timer_getcompvalue(timer_chan_t    timer_ch,
-                                   timer_comp_id_t cmp_no);
-EXTERN void     timer_setcompvalue(timer_chan_t    timer_ch,
-                                   timer_comp_id_t cmp_no,
-                                   uint32_t        val);
-EXTERN uint32_t timer_getcountervalue(timer_chan_t timer_ch);
-EXTERN uint32_t timer_getmatchstatus(timer_chan_t    timer_ch,
-                                     timer_comp_id_t cmp_no);
-EXTERN uint32_t timer_getpreloadvalue(timer_chan_t timer_ch);
-EXTERN void     timer_setpreloadvalue(timer_chan_t timer_ch, uint32_t val);
-EXTERN void     timer_setpreloadtrigsrc(timer_chan_t         timer_ch,
-                                        timer_preload_trig_t pl_src);
-EXTERN void     timer_setcountmode(timer_chan_t      timer_ch,
-                                   timer_countmode_t count_mode);
-EXTERN void     timer_clearintstatus(timer_chan_t    timer_ch,
-                                     timer_comp_id_t cmp_no);
-EXTERN void     timer_init(timer_cfg_t *timer_cfg);
-EXTERN void     timer_enable(timer_chan_t timer_ch);
-EXTERN void     timer_disable(timer_chan_t timer_ch);
-EXTERN void     timer_intmask(timer_chan_t timer_ch,
-                    timer_int_t int_type, uint32_t int_mask);
-EXTERN void     wdt_set_clock(timer_clksrc_t clk_src, uint8_t div);
-EXTERN uint32_t wdt_getmatchvalue(void);
-EXTERN void     wdt_setcompvalue(uint16_t val);
-EXTERN uint16_t wdt_getcountervalue(void);
-EXTERN void     wdt_resetcountervalue(void);
-EXTERN uint32_t wdt_getresetstatus(void);
-EXTERN void     wdt_clearresetstatus(void);
-EXTERN void     wdt_enable(void);
-EXTERN void     wdt_disable(void);
-EXTERN void     wdt_intmask(wdt_int_t int_type, uint32_t int_mask);
+EXTERN uint32_t bl602_timer_getcompvalue(uint32_t timer_ch, uint32_t cmp_no);
+EXTERN void bl602_timer_setcompvalue(uint32_t timer_ch, uint32_t cmp_no,
+                                     uint32_t val);
+EXTERN uint32_t bl602_timer_getcountervalue(uint32_t timer_ch);
+EXTERN uint32_t bl602_timer_getmatchstatus(uint32_t timer_ch,
+                                           uint32_t cmp_no);
+EXTERN uint32_t bl602_timer_getpreloadvalue(uint32_t timer_ch);
+EXTERN void bl602_timer_setpreloadvalue(uint32_t timer_ch, uint32_t val);
+EXTERN void bl602_timer_setpreloadtrigsrc(uint32_t timer_ch,
+                                          uint32_t pl_src);
+EXTERN void bl602_timer_setcountmode(uint32_t timer_ch, uint32_t count_mode);
+EXTERN void bl602_timer_clearintstatus(uint32_t timer_ch, uint32_t cmp_no);
+EXTERN void bl602_timer_init(timer_cfg_t *timer_cfg);
+EXTERN void bl602_timer_enable(uint32_t timer_ch);
+EXTERN void bl602_timer_disable(uint32_t timer_ch);
+EXTERN void bl602_timer_intmask(uint32_t timer_ch, uint32_t int_type,
+                                uint32_t int_mask);
+EXTERN void bl602_wdt_set_clock(uint32_t clk_src, uint8_t div);
+EXTERN uint32_t bl602_wdt_getmatchvalue(void);
+EXTERN void bl602_wdt_setcompvalue(uint16_t val);
+EXTERN uint16_t bl602_wdt_getcountervalue(void);
+EXTERN void bl602_wdt_resetcountervalue(void);
+EXTERN uint32_t bl602_wdt_getresetstatus(void);
+EXTERN void bl602_wdt_clearresetstatus(void);
+EXTERN void bl602_wdt_enable(void);
+EXTERN void bl602_wdt_disable(void);
+EXTERN void bl602_wdt_intmask(uint32_t int_type, uint32_t int_mask);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_timerisr.c
  *
+ * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
+ * Author: Gregory Nutt <gnutt@nuttx.org>
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
-
+#include "hardware/bl602_clint.h"
 #include "riscv_arch.h"
 
 #include "chip.h"
@@ -40,21 +43,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define TICK_COUNT         (10 * 1000 * 1000 / TICK_PER_SEC)
-#define CLINT_BASE_ADDRESS 0x02000000
-
-#define getreg64(a)    (*(volatile uint64_t *)(a))
-#define putreg64(v, a) (*(volatile uint64_t *)(a) = (v))
+/* Private definetions: mtimer frequency */
+#define TICK_COUNT (10 * 1000 * 1000 / TICK_PER_SEC)
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static bool _b_tick_started = false;
-
-#define MTIMER_HIGH (CLINT_BASE_ADDRESS + 0xBFFC)
-#define MTIMER_LOW  (CLINT_BASE_ADDRESS + 0xBFF8)
-#define MTIMER_CMP  (CLINT_BASE_ADDRESS + 0x4000)
+static bool g_b_tick_started = false;
 
 /****************************************************************************
  * Private Functions
@@ -68,21 +64,21 @@ static bool _b_tick_started = false;
 
 static inline uint64_t bl602_clint_time_read(void)
 {
-  uint64_t r = getreg32(MTIMER_HIGH);
+  uint64_t r = getreg32(BL602_MTIMER_HIGH);
   r <<= 32;
-  r |= getreg32(MTIMER_LOW);
+  r |= getreg32(BL602_MTIMER_LOW);
 
   return r;
 }
 
 static inline uint64_t bl602_clint_time_cmp_read(void)
 {
-  return getreg64(MTIMER_CMP);
+  return getreg64(BL602_MTIMER_CMP);
 }
 
 static inline void bl602_clint_time_cmp_write(uint64_t v)
 {
-  putreg64(v, MTIMER_CMP);
+  putreg64(v, BL602_MTIMER_CMP);
 }
 
 /****************************************************************************
@@ -96,10 +92,10 @@ static void bl602_reload_mtimecmp(void)
   uint64_t current;
   uint64_t next;
 
-  if (!_b_tick_started)
+  if (!g_b_tick_started)
     {
-      _b_tick_started = true;
-      current         = bl602_clint_time_read();
+      g_b_tick_started = true;
+      current          = bl602_clint_time_read();
     }
   else
     {
@@ -154,4 +150,3 @@ void up_timer_initialize(void)
 
   up_enable_irq(BL602_IRQ_MTIMER);
 }
-
