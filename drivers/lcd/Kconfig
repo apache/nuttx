@@ -590,6 +590,25 @@ if LCD_ST7735
 
 endif # LCD_ST7735
 
+config LCD_ST7789
+	bool "Sitronix ST7789 TFT Controller"
+	default n
+
+if LCD_ST7789
+	config LCD_ST7789_BPP
+		int "Bit Per Pixel (12 or 16)"
+		default 16
+
+	config LCD_ST7789_SPIMODE
+		int "SPI Mode"
+		default 0
+
+	config LCD_ST7789_FREQUENCY
+		int "SPI Frequency"
+		default 1000000
+
+endif # LCD_ST7789
+
 config LCD_PCD8544
 	bool "Nokia 5110 LCD Display (Philips PCD8544)"
 	default n
