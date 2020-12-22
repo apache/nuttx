@@ -169,12 +169,6 @@ static inline void group_release(FAR struct task_group_s *group)
   env_release(group);
 #endif
 
-#ifndef CONFIG_DISABLE_MQUEUE
-  /* Close message queues opened by members of the group */
-
-  nxmq_release(group);
-#endif
-
 #if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_SHM)
   /* Release any resource held by shared memory virtual page allocator */
 

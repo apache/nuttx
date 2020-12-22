@@ -70,16 +70,29 @@
 int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
               unsigned int prio)
 {
-  FAR struct mqueue_inode_s  *msgq;
   FAR struct mqueue_msg_s *mqmsg = NULL;
+  FAR struct mqueue_inode_s *msgq;
+  FAR struct file *filep;
+  FAR struct inode *inode;
   irqstate_t flags;
   int ret;
+
+  /* Convert fd to msgq */
+
+  ret = fs_getfilep(mqdes, &filep);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  inode = filep->f_inode;
+  msgq  = inode->i_private;
 
   /* Verify the input parameters -- setting errno appropriately
    * on any failures to verify.
    */
 
-  ret = nxmq_verify_send(mqdes, msg, msglen, prio);
+  ret = nxmq_verify_send(msgq, filep->f_oflags, msg, msglen, prio);
   if (ret < 0)
     {
       return ret;
@@ -88,7 +101,6 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
   /* Get a pointer to the message queue */
 
   sched_lock();
-  msgq = mqdes->msgq;
 
   /* Allocate a message structure:
    * - Immediately if we are called from an interrupt handler.
@@ -111,7 +123,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
            * available in the message queue.
            */
 
-          ret = nxmq_wait_send(mqdes);
+          ret = nxmq_wait_send(msgq, filep->f_oflags);
         }
     }
 
@@ -145,7 +157,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
        * to be exceeded in that case.
        */
 
-      ret = nxmq_do_send(mqdes, mqmsg, msg, msglen, prio);
+      ret = nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
     }
 
   sched_unlock();

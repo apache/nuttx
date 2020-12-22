@@ -72,9 +72,23 @@
 ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
                      FAR unsigned int *prio)
 {
+  FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *mqmsg;
+  FAR struct file *filep;
+  FAR struct inode *inode;
   irqstate_t flags;
   ssize_t ret;
+
+  /* Convert fd to msgq */
+
+  ret = fs_getfilep(mqdes, &filep);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  inode = filep->f_inode;
+  msgq  = inode->i_private;
 
   DEBUGASSERT(up_interrupt_context() == false);
 
@@ -82,7 +96,7 @@ ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
    * errno appropriately.
    */
 
-  ret = nxmq_verify_receive(mqdes, msg, msglen);
+  ret = nxmq_verify_receive(msgq, filep->f_oflags, msg, msglen);
   if (ret < 0)
     {
       return ret;
@@ -105,20 +119,20 @@ ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   /* Get the message from the message queue */
 
-  ret = nxmq_wait_receive(mqdes, &mqmsg);
+  ret = nxmq_wait_receive(msgq, filep->f_oflags, &mqmsg);
   leave_critical_section(flags);
 
   /* Check if we got a message from the message queue.  We might
    * not have a message if:
    *
-   * - The message queue is empty and O_NONBLOCK is set in the mqdes
+   * - The message queue is empty and O_NONBLOCK is set in the filep
    * - The wait was interrupted by a signal
    */
 
   if (ret >= 0)
     {
       DEBUGASSERT(mqmsg != NULL);
-      ret = nxmq_do_receive(mqdes, mqmsg, msg, prio);
+      ret = nxmq_do_receive(msgq, mqmsg, msg, prio);
     }
 
   sched_unlock();

@@ -38,10 +38,6 @@
 #  include <nuttx/semaphore.h>
 #endif
 
-#ifndef CONFIG_DISABLE_MQUEUE
-#  include <nuttx/mqueue.h>
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -341,9 +337,6 @@ union inode_ops_u
 #endif
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
   FAR struct nsem_inode_s              *i_nsem;   /* Named semaphore */
-#endif
-#ifndef CONFIG_DISABLE_MQUEUE
-  FAR struct mqueue_inode_s            *i_mqueue; /* POSIX message queue */
 #endif
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
   FAR char                             *i_link;   /* Full path to link target */

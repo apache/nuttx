@@ -145,18 +145,31 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
                    unsigned int prio, FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
-  FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *mqmsg = NULL;
+  FAR struct mqueue_inode_s *msgq;
+  FAR struct file *filep;
+  FAR struct inode *inode;
   irqstate_t flags;
   sclock_t ticks;
   int result;
   int ret;
 
+  /* Convert fd to msgq */
+
+  ret = fs_getfilep(mqdes, &filep);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  inode = filep->f_inode;
+  msgq  = inode->i_private;
+
   DEBUGASSERT(up_interrupt_context() == false);
 
   /* Verify the input parameters on any failures to verify. */
 
-  ret = nxmq_verify_send(mqdes, msg, msglen, prio);
+  ret = nxmq_verify_send(msgq, filep->f_oflags, msg, msglen, prio);
   if (ret < 0)
     {
       return ret;
@@ -177,7 +190,6 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
   /* Get a pointer to the message queue */
 
   sched_lock();
-  msgq = mqdes->msgq;
 
   /* OpenGroup.org: "Under no circumstance shall the operation fail with a
    * timeout if there is sufficient room in the queue to add the message
@@ -199,7 +211,7 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
        * Currently nxmq_do_send() always returns OK.
        */
 
-      ret = nxmq_do_send(mqdes, mqmsg, msg, msglen, prio);
+      ret = nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
       sched_unlock();
       return ret;
     }
@@ -247,7 +259,7 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
 
   /* And wait for the message queue to be non-empty */
 
-  ret = nxmq_wait_send(mqdes);
+  ret = nxmq_wait_send(msgq, filep->f_oflags);
 
   /* This may return with an error and errno set to either EINTR
    * or ETIMEOUT.  Cancel the watchdog timer in any event.
@@ -275,7 +287,7 @@ int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
    * Currently nxmq_do_send() always returns OK.
    */
 
-  ret = nxmq_do_send(mqdes, mqmsg, msg, msglen, prio);
+  ret = nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
 
   sched_unlock();
   leave_cancellation_point();
