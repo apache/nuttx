@@ -39,6 +39,67 @@
 #include "mqueue/mqueue.h"
 
 /****************************************************************************
+ * Private Functions Prototypes
+ ****************************************************************************/
+
+static int nxmq_file_close(FAR struct file *filep);
+static int nxmq_file_unlink(FAR struct inode *inode);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const struct file_operations g_nxmq_fileops =
+{
+  NULL,             /* open */
+  nxmq_file_close,  /* close */
+  NULL,             /* read */
+  NULL,             /* write */
+  NULL,             /* seek */
+  NULL,             /* ioctl */
+  NULL,             /* poll */
+  nxmq_file_unlink, /* unlink */
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static int nxmq_file_close(FAR struct file *filep)
+{
+  FAR struct inode *inode = filep->f_inode;
+
+  if (inode->i_crefs <= 1 && (inode->i_flags & FSNODEFLAG_DELETED))
+    {
+      FAR struct mqueue_inode_s *msgq = inode->i_private;
+
+      if (msgq)
+        {
+          nxmq_free_msgq(msgq);
+          inode->i_private = NULL;
+        }
+    }
+
+  return 0;
+}
+
+static int nxmq_file_unlink(FAR struct inode *inode)
+{
+  if (inode->i_crefs <= 1)
+    {
+      FAR struct mqueue_inode_s *msgq = inode->i_private;
+
+      if (msgq)
+        {
+          nxmq_free_msgq(msgq);
+          inode->i_private = NULL;
+        }
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -147,14 +208,13 @@ int nxmq_open(FAR const char *mq_name, int oflags, mode_t mode,
           goto errout_with_inode;
         }
 
-      /* Create a message queue descriptor for the current thread */
+      /* Associate the inode with a file structure */
 
-      msgq  = inode->u.i_mqueue;
-      *mqdes = nxmq_create_des(NULL, msgq, oflags);
-      if (!*mqdes)
+      *mqdes = files_allocate(inode, oflags, 0, 0);
+      if (*mqdes < 0)
         {
-          ret = -ENOMEM;
-          goto errout_with_inode;
+          ret = -EMFILE;
+          goto errout_with_msgq;
         }
     }
   else
@@ -196,19 +256,18 @@ int nxmq_open(FAR const char *mq_name, int oflags, mode_t mode,
           goto errout_with_inode;
         }
 
-      /* Create a message queue descriptor for the TCB */
+      /* Associate the inode with a file structure */
 
-      *mqdes = nxmq_create_des(NULL, msgq, oflags);
-      if (!*mqdes)
+      *mqdes = files_allocate(inode, oflags, 0, 0);
+      if (*mqdes < 0)
         {
-          ret = -ENOMEM;
+          ret = -EMFILE;
           goto errout_with_msgq;
         }
 
-      /* Bind the message queue and the inode structure */
-
       INODE_SET_MQUEUE(inode);
-      inode->u.i_mqueue = msgq;
+      inode->u.i_ops    = &g_nxmq_fileops;
+      inode->i_private  = msgq;
       msgq->inode       = inode;
 
       /* Set the initial reference count on this inode to one */
@@ -222,7 +281,6 @@ int nxmq_open(FAR const char *mq_name, int oflags, mode_t mode,
 
 errout_with_msgq:
   nxmq_free_msgq(msgq);
-  inode->u.i_mqueue = NULL;
 
 errout_with_inode:
   inode_release(inode);

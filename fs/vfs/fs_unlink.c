@@ -129,7 +129,12 @@ int nx_unlink(FAR const char *pathname)
        * release all resources because it is no longer accessible.
        */
 
+#ifdef CONFIG_DISABLE_MQUEUE
       if (INODE_IS_DRIVER(inode) && inode->u.i_ops->unlink)
+#else
+      if ((INODE_IS_DRIVER(inode) || INODE_IS_MQUEUE(inode))
+              && inode->u.i_ops->unlink)
+#endif
         {
           /* Notify the character driver that it has been unlinked */
 
@@ -157,10 +162,10 @@ int nx_unlink(FAR const char *pathname)
       else if (INODE_IS_PSEUDODIR(inode))
 #endif
         {
-           /* If this is a "dangling" pseudo-file node
-            * (i.e., it has no operations) or a soft link,
-            * then rm should remove the node.
-            */
+          /* If this is a "dangling" pseudo-file node
+           * (i.e., it has no operations) or a soft link,
+           * then rm should remove the node.
+           */
         }
       else
         {

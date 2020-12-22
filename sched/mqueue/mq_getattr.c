@@ -25,6 +25,8 @@
 #include <nuttx/config.h>
 
 #include <mqueue.h>
+
+#include <nuttx/fs/fs.h>
 #include <nuttx/mqueue.h>
 
 /****************************************************************************
@@ -51,19 +53,31 @@
 
 int mq_getattr(mqd_t mqdes, struct mq_attr *mq_stat)
 {
-  int ret = ERROR;
+  FAR struct mqueue_inode_s *msgq;
+  FAR struct file *filep;
+  FAR struct inode *inode;
+  int ret;
 
-  if (mqdes && mq_stat)
+  if (!mq_stat)
     {
-      /* Return the attributes */
-
-      mq_stat->mq_maxmsg  = mqdes->msgq->maxmsgs;
-      mq_stat->mq_msgsize = mqdes->msgq->maxmsgsize;
-      mq_stat->mq_flags   = mqdes->oflags;
-      mq_stat->mq_curmsgs = mqdes->msgq->nmsgs;
-
-      ret = OK;
+      set_errno(EINVAL);
+      return ERROR;
     }
 
-  return ret;
+  ret = fs_getfilep(mqdes, &filep);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  inode = filep->f_inode;
+  msgq  = inode->i_private;
+
+  mq_stat->mq_maxmsg  = msgq->maxmsgs;
+  mq_stat->mq_msgsize = msgq->maxmsgsize;
+  mq_stat->mq_flags   = filep->f_oflags;
+  mq_stat->mq_curmsgs = msgq->nmsgs;
+
+  return OK;
 }

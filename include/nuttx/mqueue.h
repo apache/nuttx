@@ -98,8 +98,6 @@
 
 /* This structure defines a message queue */
 
-struct mq_des; /* forward reference */
-
 struct mqueue_inode_s
 {
   FAR struct inode *inode;    /* Containing inode */
@@ -113,21 +111,9 @@ struct mqueue_inode_s
 #else
   uint16_t maxmsgsize;        /* Max size of message in message queue */
 #endif
-  FAR struct mq_des *ntmqdes; /* Notification: Owning mqdes (NULL if none) */
   pid_t ntpid;                /* Notification: Receiving Task's PID */
   struct sigevent ntevent;    /* Notification description */
   struct sigwork_s ntwork;    /* Notification work */
-};
-
-/* This describes the message queue descriptor that is held in the
- * task's TCB
- */
-
-struct mq_des
-{
-  FAR struct mq_des *flink;        /* Forward link to next message descriptor */
-  FAR struct mqueue_inode_s *msgq; /* Pointer to associated message queue */
-  int oflags;                      /* Flags set when message queue was opened */
 };
 
 /****************************************************************************
@@ -423,69 +409,6 @@ void nxmq_free_msgq(FAR struct mqueue_inode_s *msgq);
 
 FAR struct mqueue_inode_s *nxmq_alloc_msgq(mode_t mode,
                                            FAR struct mq_attr *attr);
-
-/****************************************************************************
- * Name: nxmq_create_des
- *
- * Description:
- *   Create a message queue descriptor for the specified TCB
- *
- * Input Parameters:
- *   TCB - task that needs the descriptor.
- *   msgq - Named message queue containing the message
- *   oflags - access rights for the descriptor
- *
- * Returned Value:
- *   On success, the message queue descriptor is returned.  NULL is returned
- *   on a failure to allocate.
- *
- ****************************************************************************/
-
-mqd_t nxmq_create_des(FAR struct tcb_s *mtcb,
-                      FAR struct mqueue_inode_s *msgq, int oflags);
-
-/****************************************************************************
- * Name: nxmq_close_group
- *
- * Description:
- *   This function is used to indicate that all threads in the group are
- *   finished with the specified message queue mqdes.  nxmq_close_group()
- *   deallocates any system resources allocated by the system for use by
- *   this task for its message queue.
- *
- * Input Parameters:
- *   mqdes - Message queue descriptor.
- *   group - Group that has the open descriptor.
- *
- * Returned Value:
- *   Zero (OK) if the message queue is closed successfully.  Otherwise, a
- *   negated errno value is returned.
- *
- ****************************************************************************/
-
-int nxmq_close_group(mqd_t mqdes, FAR struct task_group_s *group);
-
-/****************************************************************************
- * Name: nxmq_desclose_group
- *
- * Description:
- *   This function performs the portion of the mq_close operation related
- *   to freeing resource used by the message queue descriptor itself.
- *
- * Input Parameters:
- *   mqdes - Message queue descriptor.
- *   group - Group that has the open descriptor.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   and failure.
- *
- * Assumptions:
- * - Called only from mq_close() with the scheduler locked.
- *
- ****************************************************************************/
-
-int nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group);
 
 #undef EXTERN
 #ifdef __cplusplus

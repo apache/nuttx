@@ -47,12 +47,6 @@
 #define MQ_MAX_MSGS    16
 #define MQ_PRIO_MAX    _POSIX_MQ_PRIO_MAX
 
-/* This defines the number of messages descriptors to allocate at each
- * "gulp."
- */
-
-#define NUM_MSG_DESCRIPTORS  4
-
 /********************************************************************************
  * Public Type Definitions
  ********************************************************************************/
@@ -103,13 +97,6 @@ EXTERN sq_queue_t  g_msgfree;
 
 EXTERN sq_queue_t  g_msgfreeirq;
 
-/* The g_desfree data structure is a list of message descriptors available
- * to the operating system for general use. The number of messages in the
- * pool is a constant.
- */
-
-EXTERN sq_queue_t  g_desfree;
-
 /********************************************************************************
  * Public Function Prototypes
  ********************************************************************************/
@@ -120,7 +107,6 @@ struct task_group_s; /* Forward reference */
 /* Functions defined in mq_initialize.c *****************************************/
 
 void weak_function nxmq_initialize(void);
-void nxmq_alloc_desblock(void);
 void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg);
 
 /* mq_waitirq.c *****************************************************************/
@@ -129,23 +115,23 @@ void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
 /* mq_rcvinternal.c *************************************************************/
 
-int nxmq_verify_receive(mqd_t mqdes, FAR char *msg, size_t msglen);
-int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg);
-ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
-                        FAR char *ubuffer, FAR unsigned int *prio);
+int nxmq_verify_receive(FAR struct mqueue_inode_s *msgq,
+                        int oflags, FAR char *msg, size_t msglen);
+int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
+                      int oflags, FAR struct mqueue_msg_s **rcvmsg);
+ssize_t nxmq_do_receive(FAR struct mqueue_inode_s *msgq,
+                        FAR struct mqueue_msg_s *mqmsg,
+                        FAR char *ubuffer, unsigned int *prio);
 
 /* mq_sndinternal.c *************************************************************/
 
-int nxmq_verify_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
-                     unsigned int prio);
+int nxmq_verify_send(FAR struct mqueue_inode_s *msgq, int oflags,
+                     FAR const char *msg, size_t msglen, unsigned int prio);
 FAR struct mqueue_msg_s *nxmq_alloc_msg(void);
-int nxmq_wait_send(mqd_t mqdes);
-int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
+int nxmq_wait_send(FAR struct mqueue_inode_s *msgq, int oflags);
+int nxmq_do_send(FAR struct mqueue_inode_s *msgq,
+                 FAR struct mqueue_msg_s *mqmsg,
                  FAR const char *msg, size_t msglen, unsigned int prio);
-
-/* mq_release.c *****************************************************************/
-
-void nxmq_release(FAR struct task_group_s *group);
 
 /* mq_recover.c *****************************************************************/
 
