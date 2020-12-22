@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl602/bl602_glb.h
+ * arch/risc-v/src/bl602/bl602_netdev.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,29 +18,35 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_BL602_BL602_GLB_H
-#define __ARCH_RISCV_SRC_BL602_BL602_GLB_H
+#ifndef _BL602_NETDEV_H__
+#define _BL602_NETDEV_H__
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <stdint.h>
 
-#define BL602_GLB_EM_0KB  0x0 /* 0KB */
-#define BL602_GLB_EM_8KB  0x3 /* 8KB */
-#define BL602_GLB_EM_16KB 0xF /* 16KB */
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define PRESERVE_80211_HEADER_LEN 128
+
+#define BL602_NET_EVT_TX_DONE (0x1 << 0x0)
+#define BL602_NET_EVT_RX      (0x1 << 0x1)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
 {
@@ -53,57 +59,76 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bl602_swrst_ahb_slave1
+ * Name: bl602_netdev_alloc_txbuf
  *
  * Description:
- *   SW Reset ahb slave.
+ *   Allocate wifi transmit buffer
  *
  * Input Parameters:
- *   slave1: reset signal
- *
- * Returned Value:
  *   None
  *
+ * Returned Value:
+ *   Non-zero: Buffer address, otherwise error.
+ *
  ****************************************************************************/
 
-void bl602_swrst_ahb_slave1(uint32_t slave1);
+uint8_t *bl602_netdev_alloc_txbuf(void);
 
 /****************************************************************************
- * Name: bl602_glb_get_bclk_div
+ * Name: bl602_netdev_free_txbuf
  *
  * Description:
- *   get bus clock div.
+ *   Free wifi transmit buffer
  *
  * Input Parameters:
- *   void
+ *   buf: The address of the buffer to be released.
  *
  * Returned Value:
- *   bus clock div
+ *   None.
  *
  ****************************************************************************/
 
-uint8_t bl602_glb_get_bclk_div(void);
+void bl602_netdev_free_txbuf(uint8_t *buf);
 
 /****************************************************************************
- * Name: bl602_set_em_sel
+ * Name: bl602_net_notify
  *
  * Description:
- *   Set how much wifi ram is allocated to ble.
+ *   BL602 WiFi notify handler, similar interrupt function
  *
  * Input Parameters:
- *   em_type: memory size type
+ *   event: notify type, tx done or received new data
+ *   data: The data of the event, may be NULL
+ *   len: data length
  *
  * Returned Value:
- *   None
+ *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
-void bl602_set_em_sel(int em_type);
+int  bl602_net_notify(uint32_t event, uint8_t *data, int len);
+
+/****************************************************************************
+ * Name: bl602_net_event
+ *
+ * Description:
+ *   BL602 WiFi event handler, called by BL602 wifi manager private library
+ *
+ * Input Parameters:
+ *   event: event number
+ *   val: the value of the event
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+void bl602_net_event(int evt, int val);
 
 #undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_BL602_BL602_GLB_H */
+#endif /* __INCLUDE_ASSERT_H */
+#endif /* _BL602_NETDEV_H__ */
