@@ -35,6 +35,8 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/fs/ioctl.h>
+#include <nuttx/serial/tioctl.h>
 
 #include "bl602_lowputc.h"
 #include "bl602_gpio.h"
@@ -461,25 +463,25 @@ static int bl602_ioctl(struct file *filep, int cmd, unsigned long arg)
 
           /* Return parity */
 
-          termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
-                              ((priv->parity == 1) ? PARODD : 0);
+          termiosp->c_cflag = ((priv->config.parity != 0) ? PARENB : 0) |
+                              ((priv->config.parity == 1) ? PARODD : 0);
 
           /* Return stop bits */
 
-          termiosp->c_cflag |= (priv->stop_bits) ? CSTOPB : 0;
+          termiosp->c_cflag |= (priv->config.stop_bits) ? CSTOPB : 0;
 
           /* Return flow control */
 
-          termiosp->c_cflag |= (priv->iflow_ctl) ? CRTS_IFLOW : 0;
-          termiosp->c_cflag |= (priv->oflow_ctl) ? CCTS_OFLOW : 0;
+          termiosp->c_cflag |= (priv->config.iflow_ctl) ? CRTS_IFLOW : 0;
+          termiosp->c_cflag |= (priv->config.oflow_ctl) ? CCTS_OFLOW : 0;
 
           /* Return baud */
 
-          cfsetispeed(termiosp, priv->baud);
+          cfsetispeed(termiosp, priv->config.baud);
 
           /* Return number of bits */
 
-          switch (priv->data_bits)
+          switch (priv->config.data_bits)
             {
             case 5:
               termiosp->c_cflag |= CS5;
@@ -563,7 +565,7 @@ static int bl602_ioctl(struct file *filep, int cmd, unsigned long arg)
 
           /* Decode flow control */
 
-          if (priv->idx == 0)
+          if (priv->config.idx == 0)
             {
 #if CONFIG_UART0_IFLOWCONTROL
               config.iflow_ctl = (termiosp->c_cflag & CRTS_IFLOW) != 0;
@@ -594,9 +596,9 @@ static int bl602_ioctl(struct file *filep, int cmd, unsigned long arg)
                * implement TCSADRAIN / TCSAFLUSH
                */
 
-              tmp_val = getreg32(BL602_UART_INT_MASK(config->idx));
+              tmp_val = getreg32(BL602_UART_INT_MASK(config.idx));
               bl602_uart_configure(&config);
-              putreg32(tmp_val, BL602_UART_INT_MASK(config->idx));
+              putreg32(tmp_val, BL602_UART_INT_MASK(config.idx));
             }
         }
       while (0);

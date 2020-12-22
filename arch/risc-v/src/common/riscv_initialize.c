@@ -164,5 +164,11 @@ void up_initialize(void)
   ptmx_register();
 #endif
 
+#ifdef CONFIG_NET_LOOPBACK
+  /* Initialize the local loopback device */
+
+  localhost_initialize();
+#endif
+
   board_autoled_on(LED_IRQSENABLED);
 }

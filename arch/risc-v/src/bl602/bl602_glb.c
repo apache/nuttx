@@ -95,3 +95,22 @@ uint8_t bl602_glb_get_bclk_div(void)
 
   return (uint8_t)tmp_val;
 }
+
+/****************************************************************************
+ * Name: bl602_set_em_sel
+ *
+ * Description:
+ *   Set how much wifi ram is allocated to ble.
+ *
+ * Input Parameters:
+ *   em_type: memory size type
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void bl602_set_em_sel(int em_type)
+{
+  modifyreg32(BL602_SEAM_MISC, SEAM_MISC_EM_SEL_MASK, em_type);
+}

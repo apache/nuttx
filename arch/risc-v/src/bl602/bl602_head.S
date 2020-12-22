@@ -90,6 +90,9 @@ exception_common:
 
   lui  sp, %hi(g_intstackbase)
   addi sp, sp, %lo(g_intstackbase)
+#ifdef CONFIG_STACK_OVERFLOW_CHECK
+  la s11, g_intstackalloc
+#endif
 #endif
 
   /* Call interrupt handler in C */

@@ -30,6 +30,10 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
+#ifdef CONFIG_STACK_OVERFLOW_CHECK
+# include "sched/sched.h"
+#endif
+
 #include "riscv_arch.h"
 #include "riscv_internal.h"
 #include "chip.h"
@@ -47,7 +51,7 @@
 #define showprogress(c)
 #endif
 
-#define BL602_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE & ~3)
+#define BL602_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE)
 
 /****************************************************************************
  * Private Data
@@ -63,20 +67,21 @@
  * address.
  */
 
-static uint8_t g_idle_stack[BL602_IDLESTACK_SIZE];
+uint8_t g_idle_stack[BL602_IDLESTACK_SIZE]
+  __attribute__((section(".noinit_idle_stack")));
 
 /* Dont change the name of variable, since we refer this
  * g_boot2_partition_table in linker script
  */
 
-static struct boot2_partition_table_s g_boot2_partition_table \
-              __attribute__((used));
+static struct boot2_partition_table_s g_boot2_partition_table
+  __attribute__((used));
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-uint32_t g_idle_topstack = (uintptr_t)g_idle_stack + BL602_IDLESTACK_SIZE;
+uint32_t g_idle_topstack = 0;
 
 /****************************************************************************
  * Public Functions
@@ -90,7 +95,7 @@ extern void bl602_boardinitialize(void);
  * Name: boot2_get_flash_addr
  ****************************************************************************/
 
-uint32_t boot2_get_flash_addr(void)
+uint32_t __attribute__((no_instrument_function)) boot2_get_flash_addr(void)
 {
   extern uint8_t __boot2_flash_cfg_src;
 
@@ -98,6 +103,56 @@ uint32_t boot2_get_flash_addr(void)
                     (sizeof(g_boot2_partition_table.table.entries[0]) *
                      g_boot2_partition_table.table.table.entry_cnt));
 }
+
+#ifdef CONFIG_STACK_OVERFLOW_CHECK
+void __attribute__((no_instrument_function, section(".tcm_code")))
+__cyg_profile_func_enter(void *this_fn, void *call_site)
+{
+  register uintptr_t *sp;
+  register uintptr_t *stack_base;
+
+  __asm__("add %0, x0, sp" : "=r"(sp));
+  __asm__("add %0, x0, s11" : "=r"(stack_base));
+
+  if (sp <= stack_base)
+    {
+#if CONFIG_TASK_NAME_SIZE > 0
+      struct tcb_s *rtcb;
+#endif
+      __asm volatile("csrc mstatus, 8");
+      __asm__("li s11, 0");
+
+#if CONFIG_TASK_NAME_SIZE > 0
+      /* get current task */
+
+      rtcb = running_task();
+
+      syslog(LOG_EMERG,
+             "task %s stack overflow detected! base:0x%x >= sp:0x%x\r\n",
+             rtcb->name,
+             stack_base,
+             sp);
+#else
+      syslog(LOG_EMERG,
+             "stack overflow detected! base:0x%x >= sp:0x%x\r\n",
+             stack_base,
+             sp);
+#endif
+      /* PANIC(); */
+
+      while (1)
+        ;
+    }
+
+  return;
+}
+
+void __attribute__((no_instrument_function, section(".tcm_code")))
+__cyg_profile_func_exit(void *this_fn, void *call_site)
+{
+  return;
+}
+#endif
 
 /****************************************************************************
  * Name: bfl_main
@@ -108,6 +163,10 @@ void bfl_main(void)
   /* set interrupt vector */
 
   asm volatile("csrw mtvec, %0" ::"r"((uintptr_t)exception_common + 2));
+
+  /* Configure IDLE stack */
+
+  g_idle_topstack = ((uint32_t)g_idle_stack + BL602_IDLESTACK_SIZE);
 
   /* Configure the UART so we can get debug output */
 
