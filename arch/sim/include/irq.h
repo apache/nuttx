@@ -69,7 +69,7 @@
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
 typedef unsigned long xcpt_reg_t;
 #else
-typedef int xcpt_reg_t;
+typedef unsigned int xcpt_reg_t;
 #endif
 
 /* This struct defines the way the registers are stored */
