@@ -126,14 +126,14 @@ Configuration sub-directories
     Configures the NuttShell (nsh) located at examples/nsh for Teensy 4.0.  
     This NSH configuration is focused on low level, command-line driver testing.
     Built-in applications are supported, but none are enabled. NutShells then
-    runs on UART6: Pin 0 is RX and pin 1 is TX
+    runs on USB console.
 
   nsh-4.1:
 
     Configures the NuttShell (nsh) located at examples/nsh for Teensy 4.1.  
     This NSH configuration is focused on low level, command-line driver testing.
     Built-in applications are supported, but none are enabled. NutShells then
-    runs on UART1: Pin 24 is TX and pin 25 is RX
+    runs USB console.
 
   can-4.1:
 
@@ -174,3 +174,12 @@ Configuration sub-directories
 
     This configuration cannot be changed to Teensy 4.0 as this board does
     not have micro SD card slot.
+
+  lcd-4.1
+
+    This is an nsh configuration (see above) for Teensy-4.x with added support of
+    connecting LCD TFT display with ST7789 controller. You can run framebuffer demo
+    by starting "fb" in console. The LCD display is connected via SPI4.
+
+    This configuration can be easily changed to work with Teensy 4.0 by
+    selecting CONFIG_TEENSY_40=y.
