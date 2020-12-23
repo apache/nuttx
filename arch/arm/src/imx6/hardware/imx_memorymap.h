@@ -246,73 +246,73 @@
 
 /* i.MX6 AIPS-2 PSECTION Offsets */
 
-#define IMX_CAAM_OFFSET          0x00100000  /* 00100000 0210ffff CAAM 64 KB */
-                                             /* 00110000 0213ffff Reserved 192 KB */
-#define IMX_DAP_OFFSET           0x00140000  /* 00140000 00160fff ARM Cortex A9 MPCore / DAP 132 KB (See below) */
-                                             /* 00161000 0017bfff ARM Cortex A9 MPCore - Reserved 108 KB */
-#define IMX_AIPS2CGF_OFFSET      0x0017c000  /* 0017c000 0017ffff AIPS-2 configuration 16 KB */
-                                             /* 00180000 00183fff Reserved 16 KB */
-#define IMX_USBOH3_OFFSET        0x00184000  /* 00184000 00187fff USBOH3 (USB) 16 KB */
-#define IMX_ENET_OFFSET          0x00188000  /* 00188000 0018bfff ENET 16 KB */
-#define IMX_MLB150_OFFSET        0x0018c000  /* 0018c000 0018ffff MLB150 16 KB */
-#define IMX_USDHC1_OFFSET        0x00190000  /* 00190000 00193fff uSDHC1 16 KB */
-#define IMX_USDHC2_OFFSET        0x00194000  /* 00194000 00197fff uSDHC2 16 KB */
-#define IMX_USDHC3_OFFSET        0x00198000  /* 00198000 0019bfff uSDHC3 16 KB */
-#define IMX_USDHC4_OFFSET        0x0019c000  /* 0019c000 0019ffff uSDHC4 16 KB */
-#define IMX_I2C1_OFFSET          0x001a0000  /* 001a0000 001a3fff I2C1 16 KB */
-#define IMX_I2C2_OFFSET          0x001a4000  /* 001a4000 001a7fff I2C2 16 KB */
-#define IMX_I2C3_OFFSET          0x001a8000  /* 001a8000 001abfff I2C3 16 KB */
-#define IMX_ROMCP_OFFSET         0x001ac000  /* 001ac000 001affff ROMCP 16 KB */
-#define IMX_MMDC_OFFSET          0x001b0000  /* 001b0000 001b3fff MMDC 16 KB */
-#define IMX_MMDCP1_OFFSET        0x001b4000  /* 001b4000 001b7fff MMDC (port 1) 16 KB */
-#define IMX_EIM_OFFSET           0x001b8000  /* 001b8000 001bbfff EIM 16 KB */
-#define IMX_OCOTPCTRL_OFFSET     0x001bc000  /* 001bc000 001bffff OCOTPCTRL 16 KB */
-#define IMX_CSU_OFFSET           0x001c0000  /* 001c0000 001c3fff CSU 16 KB */
-                                             /* 001c4000 001c7fff Reserved */
-                                             /* 001c8000 Reserved */
-                                             /* 001cc000 Reserved */
-#define IMX_TZASC1_OFFSET        0x001d0000  /* 001d0000 001d3fff TZASC1 16 KB */
-#define IMX_TZASC2_OFFSET        0x001d4000  /* 001d4000 001d7fff TZASC2 16 KB */
-#define IMX_AUDMUX_OFFSET        0x001d8000  /* 001d8000 001dbfff AUDMUX 16 KB */
-#define IMX_MIPICSI_OFFSET       0x001dc000  /* 001dc000 001dffff MIPI (CSI port) 16 KB */
-#define IMX_MIPIDSI_OFFSET       0x001e0000  /* 001e0000 001e3fff MIPI (DSI port) 16 KB */
-#define IMX_VDOA_OFFSET          0x001e4000  /* 001e4000 001e7fff VDOA 16 KB */
-#define IMX_UART2_OFFSET         0x001e8000  /* 001e8000 001ebfff UART2 16 KB */
-#define IMX_UART3_OFFSET         0x001ec000  /* 001ec000 001effff UART3 16 KB */
-#define IMX_UART4_OFFSET         0x001f0000  /* 001f0000 001f3fff UART4 16 KB */
-#define IMX_UART5_OFFSET         0x001f4000  /* 001f4000 001f7fff UART5 16 KB */
-                                             /* 001f8000 001fbfff Reserved 16 KB */
+#define IMX_CAAM_OFFSET          0x00000000  /* 00000000 0000ffff CAAM 64 KB */
+                                             /* 00010000 0003ffff Reserved 192 KB */
+#define IMX_DAP_OFFSET           0x00040000  /* 00040000 00060fff ARM Cortex A9 MPCore / DAP 132 KB (See below) */
+                                             /* 00061000 0007bfff ARM Cortex A9 MPCore - Reserved 108 KB */
+#define IMX_AIPS2CGF_OFFSET      0x0007c000  /* 0007c000 0007ffff AIPS-2 configuration 16 KB */
+                                             /* 00080000 00083fff Reserved 16 KB */
+#define IMX_USBOH3_OFFSET        0x00084000  /* 00084000 00087fff USBOH3 (USB) 16 KB */
+#define IMX_ENET_OFFSET          0x00088000  /* 00088000 0008bfff ENET 16 KB */
+#define IMX_MLB150_OFFSET        0x0008c000  /* 0008c000 0008ffff MLB150 16 KB */
+#define IMX_USDHC1_OFFSET        0x00090000  /* 00090000 00093fff uSDHC1 16 KB */
+#define IMX_USDHC2_OFFSET        0x00094000  /* 00094000 00097fff uSDHC2 16 KB */
+#define IMX_USDHC3_OFFSET        0x00098000  /* 00098000 0009bfff uSDHC3 16 KB */
+#define IMX_USDHC4_OFFSET        0x0009c000  /* 0009c000 0009ffff uSDHC4 16 KB */
+#define IMX_I2C1_OFFSET          0x000a0000  /* 000a0000 000a3fff I2C1 16 KB */
+#define IMX_I2C2_OFFSET          0x000a4000  /* 000a4000 000a7fff I2C2 16 KB */
+#define IMX_I2C3_OFFSET          0x000a8000  /* 000a8000 000abfff I2C3 16 KB */
+#define IMX_ROMCP_OFFSET         0x000ac000  /* 000ac000 000affff ROMCP 16 KB */
+#define IMX_MMDC_OFFSET          0x000b0000  /* 000b0000 000b3fff MMDC 16 KB */
+#define IMX_MMDCP1_OFFSET        0x000b4000  /* 000b4000 000b7fff MMDC (port 1) 16 KB */
+#define IMX_EIM_OFFSET           0x000b8000  /* 000b8000 000bbfff EIM 16 KB */
+#define IMX_OCOTPCTRL_OFFSET     0x000bc000  /* 000bc000 000bffff OCOTPCTRL 16 KB */
+#define IMX_CSU_OFFSET           0x000c0000  /* 000c0000 000c3fff CSU 16 KB */
+                                             /* 000c4000 000c7fff Reserved */
+                                             /* 000c8000 Reserved */
+                                             /* 000cc000 Reserved */
+#define IMX_TZASC1_OFFSET        0x000d0000  /* 000d0000 000d3fff TZASC1 16 KB */
+#define IMX_TZASC2_OFFSET        0x000d4000  /* 000d4000 000d7fff TZASC2 16 KB */
+#define IMX_AUDMUX_OFFSET        0x000d8000  /* 000d8000 000dbfff AUDMUX 16 KB */
+#define IMX_MIPICSI_OFFSET       0x000dc000  /* 000dc000 000dffff MIPI (CSI port) 16 KB */
+#define IMX_MIPIDSI_OFFSET       0x000e0000  /* 000e0000 000e3fff MIPI (DSI port) 16 KB */
+#define IMX_VDOA_OFFSET          0x000e4000  /* 000e4000 000e7fff VDOA 16 KB */
+#define IMX_UART2_OFFSET         0x000e8000  /* 000e8000 000ebfff UART2 16 KB */
+#define IMX_UART3_OFFSET         0x000ec000  /* 000ec000 000effff UART3 16 KB */
+#define IMX_UART4_OFFSET         0x000f0000  /* 000f0000 000f3fff UART4 16 KB */
+#define IMX_UART5_OFFSET         0x000f4000  /* 000f4000 000f7fff UART5 16 KB */
+                                             /* 000f8000 000fbfff Reserved 16 KB */
 
 /* i.MX6 DAP AIPS-2 PSECTION Offsets */
 
-#define IMX_DAPROM_OFFSET        0x00140000  /* 00140000 00140fff 4 KB DAP ROM Table */
-#define IMX_ETB_OFFSET           0x00141000  /* 00141000 00141fff 4 KB ETB */
-#define IMX_EXTCTI_OFFSET        0x00142000  /* 00142000 00142fff 4 KB ext. CTI */
-#define IMX_TPIU_OFFSET          0x00143000  /* 00143000 00143fff 4 KB TPIU */
-#define IMX_FUNNEL_OFFSET        0x00144000  /* 00144000 00144fff 4 KB FUNNEL */
-                                             /* 00145000 0014efff 40 KB Reserved */
-#define IMX_CA9INTEG_OFFSET      0x0014f000  /* 0014f000 0014ffff 4 KB CA9-INTEG */
-#define IMX_CPUDBG_OFFSET(n)     (0x00150000 + ((n) << 13))
-#define IMX_CPUPMU_OFFSET(n)     (0x00151000 + ((n) << 13))
-#define IMX_CPU0DBG_OFFSET       0x00150000  /* 00150000 00150fff 4 KB CPU0 Debug I/F */
-#define IMX_CPU0PMU_OFFSET       0x00151000  /* 00151000 00151fff 4 KB CPU0 PMU */
-#define IMX_CPU1DBG_OFFSET       0x00152000  /* 00152000 00152fff 4 KB CPU1 Debug I/F */
-#define IMX_CPU1PMC_OFFSET       0x00153000  /* 00153000 00153fff 4 KB CPU1 PMU */
-#define IMX_CPU2DBG_OFFSET       0x00154000  /* 00154000 00154fff 4 KB CPU2 Debug I/F */
-#define IMX_CPU2PMU_OFFSET       0x00155000  /* 00155000 00155fff 4 KB CPU2 PMU */
-#define IMX_CPU3DBG_OFFSET       0x00156000  /* 00156000 00156fff 4 KB CPU3 Debug I/F */
-#define IMX_CPU3PMU_OFFSET       0x00157000  /* 00157000 00157fff 4 KB CPU3 PMU */
-#define IMX_CTI_OFFSET(n)        (0x00158000 + ((n) << 12))
-#define IMX_CTI0_OFFSET          0x00158000  /* 00158000 00158fff 4 KB CTI0 */
-#define IMX_CTI1_OFFSET          0x00159000  /* 00159000 00159fff 4 KB CTI1 */
-#define IMX_CTI2_OFFSET          0x0015a000  /* 0015a000 0015afff 4 KB CTI2 */
-#define IMX_CTI3_OFFSET          0x0015b000  /* 0015b000 0015bfff 4 KB CTI3 */
-#define IMX_PTM_OFFSET(n)        (0x0015c000 + ((n) << 12))
-#define IMX_PTM0_OFFSET          0x0015c000  /* 0015c000 0015cfff 4 KB PTM0 */
-#define IMX_PTM1_OFFSET          0x0015d000  /* 0015d000 0015dfff 4 KB PTM1 */
-#define IMX_PTM2_OFFSET          0x0015e000  /* 0015e000 0015efff 4 KB PTM2 */
-#define IMX_PTM3_OFFSET          0x0015f000  /* 0015f000 0015ffff 4 KB PTM3 */
-#define IMX_PLATCTRL_OFFSET      0x00160000  /* 00160000 00160fff 4 KB Platform Control */
+#define IMX_DAPROM_OFFSET        0x00040000  /* 00040000 00040fff 4 KB DAP ROM Table */
+#define IMX_ETB_OFFSET           0x00041000  /* 00041000 00041fff 4 KB ETB */
+#define IMX_EXTCTI_OFFSET        0x00042000  /* 00042000 00042fff 4 KB ext. CTI */
+#define IMX_TPIU_OFFSET          0x00043000  /* 00043000 00043fff 4 KB TPIU */
+#define IMX_FUNNEL_OFFSET        0x00044000  /* 00044000 00044fff 4 KB FUNNEL */
+                                             /* 00045000 0004efff 40 KB Reserved */
+#define IMX_CA9INTEG_OFFSET      0x0004f000  /* 0004f000 0004ffff 4 KB CA9-INTEG */
+#define IMX_CPUDBG_OFFSET(n)     (0x00050000 + ((n) << 13))
+#define IMX_CPUPMU_OFFSET(n)     (0x00051000 + ((n) << 13))
+#define IMX_CPU0DBG_OFFSET       0x00050000  /* 00050000 00050fff 4 KB CPU0 Debug I/F */
+#define IMX_CPU0PMU_OFFSET       0x00051000  /* 00051000 00051fff 4 KB CPU0 PMU */
+#define IMX_CPU1DBG_OFFSET       0x00052000  /* 00052000 00052fff 4 KB CPU1 Debug I/F */
+#define IMX_CPU1PMC_OFFSET       0x00053000  /* 00053000 00053fff 4 KB CPU1 PMU */
+#define IMX_CPU2DBG_OFFSET       0x00054000  /* 00054000 00054fff 4 KB CPU2 Debug I/F */
+#define IMX_CPU2PMU_OFFSET       0x00055000  /* 00055000 00055fff 4 KB CPU2 PMU */
+#define IMX_CPU3DBG_OFFSET       0x00056000  /* 00056000 00056fff 4 KB CPU3 Debug I/F */
+#define IMX_CPU3PMU_OFFSET       0x00057000  /* 00057000 00057fff 4 KB CPU3 PMU */
+#define IMX_CTI_OFFSET(n)        (0x00058000 + ((n) << 12))
+#define IMX_CTI0_OFFSET          0x00058000  /* 00058000 00058fff 4 KB CTI0 */
+#define IMX_CTI1_OFFSET          0x00059000  /* 00059000 00059fff 4 KB CTI1 */
+#define IMX_CTI2_OFFSET          0x0005a000  /* 0005a000 0005afff 4 KB CTI2 */
+#define IMX_CTI3_OFFSET          0x0005b000  /* 0005b000 0005bfff 4 KB CTI3 */
+#define IMX_PTM_OFFSET(n)        (0x0005c000 + ((n) << 12))
+#define IMX_PTM0_OFFSET          0x0005c000  /* 0005c000 0005cfff 4 KB PTM0 */
+#define IMX_PTM1_OFFSET          0x0005d000  /* 0005d000 0005dfff 4 KB PTM1 */
+#define IMX_PTM2_OFFSET          0x0005e000  /* 0005e000 0005efff 4 KB PTM2 */
+#define IMX_PTM3_OFFSET          0x0005f000  /* 0005f000 0005ffff 4 KB PTM3 */
+#define IMX_PLATCTRL_OFFSET      0x00060000  /* 00060000 00060fff 4 KB Platform Control */
 
 /* i.MX6 SATA PSECTION Offsets */
 
