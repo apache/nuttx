@@ -100,7 +100,7 @@
 #define CSR_HPCOUNTER31     0xC1F
 #define CSR_CYCLEH          0xC80
 #define CSR_TIMEH           0xC81
-#define CSR_INSTRET         0xC82
+#define CSR_INSTRETH        0xC82
 #define CSR_HPCOUNTER3H     0xC83
 #define CSR_HPCOUNTER4H     0xC84
 #define CSR_HPCOUNTER5H     0xC85
