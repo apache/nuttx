@@ -114,13 +114,7 @@ int unlink(FAR const char *pathname)
    * or a soft link, then rm should remove the node.
    */
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  /* A soft link is the only "specal" file that we can remove via unlink(). */
-
-  if (!INODE_IS_SPECIAL(inode) || INODE_IS_SOFTLINK(inode))
-#else
   if (!INODE_IS_SPECIAL(inode))
-#endif
     {
       /* If this is a pseudo-file node (i.e., it has no operations)
        * then unlink should remove the node.
