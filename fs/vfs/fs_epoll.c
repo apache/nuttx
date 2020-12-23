@@ -162,67 +162,78 @@ int epoll_ctl(int epfd, int op, int fd, struct epoll_event *ev)
    */
 
   FAR struct epoll_head *eph = (FAR struct epoll_head *)((intptr_t)epfd);
+  int i;
 
   switch (op)
     {
       case EPOLL_CTL_ADD:
         finfo("%08x CTL ADD(%d): fd=%d ev=%08" PRIx32 "\n",
               epfd, eph->occupied, fd, ev->events);
+        if (eph->occupied >= eph->size)
+          {
+            set_errno(ENOMEM);
+            return -1;
+          }
+
+        for (i = 0; i < eph->occupied; i++)
+          {
+            if (eph->poll[i].fd == fd)
+              {
+                set_errno(EEXIST);
+                return -1;
+              }
+          }
 
         eph->data[eph->occupied]        = ev->data;
         eph->poll[eph->occupied].events = ev->events | POLLERR | POLLHUP;
         eph->poll[eph->occupied++].fd   = fd;
-        return 0;
+
+        break;
 
       case EPOLL_CTL_DEL:
-        {
-          int i;
+        for (i = 0; i < eph->occupied; i++)
+          {
+            if (eph->poll[i].fd == fd)
+              {
+                if (i != eph->occupied - 1)
+                  {
+                    memmove(&eph->data[i], &eph->data[i + 1],
+                            sizeof(epoll_data_t) * (eph->occupied - i));
+                    memmove(&eph->poll[i], &eph->poll[i + 1],
+                            sizeof(struct pollfd) * (eph->occupied - i));
+                  }
 
-          for (i = 0; i < eph->occupied; i++)
-            {
-              if (eph->poll[i].fd == fd)
-                {
-                  if (i != eph->occupied - 1)
-                    {
-                      memmove(&eph->data[i], &eph->data[i + 1],
-                              sizeof(epoll_data_t) * (eph->occupied - i));
-                      memmove(&eph->poll[i], &eph->poll[i + 1],
-                              sizeof(struct pollfd) * (eph->occupied - i));
-                    }
+                eph->occupied--;
+                break;
+              }
+          }
 
-                  eph->occupied--;
-                  return 0;
-                }
-            }
-
-          set_errno(ENOENT);
-          return -1;
-        }
+        set_errno(ENOENT);
+        return -1;
 
       case EPOLL_CTL_MOD:
-        {
-          int i;
+        finfo("%08x CTL MOD(%d): fd=%d ev=%08" PRIx32 "\n",
+              epfd, eph->occupied, fd, ev->events);
 
-          finfo("%08x CTL MOD(%d): fd=%d ev=%08" PRIx32 "\n",
-                epfd, eph->occupied, fd, ev->events);
+        for (i = 0; i < eph->occupied; i++)
+          {
+            if (eph->poll[i].fd == fd)
+              {
+                eph->data[i]        = ev->data;
+                eph->poll[i].events = ev->events | POLLERR | POLLHUP;
+                break;
+              }
+          }
 
-          for (i = 0; i < eph->occupied; i++)
-            {
-              if (eph->poll[i].fd == fd)
-                {
-                  eph->data[i]        = ev->data;
-                  eph->poll[i].events = ev->events | POLLERR | POLLHUP;
-                  return 0;
-                }
-            }
+        set_errno(ENOENT);
+        return -1;
 
-          set_errno(ENOENT);
-          return -1;
-        }
+      default:
+        set_errno(EINVAL);
+        return -1;
     }
 
-  set_errno(EINVAL);
-  return -1;
+  return 0;
 }
 
 /****************************************************************************
