@@ -397,6 +397,13 @@ int bthcisock_register(int dev_id);
 int bthcisock_loop(void);
 #endif
 
+/* up_hcitty.c **************************************************************/
+
+#ifdef CONFIG_SIM_HCITTY
+int bthcitty_register(int dev_id);
+void bthcitty_loop(void);
+#endif
+
 /* up_audio.c ***************************************************************/
 
 #ifdef CONFIG_SIM_SOUND
