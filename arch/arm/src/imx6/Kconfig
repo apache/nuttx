@@ -120,7 +120,46 @@ config IMX6_SPI2
 	default n
 	select SPI
 
+config IMX6_ENET
+	bool "Ethernet"
+	default n
+	select ARCH_HAVE_PHY
+	select ARCH_PHY_INTERRUPT
+	select ARCH_HAVE_NETDEV_STATISTICS
+
 endmenu # iMX Peripheral Selection
+
+menu "Ethernet Configuration"
+	depends on IMX6_ENET
+
+config IMX_ENET_NRXBUFFERS
+	int "Number Rx buffers"
+	default 6
+
+config IMX_ENET_NTXBUFFERS
+	int "Number Tx buffers"
+	default 2
+
+config IMX_ENET_ENHANCEDBD
+	bool # not optional
+	default n
+
+config IMX_ENET_NETHIFS
+	int  # Not optional
+	default 1
+
+config IMX_ENET_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it
+		can be used.  This may include such things as configuring GPIOs,
+		resetting the PHY, etc.  If CONFIG_IMX_ENET_PHYINIT is defined in
+		the configuration then the board specific logic must provide
+		imx_phy_boardinitialize();  The i.MX6 ENET driver will call this
+		function one time before it first uses the PHY.
+
+endmenu # IMX_ENET
 
 config IMX_DDR_SIZE
 	int "Installed DRAM size (bytes)"
@@ -152,4 +191,5 @@ config IMX6_BOOT_SRAM
 	select BOOT_RUNFROMEXTSRAM
 
 endchoice # i.MX6 Boot Configuration
+
 endif # ARCH_CHIP_IMX6
