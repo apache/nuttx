@@ -47,9 +47,19 @@
 #include <nuttx/config.h>
 #include <arch/imx6/chip.h>
 
+/* i.MX6 Virtual (mapped) Memory Map
+ *
+ * board_memorymap.h contains special mappings that are needed when a ROM
+ * memory map is used.  It is included in this odd location because it depends
+ * on some the virtual address definitions provided above.
+ */
+
+#include <arch/board/board_memorymap.h>
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Decimal configuration values may exceed 2Gb and, hence, overflow to negative
  * values unless we force them to unsigned long:
  */
@@ -57,7 +67,7 @@
 #define __CONCAT(a,b) a ## b
 #define MKULONG(a) __CONCAT(a,ul)
 
-/* Overview *****************************************************************
+/* Overview *************************************************************************
  *
  *  i.MX6 Physical (unmapped) Memory Map
  *  - i.MX6 System 1MB PSECTIONS
@@ -94,9 +104,10 @@
  *  Page table start addresses
  *  Base address of the interrupt vector table
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-/* i.MX6 Physical (unmapped) Memory Map *************************************/
+/* i.MX6 Physical (unmapped) Memory Map *********************************************/
+
 /* i.MX6 System PSECTIONS */
 
 #define IMX_ROMCP_PSECTION       0x00000000  /* 00000000-00017fff  96 KB Boot ROM (ROMCP) */
@@ -146,6 +157,7 @@
 #define IMX_GPU2D_OFFSET         0x00034000  /* 00034000-00037fff  16 KB GPU 2D (GC320) */
 #define IMX_DTCP_OFFSET          0x00038000  /* 00038000-0003bfff  16 KB DTCP */
                                              /* 0003c000-000fffff 784 KB Reserved */
+
 /* i.MX6 OCRAM PSECTION Offsets */
 
 #define IMX_OCRAM_OFFSET         0x00000000  /* 00000000-0003ffff  0.25 MB OCRAM 256 KB */
@@ -170,7 +182,8 @@
 
 /* i.MX6 AIPS-1 PSECTION Offsets */
 
-                                             /* 00000000 00003fff Reserved for SDMA internal registers 16 KB */
+/* 00000000 00003fff Reserved for SDMA internal registers 16 KB */
+
 #define IMX_SPDIF_OFFSET         0x00004000  /* 00004000 00007fff SPDIF 16 KB */
 #define IMX_ECSPI1_OFFSET        0x00008000  /* 00008000 0000bfff eCSPI1 16 KB */
 #define IMX_ECSPI2_OFFSET        0x0000c000  /* 0000c000 0000ffff eCSPI2 16KB */
@@ -195,7 +208,9 @@
 #define IMX_CAN1_OFFSET          0x00090000  /* 00090000 00093fff CAN1 16 KB */
 #define IMX_CAN2_OFFSET          0x00094000  /* 00094000 00097fff CAN2 16 KB */
 #define IMX_GPT_OFFSET           0x00098000  /* 00098000 0009bfff GPT 16 KB */
+
 #define IMX_GPIO_OFFSET(n)       (0x0009c000 + ((n) << 14)) /* n=0..6 */
+
 #define IMX_GPIO1_OFFSET         0x0009c000  /* 0009c000 0009ffff GPIO1 16 KB */
 #define IMX_GPIO2_OFFSET         0x000a0000  /* 000a0000 000a3fff GPIO2 16 KB */
 #define IMX_GPIO3_OFFSET         0x000a4000  /* 000a4000 000a7fff GPIO3 16 KB */
@@ -228,6 +243,7 @@
                                              /* 000f4000 000f7fff Reserved 16 KB */
                                              /* 000f8000 000fbfff Reserved 16 KB */
                                              /* 000fc000 000fffff AIPS-1 Reserved 16 KB */
+
 /* i.MX6 AIPS-2 PSECTION Offsets */
 
 #define IMX_CAAM_OFFSET          0x00100000  /* 00100000 0210ffff CAAM 64 KB */
@@ -304,6 +320,7 @@
 #define IMX_OPENVG_OFFSET        0x00204000  /* 00204000-02207fff  16 KB OpenVG (GC355) */
 #define IMX_MIPIHSI_OFFSET       0x00208000  /* 00208000-0220bfff  16 KB MIPIHSI */
                                              /* 0020c000-000fffff   2 MB Reserved */
+
 /* i.MX6 DMA Physical Base Addresses */
 
 #define IMX_CAAMRAM_PBASE        (IMX_DMA_PSECTION+IMX_CAAMRAM_OFFSET)
@@ -478,9 +495,10 @@
                                              /* 0220c000-023fffff   2 MB Reserved */
 #define IMX_IPU1_SECSIZE       (4*1024*1024) /* 02600000-029fffff   4 MB IPU-1 */
 #define IMX_IPU2_SECSIZE       (4*1024*1024) /* 02a00000-02dfffff   4 MB IPU-2 */
+
 #define IMX_EIM_SECSIZE     MKULONG(CONFIG_IMX_EIM_SIZE) /* 08000000-0fffffff 128 MB EIM - (NOR/SRAM) */
 #define IMX_MMDCDDR_SECSIZE MKULONG(CONFIG_IMX_DDR_SIZE) /* 10000000-ffffffff 3840 MB MMDC-DDR Controller */
-                                             /* 10000000-7fffffff 1792 MB */
+                                                         /* 10000000-7fffffff 1792 MB */
 
 /* Convert size in bytes to number of sections (in Mb). */
 
@@ -535,15 +553,6 @@
 #define IMX_IPU2_MMUFLAGS        MMU_IOFLAGS
 #define IMX_EIM_MMUFLAGS         MMU_ROMFLAGS /* REVISIT */
 #define IMX_MMDCDDR_MMUFLAGS     MMU_MEMFLAGS
-
-/* i.MX6 Virtual (mapped) Memory Map
- *
- * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location because it depends
- * on some the virtual address definitions provided above.
- */
-
-#include <arch/board/board_memorymap.h>
 
 /* i.MX6 Virtual (mapped) Memory Map.  These are the mappings that will
  * be created if the page table lies in RAM.  If the platform has another,
@@ -799,43 +808,44 @@
 #    error "Only one of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is defined"
 #  endif
 
-  /* A sanity check, if the configuration says that the page table is read-only
-   * and pre-initialized (maybe ROM), then it should have also defined both of
-   * the page table base addresses.
-   */
+/* A sanity check, if the configuration says that the page table is read-only
+ * and pre-initialized (maybe ROM), then it should have also defined both of
+ * the page table base addresses.
+ */
 
 #  ifdef CONFIG_ARCH_ROMPGTABLE
 #    error "CONFIG_ARCH_ROMPGTABLE defined; PGTABLE_BASE_P/VADDR not defined"
 #  endif
 
-  /* We must declare the page table at the bottom or at the top of OCRAM. */
-  /* Yes.. do the vectors lie in low memory? */
+/* We must declare the page table at the bottom or at the top of OCRAM.
+ * Yes.. do the vectors lie in low memory?
+ */
 
 #  ifdef CONFIG_ARCH_LOWVECTORS
 
-  /* In this case, page table must lie at the top 16Kb of OCRAM. */
+/* In this case, page table must lie at the top 16Kb of OCRAM. */
 
 #    define PGTABLE_BASE_PADDR    (IMX_OCRAM_PBASE + IMX_OCRAM_SIZE - PGTABLE_SIZE)
 #    define PGTABLE_BASE_VADDR    (IMX_OCRAM_VBASE + IMX_OCRAM_SIZE - PGTABLE_SIZE)
 #    define PGTABLE_IN_HIGHSRAM   1
 
-  /* We will force the IDLE stack to precede the page table */
+/* We will force the IDLE stack to precede the page table */
 
 #    define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR - CONFIG_IDLETHREAD_STACKSIZE)
 #    define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR - CONFIG_IDLETHREAD_STACKSIZE)
 
 #  else /* CONFIG_ARCH_LOWVECTORS */
 
-  /* Otherwise, the vectors lie at another location (perhaps in NOR FLASH,
-   * perhaps elsewhere in OCRAM).  The page table will then be positioned
-   * at the first 16Kb of SRAM.
-   */
+/* Otherwise, the vectors lie at another location (perhaps in NOR FLASH,
+ * perhaps elsewhere in OCRAM).  The page table will then be positioned
+ * at the first 16Kb of SRAM.
+ */
 
 #    define PGTABLE_BASE_PADDR    IMX_OCRAM_PBASE
 #    define PGTABLE_BASE_VADDR    IMX_OCRAM_VBASE
 #    define PGTABLE_IN_LOWSRAM    1
 
-   /* We will force the IDLE stack to follow the page table */
+/* We will force the IDLE stack to follow the page table */
 
 #    define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
 #    define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
@@ -867,21 +877,21 @@
 
 #else /* !PGTABLE_BASE_PADDR || !PGTABLE_BASE_VADDR */
 
-  /* Sanity check.. if one is defined, both should be defined */
+/* Sanity check.. if one is defined, both should be defined */
 
 #  if !defined(PGTABLE_BASE_PADDR) || !defined(PGTABLE_BASE_VADDR)
 #    error "One of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is undefined"
 #  endif
 
-  /* The page table then lies at the beginning of the OSSRAM and
-   * the IDLE stack follows immediately.
-   */
+/* The page table then lies at the beginning of the OSSRAM and
+ * the IDLE stack follows immediately.
+ */
 
 #    define PGTABLE_BASE_PADDR    IMX_OCRAM_PBASE
 #    define PGTABLE_BASE_VADDR    IMX_OCRAM_VBASE
 #    define PGTABLE_IN_LOWSRAM    1
 
-   /* We will force the IDLE stack to follow the page table */
+/* We will force the IDLE stack to follow the page table */
 
 #    define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
 #    define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
@@ -1030,17 +1040,5 @@
 #  define IMX_VECTOR_VADDR        0xffff0000
 
 #endif
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_MEMORYMAP_H */
