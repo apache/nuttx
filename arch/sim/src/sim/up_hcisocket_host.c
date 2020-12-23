@@ -63,6 +63,43 @@ struct sockaddr_hci
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: bthcisock_host_avail
+ *
+ * Description:
+ *   Monitor the host user channel to see if I/O is possible on socket.
+ *
+ * Input Parameters:
+ *   fd: Host Bluetooth socket fd
+ *
+ * Returned Value:
+ *   TRUE is returned on I/O available
+ *
+ ****************************************************************************/
+
+int bthcisock_host_avail(int fd)
+{
+  struct timeval tv;
+  fd_set fdset;
+
+  /* We can't do anything if we failed to open the user channel */
+
+  if (fd < 0)
+    {
+      return 0;
+    }
+
+  /* Wait for data on the user channel (or a timeout) */
+
+  tv.tv_sec  = 0;
+  tv.tv_usec = 0;
+
+  FD_ZERO(&fdset);
+  FD_SET(fd, &fdset);
+
+  return select(fd + 1, &fdset, NULL, NULL, &tv) > 0;
+}
+
+/****************************************************************************
  * Name: bthcisock_host_send
  *
  * Description:
@@ -189,4 +226,24 @@ int bthcisock_host_open(int dev_idx)
     }
 
   return fd;
+}
+
+/****************************************************************************
+ * Name: bthcisock_host_close
+ *
+ * Description:
+ *   Close a User Channel HCI socket on the Host for the given device idx.
+ *
+ * Input Parameters:
+ *   fd: The resources associated with the open user channel are freed.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated errno value is returned on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+int bthcisock_host_close(int fd)
+{
+  return close(fd);
 }

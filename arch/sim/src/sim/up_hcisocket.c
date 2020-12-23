@@ -177,7 +177,7 @@ int bthcisock_register(int dev_id)
  *
  ****************************************************************************/
 
-int bthcisock_loop()
+int bthcisock_loop(void)
 {
   uint8_t type;
   int len;
