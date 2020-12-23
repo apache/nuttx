@@ -168,6 +168,7 @@ jobs:
         with:
           name: linux-builds
           path: buildartifacts/
+        continue-on-error: true
 
   macOS:
     runs-on: macos-10.15
@@ -207,3 +208,4 @@ jobs:
         with:
           name: macos-builds
           path: buildartifacts/
+        continue-on-error: true
