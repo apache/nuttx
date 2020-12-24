@@ -88,6 +88,7 @@ static int esp32_tim_getcounter(FAR struct esp32_tim_dev_s *dev,
                                 uint64_t *value);
 static int esp32_tim_setcounter(FAR struct esp32_tim_dev_s *dev,
                                 uint64_t value);
+static int esp32_tim_reload_now(FAR struct esp32_tim_dev_s *dev);
 static int esp32_tim_getalarmvalue(FAR struct esp32_tim_dev_s *dev,
                                    uint64_t *value);
 static int esp32_tim_setalarmvalue(FAR struct esp32_tim_dev_s *dev,
@@ -119,6 +120,7 @@ struct esp32_tim_ops_s esp32_tim_ops =
   .setpre        = esp32_tim_setpre,
   .getconfig     = esp32_tim_getconfig,
   .setcounter    = esp32_tim_setcounter,
+  .reloadnow     = esp32_tim_reload_now,
   .getalarmvalue = esp32_tim_getalarmvalue,
   .setalarmvalue = esp32_tim_setalarmvalue,
   .setalarm      = esp32_tim_setalarm,
@@ -286,16 +288,13 @@ static int esp32_tim_stop(FAR struct esp32_tim_dev_s *dev)
 
 static int esp32_tim_clear(FAR struct esp32_tim_dev_s *dev)
 {
-  uint32_t clear_value = 0;
+  uint64_t clear_value = 0;
 
   DEBUGASSERT(dev);
 
-  esp32_tim_putreg(dev, TIM_LOAD_LO_OFFSET, clear_value);
-  esp32_tim_putreg(dev, TIM_LOAD_HI_OFFSET, clear_value);
+  esp32_tim_setcounter(dev, clear_value);
 
-  /* Dummy value to trigger reload the counter with the previous value */
-
-  esp32_tim_putreg(dev, TIM_LOAD_OFFSET, BIT(0));
+  esp32_tim_reload_now(dev);
 
   return OK;
 }
@@ -503,7 +502,10 @@ static int esp32_tim_getcounter(FAR struct esp32_tim_dev_s *dev,
  *
  * Description:
  *   Set the value to be loaded to the counter
- *   It may be loaded at an alarm or instantly
+ *   If you want the counter to be loaded at an alarm, enable the alarm and
+ *   the auto-reload before.
+ *   I you want the counter to be loaded instantly, call esp32_tim_reload_now
+ *   after.
  *
  ****************************************************************************/
 
@@ -519,6 +521,25 @@ static int esp32_tim_setcounter(FAR struct esp32_tim_dev_s *dev,
 
   esp32_tim_putreg(dev, TIM_LOAD_LO_OFFSET, (uint32_t)low_64);
   esp32_tim_putreg(dev, TIM_LOAD_HI_OFFSET, (uint32_t)high_64);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp32_tim_reload_now
+ *
+ * Description:
+ *   Reloads the counter instantly. May be called after esp32_tim_setcounter.
+ *
+ ****************************************************************************/
+
+static int esp32_tim_reload_now(FAR struct esp32_tim_dev_s *dev)
+{
+  DEBUGASSERT(dev);
+
+  /* Dummy value to trigger reloading  */
+
+  esp32_tim_putreg(dev, TIM_LOAD_OFFSET, BIT(0));
 
   return OK;
 }
