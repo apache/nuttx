@@ -1458,6 +1458,23 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf);
 
 int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve);
 
+/****************************************************************************
+ * Name: nx_unlink
+ *
+ * Description:
+ *   nx_unlink() is similar to the standard 'unlink' interface except that
+ *   is not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_unlink() is an internal NuttX interface and should not be called
+ *   from applications.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int nx_unlink(FAR const char *pathname);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
