@@ -42,6 +42,100 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: file_mq_receive
+ *
+ * Description:
+ *   This function receives the oldest of the highest priority messages
+ *   from the message queue specified by "mq."  This is an internal OS
+ *   interface.  It is functionally equivalent to mq_receive except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_receive() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mq     - Message Queue Descriptor
+ *   msg    - Buffer to receive the message
+ *   msglen - Size of the buffer in bytes
+ *   prio   - If not NULL, the location to store message priority.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   (see mq_receive() for the list list valid return values).
+ *
+ ****************************************************************************/
+
+ssize_t file_mq_receive(FAR struct file *mq, FAR char *msg, size_t msglen,
+                        FAR unsigned int *prio)
+{
+  FAR struct inode *inode = mq->f_inode;
+  FAR struct mqueue_inode_s *msgq;
+  FAR struct mqueue_msg_s *mqmsg;
+  irqstate_t flags;
+  ssize_t ret;
+
+  inode = mq->f_inode;
+  if (!inode)
+    {
+      return -EBADF;
+    }
+
+  msgq = inode->i_private;
+
+  DEBUGASSERT(up_interrupt_context() == false);
+
+  /* Verify the input parameters and, in case of an error, set
+   * errno appropriately.
+   */
+
+  ret = nxmq_verify_receive(msgq, mq->f_oflags, msg, msglen);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Get the next message from the message queue.  We will disable
+   * pre-emption until we have completed the message received.  This
+   * is not too bad because if the receipt takes a long time, it will
+   * be because we are blocked waiting for a message and pre-emption
+   * will be re-enabled while we are blocked
+   */
+
+  sched_lock();
+
+  /* Furthermore, nxmq_wait_receive() expects to have interrupts disabled
+   * because messages can be sent from interrupt level.
+   */
+
+  flags = enter_critical_section();
+
+  /* Get the message from the message queue */
+
+  ret = nxmq_wait_receive(msgq, mq->f_oflags, &mqmsg);
+  leave_critical_section(flags);
+
+  /* Check if we got a message from the message queue.  We might
+   * not have a message if:
+   *
+   * - The message queue is empty and O_NONBLOCK is set in the mq
+   * - The wait was interrupted by a signal
+   */
+
+  if (ret >= 0)
+    {
+      DEBUGASSERT(mqmsg != NULL);
+      ret = nxmq_do_receive(msgq, mqmsg, msg, prio);
+    }
+
+  sched_unlock();
+  return ret;
+}
+
+/****************************************************************************
  * Name: nxmq_receive
  *
  * Description:
@@ -72,14 +166,8 @@
 ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
                      FAR unsigned int *prio)
 {
-  FAR struct mqueue_inode_s *msgq;
-  FAR struct mqueue_msg_s *mqmsg;
   FAR struct file *filep;
-  FAR struct inode *inode;
-  irqstate_t flags;
-  ssize_t ret;
-
-  /* Convert fd to msgq */
+  int ret;
 
   ret = fs_getfilep(mqdes, &filep);
   if (ret < 0)
@@ -87,56 +175,7 @@ ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
       return ret;
     }
 
-  inode = filep->f_inode;
-  msgq  = inode->i_private;
-
-  DEBUGASSERT(up_interrupt_context() == false);
-
-  /* Verify the input parameters and, in case of an error, set
-   * errno appropriately.
-   */
-
-  ret = nxmq_verify_receive(msgq, filep->f_oflags, msg, msglen);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Get the next message from the message queue.  We will disable
-   * pre-emption until we have completed the message received.  This
-   * is not too bad because if the receipt takes a long time, it will
-   * be because we are blocked waiting for a message and pre-emption
-   * will be re-enabled while we are blocked
-   */
-
-  sched_lock();
-
-  /* Furthermore, nxmq_wait_receive() expects to have interrupts disabled
-   * because messages can be sent from interrupt level.
-   */
-
-  flags = enter_critical_section();
-
-  /* Get the message from the message queue */
-
-  ret = nxmq_wait_receive(msgq, filep->f_oflags, &mqmsg);
-  leave_critical_section(flags);
-
-  /* Check if we got a message from the message queue.  We might
-   * not have a message if:
-   *
-   * - The message queue is empty and O_NONBLOCK is set in the filep
-   * - The wait was interrupted by a signal
-   */
-
-  if (ret >= 0)
-    {
-      DEBUGASSERT(mqmsg != NULL);
-      ret = nxmq_do_receive(msgq, mqmsg, msg, prio);
-    }
-
-  sched_unlock();
-  return ret;
+  return file_mq_receive(filep, msg, msglen, prio);
 }
 
 /****************************************************************************

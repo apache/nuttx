@@ -166,7 +166,7 @@ static int conn_tx_kthread(int argc, FAR char *argv[])
 
       /* Get next ACL packet for connection */
 
-      ret = bt_queue_receive(conn->tx_queue, &buf);
+      ret = bt_queue_receive(&conn->tx_queue, &buf);
       DEBUGASSERT(ret >= 0 && buf != NULL);
       UNUSED(ret);
 
@@ -195,7 +195,7 @@ static int conn_tx_kthread(int argc, FAR char *argv[])
        * result in a successful termination of this thread.
        */
 
-      ret = mq_getattr(conn->tx_queue, &attr);
+      ret = file_mq_getattr(&conn->tx_queue, &attr);
       if (ret != OK)
         {
           break;
@@ -206,7 +206,7 @@ static int conn_tx_kthread(int argc, FAR char *argv[])
           break;
         }
 
-      ret = bt_queue_receive(conn->tx_queue, &buf);
+      ret = bt_queue_receive(&conn->tx_queue, &buf);
       if (ret >= 0)
         {
           DEBUGASSERT(buf != NULL);
@@ -470,7 +470,7 @@ void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
 
   while ((buf = (FAR struct bt_buf_s *)sq_remfirst(&fraglist)) != NULL)
     {
-      bt_queue_send(conn->tx_queue, buf, BT_NORMAL_PRIO);
+      bt_queue_send(&conn->tx_queue, buf, BT_NORMAL_PRIO);
     }
 }
 
@@ -569,7 +569,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
           ret = bt_queue_open(BT_CONN_TX, O_RDWR | O_CREAT,
                               CONFIG_BLUETOOTH_TXCONN_NMSGS,
                               &conn->tx_queue);
-          DEBUGASSERT(ret >= 0 && g_btdev.tx_queue != 0);
+          DEBUGASSERT(ret >= 0);
           UNUSED(ret);
 
           /* Get exclusive access to the handoff structure.  The count will
@@ -609,7 +609,7 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
         if (old_state == BT_CONN_CONNECTED ||
            old_state == BT_CONN_DISCONNECT)
           {
-            bt_queue_send(conn->tx_queue, bt_buf_alloc(BT_DUMMY, NULL, 0),
+            bt_queue_send(&conn->tx_queue, bt_buf_alloc(BT_DUMMY, NULL, 0),
                           BT_NORMAL_PRIO);
           }
 

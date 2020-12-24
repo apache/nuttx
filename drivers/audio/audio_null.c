@@ -72,7 +72,7 @@ struct null_dev_s
 {
   struct audio_lowerhalf_s dev; /* Audio lower half (this device) */
   uint32_t      scaler;         /* Data bytes to sec scaler (bytes per sec) */
-  mqd_t         mq;             /* Message queue for receiving messages */
+  struct file   mq;             /* Message queue for receiving messages */
   char          mqname[16];     /* Our message queue name */
   pthread_t     threadid;       /* ID of our thread */
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
@@ -499,7 +499,8 @@ static void *null_workerthread(pthread_addr_t pvarg)
     {
       /* Wait for messages from our message queue */
 
-      msglen = nxmq_receive(priv->mq, (FAR char *)&msg, sizeof(msg), &prio);
+      msglen = file_mq_receive(&priv->mq, (FAR char *)&msg,
+                               sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
 
@@ -537,9 +538,8 @@ static void *null_workerthread(pthread_addr_t pvarg)
 
   /* Close the message queue */
 
-  mq_close(priv->mq);
-  mq_unlink(priv->mqname);
-  priv->mq = NULL;
+  file_mq_close(&priv->mq);
+  file_mq_unlink(priv->mqname);
   priv->terminate = false;
 
   /* Send an AUDIO_MSG_COMPLETE message to the client */
@@ -587,13 +587,14 @@ static int null_start(FAR struct audio_lowerhalf_s *dev)
   attr.mq_curmsgs = 0;
   attr.mq_flags   = 0;
 
-  priv->mq = mq_open(priv->mqname, O_RDWR | O_CREAT, 0644, &attr);
-  if (priv->mq == NULL)
+  ret = file_mq_open(&priv->mq, priv->mqname,
+                     O_RDWR | O_CREAT, 0644, &attr);
+  if (ret < 0)
     {
       /* Error creating message queue! */
 
       auderr("ERROR: Couldn't allocate message queue\n");
-      return -ENOMEM;
+      return ret;
     }
 
   /* Join any old worker thread we had created to prevent a memory leak */
@@ -655,8 +656,8 @@ static int null_stop(FAR struct audio_lowerhalf_s *dev)
 
   term_msg.msg_id = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  nxmq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
-            CONFIG_AUDIO_NULL_MSG_PRIO);
+  file_mq_send(&priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+               CONFIG_AUDIO_NULL_MSG_PRIO);
 
   /* Join the worker thread */
 
@@ -727,11 +728,11 @@ static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   msg.msg_id = AUDIO_MSG_ENQUEUE;
   msg.u.ptr = apb;
 
-  ret = nxmq_send(priv->mq, (FAR const char *)&msg,
-                  sizeof(msg), CONFIG_AUDIO_NULL_MSG_PRIO);
+  ret = file_mq_send(&priv->mq, (FAR const char *)&msg,
+                     sizeof(msg), CONFIG_AUDIO_NULL_MSG_PRIO);
   if (ret < 0)
     {
-      auderr("ERROR: nxmq_send failed: %d\n", ret);
+      auderr("ERROR: file_mq_send failed: %d\n", ret);
     }
 
   audinfo("Return OK\n");

@@ -101,15 +101,15 @@ static void nxmq_rcvtimeout(wdparm_t pid)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmq_timedreceive
+ * Name: file_mq_timedreceive
  *
  * Description:
  *   This function receives the oldest of the highest priority messages from
- *   the message queue specified by "mqdes."  If the message queue is empty
- *   and O_NONBLOCK was not set, nxmq_timedreceive() will block until a
+ *   the message queue specified by "mq."  If the message queue is empty
+ *   and O_NONBLOCK was not set, file_mq_timedreceive() will block until a
  *   message is added to the message queue (or until a timeout occurs).
  *
- *   nxmq_timedreceive() is an internal OS interface.  It is functionally
+ *   file_mq_timedreceive() is an internal OS interface.  It is functionally
  *   equivalent to mq_timedreceive() except that:
  *
  *   - It is not a cancellation point, and
@@ -119,7 +119,7 @@ static void nxmq_rcvtimeout(wdparm_t pid)
  *  the behavior of this function
  *
  * Input Parameters:
- *   mqdes   - Message Queue Descriptor
+ *   mq      - Message Queue Descriptor
  *   msg     - Buffer to receive the message
  *   msglen  - Size of the buffer in bytes
  *   prio    - If not NULL, the location to store message priority.
@@ -133,28 +133,24 @@ static void nxmq_rcvtimeout(wdparm_t pid)
  *
  ****************************************************************************/
 
-ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
-                          FAR unsigned int *prio,
-                          FAR const struct timespec *abstime)
+ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
+                             size_t msglen, FAR unsigned int *prio,
+                             FAR const struct timespec *abstime)
 {
+  FAR struct inode *inode = mq->f_inode;
   FAR struct tcb_s *rtcb = this_task();
   FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *mqmsg;
-  FAR struct file *filep;
-  FAR struct inode *inode;
   irqstate_t flags;
   int ret;
 
-  /* Convert fd to msgq */
-
-  ret = fs_getfilep(mqdes, &filep);
-  if (ret < 0)
+  inode = mq->f_inode;
+  if (!inode)
     {
-      return ret;
+      return -EBADF;
     }
 
-  inode = filep->f_inode;
-  msgq  = inode->i_private;
+  msgq = inode->i_private;
 
   DEBUGASSERT(up_interrupt_context() == false);
 
@@ -162,7 +158,7 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
    * errno appropriately.
    */
 
-  ret = nxmq_verify_receive(msgq, filep->f_oflags, msg, msglen);
+  ret = nxmq_verify_receive(msgq, mq->f_oflags, msg, msglen);
   if (ret < 0)
     {
       return ret;
@@ -227,7 +223,7 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   /* Get the message from the message queue */
 
-  ret = nxmq_wait_receive(msgq, filep->f_oflags, &mqmsg);
+  ret = nxmq_wait_receive(msgq, mq->f_oflags, &mqmsg);
 
   /* Stop the watchdog timer (this is not harmful in the case where
    * it was never started)
@@ -255,6 +251,55 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
 
   sched_unlock();
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxmq_timedreceive
+ *
+ * Description:
+ *   This function receives the oldest of the highest priority messages from
+ *   the message queue specified by "mqdes."  If the message queue is empty
+ *   and O_NONBLOCK was not set, nxmq_timedreceive() will block until a
+ *   message is added to the message queue (or until a timeout occurs).
+ *
+ *   nxmq_timedreceive() is an internal OS interface.  It is functionally
+ *   equivalent to mq_timedreceive() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_timedreceive() for a more complete description of
+ *  the behavior of this function
+ *
+ * Input Parameters:
+ *   mqdes   - Message Queue Descriptor
+ *   msg     - Buffer to receive the message
+ *   msglen  - Size of the buffer in bytes
+ *   prio    - If not NULL, the location to store message priority.
+ *   abstime - the absolute time to wait until a timeout is declared.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   (see mq_timedreceive() for the list list valid return values).
+ *
+ ****************************************************************************/
+
+ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
+                          FAR unsigned int *prio,
+                          FAR const struct timespec *abstime)
+{
+  FAR struct file *filep;
+  int ret;
+
+  ret = fs_getfilep(mqdes, &filep);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return file_mq_timedreceive(filep, msg, msglen, prio, abstime);
 }
 
 /****************************************************************************

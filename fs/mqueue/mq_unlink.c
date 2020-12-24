@@ -72,7 +72,7 @@ static void mq_inode_release(FAR struct inode *inode)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmq_unlink
+ * Name: file_mq_unlink
  *
  * Description:
  *   This is an internal OS interface.  It is functionally equivalent to
@@ -94,7 +94,7 @@ static void mq_inode_release(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-int nxmq_unlink(FAR const char *mq_name)
+int file_mq_unlink(FAR const char *mq_name)
 {
   FAR struct inode *inode;
   struct inode_search_s desc;
@@ -185,6 +185,34 @@ errout_with_search:
   RELEASE_SEARCH(&desc);
   sched_unlock();
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxmq_unlink
+ *
+ * Description:
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   mq_unlink() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_unlink() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mq_name - Name of the message queue
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success. A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxmq_unlink(FAR const char *mq_name)
+{
+  return file_mq_unlink(mq_name);
 }
 
 /****************************************************************************

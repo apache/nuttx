@@ -138,6 +138,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ssd1306.h>
+#include <nuttx/signal.h>
 
 #include <arch/irq.h>
 

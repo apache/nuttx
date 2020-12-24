@@ -43,9 +43,9 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/mqueue.h>
 
 #include <limits.h>
-#include <mqueue.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -100,7 +100,7 @@ struct bt_buf_s; /* Forward Reference */
  ****************************************************************************/
 
 int bt_queue_open(FAR const char *name, int oflags, int nmsgs,
-                  FAR mqd_t *mqd);
+                  FAR struct file *mqd);
 
 /****************************************************************************
  * Name: bt_queue_receive
@@ -119,7 +119,7 @@ int bt_queue_open(FAR const char *name, int oflags, int nmsgs,
  *
  ****************************************************************************/
 
-int bt_queue_receive(mqd_t mqd, FAR struct bt_buf_s **buf);
+int bt_queue_receive(struct file *mqd, FAR struct bt_buf_s **buf);
 
 /****************************************************************************
  * Name: bt_queue_send
@@ -141,7 +141,7 @@ int bt_queue_receive(mqd_t mqd, FAR struct bt_buf_s **buf);
  *
  ****************************************************************************/
 
-int bt_queue_send(mqd_t mqd,
+int bt_queue_send(struct file *mqd,
                   FAR struct bt_buf_s *buf,
                   unsigned int priority);
 
