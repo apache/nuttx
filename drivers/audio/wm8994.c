@@ -578,11 +578,11 @@ static void  wm8994_senddone(FAR struct i2s_dev_s *i2s,
    */
 
   msg.msg_id = AUDIO_MSG_COMPLETE;
-  ret = nxmq_send(priv->mq, (FAR const char *)&msg, sizeof(msg),
-                  CONFIG_WM8994_MSG_PRIO);
+  ret = file_mq_send(&priv->mq, (FAR const char *)&msg, sizeof(msg),
+                     CONFIG_WM8994_MSG_PRIO);
   if (ret < 0)
     {
-      auderr("ERROR: nxmq_send failed: %d\n", ret);
+      auderr("ERROR: file_mq_send failed: %d\n", ret);
     }
 }
 
@@ -775,13 +775,13 @@ static int wm8994_start(FAR struct audio_lowerhalf_s *dev)
   attr.mq_curmsgs = 0;
   attr.mq_flags   = 0;
 
-  priv->mq = mq_open(priv->mqname, O_RDWR | O_CREAT, 0644, &attr);
-  if (priv->mq == NULL)
+  ret = file_mq_open(&priv->mq, priv->mqname, O_RDWR | O_CREAT, 0644, &attr);
+  if (ret < 0)
     {
       /* Error creating message queue! */
 
       auderr("ERROR: Couldn't allocate message queue\n");
-      return -ENOMEM;
+      return ret;
     }
 
   /* Join any old worker thread we had created to prevent a memory leak */
@@ -837,8 +837,8 @@ static int wm8994_stop(FAR struct audio_lowerhalf_s *dev)
 
   term_msg.msg_id = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
-  (void)nxmq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
-                  CONFIG_WM8994_MSG_PRIO);
+  (void)file_mq_send(&priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
+                     CONFIG_WM8994_MSG_PRIO);
 
   /* Join the worker thread */
 
@@ -945,16 +945,16 @@ static int wm8994_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
    */
 
   ret = OK;
-  if (priv->mq != NULL)
+  if (priv->mq.f_inode != NULL)
     {
       term_msg.msg_id  = AUDIO_MSG_ENQUEUE;
       term_msg.u.data = 0;
 
-      ret = nxmq_send(priv->mq, (FAR const char *)&term_msg,
-                      sizeof(term_msg), CONFIG_WM8994_MSG_PRIO);
+      ret = file_mq_send(&priv->mq, (FAR const char *)&term_msg,
+                         sizeof(term_msg), CONFIG_WM8994_MSG_PRIO);
       if (ret < 0)
         {
-          auderr("ERROR: nxmq_send failed: %d\n", ret);
+          auderr("ERROR: file_mq_send failed: %d\n", ret);
         }
     }
 
@@ -1256,7 +1256,7 @@ static void *wm8994_workerthread(pthread_addr_t pvarg)
 
       /* Wait for messages from our message queue */
 
-      msglen = nxmq_receive(priv->mq, (FAR char *)&msg, sizeof(msg), &prio);
+      msglen = file_mq_receive(&priv->mq, (FAR char *)&msg, sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
 
@@ -1341,9 +1341,8 @@ static void *wm8994_workerthread(pthread_addr_t pvarg)
 
   /* Close the message queue */
 
-  mq_close(priv->mq);
-  mq_unlink(priv->mqname);
-  priv->mq = NULL;
+  file_mq_close(&priv->mq);
+  file_mq_unlink(priv->mqname);
 
   /* Send an AUDIO_MSG_COMPLETE message to the client */
 

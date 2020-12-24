@@ -279,7 +279,7 @@ struct cxd56_dev_s
   const FAR struct cxd56_lower_s *lower;    /* Pointer to the board lower functions */
   enum cxd56_devstate_e   state;            /* Driver state */
   enum cxd56_dmahandle_e  dma_handle;       /* DMA handle */
-  mqd_t                   mq;               /* Message queue for receiving messages */
+  struct file             mq;               /* Message queue for receiving messages */
   char                    mqname[16];       /* Our message queue name */
   pthread_t               threadid;         /* ID of our thread */
   sem_t                   pendsem;          /* Protect pendq */

@@ -50,7 +50,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <mqueue.h>
+#include <nuttx/mqueue.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
@@ -118,11 +118,11 @@ struct bt_dev_s
 
   /* Queue for incoming HCI events and ACL data */
 
-  mqd_t rx_queue;
+  struct file rx_queue;
 
   /* Queue for outgoing HCI commands */
 
-  mqd_t tx_queue;
+  struct file tx_queue;
 
   /* Registered HCI driver */
 
