@@ -46,7 +46,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <mqueue.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
@@ -91,7 +90,7 @@ struct audio_upperhalf_s
   volatile bool     started;          /* True: playback is active */
   sem_t             exclsem;          /* Supports mutual exclusion */
   FAR struct audio_lowerhalf_s *dev;  /* lower-half state */
-  mqd_t             usermq;           /* User mode app's message queue */
+  struct file      *usermq;           /* User mode app's message queue */
 };
 
 /****************************************************************************
@@ -608,8 +607,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_REGISTERMQ\n");
 
-          upper->usermq = (mqd_t) arg;
-          ret = OK;
+          ret = fs_getfilep((mqd_t)arg, &upper->usermq);
         }
         break;
 
@@ -739,8 +737,8 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
       msg.session = session;
 #endif
       apb->flags |= AUDIO_APB_DEQUEUED;
-      nxmq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
-                CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+      file_mq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
+                   CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
     }
 }
 
@@ -777,8 +775,8 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       msg.session = session;
 #endif
-      nxmq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
-                CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+      file_mq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
+                   CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
     }
 }
 
@@ -810,8 +808,8 @@ static inline void audio_message(FAR struct audio_upperhalf_s *upper,
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       msg->session = session;
 #endif
-      nxmq_send(upper->usermq, (FAR const char *)msg, sizeof(*msg),
-                CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+      file_mq_send(upper->usermq, (FAR const char *)msg, sizeof(*msg),
+                   CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
     }
 }
 

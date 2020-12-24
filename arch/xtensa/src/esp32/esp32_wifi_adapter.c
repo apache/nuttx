@@ -28,7 +28,6 @@
 #include <string.h>
 #include <assert.h>
 #include <pthread.h>
-#include <mqueue.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <clock/clock.h>
@@ -36,6 +35,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "nuttx/kmalloc.h"
+#include <nuttx/mqueue.h>
 #include "nuttx/spinlock.h"
 #include <nuttx/irq.h>
 #include <nuttx/semaphore.h>
@@ -87,9 +87,9 @@ struct irq_adpt
 
 struct mq_adpt
 {
-  mqd_t    mq;              /* Message queue handle */
-  uint32_t msgsize;         /* Message size */
-  char     name[16];        /* Message queue name */
+  struct file mq;           /* Message queue handle */
+  uint32_t    msgsize;      /* Message size */
+  char        name[16];     /* Message queue name */
 };
 
 /* WiFi time private data */
@@ -1144,8 +1144,8 @@ static int32_t esp_mutex_unlock(void *mutex_data)
 static void *esp_queue_create(uint32_t queue_len, uint32_t item_size)
 {
   struct mq_attr attr;
-  mqd_t mq;
   struct mq_adpt *mq_adpt;
+  int ret;
 
   mq_adpt = kmm_malloc(sizeof(struct mq_adpt));
   if (!mq_adpt)
@@ -1162,15 +1162,15 @@ static void *esp_queue_create(uint32_t queue_len, uint32_t item_size)
   attr.mq_curmsgs = 0;
   attr.mq_flags   = 0;
 
-  mq = mq_open(mq_adpt->name, O_RDWR | O_CREAT, 0644, &attr);
-  if (!mq)
+  ret = file_mq_open(&mq_adpt->mq, mq_adpt->name,
+                     O_RDWR | O_CREAT, 0644, &attr);
+  if (ret < 0)
     {
       wlerr("ERROR: Failed to create mqueue\n");
       kmm_free(mq_adpt);
       return NULL;
     }
 
-  mq_adpt->mq = mq;
   mq_adpt->msgsize = item_size;
 
   return (void *)mq_adpt;
@@ -1194,8 +1194,8 @@ static void esp_queue_delete(void *queue)
 {
   struct mq_adpt *mq_adpt = (struct mq_adpt *)queue;
 
-  mq_close(mq_adpt->mq);
-  mq_unlink(mq_adpt->name);
+  file_mq_close(&mq_adpt->mq);
+  file_mq_unlink(mq_adpt->name);
   kmm_free(mq_adpt);
 }
 
@@ -1231,8 +1231,8 @@ static int32_t esp_queue_send_generic(void *queue, void *item,
        * instead of application API
        */
 
-      ret = nxmq_send(mq_adpt->mq, (const char *)item,
-                    mq_adpt->msgsize, prio);
+      ret = file_mq_send(&mq_adpt->mq, (const char *)item,
+                         mq_adpt->msgsize, prio);
       if (ret < 0)
         {
           wlerr("ERROR: Failed to send message to mqueue error=%d\n",
@@ -1253,8 +1253,8 @@ static int32_t esp_queue_send_generic(void *queue, void *item,
           esp_update_time(&timeout, ticks);
         }
 
-      ret = mq_timedsend(mq_adpt->mq, (const char *)item,
-                         mq_adpt->msgsize, prio, &timeout);
+      ret = file_mq_timedsend(&mq_adpt->mq, (const char *)item,
+                              mq_adpt->msgsize, prio, &timeout);
       if (ret < 0)
         {
           wlerr("ERROR: Failed to timedsend message to mqueue error=%d\n",
@@ -1381,8 +1381,8 @@ static int32_t esp_queue_recv(void *queue, void *item, uint32_t ticks)
 
   if (ticks == OSI_FUNCS_TIME_BLOCKING)
     {
-      ret = mq_receive(mq_adpt->mq, (char *)item,
-                       mq_adpt->msgsize, &prio);
+      ret = file_mq_receive(&mq_adpt->mq, (char *)item,
+                            mq_adpt->msgsize, &prio);
       if (ret < 0)
         {
           wlerr("ERROR: Failed to receive from mqueue error=%d\n", ret);
@@ -1402,8 +1402,8 @@ static int32_t esp_queue_recv(void *queue, void *item, uint32_t ticks)
           esp_update_time(&timeout, ticks);
         }
 
-      ret = mq_timedreceive(mq_adpt->mq, (char *)item,
-                            mq_adpt->msgsize, &prio, &timeout);
+      ret = file_mq_timedreceive(&mq_adpt->mq, (char *)item,
+                                 mq_adpt->msgsize, &prio, &timeout);
       if (ret < 0)
         {
           wlerr("ERROR: Failed to timedreceive from mqueue error=%d\n",
@@ -1434,7 +1434,7 @@ static uint32_t esp_queue_msg_waiting(void *queue)
   struct mq_attr attr;
   struct mq_adpt *mq_adpt = (struct mq_adpt *)queue;
 
-  ret = mq_getattr(mq_adpt->mq, &attr);
+  ret = file_mq_getattr(&mq_adpt->mq, &attr);
   if (ret < 0)
     {
       wlerr("ERROR: Failed to get attr from mqueue error=%d\n", ret);

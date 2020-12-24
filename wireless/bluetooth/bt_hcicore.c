@@ -1012,7 +1012,7 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
       /* Get next command - wait if necessary */
 
       buf = NULL;
-      ret = bt_queue_receive(g_btdev.tx_queue, &buf);
+      ret = bt_queue_receive(&g_btdev.tx_queue, &buf);
       DEBUGASSERT(ret >= 0 && buf != NULL);
       UNUSED(ret);
 
@@ -1450,10 +1450,9 @@ static void cmd_queue_init(void)
    * the Tx queue and received by logic on the Tx kernel thread.
    */
 
-  g_btdev.tx_queue = NULL;
   ret = bt_queue_open(BT_HCI_TX, O_RDWR | O_CREAT,
                       CONFIG_BLUETOOTH_TXCMD_NMSGS, &g_btdev.tx_queue);
-  DEBUGASSERT(ret >= 0 &&  g_btdev.tx_queue != NULL);
+  DEBUGASSERT(ret >= 0);
   UNUSED(ret);
 
   nxsem_init(&g_btdev.ncmd_sem, 0, 1);
@@ -1769,7 +1768,7 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
       return 0;
     }
 
-  ret = bt_queue_send(g_btdev.tx_queue, buf, BT_NORMAL_PRIO);
+  ret = bt_queue_send(&g_btdev.tx_queue, buf, BT_NORMAL_PRIO);
   if (ret < 0)
     {
       wlerr("ERROR: bt_queue_send() failed: %d\n", ret);
@@ -1813,7 +1812,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
 
   /* Send the frame */
 
-  ret = bt_queue_send(g_btdev.tx_queue, buf, BT_NORMAL_PRIO);
+  ret = bt_queue_send(&g_btdev.tx_queue, buf, BT_NORMAL_PRIO);
   if (ret < 0)
     {
       wlerr("ERROR: bt_queue_send() failed: %d\n", ret);

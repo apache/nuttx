@@ -29,8 +29,8 @@
 #include <nuttx/compiler.h>
 
 #include <pthread.h>
-#include <mqueue.h>
 
+#include <nuttx/mqueue.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/ioctl.h>
 
@@ -81,7 +81,7 @@ struct wm8776_dev_s
   FAR struct i2s_dev_s   *i2s;              /* I2S driver to use */
   struct dq_queue_s       pendq;            /* Queue of pending buffers to be sent */
   struct dq_queue_s       doneq;            /* Queue of sent buffers to be returned */
-  mqd_t                   mq;               /* Message queue for receiving messages */
+  struct file             mq;               /* Message queue for receiving messages */
   char                    mqname[16];       /* Our message queue name */
   pthread_t               threadid;         /* ID of our thread */
   uint32_t                bitrate;          /* Actual programmed bit rate */

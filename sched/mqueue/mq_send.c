@@ -40,11 +40,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmq_send
+ * Name: file_mq_send
  *
  * Description:
  *   This function adds the specified message (msg) to the message queue
- *   (mqdes).  This is an internal OS interface.  It is functionally
+ *   (mq).  This is an internal OS interface.  It is functionally
  *   equivalent to mq_send() except that:
  *
  *   - It is not a cancellation point, and
@@ -54,7 +54,7 @@
  *  behavior of this function
  *
  * Input Parameters:
- *   mqdes  - Message queue descriptor
+ *   mq     - Message queue descriptor
  *   msg    - Message to send
  *   msglen - The length of the message in bytes
  *   prio   - The priority of the message
@@ -67,32 +67,28 @@
  *
  ****************************************************************************/
 
-int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
-              unsigned int prio)
+int file_mq_send(FAR struct file *mq, FAR const char *msg, size_t msglen,
+                 unsigned int prio)
 {
   FAR struct mqueue_msg_s *mqmsg = NULL;
+  FAR struct inode *inode = mq->f_inode;
   FAR struct mqueue_inode_s *msgq;
-  FAR struct file *filep;
-  FAR struct inode *inode;
   irqstate_t flags;
   int ret;
 
-  /* Convert fd to msgq */
-
-  ret = fs_getfilep(mqdes, &filep);
-  if (ret < 0)
+  inode = mq->f_inode;
+  if (!inode)
     {
-      return ret;
+      return -EBADF;
     }
 
-  inode = filep->f_inode;
-  msgq  = inode->i_private;
+  msgq = inode->i_private;
 
   /* Verify the input parameters -- setting errno appropriately
    * on any failures to verify.
    */
 
-  ret = nxmq_verify_send(msgq, filep->f_oflags, msg, msglen, prio);
+  ret = nxmq_verify_send(msgq, mq->f_oflags, msg, msglen, prio);
   if (ret < 0)
     {
       return ret;
@@ -123,7 +119,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
            * available in the message queue.
            */
 
-          ret = nxmq_wait_send(msgq, filep->f_oflags);
+          ret = nxmq_wait_send(msgq, mq->f_oflags);
         }
     }
 
@@ -162,6 +158,49 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
 
   sched_unlock();
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxmq_send
+ *
+ * Description:
+ *   This function adds the specified message (msg) to the message queue
+ *   (mqdes).  This is an internal OS interface.  It is functionally
+ *   equivalent to mq_send() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_send() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mqdes  - Message queue descriptor
+ *   msg    - Message to send
+ *   msglen - The length of the message in bytes
+ *   prio   - The priority of the message
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   (see mq_send() for the list list valid return values).
+ *
+ ****************************************************************************/
+
+int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
+              unsigned int prio)
+{
+  FAR struct file *filep;
+  int ret;
+
+  ret = fs_getfilep(mqdes, &filep);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return file_mq_send(filep, msg, msglen, prio);
 }
 
 /****************************************************************************
