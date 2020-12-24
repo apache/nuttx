@@ -73,6 +73,10 @@
 #  include "esp32_board_wdt.h"
 #endif
 
+#ifdef CONFIG_ESP32_AES_ACCELERATOR
+#  include "esp32_aes.h"
+#endif
+
 #include "esp32-devkitc.h"
 
 /****************************************************************************
@@ -146,6 +150,15 @@ int esp32_bringup(void)
              ret);
     }
 
+#endif
+
+#ifdef CONFIG_ESP32_AES_ACCELERATOR
+  ret = esp32_aes_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize AES: %d\n", ret);
+    }
 #endif
 
 #if defined(CONFIG_ESP32_SPIRAM) && \

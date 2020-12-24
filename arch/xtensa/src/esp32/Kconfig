@@ -280,6 +280,10 @@ config ESP32_I2C1
 	select I2C
 	select I2C_DRIVER
 
+config ESP32_AES_ACCELERATOR
+	bool "AES Accelerator"
+	default n
+
 endmenu # ESP32 Peripheral Selection
 
 menu "Memory Configuration"
@@ -758,5 +762,14 @@ config ESP32_PARTITION_MOUNT
 	default "/dev/esp/partition/"
 
 endmenu # ESP32_PARTITION
+
+menu "AES accelerate"
+	depends on ESP32_AES_ACCELERATOR
+
+config ESP32_AES_ACCELERATOR_TEST
+	bool "AES driver test"
+	default n
+
+endmenu # ESP32_AES_ACCELERATOR
 
 endif # ARCH_CHIP_ESP32
