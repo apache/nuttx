@@ -381,6 +381,7 @@ extern "C"
 #endif
 
 int socket(int domain, int type, int protocol);
+int socketpair(int domain, int type, int protocol, int sv[2]);
 int bind(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
 int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
 
