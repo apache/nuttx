@@ -96,7 +96,7 @@ struct bt_conn_s
 
   /* Queue for outgoing ACL data */
 
-  mqd_t tx_queue;
+  struct file tx_queue;
 
   FAR struct bt_keys_s *keys;
 

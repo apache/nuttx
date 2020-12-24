@@ -35,6 +35,55 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name:  file_mq_setattr
+ *
+ * Description:
+ *   This function sets the attributes associated with the
+ *   specified message queue "mq".  Only the "O_NONBLOCK"
+ *   bit of the "mq_flags" can be changed.
+ *
+ *   If "oldstat" is non-null, mq_setattr() will store the
+ *   previous message queue attributes at that location (just
+ *   as would have been returned by file_mq_getattr()).
+ *
+ * Input Parameters:
+ *   mq - Message queue descriptor
+ *   mq_stat - New attributes
+ *   oldstate - Old attributes
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int file_mq_setattr(FAR struct file *mq, FAR const struct mq_attr *mq_stat,
+                    FAR struct mq_attr *oldstat)
+{
+  if (!mq || !mq_stat)
+    {
+      return -EINVAL;
+    }
+
+  /* Return the attributes if so requested */
+
+  if (oldstat)
+    {
+      file_mq_getattr(mq, oldstat);
+    }
+
+  /* Set the new value of the O_NONBLOCK flag. */
+
+  mq->f_oflags = ((mq_stat->mq_flags & O_NONBLOCK) |
+                 (mq->f_oflags & (~O_NONBLOCK)));
+
+  return 0;
+}
+
+/****************************************************************************
  * Name:  mq_setattr
  *
  * Description:
@@ -65,12 +114,6 @@ int mq_setattr(mqd_t mqdes, const struct mq_attr *mq_stat,
   FAR struct file *filep;
   int ret;
 
-  if (!mq_stat)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
   ret = fs_getfilep(mqdes, &filep);
   if (ret < 0)
     {
@@ -78,17 +121,12 @@ int mq_setattr(mqd_t mqdes, const struct mq_attr *mq_stat,
       return ERROR;
     }
 
-  /* Return the attributes if so requested */
-
-  if (oldstat)
+  ret = file_mq_setattr(filep, mq_stat, oldstat);
+  if (ret < 0)
     {
-      mq_getattr(mqdes, oldstat);
+      set_errno(-ret);
+      return ERROR;
     }
-
-  /* Set the new value of the O_NONBLOCK flag. */
-
-  filep->f_oflags = ((mq_stat->mq_flags & O_NONBLOCK) |
-                    (filep->f_oflags & (~O_NONBLOCK)));
 
   return OK;
 }

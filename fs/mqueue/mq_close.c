@@ -41,6 +41,34 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: file_mq_close
+ *
+ * Description:
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   mq_close() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_close() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mq - Message queue descriptor.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success. A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int file_mq_close(FAR struct file *mq)
+{
+  return file_close(mq);
+}
+
+/****************************************************************************
  * Name: nxmq_close
  *
  * Description:

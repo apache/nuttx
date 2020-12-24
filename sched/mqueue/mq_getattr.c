@@ -34,6 +34,52 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name:  file_mq_getattr
+ *
+ * Description:
+ *   This functions gets status information and attributes
+ *   associated with the specified message queue.
+ *
+ * Input Parameters:
+ *   mq      - Message queue descriptor
+ *   mq_stat - Buffer in which to return attributes
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int file_mq_getattr(FAR struct file *mq, FAR struct mq_attr *mq_stat)
+{
+  FAR struct mqueue_inode_s *msgq;
+  FAR struct inode *inode;
+
+  if (!mq || !mq_stat)
+    {
+      return -EINVAL;
+    }
+
+  inode = mq->f_inode;
+  if (!inode)
+    {
+      return -EBADF;
+    }
+
+  msgq = inode->i_private;
+
+  mq_stat->mq_maxmsg  = msgq->maxmsgs;
+  mq_stat->mq_msgsize = msgq->maxmsgsize;
+  mq_stat->mq_flags   = mq->f_oflags;
+  mq_stat->mq_curmsgs = msgq->nmsgs;
+
+  return 0;
+}
+
+/****************************************************************************
  * Name:  mq_getattr
  *
  * Description:
@@ -53,16 +99,8 @@
 
 int mq_getattr(mqd_t mqdes, struct mq_attr *mq_stat)
 {
-  FAR struct mqueue_inode_s *msgq;
   FAR struct file *filep;
-  FAR struct inode *inode;
   int ret;
-
-  if (!mq_stat)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
 
   ret = fs_getfilep(mqdes, &filep);
   if (ret < 0)
@@ -71,13 +109,12 @@ int mq_getattr(mqd_t mqdes, struct mq_attr *mq_stat)
       return ERROR;
     }
 
-  inode = filep->f_inode;
-  msgq  = inode->i_private;
-
-  mq_stat->mq_maxmsg  = msgq->maxmsgs;
-  mq_stat->mq_msgsize = msgq->maxmsgsize;
-  mq_stat->mq_flags   = filep->f_oflags;
-  mq_stat->mq_curmsgs = msgq->nmsgs;
+  ret = file_mq_getattr(filep, mq_stat);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
 
   return OK;
 }

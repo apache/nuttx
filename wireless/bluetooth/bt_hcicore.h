@@ -118,11 +118,11 @@ struct bt_dev_s
 
   /* Queue for incoming HCI events and ACL data */
 
-  mqd_t rx_queue;
+  struct file rx_queue;
 
   /* Queue for outgoing HCI commands */
 
-  mqd_t tx_queue;
+  struct file tx_queue;
 
   /* Registered HCI driver */
 
