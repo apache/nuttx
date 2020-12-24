@@ -95,7 +95,7 @@ static int  u16550_attach(FAR struct uart_dev_s *dev);
 static void u16550_detach(FAR struct uart_dev_s *dev);
 static int  u16550_interrupt(int irq, FAR void *context, FAR void *arg);
 static int  u16550_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int  u16550_receive(FAR struct uart_dev_s *dev, uint32_t *status);
+static int  u16550_receive(FAR struct uart_dev_s *dev, unsigned int *status);
 static void u16550_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool u16550_rxavailable(FAR struct uart_dev_s *dev);
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -1080,7 +1080,7 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-static int u16550_receive(struct uart_dev_s *dev, uint32_t *status)
+static int u16550_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;
   uint32_t rbr;
