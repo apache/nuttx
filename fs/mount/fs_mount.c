@@ -356,7 +356,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
        * node)?
        */
 
-      if (INODE_IS_SPECIAL(mountpt_inode))
+      if (!INODE_IS_PSEUDODIR(mountpt_inode))
         {
           ferr("ERROR: target %s exists and is a special node\n", target);
           ret = -ENOTDIR;

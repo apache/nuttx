@@ -259,115 +259,110 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 
   /* Handle "special" nodes */
 
-  if (INODE_IS_SPECIAL(inode))
-    {
 #if defined(CONFIG_FS_NAMED_SEMAPHORES)
-      /* Check for a named semaphore */
+  /* Check for a named semaphore */
 
-      if (INODE_IS_NAMEDSEM(inode))
-        {
-          buf->st_mode = S_IFSEM;
-        }
-      else
+  if (INODE_IS_NAMEDSEM(inode))
+    {
+      buf->st_mode = S_IFSEM;
+    }
+  else
 #endif
 #if !defined(CONFIG_DISABLE_MQUEUE)
-      /* Check for a message queue */
+  /* Check for a message queue */
 
-      if (INODE_IS_MQUEUE(inode))
-        {
-          buf->st_mode = S_IFMQ;
-        }
-      else
+  if (INODE_IS_MQUEUE(inode))
+    {
+      buf->st_mode = S_IFMQ;
+    }
+  else
 #endif
 #if defined(CONFIG_FS_SHM)
-      /* Check for shared memory */
+  /* Check for shared memory */
 
-      if (INODE_IS_SHM(inode))
-        {
-          buf->st_mode = S_IFSHM;
-        }
-      else
+  if (INODE_IS_SHM(inode))
+    {
+      buf->st_mode = S_IFSHM;
+    }
+  else
 #endif
 #if defined(CONFIG_MTD)
-      /* Check for an MTD driver */
+  /* Check for an MTD driver */
 
-      if (INODE_IS_MTD(inode))
+  if (INODE_IS_MTD(inode))
+    {
+      struct mtd_geometry_s mtdgeo;
+
+      buf->st_mode  = S_IFMTD;
+      buf->st_mode |= S_IROTH | S_IRGRP | S_IRUSR;
+      buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
+
+      if (inode->u.i_mtd != NULL &&
+          MTD_IOCTL(inode->u.i_mtd, MTDIOC_GEOMETRY,
+                    (unsigned long)((uintptr_t)&mtdgeo)) >= 0)
         {
-          struct mtd_geometry_s mtdgeo;
-
-          buf->st_mode  = S_IFMTD;
-          buf->st_mode |= S_IROTH | S_IRGRP | S_IRUSR;
-          buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
-
-          if (inode->u.i_mtd != NULL &&
-              MTD_IOCTL(inode->u.i_mtd, MTDIOC_GEOMETRY,
-                        (unsigned long)((uintptr_t)&mtdgeo)) >= 0)
-            {
-              buf->st_size = mtdgeo.neraseblocks * mtdgeo.erasesize;
-            }
-        }
-      else
-#endif
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-      /* Handle softlinks differently.  Just call stat() recursively on the
-       * target of the softlink.
-       *
-       * REVISIT: This has the possibility of an infinite loop!
-       */
-
-      if (INODE_IS_SOFTLINK(inode))
-        {
-          if (resolve)
-            {
-              int ret;
-
-              /* Increment the link counter.  This is necessary to avoid
-               * infinite recursion if loops are encountered in the
-               * traversal. If we encounter more SYMLOOP_MAX symbolic links
-               * at any time during the traversal, error out.
-               *
-               * NOTE: That inode_search() will automatically skip over
-               * consecutive, intermediate symbolic links.  Those numbers
-               * will not be included in the total.
-               */
-
-              if (++buf->st_count > SYMLOOP_MAX)
-                {
-                  return -ELOOP;
-                }
-
-              DEBUGASSERT(buf->st_count > 0);  /* Check for unsigned integer overflow */
-
-              /* stat() the target of the soft link. */
-
-              ret = stat_recursive(inode->u.i_link, buf, 1);
-
-              /* If stat() fails, then there is a problem with the target of
-               * the symbolic link, but not with the symbolic link itself.
-               * We should still report success, just with less information.
-               */
-
-              if (ret < 0)
-                {
-                  RESET_BUF(buf);
-                }
-            }
-          else
-            {
-              /* Make sure the caller knows that this is a symbolic link. */
-
-              buf->st_mode = S_IRWXO | S_IRWXG | S_IRWXU | S_IFLNK;
-            }
-        }
-      else
-#endif
-        {
+          buf->st_size = mtdgeo.neraseblocks * mtdgeo.erasesize;
         }
     }
+  else
+#endif
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  /* Handle softlinks differently.  Just call stat() recursively on the
+   * target of the softlink.
+   *
+   * REVISIT: This has the possibility of an infinite loop!
+   */
+
+  if (INODE_IS_SOFTLINK(inode))
+    {
+      if (resolve)
+        {
+          int ret;
+
+          /* Increment the link counter.  This is necessary to avoid
+           * infinite recursion if loops are encountered in the
+           * traversal. If we encounter more SYMLOOP_MAX symbolic links
+           * at any time during the traversal, error out.
+           *
+           * NOTE: That inode_search() will automatically skip over
+           * consecutive, intermediate symbolic links.  Those numbers
+           * will not be included in the total.
+           */
+
+          if (++buf->st_count > SYMLOOP_MAX)
+            {
+              return -ELOOP;
+            }
+
+          DEBUGASSERT(buf->st_count > 0);  /* Check for unsigned integer overflow */
+
+          /* stat() the target of the soft link. */
+
+          ret = stat_recursive(inode->u.i_link, buf, 1);
+
+          /* If stat() fails, then there is a problem with the target of
+           * the symbolic link, but not with the symbolic link itself.
+           * We should still report success, just with less information.
+           */
+
+          if (ret < 0)
+            {
+              RESET_BUF(buf);
+            }
+        }
+      else
+        {
+          /* Make sure the caller knows that this is a symbolic link. */
+
+          buf->st_mode = S_IRWXO | S_IRWXG | S_IRWXU | S_IFLNK;
+        }
+    }
+  else
+#endif
 
   /* Handle "normal inodes */
 
-  else if (inode->u.i_ops != NULL)
+  if (inode->u.i_ops != NULL)
     {
       /* Determine read/write privileges based on the existence of read
        * and write methods.
