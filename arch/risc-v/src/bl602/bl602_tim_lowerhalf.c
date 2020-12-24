@@ -288,7 +288,7 @@ static int bl602_tim_getstatus(FAR struct timer_lowerhalf_s *lower,
     (FAR struct bl602_tim_lowerhalf_s *)lower;
   uint32_t current_count;
 
-  status->timeout = timer_getcompvalue(priv->tim, TIMER_COMP_ID_0);
+  status->timeout = bl602_timer_getcompvalue(priv->tim, TIMER_COMP_ID_0);
   current_count   = bl602_timer_getcountervalue(priv->tim);
   if (current_count < status->timeout)
     {
