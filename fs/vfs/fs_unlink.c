@@ -49,17 +49,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: unlink
+ * Name: nx_unlink
  *
  * Description:  Remove a file managed a mountpoint
  *
  ****************************************************************************/
 
-int unlink(FAR const char *pathname)
+int nx_unlink(FAR const char *pathname)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
-  int errcode;
   int ret;
 
   /* Get an inode for this file (without deference the final node in the path
@@ -73,7 +72,6 @@ int unlink(FAR const char *pathname)
     {
       /* There is no inode that includes in this path */
 
-      errcode = -ret;
       goto errout_with_search;
     }
 
@@ -96,13 +94,12 @@ int unlink(FAR const char *pathname)
           ret = inode->u.i_mops->unlink(inode, desc.relpath);
           if (ret < 0)
             {
-              errcode = -ret;
               goto errout_with_inode;
             }
         }
       else
         {
-          errcode = ENOSYS;
+          ret = -ENOSYS;
           goto errout_with_inode;
         }
     }
@@ -131,7 +128,6 @@ int unlink(FAR const char *pathname)
           ret = inode_semtake();
           if (ret < 0)
             {
-              errcode = -ret;
               goto errout_with_inode;
             }
 
@@ -141,7 +137,7 @@ int unlink(FAR const char *pathname)
 
           if (inode->i_child != NULL)
             {
-              errcode = ENOTEMPTY;
+              ret = -ENOTEMPTY;
               inode_semgive();
               goto errout_with_inode;
             }
@@ -158,7 +154,6 @@ int unlink(FAR const char *pathname)
               ret = inode->u.i_ops->unlink(inode);
               if (ret < 0)
                 {
-                  errcode = -ret;
                   goto errout_with_inode;
                 }
             }
@@ -170,7 +165,6 @@ int unlink(FAR const char *pathname)
               ret = inode->u.i_bops->unlink(inode);
               if (ret < 0)
                 {
-                  errcode = -ret;
                   goto errout_with_inode;
                 }
             }
@@ -188,20 +182,19 @@ int unlink(FAR const char *pathname)
 
           if (ret < 0 && ret != -EBUSY)
             {
-              errcode = -ret;
               goto errout_with_inode;
             }
         }
       else
         {
-          errcode = EISDIR;
+          ret = -EISDIR;
           goto errout_with_inode;
         }
     }
   else
 #endif
     {
-      errcode = ENXIO;
+      ret = -ENXIO;
       goto errout_with_inode;
     }
 
@@ -216,8 +209,28 @@ errout_with_inode:
 
 errout_with_search:
   RELEASE_SEARCH(&desc);
-  set_errno(errcode);
-  return ERROR;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: unlink
+ *
+ * Description:  Remove a file managed a mountpoint
+ *
+ ****************************************************************************/
+
+int unlink(FAR const char *pathname)
+{
+  int ret;
+
+  ret = nx_unlink(pathname);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  return OK;
 }
 
 #endif /* FS_HAVE_UNLINK */
