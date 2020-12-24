@@ -1,8 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl602/bl602_init.c
- *
- * Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
- * Author: Gregory Nutt <gnutt@nuttx.org>
+ * arch/risc-v/src/bl602/bl602_start.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
